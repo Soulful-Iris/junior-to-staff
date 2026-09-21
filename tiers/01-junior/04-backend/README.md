@@ -17,7 +17,7 @@ connection and then never sends a byte — a half-crashed machine, a load
 balancer with nothing behind it.
 
 Your title-fetch code waits. How long? You never said, so you inherited your
-HTTP client's default. In Node's built-in `fetch` that is five minutes of
+HTTP client's default. In Node's built-in `fetch` that is five minutes
 waiting for response headers (300 seconds; checked 2026-09-21). In Python's
 `requests` there is no default at all — the docs warn that without a timeout
 "your code may hang for minutes or more" (checked 2026-09-21).
@@ -27,7 +27,7 @@ crashes and nothing logs, because nothing is wrong — everything is just
 waiting. A few links later, the sign-in page stops loading for everyone.
 
 One pasted URL, zero exceptions, whole site down. That is the cost of an
-unchosen timeout — one entry on the list this section is about: every place
+unchosen timeout — one entry on this section's list: every place
 between the click and the row where a request can stop, and who finds out when
 it does.
 
@@ -38,13 +38,13 @@ A request is a message on a journey. The browser turns a name into an address
 bytes across machines you do not own. At your process a router picks the code,
 the body is parsed and validated, auth decides who is asking, and your handler
 does the work — reading and writing the database, sometimes calling someone
-else's server. Then the response makes the same trip in reverse, to a browser
+else's server. The response makes the same trip in reverse, to a browser
 that may no longer be waiting. The order of the middle steps varies by
 framework; the stops do not.
 
 ![One request travels from browser through router, auth and handler to the database and back; numbered markers show the seven places it can stop, from the network to the reply itself](../../../assets/diagrams/request-lifecycle.svg)
 
-Three ideas survive any change of framework.
+Three ideas survive framework churn.
 
 **Every hop is a place it can stop, and each stop needs an owner.** HTTP is
 the contract for saying so: 4xx means the sender got it wrong, 5xx means you
@@ -52,20 +52,20 @@ did. GET must never change anything. PUT and DELETE are idempotent — twice
 leaves the world as once — while POST is not guaranteed to be (RFC 9110;
 checked 2026-09-21), which matters because networks deliver things twice and
 users double-click. Failures come in three kinds: expected (a 4xx with a clear
-message), unexpected (a 5xx, logged loudly with a stack trace and a request
-id), and swallowed — caught, hidden, returned as success. The third costs the
+message), unexpected (a 5xx, logged loudly with stack trace and request id),
+and swallowed — caught, hidden, returned as success. The third costs the
 most; the 2025 OWASP Top 10 added "Mishandling of Exceptional Conditions" as a
 category of its own (checked 2026-09-21).
 
-**Your process is disposable; nothing true lives in it.** It is restarted,
+**Your process is disposable; nothing true lives in it.** Restarted,
 duplicated, killed mid-request; truth lives in the database. Requests
 interleave, so "read a value, change it, write it back" is a bug waiting for
 company: both read 4, both write 5, one update vanishes without an error. A
 transaction is the database's promise that a group of changes happens entirely
 or not at all, never seen half-done. Identity comes from the environment:
 harmless defaults in committed config files; secrets handed to the process at
-start, as environment variables set by whatever launches it or values read
-from a secret store. Never the repo — a repo is designed to be copied
+start, as environment variables set by whatever launches it, or read from a
+secret store. Never the repo — a repo is designed to be copied
 everywhere.
 
 **Everything crossing the boundary is untrusted.** Body, headers, URL,
@@ -177,8 +177,8 @@ first is a guess that happened to compile.
 test green after the fix, in that order.
 
 *Push back on:* a test that fakes concurrency with sleeps and sequential
-calls; any fix that adds an in-process lock, which stops working the moment
-you run a second process — the first thing that happens after P1.
+calls; any fix that adds an in-process lock, which dies the moment you run a
+second process — the first thing that happens after P1.
 
 ## How you would know it is wrong
 
@@ -207,8 +207,8 @@ The checks for this topic, each one capable of going red:
    the fix is rotation, not deletion — history is the repo.
 
 > Underneath all six: **before believing a green result, say what it would
-> have looked like if the thing were broken.** A fetcher you never pointed at
-> a hostile URL is not safe; it is untested.
+> have looked like if the thing were broken.** A fetcher never pointed at a
+> hostile URL is not safe; it is untested.
 
 ## Your slice of the project
 
@@ -229,7 +229,7 @@ On **P1**, this section is the add-a-URL flow done properly:
 
 **Acceptance criteria you can check yourself:**
 
-- Checks 1 through 5 above each run once, with what you saw written down.
+- Checks 1 through 5 each run once, with what you saw written down.
 - The hanging-URL check completes within your chosen timeout plus one second,
   measured, not felt.
 - Grepping the full git history for your database password and session secret
@@ -243,7 +243,6 @@ On **P1**, this section is the add-a-URL flow done properly:
 - **status code** — the machine-readable verdict: 2xx worked, 4xx the sender's problem, 5xx yours.
 - **idempotent** — safe to repeat; the second identical call changes nothing more.
 - **structured error** — a failure with a machine-readable code and a request id, not just prose.
-- **request id** — minted per request, carried into logs and error responses, so one user's bad afternoon can be found.
 - **timeout** — the longest you are willing to wait, chosen on purpose.
 - **transaction** — a group of database changes that happens entirely or not at all, never seen half-done.
 - **race condition** — two interleaved operations producing a result neither would alone; the lost update is the starter kind.
@@ -256,5 +255,5 @@ On **P1**, this section is the add-a-URL flow done properly:
 has its own section; here it is where truth lives, nothing more.
 Authentication internals (passwords, sessions, tokens) likewise. Retries,
 queues, caching and rate limits are P3; deploying and observing this backend
-is P2. And nothing here is about speed — a backend first has to be right when
+is P2. Nothing here is about speed — a backend first has to be right when
 things go wrong, which is most of what a backend is.

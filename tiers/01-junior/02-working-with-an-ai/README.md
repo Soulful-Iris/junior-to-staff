@@ -27,9 +27,12 @@ The measured version of this, so it is not folklore:
 - A 2025 randomised controlled trial by METR found experienced open-source
   developers were **19% slower** on their own repositories using AI tooling — and
   believed they had been about 20% *faster*. The perception gap is the finding.
-- The 2025 Stack Overflow developer survey found **84%** use or plan to use AI
-  tools, while trust in their output **fell to 29%**, and the single most common
-  frustration, at **66%**, was output that is "almost right, but not quite".
+- The 2025 Stack Overflow developer survey (49,009 respondents) found **84%**
+  use or plan to use AI tools, and at the same time **more developers actively
+  distrust the accuracy of the output (46%) than trust it (33%)** — distrust up
+  from 31% the year before, with only 3% saying they highly trust it. The single
+  most common frustration, at **66%**, was output that is "almost right, but not
+  quite". Experienced developers are the most sceptical of all.
 - GitClear's analysis of large commit corpora reports code duplication rising
   sharply and refactoring collapsing as a share of changes.
 - Google's DORA 2025 report frames AI as an **amplifier**: it magnifies whatever
