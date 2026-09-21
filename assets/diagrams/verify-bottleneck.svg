@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 290" width="760" height="290" role="img" aria-label="Two stacked bars comparing where the time in a change goes. Before, generating code dominated. Now generation is small, specification grew a little, and verification is unchanged in size and so has become most of the work.">
+  <rect width="760" height="290" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHERE THE TIME IN ONE CHANGE GOES</text>
+
+  <!-- legend -->
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#3f3b36">
+    <rect x="44" y="52" width="13" height="13" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+    <text x="64" y="63">specify</text>
+    <rect x="132" y="52" width="13" height="13" rx="2.5" fill="#dfe7e1" stroke="#7f9b8b" stroke-width="1.2"/>
+    <text x="152" y="63">generate</text>
+    <rect x="228" y="52" width="13" height="13" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="1.2"/>
+    <text x="248" y="63">verify</text>
+  </g>
+
+  <!-- bar 1: before -->
+  <text x="44" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.4">BEFORE</text>
+  <g>
+    <rect x="44" y="120" width="60" height="34" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+    <rect x="104" y="120" width="420" height="34" fill="#dfe7e1" stroke="#7f9b8b" stroke-width="1.2"/>
+    <rect x="524" y="120" width="180" height="34" rx="3" fill="#c2703d" stroke="#a85d2f" stroke-width="1.2"/>
+  </g>
+
+  <!-- bar 2: now -->
+  <text x="44" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.4">NOW</text>
+  <g>
+    <rect x="44" y="200" width="96" height="34" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+    <rect x="140" y="200" width="54" height="34" fill="#dfe7e1" stroke="#7f9b8b" stroke-width="1.2"/>
+    <rect x="194" y="200" width="180" height="34" rx="3" fill="#c2703d" stroke="#a85d2f" stroke-width="1.2"/>
+  </g>
+
+  <!-- the point -->
+  <g stroke="#c2703d" stroke-width="1" stroke-dasharray="3 3">
+    <line x1="524" y1="154" x2="194" y2="200"/>
+    <line x1="704" y1="154" x2="374" y2="200"/>
+  </g>
+  <text x="392" y="222" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">same width, both rows</text>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">
+    <text x="44" y="262">Generation collapsed. Specification grew a little. Verification did not move at all,</text>
+    <text x="44" y="279">which is how it went from a third of the work to most of it.</text>
+  </g>
+</svg>

@@ -67,41 +67,62 @@ failures you should deliberately induce.
 
 ---
 
-## The tiers
+## The sections
 
 ### Junior — build a thing that works
 
 You can take a requirement and produce something that runs, and you can tell
 whether it runs.
 
+| | section | what it buys you |
+|---|---|---|
+| 01 | [The change loop](tiers/01-junior/01-the-change-loop/) | how a change gets from an idea into running software, and why review capacity is now the bottleneck |
+| 02 | [Working with an AI that writes the code](tiers/01-junior/02-working-with-an-ai/) | specification and verification — the two skills that did not get cheaper |
+| 03 | [Frontend](tiers/01-junior/03-frontend/) | where rendering happens, where state lives, and accessibility as a legal floor |
+| 04 | [Backend](tiers/01-junior/04-backend/) | the request lifecycle and every point at which it can stop |
+| 05 | [Data and databases](tiers/01-junior/05-data-and-databases/) | the schema is the part you cannot take back |
+| 06 | [Testing](tiers/01-junior/06-testing/) | making breakage loud instead of silent |
+| 07 | Shipping it | environments, configuration, secrets, and dependencies as attack surface |
+
 ### Senior — build a thing that survives
 
-You can build something that keeps working when it is under load, when a
-dependency fails, when somebody else changes it, and at three in the morning
-when you are asleep.
+It keeps working under load, when a dependency fails, when somebody else changes
+it, and at three in the morning while you are asleep.
+
+| | section | what it buys you |
+|---|---|---|
+| 08 | System design | the thinking process, not the interview ritual |
+| 09 | Reliability | SLOs, error budgets, degradation, backpressure, idempotency |
+| 10 | Observability | answering "what happened?" without guessing, and what that costs |
+| 11 | Security | authorisation, secrets, and the supply chain you did not know you had |
+| 12 | Delivery | CI/CD, infrastructure as code, progressive rollout |
+| 13 | Data at scale | caching, queues, consistency, and what actually breaks first |
+| 14 | Performance and cost | finding both, and the fact that they are the same skill |
+| 15 | AI systems | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
 
 ### Staff — change what gets built
 
 Your leverage stops being the code you write. It becomes the decisions you make
-and the other engineers you make faster. This tier is about scope, strategy,
-migrations, risk, and knowing when the answer is not to build the thing.
+and the engineers you make faster.
 
-*(The section list is being filled in. What is here is real; what is not here
-yet is not pretending to be.)*
+| | section | what it buys you |
+|---|---|---|
+| 16 | Scope and leverage | what actually changes at staff, and the four archetypes |
+| 17 | Writing that decides | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
+| 18 | Technical strategy | synthesising strategy from real decisions, and why a good vision is boring |
+| 19 | Migrations | de-risk, enable, **finish** — and why most are abandoned at 80% |
+| 20 | Risk and incidents | operating under failure, and postmortems that change something |
+| 21 | Making other engineers faster | sponsorship versus mentorship, platform quality, and glue work |
 
 ---
 
 ## Status
 
-This guide is under construction, in the open. Sections land one at a time and
-each one is complete when it lands — there are no stubs pretending to be
-chapters.
+Under construction, in the open. Sections land one at a time and each one is
+complete when it lands — there are no stubs pretending to be chapters. A section
+with no link next to it is not written yet, and is not pretending to be.
 
-| | |
-|---|---|
-| written | 1 |
-| in progress | the rest |
-| last updated | 2026-09-21 |
+Last updated 2026-09-21.
 
-Nothing in here is "production-ready" by assertion. Where something is untested
-or unverified, it says so.
+Nothing here is "production-ready" by assertion. Where something is unverified,
+it says so.
