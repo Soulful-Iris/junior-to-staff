@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 268" width="760" height="268" role="img" aria-label="One change rides the loop: edit, commit, open a PR, review, merge, run, and what it does in production becomes the next change. Review is drawn widest, with a queue in front of it, because writing is cheap now and judging is not.">
+  <rect width="760" height="268" rx="10" fill="#faf9f7"/>
+
+  <text x="42" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE CHANGE LOOP · WIDTH IS WHERE THE TIME GOES</text>
+
+  <!-- forward edges -->
+  <g stroke="#8a857d" stroke-width="1.5">
+    <line x1="108" y1="96" x2="123" y2="96"/>
+    <line x1="196" y1="96" x2="211" y2="96"/>
+    <line x1="298" y1="96" x2="339" y2="96"/>
+    <line x1="514" y1="96" x2="529" y2="96"/>
+    <line x1="600" y1="96" x2="615" y2="96"/>
+  </g>
+  <g fill="#8a857d">
+    <polygon points="130,96 123,92.5 123,99.5"/>
+    <polygon points="218,96 211,92.5 211,99.5"/>
+    <polygon points="346,96 339,92.5 339,99.5"/>
+    <polygon points="536,96 529,92.5 529,99.5"/>
+    <polygon points="622,96 615,92.5 615,99.5"/>
+  </g>
+
+  <!-- the queue that forms in front of review -->
+  <text x="322" y="64" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d" letter-spacing="1.5">QUEUE</text>
+  <g fill="#8a857d">
+    <circle cx="311" cy="96" r="3.5"/>
+    <circle cx="323" cy="96" r="3.5"/>
+    <circle cx="335" cy="96" r="3.5"/>
+  </g>
+
+  <!-- stations: width is where a change spends its life -->
+  <g stroke-width="1.5">
+    <rect x="42"  y="72" width="66"  height="48" rx="6" fill="#faf9f7" stroke="#ded9d1"/>
+    <rect x="130" y="72" width="66"  height="48" rx="6" fill="#faf9f7" stroke="#ded9d1"/>
+    <rect x="218" y="72" width="80"  height="48" rx="6" fill="#faf9f7" stroke="#ded9d1"/>
+    <rect x="346" y="72" width="168" height="48" rx="6" fill="#eef2ef" stroke="#2f6f4e"/>
+    <rect x="536" y="72" width="64"  height="48" rx="6" fill="#faf9f7" stroke="#ded9d1"/>
+    <rect x="622" y="72" width="92"  height="48" rx="6" fill="#faf9f7" stroke="#ded9d1"/>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24" text-anchor="middle">
+    <text x="75"  y="91">edit</text>
+    <text x="163" y="91">commit</text>
+    <text x="258" y="91">open a PR</text>
+    <text x="430" y="91" fill="#2f6f4e">review</text>
+    <text x="568" y="91">merge</text>
+    <text x="668" y="91">run</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d6459" text-anchor="middle">
+    <text x="75"  y="108">cheap now</text>
+    <text x="163" y="108">a decision</text>
+    <text x="258" y="108">the argument</text>
+    <text x="430" y="108">the narrow point</text>
+    <text x="568" y="108">history</text>
+    <text x="668" y="108">the evidence</text>
+  </g>
+
+  <!-- measure under review -->
+  <g stroke="#ded9d1" stroke-width="1.5">
+    <line x1="346" y1="134" x2="514" y2="134"/>
+    <line x1="346" y1="130" x2="346" y2="138"/>
+    <line x1="514" y1="130" x2="514" y2="138"/>
+  </g>
+  <text x="430" y="151" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">where a change now waits</text>
+
+  <!-- return edge: production feeds the next change -->
+  <path d="M 668 120 L 668 168 Q 668 174 662 174 L 81 174 Q 75 174 75 168 L 75 128" fill="none" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="75,121 71.5,129 78.5,129" fill="#8a857d"/>
+  <text x="400" y="192" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">what it does when real people use it becomes the next change</text>
+
+  <!-- one change, riding the loop; frozen frame shows it waiting in the queue -->
+  <circle cx="49" cy="188" r="4.5" fill="#c2703d"/>
+  <text x="59" y="192" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#c2703d">one change</text>
+
+  <circle cx="302" cy="96" r="5" fill="#c2703d">
+    <animateMotion dur="16s" repeatCount="indefinite"
+      path="M 0 0 L 360 0 Q 366 0 366 6 L 366 72 Q 366 78 360 78 L -221 78 Q -227 78 -227 72 L -227 6 Q -227 0 -221 0 L 0 0"/>
+  </circle>
+
+  <text x="42" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Box width is time, not importance: writing got cheap, judging did not. A loop moves at the</text>
+  <text x="42" y="245" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">pace of its narrowest station, so the work is making every change easy to judge.</text>
+</svg>

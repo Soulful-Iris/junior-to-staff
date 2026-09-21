@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 448" width="760" height="448" role="img" aria-label="Where state lives, as a decision ladder. Must another device or person see it: the server. Should refresh or a shared link reproduce it: the URL. Do far-apart parts of the page need it at the same moment: a shared store. Otherwise: component memory. Keeping one fact in two homes causes drift.">
+  <rect width="760" height="448" rx="10" fill="#faf9f7"/>
+
+  <text x="60" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHERE DOES THIS STATE LIVE · FIRST YES WINS</text>
+
+  <!-- question 1 -->
+  <rect x="60" y="56" width="340" height="56" rx="5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">
+    <text x="76" y="79">Must another device, or another</text>
+    <text x="76" y="97">person, be able to see it?</text>
+  </g>
+  <line x1="400" y1="84" x2="468" y2="84" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="476,84 466,80 466,88" fill="#8a857d"/>
+  <text x="424" y="78" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">yes</text>
+  <rect x="478" y="56" width="222" height="56" rx="5" fill="#2f6f4e" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="494" y="80" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#faf9f7">the server</text>
+  <text x="494" y="96" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#eef2ef">the reading list itself</text>
+
+  <line x1="230" y1="112" x2="230" y2="134" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="230,140 226,132 234,132" fill="#8a857d"/>
+  <text x="242" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">no</text>
+
+  <!-- question 2 -->
+  <rect x="60" y="144" width="340" height="56" rx="5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">
+    <text x="76" y="167">Should a refresh, the back button,</text>
+    <text x="76" y="185">or a shared link reproduce it?</text>
+  </g>
+  <line x1="400" y1="172" x2="468" y2="172" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="476,172 466,168 466,176" fill="#8a857d"/>
+  <text x="424" y="166" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">yes</text>
+  <rect x="478" y="144" width="222" height="56" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="494" y="168" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">the URL</text>
+  <text x="494" y="184" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#6d6459">?page=2&amp;filter=unread</text>
+
+  <line x1="230" y1="200" x2="230" y2="222" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="230,228 226,220 234,220" fill="#8a857d"/>
+  <text x="242" y="216" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">no</text>
+
+  <!-- question 3 -->
+  <rect x="60" y="232" width="340" height="56" rx="5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">
+    <text x="76" y="255">Do far-apart parts of the page</text>
+    <text x="76" y="273">need it at the same moment?</text>
+  </g>
+  <line x1="400" y1="260" x2="468" y2="260" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="476,260 466,256 466,264" fill="#8a857d"/>
+  <text x="424" y="254" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">yes</text>
+  <rect x="478" y="232" width="222" height="56" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="494" y="256" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">a shared store</text>
+  <text x="494" y="272" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">signed-in user, unread count</text>
+
+  <line x1="230" y1="288" x2="230" y2="310" stroke="#8a857d" stroke-width="1.5"/>
+  <polygon points="230,316 226,308 234,308" fill="#8a857d"/>
+  <text x="242" y="304" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">no</text>
+
+  <!-- the default home -->
+  <rect x="60" y="320" width="340" height="56" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="76" y="343" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">component memory</text>
+  <text x="76" y="359" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">is the dropdown open · dies with the view</text>
+
+  <!-- the one warning -->
+  <rect x="478" y="320" width="222" height="56" rx="5" fill="none" stroke="#c2703d" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">
+    <text x="494" y="343">the classic bug: the same fact</text>
+    <text x="494" y="359">kept in two homes — they drift</text>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">
+    <text x="60" y="410">Ask from the top; the first yes is the home. Each fact gets the shortest-lived home</text>
+    <text x="60" y="427">that satisfies what it must survive — and exactly one home.</text>
+  </g>
+</svg>

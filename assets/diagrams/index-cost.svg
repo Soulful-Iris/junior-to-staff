@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 372" width="760" height="372" role="img" aria-label="An index is a trade: a read follows one sorted index straight to its row in a few page reads, while one inserted row must also be written into the table and every index on it. Faster reads are bought with slower writes and more disk.">
+  <rect width="760" height="372" rx="10" fill="#faf9f7"/>
+
+  <text x="48" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHAT AN INDEX COSTS</text>
+
+  <line x1="380" y1="52" x2="380" y2="322" stroke="#ded9d1" stroke-width="1.5"/>
+
+  <!-- left: the read the index buys -->
+  <text x="48" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.4">ONE READ</text>
+
+  <rect x="48" y="72" width="210" height="32" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="62" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#1f2b24">WHERE email = ?</text>
+
+  <line x1="153" y1="104" x2="153" y2="126" stroke="#2f6f4e" stroke-width="1.5"/>
+  <polygon points="153,133 149,125 157,125" fill="#2f6f4e"/>
+
+  <rect x="48" y="136" width="210" height="32" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="62" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">index on email — sorted</text>
+
+  <line x1="153" y1="168" x2="153" y2="190" stroke="#2f6f4e" stroke-width="1.5"/>
+  <polygon points="153,197 149,189 157,189" fill="#2f6f4e"/>
+
+  <rect x="48" y="200" width="210" height="88" rx="5" fill="#faf9f7" stroke="#8a857d" stroke-width="1.25"/>
+  <text x="58" y="215" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">TABLE</text>
+  <line x1="49" y1="222" x2="257" y2="222" stroke="#ded9d1"/>
+  <line x1="49" y1="244" x2="257" y2="244" stroke="#ded9d1"/>
+  <line x1="49" y1="266" x2="257" y2="266" stroke="#ded9d1"/>
+  <rect x="51" y="246" width="204" height="19" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <text x="60" y="260" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#1f2b24">the row you asked for</text>
+
+  <text x="48" y="308" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">a few page reads to find it,</text>
+  <text x="48" y="324" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">even at millions of rows</text>
+
+  <!-- right: what every write now pays -->
+  <text x="400" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.4">ONE WRITE</text>
+
+  <rect x="400" y="72" width="150" height="32" rx="5" fill="#2f6f4e"/>
+  <text x="414" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#faf9f7">INSERT one row</text>
+
+  <line x1="430" y1="104" x2="430" y2="245" stroke="#6d6459" stroke-width="1.5"/>
+
+  <line x1="430" y1="131" x2="488" y2="131" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="496,131 488,127 488,135" fill="#6d6459"/>
+  <line x1="430" y1="169" x2="488" y2="169" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="496,169 488,165 488,173" fill="#6d6459"/>
+  <line x1="430" y1="207" x2="488" y2="207" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="496,207 488,203 488,211" fill="#6d6459"/>
+  <line x1="430" y1="245" x2="488" y2="245" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="496,245 488,241 488,249" fill="#6d6459"/>
+
+  <rect x="500" y="116" width="212" height="30" rx="5" fill="#faf9f7" stroke="#8a857d" stroke-width="1.25"/>
+  <text x="512" y="135" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">the table itself</text>
+
+  <rect x="500" y="154" width="212" height="30" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="512" y="173" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">index on the primary key</text>
+
+  <rect x="500" y="192" width="212" height="30" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="512" y="211" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">index on email</text>
+
+  <rect x="500" y="230" width="212" height="30" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="512" y="249" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">index on created_at</text>
+
+  <text x="500" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#c2703d">one row in · four writes out</text>
+  <text x="500" y="324" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">each index is one more copy on disk</text>
+
+  <text x="48" y="344" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">An index makes one shape of question fast. The price is paid on every write,</text>
+  <text x="48" y="360" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">because each index is one more sorted copy the database must keep true.</text>
+</svg>
