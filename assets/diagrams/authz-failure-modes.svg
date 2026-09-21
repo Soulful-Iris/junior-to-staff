@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 392" width="760" height="392" role="img" aria-label="Three authorisation models side by side, each with its failure mode: scattered per-endpoint checks fail by omission when one route never gets a check; a central policy engine fails by drift when the policy stops matching the running code; a relationship graph fails by weight, because the graph is a second stateful system that must be fed and kept in sync.">
+  <rect width="760" height="392" rx="10" fill="#faf9f7"/>
+
+  <text x="40" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THREE WAYS TO ANSWER "MAY THEY DO THIS?"</text>
+
+  <line x1="263" y1="52" x2="263" y2="330" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="497" y1="52" x2="497" y2="330" stroke="#ded9d1" stroke-width="1"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#6d6459" letter-spacing="1.2" text-anchor="middle">
+    <text x="151" y="66">PER-ENDPOINT CHECKS</text>
+    <text x="380" y="66">POLICY ENGINE</text>
+    <text x="609" y="66">RELATIONSHIP GRAPH</text>
+  </g>
+
+  <!-- column 1: per-endpoint checks, one forgotten -->
+  <rect x="58" y="82" width="186" height="26" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <rect x="58" y="116" width="186" height="26" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <rect x="58" y="150" width="186" height="26" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <rect x="58" y="184" width="186" height="26" rx="4" fill="#faf9f7" stroke="#c2703d" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#1f2b24">
+    <text x="68" y="99">GET /items</text>
+    <text x="68" y="133">POST /items</text>
+    <text x="68" y="167">PATCH /items/:id</text>
+    <text x="68" y="201">DELETE /items/:id</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e" text-anchor="middle">
+    <text x="230" y="100">✓</text>
+    <text x="230" y="134">✓</text>
+    <text x="230" y="168">✓</text>
+  </g>
+
+  <!-- column 2: policy engine, drifting from the code -->
+  <rect x="276" y="84" width="50" height="20" rx="3" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="276" y="114" width="50" height="20" rx="3" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="276" y="144" width="50" height="20" rx="3" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#6d6459" text-anchor="middle">
+    <text x="301" y="97">route</text>
+    <text x="301" y="127">route</text>
+    <text x="301" y="157">route</text>
+  </g>
+  <g stroke="#8a857d" stroke-width="1.2" fill="none">
+    <line x1="326" y1="94" x2="356" y2="112"/>
+    <line x1="326" y1="124" x2="356" y2="124"/>
+    <line x1="326" y1="154" x2="356" y2="136"/>
+  </g>
+  <rect x="356" y="86" width="110" height="76" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="411" y="116" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">policy engine</text>
+  <text x="411" y="136" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#6d6459">owner may edit</text>
+  <line x1="411" y1="162" x2="411" y2="204" stroke="#c2703d" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <polygon points="411,212 406,202 416,202" fill="#c2703d"/>
+  <text x="421" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d">drift</text>
+  <rect x="336" y="214" width="150" height="56" rx="5" fill="#faf9f7" stroke="#c2703d" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <g text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="411" y="233" font-size="11" fill="#3f3b36">the running code</text>
+    <text x="411" y="249" font-size="10" fill="#6d6459">grew a route the</text>
+    <text x="411" y="263" font-size="10" fill="#6d6459">policy never met</text>
+  </g>
+
+  <!-- column 3: relationship graph, a second system -->
+  <path d="M 545 106 Q 609 68 673 106" stroke="#2f6f4e" stroke-width="1.2" stroke-dasharray="4 4" fill="none"/>
+  <text x="609" y="83" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" fill="#2f6f4e">may edit? walk the edges</text>
+  <line x1="545" y1="120" x2="609" y2="178" stroke="#8a857d" stroke-width="1.3"/>
+  <line x1="673" y1="120" x2="609" y2="178" stroke="#8a857d" stroke-width="1.3"/>
+  <circle cx="545" cy="120" r="17" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4"/>
+  <circle cx="609" cy="178" r="17" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4"/>
+  <circle cx="673" cy="120" r="17" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#1f2b24" text-anchor="middle">
+    <text x="545" y="124">user</text>
+    <text x="609" y="182">team</text>
+    <text x="673" y="124">doc</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" fill="#6d6459">
+    <text x="568" y="158" text-anchor="end">member</text>
+    <text x="650" y="158">editor</text>
+  </g>
+  <line x1="609" y1="195" x2="609" y2="216" stroke="#c2703d" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <rect x="520" y="216" width="92" height="26" rx="4" fill="#faf9f7" stroke="#8a857d" stroke-width="1.1"/>
+  <text x="566" y="233" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#3f3b36">your app db</text>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#c2703d">
+    <text x="620" y="222">every change</text>
+    <text x="620" y="234">synced, always</text>
+  </g>
+
+  <!-- strengths, then failures -->
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d6459" text-anchor="middle">
+    <text x="151" y="284">simple, local, greppable</text>
+    <text x="380" y="284">one place to audit and test</text>
+    <text x="609" y="284">sharing and nesting for free</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d" text-anchor="middle">
+    <text x="151" y="303">fails by omission</text>
+    <text x="380" y="303">fails by drift</text>
+    <text x="609" y="303">fails by weight</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#c2703d" text-anchor="middle">
+    <text x="151" y="319">one route never got a check</text>
+    <text x="380" y="319">the policy stops matching the code</text>
+    <text x="609" y="319">the graph is a second system</text>
+  </g>
+
+  <line x1="40" y1="336" x2="720" y2="336" stroke="#ded9d1" stroke-width="1"/>
+  <text x="40" y="361" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#3f3b36">None of the three removes the judgment. You are choosing which failure you will have to hunt for.</text>
+</svg>

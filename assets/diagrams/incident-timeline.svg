@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="An incident timeline with four moments: it broke, we noticed, we mitigated, we fixed it. The gap between breaking and noticing is detection time, usually the largest and the only one that can be shortened by work done in advance.">
+  <rect width="760" height="300" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE GAPS ARE WHERE THE INFORMATION IS</text>
+
+  <!-- gap brackets -->
+  <g stroke="#c2703d" stroke-width="1.4" fill="none">
+    <path d="M 90 96 L 90 84 L 340 84 L 340 96"/>
+  </g>
+  <text x="215" y="76" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#a85d2f">detection time</text>
+  <text x="215" y="60" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">usually the biggest gap, and the only one you shrink in advance</text>
+
+  <g stroke="#8a857d" stroke-width="1.2" fill="none">
+    <path d="M 340 96 L 340 84 L 500 84 L 500 96"/>
+    <path d="M 500 96 L 500 84 L 660 84 L 660 96"/>
+  </g>
+  <text x="420" y="76" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">mitigate first</text>
+  <text x="580" y="76" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">the tail nobody watches</text>
+
+  <!-- the line -->
+  <line x1="70" y1="140" x2="700" y2="140" stroke="#c9c3b8" stroke-width="1.6"/>
+  <line x1="90" y1="140" x2="340" y2="140" stroke="#c2703d" stroke-width="3"/>
+  <line x1="340" y1="140" x2="660" y2="140" stroke="#2f6f4e" stroke-width="3"/>
+
+  <g>
+    <circle cx="90"  cy="140" r="7" fill="#c2703d" stroke="#a85d2f" stroke-width="1.6"/>
+    <circle cx="340" cy="140" r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2"/>
+    <circle cx="500" cy="140" r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2"/>
+    <circle cx="660" cy="140" r="7" fill="#2f6f4e" stroke="#2f6f4e" stroke-width="2"/>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24" text-anchor="middle">
+    <text x="90"  y="172">it broke</text>
+    <text x="340" y="172">we noticed</text>
+    <text x="500" y="172">we mitigated</text>
+    <text x="660" y="172">we fixed it</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459" text-anchor="middle">
+    <text x="90"  y="189">nobody knows yet</text>
+    <text x="340" y="189">an alert, or a customer</text>
+    <text x="500" y="189">it stops hurting</text>
+    <text x="660" y="189">understood, in daylight</text>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">
+    <text x="44" y="234">If a customer closed the first gap for you, that is the finding, and the rest of the</text>
+    <text x="44" y="252">postmortem is detail. Understanding why belongs after the site is back up, not before.</text>
+  </g>
+
+  <circle r="4" fill="#c2703d">
+    <animateMotion dur="8s" repeatCount="indefinite" calcMode="linear" path="M 90 140 L 660 140"/>
+  </circle>
+</svg>
