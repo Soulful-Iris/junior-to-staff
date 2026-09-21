@@ -7,8 +7,8 @@
 A change is not the edit you made; it is the trip that edit takes — commit,
 review, merge, run — and the record it leaves behind. That loop, not the file,
 is the unit of engineering. In 2026 the expensive half of the loop is no longer
-writing the code, it is judging it, and this section is about running the loop
-so that judgment stays possible.
+writing the code but judging it; this section is about running the loop so
+judgment stays possible.
 
 ## The failure it prevents
 
@@ -21,8 +21,8 @@ a41f9c2 checkout updates + refactor + review comments
 77b0d1e wip
 ```
 
-`a41f9c2` touches 38 files. It was generated in an afternoon, opened as one
-pull request, and approved in four minutes with "LGTM". Somewhere inside it is
+`a41f9c2` touches 38 files. Generated in an afternoon, opened as one pull
+request, approved in four minutes with "LGTM". Somewhere inside it is
 a change to how prices are rounded. Also inside it: a rename that touched
 thirty files, and a database migration. You cannot revert it — the migration
 already ran. You cannot read it — the one behaviour change is diluted across a
@@ -40,48 +40,40 @@ of a diff too big to judge.
 
 **Version control is a record of decisions, not a backup.** A backup answers
 "what did the code look like on Tuesday?" A record answers "why is this line
-here?" — which is the question you actually have when something breaks. That
-framing sets the units. A **commit** is the smallest change you can honestly
-describe in one sentence, with the reason attached. A **pull request** is an
-argument for changing the shared branch: what changes, why now, how you
-checked. A **merge** turns the argument into shared history, and the running
-system then produces the evidence — what real use does to your decision — that
-becomes the next change. The loop closes. "The code exists" is the middle of
-the loop, not the end.
+here?" — the question you actually have when something breaks. A **commit** is
+the smallest change you can honestly describe in one sentence, with the reason
+attached. A **pull request** is an argument for changing the shared branch:
+what changes, why now, how you checked. A **merge** turns the argument into
+shared history, and the running system produces the evidence that becomes the
+next change. "The code exists" is the middle of the loop, not the end.
 
 **Small batches win by arithmetic, not taste.** A reviewer has a roughly fixed
 budget of attention per sitting. Spend it on sixty lines and every line gets
-read; spread it over two thousand and each line gets a glance — which is
-exactly how a rounding change hides inside a rename. Small batches also fail
-better: a bad small change reverts cleanly, a bad big one has grown roots. The
-old joke — ten-line PR, ten comments; five-hundred-line PR, "looks good" — is
-folklore, but it is folklore you can confirm against your own team's history
-in an afternoon.
+read; spread it over two thousand and each line gets a glance — which is how a
+rounding change hides inside a rename. Small batches also fail better: a bad
+small change reverts cleanly, a bad big one has grown roots.
 
 **The bottleneck moved, and 2026's tooling is the evidence.** Producing code
 stopped being the slow part. In Stack Overflow's 2025 survey of about 49,000
 developers, 84% use or plan to use AI tools, and the most-cited frustration,
-at 66%, is solutions that are "almost right, but not quite" (checked
-2026-09-21). METR's randomized trial of experienced open-source developers
-(published July 2025) found them 19% slower with AI on their own mature repos
-— while believing they had been 20% faster (checked 2026-09-21). Read those
-together: generation feels like speed, verification is where the time goes,
-and your own sense of progress is not an instrument. GitClear's repo-scale
-analysis found blocks of duplicated code up roughly 8x during 2024, with
-copy/paste exceeding refactoring moves for the first time that year (checked
-2026-09-21). Google's DORA 2025 report calls AI an amplifier: it magnifies
-whatever development system it lands in, good or bad (checked 2026-09-21).
-More code, cheaper, of uneven quality — all arriving at the same narrow gate.
+at 66%, is solutions that are "almost right, but not quite". METR's randomized
+trial (July 2025) found experienced open-source developers 19% slower with AI
+on their own mature repos — while believing they had been 20% faster.
+Generation feels like speed; verification is where the time goes; your own
+sense of progress is not an instrument. GitClear found duplicated code blocks
+up roughly 8x during 2024, copy/paste exceeding refactoring moves for the
+first time, and DORA 2025 calls AI an amplifier of whatever system it lands
+in. (All figures checked 2026-09-21.) More code, cheaper, of uneven quality —
+all arriving at the same narrow gate.
 
 So the platform rebuilt itself around that gate. **Merge queues** (generally
 available on GitHub since July 2023) land approved changes one at a time
 against the latest main, so nobody babysits a merge. **AI first-pass review**
-(Copilot code review generally available April 2025) puts a machine read on
-every PR before a human spends attention. **Stacked pull requests** (GitHub
-public preview 2026-07-30) let one large feature land as a chain of small,
-individually judgeable diffs instead of one unreviewable batch. All dates
-checked 2026-09-21. Three different features, one shared premise: review
-capacity is the constraint now, and everything else queues behind it.
+(Copilot code review, generally available April 2025) puts a machine read on
+every PR before a human spends attention. **Stacked pull requests** (public
+preview 2026-07-30) let a large feature land as a chain of small, individually
+judgeable diffs. Dates checked 2026-09-21. Three features, one premise: review
+capacity is the constraint, and everything else queues behind it.
 
 **Which leaves the skill: reading a diff.** Not top to bottom like a novel.
 State the claim first — what does the message say this does — then sort every
@@ -97,7 +89,7 @@ where a human decides anything at all.
 - `git log --oneline -20` reads like a story someone decided to tell: each line says what, each body says why.
 - Every PR does one thing you can state without the word "and".
 - The diff is mostly signal: the behaviour change, its tests, nothing else riding along.
-- Review comments are about behaviour, risk and names. Formatting is a machine's job — a formatter, enforced, never argued about.
+- Review comments are about behaviour, risk and names; formatting is a machine's job, enforced, never argued about.
 - Any single commit can be reverted without dragging strangers with it.
 - The repo holds everything needed to rebuild the system and nothing that can be rebuilt from it: source, tests, lockfile, config-as-code, decision notes in; secrets, build artifacts, generated files, editor droppings out.
 - `main` is always in a state you would be willing to run.
@@ -108,7 +100,6 @@ Done badly, you see:
 - One PR per feature, forty files at a time, mixing a rename, a refactor and a behaviour change.
 - Approvals in minutes on diffs that would take an hour to actually read.
 - A `.env` file in history — history, not just the tip — or `node_modules`, or a 200 MB binary nobody remembers.
-- Force-pushes to main, and merges timed for "when CI is quiet" because there is no queue.
 
 ## Ask Claude for this
 
@@ -132,8 +123,7 @@ this commit is ever suspected in an incident.
 structure to exist before the code does, so you can veto the shape while it is
 still cheap. The "and" test is mechanical enough that the model can apply it
 to itself. The refactor/behaviour separation is what makes each diff readable
-later — a rename plus a logic change in one commit is precisely the failure
-story above.
+later.
 
 *What you should get back:* a numbered commit plan you could review as prose,
 then commits that match it. Check out the refactor commit and run the tests:
@@ -158,14 +148,14 @@ Here is a diff I have to review. Do a first pass. Do not comment on style.
    handling, a way to roll back?
 ```
 
-*Why:* requiring the summary to be written without the ticket, with hunks
-cited, stops the model paraphrasing the PR title — which is the failure mode,
-a summary of the claim instead of the diff. Question 4 is where a first pass
-earns its keep, because absence never shows up in a diff on its own.
+*Why:* requiring the summary without the ticket, hunks cited, stops the model
+paraphrasing the PR title — the failure mode is a summary of the claim instead
+of the diff. Question 4 is where a first pass earns its keep: absence never
+shows up in a diff on its own.
 
 *What you should get back:* a behaviour summary you can hold against the PR
-description. A mismatch between what the description promises and what the
-hunks say is a finding, whichever of the two turns out to be wrong.
+description. A mismatch between the two is a finding, whichever turns out to
+be wrong.
 
 *Push back on:* answers that could have been produced from the title alone —
 ask for the hunk citations again. Confident claims about behaviour that lives
@@ -189,8 +179,8 @@ says what.
 *Why:* the "if applied, this commit will…" frame produces imperative summaries
 that scan in `git log --oneline`. The 3am questions define what a body is
 for. "What we tried that did not work" is the most valuable sentence in a
-history and almost nobody writes it — it is the one that stops the next
-person re-walking the dead end.
+history and almost nobody writes it; it stops the next person re-walking the
+dead end.
 
 *What you should get back:* a message where every sentence says something the
 diff cannot. If a sentence merely re-describes an edit, delete it and check

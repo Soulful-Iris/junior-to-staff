@@ -8,8 +8,8 @@ The frontend is the part of your system that runs on hardware you did not
 choose, over a network you cannot trust, in front of the only person whose
 opinion of the software counts. It is not the pretty part. It is a small set of
 placement decisions — where the page gets built, where each fact lives, what
-the user sees while the truth is still in transit — and every one of those
-decisions is checkable.
+the user sees while the truth is still in transit — and every one of them is
+checkable.
 
 ## The failure it prevents
 
@@ -17,17 +17,16 @@ The reading list demos perfectly on your laptop. Then a real person opens it on
 a phone, on hotel wifi.
 
 They tap **add**. The request is in flight but the screen does not say so, so
-they tap four more times. Now there are five copies of the same URL, because
-the button never disabled and the server never checked. The fifth request times
-out; the list code assumed responses always succeed, so the page renders
-nothing at all — not an error message, just white. They give up and reopen the
-app, and the three items they marked read yesterday are unread again, because
-"read" lived in the page's memory and never reached the database.
+they tap four more times: five copies of the same URL, because the button never
+disabled and the server never checked. The fifth request times out; the list
+code assumed responses succeed, so the page renders nothing at all — just
+white. They give up and reopen the app, and the three items they marked read
+yesterday are unread again, because "read" lived in the page's memory and never
+reached the database.
 
-Nothing in that chain is exotic. A slow network, a missing pending state, a
-server that trusts the client, a fact stored in the wrong place. Each one was
-invisible on the machine it was built on, because a fast network and a mouse
-hide all four.
+Nothing in that chain is exotic: a slow network, a missing pending state, a
+server that trusts the client, a fact in the wrong home. Each was invisible on
+the machine it was built on, because a fast network and a mouse hide all four.
 
 The demo did not lie. It was measured on the one machine where none of this can
 happen.
@@ -43,35 +42,34 @@ bundle of defaults over them:
   cheapest to serve; stale by definition. Right for content that changes when
   you deploy.
 - **On the server, per request.** Fresh every time, and secrets stay on the
-  server. Costs a round trip, and a server doing work for every view.
+  server. Costs a round trip and server work on every view.
 - **In the browser (client).** The server sends data plus a program that builds
   the page. Interactions after load feel instant; the first load pays to ship
   and run that program on the user's device.
-- **Streamed.** The server sends the parts that are ready first and the rest as
-  it comes — a schedule mixing the above.
+- **Streamed.** The server sends what is ready first and the rest as it comes —
+  a schedule mixing the above.
 
 The question underneath is **who pays, and when**: your build machine
-yesterday, your server right now, or the user's phone. The phone is the only
-one you do not control and the only one that is ever slow.
+yesterday, your server now, or the user's phone — the only one you do not
+control and the only one that is ever slow.
 
 "Fast enough" is measured, not felt on your laptop. The field benchmark
 (checked 2026-09-21 at web.dev) is Core Web Vitals at the 75th percentile of
 real visits: main content painted within 2.5 s (LCP), a response to any
 interaction within 200 ms (INP), layout shift under 0.1 (CLS). The human
-thresholds underneath are older than the web: around a tenth of a second feels
-instant, around a second keeps the thread of thought.
+thresholds underneath are older than the web: a tenth of a second feels
+instant; a second keeps the thread of thought.
 
 **2. Where does each fact live?** State is any fact the interface must
-remember: the list, the current filter, the open dropdown, who is signed in.
-Each fact needs exactly one home, and the home is chosen by what the fact must
-survive.
+remember: the list, the filter, the open dropdown, who is signed in. Each fact
+needs exactly one home, chosen by what the fact must survive.
 
 ![Where state lives, as a decision ladder: must another device or person see it, the server; should refresh or a shared link reproduce it, the URL; do far-apart parts of the page need it at once, a shared store; otherwise component memory. One fact in two homes drifts.](../../../assets/diagrams/where-state-lives.svg)
 
 The classic self-inflicted bug is the same fact in two homes: server truth
 copied into page memory "for convenience" and synchronised by hope. Treat
-everything outside the server as a cache you are willing to throw away, and
-P1's "refreshing loses nothing" criterion follows on its own.
+everything outside the server as a cache you can throw away, and P1's
+"refreshing loses nothing" criterion follows on its own.
 
 **3. The boundary.** Between the page and the server, data arrives late,
 broken, or not at all. So every server-backed view has four states —

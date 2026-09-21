@@ -122,7 +122,7 @@ Under construction, in the open. Sections land one at a time and each one is
 complete when it lands — there are no stubs pretending to be chapters. A section
 with no link next to it is not written yet, and is not pretending to be.
 
-Written and checked: **11 of 21 sections**, all five project briefs indexed, P1 complete.
+Written and checked: **10 of 21 sections**, all five project briefs indexed, P1 complete.
 Last updated 2026-09-21.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,
