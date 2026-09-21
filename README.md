@@ -91,12 +91,12 @@ it, and at three in the morning while you are asleep.
 
 | | section | what it buys you |
 |---|---|---|
-| 08 | System design | the thinking process, not the interview ritual |
-| 09 | Reliability | SLOs, error budgets, degradation, backpressure, idempotency |
-| 10 | Observability | answering "what happened?" without guessing, and what that costs |
-| 11 | Security | authorisation, secrets, and the supply chain you did not know you had |
+| 08 | [System design](tiers/02-senior/08-system-design/) | the thinking process, not the interview ritual |
+| 09 | [Reliability](tiers/02-senior/09-reliability/) | SLOs, error budgets, degradation, backpressure, idempotency |
+| 10 | [Observability](tiers/02-senior/10-observability/) | answering "what happened?" without guessing, and what that costs |
+| 11 | [Security](tiers/02-senior/11-security/) | authorisation, secrets, and the supply chain you did not know you had |
 | 12 | Delivery | CI/CD, infrastructure as code, progressive rollout |
-| 13 | Data at scale | caching, queues, consistency, and what actually breaks first |
+| 13 | [Data at scale](tiers/02-senior/13-data-at-scale/) | caching, queues, consistency, and what actually breaks first |
 | 14 | Performance and cost | finding both, and the fact that they are the same skill |
 | 15 | [AI systems](tiers/02-senior/15-ai-systems/) | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
 
@@ -109,10 +109,10 @@ and the engineers you make faster.
 |---|---|---|
 | 16 | [Scope and leverage](tiers/03-staff/16-scope-and-leverage/) | what actually changes at staff, and the four archetypes |
 | 17 | [Writing that decides](tiers/03-staff/17-writing-that-decides/) | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
-| 18 | Technical strategy | synthesising strategy from real decisions, and why a good vision is boring |
+| 18 | [Technical strategy](tiers/03-staff/18-technical-strategy/) | synthesising strategy from real decisions, and why a good vision is boring |
 | 19 | [Migrations](tiers/03-staff/19-migrations/) | de-risk, enable, **finish** — and why most are abandoned at 80% |
-| 20 | Risk and incidents | operating under failure, and postmortems that change something |
-| 21 | Making other engineers faster | sponsorship versus mentorship, platform quality, and glue work |
+| 20 | [Risk and incidents](tiers/03-staff/20-risk-and-incidents/) | operating under failure, and postmortems that change something |
+| 21 | [Making other engineers faster](tiers/03-staff/21-making-others-faster/) | sponsorship versus mentorship, platform quality, and glue work |
 
 ---
 
@@ -122,7 +122,7 @@ Under construction, in the open. Sections land one at a time and each one is
 complete when it lands — there are no stubs pretending to be chapters. A section
 with no link next to it is not written yet, and is not pretending to be.
 
-Written and checked: **11 of 21 sections**, all five project briefs indexed, P1 complete.
+Written and checked: **19 of 21 sections**, all five project briefs indexed, P1 complete.
 Last updated 2026-09-21.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,
