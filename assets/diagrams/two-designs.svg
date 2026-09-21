@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" width="760" height="340" role="img" aria-label="The same requirement satisfied by two defensible designs. One service keeps everything in a single process: it buys simplicity and bills shared fate. A split isolates failure and deploys, and bills network calls, coordination and partial states. Neither is correct; being unable to name the bill is.">
+  <rect width="760" height="340" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE REQUIREMENT · TWO DEFENSIBLE SHAPES · TWO DIFFERENT BILLS</text>
+
+  <!-- left: one service -->
+  <rect x="44" y="60" width="316" height="104" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="202" y="82" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">one service</text>
+  <g fill="#faf9f7" stroke="#7f9b8b" stroke-width="1.1">
+    <rect x="66" y="98" width="84" height="44" rx="4"/>
+    <rect x="160" y="98" width="84" height="44" rx="4"/>
+    <rect x="254" y="98" width="84" height="44" rx="4"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#3f3b36" text-anchor="middle">
+    <text x="108" y="124">api</text>
+    <text x="202" y="124">work</text>
+    <text x="296" y="124">data</text>
+  </g>
+
+  <!-- right: split -->
+  <rect x="400" y="60" width="150" height="104" rx="6" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.6"/>
+  <rect x="566" y="60" width="150" height="104" rx="6" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.6"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24" text-anchor="middle">
+    <text x="475" y="98">service A</text>
+    <text x="641" y="98">service B</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459" text-anchor="middle">
+    <text x="475" y="118">api</text>
+    <text x="641" y="118">work + data</text>
+  </g>
+  <line x1="550" y1="112" x2="566" y2="112" stroke="#c2703d" stroke-width="2.4"/>
+  <circle cx="558" cy="112" r="3.2" fill="#faf9f7" stroke="#c2703d" stroke-width="1.6"/>
+
+  <!-- bills -->
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5">
+    <text x="44" y="204" fill="#2f6f4e">buys: simplicity, one deploy, calls that</text>
+    <text x="44" y="221" fill="#2f6f4e">cannot fail over a network</text>
+    <text x="44" y="248" fill="#a85d2f">bills: shared fate. One bad deploy, one</text>
+    <text x="44" y="265" fill="#a85d2f">memory leak, and all of it stops.</text>
+
+    <text x="400" y="204" fill="#2f6f4e">buys: failure and deploys that are</text>
+    <text x="400" y="221" fill="#2f6f4e">independent of each other</text>
+    <text x="400" y="248" fill="#a85d2f">bills: a network in the middle, partial</text>
+    <text x="400" y="265" fill="#a85d2f">states, and two things to run.</text>
+  </g>
+
+  <line x1="44" y1="288" x2="716" y2="288" stroke="#ded9d1" stroke-width="1"/>
+  <text x="44" y="312" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Neither of these is wrong. Choosing one and being unable to say what it cost is.</text>
+</svg>
