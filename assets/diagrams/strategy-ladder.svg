@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" width="760" height="330" role="img" aria-label="Strategy is built upward from real decisions. Five design documents about actual work reveal one recurring decision, which becomes a strategy. Five strategies extrapolated two or three years become a vision.">
+  <rect width="760" height="330" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">BUILT UPWARD FROM DECISIONS ALREADY MADE, NEVER DOWNWARD FROM AMBITION</text>
+
+  <!-- five design docs -->
+  <g fill="#faf9f7" stroke="#8a857d" stroke-width="1.2">
+    <rect x="44"  y="238" width="110" height="46" rx="4"/>
+    <rect x="166" y="238" width="110" height="46" rx="4"/>
+    <rect x="288" y="238" width="110" height="46" rx="4"/>
+    <rect x="410" y="238" width="110" height="46" rx="4"/>
+    <rect x="532" y="238" width="110" height="46" rx="4"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#3f3b36" text-anchor="middle">
+    <text x="99"  y="260">design doc</text>
+    <text x="221" y="260">design doc</text>
+    <text x="343" y="260">design doc</text>
+    <text x="465" y="260">design doc</text>
+    <text x="587" y="260">design doc</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d6459" text-anchor="middle">
+    <text x="99"  y="275">a real decision</text>
+    <text x="221" y="275">a real decision</text>
+    <text x="343" y="275">a real decision</text>
+    <text x="465" y="275">a real decision</text>
+    <text x="587" y="275">a real decision</text>
+  </g>
+  <text x="44" y="306" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">WEEKS · THINGS THAT HAD TO BE BUILT</text>
+
+  <!-- converge to strategy -->
+  <g stroke="#2f6f4e" stroke-width="1.2" fill="none">
+    <path d="M 99 236 C 99 210, 300 210, 300 192"/>
+    <path d="M 221 236 C 221 212, 300 210, 300 192"/>
+    <path d="M 343 236 L 343 210 L 300 192"/>
+    <path d="M 465 236 C 465 212, 320 210, 300 192"/>
+    <path d="M 587 236 C 587 210, 320 210, 300 192"/>
+  </g>
+
+  <rect x="188" y="146" width="230" height="44" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="303" y="165" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">a strategy</text>
+  <text x="303" y="181" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">the decision you kept re-making</text>
+  <text x="440" y="172" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">MONTHS</text>
+
+  <!-- up to vision -->
+  <line x1="303" y1="144" x2="303" y2="112" stroke="#2f6f4e" stroke-width="1.4"/>
+  <polygon points="303,106 298,116 308,116" fill="#2f6f4e"/>
+  <text x="318" y="128" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">five of these, extrapolated</text>
+
+  <rect x="188" y="60" width="230" height="44" rx="4" fill="#2f6f4e" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="303" y="79" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#faf9f7">a vision</text>
+  <text x="303" y="95" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#cfe0d5">where this ends up if they hold</text>
+  <text x="440" y="86" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">YEARS</text>
+
+  <text x="740" y="146" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">if it is exciting rather than</text>
+  <text x="740" y="162" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">boring, it is a proposal</text>
+</svg>

@@ -188,7 +188,7 @@ On **P1**, add:
 ---
 
 **Not covered here:** performance testing, load testing and chaos testing are
-senior-tier and live in [08 · Reliability](../../02-senior/08-reliability-and-observability/),
+senior-tier and live in [09 · Reliability](../../02-senior/09-reliability/),
 because they measure the system under conditions rather than the code under
 change. Property-based testing is genuinely useful and deliberately left out of
 the junior tier; it is easier to appreciate once you have felt an example-based

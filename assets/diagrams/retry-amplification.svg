@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" width="760" height="540" role="img" aria-label="One click becomes twenty-seven calls: each of three layers retries three times, so one request at the edge fans out to three at the service, nine at the data client, and twenty-seven at the already-slow database">
+  <rect width="760" height="540" rx="10" fill="#faf9f7"/>
+
+  <text x="40" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE CLICK BECOMES TWENTY-SEVEN CALLS</text>
+
+  <!-- the one legitimate request -->
+  <rect x="250" y="56" width="120" height="36" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="310" y="79" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">user</text>
+  <text x="382" y="79" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">one click</text>
+  <line x1="310" y1="92" x2="310" y2="130" stroke="#2f6f4e" stroke-width="2"/>
+  <polygon points="310,136 306,127 314,127" fill="#2f6f4e"/>
+
+  <!-- three layers, each retrying -->
+  <g fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5">
+    <rect x="210" y="136" width="200" height="44" rx="5"/>
+    <rect x="210" y="232" width="200" height="44" rx="5"/>
+    <rect x="210" y="328" width="200" height="44" rx="5"/>
+  </g>
+  <g text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">
+    <text x="310" y="155">edge / API</text>
+    <text x="310" y="251">service</text>
+    <text x="310" y="347">data client</text>
+  </g>
+  <g text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">
+    <text x="310" y="171">sees 1 · sends up to 3</text>
+    <text x="310" y="267">sees 3 · sends up to 9</text>
+    <text x="310" y="363">sees 9 · sends up to 27</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">
+    <text x="422" y="161">RETRIES ×3</text>
+    <text x="422" y="257">RETRIES ×3</text>
+    <text x="422" y="353">RETRIES ×3</text>
+  </g>
+
+  <!-- the multiplication, drawn -->
+  <g stroke="#c2703d" stroke-width="1.6" opacity="0.9">
+    <line x1="290" y1="180" x2="240" y2="232"/>
+    <line x1="310" y1="180" x2="310" y2="232"/>
+    <line x1="330" y1="180" x2="380" y2="232"/>
+  </g>
+  <g stroke="#c2703d" stroke-width="1.3" opacity="0.8">
+    <line x1="240" y1="276" x2="220" y2="328"/>
+    <line x1="257.5" y1="276" x2="242.5" y2="328"/>
+    <line x1="275" y1="276" x2="265" y2="328"/>
+    <line x1="292.5" y1="276" x2="287.5" y2="328"/>
+    <line x1="310" y1="276" x2="310" y2="328"/>
+    <line x1="327.5" y1="276" x2="332.5" y2="328"/>
+    <line x1="345" y1="276" x2="355" y2="328"/>
+    <line x1="362.5" y1="276" x2="377.5" y2="328"/>
+    <line x1="380" y1="276" x2="400" y2="328"/>
+  </g>
+  <g stroke="#c2703d" stroke-width="1.1" opacity="0.75">
+    <animate attributeName="opacity" values="0.75;0.4;0.75" dur="2.2s" repeatCount="indefinite"/>
+    <line x1="220" y1="372" x2="120" y2="436"/>
+    <line x1="226.9" y1="372" x2="134.6" y2="436"/>
+    <line x1="233.8" y1="372" x2="149.2" y2="436"/>
+    <line x1="240.8" y1="372" x2="163.8" y2="436"/>
+    <line x1="247.7" y1="372" x2="178.5" y2="436"/>
+    <line x1="254.6" y1="372" x2="193.1" y2="436"/>
+    <line x1="261.5" y1="372" x2="207.7" y2="436"/>
+    <line x1="268.5" y1="372" x2="222.3" y2="436"/>
+    <line x1="275.4" y1="372" x2="236.9" y2="436"/>
+    <line x1="282.3" y1="372" x2="251.5" y2="436"/>
+    <line x1="289.2" y1="372" x2="266.2" y2="436"/>
+    <line x1="296.2" y1="372" x2="280.8" y2="436"/>
+    <line x1="303.1" y1="372" x2="295.4" y2="436"/>
+    <line x1="310" y1="372" x2="310" y2="436"/>
+    <line x1="316.9" y1="372" x2="324.6" y2="436"/>
+    <line x1="323.8" y1="372" x2="339.2" y2="436"/>
+    <line x1="330.8" y1="372" x2="353.8" y2="436"/>
+    <line x1="337.7" y1="372" x2="368.5" y2="436"/>
+    <line x1="344.6" y1="372" x2="383.1" y2="436"/>
+    <line x1="351.5" y1="372" x2="397.7" y2="436"/>
+    <line x1="358.5" y1="372" x2="412.3" y2="436"/>
+    <line x1="365.4" y1="372" x2="426.9" y2="436"/>
+    <line x1="372.3" y1="372" x2="441.5" y2="436"/>
+    <line x1="379.2" y1="372" x2="456.2" y2="436"/>
+    <line x1="386.2" y1="372" x2="470.8" y2="436"/>
+    <line x1="393.1" y1="372" x2="485.4" y2="436"/>
+    <line x1="400" y1="372" x2="500" y2="436"/>
+  </g>
+
+  <!-- where it all lands -->
+  <rect x="110" y="436" width="400" height="52" rx="5" fill="#c2703d" fill-opacity="0.07" stroke="#c2703d" stroke-width="2"/>
+  <text x="310" y="457" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">database</text>
+  <text x="310" y="474" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#c2703d">already slow — now hit 27 times for one click</text>
+
+  <!-- the arithmetic, run down the right edge -->
+  <text x="600" y="100" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">CALLS IN FLIGHT</text>
+  <g text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <text x="600" y="119" font-size="14" fill="#2f6f4e">1</text>
+    <text x="600" y="161" font-size="10" fill="#8a857d">×3</text>
+    <text x="600" y="211" font-size="16" fill="#1f2b24">3</text>
+    <text x="600" y="257" font-size="10" fill="#8a857d">×3</text>
+    <text x="600" y="307" font-size="20" fill="#1f2b24">9</text>
+    <text x="600" y="353" font-size="10" fill="#8a857d">×3</text>
+    <text x="600" y="414" font-size="30" font-weight="600" fill="#c2703d">27</text>
+  </g>
+
+  <text x="40" y="512" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Each layer retried three times — a reasonable policy, locally. Multiplied through the</text>
+  <text x="40" y="529" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">stack, one click is 27 calls at a database that was already struggling at one.</text>
+</svg>

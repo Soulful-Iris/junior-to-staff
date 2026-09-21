@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" width="760" height="480" role="img" aria-label="The escalation ladder for data under load: index, then cache, then replicas, then shard last. Each rung buys headroom — fast reads, read headroom, read scale, write headroom — and bills a new failure class: write cost on every insert, staleness and stampedes, replication lag and failover itself, routing and rebalancing with no cross-shard transactions.">
+  <rect width="760" height="480" rx="10" fill="#faf9f7"/>
+
+  <text x="40" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">SCALE IN THIS ORDER</text>
+  <text x="40" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">each rung buys headroom and bills a new failure class</text>
+
+  <!-- rung 4: shard -->
+  <rect x="520" y="60" width="150" height="34" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="534" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#1f2b24">4 · SHARD</text>
+  <text x="520" y="116" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">buys: write headroom</text>
+  <text x="520" y="133" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">bills: routing · rebalancing ·</text>
+  <text x="520" y="150" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">no cross-shard transactions</text>
+
+  <!-- rung 3: replicate -->
+  <rect x="360" y="150" width="150" height="34" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="374" y="172" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#1f2b24">3 · REPLICATE</text>
+  <text x="360" y="206" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">buys: read scale + a standby</text>
+  <text x="360" y="223" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">bills: lag · failover itself</text>
+
+  <!-- rung 2: cache -->
+  <rect x="200" y="240" width="150" height="34" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="214" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#1f2b24">2 · CACHE</text>
+  <text x="200" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">buys: read headroom</text>
+  <text x="200" y="313" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">bills: staleness · stampedes</text>
+
+  <!-- rung 1: index -->
+  <rect x="40" y="330" width="150" height="34" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
+  <text x="54" y="352" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#1f2b24">1 · INDEX</text>
+  <text x="40" y="386" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">buys: fast reads on one shape</text>
+  <text x="40" y="403" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">bills: every write pays for it</text>
+  <text x="40" y="421" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">(priced in the junior data section)</text>
+
+  <!-- climb 1 → 2 -->
+  <line x1="115" y1="330" x2="115" y2="257" stroke="#6d6459" stroke-width="1.5"/>
+  <line x1="115" y1="257" x2="190" y2="257" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="198,257 190,253 190,261" fill="#6d6459"/>
+  <text x="123" y="298" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">STILL SLOW?</text>
+
+  <!-- climb 2 → 3 -->
+  <line x1="275" y1="240" x2="275" y2="167" stroke="#6d6459" stroke-width="1.5"/>
+  <line x1="275" y1="167" x2="350" y2="167" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="358,167 350,163 350,171" fill="#6d6459"/>
+  <text x="283" y="208" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">STILL SLOW?</text>
+
+  <!-- climb 3 → 4 -->
+  <line x1="435" y1="150" x2="435" y2="77" stroke="#6d6459" stroke-width="1.5"/>
+  <line x1="435" y1="77" x2="510" y2="77" stroke="#6d6459" stroke-width="1.5"/>
+  <polygon points="518,77 510,73 510,81" fill="#6d6459"/>
+  <text x="427" y="118" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">WRITES SLOW?</text>
+
+  <text x="40" y="450" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Every rung buys headroom and bills a failure class you keep paying after the win fades.</text>
+  <text x="40" y="468" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Climb on a measured number, one rung at a time — and shard last: it has no ladder down.</text>
+</svg>

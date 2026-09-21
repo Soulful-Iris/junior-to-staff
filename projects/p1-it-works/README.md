@@ -91,7 +91,7 @@ the definition of done, you have delegated the only thing that was yours.
 2. **Turn the network off and add a URL.** The failure should be visible and the item should still be in a sane state.
 3. **Grep your own repository for secrets** before every push, and know what you are grepping for.
 4. **Run it from a clean clone in a fresh directory.** The number of projects that only run in the folder they were built in is very large.
-5. **Put a deliberate bug in and watch the suite go red.** If it does not, the suite is decorative. See [05 · Testing](../../tiers/01-junior/05-testing/).
+5. **Put a deliberate bug in and watch the suite go red.** If it does not, the suite is decorative. See [06 · Testing](../../tiers/01-junior/06-testing/).
 6. **Tab through the whole flow.** If you cannot add an item using only the keyboard, it does not work for a real group of people, and since June 2025 in the EU that is a legal floor rather than a nicety.
 
 ## Break it on purpose
