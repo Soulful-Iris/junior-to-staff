@@ -31,12 +31,12 @@ because the message says `fixes`.
 
 The bug is not the failure. The failure is that the record cannot answer the
 only two questions that matter at 02:40 — **what changed, and why** — and that
-the single moment a human could have caught it was a four-minute wave-through
-of a diff too big to judge.
+the one moment a human could have caught it was a four-minute wave-through of
+a diff too big to judge.
 
 ## The mental model
 
-![One change rides the loop — edit, commit, open a PR, review, merge, run — and what it does in production becomes the next change. Review is drawn widest, with a queue in front of it, because writing is cheap now and judging is not.](../../../assets/diagrams/change-loop.svg)
+![One change rides the loop — edit, commit, open a PR, review, merge, run — and production feeds the next change. Review is drawn widest, with a queue in front, because writing is cheap now and judging is not.](../../../assets/diagrams/change-loop.svg)
 
 **Version control is a record of decisions, not a backup.** A backup answers
 "what did the code look like on Tuesday?" A record answers "why is this line
@@ -54,13 +54,13 @@ rounding change hides inside a rename. Small batches also fail better: a bad
 small change reverts cleanly, a bad big one has grown roots.
 
 **The bottleneck moved, and 2026's tooling is the evidence.** Producing code
-stopped being the slow part. In Stack Overflow's 2025 survey of about 49,000
-developers, 84% use or plan to use AI tools, and the most-cited frustration,
-at 66%, is solutions that are "almost right, but not quite". METR's randomized
+stopped being the slow part. Stack Overflow's 2025 survey (about 49,000
+developers): 84% use or plan to use AI tools, and the most-cited frustration,
+at 66%, is solutions "almost right, but not quite". METR's randomized
 trial (July 2025) found experienced open-source developers 19% slower with AI
 on their own mature repos — while believing they had been 20% faster.
-Generation feels like speed; verification is where the time goes; your own
-sense of progress is not an instrument. GitClear found duplicated code blocks
+Generation feels like speed; verification is where the time goes; your sense
+of progress is not an instrument. GitClear found duplicated code blocks
 up roughly 8x during 2024, copy/paste exceeding refactoring moves for the
 first time, and DORA 2025 calls AI an amplifier of whatever system it lands
 in. (All figures checked 2026-09-21.) More code, cheaper, of uneven quality —
@@ -72,26 +72,26 @@ against the latest main, so nobody babysits a merge. **AI first-pass review**
 (Copilot code review, generally available April 2025) puts a machine read on
 every PR before a human spends attention. **Stacked pull requests** (public
 preview 2026-07-30) let a large feature land as a chain of small, individually
-judgeable diffs. Dates checked 2026-09-21. Three features, one premise: review
-capacity is the constraint, and everything else queues behind it.
+judgeable diffs. (Dates checked 2026-09-21.) Three features, one premise:
+review capacity is the constraint; everything else queues behind it.
 
-**Which leaves the skill: reading a diff.** Not top to bottom like a novel.
-State the claim first — what does the message say this does — then sort every
-hunk into "needed for that claim" or "riding along", then hunt for what is
-absent: the test, the migration, the error path. Review was never spell-check;
-it is the moment a second mind asks *is this the right change, what does it
-break, will we understand it in a year*. When the author is a model, that
-moment is not politeness toward a colleague. It is the only point in the loop
-where a human decides anything at all.
+**Which leaves the skill: reading a diff.** Not top to bottom: state the claim
+first — what does the message say this does — then sort every hunk into
+"needed for that claim" or "riding along", then hunt for what is absent: the
+test, the migration, the error path. Review was never spell-check; it is the
+moment a second mind asks *is this the right change, what does it break, will
+we understand it in a year*. When the author is a model, that moment is not
+courtesy; it is the only point in the loop where a human decides anything at
+all.
 
 ## What good looks like
 
-- `git log --oneline -20` reads like a story someone decided to tell: each line says what, each body says why.
+- `git log --oneline -20` reads like a story someone chose to tell: each line says what, each body says why.
 - Every PR does one thing you can state without the word "and".
 - The diff is mostly signal: the behaviour change, its tests, nothing else riding along.
 - Review comments are about behaviour, risk and names; formatting is a machine's job, enforced, never argued about.
 - Any single commit can be reverted without dragging strangers with it.
-- The repo holds everything needed to rebuild the system and nothing that can be rebuilt from it: source, tests, lockfile, config-as-code, decision notes in; secrets, build artifacts, generated files, editor droppings out.
+- The repo holds everything needed to rebuild the system and nothing that can be rebuilt from it: source, tests, lockfile, config, decision notes in; secrets, artifacts, generated files out.
 - `main` is always in a state you would be willing to run.
 
 Done badly, you see:
@@ -157,11 +157,11 @@ shows up in a diff on its own.
 description. A mismatch between the two is a finding, whichever turns out to
 be wrong.
 
-*Push back on:* answers that could have been produced from the title alone —
-ask for the hunk citations again. Confident claims about behaviour that lives
-outside the diff: the model has not seen that code, and neither have you until
-you open it. And keep the verdict: this pass is a map of where to spend your
-attention, not a substitute for spending it.
+*Push back on:* answers that could have come from the title alone — ask for
+the hunk citations again. Confident claims about behaviour outside the diff:
+the model has not seen that code, and neither have you until you open it. Keep
+the verdict: this pass is a map of where to spend your attention, not a
+substitute for spending it.
 
 **Request 3 — the message the 3am debugger will read**
 
@@ -194,49 +194,43 @@ which makes it worse than none.
 ## How you would know it is wrong
 
 1. **Ask history a real question.** Take a bug you fixed last month and, using
-   only `git log` and `git blame`, work out why the offending line was written
-   in the first place. If the record cannot answer, you have a backup, not a
-   record — and the next person asking will be you at 02:40.
+   only `git log` and `git blame`, work out why the offending line was written.
+   If the record cannot answer, you have a backup, not a record.
 2. **The revert drill.** Pick a merged change from last week at random and
    revert it on a branch. If the revert refuses to apply cleanly, or drags
-   unrelated behaviour out with it, your batches are entangled whatever their
-   line count says.
+   unrelated behaviour out with it, your batches are entangled.
 3. **Plot approval time against diff size** for your last twenty PRs. Slow
    review on big diffs is honest friction. *Fast* approval on big diffs is the
    red flag: it means review has become a ritual that cannot say no.
-4. **Plant a bug in a PR** — a real one, an inverted condition, an off-by-one —
-   and let the normal process run: machine first pass, then reviewer. If it
+4. **Plant a bug in a PR** — an inverted condition, an off-by-one — and let
+   the normal process run: machine first pass, then reviewer. If it
    gets approved, the review step is decorative, and you learned that for the
-   price of one closed PR instead of one incident.
-5. **Clone fresh and search for what should not be there.** Scan the whole
-   history, not the tip — `git log --all` over `.env`, keys, tokens — because
-   deleting a file in a new commit unpublishes nothing. Then build from that
-   clean clone: if the build fails, something the repo needs is not in the
-   repo.
+   price of one closed PR rather than an incident.
+5. **Search history, then build from a clean clone.** History, not the tip —
+   deleting a file in a new commit unpublishes nothing — so scan `git log
+   --all` for `.env`, keys, tokens. If the clean-clone build fails, something
+   the repo needs is not in the repo.
 
 > The rule under all five: **a check that cannot fail is not a check.** A
-> review process that has never rejected anything, a history nobody has ever
-> queried, a secret scan nobody has planted a secret against — all green, all
-> unproven.
+> review that has never rejected anything, a history never queried, a secret
+> scan never tested with a planted secret — all green, all unproven.
 
 ## Your slice of the project
 
-This is the first section, so your slice starts
-[P1](../../../projects/p1-it-works/):
+Your slice starts [P1](../../../projects/p1-it-works/):
 
 - Create the repository before the first line of code. First commit:
-  `.gitignore`, the lockfile decision, and a short note in the repo saying
-  what stays out — secrets, artifacts, generated files — and why.
+  `.gitignore`, the lockfile decision, and a short note saying what stays out
+  — secrets, artifacts, generated files — and why.
 - Build P1's first runnable slice — a person can sign up and sign in — as
   **two to four commits**, each doing one thing, each leaving the app
   runnable.
-- Land it through a real pull request, even though you are alone: a
-  description with one sentence of behaviour and the exact steps to verify
-  it; a machine first pass if you have one available; your own full read of
-  the diff before merging.
-- Reject at least one review suggestion — the machine's, or your own second
-  thought — in writing, in the PR, with the reason. Saying "no, because" in
-  review is the skill; agreeing is not.
+- Land it through a real pull request, even alone: a description with one
+  sentence of behaviour and the exact steps to verify it; a machine first
+  pass if available; your own full read of the diff before merging.
+- Reject at least one review suggestion — the machine's or your own second
+  thought — in writing, in the PR, with the reason. "No, because" is the
+  review skill; agreeing is not.
 
 **Acceptance criteria you can check yourself:**
 
@@ -255,25 +249,23 @@ This is the first section, so your slice starts
 - **commit** — the smallest recorded decision: one change plus its reason.
 - **diff / hunk** — the difference between two versions; a hunk is one contiguous block of it.
 - **pull request (PR)** — a proposed batch of commits plus the argument for merging it.
-- **branch** — a movable label on a line of history; cheap to create, cheap to delete.
 - **main / trunk** — the shared branch every loop returns to; its state is the team's state.
-- **merge queue** — machinery that lands approved PRs one at a time against the latest main, so green keeps meaning green.
+- **merge queue** — machinery that lands approved PRs one at a time against the latest main.
 - **stacked PRs** — one large feature as a chain of small dependent PRs, each reviewable alone.
-- **review latency** — time from "PR opened" to first meaningful response; the dominant wait in most loops now.
+- **review latency** — time from "PR opened" to first meaningful response; the loop's dominant wait now.
 - **revert** — a new commit that undoes an old one; the record keeps both, which is the point.
 - **git blame** — shows which commit last touched each line; the tool that makes commit messages matter.
 - **lockfile** — the exact dependency versions you actually run; belongs in the repo precisely because it is boring.
-- **trunk-based development** — everyone merges small changes into main frequently, instead of long-lived branches merging rarely.
+- **trunk-based development** — small changes merged into main frequently, instead of long-lived branches merged rarely.
 
 ---
 
-**Not covered here:** git's internals — objects, refs, the mechanics of rebase
-versus merge — which are worth learning the first time a rebase eats your
-afternoon, not before. CI pipelines and deployment are P2's territory: this
-section ends at "merged and running", P2 is where "running" becomes
-trustworthy. The test half of "how you checked it" gets its own section,
-[06 · Testing](../06-testing/). Branching-strategy debates (gitflow and its
-relatives) are deliberately skipped: every tool named above assumes short-lived
-branches off main, and that is the default worth learning first. Monorepo
-versus many repos is a staff-tier argument about organisations, not a junior
-decision.
+**Not covered here:** git's internals — objects, refs, rebase-versus-merge
+mechanics — worth learning the first time a rebase eats your afternoon, not
+before. CI pipelines and deployment are P2's territory: this section ends at
+"merged and running", P2 is where "running" becomes trustworthy. The test half
+of "how you checked it" gets its own section, [06 · Testing](../06-testing/).
+Branching-strategy debates (gitflow and relatives) are deliberately skipped:
+every tool named above assumes short-lived branches off main, and that default
+is the one worth learning first. Monorepo versus many repos is a staff-tier
+argument about organisations, not a junior decision.

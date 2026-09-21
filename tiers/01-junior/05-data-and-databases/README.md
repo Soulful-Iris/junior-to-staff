@@ -42,62 +42,59 @@ lives in forty rows, renaming it is forty updates, and a crash after twelve
 leaves a database that disagrees with itself. Normalising gives each fact one
 home and points at it from everywhere else. Denormalising — a deliberate copy,
 like a cached count — is sometimes right when a *measured* read is too slow,
-but the database stops guaranteeing the copies agree; keeping them true becomes
-your job, including in the failure cases. Do it late, on evidence.
+but keeping the copies true becomes your job. Do it late, on evidence.
 
 **3. A join is a lookup you can reason about.** A foreign key is a value that
 names a row in another table. A join says: for each row here, find the rows
-there whose key matches. The entire cost lives in the word *find* — check every
+there whose key matches. The whole cost lives in the word *find* — check every
 row (a scan) or seek in something kept sorted (an index). Any join yields to
 two questions: how many rows survive the filters on each side, and how are the
-matches found. You never need to recite join types to answer either.
+matches found. You never need the join-type vocabulary to answer either.
 
 **4. Keys — and why their order is physical.** A natural key is a real-world
 value (an email); a surrogate key is generated and meaningless. Natural keys
 break when the world changes — people change emails — so rows usually get a
-surrogate key, keeping the real value as an ordinary unique column. The primary
-key lives in a B-tree, kept sorted, and fully random UUIDs land each new row on
-a random page of it; once the index outgrows memory, a typical insert fetches a
+surrogate key, with the real value kept as a plain unique column. The primary
+key lives in a B-tree, kept sorted. Fully random UUIDs land each new row on a
+random page of it; once the index outgrows memory, a typical insert fetches a
 cold page from disk and often splits it. Time-ordered ids land at the same
-recent edge, on a few pages that stay hot in cache, and rows created together
-stay stored together — which is what "latest items" queries want. UUIDv7 (RFC
-9562, 2024) puts a millisecond timestamp in the first 48 bits for exactly this
-reason, and PostgreSQL 18 (released 25 September 2025; checked 2026-09-21)
-ships it as `uuidv7()`. The trade: a v7 id reveals when its row was created.
-The function name is trivia; the idea — identifier order is a physical property
-with a cost — is not.
+recent edge, on a few hot pages already in cache, and rows created together
+stay stored together — what "latest items" queries want. UUIDv7 (RFC 9562,
+2024) puts a millisecond timestamp in the first 48 bits for this reason;
+PostgreSQL 18 (released 25 September 2025; checked 2026-09-21) ships it as
+`uuidv7()`, at the price that an id now reveals its row's age. The function is
+trivia; the idea — identifier order is physical — is not.
 
 **5. An index is a purchase, and the planner holds the receipt.**
 
-![An index is a trade: a read follows one sorted index straight to its row in a few page reads, while one inserted row must also be written into the table and every index on it — faster reads bought with slower writes and more disk](../../../assets/diagrams/index-cost.svg)
+![One read uses a single sorted index to reach its row in a few page reads; one insert must also write the table and every index on it](../../../assets/diagrams/index-cost.svg)
 
 An index is a sorted copy of chosen columns with pointers back to the rows.
 Reads matching its shape get fast; in exchange, every insert and update writes
 the table *and* every index, and the copies take disk. You also do not decide
-whether an index gets used — the query planner does, from statistics about your
-actual data, and it can rightly choose differently at a thousand rows than at a
-million. Arguments about query speed are settled by `EXPLAIN`, not intuition,
-because intuition does not execute queries and the planner does.
+whether an index is used — the query planner does, from statistics about your
+actual data, and it can rightly choose differently at a thousand rows than at
+a million. Arguments about query speed are settled by `EXPLAIN`, because
+intuition does not execute queries and the planner does.
 
 **6. "Atomic" means both writes or neither.** The classic bug: debit one
 account, crash, never credit the other. No error anywhere — the money is simply
-gone, because two writes that only make sense together were allowed to happen
-separately. A transaction is the database's promise that if the process dies
-between them, the world looks as if nothing started. A migration is the same
-both-or-neither problem stretched over days, with old code still running while
-the shape changes: additive first, then backfill, then switch, and only then
-remove the old shape. Never a destructive change in one step, because there is
-no moment when nothing is reading.
+gone, because two writes that only make sense together happened separately. A
+transaction is the database's promise that if the process dies between them,
+the world looks as if nothing started. A migration is the same problem
+stretched over days, with old code still running while the shape changes: add
+first, then backfill, then switch, only then remove. Never a destructive change
+in one step — there is no moment when nothing is reading.
 
 **7. Where juniors reliably lose data: NULL, time zones, money.** NULL means
 three different things — unknown, not applicable, not yet — and where nobody
-wrote down which, sums, joins and comparisons quietly skip rows. Default to NOT
-NULL; comment every exception. A timestamp without a time zone is a time
+wrote down which, sums, joins and comparisons quietly skip rows: default to
+NOT NULL and comment every exception. A timestamp without a time zone is a time
 nowhere: store instants in UTC (PostgreSQL's `timestamptz` stores the instant
 and converts on display), keeping a zone only where wall-clock time *is* the
-fact, like a calendar event. And binary floats cannot represent 0.10 exactly,
-so money in a `float` drifts by rounding until an audit finds it: store integer
-minor units, or a decimal type.
+fact, like a calendar event. Binary floats cannot represent 0.10 exactly, so
+money in a `float` drifts by rounding until an audit finds it: store integer
+minor units or a decimal type.
 
 ## What good looks like
 
@@ -121,8 +118,8 @@ Done badly, you see:
 - Prices in `float`, off by a cent, and a reconciliation spreadsheet nobody
   admits to owning.
 - An index on every column just in case: writes crawl, the planner ignores half.
-- A migration that adds the new column and drops the old one in the same
-  deploy, and a minute of errors while old code runs against the new schema.
+- A migration that adds the new column and drops the old in the same deploy,
+  and a minute of errors while old code runs against the new schema.
 
 ## Ask Claude for this
 
@@ -142,20 +139,19 @@ Then name the three decisions you are least sure of, and for each, the
 future requirement that would prove it wrong. No code yet.
 ```
 
-*Why it is asked that way:* the row-sentence forces tables to be nouns in the
-domain — a table you cannot say as a sentence is usually a screen in disguise.
-The NULL question and the enforced-versus-promised split surface the two places
-schemas rot first, and the "least sure" list extracts the model's own
-uncertainty, which "is this good?" never does.
+*Why:* the row-sentence forces tables to be nouns — a table you cannot say as a
+sentence is usually a screen in disguise. The NULL question and the
+enforced-versus-promised split surface the two places schemas rot first, and
+the "least sure" list extracts the model's own uncertainty, which "is this
+good?" never does.
 
 *What you should get back:* nouns — people, items, tags, a person-item table
-for read-state — explicit NULL meanings, and honest doubt around tags and
-read-state, which is where it belongs. If "read" comes back as a boolean on
-items, you are holding the failure story above in written form.
+for read-state — with explicit NULL meanings. If "read" comes back as a boolean
+on items, you are holding the failure story above in written form.
 
 *Push back on:* any rule left to the application "for flexibility". The
 application is only one of the things that will write to this database,
-alongside the migration script, the console, and next year's rewrite.
+alongside the migration script, the console and next year's rewrite.
 
 **Request 2 — reviewing a schema a model proposed**
 
@@ -175,12 +171,11 @@ Finish with the one change that is cheapest now and most expensive in
 six months.
 ```
 
-*Why:* models writing schemas reliably default to the same weaknesses —
-nullable everything, floats for money, naive timestamps, undeclared
-uniqueness, boolean flags where a pair table or an `_at` timestamp belongs,
-and tables shaped after your prompt's phrasing rather than the domain. The
-named checklist points the review at exactly those, because a bare "review this
-schema" tends to return compliments and an index suggestion.
+*Why:* models writing schemas default to the same weaknesses — nullable
+everything, floats for money, naive timestamps, undeclared uniqueness, flags
+where a pair table or an `_at` timestamp belongs, tables shaped after your
+prompt rather than the domain. The checklist points the review at exactly
+those; a bare "review this schema" returns compliments and an index suggestion.
 
 *What you should get back:* findings that cite specific columns, at least one
 undeclared uniqueness (there is almost always one), and a closing ranked by
@@ -213,8 +208,8 @@ remove — and a plain admission that per-person history from before the change
 does not exist.
 
 *Push back on:* a backfill that invents facts. Marking each item read by
-whoever added it looks plausible and is fiction; the honest version records the
-assumption, or stores nothing with a documented meaning.
+whoever added it looks plausible and is fiction; the honest version records
+the assumption.
 
 ## How you would know it is wrong
 
@@ -230,7 +225,7 @@ assumption, or stores nothing with a documented meaning.
 3. **Kill the process mid-transaction.** Put a sleep between two writes that
    only make sense together, `kill -9` in the gap, restart, count. If half the
    change is visible, those writes were never in one transaction — and now you
-   have seen the check go red, which is worth more than a week of green.
+   have seen the check go red, which is worth a week of green.
 4. **Run every migration forwards and backwards on a copy.** Row counts and a
    spot-check query must survive the round trip. A down step that cannot
    restore what the up step removed is telling you the up step was destructive
@@ -275,14 +270,14 @@ On **P1**, add:
 - **schema** — the shape of your data: tables, columns and the rules between them.
 - **primary key** — the value that names a row uniquely, forever.
 - **foreign key** — a column holding another row's key, enforced by the database.
-- **surrogate key** — a generated identifier with no real-world meaning, so facts can change without renaming the row.
+- **surrogate key** — a generated identifier with no real-world meaning.
 - **normalisation** — each fact stored once and referenced, so copies cannot disagree.
-- **denormalisation** — a deliberate copy kept for read speed; keeping it true becomes your job.
+- **denormalisation** — a deliberate copy kept for read speed; keeping it true is now your job.
 - **index** — a sorted copy of chosen columns, bought with write time and disk.
 - **query planner** — decides how to run your query, from statistics rather than your intent.
 - **EXPLAIN** — the planner showing its plan; with ANALYZE, what actually happened.
 - **transaction** — writes that succeed together or leave no trace.
-- **migration** — a versioned change to the schema and to the data already living under it.
+- **migration** — a versioned change to the schema and the data already under it.
 - **backfill** — filling in values for rows that existed before the column did.
 
 ---
@@ -291,5 +286,4 @@ On **P1**, add:
 first, so that when an ORM later writes queries for you, you can read what it
 wrote. Document and key-value stores are real answers for data that is not
 row-shaped and belong to the senior tier, as do isolation levels, locking,
-replication and backups-you-have-actually-restored. P2 will make you feel the
-first of those.
+replication and backups-you-have-actually-restored.

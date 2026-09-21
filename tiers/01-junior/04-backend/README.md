@@ -5,103 +5,92 @@
 ## The one-liner
 
 The backend is where a click becomes a row in a database — the code that takes
-requests from the outside world and decides what actually happens. Two facts
-define the job: everything that arrives is a message from a stranger, and
-everything you promise has to stay true when two strangers arrive at once. A
-frontend bug is wrong on one screen; a backend bug is wrong for everyone at
-once.
+requests from the outside world and decides what actually happens. Everything
+that arrives is a message from a stranger, and everything you promise must
+stay true when two strangers arrive at once. A frontend bug is wrong on one
+screen; a backend bug is wrong for everyone.
 
 ## The failure it prevents
 
 You ship the reading list. Someone pastes a link to a server that accepts the
-connection and then never sends a byte — a half-crashed machine, a hotel
-captive portal, a load balancer with nothing behind it. The internet is full
-of these.
+connection and then never sends a byte — a half-crashed machine, a load
+balancer with nothing behind it.
 
-Your title-fetch code waits. How long? You never said, so you inherited the
-default of whatever HTTP client you happen to use. In Node's built-in `fetch`
-that is five minutes of waiting for response headers (300 seconds; checked
-2026-09-21). In Python's `requests` there is no default at all — the official
-docs warn that without a timeout "your code may hang for minutes or more"
-(checked 2026-09-21).
+Your title-fetch code waits. How long? You never said, so you inherited your
+HTTP client's default. In Node's built-in `fetch` that is five minutes of
+waiting for response headers (300 seconds; checked 2026-09-21). In Python's
+`requests` there is no default at all — the docs warn that without a timeout
+"your code may hang for minutes or more" (checked 2026-09-21).
 
-Your app has a handful of worker processes, and each pasted link ties one up.
-Nothing crashes. Nothing logs an error, because nothing is wrong — everything
-is just waiting. A few links later, the sign-in page stops loading for
-everyone.
+Each pasted link ties up one of your handful of worker processes. Nothing
+crashes and nothing logs, because nothing is wrong — everything is just
+waiting. A few links later, the sign-in page stops loading for everyone.
 
-One pasted URL, zero exceptions, whole site down. That is what an unchosen
-timeout costs, and it is one entry on the list this section is about: every
-place between the click and the row where a request can stop, and who finds
-out when it does.
+One pasted URL, zero exceptions, whole site down. That is the cost of an
+unchosen timeout — one entry on the list this section is about: every place
+between the click and the row where a request can stop, and who finds out when
+it does.
 
 ## The mental model
 
-A request is a message on a journey, and the journey is longer than it looks.
-The browser turns a name into an address (DNS), opens an encrypted connection
-(TLS), and sends a few hundred bytes of structured text across machines you do
-not own. They arrive at your process, where a router decides which code runs,
-the body is parsed and validated, an auth check decides who is asking, and
-your handler finally does the work — reading and writing the database,
-sometimes calling someone else's server. Then a response makes the same trip
-in reverse, to a browser that may no longer be waiting. The order of the
-middle steps varies by framework; the stops do not.
+A request is a message on a journey. The browser turns a name into an address
+(DNS), opens an encrypted connection (TLS), and sends a few hundred structured
+bytes across machines you do not own. At your process a router picks the code,
+the body is parsed and validated, auth decides who is asking, and your handler
+does the work — reading and writing the database, sometimes calling someone
+else's server. Then the response makes the same trip in reverse, to a browser
+that may no longer be waiting. The order of the middle steps varies by
+framework; the stops do not.
 
-![One request travels from the browser through the router, auth and handler to the database and back as the reply; seven numbered markers show where it can stop: the network, the router, auth, the handler, the outbound fetch, the database, and the reply itself](../../../assets/diagrams/request-lifecycle.svg)
+![One request travels from browser through router, auth and handler to the database and back; numbered markers show the seven places it can stop, from the network to the reply itself](../../../assets/diagrams/request-lifecycle.svg)
 
 Three ideas survive any change of framework.
 
-**Every hop is a place it can stop, and each stop needs an owner.** HTTP gives
-you the vocabulary, and it is a contract, not decoration: 4xx means the sender
-got it wrong, 5xx means you did. GET must never change anything. PUT and
-DELETE are idempotent — doing them twice leaves the world as doing them once —
-while POST is not guaranteed to be (RFC 9110; checked 2026-09-21). That
-matters because networks deliver things twice and users double-click. Failures
-come in three kinds: the ones you expected (a 4xx with a clear message), the
-ones you did not (a 5xx, logged loudly with a stack trace and a request id),
-and the ones you swallowed — caught, hidden, returned as success. The third
-kind costs the most, and the 2025 revision of the OWASP Top 10 added
-"Mishandling of Exceptional Conditions" as a category of its own (checked
-2026-09-21).
+**Every hop is a place it can stop, and each stop needs an owner.** HTTP is
+the contract for saying so: 4xx means the sender got it wrong, 5xx means you
+did. GET must never change anything. PUT and DELETE are idempotent — twice
+leaves the world as once — while POST is not guaranteed to be (RFC 9110;
+checked 2026-09-21), which matters because networks deliver things twice and
+users double-click. Failures come in three kinds: expected (a 4xx with a clear
+message), unexpected (a 5xx, logged loudly with a stack trace and a request
+id), and swallowed — caught, hidden, returned as success. The third costs the
+most; the 2025 OWASP Top 10 added "Mishandling of Exceptional Conditions" as a
+category of its own (checked 2026-09-21).
 
-**Your process is disposable; nothing true lives in it.** It gets restarted,
-duplicated, killed mid-request. Two consequences. Truth lives in the database
-— and since requests interleave, "read a value, change it, write it back" is a
-bug waiting for company: both read 4, both write 5, one update vanishes
-without an error. A transaction is the database's promise that a group of
-changes happens entirely or not at all, and is never seen half-done. Identity
-comes from the environment — a disposable process cannot carry its own
-secrets, so configuration arrives at start time: harmless defaults in
-committed files, everything secret through environment variables or a secret
-store. A repo is designed to be copied everywhere, which is exactly why a
-password must never enter one.
+**Your process is disposable; nothing true lives in it.** It is restarted,
+duplicated, killed mid-request; truth lives in the database. Requests
+interleave, so "read a value, change it, write it back" is a bug waiting for
+company: both read 4, both write 5, one update vanishes without an error. A
+transaction is the database's promise that a group of changes happens entirely
+or not at all, never seen half-done. Identity comes from the environment:
+harmless defaults in committed config files; secrets handed to the process at
+start, as environment variables set by whatever launches it or values read
+from a secret store. Never the repo — a repo is designed to be copied
+everywhere.
 
-**Everything that crosses the boundary is untrusted.** Body, headers, URL,
-cookies: attacker-controlled bytes until you have checked them. The reading
-list makes this sharp, because it fetches URLs users hand it. Your server sits
-somewhere privileged — inside a network, possibly next to a cloud metadata
-service — and a user who submits `http://localhost:5432/` or an internal admin
-URL is asking *your server* to make that request from *its* position. That is
-server-side request forgery (SSRF). It had its own slot in the OWASP Top 10 in
-2021; the 2025 revision folded it into Broken Access Control (checked
-2026-09-21), and the reclassification is the lesson: the flaw is that you
-never decided what your fetcher was allowed to reach.
+**Everything crossing the boundary is untrusted.** Body, headers, URL,
+cookies: attacker-controlled bytes until checked. The reading list makes this
+sharp because it fetches URLs users hand it. Your server sits somewhere
+privileged — inside a network, possibly next to a cloud metadata service — so
+a user who submits `http://localhost:5432/` is asking *your server* to make
+that request from *its* position. That is server-side request forgery (SSRF).
+OWASP gave it its own slot in 2021 and folded it into Broken Access Control in
+the 2025 revision (checked 2026-09-21); the reclassification is the lesson —
+you never decided what your fetcher was allowed to reach.
 
 ## What good looks like
 
 - Status codes tell the truth: every failure is a 4xx or 5xx. A 200 with an
-  error inside the body is a lie the frontend, the caches, and the monitoring
-  will all believe.
-- Errors have one shape everywhere: a machine-readable code, a human message,
-  a request id that also appears in the logs.
-- Every outbound call has a timeout visible in the code, with the number
-  chosen on purpose.
+  error inside is a lie that frontends, caches, and monitoring all believe.
+- Errors have one shape everywhere: machine-readable code, human message, a
+  request id that also appears in the logs.
+- Every outbound call has a timeout visible in the code, chosen on purpose.
 - GET changes nothing; repeating a PUT or DELETE changes nothing more; a
   duplicate POST does something you decided in advance.
-- Input is validated at the edge, so handler logic starts only after the shape
-  of the input is proven.
-- Config comes from the environment; the repo holds an example file with the
-  names of the variables and none of the values.
+- Input is validated at the edge; handler logic starts after the shape is
+  proven.
+- Config comes from the environment; the repo holds an example file with
+  variable names and none of the values.
 - Read-modify-write paths sit inside transactions or single atomic statements.
 
 Done badly, you see:
@@ -109,12 +98,10 @@ Done badly, you see:
 - `200 {"success": false}`.
 - A catch block that logs nothing and returns something.
 - The database password in a committed config file, "to rotate later."
-- An outbound fetch with no timeout anywhere in sight.
-- A fetcher that will happily request `http://169.254.169.254/` — the address
-  where cloud providers serve a machine's own credentials.
+- A fetcher that will happily request `http://169.254.169.254/`, where cloud
+  providers serve a machine's own credentials.
 - Code that works every time you click it and corrupts data under two
-  simultaneous clicks — which the tests never produce, because tests run one
-  at a time.
+  simultaneous clicks, which sequential tests never produce.
 
 ## Ask Claude for this
 
@@ -131,14 +118,13 @@ Then tell me which failures on that list my frontend would never find out
 about if the endpoint returned 200 with an error message inside the body.
 ```
 
-*Why it is asked that way:* the failure column is the part both juniors and
-models skip, so it is demanded first, before a happy path exists to crowd it
-out. The second paragraph turns "never 200 on failure" from a rule into a
-visible cost.
+*Why it is asked that way:* the failure column is what juniors and models both
+skip, so it is demanded before a happy path exists to crowd it out. The second
+paragraph turns "never 200 on failure" from a rule into a visible cost.
 
 *What you should get back:* a boring table — nouns in the paths, methods as
-the verbs, mostly 200, 201, 400, 401, 403, 404, 409. Boring is the good
-outcome; every tool and engineer already understands it.
+verbs, mostly 200, 201, 400, 401, 403, 404, 409. Boring is the win:
+everything already understands it.
 
 *Push back on:* any failure returned as 200; POST used for reads; inventive
 shapes that trade a decade of shared convention for nothing.
@@ -160,18 +146,16 @@ when it fires.
 ```
 
 *Why:* "assume hostile" flips the model from helping the URL succeed to
-attacking it, and the list-first order means every fix maps to a named
-threat. The redirect clause is there because it is the classic bypass:
-validate the URL, then obediently follow a redirect to the address you just
-blocked.
+attacking it, and list-first means every fix maps to a named threat. The
+redirect clause names the classic bypass: validate, then obediently follow a
+redirect to the address you just blocked.
 
 *What you should get back:* timeout, size cap, scheme allowlist,
-private-address block — each tied to a user-visible outcome rather than a
-silent one.
+private-address block — each tied to a user-visible outcome, not a silent one.
 
-*Push back on:* validation that checks the hostname string but fetches
-whatever it resolves to; a timeout on connecting but none on reading the
-body; any attempt to "sanitise" a bad URL instead of refusing it.
+*Push back on:* checking the hostname string but fetching whatever it resolves
+to; a timeout on connect but none on the body; "sanitising" a bad URL instead
+of refusing it.
 
 **Request 3 — prove the race, then fix it**
 
@@ -189,40 +173,42 @@ same test passing.
 bug exists before you trust the fix. A concurrency fix without a red test
 first is a guess that happened to compile.
 
+*What you should get back:* one red run showing the lost update, then the same
+test green after the fix, in that order.
+
 *Push back on:* a test that fakes concurrency with sleeps and sequential
-calls, and any fix that adds an in-process lock — it stops working the moment
-you run a second process, which is the first thing that happens after P1.
+calls; any fix that adds an in-process lock, which stops working the moment
+you run a second process — the first thing that happens after P1.
 
 ## How you would know it is wrong
 
 The checks for this topic, each one capable of going red:
 
-1. **Kill the database mid-request.** Start a request that writes, stop the
-   database while it is in flight. You want a clean 5xx within seconds, no
-   half-written rows, recovery without a restart when the database returns. A
-   200, a hang, or a half-saved item is a red result.
-2. **Point the fetcher at a URL that hangs.** A server that accepts and never
-   responds is one shell command away. Time the request with a clock: it must
-   give up within the seconds *you* chose. "It errored eventually" is a fail —
-   eventually was the default, not a decision.
+1. **Kill the database mid-request.** Stop the database while a write is in
+   flight. You want a clean 5xx within seconds, no half-written rows, and
+   recovery without a restart when it returns. A 200, a hang, or a half-saved
+   item is red.
+2. **Point the fetcher at a URL that hangs.** Time it with a clock: the
+   request must give up within the seconds *you* chose. "It errored
+   eventually" is a fail — eventually was the default.
 3. **Send a malformed body.** Truncated JSON, wrong types, a ten-megabyte
    string. You want a 400 in your structured shape. A 500 means untrusted
    bytes reached code that assumed their shape; a stack trace in the response
-   means you publish your internals.
+   publishes your internals.
 4. **Call the same endpoint twice.** Submit the same URL twice, fast. Whatever
    you documented should happen. Two identical rows means you did not decide,
    you discovered.
 5. **Ask the fetcher for something internal.** `http://localhost:5432/`, a
-   private-range address, `http://169.254.169.254/`. The refusal must happen
-   before any connection is opened — and survive a public URL that redirects
-   to the same place.
+   private-range address, `http://169.254.169.254/`. The refusal must come
+   before any connection opens — and survive a public URL that redirects
+   there.
 6. **Grep the repo for a secret you know, history included** (`git log -p`
-   piped through grep). One hit means the secret belongs to everyone who ever
-   clones, and the fix is rotation, not deletion — history is the repo.
+   piped through grep). One hit means it belongs to everyone who ever clones;
+   the fix is rotation, not deletion — history is the repo.
 
-> The rule under all six: **before believing a green result, say what it
-> would have looked like if the thing were broken.** A fetcher you never
-> pointed at a hostile URL is not safe; it is untested.
+> Underneath all six: **before believing a green result, say what it would
+> have looked like if the thing were broken.** A fetcher you never pointed at
+> a hostile URL is not safe; it is untested.
 
 ## Your slice of the project
 
@@ -232,12 +218,12 @@ On **P1**, this section is the add-a-URL flow done properly:
   failure column included.
 - The title fetcher with a total timeout you chose (write the number and the
   reason next to it), a size cap, a scheme allowlist, and a private-address
-  block. A failed fetch still saves the item, with the failure visible on it.
+  block. A failed fetch still saves the item, failure visible on it.
 - One structured error shape — code, message, request id — used by every
   handler, and no 200-with-a-failure-inside anywhere.
-- Your one genuinely concurrent write (two people marking the same item read
-  is a fine candidate) protected by a transaction or atomic update, with the
-  red-then-green test from Request 3 as evidence.
+- Your one genuinely concurrent write (two people marking the same item read,
+  say) protected by a transaction or atomic update, with Request 3's
+  red-then-green test as evidence.
 - Secrets via the environment: an example env file in the repo, the real one
   ignored.
 
@@ -248,17 +234,16 @@ On **P1**, this section is the add-a-URL flow done properly:
   measured, not felt.
 - Grepping the full git history for your database password and session secret
   returns nothing.
-- A fresh clone with only the example env file refuses to start with a
-  message naming the missing variable — not a stack trace.
+- A fresh clone with only the example env file refuses to start, naming the
+  missing variable — not a stack trace.
 
 ## Words you now own
 
 - **endpoint** — one method plus one path your server answers; the unit of API contract.
 - **status code** — the machine-readable verdict: 2xx worked, 4xx the sender's problem, 5xx yours.
 - **idempotent** — safe to repeat; the second identical call changes nothing more.
-- **validation** — proving input has the shape you expected before acting on it.
 - **structured error** — a failure with a machine-readable code and a request id, not just prose.
-- **request id** — a random id minted per request, carried into logs and error responses, so one user's bad afternoon can be found later.
+- **request id** — minted per request, carried into logs and error responses, so one user's bad afternoon can be found.
 - **timeout** — the longest you are willing to wait, chosen on purpose.
 - **transaction** — a group of database changes that happens entirely or not at all, never seen half-done.
 - **race condition** — two interleaved operations producing a result neither would alone; the lost update is the starter kind.
@@ -267,9 +252,9 @@ On **P1**, this section is the add-a-URL flow done properly:
 
 ---
 
-**Not covered here:** the database in its own right — modelling, indexes,
-migrations — has its own section; here it is simply where truth lives. The
-internals of authentication (passwords, sessions, tokens) likewise. Retries,
-queues, caching and rate limits are P3 problems; deploying and observing this
-backend is P2. Nothing here is about making it fast, either — a backend first
-has to be right when things go wrong, which is most of what a backend is.
+**Not covered here:** the database itself — modelling, indexes, migrations —
+has its own section; here it is where truth lives, nothing more.
+Authentication internals (passwords, sessions, tokens) likewise. Retries,
+queues, caching and rate limits are P3; deploying and observing this backend
+is P2. And nothing here is about speed — a backend first has to be right when
+things go wrong, which is most of what a backend is.

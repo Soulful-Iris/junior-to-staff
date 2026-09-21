@@ -110,7 +110,7 @@ and the engineers you make faster.
 | 16 | [Scope and leverage](tiers/03-staff/16-scope-and-leverage/) | what actually changes at staff, and the four archetypes |
 | 17 | [Writing that decides](tiers/03-staff/17-writing-that-decides/) | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
 | 18 | Technical strategy | synthesising strategy from real decisions, and why a good vision is boring |
-| 19 | Migrations | de-risk, enable, **finish** — and why most are abandoned at 80% |
+| 19 | [Migrations](tiers/03-staff/19-migrations/) | de-risk, enable, **finish** — and why most are abandoned at 80% |
 | 20 | Risk and incidents | operating under failure, and postmortems that change something |
 | 21 | Making other engineers faster | sponsorship versus mentorship, platform quality, and glue work |
 
@@ -122,7 +122,7 @@ Under construction, in the open. Sections land one at a time and each one is
 complete when it lands — there are no stubs pretending to be chapters. A section
 with no link next to it is not written yet, and is not pretending to be.
 
-Written and checked: **10 of 21 sections**, all five project briefs indexed, P1 complete.
+Written and checked: **11 of 21 sections**, all five project briefs indexed, P1 complete.
 Last updated 2026-09-21.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,

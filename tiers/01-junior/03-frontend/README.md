@@ -73,34 +73,33 @@ everything outside the server as a cache you can throw away, and P1's
 
 **3. The boundary.** Between the page and the server, data arrives late,
 broken, or not at all. So every server-backed view has four states —
-**loading, error, empty, data** — and only one of them is the happy path. The
-empty state is the first thing every new user sees. The error state is the
-difference between "the system failed" and the far worse "no items yet"
-rendered over data that is actually fine. "There is nothing" and "I could not
-find out" must never look the same.
+**loading, error, empty, data** — and only one is the happy path. The empty
+state is the first thing every new user sees. The error state is the difference
+between "the system failed" and the far worse "no items yet" shown over data
+that is fine. "There is nothing" and "I could not find out" must never look the
+same.
 
 ## What good looks like
 
 One property here is a legal floor, not a preference. The European
-Accessibility Act has applied to products and services sold into the EU since
-28 June 2025 — checked 2026-09-21 against the directive's own text (Directive
-(EU) 2019/882). The benchmark to build against is WCAG 2.2 AA: it is the
-current W3C Recommendation, and the updated European standard (EN 301 549
-v4.1.1, published 2026-09-02) adopts it, with formal citation in the EU's
-Official Journal still pending as of that same check. Concretely, AA means
-among other things: text contrast of at least 4.5:1 (3:1 for large text), a
-visible focus indicator, and interactive targets of at least 24×24 CSS pixels.
+Accessibility Act (Directive (EU) 2019/882) has applied to products and
+services sold into the EU since 28 June 2025, and the benchmark is WCAG 2.2
+AA — the current W3C Recommendation, adopted by the updated European standard
+EN 301 549 v4.1.1 (published 2026-09-02, its Official Journal citation still
+pending). All checked 2026-09-21. At AA that means, among other things: text
+contrast of at least 4.5:1 (3:1 for large text), a visible focus indicator, and
+interactive targets of at least 24×24 CSS pixels.
 
 Done well:
 
 - For every fact on screen you can say, in one sentence, where it lives and
   what it survives.
-- Every server-backed view has loading, error and empty states designed, and
-  you can force each one on demand.
-- The URL reproduces the view: refresh, the back button, and a pasted link all
-  land on the same page, filter and item.
-- The server validates everything it stores; client-side validation is a
-  courtesy copy of the same rules, never the enforcement.
+- Every server-backed view has loading, error and empty designed, and you can
+  force each on demand.
+- The URL reproduces the view: refresh, back, and a pasted link land on the
+  same page, filter and item.
+- The server validates everything it stores; client validation is a courtesy
+  copy, never the enforcement.
 - The whole main flow works with Tab, Enter and Escape; every field has a
   visible label; focus never disappears.
 - Contrast and target sizes were measured, not eyeballed.
@@ -110,7 +109,7 @@ Done well:
 Done badly:
 
 - A spinner that never resolves, or a blank page with the real error in a
-  console no user will ever open.
+  console no user opens.
 - Filters and half-written forms vanish on refresh; the back button loses the
   view or exits the app.
 - The same fact in three homes, synchronised by effects and luck.
@@ -119,9 +118,8 @@ Done badly:
 - "Validation" that a raw HTTP request walks straight past.
 - The error state and the empty state are the same grey nothing.
 
-When a model writes the interface, the misses cluster. Generated UI is fluent
-at layout and component vocabulary and weakest exactly where this section
-lives. Judge these first:
+When a model writes the interface, the misses cluster — fluent at layout,
+weakest exactly where this section lives. Judge these first:
 
 - **Happy path only.** Loading, error and empty exist only if you demanded them.
 - **Semantics traded for looks.** A `<div>` with a click handler instead of a
@@ -130,10 +128,10 @@ lives. Judge these first:
 - **State over-copied.** Server data duplicated into local variables and kept
   in sync by effects — drift, scheduled.
 - **Client-only validation.** The endpoint believes whatever arrives.
-- **Dependencies by reflex.** A store, a data-fetching library and a form
-  library for a page that needed none of them.
+- **Dependencies by reflex.** A store, a fetching library and a form library
+  for a page that needed none of them.
 - **Plausible inventions.** Endpoints and options that look right and do not
-  exist. Read every one as a claim to verify, not a fact.
+  exist. Read each as a claim, not a fact.
 
 ## Ask Claude for this
 
@@ -149,15 +147,15 @@ Then implement the view with explicit loading, error and empty states,
 and give me a way to force each of the three so I can look at them.
 ```
 
-*Why it is asked that way:* the inventory-before-code turns state placement
-into a decision you can review instead of a default you inherit. "A way to
-force each state" is the constraint doing the work — an error state you cannot
-summon is an error state that ships unseen.
+*Why it is asked that way:* the inventory-before-code turns placement into a
+decision you can review instead of a default you inherit. "A way to force each
+state" is the constraint doing the work — an error state you cannot summon
+ships unseen.
 
-*What you should get back:* a short table of fact → home → what it survives,
-then a view where you can switch the API off, open an empty account, and watch
-the pending state. If every fact landed in a store, the placement question was
-not answered; it was avoided.
+*What you should get back:* a table of fact → home → what it survives, then a
+view where you can kill the API, open an empty account, and watch the pending
+state. If every fact landed in a store, the question was not answered; it was
+avoided.
 
 *Push back on:* server data copied into a store or component "for performance"
 with no story for when the copy goes stale; an error state that logs to the
@@ -175,9 +173,9 @@ submitted twice; and a submission that takes ten seconds. The submit
 button must not be clickable while a submission is in flight.
 ```
 
-*Why:* the three named cases are the three ways forms actually fail, and
-naming them forces the enforcement point onto the server. Without them you get
-a polished client and an endpoint that believes anything.
+*Why:* the three cases are the three ways forms actually fail, and naming them
+forces the enforcement point onto the server. Left unnamed, you get a polished
+client and an endpoint that believes anything.
 
 *What you should get back:* server-side checks that reject garbage no matter
 what the page did, a pending and disabled submit, and a decision — not an
@@ -199,9 +197,9 @@ List every failure with the exact line that causes it. Do not fix
 anything yet.
 ```
 
-*Why:* "make it accessible" produces a coat of aria-labels. Walking element by
-element against named criteria produces findings you can verify yourself, and
-"list, don't fix" keeps the judgment step with you.
+*Why:* "make it accessible" produces a coat of aria-labels; element by element
+against named criteria produces findings you can verify. "List, don't fix"
+keeps the judgment with you.
 
 *What you should get back:* a concrete failure list — an input with no label, a
 clickable div, a focus order that jumps across the page, a grey caption below
@@ -216,22 +214,22 @@ fix that quietly removes the visible focus indicator.
 Seven checks, each capable of going red:
 
 1. **Unplug the mouse.** Tab through sign-in → add → tag → mark read → delete.
-   Anything you cannot reach, or cannot see focused, is a failure — a legal
-   one, in the EU, since June 2025.
-2. **Throttle the network** in the browser's dev tools and click **add** twice.
-   Count the rows in the database. Then watch the screen during the wait: if
-   nothing acknowledges the click, real users will do exactly what you just did.
+   Anything you cannot reach, or cannot see focused, is red — and in the EU,
+   illegal since June 2025.
+2. **Throttle the network** in the dev tools and click **add** twice. Count
+   the rows in the database, and watch the screen during the wait: if nothing
+   acknowledges the click, real users will do what you just did.
 3. **Measure contrast with a tool**, never your eye — your eye knows what the
    design intended. Body text below 4.5:1 is red.
-4. **Stop the API mid-session.** A readable failure is green. A blank page or
-   an eternal spinner is red. "No items yet" shown over data that exists is the
-   worst result on this list, because it lies.
+4. **Stop the API mid-session.** A readable failure is green; a blank page or
+   an eternal spinner is red. "No items yet" over data that exists is the worst
+   result here, because it lies.
 5. **Bypass the client.** Send the form endpoint a raw request with a garbage
    "URL". Anything other than a rejection and zero new rows means the
    validation was theatre.
 6. **Give a screen reader five minutes** — VoiceOver ships with macOS and iOS,
    Narrator with Windows, NVDA is free. Do buttons announce as buttons, with
-   names? If it reads "clickable, clickable, clickable", the page is divs.
+   names? "Clickable, clickable, clickable" means the page is divs.
 7. **Open a brand-new account.** The first screen is either the empty state you
    designed or the proof that you never designed one.
 
@@ -245,11 +243,11 @@ On **P1**, add:
 
 - The list view with all four states explicit — loading, error, empty, data —
   and a documented way to force each one.
-- The add-URL form with a pending state, a submit disabled while in flight,
-  server-side validation, and a written decision about duplicate URLs.
+- The add-URL form with a pending state, a submit disabled in flight,
+  server-side validation, and a written decision about duplicates.
 - The current filter (and page, if you paginate) carried in the URL.
 - A state inventory in your decisions file: every fact on screen, its home,
-  what it survives. Three columns, however many rows it takes.
+  what it survives. Three columns, however many rows.
 
 **Acceptance criteria you can check yourself:**
 
@@ -264,15 +262,15 @@ On **P1**, add:
 
 ## Words you now own
 
-- **rendering** — turning data into the page a user sees; the question is
-  always where and when.
+- **rendering** — turning data into the page; the question is always where and
+  when.
 - **hydration** — attaching interactivity in the browser to HTML that was built
   on the server.
 - **state** — any fact the interface must remember.
 - **source of truth** — the one home where a fact is authoritative; every other
   copy is a cache.
-- **optimistic update** — showing a result before the server confirms it, with
-  a plan for rolling back.
+- **optimistic update** — showing a result before the server confirms, with a
+  plan to roll back.
 - **pending state** — the screen acknowledging work in flight; its absence is
   behind most double-submits.
 - **empty state** — what a view shows when there is genuinely nothing; must be
@@ -283,16 +281,16 @@ On **P1**, add:
   the order the eye reads.
 - **contrast ratio** — measured, not judged: 4.5:1 minimum for body text at
   WCAG AA.
-- **progressive enhancement** — building so the basic flow works before the
-  client-side program loads, which then improves it.
-- **Core Web Vitals** — the three field metrics (LCP, INP, CLS), judged at the
-  75th percentile of real users, not on your machine.
+- **progressive enhancement** — the basic flow works before the client-side
+  program loads; the program improves it.
+- **Core Web Vitals** — the three field metrics (LCP, INP, CLS) at the 75th
+  percentile of real users, not your machine.
 
 ---
 
 **Not covered here:** CSS itself — layout, typography, design systems — is a
 craft this section only borders. Build tooling, caching, offline behaviour,
 real-time updates and animation are deliberately out; performance returns in
-the senior tier, where "feels fine" becomes a budget you defend with numbers.
-And nothing here helps you choose a framework, on purpose: every placement
-decision above outlives whichever one you pick.
+the senior tier as a budget you defend with numbers. And nothing here helps you
+choose a framework, on purpose: every placement decision above outlives
+whichever one you pick.
