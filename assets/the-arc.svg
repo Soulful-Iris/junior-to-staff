@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" width="880" height="300" role="img" aria-label="The arc: junior, senior and staff tiers, with five projects rising in complexity along the way">
+  <rect width="880" height="300" rx="10" fill="#faf9f7"/>
+
+  <line x1="60" y1="216" x2="820" y2="216" stroke="#ded9d1" stroke-width="1.5"/>
+
+  <path d="M 60 205 C 240 205, 260 150, 440 148 C 620 146, 640 78, 820 74"
+        fill="none" stroke="#2f6f4e" stroke-width="2.5" stroke-linecap="round"/>
+
+  <g stroke="#ded9d1" stroke-width="1" stroke-dasharray="2 3">
+    <line x1="187" y1="50" x2="187" y2="184"/>
+    <line x1="287" y1="50" x2="287" y2="158"/>
+    <line x1="440" y1="50" x2="440" y2="139"/>
+    <line x1="606" y1="50" x2="606" y2="111"/>
+    <line x1="770" y1="50" x2="770" y2="68"/>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36" text-anchor="middle">
+    <text x="187" y="42">it works</text>
+    <text x="287" y="42">it survives</text>
+    <text x="440" y="42">it holds under load</text>
+    <text x="606" y="42">it reasons, provably</text>
+    <text x="770" y="42">it changes safely</text>
+  </g>
+
+  <g>
+    <circle cx="187.4" cy="193.1" r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2.5"/>
+    <circle cx="286.6" cy="167.3" r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2.5"/>
+    <circle cx="440"   cy="148"   r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2.5"/>
+    <circle cx="605.8" cy="120.2" r="7" fill="#faf9f7" stroke="#2f6f4e" stroke-width="2.5"/>
+    <circle cx="770.5" cy="77"    r="7" fill="#2f6f4e" stroke="#2f6f4e" stroke-width="2.5"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e" letter-spacing="0.8" text-anchor="middle">
+    <text x="187" y="178">P1</text>
+    <text x="287" y="152">P2</text>
+    <text x="440" y="133">P3</text>
+    <text x="606" y="105">P4</text>
+    <text x="770" y="62">P5</text>
+  </g>
+
+  <g stroke="#e6e2da" stroke-width="1.5">
+    <line x1="60" y1="234" x2="300" y2="234"/>
+    <line x1="330" y1="234" x2="640" y2="234"/>
+    <line x1="670" y1="234" x2="820" y2="234"/>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.8">
+    <text x="60" y="254">JUNIOR</text>
+    <text x="330" y="254">SENIOR</text>
+    <text x="670" y="254">STAFF</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#57534e">
+    <text x="60" y="274">build a thing that works</text>
+    <text x="330" y="274">build a thing that survives</text>
+    <text x="670" y="274">change what gets built</text>
+  </g>
+
+  <circle r="4.5" fill="#c2703d">
+    <animateMotion dur="11s" repeatCount="indefinite" calcMode="linear"
+      path="M 60 205 C 240 205, 260 150, 440 148 C 620 146, 640 78, 820 74"/>
+  </circle>
+</svg>
