@@ -1,0 +1,12 @@
+Research subagent run for Bruno's engineering-guide work: what a 2026 app engineer needs to ship AI features. ~10 searches + 5 full fetches. What stuck:
+
+- The field renamed itself under us: "context engineering" absorbed RAG. Naive vector-only RAG is now the named mistake; the standard recipe is hybrid BM25+dense -> rerank ~20-50 down to 3-5 chunks. Long context did NOT kill retrieval (cost, TTFT, context rot). Anthropic's agent-side answer is just-in-time retrieval by identifier, compaction, notes outside the window - which is literally the temp-memories/ discipline. We independently arrived at what they published.
+- Evals: Hamel/Shreya's error-analysis-first line is the practitioner consensus. 30 hand-annotated traces, failure taxonomy, binary pass/fail judges validated against human labels. "If you pass 100% of evals your eval can't fail" - same instinct as count-the-instruments. Judge weaknesses now quantified (order flips ~15% of verdicts; RAND found no frontier judge uniformly reliable).
+- Security: filtering defenses are dead as a primary control - "Attacker Moves Second" (arXiv 2510.09023) bypassed all 12 published defenses >90%, humans 100%. Durable advice is architectural: Willison's lethal trifecta / Meta's Rule of Two. EchoLeak and the GitHub MCP exploit are the teaching incidents.
+- Cost: agent loops make per-TASK cost the unit, not per-token. Caching (Anthropic 1.25x write/0.1x read), routing with measured escalation rate, batch tier, hard caps. Named mistake: routing to cheap model with no eval watching quality.
+- Latency: TTFT + inter-token gap are the SLOs for streaming, not total p99. 200-600ms TTFT typical, ITL p99 <30ms cited.
+- Observability: OTel GenAI semconv won; content capture opt-in; sample 100% errors/expensive + ~1% full content, 7-30d retention.
+- Agents: consensus = orchestrator + isolated ephemeral subagents, parallel reads/single-threaded writes (Cognition recanted their "don't build multi-agents" in Apr 2026 with exactly this carve-out). MCP survived its backlash but scoped down.
+- Vendor claims I could not verify and flagged: Redis 73% savings, "60-80% stacked savings", "40-60% wasted input tokens", Zilliz "90% coverage", the eternal "judge agrees with humans 85%".
+
+Felt: search-result digests were dense but I only trusted numbers after fetching primaries (Willison, Anthropic eng, Hamel, the arXiv paper). Two of the best sources were things Bruno's world already lives: the trifecta and error-analysis-first.
