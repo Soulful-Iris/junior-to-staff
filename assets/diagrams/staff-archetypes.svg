@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 350" width="760" height="350" role="img" aria-label="The four staff archetypes placed by organisation size and by how wide their scope is. Tech lead sits at small organisations with one team cluster. Solver sits at mid size with a roving narrow scope. Architect needs a large organisation and owns a domain. Right hand only exists at very large organisations and takes the widest scope.">
+  <rect width="760" height="350" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE ARCHETYPE IS CHOSEN BY THE ORGANISATION, NOT BY YOU</text>
+
+  <!-- axes -->
+  <line x1="120" y1="290" x2="700" y2="290" stroke="#c9c3b8" stroke-width="1.4"/>
+  <line x1="120" y1="290" x2="120" y2="62" stroke="#c9c3b8" stroke-width="1.4"/>
+  <polygon points="706,290 696,285 696,295" fill="#c9c3b8"/>
+  <polygon points="120,56 115,66 125,66" fill="#c9c3b8"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">
+    <text x="120" y="312">ONE TEAM</text>
+    <text x="330" y="312">~50</text>
+    <text x="470" y="312">~100+</text>
+    <text x="600" y="312">THOUSANDS</text>
+    <text x="330" y="332" font-size="11">ORGANISATION SIZE</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">
+    <text x="30" y="266">ONE TEAM</text>
+    <text x="30" y="279">CLUSTER</text>
+    <text x="30" y="90">THE WHOLE</text>
+    <text x="30" y="103">ORGANISATION</text>
+  </g>
+
+  <!-- archetypes -->
+  <g>
+    <circle cx="210" cy="252" r="9" fill="#eef2ef" stroke="#2f6f4e" stroke-width="2"/>
+    <circle cx="368" cy="206" r="9" fill="#eef2ef" stroke="#2f6f4e" stroke-width="2"/>
+    <circle cx="500" cy="140" r="9" fill="#eef2ef" stroke="#2f6f4e" stroke-width="2"/>
+    <circle cx="648" cy="96" r="9" fill="#c2703d" stroke="#a85d2f" stroke-width="2"/>
+  </g>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">
+    <text x="228" y="249">Tech Lead</text>
+    <text x="386" y="203">Solver</text>
+    <text x="486" y="137" text-anchor="end">Architect</text>
+    <text x="634" y="93" text-anchor="end">Right Hand</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">
+    <text x="228" y="265">guides one team or cluster · the commonest</text>
+    <text x="386" y="219">aimed at one fire after another · transience risk</text>
+    <text x="486" y="153" text-anchor="end">owns a domain · needs the business context</text>
+    <text x="634" y="109" text-anchor="end">extends a leader's attention · borrowed authority</text>
+  </g>
+
+  <text x="120" y="52" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">an archetype the org has no room for is a title with no work under it</text>
+</svg>
