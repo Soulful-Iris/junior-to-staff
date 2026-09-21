@@ -6,7 +6,7 @@
 
 Code can be rewritten any afternoon. Data has to be carried, live and intact,
 through every rewrite — which makes the schema the one decision in a young
-system that is genuinely hard to take back. A fact you never recorded cannot be
+system that is hard to take back. A fact you never recorded cannot be
 recovered at any price.
 
 ## The failure it prevents
@@ -25,8 +25,7 @@ backfill from. Nothing crashed, every test stayed green, and a piece of the
 past is gone.
 
 Code bugs cost time. Schema bugs cost data, and they are committed on the
-quietest day of the project, when someone models the checkbox instead of the
-fact.
+quietest day, when someone models the checkbox instead of the fact.
 
 ## The mental model
 
@@ -69,15 +68,15 @@ order is physical — is not.
 
 An index is a sorted copy of chosen columns with pointers back to the rows.
 Reads matching its shape get fast; in exchange, every insert and update writes
-the table *and* every index, and the copies take disk. You also do not decide
-whether an index is used — the planner does, from statistics about your actual
-data, and it can rightly choose differently at a thousand rows than at a
+the table *and* every index, and the copies take disk. Whether an index is used
+is not your call either — the planner decides, from statistics about your
+actual data, and can rightly decide differently at a thousand rows than a
 million. Query-speed arguments are settled by `EXPLAIN`, because intuition does
 not execute queries and the planner does.
 
 **6. "Atomic" means both writes or neither.** The classic bug: debit one
-account, crash, never credit the other. No error anywhere — the money is simply
-gone, because two writes that only make sense together happened separately. A
+account, crash, never credit the other. No error anywhere — the money is gone,
+because two writes that only make sense together happened separately. A
 transaction is the database's promise that if the process dies between them,
 the world looks as if nothing started. A migration is the same problem
 stretched over days, old code still running while the shape changes: add first,
@@ -113,13 +112,13 @@ Done badly, you see:
 - No foreign keys "for flexibility", and rows pointing at rows that no longer
   exist.
 - Prices in `float`, off by a cent somewhere nobody can find.
-- A migration that adds the new column and drops the old in one deploy, and a
+- A migration that adds the new column and drops the old in one deploy — a
   minute of errors while old code runs against the new schema.
 
 ## Ask Claude for this
 
-(P1's own page has the first ask — describe the data model before any code.
-These two are what you do with what comes back.)
+(The design ask — model before code — already lives on P1's page. These two
+judge what comes back.)
 
 **Request 1 — reviewing a schema a model proposed**
 
@@ -139,7 +138,7 @@ Finish with the one change that is cheapest now and most expensive in
 six months.
 ```
 
-*Why:* models writing schemas default to the same weaknesses — nullable
+*Why:* models default to the same schema weaknesses — nullable
 everything, floats for money, naive timestamps, undeclared uniqueness, flags
 where a pair table or an `_at` timestamp belongs, tables shaped after your
 prompt rather than the domain. The checklist points the review at those; a bare
@@ -168,8 +167,7 @@ we should record about that.
 ```
 
 *Why:* "old code keeps running" is the constraint that kills one-step
-migrations, and the dies-halfway question forces each step to be safe on its
-own.
+migrations, and the dies-halfway question forces each step to be safe alone.
 
 *What you should get back:* three to five steps — add, backfill, switch, then
 remove — and a plain admission that per-person history from before the change
@@ -183,8 +181,8 @@ the assumption.
 
 1. **Run `EXPLAIN ANALYZE` on your main query and read it.** A sequential scan
    over the big table under a selective filter means the index is missing or
-   unusable by that query. Estimated row counts off from actuals by orders of
-   magnitude mean stale statistics — plans chosen on fiction.
+   unusable by that query. Estimates off from actuals by orders of magnitude
+   mean stale statistics — plans chosen on fiction.
 2. **Insert 100,000 rows and time the same query.** In PostgreSQL,
    `generate_series` makes seeding a one-liner. Everything is fast at 200 rows;
    if query time grows in step with table size you are scanning — an indexed
@@ -195,8 +193,7 @@ the assumption.
    have seen the check go red.
 4. **Run every migration forwards and backwards on a copy.** Row counts and a
    spot-check query must survive the round trip. A down step that cannot
-   restore what the up step removed means the up step was destructive — a red
-   result on the copy, where it is cheap.
+   restore what the up step removed means the up step was destructive.
 5. **Attempt the illegal writes from `psql`, not the app.** An item with no
    owner; a duplicate of something you believe unique; NULL into a mandatory
    column. The refusal must come from the database — the migration script, the
@@ -210,15 +207,15 @@ the assumption.
 
 On **P1**, add:
 
-- The schema, as your first migration files: users, items, and your written
-  answers to P1's tag and read-state decisions — every relationship an enforced
+- The schema as your first migration files: users, items, and your answers to
+  P1's tag and read-state decisions — every relationship an enforced
   foreign key, every column NOT NULL unless a comment says what NULL means.
 - A seed script that inserts 100,000 items, so your numbers mean something.
 - The `EXPLAIN ANALYZE` output of the group-list query at that size, saved with
   two sentences: what the planner chose, and why that is fine — or the index
-  you added because it was not.
-- One additive migration performed *after* seeding — add a `fetched_at` column
-  with a backfill — run forwards and backwards on a copy first.
+  you added.
+- One additive migration *after* seeding — a `fetched_at` column with a
+  backfill — run forwards and backwards on a copy first.
 
 **Acceptance criteria you can check yourself:**
 
@@ -228,8 +225,8 @@ On **P1**, add:
   with no schema change between them.
 - The list query's time barely moves between 1,000 and 100,000 rows, and both
   timings are written down.
-- Deleting a user is a decision — cascade or refuse — written down and proven
-  by a test (see [06 · Testing](../06-testing/)).
+- Deleting a user is a decision — cascade or refuse — proven by a test
+  (see [06 · Testing](../06-testing/)).
 
 ## Words you now own
 
@@ -239,12 +236,12 @@ On **P1**, add:
 - **surrogate key** — a generated id with no real-world meaning.
 - **normalisation** — each fact stored once, referenced everywhere else.
 - **denormalisation** — a deliberate copy; keeping it true is your job.
-- **index** — a sorted copy of chosen columns, bought with write time and disk.
-- **query planner** — picks how to run a query, from statistics, not your intent.
+- **index** — a sorted copy bought with write time and disk.
+- **query planner** — picks how to run a query from statistics, not intent.
 - **EXPLAIN** — the plan; with ANALYZE, what actually happened.
 - **transaction** — writes that succeed together or leave no trace.
-- **migration** — a versioned change to the schema and the data already under it.
-- **backfill** — filling in values for rows older than the column.
+- **migration** — a versioned change to schema and the data under it.
+- **backfill** — filling values for rows older than the column.
 
 ---
 
