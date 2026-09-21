@@ -82,7 +82,7 @@ whether it runs.
 | 04 | [Backend](tiers/01-junior/04-backend/) | the request lifecycle and every point at which it can stop |
 | 05 | [Data and databases](tiers/01-junior/05-data-and-databases/) | the schema is the part you cannot take back |
 | 06 | [Testing](tiers/01-junior/06-testing/) | making breakage loud instead of silent |
-| 07 | Shipping it | environments, configuration, secrets, and dependencies as attack surface |
+| 07 | [Shipping it](tiers/01-junior/07-shipping-it/) | environments, configuration, secrets, and dependencies as attack surface |
 
 ### Senior — build a thing that survives
 
@@ -98,7 +98,7 @@ it, and at three in the morning while you are asleep.
 | 12 | Delivery | CI/CD, infrastructure as code, progressive rollout |
 | 13 | Data at scale | caching, queues, consistency, and what actually breaks first |
 | 14 | Performance and cost | finding both, and the fact that they are the same skill |
-| 15 | AI systems | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
+| 15 | [AI systems](tiers/02-senior/15-ai-systems/) | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
 
 ### Staff — change what gets built
 
@@ -107,8 +107,8 @@ and the engineers you make faster.
 
 | | section | what it buys you |
 |---|---|---|
-| 16 | Scope and leverage | what actually changes at staff, and the four archetypes |
-| 17 | Writing that decides | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
+| 16 | [Scope and leverage](tiers/03-staff/16-scope-and-leverage/) | what actually changes at staff, and the four archetypes |
+| 17 | [Writing that decides](tiers/03-staff/17-writing-that-decides/) | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
 | 18 | Technical strategy | synthesising strategy from real decisions, and why a good vision is boring |
 | 19 | Migrations | de-risk, enable, **finish** — and why most are abandoned at 80% |
 | 20 | Risk and incidents | operating under failure, and postmortems that change something |
@@ -122,6 +122,7 @@ Under construction, in the open. Sections land one at a time and each one is
 complete when it lands — there are no stubs pretending to be chapters. A section
 with no link next to it is not written yet, and is not pretending to be.
 
+Written and checked: **11 of 21 sections**, all five project briefs indexed, P1 complete.
 Last updated 2026-09-21.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,
