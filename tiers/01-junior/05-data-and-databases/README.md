@@ -118,36 +118,10 @@ Done badly, you see:
 
 ## Ask Claude for this
 
-**Request 1 — the schema, before any code**
+(P1's own page has the first ask — describe the data model before any code.
+These two are what you do with what comes back.)
 
-```
-I am building a shared reading list: a group signs in, adds URLs, tags
-them, and each person marks items read for themselves.
-
-Propose the schema. For every table, give the sentence one row asserts
-("one row = one ..."). For every column: can it be NULL, and what does
-NULL mean there? List the rules the database itself will enforce —
-unique, foreign key, NOT NULL — separately from rules only the
-application would enforce.
-
-Then name the three decisions you are least sure of, and for each, the
-future requirement that would prove it wrong. No code yet.
-```
-
-*Why:* the row-sentence forces tables to be nouns — a table you cannot say as a
-sentence is usually a screen in disguise. The NULL question and the
-enforced-versus-promised split surface where schemas rot first, and the "least
-sure" list extracts the model's own uncertainty.
-
-*What you should get back:* nouns — people, items, tags, a person-item table
-for read-state — with explicit NULL meanings. If "read" comes back as a boolean
-on items, you are holding the failure story above in written form.
-
-*Push back on:* any rule left to the application "for flexibility". The
-application is only one of the things that will write to this database,
-alongside the migration script, the console and next year's rewrite.
-
-**Request 2 — reviewing a schema a model proposed**
+**Request 1 — reviewing a schema a model proposed**
 
 ```
 Here is the schema you proposed. Review it as data, not as code.
@@ -178,7 +152,7 @@ reversibility.
 *Push back on:* a review that finds nothing. Plant a `price float` column and
 run it again; if the review misses the plant, it is not measuring anything.
 
-**Request 3 — the migration that cannot be one step**
+**Request 2 — the migration that cannot be one step**
 
 ```
 The live system stores read as a boolean on items. It must become
