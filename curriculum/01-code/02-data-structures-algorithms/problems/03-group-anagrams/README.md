@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [valid anag
 | Invalid input | Invalid container or non-string element raises `ValueError` |
 | Excluded | Text normalization, approximate similarity, and sorting output alphabetically |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** List of groups; group order follows first occurrence; words retain input order.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `["eat","tea","tan","ate"]` | `[["eat","tea","ate"],["tan"]]` | Canonical keys form groups. |
+| Empty batch | `[]` | `[]` | No synthetic empty group is created. |
+| Empty words | `["",""]` | `[["",""]]` | Empty strings are real entries. |
+| Duplicates | `["ab","ab","ba"]` | one group retaining all three entries | Do not deduplicate input. |
+| Stable order | `["tan","eat","nat","tea"]` | groups and members follow first appearance | Sorting the final answer changes the contract. |
+| Invalid/atomic | `["ok", 7]` | `ValueError`; input unchanged | Validate the whole batch. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `group_anagrams(["eat", "tea", "tan", "eat", "ate"])`
 returns `[["eat", "tea", "eat", "ate"], ["tan"]]`.
 `group_anagrams(["", ""]) == [["", ""]]`.

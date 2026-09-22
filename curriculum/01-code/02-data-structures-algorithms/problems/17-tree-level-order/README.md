@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [node ident
 | Invalid input | Malformed child links, cycles, or a child shared by multiple parents raise `ValueError` |
 | Excluded | DAG traversal and concurrent topology changes; output stores value references |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Lists of values by depth, in left-to-right order; root is depth 0.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | root a; children b,c; b has d | `[[a],[b,c],[d]]` by value | Queue boundaries preserve levels. |
+| Empty | `None` | `[]` | No empty level is emitted. |
+| Singleton | one node | one one-element level | Depth zero is represented. |
+| Duplicate values | distinct nodes with equal values | both values appear | Topology, not a value set, controls visitation. |
+| Shared child | left and right reference same node | `ValueError` | The input must be a tree, not a DAG. |
+| Cycle/malformed | child returns to ancestor or invalid object | `ValueError`; no mutation | Traversal must terminate safely. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 A root `a`, children `b, c`, and `b.right = d` gives
 `tree_level_order(a) == [["a"], ["b", "c"], ["d"]]`.
 Two distinct children both valued `"x"` produce `["x", "x"]`.

@@ -18,6 +18,39 @@ structure stores a partition: every vertex belongs to exactly one component.
 | Failure | Negative size raises `ValueError`; unknown vertex raises `IndexError` |
 | Scope | Links only added; no route reconstruction, removals, or concurrency |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Union returns whether two components merged; connectivity returns a boolean.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Initial | fresh set of n vertices | `connected(a,b)` false when a≠b | Every vertex starts as its own component. |
+| Merge | `union(0,3)` | `True`; now connected | A successful union reduces component count once. |
+| Repeat | same union again | `False` | Idempotence avoids double accounting. |
+| Self link | `union(2,2)` | `False` | A vertex already shares its own component. |
+| Empty universe | `n=0` | construction succeeds; any lookup is out of range | Empty is valid, phantom vertices are not. |
+| Bounds | negative or `n` index | `IndexError`; state unchanged | Python negative indexing is not allowed here. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 With four vertices, add `(0,1)` then `(2,3)`: there are two components and
 `connected(0,3)` is false. Add `(1,2)` and it becomes true with one component.
 Adding `(0,3)` again returns false. Asking about vertex 4 must fail, not silently

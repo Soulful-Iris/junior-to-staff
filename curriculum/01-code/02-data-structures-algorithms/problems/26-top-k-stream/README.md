@@ -19,6 +19,39 @@ partially ordered; reading that array is not the same as a sorted answer.
 | Failure | Negative/noninteger k or noninteger sample raises `ValueError` |
 | Scope | All history; fixed k; no deletion, timestamps, or distinct-only semantics |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `largest()` returns up to k values in descending order.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| No arrivals | fresh `TopK(3)` | `[]` | A query does not invent values. |
+| Fewer than k | add 4,1 to k=3 | `[4,1]` | Return only observed values. |
+| More than k | add 4,1,7,3 to k=2 | `[7,4]` | Only the retained frontier matters. |
+| Duplicates | add 5,5,4 to k=2 | `[5,5]` | Observations are not distinct keys. |
+| Zero k | add any values to k=0 | `[]` | Nothing is retained. |
+| Invalid/atomic | boolean sample or negative k | `ValueError`; prior snapshot unchanged | Failed input must not corrupt retained state. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For k=3 and arrivals `[4,1,7,7,2]`, the successive answers are `[4]`, `[4,1]`,
 `[7,4,1]`, `[7,7,4]`, `[7,7,4]`. Distinct-only `[7,4,2]` would violate the contract.
 After zero arrivals return `[]`; an invalid sample must leave retained state intact.

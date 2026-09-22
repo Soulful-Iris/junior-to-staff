@@ -19,6 +19,39 @@ A terminal marker records a complete word independently of whether children exis
 | Failure | Invalid characters/empty added word/negative limit raise `ValueError` |
 | Scope | Exact prefix, fixed alphabet; no popularity, fuzzy matching, or removal |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Up to limit unique matching words, ascending lexicographic order.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | add car,card,cat; suggest `car`, 5 | `["car","card"]` | A terminal prefix word remains a suggestion. |
+| Limit | same data; suggest `car`, 1 | `["car"]` | Stop after enough lexicographic results. |
+| Empty prefix | suggest `""`, 5 | first five words globally | The root represents all words. |
+| Duplicate add | add car twice | car appears once | Dictionary membership is unique. |
+| No match/zero limit | prefix z or limit 0 | `[]` | Both are normal results. |
+| Invalid | uppercase/empty added word or negative limit | `ValueError` | The fixed alphabet contract is enforced. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 Adding `[cart,cat,car,dog,car]` gives `suggest('ca',5) = [car,cart,cat]` and
 `suggest('car',1) = [car]`. `suggest('z',5)` returns `[]`; `'Car'` is rejected rather
 than silently lowercased. Ask whether lexical ordering is truly desired: popularity

@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [tree struc
 | Invalid input | Invalid values/links, cycles, or shared nodes raise `ValueError`; ordering violations return `False` |
 | Excluded | Balancing guarantees and duplicate-placement policies |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Boolean for strict BST ordering; equal values anywhere cannot satisfy strict ordering.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Valid | 2 with children 1 and 3 | `True` | Both global bounds hold. |
+| Ancestor violation | 10 → left 5 → right 12 | `False` | Checking only each parent misses the violation. |
+| Duplicate | 2 with child 2 | `False` | The baseline ordering is strict. |
+| Empty/singleton | `None` / one integer node | `True` / `True` | Small valid structures establish boundaries. |
+| Invalid value | a node contains `True` | `ValueError` | Boolean is excluded despite integer inheritance. |
+| Invalid topology | cycle or shared child | `ValueError` | Ordering failure does not hide structural corruption. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `Node(2, Node(1), Node(3))` is valid.
 `Node(10, Node(5), Node(15, Node(6), Node(20)))` is invalid: 6 is in 10's right subtree.
 `Node(2, Node(2))` returns `False`; `Node(True)` raises `ValueError`.

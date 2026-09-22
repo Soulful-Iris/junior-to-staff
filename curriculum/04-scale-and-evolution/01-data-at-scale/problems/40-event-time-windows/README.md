@@ -21,6 +21,39 @@ this exercise does not infer it from local wall time or the largest event seen.
 | Boundary | Close when `end+L <= watermark`; equal watermarks are idempotent |
 | Failure/scope | Decreasing watermark/invalid numbers raise `ValueError`; duplicates count, no retractions |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Accept or reject each event against the watermark and emit every newly closed, nonempty window exactly once in start order.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Window boundary | width 10; events at 9 and 10 | counts in `[0,10)` and `[10,20)` | Intervals are half-open. |
+| Allowed late | event arrives behind watermark but window not closed | `add` returns true and count includes it | Arrival order differs from event time. |
+| Too late | `end + lateness <= watermark` | `add` returns false | Closed windows never reopen. |
+| Exact close | watermark equals end plus lateness | emit that nonempty window once | Equality belongs to closed. |
+| Duplicates/empty | same timestamp twice; untouched windows | duplicates count; empty windows omitted | Events are observations, not unique IDs. |
+| Invalid/atomic | decreasing watermark or bad number | `ValueError`; watermark/state unchanged | Failed control input cannot move time backward. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 With W=10, L=5, add events 9 and 10. Advancing to 10 emits nothing; late event 2
 still joins `[0,10)`. At watermark 15 emit `(0,10,2)`. Another event 9 is rejected,
 while event 10 belongs to `[10,20)` and may still arrive. Ask who owns watermark

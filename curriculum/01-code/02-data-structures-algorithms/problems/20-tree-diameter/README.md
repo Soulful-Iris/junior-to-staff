@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [tree level
 | Invalid input | Malformed links, cycles, or shared-child DAGs raise `ValueError` |
 | Excluded | Edge weights, path reconstruction, and directed reachability semantics |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Diameter measured in edges, as a nonnegative integer.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | a with b,c; b with d,e | `3` edges | The best path can combine two child heights. |
+| Empty | `None` | `0` | No path has zero edges. |
+| Singleton | one node | `0` | Diameter counts edges, not nodes. |
+| Chain | four nodes in one line | `3` | The deepest subtree can contain the answer. |
+| Off-root maximum | long path entirely within one subtree | that subtree distance | Do not require the global root to be crossed. |
+| Invalid topology | cycle or shared child | `ValueError` | Tree assumptions are enforced. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For root a with children b,c and b with children d,e, `tree_diameter(a) == 3`
 using d–b–a–c (or e–b–a–c). A chain of four nodes also has diameter 3.
 `tree_diameter(None) == 0`; a self-child raises `ValueError`.

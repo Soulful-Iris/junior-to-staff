@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [reversing 
 | Invalid input | Malformed links, cycles, unsorted/noninteger values, or shared nodes raise `ValueError` before mutation |
 | Excluded | Persistent input chains and concurrent access during splicing |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Head of one merged chain using exactly all original node identities.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `1→3` and `1→2` | `1(first)→1(second)→2→3` | The first chain wins equal-value ties. |
+| One empty | `None` and `2→4` | the original second head | No replacement nodes are needed. |
+| Both empty | `None`, `None` | `None` | The frontier can be empty on both sides. |
+| Duplicates | `1→1` and `1` | all identities retained stably | Multiplicity and stable ties matter. |
+| Shared node | two inputs converge on one object | `ValueError` before mutation | Splicing shared ownership can create corruption. |
+| Unsorted/malformed | a descending link or cycle | `ValueError` before mutation | Validate the whole reachable inputs. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For identities `a1(1) → a2(3)` and `b1(1) → b2(2)`, return
 `a1 → b1 → b2 → a2 → None`.
 `merge_sorted_lists(None, b1) is b1` when that chain is valid.

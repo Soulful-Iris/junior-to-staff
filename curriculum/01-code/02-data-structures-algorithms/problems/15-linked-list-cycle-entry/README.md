@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [linked-lis
 | Invalid input | Non-node head or malformed reachable next link raises `ValueError` |
 | Excluded | Concurrent link changes and detecting cycles by equal node values |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Entry node by object identity, or `None` if acyclic.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Acyclic | `a → b → None` | `None` | Equal values would not create a cycle. |
+| Self-cycle | `a.next = a` | the exact object `a` | The smallest cycle must terminate. |
+| Tail into cycle | `a → b → c → b` | the exact object `b` | Meeting point and entry are different concepts. |
+| Repeated values | acyclic nodes sharing a value | `None` | Use object identity. |
+| No mutation | any valid chain | every original link unchanged | Detection is observational. |
+| Malformed link | reachable non-node `next` | `ValueError` | Reject invalid topology explicitly. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For `a → b → c → d → b`, `cycle_entry(a) is b`.
 For distinct nodes `a(7) → b(7) → None`, the result is `None`.
 For `a.next = a`, the result is `a`; `a.next = 42` raises `ValueError`.

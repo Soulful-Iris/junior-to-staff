@@ -19,6 +19,39 @@ reading at write plus TTL. A monotonic clock advances without wall-clock correct
 | Cleanup | `purge()` removes all entries expired at one sampled instant and returns count |
 | Failure/scope | Invalid TTL raises `ValueError` without overwriting; no persistence/concurrency |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `get` returns live value or raises `KeyError`; delete reports live removal.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Before boundary | deadline 105; get at 104.999 | stored value | Liveness is strict `now < deadline`. |
+| Exact boundary | get at 105 | `KeyError` | Expiration does not wait for cleanup. |
+| Stored None | live key maps to `None` | `get` returns `None` | A miss needs an exception, not a sentinel. |
+| Zero TTL | put with TTL 0 | key is immediately absent | No transient live interval exists. |
+| Overwrite invalid | live key then put invalid TTL | `ValueError`; old value/deadline remain | Validation is atomic. |
+| Purge sample | several deadlines around one injected time | remove exactly all expired keys | Read the clock once for a coherent purge. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 At clock 100, `set(a,'ok',5)` yields `'ok'` at 104.999 and `KeyError` at 105.
 Overwrite a at 103 with TTL 10 and it remains live at 105 until deadline 113.
 Storing `None` remains distinguishable from absence. Clarify whether reads extend

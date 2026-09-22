@@ -20,6 +20,39 @@ selected along a particular search path.
 | Failure | Nonpositive/noninteger coin or negative/noninteger amount raises `ValueError` |
 | Scope | Unlimited stock, equal per-coin cost; input remains unchanged |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `(minimum_count, list_of_coins)`; any optimal witness.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Greedy trap | `[1,3,4]`, amount 6 | `(2,[3,3])` | Largest-first is not generally optimal. |
+| Zero amount | any valid coins, amount 0 | `(0,[])` | The empty witness is optimal. |
+| Impossible | `[2]`, amount 3 | `(-1,[])` | No witness has a distinct result. |
+| Duplicate coins | `[1,1,3]` | same answer as unique denominations | Input duplicates add no choice. |
+| Tied optimum | multiple minimum witnesses | any stated optimal witness | Do not promise an unspecified tie. |
+| Invalid/atomic | nonpositive coin or negative amount | `ValueError`; input unchanged | DP states require positive progress. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For `[1,3,4]` and amount 6 return `(2,[3,3])`; greedy chooses 4+1+1 and uses three
 coins. For `[2]` and amount 3 return `(-1,[])`. Clarify whether the product needs
 minimum count, number of combinations, or one combination: these have different

@@ -19,6 +19,39 @@ the allowed next moves depend on which cells the current path already consumed.
 | Failure | Ragged board or invalid cells/word type raise `ValueError` |
 | Scope | No diagonal moves, wildcard characters, mutation, or all-path enumeration |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Boolean existence of an orthogonal path with no repeated cell.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | board contains an orthogonal spelling | `True` | A path may turn. |
+| No cell reuse | word needs the same cell twice | `False` | Visited state belongs to the current path. |
+| Backtrack | first matching prefix dead-ends; later start succeeds | `True` | Restore state before exploring alternatives. |
+| Empty word | any board, including empty | `True` | No cells are required. |
+| Empty board | nonempty word | `False` | Valid but unsatisfiable. |
+| Invalid/atomic | ragged board or multi-character cell | `ValueError`; board unchanged | Validation and restoration are observable. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For rows `ABCE / SFCS / ADEE`, `ABCCED` and `SEE` are present; `ABCB` is absent
 because its apparent final B would reuse the earlier B. In a two-cell board `AB`,
 `ABA` is false. Ask whether returning one coordinate witness would be more useful;

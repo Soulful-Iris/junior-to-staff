@@ -47,6 +47,22 @@ for path in files:
         if not (path.parent/target).exists():errors.append(f'{path.relative_to(ROOT)}: missing {target}')
     if content.count('```')%2:errors.append(f'{path}: unclosed code fence')
     if content.count('<details>')!=content.count('</details>'):errors.append(f'{path}: unclosed disclosure')
+
+# Every coding prompt exposes the expected interview behavior and enough concrete
+# edge cases before the worked answer. This guards against a future problem being
+# added with only an implementation and hidden tests.
+problem_bank=json.loads((ROOT/'indexes/problem-bank.json').read_text())
+if len(problem_bank)!=42:errors.append('problem bank must contain 42 entries')
+for item in problem_bank:
+    path=ROOT/item['path'];content=path.read_text()
+    start='<!-- interview-rehearsal:start -->';end='<!-- interview-rehearsal:end -->'
+    if content.count(start)!=1 or content.count(end)!=1:
+        errors.append(f'{path}: expected one interview rehearsal block');continue
+    block=content.split(start,1)[1].split(end,1)[0]
+    if '## What the interviewer expects' not in block or '### Test-case scenarios to settle before coding' not in block:
+        errors.append(f'{path}: incomplete expectation headings')
+    scenario_rows=[line for line in block.splitlines() if line.startswith('| ')][1:]
+    if len(scenario_rows)<6:errors.append(f'{path}: fewer than six explicit test-case scenarios')
 ns={'s':'http://www.w3.org/2000/svg'}
 manifest=json.loads((ROOT/'assets/learning/manifest.json').read_text())
 for item in manifest:

@@ -19,6 +19,39 @@ pointers, allowing removal from the middle when the node is already known.
 | Zero capacity | Every put returns its input as immediately evicted; retains nothing |
 | Failure/scope | Invalid capacity raises `ValueError`; single-threaded, entry count only |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `get` returns value; `put` returns evicted `(key,value)` or `None`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Eviction | capacity 2; put a,b; get a; put c | evict b | A successful read refreshes recency. |
+| Overwrite | put existing a with new value | no size growth; a becomes most recent | Update and insert differ. |
+| Stored None | put key with value `None` | `get` returns `None` | None cannot stand in for a miss. |
+| Miss | get absent key | `KeyError` | Miss behavior is explicit. |
+| Zero capacity | put a into capacity 0 | returns a as immediately evicted | The structure retains nothing. |
+| Invalid construction | negative/noninteger capacity | `ValueError` | Capacity is validated once. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 At capacity 2: `put(a,1)`, `put(b,2)`, `get(a)`, `put(c,3)` evicts `(b,2)`.
 Reading b then raises `KeyError`. Ask whether reads that miss affect recency (no)
 and whether an overwrite should count as a third entry (no).

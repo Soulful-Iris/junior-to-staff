@@ -18,6 +18,39 @@ cost; **relaxing** an edge means replacing a known cost when that edge improves 
 | Failure | Missing vertices or negative/nonfinite weights raise `ValueError` |
 | Scope | Directed, static graph; numeric cost arithmetic; no negative edges |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `(minimum_cost, endpoint-inclusive_path)`; any tied shortest path.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Relaxation | A→B 8, A→C 1, C→B 2 | `(3,[A,C,B])` | First discovery is not final. |
+| Same vertex | source equals target | `(0,[source])` | The empty edge path is valid. |
+| Unreachable | target in a disconnected component | `(inf,[])` | Absence has an explicit pair result. |
+| Zero-cost cycle | cycle edges cost zero | terminates with an optimal simple witness | Stale heap work must not loop. |
+| Huge integers | weights beyond float precision | exact integer total | Do not coerce costs to float. |
+| Invalid anywhere | negative/nonfinite edge in disconnected component | `ValueError` | Whole-graph validation is not traversal-dependent. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For `A→B:8`, `A→C:1`, and `C→B:2`, return `(3,[A,C,B])`, even though B was
 discovered directly first. A disconnected target returns infinity and no path.
 Clarify whether edge weights represent exact integers or floating measurements;

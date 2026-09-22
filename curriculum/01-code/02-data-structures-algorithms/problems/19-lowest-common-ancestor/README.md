@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [tree ident
 | Invalid input | Non-node query references, malformed links, cycles, or shared-child DAGs raise `ValueError` |
 | Excluded | Value/ID lookup, graph ancestor ambiguity, and concurrent mutation |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Lowest common ancestor node by identity if both are reachable; otherwise `None`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Split branches | p in left subtree, q in right | root object | The first subtree joining both presences wins. |
+| Ancestor | p is an ancestor of q | the exact object p | A node is its own ancestor. |
+| Same query | `p is q` and reachable | the exact p object | Presence is counted correctly once. |
+| One absent | p reachable, q detached | `None` | A partial candidate is not an answer. |
+| Equal values | different nodes share values | identity-based ancestor | Values cannot substitute for node identity. |
+| Invalid topology | cycle/shared child/malformed query | `ValueError` | Validate even when an answer seems discoverable early. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 With `a.left=b`, `a.right=c`, and `b.left=d`, `lowest_common_ancestor(a, d, b) is b`.
 `lowest_common_ancestor(a, d, c) is a`; querying `d` and a new absent node gives `None`.
 `lowest_common_ancestor(a, d, d) is d`; passing `p=None` raises `ValueError`.

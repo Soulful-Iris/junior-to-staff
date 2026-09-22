@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [interval e
 | Invalid input | Invalid container/pair/type or nonpositive duration raises `ValueError` |
 | Excluded | Room features, travel buffers, recurring meetings, or actual room IDs |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Nonnegative integer: maximum simultaneous half-open meetings.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[(0,10),(5,7),(7,12)]` | `2` | End-before-start tie handling lets a room turn over at 7. |
+| Empty | `[]` | `0` | No rooms are required. |
+| Touching | `[(1,2),(2,3)]` | `1` | Half-open meetings share a room. |
+| Duplicates | `[(1,4),(1,4)]` | `2` | Multiplicity matters even for identical intervals. |
+| Nested | `[(0,10),(2,3),(4,5)]` | `2` | Peak concurrency is not number of meetings. |
+| Invalid/atomic | `[(4,4)]` | `ValueError`; input unchanged | Zero-duration entries are outside the contract. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `meeting_room_capacity([(0, 10), (5, 7), (7, 12)]) == 2`.
 At time 7 one meeting ends and another starts, so demand stays 2.
 `meeting_room_capacity([(1, 2), (2, 3)]) == 1`; `[(4, 4)]` raises `ValueError`.

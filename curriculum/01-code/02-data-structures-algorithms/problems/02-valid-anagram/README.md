@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [two sum](.
 | Invalid input | Non-string arguments raise `ValueError` |
 | Excluded | Normalization, locale collation, and visual/grapheme equivalence |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Boolean: each code point appears equally often.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Both empty | `""`, `""` | `True` | The empty multiplicity maps are equal. |
+| Same inventory | `"aab"`, `"aba"` | `True` | Order is irrelevant; counts are not. |
+| Missing copy | `"aab"`, `"ab"` | `False` | A set would lose multiplicity. |
+| Case | `"A"`, `"a"` | `False` | Comparison is exact and case-sensitive. |
+| Unicode form | precomposed `"é"` vs `"é"` | `False` | Normalization is explicitly outside the baseline. |
+| Invalid | `None`, `""` | `ValueError` | Reject the contract violation before counting. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `valid_anagram("aab", "aba") is True`; `valid_anagram("aab", "abb") is False`.
 `valid_anagram("é", "e\u0301") is False` despite similar rendering.
 `valid_anagram(None, "")` raises `ValueError`.

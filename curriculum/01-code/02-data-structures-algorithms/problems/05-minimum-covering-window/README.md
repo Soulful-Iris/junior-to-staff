@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [longest un
 | Invalid input | Either non-string argument raises `ValueError` |
 | Excluded | Reordering characters or matching tokens across noncontiguous positions |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Shortest half-open `(start, end)`, earliest start on ties; `None` if impossible.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `"ABAAC"`, required `"AAC"` | `(2, 5)` for `"AAC"` | Required multiplicities drive validity. |
+| Empty requirement | any text, required `""` | `(0, 0)` | The empty need is already satisfied. |
+| Impossible multiplicity | `"ab"`, required `"aa"` | `None` | Presence without enough copies is insufficient. |
+| Surplus | `"AAABC"`, required `"AC"` | shortest window containing one A and one C | Extra required characters must not inflate unmet demand. |
+| Tie | two equal-length valid windows | the one with the smallest start | State the deterministic result before coding. |
+| Invalid | either argument is not a string | `ValueError` | Validation precedes scanning. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `minimum_covering_window("ABAAC", "AAC") == (2, 5)` highlights `"AAC"`.
 `minimum_covering_window("ab", "aa") is None`; `minimum_covering_window("", "") == (0, 0)`.
 `minimum_covering_window("abc", None)` raises `ValueError`.

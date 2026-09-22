@@ -19,6 +19,39 @@ source exposes the smallest value that source could contribute next.
 | Failure | Nonsorted or noninteger values raise `ValueError` when consumed |
 | Scope | Synchronous iterators; no I/O deadlines or atomic all-or-nothing export |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Lazy ascending iterator preserving every occurrence, including ties.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[1,4]`, `[1,3]`, `[2]` | `1,1,2,3,4` lazily | Heap entries identify their source. |
+| No sources | `[]` | empty iterator | The collection itself may be empty. |
+| Empty sources | `[[],[1],[]]` | `1` | Do not assume every source has a head. |
+| Duplicates | equal values within/across streams | every occurrence retained | Merging is not deduplication. |
+| Laziness | a source raises if read past requested prefix | only necessary values consumed | Do not materialize all streams. |
+| Late invalid order | source yields 3 then 2 | `ValueError` when 2 is consumed | Iterator validation occurs at the observable boundary. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `[[1,4],[],[1,3,8]]` produces `[1,1,3,4,8]`. For `[[1,0]]`, the iterator yields
 1 and then raises when it reads 0. Previously yielded data cannot be retracted.
 Ask whether partial output is acceptable: eager validation requires reading or

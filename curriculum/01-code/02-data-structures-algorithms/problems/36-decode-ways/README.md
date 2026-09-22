@@ -19,6 +19,39 @@ count partitions; we do not need to construct the potentially numerous strings.
 | Boundaries | Empty public input returns 0; impossible nonempty input returns 0 |
 | Failure/scope | Other characters/types raise `ValueError`; no wildcard/modulus |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Exact number of partitions into codes 1..26.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `"226"` | `3` | It partitions as 2-2-6, 22-6, and 2-26. |
+| Leading zero | `"06"` | `0` | Zero cannot begin a code. |
+| Valid zero | `"10"` / `"20"` | `1` / `1` | Zero participates only in those pairs. |
+| Invalid zero | `"30"` / `"100"` | `0` / `0` | A preceding digit does not always rescue zero. |
+| Empty public input | `""` | `0` | Public semantics differ from the DP empty suffix base. |
+| Invalid/large | nondigit raises; long valid digits return exact integer | no truncation or modulus | Separate validation from arbitrary-size counting. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `226` has three decodings: `2|2|6`, `22|6`, `2|26`. `10` has one, `06` has none,
 and `100` has none because the last zero cannot stand alone. Reject `'1x'` rather
 than returning zero: malformed data and a well-formed but undecodable string are

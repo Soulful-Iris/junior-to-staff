@@ -19,6 +19,39 @@ means **a must finish before b can start**. An incoming-edge count is called ind
 | Failure | Unknown IDs, duplicate task IDs, or a cycle raise `ValueError` |
 | Scope | Planning only; durations, retries, and parallel execution excluded |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Every task once in a valid order; ties follow input/edge discovery order.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | tasks fetch,parse,save,metrics; fetch→parse→save | `[fetch,metrics,parse,save]` | Independent tasks must not disappear. |
+| Empty | no tasks or edges | `[]` | An empty plan is valid. |
+| Duplicate edge | submit fetch→parse twice | count the prerequisite once | Indegree represents unique requirements. |
+| Partial cycle | fetch→parse→save→fetch plus metrics | `ValueError` | A runnable vertex does not make the whole plan valid. |
+| Unknown task | edge mentions undeclared task | `ValueError` | The graph is closed over declared IDs. |
+| Long chain | thousands of serial tasks | every task once without recursion failure | Work should be O(V+E). |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For tasks `[fetch, parse, save, metrics]` and edges `fetch → parse → save`, return
 `[fetch, metrics, parse, save]`. Metrics is independent and still belongs in the
 answer. Adding `save → fetch` must fail, even though metrics can run. Ask whether the

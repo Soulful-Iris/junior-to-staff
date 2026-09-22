@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [state inva
 | Invalid input | Malformed links or cycles raise `ValueError` before any mutation |
 | Excluded | Shared ownership guarantees and concurrent readers/writers during reversal |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** New head of the reversed chain using exactly the original node identities.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `a → b → c → None` | same objects as `c → b → a → None` | Identity, not copied values, defines success. |
+| Empty | `None` | `None` | No links are written. |
+| Singleton | `a → None` | the exact object `a` | Head identity stays the same. |
+| Repeated values | three distinct nodes all storing `1` | all three identities reversed | Values cannot identify nodes. |
+| Cycle | `a → b → a` | `ValueError` before mutation | Validation must not partially destroy the structure. |
+| Malformed link | reachable `next` is not Node/None | `ValueError` before mutation | Atomic rejection is observable behavior. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For distinct objects `a → b → c → None`, return object `c` with links `c → b → a → None`.
 Even if all three values are `7`, all three identities must remain.
 A self-link `a.next = a` raises `ValueError` and remains unchanged.

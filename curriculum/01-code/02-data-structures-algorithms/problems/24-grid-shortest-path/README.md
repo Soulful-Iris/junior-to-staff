@@ -19,6 +19,39 @@ supplies neighbors implicitly, so no separate adjacency list is necessary.
 | Failure | Empty/ragged grid, other cell values, or out-of-bounds endpoints raise `ValueError` |
 | Scope | No diagonal moves, weighted terrain, moving walls, or input mutation |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Endpoint-inclusive shortest coordinate list; any shortest route accepted.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | open grid with a wall forcing a detour | an endpoint-inclusive shortest coordinate path | BFS discovers by distance layers. |
+| Same endpoint | open start equals goal | one-coordinate path | Distance zero still includes the point. |
+| Blocked endpoint | start or goal cell is 1 | `[]` | Blocked is valid input but unsolvable. |
+| Unreachable | walls separate the endpoints | `[]` | Failure is not an exception. |
+| Tie | two equal shortest routes | either valid shortest route | Do not overfit an unspecified tie. |
+| Invalid/atomic | empty/ragged grid or bad coordinate | `ValueError`; grid unchanged | Validate shape and bounds. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For rows `[[0,1,0],[0,1,0],[0,0,0]]`, start `(0,0)` and goal `(0,2)` require six
 moves around the shelf. The path is `[(0,0),(1,0),(2,0),(2,1),(2,2),(1,2),(0,2)]`.
 In `[[0,1,0]]` the same endpoints are unreachable. Ask whether distance alone

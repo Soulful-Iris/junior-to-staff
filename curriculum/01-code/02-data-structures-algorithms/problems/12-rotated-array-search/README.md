@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [binary sea
 | Invalid input | Invalid types, duplicates, or invalid rotation raise `ValueError` |
 | Excluded | Duplicates and concurrent mutation; checked validation costs O(n) |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Index in the supplied array, or `-1` if absent.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[4,5,7,0,1,2]`, target `1` | `4` | One half remains ordered at every step. |
+| Absent | same array, target `6` | `-1` | Absence uses an index sentinel. |
+| Empty | `[]`, any target | `-1` | No midpoint exists. |
+| Unrotated | `[1,2,3]`, target `2` | `1` | A rotation by zero is valid. |
+| Singleton | `[1]`, target `1` / `2` | `0` / `-1` | Both smallest success and failure paths matter. |
+| Invalid/atomic | duplicates or invalid rotation | `ValueError`; input unchanged | The ordered-half proof relies on the contract. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `rotated_search([4, 5, 7, 0, 1, 2], 1) == 4`; target 6 gives `-1`.
 `rotated_search([1], 1) == 0`; `rotated_search([2, 1, 3], 1)` raises `ValueError`.
 The output refers to the exported order, not the original sorted index.

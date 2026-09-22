@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [binary sea
 | Invalid input | Invalid types, nonpositive weights, or nonpositive days raise `ValueError` |
 | Excluded | Reordering, per-day capacity variation, and fractional package weights |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Smallest capacity that ships all packages in order in at most `days`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[3,2,2,4,1,4]`, days `3` | `6` | Capacity 5 fails and 6 is feasible. |
+| Empty shipment | `[]`, days `2` | `0` | No capacity is required. |
+| One day | `[2,3,4]`, days `1` | `9` | Every package must fit in one ordered day. |
+| Many days | `[2,3,4]`, days `10` | `4` | Unused days are allowed; largest package is the floor. |
+| No splitting | `[8,1,1]`, days `2` | `8` | A package is indivisible. |
+| Invalid/atomic | zero weight or nonpositive days | `ValueError`; input unchanged | Validate before feasibility search. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `shipping_capacity([3, 2, 2, 4, 1, 4], 3) == 6`: days load `[3, 2]`, `[2, 4]`, `[1, 4]`.
 Capacity 5 needs four days, so 6 is minimal.
 `shipping_capacity([], 2) == 0`; `shipping_capacity([0, 3], 2)` raises `ValueError`.

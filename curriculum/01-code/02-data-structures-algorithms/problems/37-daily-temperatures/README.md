@@ -19,6 +19,39 @@ to settle several answers. Store indices because the answer is an index differen
 | Failure | Noninteger temperatures raise `ValueError`; input unchanged |
 | Scope | One complete series; no circular wraparound or minimum-rise threshold |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Same-length list of waits to the first strictly warmer future day.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[73,74,75,71,69,72,76,73]` | `[1,1,4,2,1,1,0,0]` | Unresolved days remain on a decreasing stack. |
+| Empty | `[]` | `[]` | Output shape matches input. |
+| Equals | `[5,5,5]` | `[0,0,0]` | Warmer means strictly greater. |
+| Decreasing | `[3,2,1]` | `[0,0,0]` | No future resolution exists. |
+| Negative | `[-2,-1]` | `[1,0]` | Temperature sign is irrelevant. |
+| Invalid/atomic | noninteger/bool element | `ValueError`; input unchanged | Validation precedes stack mutation. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 For `[73,74,75,71,69,72,76,73]`, return `[1,1,4,2,1,1,0,0]`. Day 2 at 75 waits
 four days for 76; 72 is warmer than 71 but cannot resolve 75. `[5,5,5]` returns
 all zeros. Clarify whether the word “warmer” means `>` or `>=` before testing ties.

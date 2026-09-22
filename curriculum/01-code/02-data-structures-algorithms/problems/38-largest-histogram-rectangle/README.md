@@ -19,6 +19,39 @@ bar. A stack can retain heights whose right boundary has not yet been discovered
 | Failure | Negative/noninteger heights raise `ValueError`; input unchanged |
 | Scope | Area only; no witness coordinates or variable widths |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Maximum integer area under a contiguous interval.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[2,1,5,6,2,3]` | `10` | Height 5 across width 2 is best. |
+| Empty/all zero | `[]` / `[0,0]` | `0` / `0` | No positive rectangle exists. |
+| Plateau | `[2,2,2]` | `6` | Equal heights must combine across width. |
+| Zero split | `[2,0,2]` | `2` | A zero ends positive rectangles. |
+| Final flush | `[1,2,3]` | `4` | Remaining bars need a virtual right boundary. |
+| Invalid/atomic | negative or noninteger height | `ValueError`; input unchanged | Histogram geometry assumes nonnegative integers. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `[2,1,5,6,2,3]` returns 10 from heights 5 and 6 over width two. `[2,2,2]` returns
 6. `[2,0,2]` returns 2 because the zero breaks a positive rectangle. Ask whether
 the caller needs the left/right boundaries: save them with the winning area if so.

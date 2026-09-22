@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 | Invalid input | Malformed pairs, bool/noninteger endpoints, or `start >= end` raise `ValueError` |
 | Excluded | Time zones, recurring events, and preserving event identities |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** New sorted list of `(start, end)` half-open intervals; touching intervals merge.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[(5,7),(1,3),(3,6)]` | `[(1,7)]` | Sorting exposes one unresolved covered range. |
+| Empty | `[]` | `[]` | No placeholder interval is returned. |
+| Disjoint | `[(1,2),(3,4)]` | both intervals in sorted order | A real gap stays visible. |
+| Touching | `[(1,3),(3,5)]` | `[(1,5)]` | This contract merges half-open boundaries that touch. |
+| Nested/duplicate | `[(1,10),(2,3),(1,10)]` | `[(1,10)]` | Contained coverage adds no new range. |
+| Invalid/atomic | `[(3,3)]` or malformed pair | `ValueError`; input unchanged | Reject zero duration and bad structure. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `merge_intervals([(5, 7), (1, 3), (3, 6)]) == [(1, 7)]`.
 `merge_intervals([(1, 2), (3, 4)]) == [(1, 2), (3, 4)]`.
 `merge_intervals([(2, 2)])` raises `ValueError`: zero-duration events are excluded.

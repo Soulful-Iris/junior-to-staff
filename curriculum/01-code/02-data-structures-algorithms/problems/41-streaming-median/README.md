@@ -19,6 +19,39 @@ exposes the largest lower-half value; Python's min-heap can represent it by nega
 | Failure | Empty median or noninteger observation raises `ValueError` |
 | Scope | All history, append only; no window removal, approximation, or constant-memory promise |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `median()` returns an exact `fractions.Fraction`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Odd count | add 5,1,9 | `Fraction(5,1)` | Median is the ordered middle. |
+| Even count | add 1,2 | `Fraction(3,2)` | Return an exact average. |
+| Duplicates | add 4,4,4,4 | `Fraction(4,1)` | Multiplicity is preserved. |
+| Empty | median before any add | `ValueError` | No sentinel number represents absence. |
+| Huge integers | two values beyond float precision | exact `Fraction` | Do not overflow or round through float. |
+| Invalid/atomic | boolean/noninteger observation | `ValueError`; prior median unchanged | Heap balance survives rejected input. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 After arrivals `[5,1,9,2]`, medians are `5`, `3`, `5`, and `7/2`. The final answer
 is not one of the observed values. Negative and arbitrarily large Python integers
 are accepted; conversion through a float could overflow or round. Ask whether

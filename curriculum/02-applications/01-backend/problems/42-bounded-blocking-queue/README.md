@@ -23,6 +23,39 @@ lets a thread release a mutex while waiting, then reacquire it before checking s
 | Drain/cancel | Drain permits existing gets; cancel returns removed items; closed-empty get raises `QueueClosed` |
 | Scope | One process; no fairness, task execution, acknowledgement, or cross-replica limit |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Preserve FIFO and bounded capacity while giving every put, get, timeout, drain, and cancellation race the documented outcome.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| FIFO | put A, put B, then two gets | A then B | Acceptance order is preserved. |
+| Full producer | capacity 1 contains A; producer puts B | producer waits until A is removed, then succeeds once | Use a condition loop, not one wakeup assumption. |
+| Empty consumer | consumer gets from empty queue | waits until item, close, cancel, or deadline | Every wake path rechecks state. |
+| Timeout zero | full put or empty get with timeout 0 | immediate `TimeoutError` | Zero is a nonblocking attempt. |
+| Drain/cancel | close with items present | drain serves them; cancel returns/removes them | Shutdown policy is explicit and first call wins. |
+| Race safety | competing producers/consumers plus spurious wakeups | no loss/duplication; deadline budget not reset | Concurrency tests target schedules, not only values. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 At capacity 1, put A succeeds; put B waits. Getting A frees B's slot. If shutdown
 begins while B waits, B instead raises `QueueClosed`; drain still permits reading A.
 Cancel mode returns `[A]` and leaves no item to read. Invalid capacity/timeout raises

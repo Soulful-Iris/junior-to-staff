@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 | Invalid input | `ValueError` for invalid container, element, or target type |
 | Excluded | Approximate floating-point money and distributed reconciliation |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** `(i, j)` with `i < j`; choose smallest `j`, then smallest `i`; otherwise `None`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[2, 7, 11, 15]`, target `9` | `(0, 1)` | A prior complement should be found. |
+| Repeated value | `[3, 3]`, target `6` | `(0, 1)` | Two positions may hold the same value. |
+| No answer | `[1, 2, 3]`, target `20` | `None` | Absence is part of the return contract. |
+| Too little input | `[]` and `[9]` | `None` for both | One position cannot be reused. |
+| Tie rule | `[1, 4, 2, 3]`, target `5` | `(0, 1)` | Smallest right index wins before later pairs. |
+| Invalid/atomic | `[True, 2]`, target `3` | `ValueError`; input unchanged | Python booleans must not silently count as integers. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `two_sum([3, 3, 2], 6) == (0, 1)`: equal values at distinct positions are allowed.
 `two_sum([3], 6) is None`: one position cannot be reused.
 `two_sum([True, 2], 3)` raises `ValueError`.

@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [prefix sum
 | Invalid input | Invalid container or element raises `ValueError` |
 | Excluded | Division, floating-point stability, fixed-width integer arithmetic |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** New list where output i is the product over every position except i.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[2,3,4]` | `[12,8,6]` | Each answer combines strict prefix and suffix. |
+| Singleton | `[7]` | `[1]` | The product of no other values is the multiplicative identity. |
+| One zero | `[0,3,4]` | `[12,0,0]` | Only the zero position sees the nonzero product. |
+| Two zeros | `[0,0,4]` | `[0,0,0]` | Every exclusion still contains a zero. |
+| Negative values | `[-1,2,-3]` | `[-6,3,-2]` | Signs follow ordinary integer multiplication. |
+| Invalid/atomic | `[1,False]` | `ValueError`; input unchanged | No division or silent boolean coercion. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `product_except_self([2, 3, 4]) == [12, 8, 6]`.
 `product_except_self([0, 3, 4]) == [12, 0, 0]`; `[0, 0, 4]` gives `[0, 0, 0]`.
 `product_except_self([7]) == [1]`; `product_except_self([False])` raises `ValueError`.

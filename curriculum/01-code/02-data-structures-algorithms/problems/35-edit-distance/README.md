@@ -20,6 +20,39 @@ points, which may differ from user-perceived characters.
 | Failure | Nonstrings raise `ValueError` |
 | Scope | Distance only; no edit script, normalization, transposition, or weighted costs |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Minimum unit-cost insertion/deletion/replacement count.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `"kitten"` to `"sitting"` | `3` | Replace, replace, insert is optimal. |
+| Equal | same string twice | `0` | No operation is required. |
+| Empty side | `""` to length-n text | `n` | Every target symbol must be inserted. |
+| Order | `"ab"` to `"ba"` | `2` | Transposition is not a baseline operation. |
+| Unicode | strings compared by Python code point | distance over exact code points | No implicit normalization/grapheme logic. |
+| Invalid | either input non-string | `ValueError` | The API does not stringify values. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `kitten → sitting` costs 3: replace k→s, replace e→i, append g. `ab → ba` costs 2,
 not 1, because swapping is excluded. A list of characters raises `ValueError` rather
 than silently changing the input contract. Ask whether an actual edit script or

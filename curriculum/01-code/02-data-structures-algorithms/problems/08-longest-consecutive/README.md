@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [map/set me
 | Invalid input | Invalid container or element raises `ValueError` |
 | Excluded | Returning all runs, requiring input adjacency, or mutating input |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Length of longest set of values `a, a+1, ..., b`.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `[100,4,200,1,3,2,2]` | `4` | Duplicates do not lengthen the run 1..4. |
+| Empty | `[]` | `0` | No run exists. |
+| Negative bridge | `[-1,1,0]` | `3` | The ordering crosses zero normally. |
+| Duplicates only | `[5,5,5]` | `1` | Distinct values define run length. |
+| Separated values | `[1,3,5]` | `1` | Input adjacency is irrelevant. |
+| Invalid/atomic | noninteger or boolean element | `ValueError`; input unchanged | Validate before building the set. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `longest_consecutive([100, 4, 200, 1, 3, 2, 2]) == 4`, for values 1 through 4.
 `longest_consecutive([-1, 1, 0]) == 3`; `longest_consecutive([]) == 0`.
 `longest_consecutive(["1"])` raises `ValueError`.

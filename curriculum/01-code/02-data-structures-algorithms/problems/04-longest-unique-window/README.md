@@ -16,6 +16,39 @@ Constructed practice problem; no company attribution. Prerequisites: [maps](../0
 | Invalid input | Non-string raises `ValueError` |
 | Excluded | Grapheme indexing, normalization, and noncontiguous subsequences |
 
+<!-- interview-rehearsal:start -->
+
+## What the interviewer expects
+
+The opening scenario is the product context; the table above is the callable
+contract. Your job is to connect them. Before coding, say what the output means,
+walk one normal case and one case that could disprove a tempting shortcut, then
+name the invariant your implementation will preserve. Start with a correct
+baseline, improve it deliberately, and derive time and space from actual work.
+
+**Done means:** Half-open `(start, end)` indices; `text[start:end]` is longest unique run.
+
+Passing the happy path alone is not done; your answer
+must make a deliberate decision for every scenario below without mutating input
+unless the contract explicitly permits it.
+
+### Test-case scenarios to settle before coding
+
+| Case | Exact input or state | Expected result | What it is testing |
+|---|---|---|---|
+| Representative | `"abba"` | `(0, 2)` for `"ab"` | The left edge never moves backward. |
+| Empty | `""` | `(0, 0)` | Half-open indices still form a valid empty slice. |
+| All repeated | `"aaaa"` | `(0, 1)` | A repeated character closes the longer window. |
+| Tie | `"abcaef"` | earliest maximum window | Equal lengths do not replace the earlier answer. |
+| Exact code points | `"aA"` | `(0, 2)` | Case-sensitive symbols are distinct. |
+| Invalid | non-string input | `ValueError` | The API does not coerce collections to text. |
+
+Do not merely list these cases in an interview. For each one, point to the branch,
+state transition, or invariant that makes the expected result inevitable. If your
+design cannot explain a row, the design is not finished yet.
+
+<!-- interview-rehearsal:end -->
+
 `longest_unique_window("abba") == (0, 2)` highlights `"ab"`.
 `longest_unique_window("aaaa") == (0, 1)`; `longest_unique_window("") == (0, 0)`.
 `longest_unique_window(["a"])` raises `ValueError`.
