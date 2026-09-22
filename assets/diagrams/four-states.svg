@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 392" width="760" height="392" role="img" aria-label="The same reading-list screen shown four times: loading, with pulsing placeholder bars; empty, inviting the user to add the first link; error, saying the list did not load, with a retry button; and loaded, with three rows of content. A green ring steps across the four to show that at any moment some real user is looking at each of them. Only the loaded state usually gets designed; the caption says to design all four and build a way to force each one.">
+  <rect width="760" height="392" rx="10" fill="#faf9f7"/>
+
+  <text x="30" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE SCREEN, FOUR STATES · THE RING IS WHAT SOMEONE IS SEEING RIGHT NOW</text>
+
+  <!-- the ring that steps across the four states -->
+  <rect x="24" y="52" width="170" height="254" rx="10" fill="none" stroke="#2f6f4e" stroke-width="2">
+    <animate attributeName="x" values="24;206;388;570" keyTimes="0;0.25;0.5;0.75" dur="10s" calcMode="discrete" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ============ frame 1 · loading ============ -->
+  <rect x="30" y="58" width="158" height="200" rx="8" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <circle cx="44" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="52" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="60" cy="70" r="2" fill="#c9c3b8"/>
+  <line x1="31" y1="82" x2="187" y2="82" stroke="#ded9d1" stroke-width="1"/>
+  <g>
+    <animate attributeName="opacity" values="1;0.45;1" keyTimes="0;0.5;1" dur="1.8s" repeatCount="indefinite"/>
+    <rect x="42" y="96" width="70" height="10" rx="3" fill="#ded9d1"/>
+    <rect x="42" y="120" width="134" height="12" rx="3" fill="#ded9d1"/>
+    <rect x="42" y="138" width="86" height="8" rx="3" fill="#ded9d1" opacity="0.6"/>
+    <rect x="42" y="158" width="134" height="12" rx="3" fill="#ded9d1"/>
+    <rect x="42" y="176" width="86" height="8" rx="3" fill="#ded9d1" opacity="0.6"/>
+    <rect x="42" y="196" width="134" height="12" rx="3" fill="#ded9d1"/>
+    <rect x="42" y="214" width="86" height="8" rx="3" fill="#ded9d1" opacity="0.6"/>
+  </g>
+
+  <!-- ============ frame 2 · empty ============ -->
+  <rect x="212" y="58" width="158" height="200" rx="8" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <circle cx="226" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="234" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="242" cy="70" r="2" fill="#c9c3b8"/>
+  <line x1="213" y1="82" x2="369" y2="82" stroke="#ded9d1" stroke-width="1"/>
+  <text x="224" y="102" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#1f2b24">Reading list</text>
+  <circle cx="291" cy="148" r="14" fill="none" stroke="#c9c3b8" stroke-width="1.5"/>
+  <line x1="285" y1="148" x2="297" y2="148" stroke="#c9c3b8" stroke-width="1.5"/>
+  <line x1="291" y1="142" x2="291" y2="154" stroke="#c9c3b8" stroke-width="1.5"/>
+  <text x="291" y="184" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#3f3b36">No links yet</text>
+  <rect x="229" y="196" width="124" height="22" rx="11" fill="#2f6f4e"/>
+  <text x="291" y="210" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#faf9f7">Add the first link</text>
+
+  <!-- ============ frame 3 · error ============ -->
+  <rect x="394" y="58" width="158" height="200" rx="8" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <circle cx="408" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="416" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="424" cy="70" r="2" fill="#c9c3b8"/>
+  <line x1="395" y1="82" x2="551" y2="82" stroke="#ded9d1" stroke-width="1"/>
+  <text x="406" y="102" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#1f2b24">Reading list</text>
+  <circle cx="473" cy="146" r="13" fill="none" stroke="#c2703d" stroke-width="1.5"/>
+  <text x="473" y="151" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#c2703d">!</text>
+  <text x="473" y="182" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">The list didn't load</text>
+  <text x="473" y="197" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">nothing was lost</text>
+  <rect x="435" y="208" width="76" height="22" rx="11" fill="none" stroke="#c2703d" stroke-width="1.2"/>
+  <text x="473" y="222" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#a85d2f">Try again</text>
+
+  <!-- ============ frame 4 · loaded ============ -->
+  <rect x="576" y="58" width="158" height="200" rx="8" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <circle cx="590" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="598" cy="70" r="2" fill="#c9c3b8"/>
+  <circle cx="606" cy="70" r="2" fill="#c9c3b8"/>
+  <line x1="577" y1="82" x2="733" y2="82" stroke="#ded9d1" stroke-width="1"/>
+  <text x="588" y="102" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#1f2b24">Reading list</text>
+  <rect x="588" y="118" width="110" height="10" rx="3" fill="#3f3b36"/>
+  <rect x="588" y="134" width="34" height="12" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.8"/>
+  <circle cx="716" cy="123" r="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+  <path d="M713,123 l2.2,2.2 l4.2,-4.8" fill="none" stroke="#2f6f4e" stroke-width="1.4"/>
+  <rect x="588" y="158" width="96" height="10" rx="3" fill="#3f3b36"/>
+  <rect x="588" y="174" width="46" height="12" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.8"/>
+  <rect x="588" y="198" width="118" height="10" rx="3" fill="#3f3b36"/>
+  <rect x="588" y="214" width="70" height="8" rx="3" fill="#c9c3b8"/>
+
+  <!-- state names and verdicts -->
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#6d6459" letter-spacing="1.5">
+    <text x="30" y="280">LOADING</text>
+    <text x="212" y="280">EMPTY</text>
+    <text x="394" y="280">ERROR</text>
+    <text x="576" y="280">LOADED</text>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11">
+    <text x="30" y="297" fill="#6d6459">built only if demanded</text>
+    <text x="212" y="297" fill="#6d6459">a new user's first screen</text>
+    <text x="394" y="297" fill="#a85d2f">must not look like empty</text>
+    <text x="576" y="297" fill="#6d6459">the only one that demos</text>
+  </g>
+
+  <line x1="30" y1="324" x2="730" y2="324" stroke="#ded9d1" stroke-width="1"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">
+    <text x="30" y="348">Only the loaded state appears in the demo — a fast network and a full account hide the other three.</text>
+    <text x="30" y="366">Design all four, and build yourself a way to force each one on demand before you ship.</text>
+  </g>
+</svg>

@@ -1,61 +1,132 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" width="760" height="330" role="img" aria-label="A vague ask fans out into five different plausible implementations scattered apart. A precise ask, with its constraints named, converges on two nearly identical results. The fan-out versus the convergence is the difference precision buys.">
-  <rect width="760" height="330" rx="10" fill="#faf9f7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 396" width="760" height="396" role="img" aria-label="One vague ask, add tagging, fans out to five different but plausible systems: a column on items, a tags table with a join, free-text labels, a fixed menu, per-user private tags. The same ask rewritten as a precise specification, pinning tag length, case folding, duplicates, sharing and the empty tag, produces nearly the same build twice, and the diff between the two is nearly empty. Every place two builds differ is a sentence missing from the spec.">
+  <rect width="760" height="396" rx="10" fill="#faf9f7"/>
 
-  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ASK THE SAME THING TWICE AND SEE HOW FAR APART THE ANSWERS LAND</text>
+  <text x="44" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHAT COMES BACK, AS THE SPEC GETS MORE PRECISE</text>
 
-  <!-- vague -->
-  <text x="44" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#a85d2f" letter-spacing="1.4">VAGUE</text>
-  <rect x="44" y="78" width="132" height="44" rx="4" fill="#faf9f7" stroke="#c2703d" stroke-width="1.6"/>
-  <text x="110" y="97" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">"add caching"</text>
-  <text x="110" y="113" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">no constraints named</text>
+  <line x1="380" y1="52" x2="380" y2="312" stroke="#ded9d1" stroke-width="1"/>
 
-  <g stroke="#c2703d" stroke-width="1.1" fill="none" opacity="0.8">
-    <path d="M 176 100 C 230 100, 250 46, 306 44"/>
-    <path d="M 176 100 C 230 100, 250 76, 306 74"/>
-    <path d="M 176 100 C 230 100, 250 104, 306 104"/>
-    <path d="M 176 100 C 230 100, 250 132, 306 134"/>
-    <path d="M 176 100 C 230 100, 250 160, 306 164"/>
-  </g>
-  <g fill="#faf9f7" stroke="#c2703d" stroke-width="1.3">
-    <rect x="306" y="32" width="124" height="24" rx="3"/>
-    <rect x="306" y="62" width="124" height="24" rx="3"/>
-    <rect x="306" y="92" width="124" height="24" rx="3"/>
-    <rect x="306" y="122" width="124" height="24" rx="3"/>
-    <rect x="306" y="152" width="124" height="24" rx="3"/>
-  </g>
-  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d6459">
-    <text x="314" y="48">in-process, no ttl</text>
-    <text x="314" y="78">redis, no eviction</text>
-    <text x="314" y="108">http headers only</text>
-    <text x="314" y="138">memoised per request</text>
-    <text x="314" y="168">a whole new service</text>
-  </g>
-  <text x="452" y="92" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">all five are defensible.</text>
-  <text x="452" y="108" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">you did not choose any</text>
-  <text x="452" y="124" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">of them.</text>
+  <!-- left panel: the vague ask -->
+  <text x="44" y="64" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.4">A VAGUE ASK</text>
 
-  <line x1="44" y1="196" x2="716" y2="196" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="44" y="173" width="116" height="48" rx="6" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <text x="102" y="201" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#6d6459">&#8220;add tagging&#8221;</text>
+  <text x="102" y="239" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">the whole ask</text>
 
-  <!-- precise -->
-  <text x="44" y="224" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e" letter-spacing="1.4">PRECISE</text>
-  <rect x="44" y="236" width="132" height="58" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
-  <text x="110" y="255" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">cache this query</text>
-  <text x="110" y="270" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">60s ttl · single-flight</text>
-  <text x="110" y="284" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">stale ok · show me a miss</text>
+  <line x1="160" y1="197" x2="232" y2="93" stroke="#c9c3b8" stroke-width="1.2"/>
+  <line x1="160" y1="197" x2="232" y2="145" stroke="#c9c3b8" stroke-width="1.2"/>
+  <line x1="160" y1="197" x2="232" y2="197" stroke="#c9c3b8" stroke-width="1.2"/>
+  <line x1="160" y1="197" x2="232" y2="249" stroke="#c9c3b8" stroke-width="1.2"/>
+  <line x1="160" y1="197" x2="232" y2="301" stroke="#c9c3b8" stroke-width="1.2"/>
 
-  <g stroke="#2f6f4e" stroke-width="1.2" fill="none">
-    <path d="M 176 258 C 240 258, 260 244, 306 242"/>
-    <path d="M 176 272 C 240 272, 260 286, 306 288"/>
+  <rect x="232" y="78" width="126" height="30" rx="5" fill="#ffffff" stroke="#c9c3b8" stroke-width="1.2">
+    <animate attributeName="stroke" values="#c9c3b8;#c9c3b8;#a85d2f;#a85d2f;#c9c3b8;#c9c3b8" keyTimes="0;0.095;0.10;0.15;0.19;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="241" y="97" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">a column on items</text>
+
+  <rect x="232" y="130" width="126" height="30" rx="5" fill="#ffffff" stroke="#c9c3b8" stroke-width="1.2">
+    <animate attributeName="stroke" values="#c9c3b8;#c9c3b8;#a85d2f;#a85d2f;#c9c3b8;#c9c3b8" keyTimes="0;0.295;0.30;0.35;0.39;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="241" y="149" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">tags table + join</text>
+
+  <rect x="232" y="182" width="126" height="30" rx="5" fill="#ffffff" stroke="#c9c3b8" stroke-width="1.2">
+    <animate attributeName="stroke" values="#c9c3b8;#c9c3b8;#a85d2f;#a85d2f;#c9c3b8;#c9c3b8" keyTimes="0;0.495;0.50;0.55;0.59;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="241" y="201" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">free-text labels</text>
+
+  <rect x="232" y="234" width="126" height="30" rx="5" fill="#ffffff" stroke="#c9c3b8" stroke-width="1.2">
+    <animate attributeName="stroke" values="#c9c3b8;#c9c3b8;#a85d2f;#a85d2f;#c9c3b8;#c9c3b8" keyTimes="0;0.695;0.70;0.75;0.79;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="241" y="253" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">a fixed menu</text>
+
+  <rect x="232" y="286" width="126" height="30" rx="5" fill="#ffffff" stroke="#c9c3b8" stroke-width="1.2">
+    <animate attributeName="stroke" values="#c9c3b8;#c9c3b8;#a85d2f;#a85d2f;#c9c3b8;#c9c3b8" keyTimes="0;0.895;0.90;0.95;0.99;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <text x="241" y="305" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">per-user, private</text>
+
+  <!-- one run at a time: each cycle, a run leaves the ask and lands somewhere different -->
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion path="M160,197 L232,93" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.10;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.02;0.03;0.10;0.13;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion path="M160,197 L232,145" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.22;0.30;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.22;0.23;0.30;0.33;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion path="M160,197 L232,197" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.42;0.50;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.42;0.43;0.50;0.53;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion path="M160,197 L232,249" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.62;0.70;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.62;0.63;0.70;0.73;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion path="M160,197 L232,301" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.82;0.90;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.82;0.83;0.90;0.93;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="44" y="332" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">five runs, five different systems, all plausible</text>
+
+  <!-- right panel: the precise spec -->
+  <text x="404" y="64" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.4">A PRECISE SPEC</text>
+  <text x="404" y="130" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">the same ask, rewritten as behaviour</text>
+
+  <rect x="404" y="142" width="132" height="104" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#3f3b36">
+    <text x="414" y="162">tag: 1&#8211;40 chars</text>
+    <text x="414" y="179">case-folded</text>
+    <text x="414" y="196">duplicate: reject</text>
+    <text x="414" y="213">shared across users</text>
+    <text x="414" y="230">empty tag: error</text>
   </g>
-  <g fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4">
-    <rect x="306" y="230" width="124" height="24" rx="3"/>
-    <rect x="306" y="276" width="124" height="24" rx="3"/>
+  <text x="404" y="264" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">behaviour pinned, choices closed</text>
+
+  <line x1="536" y1="194" x2="596" y2="173" stroke="#7f9b8b" stroke-width="1.2"/>
+  <line x1="536" y1="194" x2="596" y2="237" stroke="#7f9b8b" stroke-width="1.2"/>
+
+  <text x="596" y="148" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">build one</text>
+  <rect x="596" y="154" width="120" height="38" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2">
+    <animate attributeName="stroke-width" values="1.2;1.2;2.6;1.2;1.2;2.6;1.2;1.2" keyTimes="0;0.13;0.15;0.21;0.63;0.65;0.71;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <g stroke="#2f6f4e" stroke-width="2.5" opacity="0.5">
+    <line x1="606" y1="164" x2="690" y2="164"/>
+    <line x1="606" y1="173" x2="672" y2="173"/>
+    <line x1="606" y1="182" x2="698" y2="182"/>
   </g>
-  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#3f3b36">
-    <text x="314" y="246">run one</text>
-    <text x="314" y="292">run two</text>
+
+  <text x="596" y="212" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">build two</text>
+  <rect x="596" y="218" width="120" height="38" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2">
+    <animate attributeName="stroke-width" values="1.2;1.2;2.6;1.2;1.2;2.6;1.2;1.2" keyTimes="0;0.13;0.15;0.21;0.63;0.65;0.71;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <g stroke="#2f6f4e" stroke-width="2.5" opacity="0.5">
+    <line x1="606" y1="228" x2="690" y2="228"/>
+    <line x1="606" y1="237" x2="672" y2="237"/>
+    <line x1="606" y1="246" x2="692" y2="246"/>
   </g>
-  <text x="452" y="252" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">nearly the same twice, and</text>
-  <text x="452" y="268" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">the difference between them</text>
-  <text x="452" y="284" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">is a thing you forgot to say</text>
+
+  <!-- two runs, together, landing in the same place, twice per cycle -->
+  <circle r="4" fill="#2f6f4e" opacity="0">
+    <animateMotion path="M536,194 L596,173" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.05;0.13;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.05;0.06;0.13;0.16;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#2f6f4e" opacity="0">
+    <animateMotion path="M536,194 L596,237" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.05;0.13;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.05;0.06;0.13;0.16;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#2f6f4e" opacity="0">
+    <animateMotion path="M536,194 L596,173" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.55;0.63;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.55;0.56;0.63;0.66;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4" fill="#2f6f4e" opacity="0">
+    <animateMotion path="M536,194 L596,237" dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.55;0.63;1"/>
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.55;0.56;0.63;0.66;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="404" y="332" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">two runs, and the diff is nearly empty</text>
+
+  <line x1="44" y1="346" x2="716" y2="346" stroke="#ded9d1" stroke-width="1"/>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">
+    <text x="44" y="366">Every place the two builds differ is a sentence missing from the spec. The model was not</text>
+    <text x="44" y="383">guessing wrong; it was answering the questions you left open, by coin flip.</text>
+  </g>
 </svg>

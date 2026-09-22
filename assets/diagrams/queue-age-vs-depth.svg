@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-label="Two stacked panels of the same queue over the same half hour, sharing a time axis. The top panel, queue depth, is a flat line that looks healthy the whole time. The bottom panel, age of the oldest message, climbs steadily and crosses the level where an alarm could live. A cursor sweeps both panels together: the consumer is keeping up with new arrivals while the oldest work is never the work being done.">
+  <rect width="760" height="420" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME QUEUE · THE SAME HALF HOUR · TWO ANSWERS</text>
+
+  <!-- ===== top panel: depth ===== -->
+  <text x="60" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.3">QUEUE DEPTH · WHAT THE DASHBOARD GRAPHS</text>
+  <text x="700" y="66" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">flat · looks healthy</text>
+
+  <line x1="60" y1="160" x2="700" y2="160" stroke="#c9c3b8" stroke-width="1.2"/>
+
+  <!-- ===== bottom panel: age ===== -->
+  <text x="60" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.3">AGE OF OLDEST MESSAGE · WHAT NOBODY GRAPHED</text>
+  <text x="700" y="200" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">climbing · one second per second</text>
+
+  <line x1="60" y1="300" x2="700" y2="300" stroke="#c9c3b8" stroke-width="1.2"/>
+
+  <!-- the alarm level only age offers -->
+  <line x1="60" y1="258" x2="700" y2="258" stroke="#2f6f4e" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="700" y="276" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#2f6f4e">an alarm can live here — depth has no line like this</text>
+
+  <!-- now cursor, under the data lines -->
+  <g>
+    <line x1="60" y1="76" x2="60" y2="300" stroke="#8a857d" stroke-width="1" stroke-dasharray="3 3"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;640 0;640 0;0 0;0 0" keyTimes="0;0.72;0.84;0.86;1" dur="14s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.8;0.84;0.94;1" dur="14s" repeatCount="indefinite"/>
+  </g>
+
+  <!-- depth line: flat with noise -->
+  <path d="M60,112 L140,109 L220,113 L300,108 L380,112 L460,114 L540,110 L620,113 L700,111" fill="none" stroke="#2f6f4e" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- age line: one second per second -->
+  <path d="M60,296 L700,226" fill="none" stroke="#c2703d" stroke-width="2"/>
+
+  <!-- dots riding the lines at the cursor -->
+  <circle r="4.5" cx="60" cy="112" fill="#2f6f4e" stroke="#faf9f7" stroke-width="1.5">
+    <animate attributeName="cx" values="60;700;700;60;60" keyTimes="0;0.72;0.84;0.86;1" dur="14s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="112;109;113;108;112;114;110;113;111;111;112;112" keyTimes="0;0.09;0.18;0.27;0.36;0.45;0.54;0.63;0.72;0.84;0.86;1" dur="14s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.8;0.84;0.94;1" dur="14s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="4.5" cx="60" cy="296" fill="#c2703d" stroke="#faf9f7" stroke-width="1.5">
+    <animate attributeName="cx" values="60;700;700;60;60" keyTimes="0;0.72;0.84;0.86;1" dur="14s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="296;226;226;296;296" keyTimes="0;0.72;0.84;0.86;1" dur="14s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.8;0.84;0.94;1" dur="14s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- shared time axis labels -->
+  <text x="60" y="318" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">TIME →</text>
+  <text x="700" y="318" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d" letter-spacing="1.2">THE WHOLE INCIDENT</text>
+
+  <line x1="44" y1="332" x2="716" y2="332" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="354" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Depth compares arrivals with completions, and they cancel: the consumer is keeping</text>
+  <text x="44" y="371" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">up with new work. Age asks how long the oldest job has waited — and it is still waiting.</text>
+  <text x="44" y="396" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">Alarm on age. Depth was flat through the whole thing.</text>
+</svg>
