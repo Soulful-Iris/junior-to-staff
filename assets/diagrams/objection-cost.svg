@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 328" width="760" height="328" role="img" aria-label="A curve showing what the same objection costs depending on when it arrives. Raised in week one, during the review window, it costs an afternoon. Raised around month two it costs a sprint. Raised after launch it costs the project. The curve is nearly flat through the review window and then rises steeply.">
+  <rect width="760" height="328" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME OBJECTION, COSTED BY WHEN IT ARRIVES</text>
+
+  <rect x="140" y="64" width="140" height="176" fill="#2f6f4e" opacity="0.07"/>
+  <text x="210" y="58" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1.2">THE REVIEW WINDOW</text>
+
+  <line x1="130" y1="240" x2="668" y2="240" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="130" y1="64" x2="130" y2="240" stroke="#ded9d1" stroke-width="1"/>
+
+  <path d="M 150 232 C 280 228, 360 206, 440 170 S 580 112, 645 82"
+        fill="none" stroke="#c2703d" stroke-width="2"/>
+
+  <circle cx="150" cy="232" r="4.5" fill="#2f6f4e"/>
+  <circle cx="440" cy="170" r="4.5" fill="#c2703d"/>
+  <circle cx="645" cy="82" r="5" fill="#a85d2f"/>
+
+  <text x="162" y="222" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">an afternoon</text>
+  <text x="450" y="180" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">a sprint</text>
+  <text x="560" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">the project</text>
+
+  <text x="150" y="258" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">week 1</text>
+  <text x="260" y="258" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">week 4</text>
+  <text x="380" y="258" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">month 2</text>
+  <text x="500" y="258" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">month 4</text>
+  <text x="645" y="258" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#8a857d">launched</text>
+
+  <circle r="4" fill="#c2703d" opacity="0">
+    <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;1;1" keyTimes="0;0.72;1"
+                   path="M 150 232 C 280 228, 360 206, 440 170 S 580 112, 645 82"/>
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.04;0.7;0.76;1" dur="10s" repeatCount="indefinite"/>
+  </circle>
+
+  <line x1="44" y1="276" x2="716" y2="276" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="298" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Disagreement in review is not an obstacle. It is the same information arriving while it is still cheap.</text>
+  <text x="44" y="318" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">Which is why a document that nobody argued with has not been read, and is not evidence of agreement.</text>
+</svg>
