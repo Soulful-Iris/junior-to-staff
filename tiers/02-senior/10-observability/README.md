@@ -8,7 +8,7 @@ Monitoring answers the questions you thought of in advance: is it up, is it
 slow, is the disk full. Observability is answering the question you did not
 think of — at 3am, from evidence the system already recorded, without shipping
 new code first. The skill is choosing what to record, and at what cost, so one
-failing request can be found and explained after the fact.
+failing request can be explained after the fact.
 
 ## The failure it prevents
 
@@ -21,10 +21,10 @@ request id, so you cannot say which are hers or what happened just before each
 one. The save path calls another service; there is no trace, so that hop's time
 is invisible inside the total.
 
-Four hours of ssh and grep later: her account is far larger than most, and past
-a certain row count one query flips to a bad plan, on one replica only. Nothing
-here was unknowable — the system knew which requests were hers and how long
-each hop took. It never wrote it down in a form that could be asked.
+Four hours of ssh and grep later: past a certain account size one query flips
+to a bad plan, on one replica only. Nothing was unknowable — the system knew
+which requests were hers and how long each hop took. It never wrote it down in
+a form that could be asked.
 
 The same day with observability: search traces for her user id, open the
 slowest, see one span holding nine of the ten seconds, read the query from its
@@ -36,19 +36,19 @@ Dashboards answer questions someone asked in advance. Users generate new ones.
 
 ### Known questions and new ones
 
-Monitoring is a fixed set of questions asked continuously, with alerts wired to
-the answers. You need it; it is how you learn *that* something is wrong.
-Observability is a property of what you record: whether it can answer questions
-nobody anticipated — *why*, for whom, since when. The test: **can you explain
-the last weird thing one user experienced without shipping new code to find
-out?** If every incident starts with adding a log line, you have monitoring.
+Monitoring is a fixed set of questions asked continuously, alerts wired to the
+answers. You need it; it is how you learn *that* something is wrong.
+Observability is a property of what you record: can it answer questions nobody
+anticipated — *why*, for whom, since when? The test: **can you explain the last
+weird thing one user experienced without shipping new code to find out?** If
+every incident starts with adding a log line, you have monitoring.
 
 ### Three signals, and where each one lies
 
-**Metrics** are numbers aggregated over time. Cheap and fast, the right thing
-to alert on. They lie by aggregation: the mean hides the p99, and
-pre-aggregation throws the individuals away at write time, so no metric can
-tell you *which* request was slow.
+**Metrics** are numbers aggregated over time: cheap, fast, the thing you alert
+on. They lie by aggregation — the mean hides the p99, and pre-aggregation
+throws the individuals away at write time, so no metric can tell you *which*
+request was slow.
 
 **Logs** are events with detail — but only the detail someone thought to write,
 and without a shared id a log line is a diary entry: true, timestamped, about
@@ -58,18 +58,17 @@ somebody, connectable to nothing. A log becomes telemetry when it is structured
 **Traces** follow one request across services as a tree of timed spans — the
 answer to "where did the time go" for a single request. They lie by absence:
 sampling may have dropped the one you need, and an uninstrumented hop is a gap
-blamed on the caller. A trace that stops because nobody propagated the context
-is two traces, and says nothing about the boundary between them — where the
-problem usually is.
+blamed on the caller. A trace nobody propagated across a boundary is two
+traces, silent about the boundary — where the problem usually is.
 
 ### The substrate is a standard now
 
 OpenTelemetry graduated from the CNCF in May 2026 (announced 21 May; checked on
 opentelemetry.io, 2026-09-21): one API and wire format for all three signals,
-with the vendor plugged in at the exporter. Instrument against the
-OpenTelemetry API, never a vendor SDK — instrumentation ends up in every file
-of every service, the one part you cannot afford to rewrite to change vendors.
-A fourth signal, profiles, was in alpha at graduation; don't build on it yet.
+vendor plugged in at the exporter. Instrument against the OpenTelemetry API,
+never a vendor SDK: instrumentation ends up in every file of every service, the
+part you cannot afford to rewrite to change vendors. A fourth signal, profiles,
+was in alpha at graduation; don't build on it yet.
 
 ### The cardinality trap
 
@@ -80,10 +79,10 @@ exists.
 ![One metric multiplying into time series as labels are added: four methods make 4 series, twenty routes make 80, five status classes make 400, and a customer id with ten thousand values makes 4,000,000 — a bar running off the chart](../../../assets/diagrams/cardinality-explosion.svg)
 
 Storage — and most vendor bills — scale with active series, not traffic, which
-is how one deploy adding one label doubles a bill overnight. So metric labels
-are for **bounded** dimensions you would group by: method, route, status class.
-Anything unbounded — user id, request id, raw URL — belongs on spans and logs,
-which are events you sample and query, not series you multiply.
+is how one deploy adding one label doubles a bill overnight. Metric labels are
+for **bounded** dimensions you group by: method, route, status class. Anything
+unbounded — user id, request id, raw URL — belongs on spans and logs: events
+you sample and query, not series you multiply.
 
 The counter-argument, wide events ("observability 2.0"): one wide structured
 event per request, dozens of fields, in a columnar store; metrics and traces
@@ -94,11 +93,11 @@ labels on a metrics backend is an invoice.
 
 ### Sampling, and the part nobody teaches
 
-At volume you cannot keep every trace. **Head sampling** decides at the start:
-cheap, stateless, blind — the errors and slow requests have not happened yet.
-**Tail sampling** decides once the trace is complete: keep all errors,
-everything over the latency target, 1% of the rest. That is the policy you
-want, with two consequences — the second quietly ruins dashboards:
+You cannot keep every trace at volume. **Head sampling** decides at the start:
+cheap, stateless, blind — the errors have not happened yet. **Tail sampling**
+decides once the trace is complete: keep all errors, everything over the
+latency target, 1% of the rest. The policy you want, with two consequences —
+the second quietly ruins dashboards:
 
 1. Tail sampling is **stateful**: the decision needs the whole trace, so every
    span with the same trace id must reach the same collector instance or traces
@@ -108,9 +107,9 @@ want, with two consequences — the second quietly ruins dashboards:
    layer looks fine until there is a second collector.
 2. **Compute span metrics before the sampling decision.** Tail sampling keeps
    all errors and a sliver of successes; rates derived from the survivors
-   inherit that bias — error rate reads far above truth, request rate reads
-   low, latency skews slow. Derive rate, error and duration from the full span
-   stream in the first layer; drop only the traces.
+   inherit that bias — error rate reads far above truth, request rate low,
+   latency slow. Derive rate, error and duration from the full span stream in
+   the first layer; drop only the traces.
 
 ### Where to point it
 
@@ -124,7 +123,7 @@ visible" — the user's unit of work, not your process.
 
 - Every request gets an id at the edge, and that id is on every log line, span
   and error report it causes, all the way to the worker behind the queue.
-- Alert to offending traces to one request's logs in a few clicks. No ssh in
+- From an alert to the traces to one request's logs in a few clicks; no ssh in
   the incident story.
 - Application code imports only the OpenTelemetry API; the vendor is named in
   one config file.
@@ -135,7 +134,7 @@ visible" — the user's unit of work, not your process.
 - The telemetry bill is a reviewed line item, and the top three costs can be
   attributed to named metrics or log streams.
 
-Done badly, you see:
+Done badly:
 
 - Dashboards green during an outage users can feel.
 - Logs as prose — "something went wrong in handler" — no ids, no fields.
@@ -148,7 +147,7 @@ Done badly, you see:
 
 ## Ask Claude for this
 
-**Request 1 — instrument a service, portably, cardinality conversation forced**
+**Request 1 — instrument a service, with the cardinality conversation forced**
 
 ```
 Instrument this service with OpenTelemetry: traces, metrics, logs.
@@ -170,7 +169,7 @@ and the log lines sharing its trace id.
 and it is the rule generated code breaks first. Label enumeration forces the
 cardinality conversation before the first deploy rather than on the first
 invoice. "One request's story" is the acceptance test: the point is following
-one request, so the work must demonstrate that.
+one request, so make the work demonstrate it.
 
 *What you should get back:* a service where the queue consumer's spans share or
 link to the producer's trace id. That hop is the one automatic instrumentation
@@ -207,25 +206,6 @@ a restarting collector loses what it was buffering. One collector plus "scale
 horizontally later" is the wrong answer looking reasonable: it cannot, without
 the routing layer.
 
-**Request 3 — the unanticipated-question drill**
-
-```
-Here are my instrumentation, dashboards and alert rules: <paste>.
-
-Invent five questions a user or an engineer could plausibly ask
-that none of my dashboards answer — about one specific user, one
-request, or one hour. For each, say whether my recorded telemetry
-could answer it, and exactly what is missing if not.
-```
-
-*Why:* observability is defined by unanticipated questions, so test it with
-some. Requiring questions about individuals stops the model asking aggregates
-your dashboards already handle.
-
-*Push back on:* five questions that all turn out answerable — either the
-telemetry is genuinely good or the questions were soft. Ask for five harder
-ones and find out which.
-
 ## How you would know it is wrong
 
 1. **Run the fire drill.** Someone breaks one thing on purpose — hangs a
@@ -251,8 +231,8 @@ ones and find out which.
 
 ## Your slice of the project
 
-On **P2**, the reading list from P1 gets instrumented. This is the "can you fix
-it at 3am" half of that project's question.
+On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
+3am" half of that project's question.
 
 - OpenTelemetry tracing on inbound requests, database calls, the outbound URL
   fetch, and the deferred title-fetch path in both directions.
@@ -272,7 +252,7 @@ it at 3am" half of that project's question.
 - Any failed fetch in the UI can be turned into its trace and logs by id, in
   one search.
 - Break propagation on purpose — drop the traceparent header on one hop — and
-  watch the trace split in two. Proof you can tell propagation from
+  watch the trace split in two: proof you can tell propagation from
   coincidence.
 - You can state your active series count, and predict what adding `tag` as a
   label to the request metric would do to it.
@@ -287,7 +267,7 @@ it at 3am" half of that project's question.
 - **span** — one timed operation; a trace is the tree of spans for one request.
 - **context propagation** — carrying the trace id across every boundary, queues included.
 - **head sampling** — keep-or-drop decided at trace start. Cheap, blind to outcome.
-- **tail sampling** — decided at a stateful collector once the trace is complete, so errors are always kept.
+- **tail sampling** — decided once the trace is complete, at a stateful collector; errors always kept.
 - **wide event** — one rich event per request; metrics and traces derived at query time.
 
 ---
@@ -296,4 +276,4 @@ it at 3am" half of that project's question.
 error budgets, alerting, on-call — belongs to reliability; this section is
 about being able to see. Continuous profiling is real but young. Front-end and
 real-user monitoring have their own tooling. Audit logs are a security
-artifact with different retention rules, not an observability signal.
+artifact, not an observability signal.
