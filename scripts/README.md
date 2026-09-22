@@ -61,3 +61,16 @@ npm-packaged Chromium environment, `USE_PACKAGED_CHROMIUM=1` uses the optional
 text is a failed review even if the SVG parser succeeded. Repository diagrams
 use common Markdown/Mermaid syntax; GitHub's renderer may use a different version,
 so also inspect the published pages when confirming a checkpoint.
+
+## Run the supplied reference exercises
+
+```bash
+python scripts/check_curriculum.py
+python scripts/check_curriculum.py --coding-only
+```
+
+Each test directory runs in its own process so identically named `solution.py`
+modules cannot shadow one another. A 90-second suite limit bounds accidental hangs.
+The importer starter intentionally contains defects; default checks use its reference.
+The full-stack README documents separate browser and TypeScript commands, and the
+PostgreSQL lab documents its real two-session runtime gate.
