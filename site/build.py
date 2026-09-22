@@ -48,7 +48,8 @@ from pathlib import Path
 import markdown
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = Path(__file__).resolve().parent / "out"
+OUT = Path(os.environ.get("SITE_OUT")) if os.environ.get("SITE_OUT") \
+      else Path(__file__).resolve().parent / "out"
 TOOLS = Path(__file__).resolve().parent / "tools"
 MERMAID_CACHE = Path(__file__).resolve().parent / ".mermaid-cache"
 

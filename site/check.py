@@ -15,13 +15,15 @@ Exit code is non-zero if anything is dead, so it can gate a deploy.
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
 from urllib.parse import unquote, urldefrag
 
-OUT = Path(__file__).resolve().parent / "out"
+OUT = Path(os.environ.get("SITE_OUT")) if os.environ.get("SITE_OUT") \
+      else Path(__file__).resolve().parent / "out"
 HREF = re.compile(r'(?:href|src)="([^"]+)"')
 
 
