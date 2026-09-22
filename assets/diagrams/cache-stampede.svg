@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 384" width="760" height="384" role="img" aria-label="The same cache, two behaviours. Without protection, when the hot key's time to live reaches zero every concurrent reader misses at once and each runs the expensive query, so two hundred readers become two hundred queries at a database with a hundred connection slots. With single flight, one reader recomputes and the rest wait or take the stale value, so two hundred readers become one query.">
+  <rect width="760" height="384" rx="10" fill="#faf9f7"/>
+
+  <!-- ============ top: no protection ============ -->
+  <text x="44" y="46" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a85d2f" letter-spacing="1.3">NO PROTECTION</text>
+
+  <text x="44" y="106" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#3f3b36">200 readers,</text>
+  <text x="44" y="121" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#3f3b36">all at once</text>
+
+  <line x1="130" y1="94" x2="206" y2="102" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="102" x2="206" y2="106" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="110" x2="206" y2="110" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="118" x2="206" y2="114" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="126" x2="206" y2="118" stroke="#8a857d" stroke-width="1"/>
+
+  <rect x="212" y="84" width="148" height="52" rx="6" fill="#faf0e9" stroke="#c2703d" stroke-width="1.3"/>
+  <text x="286" y="103" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">group page key</text>
+  <rect x="224" y="112" width="124" height="9" rx="2" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="225" y="113" width="122" height="7" rx="1.5" fill="#c2703d" opacity="0.5">
+    <animate attributeName="width" values="122;0;0;122" keyTimes="0;0.74;0.9;1" dur="11s" repeatCount="indefinite"/>
+  </rect>
+  <text x="286" y="132" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" fill="#a85d2f">ttl</text>
+
+  <text x="400" y="76" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">200 queries, 100 slots</text>
+
+  <line x1="362" y1="102" x2="552" y2="94" stroke="#c2703d" stroke-width="1.1"/>
+  <line x1="362" y1="106" x2="552" y2="102" stroke="#c2703d" stroke-width="1.1"/>
+  <line x1="362" y1="110" x2="552" y2="110" stroke="#c2703d" stroke-width="1.1"/>
+  <line x1="362" y1="114" x2="552" y2="118" stroke="#c2703d" stroke-width="1.1"/>
+  <line x1="362" y1="118" x2="552" y2="126" stroke="#c2703d" stroke-width="1.1"/>
+  <path d="M 556 110 l -6 -3.5 l 0 7 z" fill="#c2703d"/>
+
+  <rect x="562" y="84" width="112" height="52" rx="6" fill="#faf0e9" stroke="#c2703d" stroke-width="1.3"/>
+  <text x="618" y="114" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">database</text>
+
+  <line x1="44" y1="172" x2="716" y2="172" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- ============ bottom: single flight ============ -->
+  <text x="44" y="204" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e" letter-spacing="1.3">SINGLE FLIGHT</text>
+
+  <text x="44" y="246" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#3f3b36">200 readers,</text>
+  <text x="44" y="261" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#3f3b36">all at once</text>
+
+  <line x1="130" y1="234" x2="206" y2="242" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="242" x2="206" y2="246" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="250" x2="206" y2="250" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="258" x2="206" y2="254" stroke="#8a857d" stroke-width="1"/>
+  <line x1="130" y1="266" x2="206" y2="258" stroke="#8a857d" stroke-width="1"/>
+
+  <rect x="212" y="224" width="148" height="52" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.3"/>
+  <text x="286" y="243" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">group page key</text>
+  <rect x="224" y="252" width="124" height="9" rx="2" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="225" y="253" width="122" height="7" rx="1.5" fill="#2f6f4e" opacity="0.45">
+    <animate attributeName="width" values="122;0;0;122" keyTimes="0;0.74;0.9;1" dur="11s" repeatCount="indefinite"/>
+  </rect>
+  <text x="286" y="272" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8.5" fill="#2f6f4e">ttl</text>
+
+  <!-- four held back -->
+  <line x1="362" y1="242" x2="416" y2="238" stroke="#8a857d" stroke-width="1.1" stroke-dasharray="3 3"/>
+  <line x1="362" y1="246" x2="416" y2="244" stroke="#8a857d" stroke-width="1.1" stroke-dasharray="3 3"/>
+  <line x1="362" y1="254" x2="416" y2="258" stroke="#8a857d" stroke-width="1.1" stroke-dasharray="3 3"/>
+  <line x1="362" y1="258" x2="416" y2="264" stroke="#8a857d" stroke-width="1.1" stroke-dasharray="3 3"/>
+  <line x1="420" y1="232" x2="420" y2="270" stroke="#8a857d" stroke-width="1.4"/>
+  <text x="362" y="222" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">the other 199 wait, or take stale</text>
+
+  <!-- one goes through -->
+  <line x1="362" y1="250" x2="552" y2="250" stroke="#2f6f4e" stroke-width="1.6"/>
+  <path d="M 556 250 l -6 -3.5 l 0 7 z" fill="#2f6f4e"/>
+  <text x="446" y="266" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">1 query</text>
+
+  <rect x="562" y="224" width="112" height="52" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.3"/>
+  <text x="618" y="254" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">database</text>
+
+  <line x1="44" y1="312" x2="716" y2="312" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="334" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Both panels have a cache. The top one is the outage — and the cache is what caused it, by</text>
+  <text x="44" y="351" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">holding every reader back until the same instant and then releasing them together.</text>
+  <text x="44" y="372" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">Keys born together die together. Jitter the expiry, or the herd is scheduled rather than random.</text>
+</svg>
