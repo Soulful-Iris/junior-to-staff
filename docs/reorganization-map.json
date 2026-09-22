@@ -1,0 +1,2990 @@
+{
+  "source_commit": "4d4a42facc83a18556f4eed1696dbea807fd8763",
+  "branch": "feature/concept-first-curriculum",
+  "groups": [
+    {
+      "path": "curriculum/01-code",
+      "title": "Write correct code"
+    },
+    {
+      "path": "curriculum/02-applications",
+      "title": "Build a complete application"
+    },
+    {
+      "path": "curriculum/03-production",
+      "title": "Design, ship, and operate the application"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution",
+      "title": "Scale and evolve the system"
+    }
+  ],
+  "chapters": [
+    {
+      "key": "problem",
+      "path": "curriculum/01-code/01-problem-solving",
+      "title": "Problem solving and AI-assisted engineering",
+      "outcome": "Clarify a requirement, make a bounded change, and verify the result."
+    },
+    {
+      "key": "coding",
+      "path": "curriculum/01-code/02-data-structures-algorithms",
+      "title": "Data structures and algorithms",
+      "outcome": "Choose a representation, explain its invariant, and test time and space bounds."
+    },
+    {
+      "key": "backend",
+      "path": "curriculum/02-applications/01-backend",
+      "title": "Backend and APIs",
+      "outcome": "Trace a request, define its contract, and coordinate bounded work."
+    },
+    {
+      "key": "data",
+      "path": "curriculum/02-applications/02-databases",
+      "title": "Databases and transactions",
+      "outcome": "Model authoritative data, explain a query plan, and protect concurrent writes."
+    },
+    {
+      "key": "frontend",
+      "path": "curriculum/02-applications/03-frontend",
+      "title": "Frontend and full-stack integration",
+      "outcome": "Preserve user intent across browser, API, and persisted state."
+    },
+    {
+      "key": "testing",
+      "path": "curriculum/02-applications/04-testing",
+      "title": "Testing, debugging, and code review",
+      "outcome": "Reproduce a defect, build a check that catches it, and assess a proposed repair."
+    },
+    {
+      "key": "security",
+      "path": "curriculum/02-applications/05-security",
+      "title": "Security",
+      "outcome": "Enforce identity, ownership, and trust boundaries beyond the interface."
+    },
+    {
+      "key": "design",
+      "path": "curriculum/03-production/01-system-design",
+      "title": "System design",
+      "outcome": "Turn requirements and workload estimates into an explainable architecture."
+    },
+    {
+      "key": "delivery",
+      "path": "curriculum/03-production/02-delivery",
+      "title": "CI/CD and progressive delivery",
+      "outcome": "Build once, verify compatibility, and release a change with stop conditions."
+    },
+    {
+      "key": "infra",
+      "path": "curriculum/03-production/03-infrastructure",
+      "title": "Infrastructure as code and AWS",
+      "outcome": "Map a mechanism to explicit infrastructure, permissions, and operational limits."
+    },
+    {
+      "key": "observability",
+      "path": "curriculum/03-production/04-observability",
+      "title": "Observability",
+      "outcome": "Use logs, metrics, and traces to answer a concrete system question."
+    },
+    {
+      "key": "reliability",
+      "path": "curriculum/03-production/05-reliability",
+      "title": "Reliability and incident response",
+      "outcome": "Budget failures, bound overload, and recover from evidence."
+    },
+    {
+      "key": "scale",
+      "path": "curriculum/04-scale-and-evolution/01-data-at-scale",
+      "title": "Data at scale",
+      "outcome": "Reason about caches, replication, partitioning, streams, and coordination scope."
+    },
+    {
+      "key": "performance",
+      "path": "curriculum/04-scale-and-evolution/02-performance-cost",
+      "title": "Performance and cost",
+      "outcome": "Measure the bottleneck and defend an improvement with resource and cost evidence."
+    },
+    {
+      "key": "ai",
+      "path": "curriculum/04-scale-and-evolution/03-ai-systems",
+      "title": "AI systems",
+      "outcome": "Evaluate an AI feature, protect permissions, and enforce quality and task budgets."
+    },
+    {
+      "key": "migration",
+      "path": "curriculum/04-scale-and-evolution/04-migrations",
+      "title": "Migrations and recovery",
+      "outcome": "Move live data and clients through compatibility, reconciliation, rollback, and retirement."
+    },
+    {
+      "key": "decisions",
+      "path": "curriculum/04-scale-and-evolution/05-technical-decisions",
+      "title": "Technical decisions and engineering effectiveness",
+      "outcome": "Make options, ownership, adoption, and cross-team decisions explicit."
+    }
+  ],
+  "files": [
+    {
+      "source": ".gitignore",
+      "destination": ".gitignore",
+      "source_sha256": "5bcdb3bcfc2322eab45bb3f7b884dc20a8616ec163747a7d0392020c1053bd1c",
+      "kind": "content"
+    },
+    {
+      "source": "LICENSE",
+      "destination": "LICENSE",
+      "source_sha256": "32facf4b063064aafffecb920c896c0f06d6e994a976510ddde5a6ad01303b54",
+      "kind": "content"
+    },
+    {
+      "source": "README.md",
+      "destination": "README.md",
+      "source_sha256": "9af1a696a0fbbec79b68712e72d7fef779fc2843c2b7357f041b188039c71469",
+      "kind": "navigation"
+    },
+    {
+      "source": "acts/README.md",
+      "destination": "indexes/projects.md",
+      "source_sha256": "4b901ddc376530623fc97fe9c3d67122b7044c91c4a7891912cf6c546824093b",
+      "kind": "navigation"
+    },
+    {
+      "source": "acts/act-1-junior/README.md",
+      "destination": "indexes/projects.md",
+      "source_sha256": "4f19ed5335b7837587fd42ae9c2220ee4e9636cccb06b002a886a7e598e2257e",
+      "kind": "navigation"
+    },
+    {
+      "source": "acts/act-1-junior/projects/01-a-shared-reading-list.md",
+      "destination": "curriculum/02-applications/03-frontend/projects/a-shared-reading-list.md",
+      "source_sha256": "000e157c97c0d6096adafe5c34032587256cb38c55e5ccfb2a45d1d1b7911aec",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-1-junior/projects/02-a-receipt-tracker.md",
+      "destination": "curriculum/02-applications/02-databases/projects/a-receipt-tracker.md",
+      "source_sha256": "cc441f7f5c37417ba24dc5c1507915becac200faa692312db47f28d36984d73b",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-1-junior/projects/03-a-shift-schedule.md",
+      "destination": "curriculum/02-applications/05-security/projects/a-shift-schedule.md",
+      "source_sha256": "21cf699b7ae45440b99f99a9d99edd8c31ec51299b91e847c637a2afe210352e",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-1-junior/projects/04-a-link-rot-watcher.md",
+      "destination": "curriculum/02-applications/01-backend/projects/a-link-rot-watcher.md",
+      "source_sha256": "09b1558134322f5c3a0de4d2c1403aeb35319f3ee5acb4287eb7b0fb001bb233",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-1-junior/projects/05-a-public-form.md",
+      "destination": "curriculum/02-applications/01-backend/projects/a-public-form.md",
+      "source_sha256": "f52368f6d44c19f0b4ce152bb25e60b8030afad6aec93d0cf0426b9919a1aa2c",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-2-senior/README.md",
+      "destination": "indexes/projects.md",
+      "source_sha256": "5f9ba5228b4ba49f6f6648588a272c36bc6b98ddf340c846e0199eb9f1f792b3",
+      "kind": "navigation"
+    },
+    {
+      "source": "acts/act-2-senior/projects/01-degrade-do-not-stop.md",
+      "destination": "curriculum/03-production/05-reliability/projects/degrade-do-not-stop.md",
+      "source_sha256": "50b342b8f9f44899a99b4ffa3916cf7b6b10f8aba5fc2f90b771b123cb8994e3",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-2-senior/projects/02-twenty-deploys-a-day.md",
+      "destination": "curriculum/03-production/02-delivery/projects/twenty-deploys-a-day.md",
+      "source_sha256": "b416b513c229afdd1c25abe0ae3dfbcbff1c9d7fc5e8563e546c27439cec1601",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-2-senior/projects/03-debuggable-at-three-in-the-morning.md",
+      "destination": "curriculum/03-production/04-observability/projects/debuggable-at-three-in-the-morning.md",
+      "source_sha256": "2e8b1b339fbe4aff3e7b99b1dd136c03d92a796ba3bf658e1bbb1e7c34cc55a5",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-2-senior/projects/04-the-flood.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/projects/the-flood.md",
+      "source_sha256": "a30d9cb9e0d88dd67fc707483be8634f9bae5b500a3a9c3a80ce8df209199c42",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-2-senior/projects/05-an-ai-feature-you-can-defend.md",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/projects/an-ai-feature-you-can-defend.md",
+      "source_sha256": "a63000f1d6dfb850b0d75494fcf96cc5487459de83f684cd299337aa01e2ad99",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-3-staff/README.md",
+      "destination": "indexes/projects.md",
+      "source_sha256": "aa0754a58cb7fe7e4897b6457e7751ce6d28901131f6c5c35258468614ef4e32",
+      "kind": "navigation"
+    },
+    {
+      "source": "acts/act-3-staff/projects/01-the-migration-you-actually-finish.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/projects/the-migration-you-actually-finish.md",
+      "source_sha256": "93019ee3733c0a5bf17b1de16f2eb95c9b484f339be562e775987246dacb85d4",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-3-staff/projects/02-the-strategy-you-found-rather-than-invented.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-strategy-you-found-rather-than-invented.md",
+      "source_sha256": "cc5cdcbfb11cc6a20437c78c9e293e2fc48a0ec9bd285141b983f517c7c35e7e",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-3-staff/projects/03-the-incident-you-caused-on-purpose.md",
+      "destination": "curriculum/03-production/05-reliability/projects/the-incident-you-caused-on-purpose.md",
+      "source_sha256": "d65bc1f2a62f44dff742ea3cdb72f8f0999adca306898cb649689eea0175a025",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-3-staff/projects/04-the-paved-road.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-paved-road.md",
+      "source_sha256": "b5a08cac557654a52876a2fbae3e0409f0b2aff11945edb4aa5678cb43a43a56",
+      "kind": "content"
+    },
+    {
+      "source": "acts/act-3-staff/projects/05-the-thing-you-decided-not-to-build.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-thing-you-decided-not-to-build.md",
+      "source_sha256": "fb2101fdb448be192030c161b5df035a66b141165216b3d1a1d4ab5e4471d1ac",
+      "kind": "content"
+    },
+    {
+      "source": "assets/diagrams/act1-shape.svg",
+      "destination": "assets/diagrams/act1-shape.svg",
+      "source_sha256": "9e8ef75485fb9212379dcb8869962a4d613272faabfc893fc8fdee6b9a6210bf",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/act2-shape.svg",
+      "destination": "assets/diagrams/act2-shape.svg",
+      "source_sha256": "43981b803daf7579abf180e0108b11a6ba867c2d0e3467dafbc3f2288ec55ab7",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/authz-failure-modes.svg",
+      "destination": "assets/diagrams/authz-failure-modes.svg",
+      "source_sha256": "d06d549ac945bf4191e2fe3933e9fe4bcf68a4c35b169062baf6450684f40cb8",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/average-hides-it.svg",
+      "destination": "assets/diagrams/average-hides-it.svg",
+      "source_sha256": "2dac2c5545f40e32f6184f42a6549c1f99ce6024b7951c614d58dfd9b01408a3",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/batch-size.svg",
+      "destination": "assets/diagrams/batch-size.svg",
+      "source_sha256": "7e4f459318a0ddff2b3de4cef7b40c610a7ff922b74106dccea80fbb7c88fb5d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/build-once-promote.svg",
+      "destination": "assets/diagrams/build-once-promote.svg",
+      "source_sha256": "f0226fc57032f85308eb4f98ea3214a7b56536cd811cd309a3bc5bb6c82c9018",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/burn-rate.svg",
+      "destination": "assets/diagrams/burn-rate.svg",
+      "source_sha256": "8ca5154d5472eb373bb98a0f9da1fcc1317833e544dd80e077d40e54dfc2875a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/cardinality-explosion.svg",
+      "destination": "assets/diagrams/cardinality-explosion.svg",
+      "source_sha256": "58b2922b7113f884c814fec04c16768bc5b7695fb5d0ebcf5b11abdc1de7faa7",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/change-loop.svg",
+      "destination": "assets/diagrams/change-loop.svg",
+      "source_sha256": "d3af71ae09cb2f65d17d257218b57b708159d4a832cafa2f8dc8897bcfdd704d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/deploy-vs-release.svg",
+      "destination": "assets/diagrams/deploy-vs-release.svg",
+      "source_sha256": "cea6f20cac31093a7be279aab1fd8c12e46652c12687eb77a54e780440fa7276",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/design-doc-weight.svg",
+      "destination": "assets/diagrams/design-doc-weight.svg",
+      "source_sha256": "dd6850a78861927a50703bb4bf805e33f60202a38f7e3a026d2fae105c623cf5",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/flake-grid.svg",
+      "destination": "assets/diagrams/flake-grid.svg",
+      "source_sha256": "54ff6c038f3642914a384f1c97d57e3f031ee9221419d38a5eabfcc66e7f7728",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/incident-timeline.svg",
+      "destination": "assets/diagrams/incident-timeline.svg",
+      "source_sha256": "6f1f4eced8d6956bb8d0d88995fc93f593f4c70cec37705d25c9b92cc49d380a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/index-cost.svg",
+      "destination": "assets/diagrams/index-cost.svg",
+      "source_sha256": "bccf29ee445fb83b4253ec272e39c60f733126d7cbae7a5d7d9f306a8488d3e4",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/lethal-trifecta.svg",
+      "destination": "assets/diagrams/lethal-trifecta.svg",
+      "source_sha256": "a01f1c87a17137cf508726328639d726e48b66651b70ca6a1a529691af3ff359",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/leverage-curve.svg",
+      "destination": "assets/diagrams/leverage-curve.svg",
+      "source_sha256": "6ef937c8066da2203e08a31cb2c332364c7278c93c8177bf486a473f90545ef6",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/migration-phases.svg",
+      "destination": "assets/diagrams/migration-phases.svg",
+      "source_sha256": "e00a6f9e605d4470e69a649ecc52aab22e1c03186cdf12bbf42e819a4e223192",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/request-lifecycle.svg",
+      "destination": "assets/diagrams/request-lifecycle.svg",
+      "source_sha256": "a1215dece65fd3a8d3cd6c313837919741acf5f7bd3f6385c7cb368f1357f44a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/retry-amplification.svg",
+      "destination": "assets/diagrams/retry-amplification.svg",
+      "source_sha256": "69da7d05f6b5362e9ca46c981e4dbd8f19d156e3fbe3139c091dd455b2867054",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/scaling-order.svg",
+      "destination": "assets/diagrams/scaling-order.svg",
+      "source_sha256": "781290233d78b1be33c5e624e30c4cfba3e220126fcf5560b3cf4c11dd1d3d4f",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/spec-fidelity.svg",
+      "destination": "assets/diagrams/spec-fidelity.svg",
+      "source_sha256": "707cc1f9aa347d594da60b1066774b8e080a3c5cd6ed46fa3cc8901d5f947f77",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/staff-archetypes.svg",
+      "destination": "assets/diagrams/staff-archetypes.svg",
+      "source_sha256": "56d99e093d1383ff17d8c3cf69eff1272b60a56bd5bc9187352896daed62b670",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/strategy-ladder.svg",
+      "destination": "assets/diagrams/strategy-ladder.svg",
+      "source_sha256": "76ae06e3aaa2f5b8c359ca14d16bcf808ef6d68766029ea5a2bb7491e5272507",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/test-tradeoff.svg",
+      "destination": "assets/diagrams/test-tradeoff.svg",
+      "source_sha256": "d52936409f8c290357cd2c8753861889ed4b6fd7f709a05ebbea95fe0483ab99",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/timeout-budget.svg",
+      "destination": "assets/diagrams/timeout-budget.svg",
+      "source_sha256": "2579135cc9f6339feb7efeb8c3708dd85368244134787954e7bcd8bcd54f276b",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/two-designs.svg",
+      "destination": "assets/diagrams/two-designs.svg",
+      "source_sha256": "2c1a4f9556b730f8cdc1b8c8cb0ca4b0425b1f461ce32e3d1c3ac887828ba3d2",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/verify-bottleneck.svg",
+      "destination": "assets/diagrams/verify-bottleneck.svg",
+      "source_sha256": "c53c8471d6e0c9ea5a627e2519deab205916ccfc1b89888b3f9db5b1164498db",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/diagrams/where-state-lives.svg",
+      "destination": "assets/diagrams/where-state-lives.svg",
+      "source_sha256": "e9a47677d9a436c6d19ac3f6218c260b4e2903fc78466104f2b15f1bfaa52517",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/README.md",
+      "destination": "assets/learning/README.md",
+      "source_sha256": "1d38cc4a287675b1bd91f6cc582280d1df9c63115e4c669d43acaf10b0046c82",
+      "kind": "content"
+    },
+    {
+      "source": "assets/learning/backpressure-still.svg",
+      "destination": "assets/learning/backpressure-still.svg",
+      "source_sha256": "18b6f7d6bbbba1a95e57ac210d98abfc8e659bfbb27e3b2eb709272d9cb9ba0d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/backpressure.svg",
+      "destination": "assets/learning/backpressure.svg",
+      "source_sha256": "e63c978b20b7e71df6309fa495000795ba6e99180eebbf80576f5d7483e87759",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/backtracking-still.svg",
+      "destination": "assets/learning/backtracking-still.svg",
+      "source_sha256": "ac7455d2ccad577ea84673d3e9412c4d06e1e67dac738b3300bbdedca8ff106b",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/backtracking.svg",
+      "destination": "assets/learning/backtracking.svg",
+      "source_sha256": "56014d9adabe84e8e8b8ca784a3640329f175d5027244dac6539c7377fb30ac2",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/bfs-frontier-still.svg",
+      "destination": "assets/learning/bfs-frontier-still.svg",
+      "source_sha256": "7459ea5df97594a3a9c8d35e8a160767fd0bf9c9cf8f8f08aa33a8374972b21a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/bfs-frontier.svg",
+      "destination": "assets/learning/bfs-frontier.svg",
+      "source_sha256": "e7807898131da7f7be35eb0550cb134516f1a232b0f6ab018086fae0090e8481",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/binary-halving-still.svg",
+      "destination": "assets/learning/binary-halving-still.svg",
+      "source_sha256": "7e273bf3f3914a3e824b7f2aadd3cc4fd997dedf987a26f7b71e3d51b8b7843c",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/binary-halving.svg",
+      "destination": "assets/learning/binary-halving.svg",
+      "source_sha256": "e0dfab9548a60a68e63167c4c28e39c5613c233f52d90c733b385de7315628db",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/browser-race-still.svg",
+      "destination": "assets/learning/browser-race-still.svg",
+      "source_sha256": "267906d07b88c3eb3a81ee9d8da78e23c7a0e5a5dd93a291828ba96bb9f39dc9",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/browser-race.svg",
+      "destination": "assets/learning/browser-race.svg",
+      "source_sha256": "baeeafb67438aaf3b3901f40ca53c34679b6800181accd4b7ec9f90e5591b6a0",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/bulkhead-still.svg",
+      "destination": "assets/learning/bulkhead-still.svg",
+      "source_sha256": "fc1dce58f2b564dff8ab14015a0cec6933c60f2b96fca979163f3e969098e09c",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/bulkhead.svg",
+      "destination": "assets/learning/bulkhead.svg",
+      "source_sha256": "051ef1570b91d58d1cd97ffc27f99f381e2c20533a95db442358171196d960a3",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/cache-coalescing-still.svg",
+      "destination": "assets/learning/cache-coalescing-still.svg",
+      "source_sha256": "323c66d261f3fb70228554788832a31f1b04169210d8b2916e9bf808762040cf",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/cache-coalescing.svg",
+      "destination": "assets/learning/cache-coalescing.svg",
+      "source_sha256": "8acce20e81a8e71a703425b00d86a06659f449965f6c05c281f9a4e323f1b633",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/cache-expiry-still.svg",
+      "destination": "assets/learning/cache-expiry-still.svg",
+      "source_sha256": "9f77d5e964d28d011dbb35acc7cb344b298bbc813fc4b2d9b7606dc24669253c",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/cache-expiry.svg",
+      "destination": "assets/learning/cache-expiry.svg",
+      "source_sha256": "166a3e6fcb93006494ce3159f3cb14e65c4091da612bc8fb1154a895b78e2bea",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/circuit-breaker-still.svg",
+      "destination": "assets/learning/circuit-breaker-still.svg",
+      "source_sha256": "8dbe765ba13f900054a267ad69006c99e02c4b89e2eef6e5ad040defc4075af6",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/circuit-breaker.svg",
+      "destination": "assets/learning/circuit-breaker.svg",
+      "source_sha256": "ea81c107cd79a8f7b01f8871d777271cc0f5fa5751898bf6e9ad48990a9b4e32",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/conditional-result-still.svg",
+      "destination": "assets/learning/conditional-result-still.svg",
+      "source_sha256": "7ae2735d4b8378db2792a3779c406f2ed519a955091339caac5ca85677d4d44c",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/conditional-result.svg",
+      "destination": "assets/learning/conditional-result.svg",
+      "source_sha256": "c5238eb1954d5437bfbd1cb1da9a97edbcdecc1c7c6ad8ba78a7bedc4ada71b8",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/config-cohorts-still.svg",
+      "destination": "assets/learning/config-cohorts-still.svg",
+      "source_sha256": "8121fdddd946b6f77f1bf3bfa0c24e12a80b1bfde1463ea74556818af73d4185",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/config-cohorts.svg",
+      "destination": "assets/learning/config-cohorts.svg",
+      "source_sha256": "80cc751a87094d36d671714239e2a7dd71b5d98040d0590e443fbba34f8394b6",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/connection-pool-still.svg",
+      "destination": "assets/learning/connection-pool-still.svg",
+      "source_sha256": "bc265e639ae2669665458eac0ca00941d546f5f087a5b777a8bf874670619978",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/connection-pool.svg",
+      "destination": "assets/learning/connection-pool.svg",
+      "source_sha256": "d90f14bf2bde54a0d74efab17e39698d4ce5454c1053f22a08e09a6b8fae8da3",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/deadline-budget-still.svg",
+      "destination": "assets/learning/deadline-budget-still.svg",
+      "source_sha256": "0c0d2ce978ccc0ffcdeaf1e171f482ff66d3c27eca2fdaea6e7e94b6d1defba8",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/deadline-budget.svg",
+      "destination": "assets/learning/deadline-budget.svg",
+      "source_sha256": "e2478a03fd9fa91356c58030438f9b741c5dad65b664a2fca737aaee0ea42444",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/direct-upload-still.svg",
+      "destination": "assets/learning/direct-upload-still.svg",
+      "source_sha256": "bc1c537799f6db18b364aad2fa5c7aa20aabe88a9a58c7eb10439df99dbda387",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/direct-upload.svg",
+      "destination": "assets/learning/direct-upload.svg",
+      "source_sha256": "abdc6de018617c3cfe2fbaf2aa2190c68ddce5ebd643b4cf01629f09e218141b",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/dp-choice-still.svg",
+      "destination": "assets/learning/dp-choice-still.svg",
+      "source_sha256": "22629aa567e7c486bb736062570f4fd97cbce0e94767855b9fa5a75ec9341521",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/dp-choice.svg",
+      "destination": "assets/learning/dp-choice.svg",
+      "source_sha256": "d6f0e4ee95f03a41ec80a83b7ab7579a020436b51e082ccdb164809579265407",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/dp-edit-frontier-still.svg",
+      "destination": "assets/learning/dp-edit-frontier-still.svg",
+      "source_sha256": "52fec93a4312182f11bdc9810808bbc7f020656f864763866d8677dcc8ed6ad0",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/dp-edit-frontier.svg",
+      "destination": "assets/learning/dp-edit-frontier.svg",
+      "source_sha256": "91871c4145c20c00388f56ac6493188c6999359caa70f5a074c070a801d15f10",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/heap-sift-still.svg",
+      "destination": "assets/learning/heap-sift-still.svg",
+      "source_sha256": "69bbe64a570a6f0e2e0578a3a1872f49e817325fce7cd4248b5c6e2c043b3147",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/heap-sift.svg",
+      "destination": "assets/learning/heap-sift.svg",
+      "source_sha256": "10e836bc2521e0de6aeeb08864dfb7f18aa7767c6cf951e8b6be84251be5bd31",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/index-seek-still.svg",
+      "destination": "assets/learning/index-seek-still.svg",
+      "source_sha256": "c7023796f28a6fca94f963a7768e38754d443e11f52bc8ed41903a525f5614d9",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/index-seek.svg",
+      "destination": "assets/learning/index-seek.svg",
+      "source_sha256": "d881e7a496350565e053de879491abf4fb084c3edd06124e435607fdad37b68f",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/io-waterfall-still.svg",
+      "destination": "assets/learning/io-waterfall-still.svg",
+      "source_sha256": "816e755581a30d485a07f1bb16a55bbb4ac8d8fa623b24112d6e0ccbde0fef5b",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/io-waterfall.svg",
+      "destination": "assets/learning/io-waterfall.svg",
+      "source_sha256": "47b2a60dfa0ef17c86220ca9417cc8a4dc6285b41d6e3aa592bd6063864bfa00",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/linked-pointer-reversal-still.svg",
+      "destination": "assets/learning/linked-pointer-reversal-still.svg",
+      "source_sha256": "d7f5f3905fc4847d4141563fe663ee62f54673523da8231b2c82e7cef905602f",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/linked-pointer-reversal.svg",
+      "destination": "assets/learning/linked-pointer-reversal.svg",
+      "source_sha256": "f8131e741ee7442a3098b97f1c2bdc0c20fbb7c718f3f074303c4fb6f57283d7",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/lru-order-still.svg",
+      "destination": "assets/learning/lru-order-still.svg",
+      "source_sha256": "3fa7e6afa447def06abd2870449a7c9b95dfcc6cc0871b60b9d7f3061792ab27",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/lru-order.svg",
+      "destination": "assets/learning/lru-order.svg",
+      "source_sha256": "a1e3cf8ef452e6b1fb7b4f8be89ceb68d256fa51e933056680620c69d047cd7a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/manifest.json",
+      "destination": "assets/learning/manifest.json",
+      "source_sha256": "7d4d0a90d31969169d9bec4773fcb6ac6950233168a1b5f9d5d2546533312505",
+      "kind": "content"
+    },
+    {
+      "source": "assets/learning/map-lookup-still.svg",
+      "destination": "assets/learning/map-lookup-still.svg",
+      "source_sha256": "853e7ef2e9c0a523e2fb25f47926b79b61e59fbab8585d9e89c301fa1738c005",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/map-lookup.svg",
+      "destination": "assets/learning/map-lookup.svg",
+      "source_sha256": "5a3f1112fc67c8df4e484487387100940d2418fda9a4052dd5bfff3925598aaf",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/merge-intervals-still.svg",
+      "destination": "assets/learning/merge-intervals-still.svg",
+      "source_sha256": "a6ce54a3e5f73318a4355dd63c0ffbc56f250e6d2a23b496166ae9f608dccf0d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/merge-intervals.svg",
+      "destination": "assets/learning/merge-intervals.svg",
+      "source_sha256": "face20e4d2424a878f1fdf1b710f4f67b94e0bb2a4fb83105675110b37597ae4",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/monotonic-stack-still.svg",
+      "destination": "assets/learning/monotonic-stack-still.svg",
+      "source_sha256": "1cdf72db7f62146b89f6c3e33adad11b32985b4abfdb4a8cfcab9b83ea6f3f71",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/monotonic-stack.svg",
+      "destination": "assets/learning/monotonic-stack.svg",
+      "source_sha256": "25962124cd677e074b68087139e206d5a4a2cb04d3228e1df4331fa1edc1fd09",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/parser-precedence-still.svg",
+      "destination": "assets/learning/parser-precedence-still.svg",
+      "source_sha256": "100509cf095be118ef6704d2f62152f42fef9d1176a13b419a48117047134574",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/parser-precedence.svg",
+      "destination": "assets/learning/parser-precedence.svg",
+      "source_sha256": "1190ce77952c68ce2ca0bc9e4dfcde86dc8e70773347ebd4b2faa9603344a9f1",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/partition-skew-still.svg",
+      "destination": "assets/learning/partition-skew-still.svg",
+      "source_sha256": "a24bd938189f415e044fbba704287f895946fd4333a8c0b012975beba3a51f6f",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/partition-skew.svg",
+      "destination": "assets/learning/partition-skew.svg",
+      "source_sha256": "e90eebb7f3e05e6168ad683127fa2c461b18bf791e394def9de64a70a20784ff",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/prefix-counts-still.svg",
+      "destination": "assets/learning/prefix-counts-still.svg",
+      "source_sha256": "92c5c5883b47ddc18d9bc10e4899e4cc47579e1a5729ed4c8f5b1ef1ea0b363a",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/prefix-counts.svg",
+      "destination": "assets/learning/prefix-counts.svg",
+      "source_sha256": "56a56d8d44bde25494359c83d26b6f352a0e3ef5cf36873cbc0b57a87477eca5",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/recursion-return-state-still.svg",
+      "destination": "assets/learning/recursion-return-state-still.svg",
+      "source_sha256": "1c33d0baaa8a473e6e53a19344f6e8c39e6d0f8c7165099db91f731c42911afe",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/recursion-return-state.svg",
+      "destination": "assets/learning/recursion-return-state.svg",
+      "source_sha256": "7c0cc408d3b1fd6cc19df8a34fe3d3414a88390820d506866f4c66ff988ea39c",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/replication-lag-still.svg",
+      "destination": "assets/learning/replication-lag-still.svg",
+      "source_sha256": "ba4b25d85eb139eeab496c58229934191f16802bca1bf6a3a916e4eebf708b55",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/replication-lag.svg",
+      "destination": "assets/learning/replication-lag.svg",
+      "source_sha256": "42557842d902abd25fd68a7b7208157b42621e67a800537d61afa9fc602768b6",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/retry-tree-still.svg",
+      "destination": "assets/learning/retry-tree-still.svg",
+      "source_sha256": "018785f22877fc6dc6c8cecbd5075c10c75a3588bbe836caa0058b0ceadfb0c6",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/retry-tree.svg",
+      "destination": "assets/learning/retry-tree.svg",
+      "source_sha256": "95f742e0d821e0963f88f2ce2b8efa44b368f4b3377565ce85ab6d6432b55eb0",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/rollout-capacity-still.svg",
+      "destination": "assets/learning/rollout-capacity-still.svg",
+      "source_sha256": "f449ff8d478b75548d67e13117d66af140b0b443e3bc4af3dd285916ed1295a2",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/rollout-capacity.svg",
+      "destination": "assets/learning/rollout-capacity.svg",
+      "source_sha256": "b4fd157e594de151b401e6e57aa7157b54e001920eebc4c5fb9b4a2f074042c7",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/token-bucket-still.svg",
+      "destination": "assets/learning/token-bucket-still.svg",
+      "source_sha256": "c1a1b448cab8b46a829cd606bd2fe27687214b024e56b44e490cbd5291096d4e",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/token-bucket.svg",
+      "destination": "assets/learning/token-bucket.svg",
+      "source_sha256": "c49529da0e90cbf149351bdb2c236b2b55ec2508d56f8079b29970aced4eb5be",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/traffic-shift-still.svg",
+      "destination": "assets/learning/traffic-shift-still.svg",
+      "source_sha256": "1b8e2df1ce90a135bbd4e7c8005440e9deec430282afe3b7c1e121f68846a69b",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/traffic-shift.svg",
+      "destination": "assets/learning/traffic-shift.svg",
+      "source_sha256": "657b2d1918cf891a5963ac2a1ee00b5eb411a3b3cb2efb557c68946097c4c830",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/transaction-outbox-still.svg",
+      "destination": "assets/learning/transaction-outbox-still.svg",
+      "source_sha256": "fa41e696a885dffa88952a5010e13e98e2f0d604c7e518edb18cc0303b6d33fd",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/transaction-outbox.svg",
+      "destination": "assets/learning/transaction-outbox.svg",
+      "source_sha256": "adf1634071cd280cd0411b66e74626f4a0d66e37364a28c95e82ff7805dbc816",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/trie-prefix-still.svg",
+      "destination": "assets/learning/trie-prefix-still.svg",
+      "source_sha256": "0598b6e5e7e5d843799f9419672295c50e44fa4a1d5697ec7615e236e99000c9",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/trie-prefix.svg",
+      "destination": "assets/learning/trie-prefix.svg",
+      "source_sha256": "b620565c2f6ccfd2edfa8dea9fd306a66e42b6492a217db0df703e3f625ed375",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/version-projection-still.svg",
+      "destination": "assets/learning/version-projection-still.svg",
+      "source_sha256": "fd57f06bf3fb6b0e8d52db2ad4b7dfdf72909f202f8fcbded8463d75d767a8d0",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/version-projection.svg",
+      "destination": "assets/learning/version-projection.svg",
+      "source_sha256": "06f009990ff71276b4f771a3ccade0406c99d8e607ddf2d089e89119dd8d9812",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/window-moves-still.svg",
+      "destination": "assets/learning/window-moves-still.svg",
+      "source_sha256": "9649e977d3f2d1a48fa5aff0db70446cd9ea7effcb48e0e1e19ab7a13824cc8d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/window-moves.svg",
+      "destination": "assets/learning/window-moves.svg",
+      "source_sha256": "75a4f12cf55a838421d7143e9c48b559a03c5c4aa1315bbad69025737574be55",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/worker-slots-still.svg",
+      "destination": "assets/learning/worker-slots-still.svg",
+      "source_sha256": "9b0d1571b9140999eee00e4e2136051f88bcc7b6fadb1afbcd04ecf0e01d75c2",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/learning/worker-slots.svg",
+      "destination": "assets/learning/worker-slots.svg",
+      "source_sha256": "14bacde7642ea85419513abbd56424591ac74c0f0747a1168d614b9faf81496d",
+      "kind": "visual"
+    },
+    {
+      "source": "assets/the-arc.svg",
+      "destination": "assets/the-arc.svg",
+      "source_sha256": "2ff931d335ab3ce6d49aafa3d372fe928590fd4a3a751846cb2f20d41dbc9bc1",
+      "kind": "visual"
+    },
+    {
+      "source": "docs/AUDIT-IMPLEMENTATION.md",
+      "destination": "docs/AUDIT-IMPLEMENTATION.md",
+      "source_sha256": "438de3f84df15b4e69c5467dbe23e38c01bfd5792ddede38d165a8c6a95a349e",
+      "kind": "content"
+    },
+    {
+      "source": "docs/HOW-TO-USE.md",
+      "destination": "docs/HOW-TO-USE.md",
+      "source_sha256": "d46ebcd20ec3b7b0969f59b69827578cac9d6c99c7c3c835df7e6a11d83a8a16",
+      "kind": "content"
+    },
+    {
+      "source": "docs/LEARNING-EXPERIENCE.md",
+      "destination": "docs/LEARNING-EXPERIENCE.md",
+      "source_sha256": "cc7a3a0148abcbc2099ee1e29b0df7b9742c8a1a7c9dceccaf77e4a111b68c8f",
+      "kind": "content"
+    },
+    {
+      "source": "docs/PROJECT-SPEC.md",
+      "destination": "docs/PROJECT-SPEC.md",
+      "source_sha256": "2e8e69beb4eade929d41b130ec1c47a2642fd1998220aa7913435f598206d844",
+      "kind": "content"
+    },
+    {
+      "source": "docs/STYLE.md",
+      "destination": "docs/STYLE.md",
+      "source_sha256": "e2da79bc951f7aebf9701004cd53050716c9c706d74b286299ddb1c0cfdcf97e",
+      "kind": "content"
+    },
+    {
+      "source": "docs/check-links.py",
+      "destination": "docs/check-links.py",
+      "source_sha256": "91e646e4814499e6b5f3207ea1be1a50a37556de272aea93e090c5073c84232a",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/check_claims.py",
+      "destination": "docs/research/check_claims.py",
+      "source_sha256": "5641ca56872c0152f19bd0de8cef2d405b5b6dbad614c3bce7cd62d2b82de03a",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/claim-ledger.md",
+      "destination": "docs/research/claim-ledger.md",
+      "source_sha256": "c119f477e146123ca746ad3044221d82e98608f1cfb6950adc3cfc4859a6b0f4",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/guide-research-ai-features.md",
+      "destination": "docs/research/guide-research-ai-features.md",
+      "source_sha256": "b4dcbd592291e5d28317f2ce6a5b8b349866a3fdfbcdb31ec1f994a2e9920055",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/junior-foundation-research-2026.md",
+      "destination": "docs/research/junior-foundation-research-2026.md",
+      "source_sha256": "5129940c83910ecbe91e75a23fe5b4b5ad039b61a38db330fa24968ca241e2ee",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/pedagogy-research-for-engineering-guide.md",
+      "destination": "docs/research/pedagogy-research-for-engineering-guide.md",
+      "source_sha256": "41e9430d53db192c517b30a6ffb0101ffc44ddfd042f7460000d47f9d3eda9c8",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/senior-craft-2026.md",
+      "destination": "docs/research/senior-craft-2026.md",
+      "source_sha256": "3f0575a72b3ebe3e1c04d4bc91b9657aac1afb8c037e61539a357d9e7bd8035e",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/senior-craft-working-notes.md",
+      "destination": "docs/research/senior-craft-working-notes.md",
+      "source_sha256": "a4d3d269e41dcbd3b173587c65dc4577c13737b9d592fced7fd5e539bf36df89",
+      "kind": "content"
+    },
+    {
+      "source": "docs/research/staff-engineering-2026.md",
+      "destination": "docs/research/staff-engineering-2026.md",
+      "source_sha256": "ee1bd89fc4f0031da76d6a80b537becafece63df1a2476cd225a42a61d483792",
+      "kind": "content"
+    },
+    {
+      "source": "docs/reviews/2026-09-22-implementation-review.md",
+      "destination": "docs/reviews/2026-09-22-implementation-review.md",
+      "source_sha256": "0d13cb78dfbe66d4d04e86a2c613fc4d44954c588b8d25b9c225d8d7d613e803",
+      "kind": "content"
+    },
+    {
+      "source": "paths/README.md",
+      "destination": "curriculum/README.md",
+      "source_sha256": "b59e4309934b02a7528795bb3263dfd93c7223762382d625357dabc0f20f1710",
+      "kind": "navigation"
+    },
+    {
+      "source": "paths/ai-engineering/README.md",
+      "destination": "curriculum/01-code/01-problem-solving/ai-assisted-practice.md",
+      "source_sha256": "90c74909845ef1ad8f98671fb6effd9fc36053ebd7f335273aa8d8c32b3cc16f",
+      "kind": "navigation"
+    },
+    {
+      "source": "paths/interviews/README.md",
+      "destination": "practice/interview-guide.md",
+      "source_sha256": "d4b4b3f5a1d19b25f0439b8261f43be131a10c9cae7974dedbfab106eea67f74",
+      "kind": "navigation"
+    },
+    {
+      "source": "paths/interviews/TEACHING.md",
+      "destination": "docs/INTERVIEW-TEACHING.md",
+      "source_sha256": "b53d03d7506c6835aaa8489097760e448dbd9fe486ad919019070c075dca3f25",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/VALIDATION.md",
+      "destination": "docs/VALIDATION.md",
+      "source_sha256": "c840b23297069c032a0ff3d39cd11e27360774c4efd2acba8640490980cc3c3f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/concepts.md",
+      "destination": "curriculum/03-production/01-system-design/mechanism-reference.md",
+      "source_sha256": "db7e98e0b63eefca3c3b9c8fcdc840b7aae098d28817141a3eedc4cdd6a1acde",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs.md",
+      "destination": "indexes/system-designs.md",
+      "source_sha256": "86890eef8bc40319334eea9c2dbe36b55633750f499c5d07c01e1341044b8235",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs/bookmark-service.md",
+      "destination": "curriculum/03-production/01-system-design/problems/bookmark-service.md",
+      "source_sha256": "c950167a95916c08931f6819b7c9f13641230f33c03f01375397922ce77448f7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs/file-synchronization.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md",
+      "source_sha256": "07523c3a72077d58c68bfb7162222e1d3703d4be1f70415cf320ae0cf1f69855",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs/multi-tenant-migration.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/problems/multi-tenant-migration.md",
+      "source_sha256": "f88a99a3c9e835432594fc69ba80ea542421965482b9c548667e59d1e67d7789",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs/notification-platform.md",
+      "destination": "curriculum/03-production/01-system-design/problems/notification-platform.md",
+      "source_sha256": "43531f32afc015f491df3b4db5f7e690a0e50d257a8a0e51024707ac17fc489b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/designs/support-assistant.md",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md",
+      "source_sha256": "ac6fefafddd0da98e4eba92b0244eedcf328cdd6d71bd8cec71cd96da4097311",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/cache-consistency/README.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/README.md",
+      "source_sha256": "60e2d874b8ec4ffbb0b17688665e2d2383f3851031332f98e850fa4037171ccc",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/cache-consistency/assessor.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/assessor.md",
+      "source_sha256": "5663a1369ff6df9bfe972e828b6d492e55fef87135ca8cf122ad966c9a4c4fc1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/cache-consistency/reference.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/reference.py",
+      "source_sha256": "f7361417bfe519e612d2612b2ed5d646f956a3003e2bf6b4184d640b819c5c30",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/cache-consistency/revocation.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/revocation.md",
+      "source_sha256": "f84b17c432ccf8c8518104c8f0ba6f3048b7f8c65abcf063be6f48e39e9cd04d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/cache-consistency/test_boundaries.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/test_boundaries.py",
+      "source_sha256": "1b61b49703fd5b708bf8696af9fbee4d6bc740f4c709c6e4ecf0814975eda80c",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/README.md",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/README.md",
+      "source_sha256": "18881ce00a31433c44c4598ff0d89572399e05fa91000d5cd6be5cdeff812b45",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/assessor.md",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/assessor.md",
+      "source_sha256": "bc1739089e26f595dfbe686d0e349af4dddc688341e6daf8cf23842ff16975a7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/plans.sql",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/plans.sql",
+      "source_sha256": "f97fe665f5483379d8a2163d3e02f5521f9b731428f0ec22466feeb7e62cd10b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/retry.py",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/retry.py",
+      "source_sha256": "e8fefa3b1a9b6d98e4d86e592d464fe1aa953e8c046dbbc3484abc2d74cd55b4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/run_schedules.py",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/run_schedules.py",
+      "source_sha256": "0c0164365a4fa3d3b496b8a625e931c8ba4853dc2cc4ca4e7b786528b3f0011e",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/schedules.md",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/schedules.md",
+      "source_sha256": "6586b2d5a45b702e0e85589ed23eb1111eef3d4fc492af9d562f6ec1736cb844",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/schema.sql",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/schema.sql",
+      "source_sha256": "3131937c402263bbbb583982812d8d13dcca847b8562244f69b40964ac8fe766",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/postgresql/test_retry.py",
+      "destination": "curriculum/02-applications/02-databases/labs/postgresql/test_retry.py",
+      "source_sha256": "501b23ec8459f318aca5e6920cdb0f70931668ba9ed8b1b0d357e15c690e7a56",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/README.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/README.md",
+      "source_sha256": "966d6f9b4ba8e2bd65c72d5b2fc8434d00ec8b438a27754597a97abb3e0929a1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/assessor.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/assessor.md",
+      "source_sha256": "2832531ec99919dcab3cc5f2d85fd6d33d86d1957d985f795f167a8377f9c304",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/migration.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/migration.md",
+      "source_sha256": "9b44f5352cf1f1f3cae79bf25482800257e200203d78a1413414f12af6108ef2",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/reference.py",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/reference.py",
+      "source_sha256": "c7bdfcb8519a758e187397ffa9302a6482e42ee36800ee0dd1b6b3c3defe372f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/regions.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/regions.md",
+      "source_sha256": "2e1fc962e3a043a1e24d8a6a89b9f2f7f4b387dc2493f17f7fa679cb42b005f6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/labs/recovery-migration/test_recovery.py",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/test_recovery.py",
+      "source_sha256": "6036b378919974877c312fad1694c6b17b045d4dd3b5ab937451ff7161c582c0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/architecture/whiteboard.md",
+      "destination": "curriculum/03-production/01-system-design/whiteboard.md",
+      "source_sha256": "af0f6d3b93b34fd0748ebff0142737a63b0d521dee6a9542fa4cc2b0ad8bfde6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/README.md",
+      "destination": "curriculum/03-production/03-infrastructure/aws/README.md",
+      "source_sha256": "04acaaa4e3ad6004c6dc972d58c96b2a21d35a171004ca1397ae605a63c83ad9",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/lab-1-data.md",
+      "destination": "curriculum/03-production/03-infrastructure/aws/lab-1-data.md",
+      "source_sha256": "6fce4ce2f0afa03b98124efa7308fef42f1c8c4a487d2d17cce2766cfec851b0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/lab-2-upload.md",
+      "destination": "curriculum/03-production/03-infrastructure/aws/lab-2-upload.md",
+      "source_sha256": "c83b0a5122b8b4c9410ab5c7b3d27bf5d4d9ac6359e068a28f7f8013c3c10ade",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/api-contract/README.md",
+      "destination": "curriculum/02-applications/01-backend/labs/api-contract/README.md",
+      "source_sha256": "52c130dfc6e7c73fd2643601ea9e7cfd8068d5c69e592e806c5c37551b9aa62b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/api-contract/boundary.py",
+      "destination": "curriculum/02-applications/01-backend/labs/api-contract/boundary.py",
+      "source_sha256": "75462d0fe8b36ed56b648c8ad150883bf7be34ffa455b4b5ce88a73008990820",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/api-contract/test_contract.py",
+      "destination": "curriculum/02-applications/01-backend/labs/api-contract/test_contract.py",
+      "source_sha256": "fc4109c8b405e83a8209913a19ed783d2fcda6342295eae5bbb843d72ceac6bd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/job-pipeline/README.md",
+      "destination": "curriculum/03-production/03-infrastructure/aws/labs/job-pipeline/README.md",
+      "source_sha256": "1cc11f386bd7adf2af5884e92a265631a8839f0656a11d2d21d04556f1b17fde",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/job-pipeline/src/worker.py",
+      "destination": "curriculum/03-production/03-infrastructure/aws/labs/job-pipeline/src/worker.py",
+      "source_sha256": "dd3de0d7cc5363502fa67eb394658e2c1d7360880e88bfab7f87934a4156cd9f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/job-pipeline/template.yaml",
+      "destination": "curriculum/03-production/03-infrastructure/aws/labs/job-pipeline/template.yaml",
+      "source_sha256": "fe31c28bcb3ac6f37ae913ca5abdea4f1d85c134e43125abd5a341c83d9e73fc",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/labs/job-pipeline/test_worker.py",
+      "destination": "curriculum/03-production/03-infrastructure/aws/labs/job-pipeline/test_worker.py",
+      "source_sha256": "8a550418589b6c0c1a3f171a27b5404fdc4ff9402b1da353a0b3dbd114c0be19",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/aws/upload_demo.py",
+      "destination": "curriculum/03-production/03-infrastructure/aws/upload_demo.py",
+      "source_sha256": "eeb819b74a6fa5fa786459a956493e7ad669355ef6f3aa3dec803e45efd606d6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/practice-sequence.md",
+      "source_sha256": "13fc217cc1e828fb65fe0e5e486bf41c579739b34f143e3b40c722518e095d4f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/algorithms.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/algorithms.py",
+      "source_sha256": "40b2f546c583701ec6e1cab7917a52e2c1d1d04b45ef75243cbd2efe86304489",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/bounded-executor/README.md",
+      "destination": "curriculum/02-applications/01-backend/labs/bounded-executor/README.md",
+      "source_sha256": "9ea2fa760f3ba473d80be23a8bd394b79b0b83a55e569dc77886cfaafc2a6b98",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/bounded-executor/deadlock_demo.py",
+      "destination": "curriculum/02-applications/01-backend/labs/bounded-executor/deadlock_demo.py",
+      "source_sha256": "80e778e3fe51c8e90dbb5849aedd6b42b59bcef608262c28f87f8d36904de14f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/bounded-executor/executor.py",
+      "destination": "curriculum/02-applications/01-backend/labs/bounded-executor/executor.py",
+      "source_sha256": "279baaf38fa737c51a5da3a0d81890227959c256e56e21b9c10163f39dc14378",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/bounded-executor/runtime.md",
+      "destination": "curriculum/02-applications/01-backend/labs/bounded-executor/runtime.md",
+      "source_sha256": "ad9d67a6cbc6942f0668aaedfb6bbb46185b99f8e2448d50a211e0737967c952",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/bounded-executor/test_executor.py",
+      "destination": "curriculum/02-applications/01-backend/labs/bounded-executor/test_executor.py",
+      "source_sha256": "ca4d5a6206cb60ef50ca21027e0b716c2d32503cec7c720266eae743ed15533a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/fan-out/README.md",
+      "destination": "curriculum/02-applications/01-backend/labs/fan-out/README.md",
+      "source_sha256": "5772daa5a2ce59bbf7dbc620c5eeab5f0844326458edd5de3cc34040357eec04",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/README.md",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/README.md",
+      "source_sha256": "a2bea1d8efc654759cfa3df6c35fc72375979faa52da85566303dbbb0824fc9e",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/assessor.md",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/assessor.md",
+      "source_sha256": "2a59a3fd858b3b18c890ac7148d8954fd1c7879c8dcb68700f2867ce835c45c8",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/baseline.txt",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/baseline.txt",
+      "source_sha256": "1df81d347e6a6c238496f6729514647d82ad808905dbb70b0065281d5191f54f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/fixtures/basic.json",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/fixtures/basic.json",
+      "source_sha256": "cf4b55cb884613af719e5678f8d8ef20c071e59978ed495ab5b19126426c8d95",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/reference/__init__.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/reference/__init__.py",
+      "source_sha256": "82f09119c43164edb34dd48f12a9b50ff17bc0662f9db4d0ff7e4d8c64edc318",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/reference/importer.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/reference/importer.py",
+      "source_sha256": "041b138847c2343eff1783e98594e2d0589149b8c5bfd434d6b1d8e8ef6f1175",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/reference/model.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/reference/model.py",
+      "source_sha256": "f871f6a88b36f5833c7a8cd3fa3a48873f661efc537ed6e891235c87555e1177",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/reference/store.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/reference/store.py",
+      "source_sha256": "eb9085b907f0100ed7633c3f15614aecd567c9ed5e79afcf360383bf4aaf5457",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/reference/transport.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/reference/transport.py",
+      "source_sha256": "81e4d5e81e412a5c9d64d8d64a706cc92b489dce7bc1161d668eb1746aa8c302",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/README.md",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/README.md",
+      "source_sha256": "da3da1cbeee7b81667c39632380126d1507c30c96aaac25ac6e759967f244f80",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/assessor.md",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/assessor.md",
+      "source_sha256": "d5d151af005d1a15a7923825274878eb664f03c258609195cc1bc425ea0bc0ac",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/pr-101.diff",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/pr-101.diff",
+      "source_sha256": "d986b8d2e25095aa75ed968e0cd258a891f724aeb6cd3fd7c54be386af327322",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/pr-102.diff",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/pr-102.diff",
+      "source_sha256": "e155c39164a9f2ff2993f3e5de34d12209dec44c9bf3ae3571f54c6de791d9d7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/pr-103.diff",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/pr-103.diff",
+      "source_sha256": "b2c489cd4aa42c0171cd8f0a2e56f5b6710f77f95e723223d7bacea4b77fc187",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/review/test_review.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/review/test_review.py",
+      "source_sha256": "21ff578d608cf00f31dbfcdfd63775209540c82c9f15524ffc8f394d2aa2e53c",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/starter/__init__.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/starter/__init__.py",
+      "source_sha256": "82f09119c43164edb34dd48f12a9b50ff17bc0662f9db4d0ff7e4d8c64edc318",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/starter/importer.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/starter/importer.py",
+      "source_sha256": "2b1af946671b86752b7c1f9baf34de576f44c63a97b33cb2e0f0cf0076b25500",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/starter/model.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/starter/model.py",
+      "source_sha256": "5406cd2048954777959b37de0d47524459c92db41eaebe6df34452f5ee9b70e3",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/starter/store.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/starter/store.py",
+      "source_sha256": "0c80fc0fafe78959e3520b7f525c560d67c23b57e940d31e376bf3de7522da43",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/starter/transport.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/starter/transport.py",
+      "source_sha256": "4293ed954d0aea9a83d56c92426691729145529fc4a641bfe40234ee4477a251",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/importer/test_importer.py",
+      "destination": "curriculum/02-applications/04-testing/labs/importer/test_importer.py",
+      "source_sha256": "a08430d4c4549614d8a8e099fbcbfec6285fcbbf099714c1761af0d1b5661d73",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/quantity-debug/README.md",
+      "destination": "curriculum/02-applications/04-testing/labs/quantity-debug/README.md",
+      "source_sha256": "cd7f94c67fa317a9c6f5a28620e441f20c9a5c1935459147ab45ae133a10f372",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/labs/search-race/README.md",
+      "destination": "curriculum/02-applications/03-frontend/labs/search-race/README.md",
+      "source_sha256": "4a04d3bda35688feefd192aa001d8cbb9df0c8c2be89ff85e564614f48df324e",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/01-maps.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/01-maps.md",
+      "source_sha256": "6c382d3ffc40f6676fa4955ed41df27aab371eac0da04b2c32f5e5918632fb15",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/02-windows.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/02-windows.md",
+      "source_sha256": "54ad7dfdc296720997d69647f542ce3e5973387667c9c01ded53430f2d7bd3e7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/03-prefix.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/03-prefix.md",
+      "source_sha256": "6492b94ddb6aa32419ab449472739f5e070d1259c92d337d1b8be108e45eda63",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/04-order.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/04-order.md",
+      "source_sha256": "9633c11ca2efb6adcfd733ad990c17c64e7aa11378834321e63537e4125dea0f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/05-graphs.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/05-graphs.md",
+      "source_sha256": "b4be2775884354a000052f5712e34edcc9c5bba57642cdd5e4477eac4319c624",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/06-heaps.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/06-heaps.md",
+      "source_sha256": "68c9498603bea09775c8cb75c96b6a7dabded0161712ada4648fa7de1d83bfeb",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/07-stack.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/07-stack.md",
+      "source_sha256": "5a709cb2c908ed8bc3930c9be91bd613fa30c0461edaba79e9c058acf1bbc9ca",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/08-dp.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/08-dp.md",
+      "source_sha256": "c9cd364a60257b88fb763983f6a2ab5732ac743187a5151183ff2957fcd31e17",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/09-search.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/lessons/09-search.md",
+      "source_sha256": "9738e2fac9d178066b65726f13b63d4ea07dc5728a89b97f4faff8d43c4eadda",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/lessons/10-lru.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/cache-order.md",
+      "source_sha256": "c400988582e8a170a3dcb003cd00a2af2dcca9012380909eea32ea2240856c81",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/mock.md",
+      "destination": "practice/coding-mock.md",
+      "source_sha256": "86cfef28817666c553ab4ea08e0b815bfc0c23a7ca2e7f298c63507c976c8a9d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/pattern-notes.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/pattern-notes.md",
+      "source_sha256": "2c8720e171f0d52c174d6447f1490cd99e7a11ac71661cba570c5eaecd1429ee",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/practical.md",
+      "destination": "indexes/practical-exercises.md",
+      "source_sha256": "a60568b37eba32077996c70a7ce54a170262bb4034da2f94729f8485c108c518",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/01-two-sum/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/README.md",
+      "source_sha256": "3148999f44027332ea1b4978bc543c33a51ebe4526f6dbe3eaa7ba8b1d3d5bde",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/01-two-sum/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/solution.py",
+      "source_sha256": "d2e9bed7224383620edc964300673fb0e47ab0affd38d0bdd16ae4f8cf4d0917",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/01-two-sum/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/test_solution.py",
+      "source_sha256": "afc4df2330124806d119097969b37411f386f836b7e3b96e783b4ec7b370a5fa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/02-valid-anagram/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram/README.md",
+      "source_sha256": "26d53b8219e7e9a2844e13504eb562150c50105128c0fc997b70217828d4a031",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/02-valid-anagram/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram/solution.py",
+      "source_sha256": "9d881686c6861760cf0820ae828d7973d747d02f87ac8de54233b77989dbd494",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/02-valid-anagram/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram/test_solution.py",
+      "source_sha256": "accabdc5d9bbcd9c62e3e4536513dd05839617a8cb76ecfc9aac0026d4b8dc63",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/03-group-anagrams/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams/README.md",
+      "source_sha256": "52ecf33969c4b774051c4671d6163bb394479d429ad06f63dd6d1926546bca0f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/03-group-anagrams/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams/solution.py",
+      "source_sha256": "69aad6314e83160501ae080247363aaae63d931616f13b1f169d43b6f497eebd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/03-group-anagrams/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams/test_solution.py",
+      "source_sha256": "ceeb39ff37b63de6eba65b301407f38a9503a52408641311af57bb4af8e0f8ac",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/04-longest-unique-window/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window/README.md",
+      "source_sha256": "26b791d192af4a604ddbd582b59937608794e04b1d6e5a2563fc00654961a238",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/04-longest-unique-window/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window/solution.py",
+      "source_sha256": "f4771d7e1054453d076fcc89195e42b0e327a80a3a4991396423c45b06e5b417",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/04-longest-unique-window/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window/test_solution.py",
+      "source_sha256": "512ae3973e3014f73d69c854ea6749b0f63e2d4930d2bc088670f79b58d1e18f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/05-minimum-covering-window/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window/README.md",
+      "source_sha256": "265b4fe86db88ea2195656a4ff90a71b3ed196e7843cb1ff7f137603568395db",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/05-minimum-covering-window/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window/solution.py",
+      "source_sha256": "c247c6e4a6da6e78b912deaa160adfa819b68160e57ffd7b061373d220113d61",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/05-minimum-covering-window/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window/test_solution.py",
+      "source_sha256": "09c9f0926fd03f6af4aa709c69d8960532eda0dd81e3dcd7708301a07be5e028",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/06-subarray-sum-count/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count/README.md",
+      "source_sha256": "796b6f036fe46bbd9c150d54976de78f284c32a4b3782cdd9e3612511bb0d82b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/06-subarray-sum-count/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count/solution.py",
+      "source_sha256": "5cceb2a2b192724690ad146be9f5fc7fde8215768ede82d5fdad74d959d70234",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/06-subarray-sum-count/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count/test_solution.py",
+      "source_sha256": "e8da46d00b4afa74471efbb5c58e6199a17a537f67dd7eebc073699c1811f5d6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/07-product-except-self/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self/README.md",
+      "source_sha256": "bd63bdcd2a9ff625ccfb07e3da149d2143dd032b5098fbb811e9013f6b4589e7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/07-product-except-self/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self/solution.py",
+      "source_sha256": "98ce53f2087355528e405249e2309a5be796c92223d0bcf93323b10dbfafc047",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/07-product-except-self/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self/test_solution.py",
+      "source_sha256": "32762427bb8189cd29af573196b99fa97b92b782e77d2b85a73c617433576b16",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/08-longest-consecutive/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive/README.md",
+      "source_sha256": "0bb57e7680ab56d154155e7165feadb9c69c3a2440589880e712a14987cc321c",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/08-longest-consecutive/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive/solution.py",
+      "source_sha256": "a5c25f45065703f46f44295e40e5564f558527d779207a14ecb57d089adc5af6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/08-longest-consecutive/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive/test_solution.py",
+      "source_sha256": "98627907e856cdda5ead37f44a5c0bb1b2f39e7d8f5247338e8b63d7f4b1b5f1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/09-merge-intervals/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals/README.md",
+      "source_sha256": "4ea2b0c42aff045fc9786737b071cd900b1a2e8dfc050b7a0d59f667074f75bd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/09-merge-intervals/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals/solution.py",
+      "source_sha256": "ffcd08bb9c0699281ed933cab7a8108909c03be3544959b2257ca07e51901534",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/09-merge-intervals/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals/test_solution.py",
+      "source_sha256": "b1ebc36a473353526754c1d363befa0a6a06cb365ff025d7ed64485edd3f2f8f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/10-meeting-room-capacity/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity/README.md",
+      "source_sha256": "39edf6a791962c43cd7ad5f758fd8748130c39a3fd38bb96a461de0a3bfa34c5",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/10-meeting-room-capacity/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity/solution.py",
+      "source_sha256": "c14bbcbbf1474f5dbe792271715d06789d844a93a766cff4dd3ab6502aff881b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/10-meeting-room-capacity/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity/test_solution.py",
+      "source_sha256": "824605a3ad6ffc012786127b40c5addadd9b17c53ebe0781701a420286db0bca",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/11-binary-search-boundary/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary/README.md",
+      "source_sha256": "ef65d0eed06c71b11c24b651d4cd423e14f7b616510dbff26f082521069b57f1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/11-binary-search-boundary/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary/solution.py",
+      "source_sha256": "d2a3a5fe4666c6dc300cd4e735ba5012f32d17f90027efb693abaa4269da88e7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/11-binary-search-boundary/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary/test_solution.py",
+      "source_sha256": "b29a8904e662b4b3c1768b318e4f439ce746c99904a7dab22fdb1323e48363bf",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/12-rotated-array-search/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search/README.md",
+      "source_sha256": "c6262ac5c0b13b4e640c22b46f9e3c81f9d5d29dfb79bcccd626f5b86e1adce5",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/12-rotated-array-search/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search/solution.py",
+      "source_sha256": "1ebce0aa4572a0a7b36fbca5eade72924d9f260f15ba2f13d53777b28a8adfdd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/12-rotated-array-search/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search/test_solution.py",
+      "source_sha256": "289c374453f169172a8efa9d7f631a52905adcb8fda799cb9e50e0e2448777c4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/13-shipping-capacity/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity/README.md",
+      "source_sha256": "2a509b37d30dfab1c2543ba83adecf956729da58078ee057752f7119a44f43b0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/13-shipping-capacity/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity/solution.py",
+      "source_sha256": "aa95696db8ba2e0f60e4f10058faab1d60ffd412a2206be635ec0a137637cddb",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/13-shipping-capacity/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity/test_solution.py",
+      "source_sha256": "6f9706d7fb2d7c3d41997592accd9fdec022ec3317622cb7ec3d3020d4248862",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/14-reverse-linked-list/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list/README.md",
+      "source_sha256": "456001c755ca813659c0e5d0a9f4d402067c3c0212926c2c63c8e5c7beed43db",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/14-reverse-linked-list/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list/solution.py",
+      "source_sha256": "479b87889f801d503364ad1e6427d9f0271aed67bc719a0e4d5d299dc503d4f4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/14-reverse-linked-list/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list/test_solution.py",
+      "source_sha256": "03c384fcabc14a81806ea5ad878a402dc6dd4379c4c8185306d602ab8b4b3620",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/15-linked-list-cycle-entry/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/README.md",
+      "source_sha256": "31c38fe0aef6f488ed453731b859e42b4ae70eb232ed0ca7ec2b7f7893fed019",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/15-linked-list-cycle-entry/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/solution.py",
+      "source_sha256": "97be10303b4cdb5ee8477f0bc32b1681af15687dad3dc360e3d242c544890436",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/15-linked-list-cycle-entry/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/test_solution.py",
+      "source_sha256": "deae40d0d4f7ab8fde29719601a1fd7a275a28c16b3741fb0b6b3efd58eae4fa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/16-merge-sorted-lists/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists/README.md",
+      "source_sha256": "f5011f307a784509f91d6759b0c9b98862dac26d6899f665c3932bfd0e4eadd6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/16-merge-sorted-lists/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists/solution.py",
+      "source_sha256": "f4b346c7199e26c41b5549f0cc713da5f7c7f05365503278497356ff024e8ba5",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/16-merge-sorted-lists/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists/test_solution.py",
+      "source_sha256": "3de9614fcd3bed71e15811f5064fee6fa5a52d79cbb7231593788b89535a8c1f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/17-tree-level-order/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order/README.md",
+      "source_sha256": "e822d221e196c09b5d28ce45da70fcad04f9f15e3d215c90cd7fbba516b3bc9b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/17-tree-level-order/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order/solution.py",
+      "source_sha256": "50f13bfbae1d0dc7cac0121c9a4907bf10c1c31fa749e004bc5a9dbb25952bfd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/17-tree-level-order/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order/test_solution.py",
+      "source_sha256": "2226c13efaefacd0929bb070707b518ab609fc54efca3690daaaab203e20ad75",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/18-validate-bst/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst/README.md",
+      "source_sha256": "836b1e0adce7e189c7641c71feba8deafff1f013380da321a9b5dcf973de9f46",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/18-validate-bst/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst/solution.py",
+      "source_sha256": "82572884e83550199f3a5a31e968d57bd3850d9be4f6024a2c548f5df3183d87",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/18-validate-bst/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst/test_solution.py",
+      "source_sha256": "8874600f21eca39186a2ab7c905f31077ceafccf53e3cc26d7c4ed151e69fc4d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/19-lowest-common-ancestor/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor/README.md",
+      "source_sha256": "dc5a228bc370256e70e796f23b8ff6137126cbb4ccc1111854ac6fd1dbc3d15d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/19-lowest-common-ancestor/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor/solution.py",
+      "source_sha256": "e66325b6266b51f9d15a5c74d90398cb51f810cda16747f1de46e6c8116e2dab",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/19-lowest-common-ancestor/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor/test_solution.py",
+      "source_sha256": "b73e87f705ff1af4ceee0dbf8e04bd7fd35c94ac4c98feab801256b4aded755f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/20-tree-diameter/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter/README.md",
+      "source_sha256": "e7db1e8a632d9f5b259c01c5d8ecd450facc4c5444cc10eb9d2df40742d2753b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/20-tree-diameter/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter/solution.py",
+      "source_sha256": "6e6a5f8ecb4b3e77cc675a9c95da744d3ee5a5b8fc982e0360ed144932ce3f1a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/20-tree-diameter/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter/test_solution.py",
+      "source_sha256": "428109e457c8debde31bad9f9db8526f26b11baf420d3a3540099f13b76c2942",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/21-dependency-order/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order/README.md",
+      "source_sha256": "83d076f9c664a7dc699de86c39c55f2a00f79981ece49148ca8bdb3722b24e3b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/21-dependency-order/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order/solution.py",
+      "source_sha256": "e74da11656a0a9a449ca8e726c3e1bc0439aa346a67503c4cb3e0e6dc87d2a28",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/21-dependency-order/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order/test_solution.py",
+      "source_sha256": "ef9daf297d9fd3991a0c62b6735a4ea89733cfd7a0218bc966589f9c64394fe4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/22-word-ladder/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder/README.md",
+      "source_sha256": "a13ac04ca9fe7144f240f8105027fb8a02afb4c696a6f81b74167885b48d8b85",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/22-word-ladder/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder/solution.py",
+      "source_sha256": "f5e58bf2efee87357094403bc6f9670251b5a0153d72dd7f27557ec956303bab",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/22-word-ladder/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder/test_solution.py",
+      "source_sha256": "0feff2a5c456b0067f57b8e4102aa179198c6022ed9bf660096a596af082fdf6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/23-disjoint-set-connectivity/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity/README.md",
+      "source_sha256": "24ebff8e60323978604268024911c9d4f043b2b315c7c1bdac969f4664dd9f9b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/23-disjoint-set-connectivity/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity/solution.py",
+      "source_sha256": "7c82f23b893064c438e99f9348cc93bea738b139aa6287b7eb71b9725477e6fd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/23-disjoint-set-connectivity/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity/test_solution.py",
+      "source_sha256": "40c5c344c5ad09582c9acdc34d9dcc2773d734ed5ac61e739f6497a51a75a573",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/24-grid-shortest-path/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path/README.md",
+      "source_sha256": "deeaf88832e1653f56bff1d38c3ac28dfd54620369aa1149d980ae5ee751695a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/24-grid-shortest-path/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path/solution.py",
+      "source_sha256": "1b3fd4cd576d98c1957ec38d5588e3144c77bec0df7c78fdc318a3c3800d27b7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/24-grid-shortest-path/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path/test_solution.py",
+      "source_sha256": "92f184fb17a24127a35e6a566ed3f3e409f8a65b217bffb571bffefa1dde893b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/25-weighted-shortest-path/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path/README.md",
+      "source_sha256": "4b5039a276b2d419d3815d53b5817e3f45b35d432bf9488a6d8f4ae7177cb780",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/25-weighted-shortest-path/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path/solution.py",
+      "source_sha256": "66a25ef720f2cffb9d7496a83022fae436ad51235ccbfb5b596a7d606ad5b00b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/25-weighted-shortest-path/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path/test_solution.py",
+      "source_sha256": "ffd89c0f9df9608991760adbf41f116510d87e826aaa58fe35f6cf39b2a61a0d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/26-top-k-stream/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream/README.md",
+      "source_sha256": "0608139b09a0859920ff0d8e21a031f323be1b4772ed51582a031911dc4be7c9",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/26-top-k-stream/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream/solution.py",
+      "source_sha256": "2997c3e03bb3434f63700a7d235456d9cfd1d1f3e249da07555747b210164995",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/26-top-k-stream/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream/test_solution.py",
+      "source_sha256": "fc019444ba8a4f9df84edf2e568df59d297957d3912b98d4b8c41ed68dea06ef",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/27-merge-k-streams/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams/README.md",
+      "source_sha256": "818ce540c2b539b519e6f47b8f094c50b4dab2d0d56bce6b84efda76a0fc382f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/27-merge-k-streams/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams/solution.py",
+      "source_sha256": "228c43c8c5f48d2cfd4586c048967d26cd4655ee47158e12ea0e581ae5fc5af6",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/27-merge-k-streams/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams/test_solution.py",
+      "source_sha256": "b0bac96bef64f59bf6293e7c8753e4d17d19f7bc5b0abaa7179bba57c6a7f4f0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/28-manual-lru-cache/README.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache/README.md",
+      "source_sha256": "05c44a9f10094e13e100aa4a2a5d922a47eb6a6bc2fea16daabd943a7edcc67b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/28-manual-lru-cache/solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache/solution.py",
+      "source_sha256": "47f6ec34601d69c4684f519e7401ff45c812e6dd3f656c45d8d36ec742533522",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/28-manual-lru-cache/test_solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache/test_solution.py",
+      "source_sha256": "7284d9dd0b9f9902b872a37e6b13b17b788e011c9e005f70e06241e700b6c7c3",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/29-expiring-key-value-store/README.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store/README.md",
+      "source_sha256": "c3390909e3c7a2ac62e08ad1a5bb3f733e1331bd9e33d7bb0f642f7e152fc775",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/29-expiring-key-value-store/solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store/solution.py",
+      "source_sha256": "edf18964c829b0c233d8778a8ef3a8dc032c7984d19d3c3b68c6845082cd2143",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/29-expiring-key-value-store/test_solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store/test_solution.py",
+      "source_sha256": "97e47a73e50b1c9ca0af5c91f35a4d8d2fd5aa22320be21f0250d3b30cfba809",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/30-trie-autocomplete/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete/README.md",
+      "source_sha256": "554ac856b888890dfdf8277893f73b4f03ecdc871d2ccf73deb53a7339fe51f7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/30-trie-autocomplete/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete/solution.py",
+      "source_sha256": "6fccd4375c7df5c6b01070c90b255e1c6b1897db1d5fa5142652be3d004f3e1d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/30-trie-autocomplete/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete/test_solution.py",
+      "source_sha256": "a5385884c97f61175d77930f02e735fcb39c661c6c778f7b198fad6f10b51587",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/31-combination-search/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search/README.md",
+      "source_sha256": "762658bb89d5116e6b06eefb55830617c6061b503d3fd2a5a95c3e0792425c3f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/31-combination-search/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search/solution.py",
+      "source_sha256": "e0ec3003c9d9111e3433918bfa36ff72c9ebd82db05659597f89bedddfd6b7bb",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/31-combination-search/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search/test_solution.py",
+      "source_sha256": "c0e0f9d49cb907d75390c530992b3ce008636f6a7a42a969c4cfeae3d85efcac",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/32-word-search/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search/README.md",
+      "source_sha256": "340f1ed3f9d3aa15fe55c811ab9de6404341a8651a43114d313c9b4d977a949d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/32-word-search/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search/solution.py",
+      "source_sha256": "6563b97d091be66d95cdcf6fcaf58aa9034038a426ade6fb1c4fbdb5587cfbdf",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/32-word-search/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search/test_solution.py",
+      "source_sha256": "ed5356837bbf13ffeaf161c23ebdfe9f37d34bb5f6e243b94feeeb047bece486",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/33-coin-change/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change/README.md",
+      "source_sha256": "e91ffea08bf6656f670518fa11bfe676c8b930160e17097c7904465c9fc8beba",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/33-coin-change/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change/solution.py",
+      "source_sha256": "5f04114b8bf273f03456e1238dfe29be94fe097336d605476f97d2c743a142ee",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/33-coin-change/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change/test_solution.py",
+      "source_sha256": "ee5b79e1293561f1c1d019e26172956842714aa0ff6ea56caf9ad388b78f0d69",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/34-longest-increasing-subsequence/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence/README.md",
+      "source_sha256": "024b97f0f875545fca7ece8020ea0126b59e51b2191e753bc350f3f9eff97229",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/34-longest-increasing-subsequence/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence/solution.py",
+      "source_sha256": "ed3f8bee44d445896167b6fdc752471e5d31fbf2e26ef707b6a4e17758bd28ba",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/34-longest-increasing-subsequence/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence/test_solution.py",
+      "source_sha256": "faf6bcb31a238506a0175a1c08210d8aabb1f85a804a6a826c01bb3b45862894",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/35-edit-distance/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance/README.md",
+      "source_sha256": "dd5a67d16bfdd5eb5bbf13646f8b3f37b326563f40d91ace7a79d59a570f63c0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/35-edit-distance/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance/solution.py",
+      "source_sha256": "7f6cbad3968f8aaea97030760819e6f29ecae413ea1f9c361c3bea16b8f0fb94",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/35-edit-distance/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance/test_solution.py",
+      "source_sha256": "7bb2f19aa84a444e1cffd4a6b2dde9e20dae1c31296ce0fbcbd91dadd7914bc4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/36-decode-ways/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways/README.md",
+      "source_sha256": "b0d75f4c89309720394145ad1909b12d26498dabf14f55d1e296ec6cff8700a9",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/36-decode-ways/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways/solution.py",
+      "source_sha256": "0ca7e091db271272aa6d84d20373ad48b4ac0b42e4f07e9c085e426975aafa19",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/36-decode-ways/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways/test_solution.py",
+      "source_sha256": "818161c8c8100e749b1580907d1fa58c4dad5156a09b1e1dbc970ce1e8a7abab",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/37-daily-temperatures/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures/README.md",
+      "source_sha256": "f49b41550a1ec2c18f6c76bc1d25357a132da4371337e9716e874b494cd317cd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/37-daily-temperatures/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures/solution.py",
+      "source_sha256": "e7d9822b870af7cbf67df0bc6b2554cdf9c4df15cce6dd74bfd1aee5eac97808",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/37-daily-temperatures/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures/test_solution.py",
+      "source_sha256": "b64c581b2715d6601aaacf8dd36ade5ee75afed753a41353dce8b81ad981f4aa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/38-largest-histogram-rectangle/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle/README.md",
+      "source_sha256": "39357e3e8969746fe482a9c46079e3bb6607aad4ff07c3f323c7aaa1f2b60edd",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/38-largest-histogram-rectangle/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle/solution.py",
+      "source_sha256": "cbf763caf29d5e8ed411bbb5ac9e0266337cf93adfeaaef00df1f12a7d4fc8b4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/38-largest-histogram-rectangle/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle/test_solution.py",
+      "source_sha256": "4c2b41272b0cccd54e59b317d0bf479b0d841ab37ae6103d362abd0e532041fa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/39-policy-expression-evaluator/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator/README.md",
+      "source_sha256": "9ecdb085dae7fdf620e6bf2ca6a589e8f7b206ec40b21dac8fd83317cfc15da9",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/39-policy-expression-evaluator/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator/solution.py",
+      "source_sha256": "4758246ec975f0ec21c6d6bde63d7598406b06cf0b226b33f268cb360f6c278d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/39-policy-expression-evaluator/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator/test_solution.py",
+      "source_sha256": "081d5a2120293ec09aa7265a80b560710dc506d60dab5d386c3a12c913141c93",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/40-event-time-windows/README.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows/README.md",
+      "source_sha256": "342561b1bd5f3f43a9c25e24fef26f5c7b3839dec7ce7e0ed6532bfae0f75220",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/40-event-time-windows/solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows/solution.py",
+      "source_sha256": "f074d768c7cb4a98c669015112c6da8716751111896374f45bcf2538528b9dda",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/40-event-time-windows/test_solution.py",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows/test_solution.py",
+      "source_sha256": "58856c820f3434073d63c708fb9488a9e180bd21e809fb406fb84f4aeaa2074f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/41-streaming-median/README.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median/README.md",
+      "source_sha256": "ba5b15e9dd7e923418409cab29e4d1d4d99ddc74edc847343f6068cc78f89372",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/41-streaming-median/solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median/solution.py",
+      "source_sha256": "e9ec844e56fe08d3103ca429df6458013b981d028b85a8954d156cf648c6853d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/41-streaming-median/test_solution.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median/test_solution.py",
+      "source_sha256": "8aff3bf0786621d844857f7844c4acf74a62b09f7dba3f548f7b3214c3f05eed",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/42-bounded-blocking-queue/README.md",
+      "destination": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/README.md",
+      "source_sha256": "ab028a329a43381c05970c373393bd6574e764d4a28c14da01e35f52b2f52447",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/42-bounded-blocking-queue/solution.py",
+      "destination": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/solution.py",
+      "source_sha256": "bf1197c1c88ffa9fb3487b5923561c3e1c114982e39508ce389fb934600c4275",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/42-bounded-blocking-queue/test_solution.py",
+      "destination": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/test_solution.py",
+      "source_sha256": "e0ba74b848d4b95241b7ff53c9592d9fa24fcef6f92377dad5a83cc58e82ac17",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/advanced-index.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/advanced-index.md",
+      "source_sha256": "2c53ad1cc1eeb69746464c7ac8af9bd204d247fdf59fe48d7c451a9a3f7713be",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/problems/foundations-index.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/problems/foundations-index.md",
+      "source_sha256": "3df50f2160f9a8b3886eddf2593794d56b2bf52557e79c04b7f21b38a7db4906",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/reference.md",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/reference.md",
+      "source_sha256": "c630eeaa12b750f87e95feb6253231a9879b88d2da1eced78518f9cd83dd1420",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/test_algorithms.py",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/test_algorithms.py",
+      "source_sha256": "8d1598b0bcc60d78c82338b913b3380e5698262209ce0b3a36e593db75175afe",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/typescript.test.ts",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/typescript.test.ts",
+      "source_sha256": "18989c953321be3c20f292ecf22a50a2bd8598b3f492eac5d13958c30e37620d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/coding/typescript.ts",
+      "destination": "curriculum/01-code/02-data-structures-algorithms/typescript.ts",
+      "source_sha256": "cae27b081beb049db4c55434462f597e4a9479688183cfa3825b6bbc444577ba",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/README.md",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/README.md",
+      "source_sha256": "5e3dbafd84f87ef98d349342601b0b21f5249da3765511f53904fda4fdae42f3",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/assessor.md",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/assessor.md",
+      "source_sha256": "431e27d31bd7072456e9e5a15e12325fe2f313140152b1c36b09c38c64930736",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/challenge.json",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/challenge.json",
+      "source_sha256": "385711c8eb52f0540962c5c279fc47bce4a4d4e7a5a409788a20b9711f109d87",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/heldout-labels.json",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/heldout-labels.json",
+      "source_sha256": "8747032dc27248bca21e63b57be34f13357b70007f7704440f8a310a7e24be61",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/product.py",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/product.py",
+      "source_sha256": "e358f8c853ae90a2509518193a4ad843f91a5899854f6735723f3bfded461827",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/regression.json",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/regression.json",
+      "source_sha256": "3b6f3d9bb18eb5cfa6e1e9c3a6704f3a7522f0090cf69a68f9dc5c2a952daa9a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/evaluations/test_product.py",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/test_product.py",
+      "source_sha256": "c707dc1b8f8d67d9d008aeb1454728723a31aca064fae32829e4a3a64f4fc42c",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/README.md",
+      "destination": "curriculum/02-applications/03-frontend/full-stack-practice.md",
+      "source_sha256": "f92d54899aa342a57d8b74862a4ed34917c78e481dd857139da4a7c17290f1a8",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/.gitignore",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/.gitignore",
+      "source_sha256": "c270a03f886af594fcb3f9500321fa8dc277dabe75e3f94eb8ac2471976ad4b7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/README.md",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/README.md",
+      "source_sha256": "9e0736b8ecebfc79f09bdff5eb5582c771efea8d47286c40285b37f04c554c6a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/VALIDATION.md",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/VALIDATION.md",
+      "source_sha256": "1b302314b22a35e28a38fc16d37160b8ecbb6744bf77a4dfde75cf6b01d14f21",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/build.mjs",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/build.mjs",
+      "source_sha256": "f8ebe7f386b4a18a0ff64e980d647193ab90502af23b032ba8d0add3ff941938",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/measure.py",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/measure.py",
+      "source_sha256": "a902e862dc06a462df04e0fa5756d1d3b4ce7c828c134267fe0f207ab5ab0331",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/schema.sql",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/schema.sql",
+      "source_sha256": "1afcfebbc51de714a67c03b1db3cf0d25a9886ecae01bb7b91db379e945e248f",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/server.py",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/server.py",
+      "source_sha256": "31686015358af08b0fda34f6959624716b6c4498cd8b8244b8734af9ea59dd8e",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/tests/browser.mjs",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/tests/browser.mjs",
+      "source_sha256": "a159988bb2856b2ecdc0d95cdba0bdc1b47083a2714a768b59cad55614441eac",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/tests/test_api.py",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/tests/test_api.py",
+      "source_sha256": "c227c01b6da1d6a9740fcfc13d6fe3715657934340921e83d2f02cd4e94acb66",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/tsconfig.json",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/tsconfig.json",
+      "source_sha256": "be83bf6156c47355bce491ea36349699fec7479809bcb6109331e0d9228fdf2b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/web/app.ts",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/web/app.ts",
+      "source_sha256": "df877ec13b3cea766939f773e57050a1893cde900271ff56ac77ec6201f630aa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/web/index.html",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/web/index.html",
+      "source_sha256": "183f1e69e512ee8711812c1dfc5842b745bfaec9de0f91285b9ef8e9ac26181d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/full-stack/bookmark-editor/web/style.css",
+      "destination": "curriculum/02-applications/03-frontend/labs/bookmark-editor/web/style.css",
+      "source_sha256": "7434c81fdc8b40493f9792be8fe8bf8a36c16808270a720014049330e58f389c",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/junior/README.md",
+      "destination": "practice/depth.md",
+      "source_sha256": "5dc8e91784e4d6bf66153880c327927487b178b039763f16c7c0eb5602a81566",
+      "kind": "navigation"
+    },
+    {
+      "source": "paths/interviews/practice/README.md",
+      "destination": "practice/README.md",
+      "source_sha256": "b8ce8c7a61ae99453db3a8cc49579ed32e216d60000410b2c11087bc506017bb",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/coding.md",
+      "destination": "practice/assessor/coding.md",
+      "source_sha256": "8b55c44a4664ffd96d5a0a6d46fcad6dd39cd5bb1c5746b3b32c4bc9170b83f0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/design.md",
+      "destination": "practice/assessor/design.md",
+      "source_sha256": "8b4a8bba3e1940892a7173b6980c4392d6909bea36f81732e075075e2af370c7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/full-stack.md",
+      "destination": "practice/assessor/full-stack.md",
+      "source_sha256": "71b3cd1e20fb14af80659743410a55e0c371166938e0745fb42975ca8ee4cdf2",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/heldback_importer.py",
+      "destination": "practice/assessor/heldback_importer.py",
+      "source_sha256": "2ea7894f9230bb23f0a9996b452e01c3d743e024f77c3b39cc72e774b417efe1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/infra.md",
+      "destination": "practice/assessor/infra.md",
+      "source_sha256": "04ccadee7c58d01f852924d7b1ea4b68015245619f798479b06015b9bf477530",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/practical-debug.md",
+      "destination": "practice/assessor/practical-debug.md",
+      "source_sha256": "ad76bff63dfc7e902a7d9f46454e898af5ec8f77ba3b8d92c2378447b8816b47",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/assessor/scored-examples.md",
+      "destination": "practice/assessor/scored-examples.md",
+      "source_sha256": "b4550904e335a2abe4650ab47cb19a2913b060b0ec818bd375c4bb89e53796e0",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/attempt-record.md",
+      "destination": "practice/attempt-record.md",
+      "source_sha256": "5233497bbb8f6a3fcfadf02a6b44aca7f367f7178dc14641eb988b2d6715ce48",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/candidate/coding.md",
+      "destination": "practice/candidate/coding.md",
+      "source_sha256": "d8b906e720e4cb6a76c472e2241411b6aede90b73151613ad670731d1b6395be",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/candidate/design.md",
+      "destination": "practice/candidate/design.md",
+      "source_sha256": "b88aa093a9f75e9b10b012cedf5c942944582139b0df36348f602050b18011e7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/candidate/full-stack.md",
+      "destination": "practice/candidate/full-stack.md",
+      "source_sha256": "df2a511cb6bd17d4cd5e4793b7f7262605847915a37cef2ab41448db09449beb",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/candidate/infra.md",
+      "destination": "practice/candidate/infra.md",
+      "source_sha256": "0b85d5567ada6c711a0ed1bb8e814cf8e327b10440da1f62c3f8038df51294aa",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/practice/candidate/practical-debug.md",
+      "destination": "practice/candidate/practical-debug.md",
+      "source_sha256": "77c43dd5dffdeceb303955aea300eaed603ea56afa24ce6e46e41cec64ba20f3",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/01-config.md",
+      "destination": "curriculum/03-production/02-delivery/cases/configuration-rollout.md",
+      "source_sha256": "92c374c55f3e5d463a80104330373140fbbbb2a5f3e612f1d746aef21b75e138",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/02-retries.md",
+      "destination": "curriculum/03-production/05-reliability/cases/retry-amplification.md",
+      "source_sha256": "e913f1ebb80423559c1f63b046c547da11abf8091a5fb11480b680cf0cb7a8b5",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/03-headroom.md",
+      "destination": "curriculum/04-scale-and-evolution/02-performance-cost/cases/deployment-headroom.md",
+      "source_sha256": "316aa06feee15db91e3e09b9c0816fb33c9e6c2d84fd3bdc5a9f89f01242526d",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/04-status.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/cases/status-projections.md",
+      "source_sha256": "2c07563b7212150309d0a316a7664dc0fd93a981738dace17d8dc6b54b551eb1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/05-hot-keys.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/cases/hot-partitions.md",
+      "source_sha256": "723791956fdc3da521b098cd75de054f9b75135f043d54732a59fa39edc2c567",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/production/README.md",
+      "destination": "indexes/production-cases.md",
+      "source_sha256": "06a5e5e28d054404f7f6670384713b633b14baf167474d946829633eef83a9d4",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/README.md",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/README.md",
+      "source_sha256": "7413a9e54ed60f1b5d98b9a9f65c0fe0c9fa43d35ab91f796136fbf3152e34a1",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/incident-assessor.md",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/incident-assessor.md",
+      "source_sha256": "31d4ed8ec174cbca5e4ea4863f9ca4145aa81afed437c8e8e8374f247c411429",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/incident.csv",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/incident.csv",
+      "source_sha256": "b6fcf716de377b96e3214a5abeb737a59b3294f65a8434c74dc386f165a9bdc7",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/incident.log",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/incident.log",
+      "source_sha256": "b9735429f080db0e555d1781f744766f1d79e44619ae1e1289818ed2fabfd678",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/incident.md",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/incident.md",
+      "source_sha256": "40c0bc1418ff80b84c63c091cc534b9adf38f99e2758b759847b817f82480a04",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/model.py",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/model.py",
+      "source_sha256": "5090238141dcf827d1335d9d5520173bba03a33435377e698f2392510b4b3a3a",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/reliability/test_model.py",
+      "destination": "curriculum/03-production/05-reliability/labs/reliability/test_model.py",
+      "source_sha256": "af707eca041435b4f8c24eeb8850f7cc2acb7a268f0924d9c6ffbdddb6cc2429",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/research/README.md",
+      "destination": "docs/research/interview-evidence.md",
+      "source_sha256": "0b4d6437f2a7de45a6f882a6e33c5fb79414d2047e940a522ba865ef976f5b2b",
+      "kind": "content"
+    },
+    {
+      "source": "paths/interviews/senior/README.md",
+      "destination": "practice/depth.md",
+      "source_sha256": "6c511eb073e889defd65a145e81764691c56292281194c4fcfe9f8e4c2428535",
+      "kind": "navigation"
+    },
+    {
+      "source": "paths/interviews/staff/README.md",
+      "destination": "practice/depth.md",
+      "source_sha256": "485f69fab2e7d470ec0e8c322977c45bfc0ace1cce84089ce64c5dda6db5016a",
+      "kind": "navigation"
+    },
+    {
+      "source": "projects/README.md",
+      "destination": "projects/reading-list/README.md",
+      "source_sha256": "20a9eba6c28e0ed4461faa479dc6f04a7a35881b28df096042f5d6ffc61bba00",
+      "kind": "navigation"
+    },
+    {
+      "source": "projects/p1-it-works/README.md",
+      "destination": "projects/reading-list/stages/01-it-works/README.md",
+      "source_sha256": "2810d2ff5da06fd5a00b79ac26e19b4b09eda088c3eab5e928ce290f3ba993f3",
+      "kind": "content"
+    },
+    {
+      "source": "projects/p2-it-survives/README.md",
+      "destination": "projects/reading-list/stages/02-it-survives/README.md",
+      "source_sha256": "194549864aad123ff64bccdc44258ade44fd3d5c12e733dcb0e83c08a351194d",
+      "kind": "content"
+    },
+    {
+      "source": "projects/p3-under-load/README.md",
+      "destination": "projects/reading-list/stages/03-under-load/README.md",
+      "source_sha256": "36455379d906edf7fe9d2456d1a4ba32caae71383b645567742790bb51c767d2",
+      "kind": "content"
+    },
+    {
+      "source": "projects/p4-it-reasons/README.md",
+      "destination": "projects/reading-list/stages/04-it-reasons/README.md",
+      "source_sha256": "75fc52ccee4f155b003d9e9f65de3f6c7309078ed5178b5abb1515f151642a72",
+      "kind": "content"
+    },
+    {
+      "source": "projects/p5-it-changes/README.md",
+      "destination": "projects/reading-list/stages/05-it-changes/README.md",
+      "source_sha256": "ca31827c7e7880c65f6fe1d354b32534669fa1634c18a0948f1f45e999c8257a",
+      "kind": "content"
+    },
+    {
+      "source": "scripts/README.md",
+      "destination": "scripts/README.md",
+      "source_sha256": "234add3b1d2049d41b3bf916f6ef997530dc76678d3ca2177f5d98c697d4cd0e",
+      "kind": "content"
+    },
+    {
+      "source": "scripts/check_curriculum.py",
+      "destination": "scripts/check_curriculum.py",
+      "source_sha256": "ab4a6667aed9446f34aaf904b23f94246af0d000f0b4091df1c53f94b35c4ed2",
+      "kind": "content"
+    },
+    {
+      "source": "scripts/check_learning.py",
+      "destination": "scripts/check_learning.py",
+      "source_sha256": "27ad02c0b085a142ae3f6f15710dfcf325699ce119a6f5bebfeb6fb7b4a9988d",
+      "kind": "content"
+    },
+    {
+      "source": "scripts/render_mermaid.cjs",
+      "destination": "scripts/render_mermaid.cjs",
+      "source_sha256": "260f6cdcf42261dffb2b7a6f877d6ac1c99fcb49c2ca111aaed546059d37170b",
+      "kind": "content"
+    },
+    {
+      "source": "scripts/render_visuals.py",
+      "destination": "scripts/render_visuals.py",
+      "source_sha256": "290ca816388d25f11324dc1e3a336934aa868d9dbad76de4fc22f8274220144e",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/README.md",
+      "destination": "curriculum/01-code/01-problem-solving/change-loop.md",
+      "source_sha256": "75022a81b842a37544875b6f7f4e91101414a1e78f184f9e56fe8c7413970bec",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects.md",
+      "destination": "curriculum/01-code/01-problem-solving/change-projects.md",
+      "source_sha256": "d6528bcd6ce3ccca3e39e23341b8f39d23f449886fafddd30e5fac99996bfbe5",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects/01-the-history-a-stranger-can-debug-from.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/change-loop/01-the-history-a-stranger-can-debug-from.md",
+      "source_sha256": "b79df9656db6f9a8f41324b58089553eefc0d341986ba7accc71076d62615277",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects/02-the-change-small-enough-to-judge.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/change-loop/02-the-change-small-enough-to-judge.md",
+      "source_sha256": "0b39ebd84003ba9ceec2bef1a336beb3467691cb01e7181b39bc86d88522962a",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects/03-the-pipeline-that-can-refuse.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/change-loop/03-the-pipeline-that-can-refuse.md",
+      "source_sha256": "b16885b44a0cbefa0b1ec814d148f202dde2268655cfc0df92de3e9f530b0128",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects/04-the-review-you-automate-away.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/change-loop/04-the-review-you-automate-away.md",
+      "source_sha256": "36f73a01351fc4ed6e4ecf1b1600b477b12d784c8ccf9fa7f0dd644b8d02eac2",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/01-the-change-loop/projects/05-two-greens-that-make-a-red.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/change-loop/05-two-greens-that-make-a-red.md",
+      "source_sha256": "45eb1e626dbe201ed4288ca5e68ae7f5daa243acb8042cdc5689785d975fe0b0",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/README.md",
+      "destination": "curriculum/01-code/01-problem-solving/working-with-ai.md",
+      "source_sha256": "b52443cd4c09292ebc80b2531b2e9ebb2ffdccaaaf21a6de987403ca8d17c3e7",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects.md",
+      "destination": "curriculum/01-code/01-problem-solving/ai-projects.md",
+      "source_sha256": "db05a57a2ffdd927d4cd5d72468b091b77987cbdf8a2a4dddf7abbe10f71ce63",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects/01-the-spec-that-survives-a-stranger.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/ai-assisted/01-the-spec-that-survives-a-stranger.md",
+      "source_sha256": "a1994326ed918fb3edfeba245bf9ef56a53a622d557888aaa9dd6ae1ed440cc4",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects/02-the-verification-you-could-not-have-written-yourself.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/ai-assisted/02-the-verification-you-could-not-have-written-yourself.md",
+      "source_sha256": "474481981205a5e2cdff3c278410c53265c974c4dd6c721397c1331bd776aad6",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects/03-the-prompt-library.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/ai-assisted/03-the-prompt-library.md",
+      "source_sha256": "396b0c284cc6c1387b8d6f1b1e62498bd8a3bba425821890c86dcbcc773350c1",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects/04-the-review-harness.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/ai-assisted/04-the-review-harness.md",
+      "source_sha256": "55c642928f07d93145d135fade7f3439ca20201dbe7afb8e3647a48689b7f1ac",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/02-working-with-an-ai/projects/05-the-honest-log.md",
+      "destination": "curriculum/01-code/01-problem-solving/projects/ai-assisted/05-the-honest-log.md",
+      "source_sha256": "f9497ab3ad29b93d6353becd14504fed7b3740cb4144c23b41134d06c0fa37a5",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/03-frontend/README.md",
+      "destination": "curriculum/02-applications/03-frontend/browser-state.md",
+      "source_sha256": "4e1a9571fdf67a45139f15583551004e8c778fb2f09e2b14e18dec6859417a94",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/README.md",
+      "destination": "curriculum/02-applications/01-backend/request-lifecycle.md",
+      "source_sha256": "07a5ac373387481c9d48f05e5d4e4d9f4b3e525b446c388cba5e0f34f814c39a",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects.md",
+      "destination": "curriculum/02-applications/01-backend/projects.md",
+      "source_sha256": "7a3ea45461f13e9ecb0e4a937844cd681ee56fb27909584fab788c4e66552d51",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects/01-the-request-you-can-trace-end-to-end.md",
+      "destination": "curriculum/02-applications/01-backend/projects/01-the-request-you-can-trace-end-to-end.md",
+      "source_sha256": "fabc16a0724cbeeb102cdaf6a9c13b2c73e21ea6371679c313e11d1f1af9883e",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects/02-the-three-second-budget.md",
+      "destination": "curriculum/02-applications/01-backend/projects/02-the-three-second-budget.md",
+      "source_sha256": "a16a1f9f8babc6eaba8bf8afe5a113e7ba0ad294a6a55a52506d67bddc7ac050",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects/03-the-fetch-that-cannot-be-aimed-inward.md",
+      "destination": "curriculum/02-applications/01-backend/projects/03-the-fetch-that-cannot-be-aimed-inward.md",
+      "source_sha256": "6e6942b91899fa2dbc47863c374856787e997b114629737fe1de6d5a5b30be18",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects/04-the-api-that-does-not-break-its-callers.md",
+      "destination": "curriculum/02-applications/01-backend/projects/04-the-api-that-does-not-break-its-callers.md",
+      "source_sha256": "4831d0e5b3f66eeb8e20e84fbbe96910c40da528ff0996c0be564eb89494b226",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/04-backend/projects/05-the-job-that-survives-a-restart.md",
+      "destination": "curriculum/02-applications/01-backend/projects/05-the-job-that-survives-a-restart.md",
+      "source_sha256": "f560d1b7460a710f87bf9fa5943295adf3fa437790d7ffb4e600201efb19c881",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/05-data-and-databases/README.md",
+      "destination": "curriculum/02-applications/02-databases/data-models-and-queries.md",
+      "source_sha256": "05e1f0106eee0d8d3400568fb2492f788b90dfbb426b2bed43436b1fd41a6d29",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/README.md",
+      "destination": "curriculum/02-applications/04-testing/testing-strategy.md",
+      "source_sha256": "e538d8c64daa87e4aea192bc8ebddeb436cb70ba10b510f8d06655db51358b66",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects.md",
+      "destination": "curriculum/02-applications/04-testing/projects.md",
+      "source_sha256": "4ad7183b2a3e4aa4bd92126050b7e005d79c1f6ce028cee35f1fb4b203104b6f",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects/01-the-suite-that-can-fail.md",
+      "destination": "curriculum/02-applications/04-testing/projects/01-the-suite-that-can-fail.md",
+      "source_sha256": "143b405bee206538dab63b6fc683ba910e9970e91c0e3461618669e036f15b16",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects/02-the-contract-nobody-breaks-by-accident.md",
+      "destination": "curriculum/02-applications/04-testing/projects/02-the-contract-nobody-breaks-by-accident.md",
+      "source_sha256": "39335211af0ded8f2b7c609d63237d29da557cc2d9a542e1ba2b1811bf40baf2",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects/03-the-flake-hunter.md",
+      "destination": "curriculum/02-applications/04-testing/projects/03-the-flake-hunter.md",
+      "source_sha256": "eaf55606b0b29be755046916790cbbbe35eb8dd70731b52bfa74cceecf22be22",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects/04-the-load-test-that-finds-the-real-limit.md",
+      "destination": "curriculum/02-applications/04-testing/projects/04-the-load-test-that-finds-the-real-limit.md",
+      "source_sha256": "32e5a3174df6488bbf1f920d87b31777f78558cdb671a126e65c6627c397e0a9",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/06-testing/projects/05-the-test-that-runs-in-production-forever.md",
+      "destination": "curriculum/02-applications/04-testing/projects/05-the-test-that-runs-in-production-forever.md",
+      "source_sha256": "026dabda7533419a5dcf22431d9689c2d2c0f9fe1aab06e6de6cccc98dcdbf9b",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/01-junior/07-shipping-it/README.md",
+      "destination": "curriculum/03-production/03-infrastructure/configuration-and-environments.md",
+      "source_sha256": "0c471b81d6101691f6bbb68db51e638f24247b728c1eca9328df15d02b3718db",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/08-system-design/README.md",
+      "destination": "curriculum/03-production/01-system-design/design-method.md",
+      "source_sha256": "ad0b1c1561ca53e8ee32f7bad16b6450211b33a35d917796ec50d23a85c284e5",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/README.md",
+      "destination": "curriculum/03-production/05-reliability/failure-budgets.md",
+      "source_sha256": "326b964d456af33395775a9897b5557e608bc58eee34804f7091607ab6f9c059",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects.md",
+      "destination": "curriculum/03-production/05-reliability/projects.md",
+      "source_sha256": "4e0d40d005012e483278185c32aa59d64d9e76ebb557f09f550e252951050a23",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects/01-the-slo-you-would-actually-honour.md",
+      "destination": "curriculum/03-production/05-reliability/projects/01-the-slo-you-would-actually-honour.md",
+      "source_sha256": "54a434b3bdd01b64bdd9683b0956a97852f4779cabbeba10957ff13c0e6f354a",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects/02-the-alert-that-fires-when-it-matters-and-not-before.md",
+      "destination": "curriculum/03-production/05-reliability/projects/02-the-alert-that-fires-when-it-matters-and-not-before.md",
+      "source_sha256": "0b8cb72e79ab1bee06784172c018c558b4d9c0b588e56283f6adb54dc2ce8171",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects/03-the-retry-storm-you-build-on-purpose.md",
+      "destination": "curriculum/03-production/05-reliability/projects/03-the-retry-storm-you-build-on-purpose.md",
+      "source_sha256": "45fce72818667a7e9d02dfd61bfab8eae34b627abc04196c30af3db08c3bc1af",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects/04-shedding-the-right-thing.md",
+      "destination": "curriculum/03-production/05-reliability/projects/04-shedding-the-right-thing.md",
+      "source_sha256": "745bdab8840b77f5a8f35a05cae39928dea76920c4221b6b5767c3839a110649",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/09-reliability/projects/05-the-failure-that-will-not-recover.md",
+      "destination": "curriculum/03-production/05-reliability/projects/05-the-failure-that-will-not-recover.md",
+      "source_sha256": "0982a70165e338e05d5f0679634c1623e0a1117b54cfe2c68946159b08fac529",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/10-observability/README.md",
+      "destination": "curriculum/03-production/04-observability/logs-metrics-traces.md",
+      "source_sha256": "441b6ca05e412b400b6f0d0833b77312c803c2f8114ac83d1be304352cece9ce",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/11-security/README.md",
+      "destination": "curriculum/02-applications/05-security/trust-and-authorization.md",
+      "source_sha256": "bfc2876a8e0cf8810521599efb4ae17c0efcefba436698407a7e35a491ca242d",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/12-delivery/README.md",
+      "destination": "curriculum/03-production/02-delivery/delivery-pipeline.md",
+      "source_sha256": "1fcb90dc8460c691f2847371b5cf9fc459466f0a16575d12384455744e52bfcb",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/13-data-at-scale/README.md",
+      "destination": "curriculum/04-scale-and-evolution/01-data-at-scale/scaling-data.md",
+      "source_sha256": "5f40184b17a30175f416263386c81feb0f9433e9ffdc894dbaf08f6765c3007c",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/14-performance-and-cost/README.md",
+      "destination": "curriculum/04-scale-and-evolution/02-performance-cost/measurement-and-cost.md",
+      "source_sha256": "11e84cb0317b21b29b8035f7a74971ce93ce1e3d97fc238797058b328cd96c98",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/02-senior/15-ai-systems/README.md",
+      "destination": "curriculum/04-scale-and-evolution/03-ai-systems/evaluation-and-budgets.md",
+      "source_sha256": "0a94111ab4064978009d34aec2090319e93167f63987c7dc0f7d3723e150f2a5",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/16-scope-and-leverage/README.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/scope-and-leverage.md",
+      "source_sha256": "86a2de6fac3b2b0fd5f2568f7ad58a49296bdeba461c48f6d69540142bb8dfa1",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/17-writing-that-decides/README.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/design-documents.md",
+      "source_sha256": "fd921ebc616d46109cfff96370f8e8f4bd2ce2630fbaa53b8b519d76faa3e27f",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/18-technical-strategy/README.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/technical-strategy.md",
+      "source_sha256": "8520b287a1ea53ca4a637131f1fb148c395581cabc87f29128be5e8fecf80a9c",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/19-migrations/README.md",
+      "destination": "curriculum/04-scale-and-evolution/04-migrations/migration-method.md",
+      "source_sha256": "70f244ee18bd212c2671abfd904fbb3ae190892f4b96753b9d7c584530c8700c",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/20-risk-and-incidents/README.md",
+      "destination": "curriculum/03-production/05-reliability/risk-and-incidents.md",
+      "source_sha256": "f9da35240e3eb7d7fda5a30df0c339e37b5c7ad11c3b1118a03ff9bfc590338f",
+      "kind": "content"
+    },
+    {
+      "source": "tiers/03-staff/21-making-others-faster/README.md",
+      "destination": "curriculum/04-scale-and-evolution/05-technical-decisions/engineering-effectiveness.md",
+      "source_sha256": "6b933f1f6cd62c70ea6dc850c2e1659e6b6f03fd035571a53d697db716b62455",
+      "kind": "content"
+    }
+  ]
+}
