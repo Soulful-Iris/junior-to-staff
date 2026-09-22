@@ -1,6 +1,6 @@
 # 06 · Testing
 
-> Junior tier · feeds **P1 (it works)** and everything after it
+> Junior tier · feeds **P1 (it works)** and everything after it · **[five projects](projects.md)**
 
 ## The one-liner
 

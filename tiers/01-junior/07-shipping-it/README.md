@@ -1,6 +1,6 @@
 # 07 · Shipping it
 
-> Junior tier · feeds **P1 (it works)** and sets up **P2 (it survives)**
+> Junior tier · feeds **P1 (it works)** and sets up **P2 (it survives)** · **[five projects](projects.md)**
 
 ## The one-liner
 

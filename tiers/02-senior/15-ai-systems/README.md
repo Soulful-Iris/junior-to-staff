@@ -1,6 +1,6 @@
 # 15 · AI systems
 
-> Senior tier · feeds **P4 (it reasons, provably)**
+> Senior tier · feeds **P4 (it reasons, provably)** · **[five projects](projects.md)**
 
 ## The one-liner
 

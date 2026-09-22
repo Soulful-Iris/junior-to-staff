@@ -1,6 +1,6 @@
 # 02 · Working with an AI that writes the code
 
-> Junior tier · feeds **every project in this guide**
+> Junior tier · feeds **every project in this guide** · **[five projects](projects.md)**
 
 ## The one-liner
 

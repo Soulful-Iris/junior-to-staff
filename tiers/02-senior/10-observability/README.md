@@ -1,6 +1,6 @@
 # 10 · Observability
 
-> Senior tier · feeds **P2 (it survives)**
+> Senior tier · feeds **P2 (it survives)** · **[five projects](projects.md)**
 
 ## The one-liner
 

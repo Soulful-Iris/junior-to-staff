@@ -1,6 +1,6 @@
 # 05 · Data and databases
 
-> Junior tier · feeds **P1 (it works)**
+> Junior tier · feeds **P1 (it works)** · **[five projects](projects.md)**
 
 ## The one-liner
 

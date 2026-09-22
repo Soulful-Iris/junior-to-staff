@@ -1,6 +1,6 @@
 # 08 · System design
 
-> Senior tier · feeds **P3 (it holds under load)**
+> Senior tier · feeds **P3 (it holds under load)** · **[five projects](projects.md)**
 
 ## The one-liner
 

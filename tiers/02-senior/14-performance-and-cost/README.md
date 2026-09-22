@@ -1,6 +1,6 @@
 # 14 · Performance and cost
 
-> Senior tier · feeds **P3 (it holds under load)**
+> Senior tier · feeds **P3 (it holds under load)** · **[five projects](projects.md)**
 
 ## The one-liner
 

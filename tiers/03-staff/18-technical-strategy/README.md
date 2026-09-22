@@ -1,6 +1,6 @@
 # 18 · Technical strategy
 
-> Staff tier · feeds **P5 (it changes safely)**
+> Staff tier · feeds **P5 (it changes safely)** · **[five projects](projects.md)**
 
 ## The one-liner
 
