@@ -1,5 +1,10 @@
 # Teaching standard
 
+Start with the shared [learning experience](../../docs/LEARNING-EXPERIENCE.md).
+It governs both paths: introduce the actual problem and expected values before
+the concept, show a reusable approach, and let follow-up questions change the
+diagram. Each coding problem and project has its own page.
+
 Every substantive lesson needs a problem, a concept explanation, a visual, a worked example, an implementation exercise, failure cases, and a retrieval question. Do not replace teaching with a reading list.
 
 ## Visual standard

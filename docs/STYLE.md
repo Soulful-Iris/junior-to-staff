@@ -1,5 +1,11 @@
 # How this guide is written
 
+The [shared learning experience](LEARNING-EXPERIENCE.md) takes precedence for
+problem introductions, explicit expected behavior, project organization, and
+visual follow-ups. Open a lesson as an interviewer or reviewing engineer would:
+explain the situation before asking the reader to solve it. Keep the existing
+AI prompting and verification instruction within that clearer teaching flow.
+
 This is the internal spec for the original AI-assisted engineering chapters.
 The interview path uses [its teaching standard](../paths/interviews/TEACHING.md),
 which includes concept instruction, code, and timed independent practice.
