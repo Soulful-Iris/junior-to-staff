@@ -1,6 +1,6 @@
 # Backend and APIs
 
-Trace a request, define its contract, and coordinate bounded work. DEPLOYPROBE-7731.
+Trace a request, define its contract, and coordinate bounded work.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
 
