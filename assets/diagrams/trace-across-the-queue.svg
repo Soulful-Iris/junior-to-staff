@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 366" width="760" height="366" role="img" aria-label="The same work seen two ways. When the trace context rides inside the queue message, the API spans and the worker spans belong to one trace and the gap between them is visible as waiting. When the context is dropped at the boundary, the worker's work becomes a second, unrelated trace, and the time spent in the queue is invisible to both.">
+  <rect width="760" height="366" rx="10" fill="#faf9f7"/>
+
+  <!-- ===================== top panel: context propagated ===================== -->
+  <text x="44" y="44" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e" letter-spacing="1.3">CONTEXT RIDES INSIDE THE MESSAGE</text>
+
+  <text x="44" y="77" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">POST /links</text>
+  <rect x="180" y="66" width="150" height="14" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+
+  <text x="56" y="96" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">db insert</text>
+  <rect x="192" y="86" width="50" height="12" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+
+  <text x="56" y="114" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">sqs send</text>
+  <rect x="250" y="104" width="40" height="12" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+
+  <text x="44" y="133" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">worker consume</text>
+  <rect x="380" y="122" width="210" height="14" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+
+  <text x="56" y="152" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">fetch title</text>
+  <rect x="392" y="142" width="170" height="12" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+
+  <!-- the hop that keeps the trace whole -->
+  <path id="hop" d="M 290 110 C 322 110, 350 129, 380 129" fill="none" stroke="#2f6f4e" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <text x="300" y="96" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#2f6f4e">traceparent in the message body</text>
+  <circle r="3.5" fill="#2f6f4e" opacity="0">
+    <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.44;1" calcMode="linear"
+                   path="M 290 110 C 322 110, 350 129, 380 129"/>
+    <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.04;0.4;0.46;1" dur="4.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <rect x="632" y="92" width="52" height="17" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+  <text x="658" y="104" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e">a3f8c1</text>
+  <text x="632" y="128" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">one trace</text>
+
+  <line x1="44" y1="174" x2="716" y2="174" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- ===================== bottom panel: context dropped ===================== -->
+  <text x="44" y="200" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a85d2f" letter-spacing="1.3">CONTEXT DROPPED AT THE BOUNDARY</text>
+
+  <text x="44" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">POST /links</text>
+  <rect x="180" y="217" width="150" height="14" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+
+  <text x="56" y="247" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">sqs send</text>
+  <rect x="250" y="237" width="40" height="12" rx="3" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+
+  <text x="44" y="272" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#3f3b36">worker consume</text>
+  <rect x="380" y="261" width="210" height="14" rx="3" fill="#faf0e9" stroke="#c2703d" stroke-width="1.2" stroke-dasharray="4 3"/>
+
+  <!-- the break -->
+  <line x1="290" y1="243" x2="316" y2="256" stroke="#c2703d" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <line x1="311" y1="250" x2="323" y2="262" stroke="#a85d2f" stroke-width="1.6"/>
+  <line x1="323" y1="250" x2="311" y2="262" stroke="#a85d2f" stroke-width="1.6"/>
+  <text x="334" y="249" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#a85d2f">header never sent</text>
+
+  <rect x="632" y="215" width="52" height="17" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+  <text x="658" y="227" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e">a3f8c1</text>
+  <rect x="632" y="259" width="52" height="17" rx="4" fill="#faf0e9" stroke="#c2703d" stroke-width="1"/>
+  <text x="658" y="271" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a85d2f">9c1d04</text>
+  <text x="632" y="292" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#a85d2f">two traces</text>
+
+  <line x1="44" y1="308" x2="716" y2="308" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="330" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Both halves are instrumented. Only the top one can answer "where did the time go" — because the</text>
+  <text x="44" y="347" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">queue wait is the gap between two spans, and a gap needs both spans to exist in the same trace.</text>
+</svg>
