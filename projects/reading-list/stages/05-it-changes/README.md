@@ -86,7 +86,7 @@ These exercises verify specific boundaries; completing their reference tests doe
 
 ## Build and prompt sequence
 
-> Staff tier · fed by sections 16, 17, 19, 20 · the question is **can you replace a load-bearing piece without stopping the world?**
+> Stage 5 · the question is **can you replace a load-bearing piece without stopping the world?**
 
 The last project is not a feature. It is a **migration** of the system you have
 spent four projects building, done the way you would have to do it if other

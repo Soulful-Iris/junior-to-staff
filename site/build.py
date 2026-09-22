@@ -1,0 +1,1025 @@
+#!/usr/bin/env python3.12
+"""Build the static site from the concept-first curriculum.
+
+    python3.12 site/build.py          # markdown -> site/out/
+    python3.12 site/serve.py          # http://127.0.0.1:8901
+
+Three decisions worth knowing about, because each one removes a class of bug
+rather than adding a feature.
+
+* **The output mirrors the repo tree.** `curriculum/01-code/.../README.md`
+  becomes `curriculum/01-code/.../index.html`. That does not remove the need to
+  rewrite links — this content links to `.md` files, which is right on GitHub
+  and dead on a website, and there are 1,421 of them. What the mirroring buys
+  is that the rewrite is total and mechanical: every `.md` path maps to exactly
+  one output path by a rule with no lookups in it, so directory structure can
+  never drift out from under a link. `site/check.py` walks the BUILT pages and
+  resolves every href against disk, because the old checker validated the
+  markdown and would have passed this build with 1,421 dead links in it.
+
+* **Mermaid is pre-rendered to SVG at build time**, by `tools/render-mermaid.mjs`,
+  in the house palette. 387 diagrams that need three megabytes of JavaScript to
+  appear are 387 diagrams that sometimes do not appear. They are also emitted at
+  natural size rather than scaled to fit, because scaling a wide diagram down to
+  the text column shrinks its labels to the point of uselessness — the wide ones
+  scroll instead.
+
+* **`<details>` gets `markdown="1"` injected before conversion.** Without it the
+  197 collapsible solutions in this curriculum render their insides as raw
+  markdown: tables as pipes, emphasis as asterisks. It looks completely fine in
+  the build log.
+
+The curriculum's own vocabulary carries the teaching — `Changed requirement`,
+`Follow-up N`, `Senior expectation`, `Invariant` — so those are styled as
+first-class objects rather than left as bold paragraphs. They are the part a
+reader is here for.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import markdown
+
+ROOT = Path(__file__).resolve().parent.parent
+OUT = Path(__file__).resolve().parent / "out"
+TOOLS = Path(__file__).resolve().parent / "tools"
+MERMAID_CACHE = Path(__file__).resolve().parent / ".mermaid-cache"
+
+SITE_TITLE = "The Engineering Interview Curriculum"
+SITE_SHORT = "interview curriculum"
+SITE_LEDE = (
+    "Seventeen subjects, each starting from a concrete problem and ending in the "
+    "follow-up questions an interviewer actually asks."
+)
+
+# ---------------------------------------------------------------- content map
+
+# Four groups, in reading order. The accent is an identity mark used in small
+# doses — a chip, a rule, the active nav item — not a theme. Green stays the
+# base ink throughout so the site reads as one thing.
+GROUPS = {
+    "01-code": ("Write correct code", "#1f5b76", "Correctness, data structures, and directing an AI without losing the judgment."),
+    "02-applications": ("Build a complete application", "#2f6f4e", "Backend, data, frontend, tests, and authorisation that actually holds."),
+    "03-production": ("Design, ship, and operate", "#a8682f", "Design under constraints, then deliver it and keep it alive at three in the morning."),
+    "04-scale-and-evolution": ("Scale and evolve", "#6f4a7d", "Load, cost, models, migrations, and the decisions that outlast you."),
+}
+
+# Content kinds, derived from the tree rather than invented. Each one changes
+# what a reader is being asked to do, which is why it gets a visible badge.
+KINDS = {
+    "problem":  ("problem",  "Try it, then open the solution"),
+    "lab":      ("lab",      "Hands-on"),
+    "project":  ("project",  "Build brief"),
+    "case":     ("case",     "Real incident"),
+    "lesson":   ("lesson",   "Worked lesson"),
+    "design":   ("design",   "System design"),
+    "aws":      ("aws",      "AWS implementation"),
+    "practice": ("practice", "Mock interview"),
+    "index":    ("index",    "Index"),
+    "concept":  ("concept",  ""),
+}
+
+SECTION_DIRS = {"problems": "problem", "labs": "lab", "projects": "project",
+                "cases": "case", "lessons": "lesson", "aws": "aws"}
+
+
+def first_heading(text: str) -> str:
+    m = re.search(r"^#\s+(.+)$", text, re.M)
+    return re.sub(r"[*`\[\]]|\(.*?\)", "", m.group(1)).strip() if m else "Untitled"
+
+
+def summary_of(text: str) -> str:
+    """First real paragraph, stripped, for search results and cards."""
+    body = re.sub(r"^#.*$", "", text, flags=re.M)
+    body = re.sub(r"```.*?```", "", body, flags=re.S)
+    body = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", body)
+    body = re.sub(r"<[^>]+>", "", body)
+    for para in body.split("\n\n"):
+        p = " ".join(para.split())
+        p = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", p)
+        p = re.sub(r"[*_`#|>]", "", p).strip()
+        if len(p) > 60 and not p.startswith("Curriculum"):
+            return p
+    return ""
+
+
+def prose_of(text: str) -> str:
+    """Readable prose for full-text search.
+
+    Code, tables and mermaid come out: searching a 190,000-word curriculum for
+    "queue" should land on the paragraph explaining queues, not on the forty
+    diagrams with a node called `queue`.
+    """
+    t = re.sub(r"```.*?```", " ", text, flags=re.S)
+    t = re.sub(r"`[^`]*`", " ", t)
+    t = re.sub(r"!\[[^\]]*\]\([^)]*\)", " ", t)
+    t = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", t)
+    t = re.sub(r"^\s*\|.*$", " ", t, flags=re.M)
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"[*_#>]", " ", t)
+    return " ".join(t.split())
+
+
+def kind_for(rel: Path) -> str:
+    parts = rel.parts
+    if parts[0] == "practice":
+        return "practice"
+    if parts[0] == "indexes":
+        return "index"
+    if parts[0] == "projects":
+        return "project"
+    if parts[0] == "docs":
+        return "concept"
+    for p in parts:
+        if p in SECTION_DIRS:
+            return SECTION_DIRS[p]
+    if len(parts) >= 4 and parts[0] == "curriculum" and parts[-1].endswith(".md"):
+        if parts[-1] == "README.md":
+            return "concept"
+        return "concept"
+    return "concept"
+
+
+def collect() -> list[dict]:
+    """Every page we publish, in reading order.
+
+    Reading order is the point of this curriculum, so it is built explicitly
+    rather than falling out of a directory walk: group, then subject, then the
+    subject's own pages, then its problems and labs and projects.
+    """
+    pages: list[dict] = []
+
+    def add(src: Path, **kw):
+        if not (ROOT / src).exists():
+            return
+        pages.append({"src": str(src).replace(os.sep, "/"), **kw})
+
+    add(Path("README.md"), kind="home", title=SITE_TITLE, group=None, subject=None)
+
+    for gi, (gdir, (gname, gcolour, gblurb)) in enumerate(GROUPS.items(), 1):
+        gpath = ROOT / "curriculum" / gdir
+        if not gpath.is_dir():
+            continue
+        add(Path("curriculum") / gdir / "README.md", kind="group",
+            title=gname, group=gdir, subject=None, gnum=gi)
+
+        for sdir in sorted(p for p in gpath.iterdir() if p.is_dir()):
+            srel = Path("curriculum") / gdir / sdir.name
+            add(srel / "README.md", kind="subject", group=gdir, subject=sdir.name, gnum=gi)
+
+            # loose concept pages in the subject, alphabetical so the order is
+            # stable across rebuilds
+            for f in sorted(sdir.glob("*.md")):
+                if f.name == "README.md":
+                    continue
+                add(srel / f.name, kind="concept", group=gdir, subject=sdir.name, gnum=gi)
+
+            # then the practice material, in a deliberate order
+            for sub in ("lessons", "problems", "labs", "cases", "projects", "aws"):
+                d = sdir / sub
+                if not d.is_dir():
+                    continue
+                for f in sorted(d.rglob("*.md")):
+                    add(f.relative_to(ROOT), kind=SECTION_DIRS.get(sub, "concept"),
+                        group=gdir, subject=sdir.name, gnum=gi)
+
+    for extra in ("curriculum/README.md",):
+        add(Path(extra), kind="toc", group=None, subject=None)
+
+    for d in ("indexes", "practice", "projects", "docs", "scripts"):
+        base = ROOT / d
+        if not base.is_dir():
+            continue
+        readme = base / "README.md"
+        if readme.exists():
+            add(readme.relative_to(ROOT), kind=kind_for(Path(d, "README.md")),
+                group=None, subject=None, area=d)
+        for f in sorted(base.rglob("*.md")):
+            if f.name == "README.md" and f.parent == base:
+                continue
+            add(f.relative_to(ROOT), kind=kind_for(f.relative_to(ROOT)),
+                group=None, subject=None, area=d)
+
+    seen, ordered = set(), []
+    for p in pages:
+        if p["src"] in seen:
+            continue
+        seen.add(p["src"])
+        ordered.append(p)
+
+    subject_titles = {}
+    group_titles = {g: v[0] for g, v in GROUPS.items()}
+    for p in ordered:
+        text = (ROOT / p["src"]).read_text(encoding="utf-8")
+        p["text"] = text
+        p.setdefault("title", first_heading(text))
+        p["summary"] = summary_of(text)
+        p["url"] = url_for(p["src"])
+        if p["kind"] == "subject":
+            subject_titles[(p["group"], p["subject"])] = p["title"]
+    for p in ordered:
+        p["subject_title"] = subject_titles.get((p.get("group"), p.get("subject")), "")
+        p["group_title"] = group_titles.get(p.get("group"), "")
+    return ordered
+
+
+def url_for(src: str) -> str:
+    if src == "README.md":
+        return "/"
+    if src.endswith("/README.md"):
+        return "/" + src[: -len("README.md")]
+    return "/" + src[:-3] + ".html"
+
+
+def dest_for(src: str) -> str:
+    if src.endswith("README.md"):
+        return src[: -len("README.md")] + "index.html"
+    return src[:-3] + ".html"
+
+
+# ------------------------------------------------------------------- mermaid
+
+MERMAID_RE = re.compile(r"```mermaid\n(.*?)```", re.S)
+
+
+def mermaid_blocks(pages) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for p in pages:
+        for m in MERMAID_RE.finditer(p["text"]):
+            code = m.group(1).strip()
+            out[hashlib.sha256(code.encode()).hexdigest()[:16]] = code
+    return out
+
+
+def render_mermaid(blocks: dict[str, str]) -> set[str]:
+    """Pre-render to SVG. Returns the set of hashes that have an SVG on disk."""
+    MERMAID_CACHE.mkdir(parents=True, exist_ok=True)
+    manifest = [{"hash": h, "code": c} for h, c in sorted(blocks.items())]
+    mf = MERMAID_CACHE / "_manifest.json"
+    mf.write_text(json.dumps(manifest), encoding="utf-8")
+
+    missing = [h for h in blocks if not (MERMAID_CACHE / f"{h}.svg").exists()]
+    if missing:
+        chrome = os.environ.get("CHROME_PATH") or next(
+            (str(p) for p in Path.home().glob(".cache/ms-playwright/chromium*/chrome-linux/chrome")), "")
+        if not chrome:
+            print("  ! no chromium found; diagrams will be skipped", file=sys.stderr)
+        else:
+            env = dict(os.environ, CHROME_PATH=chrome)
+            sysroot = Path.home() / "sysroot"
+            if sysroot.is_dir():
+                env["LD_LIBRARY_PATH"] = f"{sysroot}/usr/lib64:{sysroot}/lib64:" + env.get("LD_LIBRARY_PATH", "")
+            r = subprocess.run(["node", str(TOOLS / "render-mermaid.mjs"), str(mf), str(MERMAID_CACHE)],
+                               env=env, capture_output=True, text=True)
+            for line in (r.stdout + r.stderr).strip().splitlines():
+                print(f"  {line}")
+    have = {h for h in blocks if (MERMAID_CACHE / f"{h}.svg").exists()}
+    if len(have) != len(blocks):
+        print(f"  ! {len(blocks) - len(have)} diagrams missing an SVG", file=sys.stderr)
+    return have
+
+
+def substitute_mermaid(text: str, have: set[str], depth: int) -> str:
+    """Replace each mermaid fence with a reference to its pre-rendered SVG."""
+    up = "../" * depth
+    def repl(m):
+        code = m.group(1).strip()
+        h = hashlib.sha256(code.encode()).hexdigest()[:16]
+        if h not in have:
+            return m.group(0)
+        return (f'\n<div class="mer"><img src="{up}assets/mermaid/{h}.svg" '
+                f'alt="Diagram" loading="lazy"></div>\n')
+    return MERMAID_RE.sub(repl, text)
+
+
+# -------------------------------------------------------------------- render
+
+MD_EXT = ["extra", "toc", "sane_lists", "md_in_html"]
+
+# The curriculum's recurring bold leads. These are the teaching objects, so the
+# page gives them shape instead of leaving them as another bold paragraph.
+MARKERS = [
+    (r"Changed requirement:",   "changed",  "changed requirement"),
+    (r"Follow-up\s*\d*\s*[—:-]", "followup", "follow-up"),
+    (r"Follow-up:",             "followup", "follow-up"),
+    (r"Senior expectation:",    "depth",    "senior expectation"),
+    (r"Staff(?:/lead)? expectation:", "depth", "staff expectation"),
+    (r"Invariant:",             "invariant", "invariant"),
+    (r"Redraw challenge:",      "redraw",   "redraw challenge"),
+    (r"Not covered here:",      "aside",    "not covered"),
+]
+
+
+def style_markers(html: str) -> str:
+    """Turn `<p><strong>Changed requirement:</strong> ...` into a marked block.
+
+    Where the bold lead is *only* the marker phrase it is dropped, because the
+    block already carries that word as its label and printing it twice is the
+    decoration my own style rules forbid. Where the bold carries more than the
+    phrase — `Follow-up 1 — background heap cleanup.` — it is a real title and
+    stays.
+    """
+    for pat, cls, label in MARKERS:
+        def repl(m, cls=cls, label=label):
+            inner = m.group(1)
+            rest = re.sub(rf"^{pat}\s*", "", inner).strip()
+            lead = f"<strong>{inner}</strong>" if rest else ""
+            return f'<p class="mk mk-{cls}" data-mk="{label}">{lead}'
+        html = re.sub(rf"<p><strong>({pat}(?:[^<]|<(?!/strong>))*)</strong>", repl, html)
+    return html
+
+
+def render_body(text: str, have: set[str], depth: int) -> tuple[str, list]:
+    text = substitute_mermaid(text, have, depth)
+    # md_in_html only descends into elements that ask it to
+    text = text.replace("<details>", '<details markdown="1">')
+    md = markdown.Markdown(extensions=MD_EXT)
+    html = md.convert(text)
+    toc = getattr(md, "toc_tokens", [])
+
+    html = html.replace("<table>", '<div class="tablewrap"><table>').replace("</table>", "</table></div>")
+    html = re.sub(r"<p>(<img[^>]*>)</p>", r'<div class="figwrap">\1</div>', html)
+    html = style_markers(html)
+    html = rewrite_md_links(html)
+    return html, flatten_toc(toc)
+
+
+MD_HREF = re.compile(r'(href=")([^"]+?)\.md(#[^"]*)?(")')
+
+
+def rewrite_md_links(html: str) -> str:
+    """`../x/README.md` -> `../x/`, `../x/y.md` -> `../x/y.html`.
+
+    The curriculum links to `.md` files because that is what works on GitHub.
+    On a site every one of them is a 404, and there are more than fourteen
+    hundred. The mapping is the same rule `dest_for` uses when writing the
+    files, which is why it cannot disagree with where they landed.
+    """
+    def repl(m):
+        pre, path, frag, post = m.group(1), m.group(2), m.group(3) or "", m.group(4)
+        if path.endswith("README"):
+            out = path[: -len("README")] or "./"
+        else:
+            out = path + ".html"
+        return f"{pre}{out}{frag}{post}"
+    return MD_HREF.sub(repl, html)
+
+
+CRUMB_P = re.compile(r"<p>((?:\s*<a [^>]*>[^<]*</a>\s*(?:·|\|)?\s*)+)</p>", re.S)
+LINK_RE = re.compile(r'<a href="([^"]*)"[^>]*>([^<]*)</a>')
+
+
+def lift_crumb(html: str, page) -> tuple[str, str]:
+    """Pull the markdown's own breadcrumb out of the body.
+
+    166 of these files open with `[Curriculum](..) · [Subject](..)`, which the
+    page shell already shows above the title. Left in place it reads as the
+    same line printed twice. The links that are NOT duplicates — "All coding
+    problems", a prerequisite — are worth keeping, so they become chips instead
+    of being thrown away with the rest.
+    """
+    m = CRUMB_P.search(html[:1400])
+    if not m:
+        return html, ""
+    links = LINK_RE.findall(m.group(1))
+    if len(links) < 2:
+        return html, ""
+    dupes = {"curriculum", "home", (page.get("subject_title") or "").lower()}
+    for p in ("group_title",):
+        if page.get(p):
+            dupes.add(page[p].lower())
+    keep = [(h, t) for h, t in links if t.strip().lower() not in dupes]
+    html = html[: m.start()] + html[m.end():]
+    if not keep:
+        return html, ""
+    chips = "".join(f'<a href="{h}">{esc(t)}</a>' for h, t in keep)
+    return html, f'<div class="pair">{chips}</div>'
+
+
+def flatten_toc(tokens) -> list[str]:
+    """python-markdown gives nested dicts; search only wants the heading text."""
+    names: list[str] = []
+    def walk(items):
+        for t in items:
+            names.append(t.get("name", ""))
+            walk(t.get("children", []))
+    walk(tokens or [])
+    return names
+
+
+# ----------------------------------------------------------------------- css
+
+CSS = """
+@font-face{font-family:"Source Serif 4"; src:url("fonts/source-serif-4-400.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap}
+@font-face{font-family:"Source Serif 4"; src:url("fonts/source-serif-4-600.woff2") format("woff2");
+  font-weight:600; font-style:normal; font-display:swap}
+:root{
+  --ground:#e8ece9; --paper:#fcfcfa; --ink:#1b2420; --muted:#5c675f;
+  --rule:#d6dcd7; --green:#2f6f4e; --green-tint:#eaf0ec; --warm:#b2632f;
+  --warm-tint:#f9efe7; --measure:66ch; --wide:860px;
+  --accent:#2f6f4e; --accent-tint:#eaf0ec;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{margin:0; background:var(--ground); color:var(--ink);
+  font:18px/1.68 "Source Serif 4","Iowan Old Style",Palatino,Georgia,serif}
+.ui,.rail,.crumb,.pair,.nextprev,.bar,.badge,.mk::before{
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+
+a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px}
+a:hover{color:var(--ink)}
+:focus-visible{outline:2px solid var(--warm); outline-offset:2px; border-radius:2px}
+
+/* ---- frame ---- */
+.frame{display:grid; grid-template-columns:282px minmax(0,1fr); min-height:100vh}
+.main,.sheet,.col{min-width:0}
+.rail{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  padding:24px 16px 60px 26px; border-right:1px solid var(--rule);
+  font-size:13.5px; line-height:1.45}
+.main{padding:0 0 96px}
+.sheet{background:var(--paper); border-left:1px solid var(--rule);
+  border-right:1px solid var(--rule); min-height:100vh}
+.col{max-width:var(--wide); margin:0 auto; padding:46px 28px 0}
+/* Prose keeps a reading measure; figures and tables are allowed the full
+   column, because a diagram squeezed to 66ch is a diagram nobody reads. */
+.col > p, .col > ul, .col > ol, .col > h1, .col > h2, .col > h3, .col > h4,
+.col > blockquote, .col > details > p, .col > details > ul, .col > details > ol{
+  max-width:var(--measure)}
+
+/* ---- rail ---- */
+.brand{display:block; font-size:15px; font-weight:600; color:var(--ink);
+  text-decoration:none; font-family:"Source Serif 4",Georgia,serif}
+.brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;
+  margin-top:3px; font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.search{margin:16px 0 18px}
+.search input{width:100%; padding:7px 10px; border:1px solid var(--rule); border-radius:6px;
+  background:var(--paper); color:var(--ink); font:inherit; font-size:13.5px}
+.search input::placeholder{color:#93a09a}
+.grp{margin:20px 0 5px; display:flex; align-items:baseline; gap:7px}
+.grp .gn{font-variant-numeric:tabular-nums; font-size:11px; font-weight:600;
+  color:var(--paper); background:var(--gc); border-radius:4px; padding:1px 5px}
+.grp a{color:var(--ink); text-decoration:none; font-weight:600; font-size:13.5px}
+.grp a:hover{color:var(--gc)}
+.rail ol{list-style:none; margin:0 0 2px; padding:0}
+.rail li{margin:1px 0}
+.rail a.item{display:block; padding:4px 9px 4px 12px; border-radius:5px;
+  color:var(--ink); text-decoration:none; border-left:2px solid transparent}
+.rail a.item:hover{background:var(--green-tint)}
+.rail a.item[aria-current]{background:var(--gc,var(--green)); color:var(--paper)}
+.rail .leaf{list-style:none; margin:2px 0 6px; padding:0 0 0 12px;
+  border-left:1px solid var(--rule)}
+.rail .leaf a{display:block; padding:2px 8px; color:var(--muted);
+  text-decoration:none; font-size:12.5px; border-radius:4px}
+.rail .leaf a:hover{color:var(--ink); background:var(--green-tint)}
+.rail .leaf a[aria-current]{color:var(--ink); font-weight:600}
+.rail .ext{margin-top:24px; padding-top:14px; border-top:1px solid var(--rule); font-size:12.5px}
+.rail .ext a{display:block; margin:5px 0; color:var(--muted); text-decoration:none}
+.rail .ext a:hover{color:var(--green)}
+
+/* ---- page furniture ---- */
+.crumb{font-size:13px; color:var(--muted); margin:0 0 14px}
+.crumb a{color:var(--muted); text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.crumb .dot{opacity:.5; margin:0 6px}
+.badge{display:inline-block; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  font-weight:600; padding:2px 7px; border-radius:4px; background:var(--accent-tint);
+  color:var(--accent); vertical-align:2px}
+.badge.b-problem{background:var(--warm-tint); color:var(--warm)}
+.badge.b-lab,.badge.b-aws{background:#eaeef4; color:#3a5a7a}
+.badge.b-case{background:var(--warm-tint); color:#9a4a2a}
+.badge.b-practice{background:#f1ecf4; color:#63467a}
+.kindnote{font-size:13.5px; color:var(--muted); margin:0 0 22px}
+
+/* ---- content ---- */
+.col h1{font-size:33px; line-height:1.18; margin:0 0 10px; letter-spacing:-.012em}
+.col h2{font-size:22px; line-height:1.3; margin:40px 0 12px; letter-spacing:-.008em;
+  padding-bottom:5px; border-bottom:1px solid var(--rule); max-width:var(--wide)}
+.col h3{font-size:18.5px; margin:30px 0 9px}
+.col h4{font-size:17px; margin:24px 0 8px}
+.col p,.col li{overflow-wrap:break-word}
+.col blockquote{margin:16px 0 26px; padding:12px 18px; border-left:3px solid var(--accent);
+  background:var(--accent-tint); border-radius:0 7px 7px 0; color:var(--ink);
+  font-size:17px; max-width:var(--measure)}
+.col blockquote p{margin:.3em 0}
+.col hr{border:0; border-top:1px solid var(--rule); margin:38px 0}
+.col ul,.col ol{padding-left:22px}
+.col li{margin:5px 0}
+.col code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.85em;
+  background:var(--green-tint); padding:1px 4px; border-radius:3px}
+.col pre{background:#20302a; color:#e6ece8; padding:15px 17px; border-radius:8px;
+  overflow-x:auto; font-size:14px; line-height:1.55; margin:20px 0}
+.col pre code{background:none; padding:0; color:inherit; font-size:14px}
+
+/* figures: natural size, scroll rather than shrink */
+/* Scroll shadows: a wide diagram keeps its natural text size and scrolls, so
+   the edge needs to say so. Pure CSS — the two fixed layers are the "ends",
+   the two scrolling layers cover them when there is nothing more that way. */
+.mer{margin:26px 0; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  background:var(--paper); border:1px solid var(--rule); border-radius:9px;
+  padding:16px 14px; text-align:center;
+  background-image:
+    linear-gradient(to right, var(--paper) 30%, rgba(250,249,247,0)),
+    linear-gradient(to left,  var(--paper) 30%, rgba(250,249,247,0)),
+    linear-gradient(to right, rgba(27,36,32,.20), rgba(27,36,32,0) 20px),
+    linear-gradient(to left,  rgba(27,36,32,.20), rgba(27,36,32,0) 20px);
+  background-position:0 0, 100% 0, 0 0, 100% 0;
+  background-repeat:no-repeat;
+  background-size:36px 100%, 36px 100%, 18px 100%, 18px 100%;
+  background-attachment:local, local, scroll, scroll}
+.mer img{display:inline-block; max-width:none; height:auto}
+.figwrap{margin:26px 0; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  background:var(--paper); border-radius:9px}
+.figwrap img{display:block; width:100%; height:auto; border-radius:9px}
+
+.tablewrap{overflow-x:auto; margin:22px 0; -webkit-overflow-scrolling:touch}
+.col table{width:100%; border-collapse:collapse; font-size:15px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.col th{text-align:left; font-weight:600; border-bottom:1.5px solid var(--rule);
+  padding:7px 9px; background:var(--green-tint)}
+.col td{border-bottom:1px solid var(--rule); padding:7px 9px; vertical-align:top}
+.col tr:last-child td{border-bottom:0}
+
+/* ---- the teaching objects ---- */
+.mk{position:relative; margin:22px 0; padding:13px 16px 13px 17px;
+  border-left:3px solid var(--rule); border-radius:0 7px 7px 0;
+  background:#f6f5f2; font-size:16.5px; max-width:var(--measure)}
+.mk::before{content:attr(data-mk); display:block; font-size:10.5px; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-bottom:5px}
+.mk strong{font-weight:600}
+.mk-changed{border-left-color:var(--warm); background:var(--warm-tint)}
+.mk-changed::before{color:var(--warm)}
+.mk-followup{border-left-color:#3a5a7a; background:#eef1f6}
+.mk-followup::before{color:#3a5a7a}
+.mk-depth{border-left-color:#63467a; background:#f2eef5}
+.mk-depth::before{color:#63467a}
+.mk-invariant{border-left-color:var(--green); background:var(--green-tint)}
+.mk-invariant::before{color:var(--green)}
+.mk-redraw{border-left-color:#8a857d}
+.mk-aside{border-left-color:var(--rule); background:transparent; color:var(--muted);
+  font-size:15.5px}
+
+/* ---- reveal panels ---- */
+.col details{margin:24px 0; border:1px solid var(--rule); border-radius:9px;
+  background:#f6f5f2; max-width:var(--wide)}
+.col details[open]{background:var(--paper)}
+.col summary{cursor:pointer; padding:12px 16px; font-weight:600; font-size:16px;
+  list-style:none; display:flex; gap:9px; align-items:baseline;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.col summary::-webkit-details-marker{display:none}
+.col summary::before{content:"›"; display:inline-block; color:var(--accent);
+  font-size:20px; line-height:1; transform:rotate(0deg); transition:transform .15s}
+.col details[open] summary::before{transform:rotate(90deg)}
+.col summary:hover{color:var(--accent)}
+.col details > *:not(summary){margin-left:16px; margin-right:16px}
+.col details > *:last-child{margin-bottom:16px}
+
+/* ---- nav pairs and prev/next ---- */
+.pair{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 26px; font-size:13.5px}
+.pair a{padding:5px 12px; border:1px solid var(--rule); border-radius:999px;
+  text-decoration:none; color:var(--ink); background:var(--paper)}
+.pair a:hover{border-color:var(--accent)}
+.pair a[aria-current]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
+.nextprev{display:flex; justify-content:space-between; gap:14px; margin:60px 0 0;
+  padding-top:20px; border-top:1px solid var(--rule); font-size:14px; max-width:var(--wide)}
+.nextprev a{max-width:48%; text-decoration:none; color:var(--ink)}
+.nextprev span{display:block; color:var(--muted); font-size:12.5px; margin-bottom:2px}
+.nextprev .r{text-align:right}
+
+/* ---- home ---- */
+.hero{padding:48px 28px 0; max-width:var(--wide); margin:0 auto}
+.hero h1{font-size:42px; line-height:1.1; margin:0 0 14px; letter-spacing:-.02em}
+.hero .lede{font-size:20px; line-height:1.55; color:var(--muted); max-width:36em; margin:0 0 26px}
+.hero .how{background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  padding:18px 20px; margin:0 0 34px; font-size:16px; max-width:40em}
+.hero .how b{display:block; margin-bottom:6px; font-size:14px; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--muted);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.groups{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
+  max-width:var(--wide); margin:0 auto 34px; padding:0 28px}
+.gcard{background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  padding:16px 18px 18px; text-decoration:none; color:var(--ink); display:block;
+  border-top:3px solid var(--gc)}
+.gcard:hover{border-color:var(--gc)}
+.gcard .gn{font-size:11px; font-weight:600; letter-spacing:.08em; color:var(--gc);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.gcard b{display:block; font-size:17.5px; margin:3px 0 5px}
+.gcard span{font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:13.5px; color:var(--muted); line-height:1.45; display:block}
+.gcard em{font-style:normal; color:var(--gc); font-size:12.5px; display:block; margin-top:10px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.strip{max-width:var(--wide); margin:0 auto; padding:0 28px 10px;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px}
+.strip a{display:block; background:var(--paper); border:1px solid var(--rule);
+  border-radius:9px; padding:13px 15px; text-decoration:none; color:var(--ink); font-size:14.5px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.strip a:hover{border-color:var(--green)}
+.strip a small{display:block; color:var(--muted); font-size:12.5px; margin-top:3px}
+
+/* ---- search results ---- */
+#results{margin:6px 0 0; display:none}
+#results a{display:block; padding:7px 8px 8px; border-radius:5px; text-decoration:none; color:var(--ink)}
+#results a:hover,#results a.on{background:var(--green-tint)}
+#results .t{display:block; font-size:13px}
+#results .k{font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+#results .c{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; font-size:11.5px; line-height:1.45; color:var(--muted); margin-top:2px}
+#results .c b{font-weight:600; color:var(--green); background:var(--green-tint)}
+#results .none{padding:6px 8px; font-size:12.5px; color:var(--muted)}
+
+/* ---- mobile ---- */
+.bar{display:none; position:sticky; top:0; z-index:20; background:var(--ground);
+  border-bottom:1px solid var(--rule); padding:9px 14px; align-items:center; gap:12px}
+.bar button{font:inherit; font-size:14px; background:var(--paper); color:var(--ink);
+  border:1px solid var(--rule); border-radius:7px; padding:6px 11px; cursor:pointer}
+.bar .here{font-size:14px; color:var(--muted); overflow:hidden; white-space:nowrap;
+  text-overflow:ellipsis}
+
+@media (max-width:900px){
+  body{font-size:17px}
+  .frame{grid-template-columns:minmax(0,1fr)}
+  .bar{display:flex}
+  .rail{position:fixed; inset:47px 0 0; height:auto; width:100%; background:var(--ground);
+    border-right:0; display:none; z-index:19; padding:18px 20px 70px}
+  .rail.open{display:block}
+  .sheet{border-left:0; border-right:0}
+  .col{padding:28px 18px 0}
+  .col h1{font-size:27px}
+  .col h2{font-size:20px}
+  .hero{padding:26px 20px 0}
+  .hero h1{font-size:31px}
+  .hero .lede{font-size:18px}
+  .groups{grid-template-columns:minmax(0,1fr)}
+  .groups,.strip{padding-left:20px; padding-right:20px}
+  .col table{font-size:14px}
+  .col th,.col td{padding:6px 7px}
+  .mk{font-size:16px; padding:12px 14px}
+  .col details > *:not(summary){margin-left:14px; margin-right:14px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+@media print{.rail,.bar,.nextprev,.pair{display:none}.frame{display:block}
+  .col details{border:0}.col details > *{display:block !important}}
+"""
+
+# Raw, because this is JavaScript. Without the r, Python eats the backslashes
+# and ships '\b' as a backspace character where the regex needs a word
+# boundary, and every search silently returns nothing.
+JS = r"""
+(function(){
+  var q=document.getElementById('q'), r=document.getElementById('results'), idx=null, sel=-1;
+  function load(cb){ if(idx){cb();return;}
+    fetch(BASE+'search.json').then(function(x){return x.json()}).then(function(d){idx=d;cb()}); }
+  function esc(s){return s.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function matcher(t){
+    var e=t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var b=/^\w/.test(t)?'\\b':'', a=/\w$/.test(t)?'\\b':'';
+    return new RegExp(b+e+a,'gi');
+  }
+  function count(hay,re){ re.lastIndex=0; var n=0; while(re.exec(hay)!==null){n++; if(n>9)break;} return n; }
+  function snip(body,t,re){
+    var i=-1;
+    if(re){ re.lastIndex=0; var m=re.exec(body); if(m) i=m.index; }
+    if(i<0) i=body.toLowerCase().indexOf(t);
+    if(i<0) return '';
+    var a=Math.max(0,i-52), b=Math.min(body.length,i+t.length+92);
+    if(a>0){ var sp=body.indexOf(' ',a); if(sp>-1&&sp<i) a=sp+1; }
+    return (a>0?'… ':'')+esc(body.slice(a,i))+'<b>'+esc(body.slice(i,i+t.length))+'</b>'+
+           esc(body.slice(i+t.length,b))+(b<body.length?' …':'');
+  }
+  function run(){
+    var t=q.value.trim().toLowerCase();
+    if(t.length<2){r.style.display='none'; r.innerHTML=''; return;}
+    load(function(){
+      var hits=[], re=matcher(t), loose=t.length>=5;
+      for(var i=0;i<idx.length;i++){
+        var p=idx[i], s=0, body=p.b||'';
+        if(count(p.t,re)) s+=40; else if(loose&&p.t.toLowerCase().indexOf(t)>-1) s+=20;
+        if(count(p.h,re)) s+=16; else if(loose&&p.h.toLowerCase().indexOf(t)>-1) s+=8;
+        if(count(p.s,re)) s+=8;
+        var n=count(body,re);
+        if(!n&&loose) n=Math.min(body.toLowerCase().split(t).length-1,3);
+        if(n) s+=Math.min(n,6);
+        if(s) hits.push([s,p,n?snip(body,t,re):'']);
+      }
+      hits.sort(function(a,b){return b[0]-a[0]});
+      sel=-1;
+      if(!hits.length){ r.innerHTML='<div class="none">Nothing matches that.</div>'; r.style.display='block'; return; }
+      r.innerHTML=hits.slice(0,10).map(function(h){
+        var k=h[1].k&&h[1].k!=='concept' ? '<span class="k">'+esc(h[1].k)+'</span> ' : '';
+        return '<a href="'+h[1].u+'">'+k+'<span class="t">'+esc(h[1].t)+'</span>'+
+               '<span class="c">'+(h[2]||esc(h[1].s.slice(0,90)))+'</span></a>';
+      }).join('');
+      r.style.display='block';
+    });
+  }
+  if(q){
+    q.addEventListener('input',run);
+    q.addEventListener('keydown',function(e){
+      var as=r.querySelectorAll('a');
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+        if(!as.length)return; e.preventDefault();
+        if(sel>-1) as[sel].classList.remove('on');
+        sel = e.key==='ArrowDown' ? (sel+1)%as.length : (sel<=0?as.length-1:sel-1);
+        as[sel].classList.add('on'); as[sel].scrollIntoView({block:'nearest'});
+      } else if(e.key==='Enter'&&sel>-1){ e.preventDefault(); as[sel].click(); }
+      else if(e.key==='Escape'){ q.value=''; run(); q.blur(); }
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='/'&&document.activeElement!==q&&!/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
+        e.preventDefault();q.focus();}
+    });
+  }
+  var btn=document.getElementById('menu'), rail=document.getElementById('rail');
+  if(btn) btn.addEventListener('click',function(){
+    var open=rail.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open?'true':'false');
+    btn.textContent=open?'Close':'Contents';
+    document.body.style.overflow=open?'hidden':'';
+  });
+  /* Open every reveal panel before printing, so a printed page is complete. */
+  window.addEventListener('beforeprint',function(){
+    document.querySelectorAll('details').forEach(function(d){d.open=true});
+  });
+})();
+"""
+
+
+def esc(s: str) -> str:
+    return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+             .replace('"', "&quot;"))
+
+
+def rail_html(pages, current, base) -> str:
+    by_group: dict[str, list] = {g: [] for g in GROUPS}
+    for p in pages:
+        if p["kind"] == "subject":
+            by_group[p["group"]].append(p)
+
+    out = [
+        f'<a class="brand" href="{base}">{esc(SITE_SHORT)}'
+        f'<small>every concept, its follow-ups, and the architecture behind it</small></a>',
+        '<div class="search"><label class="sr" for="q"></label>'
+        '<input id="q" type="search" placeholder="Search everything  /" '
+        'autocomplete="off" spellcheck="false"><div id="results"></div></div>',
+    ]
+    for gi, (gdir, (gname, gcolour, _)) in enumerate(GROUPS.items(), 1):
+        gpage = next((p for p in pages if p["kind"] == "group" and p["group"] == gdir), None)
+        href = base.rstrip("/") + gpage["url"] if gpage else "#"
+        out.append(f'<div class="grp" style="--gc:{gcolour}"><span class="gn">{gi}</span>'
+                   f'<a href="{href}">{esc(gname)}</a></div><ol style="--gc:{gcolour}">')
+        for sp in by_group[gdir]:
+            cur = ' aria-current="page"' if sp["url"] == current else ""
+            out.append(f'<li><a class="item" href="{base.rstrip("/")}{sp["url"]}"{cur}>'
+                       f'{esc(sp["title"])}</a>')
+            # expand the subject the reader is inside
+            if current.startswith(sp["url"]):
+                leaves = [p for p in pages
+                          if p.get("subject") == sp["subject"] and p["group"] == gdir
+                          and p["kind"] != "subject"]
+                if leaves:
+                    out.append('<ul class="leaf">')
+                    for lp in leaves:
+                        lc = ' aria-current="page"' if lp["url"] == current else ""
+                        out.append(f'<li><a href="{base.rstrip("/")}{lp["url"]}"{lc}>'
+                                   f'{esc(lp["title"])}</a></li>')
+                    out.append("</ul>")
+            out.append("</li>")
+        out.append("</ol>")
+
+    out.append('<div class="ext">')
+    for label, href in [("All coding problems", "indexes/coding.html"),
+                        ("System designs", "indexes/system-designs.html"),
+                        ("Projects", "indexes/projects.html"),
+                        ("AWS implementations", "indexes/aws.html"),
+                        ("Production cases", "indexes/production-cases.html"),
+                        ("Visual gallery", "indexes/visuals.html"),
+                        ("Mock interviews", "practice/"),
+                        ("How to study", "docs/HOW-TO-USE.html"),
+                        ("Full contents", "curriculum/")]:
+        out.append(f'<a href="{base}{href}">{label}</a>')
+    out.append('<a href="https://github.com/Soulful-Iris/junior-to-staff">Source on GitHub</a></div>')
+    return "\n".join(out)
+
+
+def crumb_for(page, pages, base) -> str:
+    bits = [f'<a href="{base}">Home</a>']
+    if page.get("group"):
+        gname, gc, _ = GROUPS[page["group"]]
+        gp = next((p for p in pages if p["kind"] == "group" and p["group"] == page["group"]), None)
+        if gp and page["kind"] != "group":
+            bits.append(f'<a href="{base.rstrip("/")}{gp["url"]}">{esc(gname)}</a>')
+    if page.get("subject") and page["kind"] not in ("subject",):
+        sp = next((p for p in pages if p["kind"] == "subject"
+                   and p["subject"] == page["subject"] and p["group"] == page["group"]), None)
+        if sp:
+            bits.append(f'<a href="{base.rstrip("/")}{sp["url"]}">{esc(sp["title"])}</a>')
+    if page.get("area"):
+        bits.append(esc(page["area"]))
+    return '<div class="crumb">' + '<span class="dot">·</span>'.join(bits) + "</div>"
+
+
+def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
+    gc = GROUPS[page["group"]][1] if page.get("group") else "#2f6f4e"
+    tint = {"#1f5b76": "#e9eff3", "#2f6f4e": "#eaf0ec",
+            "#a8682f": "#f9efe7", "#6f4a7d": "#f2eef5"}.get(gc, "#eaf0ec")
+    up = "../" * depth
+    kind, note = KINDS.get(page["kind"], ("", ""))
+    badge = (f'<span class="badge b-{kind}">{kind}</span>'
+             if kind and kind not in ("concept", "") else "")
+    kindnote = f'<p class="kindnote">{esc(note)}</p>' if note else ""
+
+    nav = []
+    if prev:
+        nav.append(f'<a href="{base.rstrip("/")}{prev["url"]}"><span>Previous</span>'
+                   f'{esc(prev["title"])}</a>')
+    else:
+        nav.append("<span></span>")
+    if nxt:
+        nav.append(f'<a class="r" href="{base.rstrip("/")}{nxt["url"]}"><span>Next</span>'
+                   f'{esc(nxt["title"])}</a>')
+    else:
+        nav.append("<span></span>")
+
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(page['title'])} · {esc(SITE_SHORT)}</title>
+<meta name="description" content="{esc(page['summary'][:180])}">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="{up}style.css">
+<style>:root{{--accent:{gc}; --accent-tint:{tint}}}</style>
+</head><body>
+<div class="bar"><button id="menu" aria-expanded="false" aria-controls="rail">Contents</button>
+<div class="here">{esc(page['title'])}</div></div>
+<div class="frame">
+<nav class="rail" id="rail" aria-label="Curriculum">{rail_html(pages, page['url'], base)}</nav>
+<div class="main"><div class="sheet"><div class="col">
+{crumb_for(page, pages, base)}
+{badge}
+{kindnote}
+{chips}
+{body}
+<nav class="nextprev">{''.join(nav)}</nav>
+</div></div></div></div>
+<script>var BASE="{base}";</script><script src="{up}app.js"></script>
+</body></html>
+"""
+
+
+def home_shell(page, body, pages, base) -> str:
+    cards = []
+    for gi, (gdir, (gname, gc, blurb)) in enumerate(GROUPS.items(), 1):
+        gp = next((p for p in pages if p["kind"] == "group" and p["group"] == gdir), None)
+        subs = [p for p in pages if p["kind"] == "subject" and p["group"] == gdir]
+        if not gp:
+            continue
+        cards.append(
+            f'<a class="gcard" style="--gc:{gc}" href="{base.rstrip("/")}{gp["url"]}">'
+            f'<span class="gn">PART {gi}</span><b>{esc(gname)}</b>'
+            f'<span>{esc(blurb)}</span>'
+            f'<em>{len(subs)} subjects</em></a>')
+
+    strip = []
+    for label, sub, href in [
+        ("Coding problems", "42 with solutions and tests", "indexes/coding.html"),
+        ("System designs", "requirements, diagrams, follow-ups", "indexes/system-designs.html"),
+        ("Mock interviews", "candidate and assessor packs", "practice/"),
+        ("Production cases", "five real incidents", "indexes/production-cases.html"),
+        ("AWS implementations", "service choices and why", "indexes/aws.html"),
+        ("Visual gallery", "every diagram in one place", "indexes/visuals.html"),
+    ]:
+        strip.append(f'<a href="{base}{href}">{label}<small>{sub}</small></a>')
+
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(SITE_TITLE)}</title>
+<meta name="description" content="{esc(SITE_LEDE)}">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="bar"><button id="menu" aria-expanded="false" aria-controls="rail">Contents</button>
+<div class="here">{esc(SITE_SHORT)}</div></div>
+<div class="frame">
+<nav class="rail" id="rail" aria-label="Curriculum">{rail_html(pages, '/', base)}</nav>
+<div class="main"><div class="sheet">
+<header class="hero">
+<h1>{esc(SITE_TITLE)}</h1>
+<p class="lede">{esc(SITE_LEDE)}</p>
+<div class="how"><b>How each concept is taught</b>
+Situation, then the contract it has to satisfy, then a diagram of the mechanism,
+then your implementation and its checks. Then the requirement changes, and the
+follow-up questions go deeper: failure behaviour, operations, scope, and
+compatibility. The depth lives inside the question rather than in a separate
+chapter.</div>
+</header>
+<section class="groups">{''.join(cards)}</section>
+<section class="strip">{''.join(strip)}</section>
+<div class="col">{body}</div>
+</div></div></div>
+<script>var BASE="{base}";</script><script src="app.js"></script>
+</body></html>
+"""
+
+
+def main() -> int:
+    base = os.environ.get("SITE_BASE", "/")
+    pages = collect()
+    print(f"collected {len(pages)} pages")
+
+    blocks = mermaid_blocks(pages)
+    print(f"mermaid: {len(blocks)} unique diagrams")
+    have = render_mermaid(blocks)
+
+    if OUT.exists():
+        shutil.rmtree(OUT)
+    OUT.mkdir(parents=True)
+
+    shutil.copytree(ROOT / "assets", OUT / "assets")
+    (OUT / "assets" / "mermaid").mkdir(parents=True, exist_ok=True)
+    for h in have:
+        shutil.copy(MERMAID_CACHE / f"{h}.svg", OUT / "assets" / "mermaid" / f"{h}.svg")
+    shutil.copytree(Path(__file__).resolve().parent / "fonts", OUT / "fonts")
+    (OUT / "style.css").write_text(CSS, encoding="utf-8")
+    (OUT / "app.js").write_text(JS, encoding="utf-8")
+
+    # Everything the lessons link to that is not markdown: solutions, tests,
+    # fixtures, diffs, logs. An unresolvable link to a fixture is the same
+    # broken experience as an unresolvable link to a page.
+    copied = 0
+    for f in ROOT.rglob("*"):
+        if not f.is_file() or f.suffix == ".md":
+            continue
+        rel = f.relative_to(ROOT)
+        if rel.parts[0] in (".git", "site", "node_modules", "assets"):
+            continue
+        (OUT / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(f, OUT / rel)
+        copied += 1
+
+    # Some pages link to an asset DIRECTORY. Give those a real index instead of
+    # a 404, since the whole point of the gallery is browsing it.
+    for d in (OUT / "assets").rglob("*"):
+        if not d.is_dir() or (d / "index.html").exists():
+            continue
+        items = sorted(x for x in d.iterdir() if x.is_file() and x.suffix in (".svg", ".png"))
+        if not items:
+            continue
+        rows = "".join(
+            f'<figure><a href="{x.name}"><img src="{x.name}" loading="lazy" alt=""></a>'
+            f'<figcaption>{x.stem}</figcaption></figure>' for x in items)
+        (d / "index.html").write_text(
+            f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<title>{d.name} · {SITE_SHORT}</title>'
+            f'<link rel="stylesheet" href="{"../" * len(d.relative_to(OUT).parts)}style.css">'
+            f'<style>body{{padding:28px}}main{{display:grid;'
+            f'grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;max-width:1100px}}'
+            f'figure{{margin:0;background:var(--paper);border:1px solid var(--rule);'
+            f'border-radius:9px;padding:12px;overflow:hidden}}'
+            f'figure img{{width:100%;height:auto}}'
+            f'figcaption{{font:12px ui-monospace,monospace;color:var(--muted);margin-top:8px}}'
+            f'</style></head><body><h1>{d.name}</h1><main>{rows}</main></body></html>',
+            encoding="utf-8")
+
+    index = []
+    for i, p in enumerate(pages):
+        rel = dest_for(p["src"])
+        dest = OUT / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        depth = len(Path(rel).parts) - 1
+        body, toc = render_body(p["text"], have, depth)
+        body, chips = lift_crumb(body, p)
+
+        prev = pages[i - 1] if i > 0 else None
+        nxt = pages[i + 1] if i < len(pages) - 1 else None
+
+        if p["kind"] == "home":
+            body = re.sub(r"^<h1[^>]*>.*?</h1>\s*", "", body, count=1, flags=re.S)
+            html = home_shell(p, body, pages, base)
+        else:
+            html = shell(p, body, pages, prev, nxt, base, depth, chips)
+        dest.write_text(html, encoding="utf-8")
+
+        index.append({"t": p["title"], "u": base.rstrip("/") + p["url"],
+                      "k": KINDS.get(p["kind"], ("", ""))[0],
+                      "s": p["summary"][:200],
+                      "h": " ".join(toc),
+                      "b": prose_of(p["text"])})
+
+    (OUT / "search.json").write_text(json.dumps(index, separators=(",", ":")), encoding="utf-8")
+    print(f"built {len(pages)} pages, {len(have)} diagrams, {copied} code files -> {OUT}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

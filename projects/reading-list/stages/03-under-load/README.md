@@ -88,7 +88,7 @@ These exercises verify specific boundaries; completing their reference tests doe
 
 ## Build and prompt sequence
 
-> Senior tier · fed by sections 09, 13, 14 · the question is **what happens when it is busy, and when a dependency dies?**
+> Stage 3 · the question is **what happens when it is busy, and when a dependency dies?**
 
 Same reading list. Now make it behave when it is under pressure and when the
 things it depends on stop working.

@@ -85,7 +85,7 @@ These exercises verify specific boundaries; completing their reference tests doe
 
 ## Build and prompt sequence
 
-> Senior tier · fed by section 15 · the question is **can you add a model to it and prove it is any good?**
+> Stage 4 · the question is **can you add a model to it and prove it is any good?**
 
 Same reading list. Add one small feature that uses a model, and then spend most
 of the project proving whether it works.

@@ -86,7 +86,7 @@ These exercises verify specific boundaries; completing their reference tests doe
 
 ## Build and prompt sequence
 
-> Junior tier · fed by sections 01-07 · the question is **can you build the thing at all?**
+> Stage 1 · the question is **can you build the thing at all?**
 
 A shared reading list. People sign in, add a URL, the system fetches the page
 title, they tag it and mark it read. Everyone in the group can see what the

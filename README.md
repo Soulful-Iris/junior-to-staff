@@ -1,4 +1,4 @@
-# junior → staff
+# The Engineering Interview Curriculum
 
 Learn software engineering through one ordered curriculum. Each concept starts with a concrete problem, then adds the existing follow-up questions that demand deeper implementation, operating judgment, and technical ownership.
 
