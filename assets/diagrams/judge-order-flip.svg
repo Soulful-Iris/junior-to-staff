@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 296" width="760" height="296" role="img" aria-label="Two candidate answers are shown to a model acting as a judge. In the first position order the judge picks answer A. The two answers then swap places, with nothing about their content changed, and the judge picks answer B. The same pair produces the opposite verdict, because the judge preferred whichever it read first.">
+  <rect width="760" height="296" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME TWO ANSWERS, IN THE OTHER ORDER</text>
+
+  <!-- slots stay put; the cards move through them -->
+  <text x="255" y="160" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a89f93" letter-spacing="1.2">FIRST</text>
+  <text x="425" y="160" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a89f93" letter-spacing="1.2">SECOND</text>
+
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 0;170 0;170 0;0 0"
+                      keyTimes="0;0.4;0.5;0.9;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="180" y="70" width="150" height="72" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.3"/>
+    <text x="192" y="91" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#1f2b24">answer A</text>
+    <line x1="192" y1="105" x2="318" y2="105" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="192" y1="116" x2="300" y2="116" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="192" y1="127" x2="272" y2="127" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 0;-170 0;-170 0;0 0"
+                      keyTimes="0;0.4;0.5;0.9;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="350" y="70" width="150" height="72" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.3"/>
+    <text x="362" y="91" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#1f2b24">answer B</text>
+    <line x1="362" y1="105" x2="488" y2="105" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="362" y1="116" x2="466" y2="116" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="362" y1="127" x2="442" y2="127" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <line x1="506" y1="106" x2="538" y2="106" stroke="#6d6459" stroke-width="1.4"/>
+  <path d="M 542 106 l -6 -3.5 l 0 7 z" fill="#6d6459"/>
+
+  <rect x="546" y="70" width="140" height="72" rx="6" fill="#faf9f7" stroke="#6d6459" stroke-width="1.4"/>
+  <text x="616" y="98" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#1f2b24">the judge</text>
+
+  <text x="616" y="124" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#2f6f4e">picks A
+    <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.44;0.48;0.9;0.96;1" dur="8s" repeatCount="indefinite"/>
+  </text>
+  <text x="616" y="124" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#c2703d" opacity="0">picks B
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.48;0.52;0.88;0.94;1" dur="8s" repeatCount="indefinite"/>
+  </text>
+
+  <text x="616" y="178" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#a85d2f">same pair, opposite verdict</text>
+
+  <line x1="44" y1="210" x2="716" y2="210" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="232" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Nothing about either answer changed. The judge preferred whichever one it read first.</text>
+  <text x="44" y="249" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Before trusting a judge, reorder the candidates and count how many verdicts move.</text>
+  <text x="44" y="270" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">That count is your noise floor. A judge you have not measured is an unvalidated instrument.</text>
+</svg>
