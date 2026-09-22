@@ -100,6 +100,21 @@ For anything streaming, total latency is the wrong number. Users feel
 **time-to-first-token** and then the gap between tokens. Budget those separately
 and set them as product targets.
 
+
+### Watch the concept, then trace the implementation
+
+![Evaluate the answer and the permission boundary: before and after](../../../assets/learning/ai-evaluation-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: a fluent answer leaks protected content. With it: check task quality and leakage separately. These are teaching states, not measured performance.
+
+![Evaluate the answer and the permission boundary: implementation sequence](../../../assets/learning/ai-evaluation-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/ai-evaluation-still.svg).
+
+**Predict before replaying:** Can a prompt alone repair retrieval that already exposed unauthorized context?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - You have an eval set built from real failures, and you can say which failure each case came from.
@@ -225,3 +240,5 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 evaluation. This section is for an application engineer shipping a feature. The
 security material here is the product-facing slice; the general case is
 **11 · Security**.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

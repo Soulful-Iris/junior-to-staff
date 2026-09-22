@@ -80,15 +80,16 @@ becomes **at-least-once**, because a consumer that crashes between the work and
 the acknowledgement gets the message again; and the backlog is invisible until
 you instrument it — the product looks healthy while work quietly ages.
 
-**Delivery semantics.** Exactly-once does not survive a system
-boundary. Kafka — 4.0, March 2025, now entirely free of ZooKeeper (checked
-2026-09-21) — can make read-process-write exactly-once while both ends are
-Kafka; the moment your consumer writes to PostgreSQL or sends an email, the
-crash-retry gap reopens. The practice is at-least-once plus **idempotent
-consumers** — a key on every message, a unique constraint where the effect
-lands, the database refusing the second delivery — or the **outbox pattern**:
-business row and outgoing message in one transaction, a relay
-publishing them, so "saved but never announced" cannot happen.
+**Delivery semantics.** Exactly-once claims have a scope and a failure model.
+Kafka transactions can coordinate consumed offsets with produced Kafka records.
+An external database write or email does not automatically join that transaction.
+After an external effect succeeds but before acknowledgement, a crash can cause
+redelivery. Coordinate the effect and deduplication record atomically where
+possible; otherwise use a destination-supported idempotency key or reconcile
+uncertain outcomes. An outbox commits a business row and outgoing event together,
+then relays the event. The relay may still publish duplicates, so consumers
+still need deduplication. See [Kafka's design documentation](https://kafka.apache.org/41/design/design/)
+for the transaction-boundary discussion.
 
 **Backpressure.** A queue with no bound is a memory leak with a scheduler: when
 arrivals outrun service long enough, it eats memory or disk and fails at
@@ -102,6 +103,23 @@ edit is gone from the screen. So they save again — now there are two — or st
 trusting the product. With replica reads, **read-your-writes** is the floor:
 route a user's reads to the primary for a window after they write, or pin
 their session.
+
+
+![Cache requests without and with shared loading](../../../assets/learning/cache-mechanism.svg)
+
+### Watch the concept, then trace the implementation
+
+![Share a hot-key load instead of multiplying it: before and after](../../../assets/learning/cache-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: database saturates during cache refill. With it: result fills cache; waiters are released. These are teaching states, not measured performance.
+
+![Share a hot-key load instead of multiplying it: implementation sequence](../../../assets/learning/cache-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/cache-still.svg).
+
+**Predict before replaying:** How many origin queries could ten independent processes still issue?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 
@@ -291,3 +309,5 @@ row-shaped; search and analytics; and distributed transactions beyond the
 outbox — sagas sit with the staff-tier migration work. Timeouts, retries, load
 shedding and backups you have actually restored live in
 [09 · Reliability](../09-reliability/).
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

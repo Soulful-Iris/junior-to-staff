@@ -132,6 +132,21 @@ emails, charged cards, and events other systems already consumed do not roll
 back either. The senior reviewer's question for every change: *if we roll this
 back in an hour, what stays behind?*
 
+
+### Watch the concept, then trace the implementation
+
+![Observe a small rollout before widening it: before and after](../../../assets/learning/canary-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: recover while everyone is impacted. With it: advance or roll back on stated thresholds. These are teaching states, not measured performance.
+
+![Observe a small rollout before widening it: implementation sequence](../../../assets/learning/canary-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/canary-still.svg).
+
+**Predict before replaying:** Which irreversible write would a feature-flag rollback fail to undo?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - Merging to main deploys, with no human running commands; deploys per week is
@@ -331,3 +346,5 @@ libraries and APIs release on contracts, not traffic; and what happens when a
 release goes wrong anyway — detection and response live in
 [09 · Reliability](../09-reliability/), and the supply chain beyond your own
 pipeline in [11 · Security](../11-security/).
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

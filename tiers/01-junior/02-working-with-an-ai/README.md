@@ -66,6 +66,21 @@ two failure modes are:
 
 Everything below is about those two.
 
+
+### Watch the concept, then trace the implementation
+
+![A specification becomes a falsifiable check: before and after](../../../assets/learning/ai-verification-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: cross-owner access remains undetected. With it: reject the patch if unauthorized data leaks. These are teaching states, not measured performance.
+
+![A specification becomes a falsifiable check: implementation sequence](../../../assets/learning/ai-verification-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/ai-verification-still.svg).
+
+**Predict before replaying:** Which test would fail if authorization were checked only in the browser?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - You can state, before you accept a change, what would make it wrong.
@@ -215,3 +230,5 @@ discipline and lives in the senior tier, in **15 · AI systems** — retrieval,
 evaluation harnesses, guardrails and cost budgets. This section is only about
 using a model to help you build. Prompt-phrasing tricks are deliberately absent;
 they were the 2023 skill, and the durable one is specification plus verification.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

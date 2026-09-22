@@ -92,6 +92,21 @@ a zone only where wall-clock time *is* the fact, like a calendar event. Binary
 floats cannot represent 0.10 exactly, so money in a `float` drifts by rounding
 until an audit finds it: store integer minor units or a decimal type.
 
+
+### Watch the concept, then trace the implementation
+
+![Put the invariant at the write boundary: before and after](../../../assets/learning/conditional-write-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: b writes stock = 0; two sales. With it: b condition fails; one sale. These are teaching states, not measured performance.
+
+![Put the invariant at the write boundary: implementation sequence](../../../assets/learning/conditional-write-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/conditional-write-still.svg).
+
+**Predict before replaying:** Why is a read followed by a write different from one conditional update?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - You can say what one row asserts, for every table, in one sentence.
@@ -250,3 +265,5 @@ first, so you can read what an ORM later writes for you. Document and key-value
 stores are real answers for data that is not row-shaped, and belong to the
 senior tier alongside isolation levels, locking, replication and
 backups-you-have-actually-restored.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

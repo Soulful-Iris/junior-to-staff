@@ -61,6 +61,21 @@ platform quality and workflow clarity rather than the tools themselves. The
 unglamorous work of making the environment good is now what decides whether
 everything else helps.
 
+
+### Watch the concept, then trace the implementation
+
+![A paved path must fit the adopting team: before and after](../../../assets/learning/developer-platform-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: adoption number hides extra work. With it: use feedback to remove repeated friction. These are teaching states, not measured performance.
+
+![A paved path must fit the adopting team: implementation sequence](../../../assets/learning/developer-platform-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/developer-platform-still.svg).
+
+**Predict before replaying:** Which outcome would show that adoption is helping engineers?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - Somebody got an opportunity because you spent credibility on them, and they know it.
@@ -175,3 +190,5 @@ the leverage described here is technical and social rather than positional. If
 you find you prefer the work in this section to the work in the rest of the
 guide, that is worth noticing rather than suppressing — it is information, not a
 failure.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

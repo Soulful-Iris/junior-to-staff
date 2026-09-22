@@ -1,4 +1,8 @@
-# How to use this
+# How to use the AI-assisted path
+
+For both learning paths, begin at [Choose your path](../paths/README.md).
+This page describes Path A. The [interview path](../paths/interviews/README.md)
+has its own reading order and independent exercises.
 
 The short version is on the front page. This is the longer one, for when you
 want to know why it is shaped like this.
@@ -85,7 +89,7 @@ forgotten is the part you did not really learn.
 learners does not hold up, and the pyramid of retention percentages that
 circulates in slide decks was fabricated. Ignore both.)*
 
-## What this guide will not do
+## What the AI-assisted path will not do
 
 - **It will not teach you a language or a framework.** Those are well covered
   elsewhere, they change, and knowing one is not the thing that was missing.

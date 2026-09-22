@@ -64,6 +64,21 @@ objection in month four costs the project.
 
 *(Read from published engineering writing on 2026-09-21.)*
 
+
+### Watch the concept, then trace the implementation
+
+![A decision includes the condition for changing it: before and after](../../../assets/learning/decision-record-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: no one knows when to reconsider. With it: record decision and revisit trigger. These are teaching states, not measured performance.
+
+![A decision includes the condition for changing it: implementation sequence](../../../assets/learning/decision-record-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/decision-record-still.svg).
+
+**Predict before replaying:** What measurement would make the rejected alternative the better choice?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - A reader who was not in any of the conversations can say back what is being decided and why.
@@ -184,3 +199,5 @@ written five of these and notice the same controversial decision recurring —
 that is **18 · Technical strategy**. Postmortems are writing that decides too,
 but they belong with **20 · Risk and incidents** because they are written under
 different pressure.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

@@ -62,6 +62,21 @@ Every quarter you do not finish, you pay the double-running cost again, and the
 remaining work gets slightly harder because more code was written in the
 meantime.
 
+
+### Watch the concept, then trace the implementation
+
+![Compatibility keeps migration reversible: before and after](../../../assets/learning/migration-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: rollback cannot reconstruct lost data. With it: shift reads, then retire old path deliberately. These are teaching states, not measured performance.
+
+![Compatibility keeps migration reversible: implementation sequence](../../../assets/learning/migration-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/migration-still.svg).
+
+**Predict before replaying:** At which step does rollback require data repair rather than a routing change?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - The hardest case migrated first, on purpose, and what it taught written down.
@@ -181,3 +196,5 @@ are junior-tier and live in [05 · Data and databases](../../01-junior/05-data-a
 This section is about the multi-month kind with other teams in it. Organisational
 resistance is real and mostly a scope problem, which is
 [16 · Scope and leverage](../16-scope-and-leverage/).
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

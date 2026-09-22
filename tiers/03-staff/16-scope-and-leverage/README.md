@@ -76,6 +76,21 @@ company rather than on you.
 Choosing the wrong archetype for your organisation is a named failure mode. An
 architect role at a forty-person company is a title with no work under it.
 
+
+### Watch the concept, then trace the implementation
+
+![Resolve the repeated constraint across teams: before and after](../../../assets/learning/staff-scope-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: every new team repeats the work. With it: teams adopt independently with compatibility. These are teaching states, not measured performance.
+
+![Resolve the repeated constraint across teams: implementation sequence](../../../assets/learning/staff-scope-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/staff-scope-still.svg).
+
+**Predict before replaying:** How would you measure whether the shared contract helps rather than slows teams?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - You can name the three problems your organisation will regret not solving, and say which one you are on.
@@ -190,3 +205,5 @@ are **17 · Writing that decides** and **18 · Technical strategy**. Promotion
 mechanics are real and are deliberately not the organising idea of this tier; if
 you do the work in this section, the packet writes itself, and if you optimise
 for the packet you will end up preening.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

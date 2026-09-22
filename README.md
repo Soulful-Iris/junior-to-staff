@@ -1,8 +1,22 @@
 # junior → staff
 
-An end-to-end guide to being a software engineer, for someone who will build
-most of the code by directing an AI and needs to be able to **judge what comes
-back**.
+Two learning paths from junior to staff: **AI-assisted engineering** and
+**software engineering interviews**. Learn the concepts, see their behavior,
+implement them, and prove that you understand the result.
+
+## Start here
+
+| I want to… | Follow |
+|---|---|
+| Build with AI and judge what it produces | [Path A · AI-assisted engineering](paths/ai-engineering/README.md) |
+| Prepare for junior, senior, or staff interviews | [Path B · Interviews](paths/interviews/README.md) |
+| Learn architecture and implement it on AWS | [Concepts](paths/interviews/architecture/concepts.md) → [designs](paths/interviews/architecture/designs.md) → [AWS labs](paths/interviews/aws/README.md) |
+| Practice Python, TypeScript, and full-stack coding | [Coding](paths/interviews/coding/README.md) → [full stack](paths/interviews/full-stack/README.md) |
+| Combine both paths | [Reading map and learning loop](paths/README.md) |
+
+The original chapters and projects below form Path A. Path B adds independent
+level routes, visual concept lessons, worked solutions, and interview practice.
+Both share the same engineering foundations.
 
 ![The arc: three tiers and five projects, rising in complexity](assets/the-arc.svg)
 
@@ -11,7 +25,7 @@ five unrelated toys.
 
 ---
 
-## Why this exists
+## Why the AI-assisted path exists
 
 Most roadmap repos are a list of things to learn with links attached. They go
 stale, nobody finishes them, and they teach the names of technologies rather
@@ -33,7 +47,7 @@ every section follows.
 
 ---
 
-## How to use it
+## How to use the AI-assisted path
 
 1. **Read a section.** They are written to be read, not skimmed.
 2. **Build the slice.** Each section adds one thing to the project you already
@@ -147,7 +161,11 @@ complete when it lands — there are no stubs pretending to be chapters. A secti
 with no link next to it is not written yet, and is not pretending to be.
 
 Written and checked: **21 of 21 sections**, all five project briefs indexed, P1 complete.
-Last updated 2026-09-21.
+Last updated 2026-09-22.
+
+The interview path and visual walkthroughs are available on this branch. See
+[validation and coverage](paths/interviews/VALIDATION.md) for exactly what was run
+and which research or deployment claims remain unverified.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,
 it says so.

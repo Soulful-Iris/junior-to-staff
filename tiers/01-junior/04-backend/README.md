@@ -78,6 +78,21 @@ OWASP gave it its own slot in 2021 and folded it into Broken Access Control in
 the 2025 revision (checked 2026-09-21); the reclassification is the lesson —
 you never decided what your fetcher was allowed to reach.
 
+
+### Watch the concept, then trace the implementation
+
+![A deadline bounds the entire request: before and after](../../../assets/learning/deadlines-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: work continues after the client gives up. With it: timeout ends waiting and records failure. These are teaching states, not measured performance.
+
+![A deadline bounds the entire request: implementation sequence](../../../assets/learning/deadlines-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/deadlines-still.svg).
+
+**Predict before replaying:** Does stopping the wait prove the dependency stopped its write?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - Status codes tell the truth: every failure is a 4xx or 5xx. A 200 with an
@@ -257,3 +272,5 @@ Authentication internals (passwords, sessions, tokens) likewise. Retries,
 queues, caching and rate limits are P3; deploying and observing this backend
 is P2. Nothing here is about speed — a backend first has to be right when
 things go wrong, which is most of what a backend is.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

@@ -84,6 +84,21 @@ we understand it in a year*. When the author is a model, that moment is not
 courtesy; it is the only point in the loop where a human decides anything at
 all.
 
+
+### Watch the concept, then trace the implementation
+
+![Small changes shorten the feedback loop: before and after](../../../assets/learning/change-loop-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: rollback removes useful work too. With it: revert only the faulty change. These are teaching states, not measured performance.
+
+![Small changes shorten the feedback loop: implementation sequence](../../../assets/learning/change-loop-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/change-loop-still.svg).
+
+**Predict before replaying:** If a patch changes five behaviors, what evidence would let you split it safely?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - `git log --oneline -20` reads like a story someone chose to tell: each line says what, each body says why.
@@ -269,3 +284,5 @@ Branching-strategy debates (gitflow and relatives) are deliberately skipped:
 every tool named above assumes short-lived branches off main, and that default
 is the one worth learning first. Monorepo versus many repos is a staff-tier
 argument about organisations, not a junior decision.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

@@ -1,7 +1,9 @@
 # How this guide is written
 
-This is the internal spec. Every section follows it, so the guide reads as one
-voice rather than seventeen.
+This is the internal spec for the original AI-assisted engineering chapters.
+The interview path uses [its teaching standard](../paths/interviews/TEACHING.md),
+which includes concept instruction, code, and timed independent practice.
+Both paths keep the rules on clarity, verification, and self-contained teaching.
 
 ## Who the reader is
 

@@ -136,6 +136,21 @@ dependency — how old, what scripts, which publisher; each new credential — w
 not federation; and what would the logs show if this were abused? Most findings
 come from the first question.
 
+
+### Watch the concept, then trace the implementation
+
+![Identity alone does not grant object access: before and after](../../../assets/learning/object-authorization-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: store returns a's private object. With it: no authorized row; reject without data. These are teaching states, not measured performance.
+
+![Identity alone does not grant object access: implementation sequence](../../../assets/learning/object-authorization-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/object-authorization-still.svg).
+
+**Predict before replaying:** Where must ownership be checked when a worker accesses the object later?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - Every non-public route can be pointed at its authorisation rule — file and
@@ -308,3 +323,5 @@ review is its working slice. AI-feature security, prompt injection and the
 lethal trifecta live in [15 · AI systems](../15-ai-systems/). The junior floor
 for secrets and dependencies is
 [07 · Shipping it](../../01-junior/07-shipping-it/), assumed here.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

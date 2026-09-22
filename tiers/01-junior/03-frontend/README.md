@@ -79,6 +79,21 @@ between "the system failed" and the far worse "no items yet" shown over data
 that is fine. "There is nothing" and "I could not find out" must never look the
 same.
 
+
+### Watch the concept, then trace the implementation
+
+![The newest intent must win the screen: before and after](../../../assets/learning/ui-race-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: a returns late; show stale cat. With it: a is generation 1; discard. These are teaching states, not measured performance.
+
+![The newest intent must win the screen: implementation sequence](../../../assets/learning/ui-race-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/ui-race-still.svg).
+
+**Predict before replaying:** Why keep a generation check even when you abort request A?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 One property here is a legal floor, not a preference. The European
@@ -294,3 +309,5 @@ real-time updates and animation are deliberately out; performance returns in
 the senior tier as a budget you defend with numbers. And nothing here helps you
 choose a framework, on purpose: every placement decision above outlives
 whichever one you pick.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

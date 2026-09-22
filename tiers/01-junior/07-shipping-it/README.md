@@ -54,6 +54,21 @@ Secrets cannot, ever, not even briefly, not even in a private repo. They are
 injected at run time from somewhere that can revoke them, and the number that
 matters is not "is it encrypted" but **"how fast can I rotate it?"**
 
+
+### Watch the concept, then trace the implementation
+
+![Test and deploy the same artifact: before and after](../../../assets/learning/artifact-promotion-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: artifact b has never passed those tests. With it: promote the same digest d. These are teaching states, not measured performance.
+
+![Test and deploy the same artifact: implementation sequence](../../../assets/learning/artifact-promotion-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/artifact-promotion-still.svg).
+
+**Predict before replaying:** What changes when configuration differs but the artifact digest stays the same?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
+
 ## What good looks like
 
 - One documented command takes a clean clone to a running system.
@@ -187,3 +202,5 @@ On **P1**, add:
 feature flags), and deployment pipelines with real gates are senior-tier and live
 in **12 · Delivery**. This section is the minimum that makes P1 reproducible by
 somebody who is not you.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)

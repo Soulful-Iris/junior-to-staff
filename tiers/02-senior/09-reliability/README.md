@@ -35,8 +35,12 @@ or the system decides it during the incident.**
 ### A budget you spend, and a policy someone signed
 
 Set an SLO — 100% is not a target — say, 99.9% of requests succeed within
-500ms, over 30 days. The remainder is the **error budget**: about 43 minutes a
-month, yours to spend on deploys and bad luck.
+500ms, over 30 days. The **error budget** is 0.1% of eligible requests: with
+1,000,000 requests, 1,000 may fail that combined success-and-latency condition.
+The familiar 43.2 minutes is the budget for a *time-based* 99.9% availability
+SLO over 30 days. These units are not interchangeable when traffic varies.
+[Google's SLO workbook](https://sre.google/workbook/implementing-slos/) describes
+request-based good-event ratios; checked 2026-09-22.
 
 A budget becomes real when a **written error-budget policy** says what changes,
 on whose authority, as it burns. Google's published example: budget exhausted
@@ -121,6 +125,21 @@ Everything else in this section is loop prevention.
 
 *(Checked against the Google SRE Workbook, the AWS Builders' Library, the
 metastability paper and Netflix's engineering material, 2026-09-21.)*
+
+
+### Watch the concept, then trace the implementation
+
+![Retries consume capacity and time: before and after](../../../assets/learning/retry-budget-compare.svg)
+
+The comparison follows four illustrative states. Without the mechanism: each starts three db attempts: up to 27. With it: at most three db attempts within deadline. These are teaching states, not measured performance.
+
+![Retries consume capacity and time: implementation sequence](../../../assets/learning/retry-budget-trace.svg)
+
+[Still storyboard / reduced-motion alternative](../../../assets/learning/retry-budget-still.svg).
+
+**Predict before replaying:** How does a bounded retry count still overload a dependency during a large outage?
+
+**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 
@@ -287,3 +306,5 @@ On **P3**, the reading list meets load. From this section:
 is its own senior section; so are queues and backpressure. Capacity planning,
 autoscaling, multi-region failover and incident response are out; chaos
 engineering appears only as this section's game day.
+
+[Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
