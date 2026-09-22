@@ -95,9 +95,9 @@ it, and at three in the morning while you are asleep.
 | 09 | [Reliability](tiers/02-senior/09-reliability/) | SLOs, error budgets, degradation, backpressure, idempotency |
 | 10 | [Observability](tiers/02-senior/10-observability/) | answering "what happened?" without guessing, and what that costs |
 | 11 | [Security](tiers/02-senior/11-security/) | authorisation, secrets, and the supply chain you did not know you had |
-| 12 | Delivery | CI/CD, infrastructure as code, progressive rollout |
+| 12 | [Delivery](tiers/02-senior/12-delivery/) | CI/CD, infrastructure as code, progressive rollout |
 | 13 | [Data at scale](tiers/02-senior/13-data-at-scale/) | caching, queues, consistency, and what actually breaks first |
-| 14 | Performance and cost | finding both, and the fact that they are the same skill |
+| 14 | [Performance and cost](tiers/02-senior/14-performance-and-cost/) | finding both, and the fact that they are the same skill |
 | 15 | [AI systems](tiers/02-senior/15-ai-systems/) | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
 
 ### Staff — change what gets built
@@ -122,7 +122,7 @@ Under construction, in the open. Sections land one at a time and each one is
 complete when it lands — there are no stubs pretending to be chapters. A section
 with no link next to it is not written yet, and is not pretending to be.
 
-Written and checked: **19 of 21 sections**, all five project briefs indexed, P1 complete.
+Written and checked: **21 of 21 sections**, all five project briefs indexed, P1 complete.
 Last updated 2026-09-21.
 
 Nothing here is "production-ready" by assertion. Where something is unverified,
