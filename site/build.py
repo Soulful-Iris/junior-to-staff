@@ -1375,7 +1375,7 @@ def gallery_page(pages, have, base) -> str:
 """
 
 
-def main() -> int:
+def main( -> int:
     base = os.environ.get("SITE_BASE", "/")
     CHAPTER_BLURBS.update(chapter_blurbs())
     pages = collect()
