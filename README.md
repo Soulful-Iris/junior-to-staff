@@ -64,7 +64,11 @@ knowing what it would take to leave the thing running.
 | **the spine** | [projects/](projects/) | 5 total | the whole guide. One system growing, if you prefer continuity to variety. |
 
 An **act** is a tier — junior, senior, staff. Three acts, five projects each at
-the end of them.
+the end of them:
+
+- [Act 1 · Junior](acts/act-1-junior/) — build a thing that works
+- [Act 2 · Senior](acts/act-2-senior/) — build a thing that survives
+- [Act 3 · Staff](acts/act-3-staff/) — change what gets built
 
 Every project carries the same seven things: what you build, **the thought
 process** (the decisions, in the order you have to make them), **how to organise

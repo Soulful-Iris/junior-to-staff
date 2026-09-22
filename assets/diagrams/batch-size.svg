@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 386" width="760" height="386" role="img" aria-label="The same week of work shipped two ways. Top: one commit touching 38 files; when production fails, every one of the 38 cells is implicated and a dark cursor sweeps slowly back and forth across the whole row, searching. Bottom: the same work as five small changes merged one at a time; the same fault ships with Thursday's seven-file change, only those seven cells are implicated, the cursor covers them almost immediately, and the other four changes stay proven good. Same bug; what changed is how much you must read to find it and how much you must undo to remove it.">
+  <rect width="760" height="386" rx="10" fill="#faf9f7"/>
+
+  <text x="60" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME WEEK OF WORK, SHIPPED TWO WAYS</text>
+  <text x="60" y="56" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">one cell per file changed</text>
+
+  <text x="60" y="86" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">shipped as one change: 38 files, one commit, merged on Friday</text>
+  <text x="634" y="86" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">one commit</text>
+  <rect x="54" y="94" width="580" height="24" rx="6" fill="none" stroke="#c9c3b8" stroke-width="1"/>
+  <rect x="60" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="75" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="90" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="105" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="120" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="135" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="150" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="165" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="180" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="195" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="210" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="225" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="240" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="255" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="270" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="285" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="300" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="315" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="330" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="345" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="360" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="375" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="390" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="405" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="420" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="435" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="450" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="465" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="480" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="495" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="510" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="525" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="540" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="555" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="570" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="585" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="600" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="615" y="100" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="56" y="90" width="20" height="32" rx="5" fill="none" stroke="#1f2b24" stroke-width="1.6">
+    <animate attributeName="x" values="56;611;56" keyTimes="0;0.5;1" dur="7.4s" repeatCount="indefinite"/>
+  </rect>
+
+  <circle cx="66" cy="146" r="4.5" fill="#c2703d"/>
+  <text x="80" y="150" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#a85d2f">production fails — the search space is all 38 files</text>
+  <text x="80" y="168" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">nothing is exonerated, and the revert is the whole week, because the week is one commit</text>
+
+  <line x1="60" y1="190" x2="700" y2="190" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="60" y="218" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">the same work as five changes, each merged and run before the next</text>
+  <text x="703" y="218" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">five commits</text>
+  <rect x="54" y="226" width="127" height="24" rx="6" fill="none" stroke="#c9c3b8" stroke-width="1"/>
+  <rect x="192" y="226" width="127" height="24" rx="6" fill="none" stroke="#c9c3b8" stroke-width="1"/>
+  <rect x="330" y="226" width="127" height="24" rx="6" fill="none" stroke="#c9c3b8" stroke-width="1"/>
+  <rect x="468" y="226" width="112" height="24" rx="6" fill="none" stroke="#a85d2f" stroke-width="1.4"/>
+  <rect x="591" y="226" width="112" height="24" rx="6" fill="none" stroke="#c9c3b8" stroke-width="1"/>
+  <rect x="60" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="75" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="90" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="105" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="120" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="135" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="150" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="165" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="198" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="213" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="228" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="243" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="258" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="273" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="288" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="303" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="336" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="351" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="366" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="381" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="396" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="411" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="426" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="441" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="474" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="489" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="504" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="519" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="534" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="549" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="564" y="232" width="12" height="12" rx="2.5" fill="#c2703d" stroke="#a85d2f" stroke-width="0.9"/>
+  <rect x="597" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="612" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="627" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="642" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="657" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="672" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="687" y="232" width="12" height="12" rx="2.5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="0.9"/>
+  <rect x="470" y="222" width="20" height="32" rx="5" fill="none" stroke="#1f2b24" stroke-width="1.6">
+    <animate attributeName="x" values="470;560;470;470" keyTimes="0;0.095;0.19;1" dur="7.4s" repeatCount="indefinite"/>
+  </rect>
+  <text x="117.5" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">mon</text>
+  <text x="255.5" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">tue</text>
+  <text x="393.5" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">wed</text>
+  <text x="524" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#a85d2f">thu</text>
+  <text x="647" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">fri</text>
+
+  <circle cx="66" cy="292" r="4.5" fill="#c2703d"/>
+  <text x="80" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#a85d2f">the same fault ships on Thursday — the search space is 7 files</text>
+  <text x="80" y="314" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">four changes are already proven in production; the revert is one small commit</text>
+
+  <line x1="60" y1="338" x2="700" y2="338" stroke="#ded9d1" stroke-width="1"/>
+  <text x="60" y="362" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Same bug, same code. The arithmetic changed: what you must read to find it, and what you must undo.</text>
+</svg>
