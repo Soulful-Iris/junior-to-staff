@@ -1,6 +1,8 @@
 """Build the guided reading experience over the repository's existing material."""
 from __future__ import annotations
 import html
+import hashlib
+import base64
 import json
 import os
 import re
@@ -234,9 +236,9 @@ def shell(b, page, body, pages, sequence, base):
     if is_home: body=overview(b,sequence,base)
     elif page['kind'] in ('group','subject'): body=intro(b,page,sequence)
     current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':len(sequence)},ensure_ascii=True).replace('<','\\u003c')
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}style.css"></head>
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
 <body class="{'home' if is_home else 'lesson'}"><a class="skip-link" href="#reading">Skip to lesson</a><div class="mobile-bar"><button id="open-contents" aria-expanded="false" aria-controls="sidebar">☰ <span>Contents</span></button><span>The Engineering Guide</span></div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar"><span>{E(subtitle)}</span><div class="reading-controls"><span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}app.js" defer></script></body></html>'''
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar"><span>{E(subtitle)}</span><div class="reading-controls"><span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
 
 
 def build(b):
@@ -278,6 +280,21 @@ def build(b):
     (b.OUT/'assets/mermaid').mkdir(exist_ok=True)
     for h in have: shutil.copy(b.MERMAID_CACHE/f'{h}.svg',b.OUT/'assets/mermaid'/f'{h}.svg')
     shutil.copytree(b.ROOT/'site/fonts',b.OUT/'fonts')
+    # Bind each HTML release to exact assets. The inline copy also keeps the
+    # layout intact if a stylesheet request fails or a stale proxy returns it.
+    b.READER_CSS = (b.ROOT/'site/style.css').read_text().replace('url(fonts/', f'url({base}fonts/')
+    assert '</style' not in b.READER_CSS.lower()
+    b.READER_ASSETS = {}
+    for kind, text in [('css', b.READER_CSS), ('js', (b.ROOT/'site/app.js').read_text())]:
+        payload = text.encode()
+        digest = hashlib.sha256(payload).digest()
+        filename = f'reader-{kind}.{digest.hex()[:16]}.{kind}'
+        (b.OUT/filename).write_bytes(payload)
+        b.READER_ASSETS[kind] = {'file': filename, 'sha256': digest.hex(),
+                                'integrity': 'sha256-' + base64.b64encode(digest).decode()}
+    (b.OUT/'reader-assets.json').write_text(json.dumps(b.READER_ASSETS, indent=2))
+    # Keep the old endpoints for existing bookmarks, but never reference them
+    # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)
     for folder in ('curriculum','projects','practice','docs','scripts','indexes'):
         for f in (b.ROOT/folder).rglob('*'):

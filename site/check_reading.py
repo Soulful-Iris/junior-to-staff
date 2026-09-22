@@ -15,6 +15,11 @@ def output_for(src):
 
 def main():
     manifest = json.loads((OUT/'course.json').read_text())
+    assets = json.loads((OUT/'reader-assets.json').read_text())
+    for kind, item in assets.items():
+        payload = (OUT/item['file']).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == item['sha256']
+        assert item['sha256'][:16] in item['file']
     pages={p['src']:p for p in manifest['pages']}
     sequence=manifest['sequence']
     assert len(sequence)==len(set(sequence))
@@ -29,6 +34,14 @@ def main():
     diagrams=set(); embedded=0; local_jumps=[]; previous_next=0
     for src,p in pages.items():
         soup=BeautifulSoup(output_for(src).read_text(),'html.parser')
+        css = soup.find('link', rel='stylesheet')
+        assert css and css['href'].endswith(assets['css']['file']), src
+        assert css['integrity'] == assets['css']['integrity'], src
+        inline = soup.find('style', id='reader-styles')
+        assert inline and hashlib.sha256(inline.string.encode()).hexdigest() == assets['css']['sha256'], src
+        js = soup.find('script', src=True)
+        assert js and js['src'].endswith(assets['js']['file']), src
+        assert js['integrity'] == assets['js']['integrity'], src
         article=soup.select_one('article.lesson-body');assert article,src
         toc=soup.select_one('nav[aria-label="Table of contents"]');assert toc,src
         assert len(toc.select('.toc-area:not(.reference-area)'))==4,src

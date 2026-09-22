@@ -53,3 +53,7 @@ The mobile contents drawer supports Escape, focus containment and return to its 
 `deploy.sh` preserves the existing automatic deployment job. It builds into a staging directory, validates the built links and learning flow, and swaps the published directory only after success. It installs the pinned Python requirements into a dedicated virtual environment and the declared Node tools when their manifests change. A failed build remains retryable even after the checkout advances to the new commit. Existing notification behavior is preserved.
 
 See [redesign verification](REDESIGN.md) for the completed checks and their limits.
+
+## Release assets
+
+Generated pages use `reader-css.<content-hash>.css` and `reader-js.<content-hash>.js` with integrity attributes. The matching stylesheet is also embedded in each page, so stale or unavailable external CSS cannot strip the reading layout. Font URLs in this embedded copy are rooted at `SITE_BASE`. The build writes `reader-assets.json`; the acceptance check verifies it against every generated content page. The mobile browser suite includes stale-stylesheet and missing-stylesheet regressions.

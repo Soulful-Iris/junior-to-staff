@@ -24,3 +24,11 @@ The staged-output build and checks are exercised independently of the live outpu
 ## Limits
 
 The browser checks use Chromium; cross-browser and full screen-reader testing are not claimed. Older animations' derived resting views are static diagrams, not sampled full animation timelines. Live publication is performed by the existing server-side deployment timer; pushing a commit does not by itself prove that the server completed deployment. No AWS resources or PostgreSQL servers are deployed by this redesign.
+
+## Deployed styling regression
+
+Mobile screenshots reported after deployment showed the new reader markup without its matching layout CSS: an exposed skip link, an inline contents tree, and overflowing diagrams. Live HTML/asset requests from the development environment returned 403, so the precise server/cache response could not be confirmed.
+
+The fix binds CSS and JavaScript filenames to SHA-256 content hashes and supplies integrity attributes. Every generated HTML page also embeds its exact release stylesheet, with font URLs rooted correctly for nested lessons. This prevents missing or mismatched external CSS from stripping the layout. The server declares CSS/JavaScript MIME types explicitly and gives immutable caching only to the fingerprinted files. Ordinary HTML continues to require revalidation.
+
+The acceptance checker verifies stylesheet and script hashes, integrity values and the embedded stylesheet on every content page. The browser suite now has **15 passing scenarios**, including explicit MIME/cache checks, blocked external CSS, and an injected stale stylesheet. The negative control removes the embedded stylesheet and reproduces the unpositioned contents tree and visible skip link; the fixed page remains styled. These checks reproduce the failure mode locally, not a verified diagnosis of the inaccessible production cache.

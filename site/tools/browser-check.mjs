@@ -103,6 +103,45 @@ try {
     const p=await c.newPage();const e=[];p.on('pageerror',x=>e.push(x.message));await p.goto(address+sum);
     await p.locator('.next-step').click();await p.waitForURL(/02-valid-anagram/);assert.deepEqual(e,[]);await c.close();
   });
+  await check('Pages use matching versioned CSS and JavaScript, with correct MIME types',async()=>{
+    await go();
+    const css=await page.locator('link[rel="stylesheet"]').getAttribute('href');
+    const js=await page.locator('script[src]').getAttribute('src');
+    assert.match(css,/reader-css\.[0-9a-f]{16}\.css$/);
+    assert.match(js,/reader-js\.[0-9a-f]{16}\.js$/);
+    const style=await context.request.get(address+css),script=await context.request.get(address+js);
+    assert.equal(style.status(),200);assert.match(style.headers()['content-type'],/text\/css/);
+    assert.equal(script.status(),200);assert.match(script.headers()['content-type'],/(?:text|application)\/javascript/);
+    assert.match(style.headers()['cache-control'],/immutable/);
+  });
+  await check('Mobile layout and contents survive an unavailable external stylesheet',async()=>{
+    const c=await browser.newContext({viewport:{width:393,height:852}});
+    await c.route('**/*.css',r=>r.abort());const p=await c.newPage();
+    for(const path of ['/',sum]){
+      await p.goto(address+path);await p.evaluate(()=>document.fonts.ready);
+      assert.equal(await p.locator('.sidebar').evaluate(e=>getComputedStyle(e).position),'fixed');
+      assert.ok(await p.locator('.skip-link').evaluate(e=>e.getBoundingClientRect().bottom<0));
+      assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      await p.locator('#open-contents').click();await p.waitForFunction(()=>Math.abs(document.getElementById('sidebar').getBoundingClientRect().x)<1);
+      assert.equal(await p.locator('#sidebar').evaluate(e=>e.inert),false);
+      await p.keyboard.press('Escape');
+    }
+    await p.screenshot({path:join(shots,'mobile-without-external-css.png'),fullPage:true});await c.close();
+  });
+  await check('Stale CSS is rejected and matching inline styles prevent the reported broken layout',async()=>{
+    const c=await browser.newContext({viewport:{width:393,height:852}});
+    await c.route('**/*.css',r=>r.fulfill({status:200,contentType:'text/css',body:'body{font-family:Georgia;background:#faf9f7}a{color:#2f6f4e}'}));
+    const p=await c.newPage();await p.goto(address+'/');await p.evaluate(()=>document.fonts.ready);
+    assert.equal(await p.locator('.sidebar').evaluate(e=>getComputedStyle(e).position),'fixed');
+    assert.ok(await p.locator('.skip-link').evaluate(e=>e.getBoundingClientRect().bottom<0));
+    await p.screenshot({path:join(shots,'mobile-stale-css-protected.png'),fullPage:true});
+    // Negative control: without the inline release styles, the stale-sheet
+    // failure recreates the screenshot's inline table of contents and skip link.
+    await p.locator('#reader-styles').evaluate(e=>e.remove());
+    assert.equal(await p.locator('.sidebar').evaluate(e=>getComputedStyle(e).position),'static');
+    assert.ok(await p.locator('.skip-link').evaluate(e=>e.getBoundingClientRect().bottom>0));
+    await c.close();
+  });
   await check('Browser console has no uncaught application errors',async()=>assert.deepEqual(errors,[]));
   console.log(`${passed} browser scenarios passed. Screenshots: ${shots}`);
 } catch(e){failures.push(String(e));console.error(e);process.exitCode=1;}
