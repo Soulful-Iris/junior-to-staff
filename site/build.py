@@ -156,6 +156,63 @@ def kind_for(rel: Path) -> str:
     return "concept"
 
 
+
+# The chapter READMEs already state the pedagogy: "Learn in this order" is an
+# ordered table, "Apply the concept" an ordered list of project briefs. That
+# order is the author's, it interleaves labs and problems deliberately, and it
+# is not the order a directory walk produces. Use it.
+NAV_SECTIONS = ("Learn in this order", "Apply the concept", "Supporting material")
+SEC_LABEL = {"Learn in this order": "Learn", "Apply the concept": "Apply",
+             "Supporting material": "Supporting material"}
+MD_LINK = re.compile(r"\[([^\]]+)\]\(([^)#]+\.md)(?:#[^)]*)?\)")
+
+# Answer keys and repo meta are not lessons. They were in the reading sequence
+# because they are markdown files in the right directory, which is the only
+# thing a directory walk can know.
+def is_lesson(name: str) -> bool:
+    n = name.lower()
+    return not (n.endswith("assessor.md") or n == "validation.md")
+
+
+def chapter_sequence(chapter_readme: Path) -> list[tuple[str, str]]:
+    """(path relative to repo root, section label) in the order he wrote."""
+    text = chapter_readme.read_text(encoding="utf-8")
+    here = chapter_readme.parent
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for sec in NAV_SECTIONS:
+        m = re.search(rf"^## {re.escape(sec)}$(.*?)(?=^## |\Z)", text, re.M | re.S)
+        if not m:
+            continue
+        for link in MD_LINK.finditer(m.group(1)):
+            target = (here / link.group(2)).resolve()
+            if not target.exists():
+                continue
+            try:
+                rel = target.relative_to(ROOT)
+            except ValueError:
+                continue
+            rels = str(rel).replace(os.sep, "/")
+            # only things inside this chapter; a cross-chapter link is a
+            # prerequisite, not a step
+            if not rels.startswith(str(here.relative_to(ROOT)).replace(os.sep, "/") + "/"):
+                continue
+            if rels in seen or not is_lesson(target.name):
+                continue
+            seen.add(rels)
+            out.append((rels, SEC_LABEL[sec]))
+
+    # anything in the chapter he did not list still has to be reachable in the
+    # flow, in a stable order, after what he did list
+    rest = []
+    for f in sorted(here.rglob("*.md")):
+        rels = str(f.relative_to(ROOT)).replace(os.sep, "/")
+        if f == chapter_readme or rels in seen or not is_lesson(f.name):
+            continue
+        rest.append((rels, "More practice"))
+    return out + rest
+
+
 def chapter_blurbs() -> dict[str, str]:
     """The `You will learn to...` line each part README already gives per chapter.
 
@@ -220,36 +277,26 @@ def collect() -> list[dict]:
                 gnum=gi, chapter=ch,
                 blurb=CHAPTER_BLURBS.get(f"{gdir}/{sdir.name}", ""))
 
-            # Sub-chapters, in the order a reader should meet them: read the
-            # concepts, work the lessons and problems, then the labs and the
-            # bigger builds. Numbered N.M so a page knows where it sits.
-            sub_no = [0]
-
-            def sub(src: Path, kind: str, section: str):
-                sub_no[0] += 1
-                add(src, kind=kind, group=gdir, subject=sdir.name, gnum=gi,
-                    chapter=ch, sub=sub_no[0], section=section)
-
-            for f in sorted(sdir.glob("*.md")):
-                if f.name != "README.md":
-                    sub(srel / f.name, "concept", "Concepts")
-
-            for dirname, kind, section in (
-                ("lessons", "lesson", "Worked lessons"),
-                ("problems", "problem", "Problems"),
-                ("labs", "lab", "Labs"),
-                ("cases", "case", "Production cases"),
-                ("aws", "aws", "AWS"),
-                ("projects", "project", "Projects"),
-            ):
-                d = sdir / dirname
-                if not d.is_dir():
-                    continue
-                for f in sorted(d.rglob("*.md")):
-                    sub(f.relative_to(ROOT), kind, section)
+            # Sub-chapters in the order the chapter README states, not the
+            # order the filesystem happens to be in.
+            sub_no = 0
+            for rels, section in chapter_sequence(sdir / "README.md"):
+                sub_no += 1
+                add(Path(rels), kind=kind_for(Path(rels)), group=gdir,
+                    subject=sdir.name, gnum=gi, chapter=ch, sub=sub_no,
+                    section=section)
 
     for extra in ("curriculum/README.md",):
         add(Path(extra), kind="toc", group=None, subject=None)
+
+    # Assessor packs and validation notes are linked from the practice material
+    # and from the repo docs, so they are built — just never handed to a learner
+    # as the next thing to read.
+    for f in sorted((ROOT / "curriculum").rglob("*.md")):
+        if is_lesson(f.name):
+            continue
+        add(f.relative_to(ROOT), kind="practice", group=None, subject=None,
+            area="assessor")
 
     for d in ("indexes", "practice", "projects", "docs", "scripts"):
         base = ROOT / d
@@ -394,6 +441,27 @@ def style_markers(html: str) -> str:
     return html
 
 
+NAV_SECTION_RE = re.compile(
+    r"^## (?:Learn in this order|Apply the concept|Supporting material)\s*$.*?(?=^## |\Z)",
+    re.M | re.S)
+TRAILING_NAV = re.compile(r"^Next chapter: \[[^\]]+\]\([^)]+\)\.?\s*$", re.M)
+
+
+def strip_chapter_menus(text: str) -> str:
+    """Take the link menus off a chapter page.
+
+    A chapter page used to be a title, a blurb and then three lists of links:
+    learn these in this order, then open each of these, then here is some
+    supporting material. That is a directory listing wearing prose, and it puts
+    the work of sequencing on the reader. The order is now enforced by the
+    reading flow, so the menus are not information, they are a second way to
+    move that disagrees with the first.
+    """
+    text = NAV_SECTION_RE.sub("", text)
+    text = TRAILING_NAV.sub("", text)
+    return re.sub(r"\n{3,}", "\n\n", text)
+
+
 def render_body(text: str, have: set[str], depth: int) -> tuple[str, list]:
     text = substitute_mermaid(text, have, depth)
     # md_in_html only descends into elements that ask it to
@@ -528,36 +596,29 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
   text-transform:uppercase; color:var(--muted); text-decoration:none; font-weight:600}
 .tocjump:hover{color:var(--green)}
 
-/* part -> chapter -> sub-chapter, and the indentation says so */
-.part{margin:20px 0 4px}
-.part:first-of-type{margin-top:6px}
-.part a{display:block; color:var(--ink); text-decoration:none; font-weight:600;
-  font-size:13.5px; padding:4px 8px; border-radius:5px; border-left:3px solid var(--gc)}
-.part a:hover{background:var(--green-tint)}
-.part a[aria-current]{background:var(--gc); color:var(--paper)}
-.part .pn{display:block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
-  color:var(--gc); font-weight:700; margin-bottom:1px}
-.part a[aria-current] .pn{color:var(--paper); opacity:.8}
-.rail ol.chapters{list-style:none; margin:0; padding:0 0 0 11px}
-.rail li{margin:1px 0}
-.rail a.item{display:flex; gap:9px; align-items:baseline; padding:4px 9px 4px 6px;
-  border-radius:5px; color:var(--ink); text-decoration:none}
-.rail a.item .n{font-variant-numeric:tabular-nums; font-size:11.5px; color:var(--muted);
-  min-width:1.5em; text-align:right; font-weight:600}
-.rail a.item:hover{background:var(--green-tint)}
-.rail a.item:hover .n{color:var(--gc)}
-.rail a.item[aria-current]{background:var(--gc,var(--green)); color:var(--paper)}
-.rail a.item[aria-current] .n{color:var(--paper); opacity:.72}
-.rail .leaf{list-style:none; margin:3px 0 8px; padding:0 0 0 14px;
-  border-left:1px solid var(--rule)}
-.rail .leaf .secl{font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-  color:#a3aea7; margin:7px 0 2px; padding-left:6px}
-.rail .leaf a{display:flex; gap:7px; padding:2px 7px; color:var(--muted);
-  text-decoration:none; font-size:12.5px; border-radius:4px}
-.rail .leaf a .sn{font-variant-numeric:tabular-nums; color:#a3aea7; min-width:2.1em}
-.rail .leaf a:hover{color:var(--ink); background:var(--green-tint)}
-.rail .leaf a[aria-current]{color:var(--ink); font-weight:600}
-.rail .leaf a[aria-current] .sn{color:var(--gc)}
+/* where you are, not where you could go */
+.where{margin:16px 0 4px; padding:11px 12px; background:var(--paper);
+  border:1px solid var(--rule); border-left:3px solid var(--gc); border-radius:7px}
+.wpart{display:block; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--gc); font-weight:700}
+.wch{display:block; font-size:13px; color:var(--ink); margin-top:3px; font-weight:600}
+.bar2{height:4px; background:var(--rule); border-radius:2px; margin:9px 0 5px; overflow:hidden}
+.bar2 i{display:block; height:100%; background:var(--gc); border-radius:2px}
+.wpct{font-size:11px; color:var(--muted)}
+
+.stepsh{margin:20px 0 6px; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); font-weight:600}
+.rail ol.steps{list-style:none; margin:0; padding:0}
+.rail ol.steps li{display:flex; gap:8px; padding:3px 7px; border-radius:4px;
+  font-size:12.5px; line-height:1.4; color:var(--muted)}
+.rail ol.steps li .sn{font-variant-numeric:tabular-nums; min-width:2.3em; color:#a8b2ab}
+.rail ol.steps a{display:flex; gap:8px; color:var(--ink); text-decoration:none; flex:1}
+.rail ol.steps li:has(a):hover{background:var(--green-tint)}
+.rail ol.steps li.on{background:var(--accent); color:var(--paper); font-weight:600}
+.rail ol.steps li.on .sn{color:var(--paper); opacity:.75}
+/* ahead of you: visible so you know the shape, not clickable so you do not skip */
+.rail ol.steps li.notyet{color:#b3bcb6}
+.rail ol.steps li.notyet .sn{color:#c6cdc8}
 .rail .ext{margin-top:24px; padding-top:14px; border-top:1px solid var(--rule); font-size:12.5px}
 .rail .ext a{display:block; margin:5px 0; color:var(--muted); text-decoration:none}
 .rail .ext a:hover{color:var(--green)}
@@ -666,11 +727,20 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
   text-decoration:none; color:var(--ink); background:var(--paper)}
 .pair a:hover{border-color:var(--accent)}
 .pair a[aria-current]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
-.nextprev{display:flex; justify-content:space-between; gap:14px; margin:60px 0 0;
-  padding-top:20px; border-top:1px solid var(--rule); font-size:14px; max-width:var(--wide)}
-.nextprev a{max-width:48%; text-decoration:none; color:var(--ink)}
-.nextprev span{display:block; color:var(--muted); font-size:12.5px; margin-bottom:2px}
-.nextprev .r{text-align:right}
+.nextprev{display:flex; justify-content:space-between; align-items:center; gap:16px;
+  margin:56px 0 0; padding-top:22px; border-top:1px solid var(--rule); font-size:14px;
+  max-width:var(--measure)}
+.nextprev a{text-decoration:none; color:var(--ink)}
+.nextprev span{display:block; font-size:12px; margin-bottom:2px; letter-spacing:.04em;
+  text-transform:uppercase}
+.nextprev .back{color:var(--muted); font-size:13.5px; max-width:42%}
+.nextprev .back span{color:#a8b2ab}
+.nextprev .back:hover{color:var(--ink)}
+/* one obvious way forward */
+.nextprev .fwd{margin-left:auto; text-align:right; max-width:58%;
+  background:var(--accent); color:var(--paper); padding:12px 20px; border-radius:10px}
+.nextprev .fwd span{color:var(--paper); opacity:.78}
+.nextprev .fwd:hover{background:var(--ink); color:var(--paper)}
 
 /* ---- home ---- */
 .hero{padding:48px 28px 0; max-width:var(--wide); margin:0 auto}
@@ -701,9 +771,14 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
   font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
 .chn b{font-size:22px; line-height:1.05; font-weight:600; color:var(--gc); letter-spacing:0}
 
-.inchapter{margin:52px 0 0; padding-top:26px; border-top:1px solid var(--rule);
-  max-width:var(--wide)}
-.inchapter h2{margin:0 0 4px; border:0; padding:0; font-size:21px}
+.ahead{margin:48px 0 0; padding:22px 24px; border-radius:10px;
+  background:var(--accent-tint); border:1px solid var(--rule); max-width:var(--measure)}
+.ahead h2{margin:0 0 6px; border:0; padding:0; font-size:19px}
+.ahead p{margin:0 0 16px; color:var(--muted); font-size:16px}
+.begin{display:inline-block; padding:11px 20px; border-radius:999px;
+  background:var(--accent); color:var(--paper); text-decoration:none; font-size:15.5px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.begin:hover{background:var(--ink); color:var(--paper)}
 .sech{margin:22px 0 8px; font-size:11px; letter-spacing:.09em; text-transform:uppercase;
   color:var(--muted); font-weight:600;
   font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
@@ -722,6 +797,23 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
 .parth a:hover{color:var(--gc)}
 .partb{margin:0 0 14px; color:var(--muted); font-size:15px; max-width:44em}
 .chlist{display:grid; gap:8px}
+.chwrap{background:var(--paper); border:1px solid var(--rule);
+  border-left:3px solid var(--gc); border-radius:8px; overflow:hidden}
+.chwrap .ch{border:0; border-radius:0; background:transparent}
+.steps-d{margin:0; border:0; border-top:1px solid var(--rule); border-radius:0;
+  background:transparent; max-width:none}
+.steps-d summary{padding:8px 16px 9px; font-size:12.5px; font-weight:400; color:var(--muted)}
+.steps-d summary::before{font-size:16px}
+.steps-d[open]{background:#fbfbf9}
+.tsteps{list-style:none; margin:0 0 12px; padding:0 16px 0 44px}
+.tsteps li{margin:2px 0; font-size:14px}
+.tsteps .secl{margin:10px 0 3px; font-size:10.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:#a8b2ab; font-weight:600;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.tsteps a{display:flex; gap:10px; color:var(--ink); text-decoration:none; padding:2px 0}
+.tsteps a:hover{color:var(--gc)}
+.tsteps .sn{font-variant-numeric:tabular-nums; color:var(--gc); min-width:2.8em;
+  font-size:12.5px; font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
 .ch{display:flex; gap:14px; align-items:baseline; background:var(--paper);
   border:1px solid var(--rule); border-left:3px solid var(--gc); border-radius:8px;
   padding:13px 16px; text-decoration:none; color:var(--ink)}
@@ -889,60 +981,75 @@ def esc(s: str) -> str:
 
 
 def rail_html(pages, current, base) -> str:
-    """Part, then chapter, then sub-chapter, and the nesting is visible.
+    """Where you are, how far in, and the one door out.
 
-    The previous version was a flat list of seventeen chapters, which reached
-    everything in one click and lost every sense of where you were. Parts are
-    headings you can open, chapters sit inside them, and the chapter you are
-    reading shows its sub-chapters. Nothing here needs a click to pass through.
+    This used to be a jump list of every chapter, which meant the site offered
+    a menu at every moment and never taught an order. It now shows position and
+    the steps of the chapter you are in. Steps you have passed are links,
+    because going back to check something is reading. Steps ahead are not,
+    because choosing among them is the work the guide is supposed to do for
+    you. The table of contents is the one place with free movement.
     """
+    seq = [q for q in pages if q["kind"] in ("group", "subject") or q.get("sub")]
+    pos = next((i for i, q in enumerate(seq) if q["url"] == current), None)
+
     out = [
         f'<a class="brand" href="{base}">{esc(SITE_SHORT)}'
-        f'<small>every concept, its follow-ups, and the architecture behind it</small></a>',
+        f'<small>a guide that keeps the order</small></a>',
         '<div class="search"><label class="sr" for="q"></label>'
         '<input id="q" type="search" placeholder="Search everything  /" '
         'autocomplete="off" spellcheck="false"><div id="results"></div></div>',
         f'<a class="tocjump" href="{base}">Table of contents</a>',
     ]
-    for gi, (gdir, (gname, gc, _)) in enumerate(GROUPS.items(), 1):
-        gp = next((q for q in pages if q["kind"] == "group" and q["group"] == gdir), None)
-        if not gp:
-            continue
-        gcur = ' aria-current="page"' if gp["url"] == current else ""
-        out.append(f'<div class="part" style="--gc:{gc}">'
-                   f'<a href="{base.rstrip("/")}{gp["url"]}"{gcur}>'
-                   f'<span class="pn">Part {gi}</span>{esc(gname)}</a></div>')
-        out.append(f'<ol class="chapters" style="--gc:{gc}">')
-        for ch in [q for q in pages if q["kind"] == "subject" and q["group"] == gdir]:
-            cur = ' aria-current="page"' if ch["url"] == current else ""
-            out.append(
-                f'<li><a class="item" href="{base.rstrip("/")}{ch["url"]}"{cur}>'
-                f'<span class="n">{ch["chapter"]}</span><span>{esc(ch["title"])}</span></a>')
-            if current.startswith(ch["url"]):
-                leaves = [q for q in pages if q.get("chapter") == ch["chapter"] and q.get("sub")]
-                if leaves:
-                    out.append('<ul class="leaf">')
-                    last = None
-                    for lp in leaves:
-                        if lp["section"] != last:
-                            last = lp["section"]
-                            out.append(f'<li class="secl">{esc(last)}</li>')
-                        lc = ' aria-current="page"' if lp["url"] == current else ""
-                        out.append(
-                            f'<li><a href="{base.rstrip("/")}{lp["url"]}"{lc}>'
-                            f'<span class="sn">{ch["chapter"]}.{lp["sub"]}</span>'
-                            f'{esc(lp["title"])}</a></li>')
-                    out.append("</ul>")
-            out.append("</li>")
+
+    if pos is None:
+        out.append('<div class="ext">')
+        for label, href in [("Every visual", "gallery/"),
+                            ("All coding problems", "indexes/coding.html"),
+                            ("Mock interviews", "practice/"),
+                            ("How to study", "docs/HOW-TO-USE.html")]:
+            out.append(f'<a href="{base}{href}">{label}</a>')
+        out.append('<a href="https://github.com/Soulful-Iris/junior-to-staff">Source on GitHub</a></div>')
+        return "\n".join(out)
+
+    here = seq[pos]
+    gname, gc, _ = GROUPS[here["group"]] if here.get("group") else ("", "#2f6f4e", "")
+    total_ch = sum(1 for q in pages if q["kind"] == "subject")
+    pct = round((pos + 1) / len(seq) * 100)
+
+    chapter_no = here.get("chapter")
+    lines = [f'<div class="where" style="--gc:{gc}">',
+             f'<span class="wpart">Part {here["gnum"]} · {esc(gname)}</span>']
+    if chapter_no:
+        lines.append(f'<span class="wch">Chapter {chapter_no} of {total_ch}</span>')
+    lines.append(f'<div class="bar2"><i style="width:{pct}%"></i></div>'
+                 f'<span class="wpct">{pct}% through the book</span></div>')
+    out.append("".join(lines))
+
+    if chapter_no:
+        steps = [q for q in pages if q.get("chapter") == chapter_no and q.get("sub")]
+        chead = next(q for q in pages if q["kind"] == "subject" and q["chapter"] == chapter_no)
+        done_to = pos
+        out.append(f'<div class="stepsh">In chapter {chapter_no}</div><ol class="steps">')
+        ci = seq.index(chead)
+        cur = ' class="on"' if chead["url"] == current else ""
+        out.append(f'<li{cur}><a href="{base.rstrip("/")}{chead["url"]}">'
+                   f'<span class="sn">·</span>{esc(chead["title"])}</a></li>')
+        for st in steps:
+            si = seq.index(st)
+            num = f'{chapter_no}.{st["sub"]}'
+            if st["url"] == current:
+                out.append(f'<li class="on"><span class="sn">{num}</span>{esc(st["title"])}</li>')
+            elif si < done_to:
+                out.append(f'<li><a href="{base.rstrip("/")}{st["url"]}">'
+                           f'<span class="sn">{num}</span>{esc(st["title"])}</a></li>')
+            else:
+                out.append(f'<li class="notyet"><span class="sn">{num}</span>{esc(st["title"])}</li>')
         out.append("</ol>")
 
     out.append('<div class="ext">')
     for label, href in [("Every visual", "gallery/"),
                         ("All coding problems", "indexes/coding.html"),
-                        ("System designs", "indexes/system-designs.html"),
-                        ("Projects", "indexes/projects.html"),
-                        ("AWS implementations", "indexes/aws.html"),
-                        ("Production cases", "indexes/production-cases.html"),
                         ("Mock interviews", "practice/"),
                         ("How to study", "docs/HOW-TO-USE.html")]:
         out.append(f'<a href="{base}{href}">{label}</a>')
@@ -991,24 +1098,25 @@ def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
 
     # A chapter lists its own sub-chapters, grouped, so the chapter page is the
     # context and the sub-chapters are the work.
+    # A chapter says what is ahead. It does not offer a menu: the order is the
+    # guide's job, and a list of links is that job handed back to the reader.
     inchapter = ""
     if page["kind"] == "subject":
-        leaves = [q for q in pages if q.get("chapter") == page["chapter"] and q.get("sub")]
-        if leaves:
-            rows, last = [], None
-            for lp in leaves:
-                if lp["section"] != last:
-                    if last is not None:
-                        rows.append("</div>")
-                    last = lp["section"]
-                    rows.append(f'<h3 class="sech">{esc(last)}</h3><div class="sublist">')
-                rows.append(
-                    f'<a class="subrow" href="{base.rstrip("/")}{lp["url"]}">'
-                    f'<span class="sn">{page["chapter"]}.{lp["sub"]}</span>'
-                    f'<span>{esc(lp["title"])}</span></a>')
-            rows.append("</div>")
-            inchapter = (f'<section class="inchapter"><h2>In this chapter</h2>'
-                         f'{"".join(rows)}</section>')
+        steps = [q for q in pages if q.get("chapter") == page["chapter"] and q.get("sub")]
+        if steps:
+            counts: dict[str, int] = {}
+            for q in steps:
+                counts[q["section"]] = counts.get(q["section"], 0) + 1
+            bits = " · ".join(f"{v} {k.lower()}" for k, v in counts.items())
+            first = steps[0]
+            inchapter = (
+                f'<section class="ahead">'
+                f'<h2>What is ahead</h2>'
+                f'<p>{len(steps)} steps in this chapter — {esc(bits)}. '
+                f'They come in order; you do not have to choose.</p>'
+                f'<a class="begin" href="{base.rstrip("/")}{first["url"]}">'
+                f'Begin {page["chapter"]}.1 &middot; {esc(first["title"])}</a>'
+                f'</section>')
 
     def label(q, word):
         if q.get("kind") == "group":
@@ -1021,15 +1129,18 @@ def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
 
     nav = []
     if prev:
-        nav.append(f'<a href="{base.rstrip("/")}{prev["url"]}">'
-                   f'<span>{label(prev, "Previous")}</span>{esc(prev["title"])}</a>')
+        nav.append(f'<a class="back" href="{base.rstrip("/")}{prev["url"]}">'
+                   f'<span>{label(prev, "Back")}</span>{esc(prev["title"])}</a>')
     else:
-        nav.append("<span></span>")
-    if nxt:
-        nav.append(f'<a class="r" href="{base.rstrip("/")}{nxt["url"]}">'
+        nav.append('<span></span>')
+    if nxt and page["kind"] != "subject":
+        nav.append(f'<a class="fwd" href="{base.rstrip("/")}{nxt["url"]}">'
                    f'<span>{label(nxt, "Next")}</span>{esc(nxt["title"])}</a>')
+    elif nxt:
+        nav.append('<span></span>')
     else:
-        nav.append("<span></span>")
+        nav.append(f'<a class="fwd" href="{base}">'
+                   f'<span>The end</span>Back to the table of contents</a>')
 
     return f"""<!doctype html>
 <html lang="en"><head>
@@ -1089,12 +1200,26 @@ def home_shell(page, body, pages, base) -> str:
             f'<a href="{base.rstrip("/")}{gp["url"]}">read the part introduction</a></p>'
             f'<div class="chlist">')
         for ch in chs:
+            steps = [q for q in pages if q.get("chapter") == ch["chapter"] and q.get("sub")]
+            rows, last = [], None
+            for st in steps:
+                if st["section"] != last:
+                    last = st["section"]
+                    rows.append(f'<li class="secl">{esc(last)}</li>')
+                rows.append(
+                    f'<li><a href="{base.rstrip("/")}{st["url"]}">'
+                    f'<span class="sn">{ch["chapter"]}.{st["sub"]}</span>'
+                    f'{esc(st["title"])}</a></li>')
             toc.append(
+                f'<div class="chwrap">'
                 f'<a class="ch" href="{base.rstrip("/")}{ch["url"]}">'
                 f'<span class="chn">Chapter<b>{ch["chapter"]}</b></span>'
                 f'<span class="cht"><b>{esc(ch["title"])}</b>'
                 f'<em>{esc(ch["blurb"])}</em>'
-                f'<small>{inside(ch)}</small></span></a>')
+                f'<small>{inside(ch)}</small></span></a>'
+                + (f'<details class="steps-d"><summary>{len(steps)} steps</summary>'
+                   f'<ol class="tsteps">{"".join(rows)}</ol></details>' if steps else "")
+                + '</div>')
         toc.append("</div></section>")
 
     first = next((q for q in pages if q["kind"] == "group"), None)
@@ -1312,6 +1437,8 @@ def main() -> int:
 
     index = []
     for i, p in enumerate(pages):
+        if p["kind"] == "subject":
+            p["text"] = strip_chapter_menus(p["text"])
         rel = dest_for(p["src"])
         dest = OUT / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
