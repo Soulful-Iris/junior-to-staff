@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" width="760" height="340" role="img" aria-label="The same error budget spent two ways. A fast burn empties it in hours and both the short and long alert windows agree, so it pages. A slow trickle empties it over a week: the short window stays quiet and the long window notices, so it becomes a ticket rather than a page. A thirty-second blip moves neither.">
+  <rect width="760" height="340" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME BUDGET, SPENT THREE WAYS · 43 MINUTES PER MONTH AT 99.9%</text>
+
+  <!-- fast burn -->
+  <text x="44" y="70" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a85d2f" letter-spacing="1.3">FAST BURN</text>
+  <text x="44" y="86" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">a 30-minute outage</text>
+  <rect x="192" y="62" width="330" height="26" rx="3" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <rect x="193" y="63" width="0" height="24" rx="2" fill="#c2703d">
+    <animate attributeName="width" values="0;328;328;0" keyTimes="0;0.3;0.92;1" dur="10s" repeatCount="indefinite"/>
+  </rect>
+  <text x="540" y="72" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">short: burning</text>
+  <text x="540" y="87" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">long: burning</text>
+  <text x="676" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#a85d2f" letter-spacing="1">PAGE</text>
+
+  <!-- slow trickle -->
+  <text x="44" y="140" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.3">SLOW TRICKLE</text>
+  <text x="44" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">0.9% errors, all week</text>
+  <rect x="192" y="132" width="330" height="26" rx="3" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <rect x="193" y="133" width="0" height="24" rx="2" fill="#c2703d" opacity="0.55">
+    <animate attributeName="width" values="0;328;328;0" keyTimes="0;0.82;0.94;1" dur="10s" repeatCount="indefinite"/>
+  </rect>
+  <text x="540" y="142" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">short: quiet</text>
+  <text x="540" y="157" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">long: burning</text>
+  <text x="676" y="150" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1">TICKET</text>
+
+  <!-- the blip -->
+  <text x="44" y="210" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#8a857d" letter-spacing="1.3">A BLIP</text>
+  <text x="44" y="226" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">30 seconds, once</text>
+  <rect x="192" y="202" width="330" height="26" rx="3" fill="#faf9f7" stroke="#c9c3b8" stroke-width="1.2"/>
+  <rect x="193" y="203" width="6" height="24" rx="2" fill="#c2703d" opacity="0.35"/>
+  <text x="540" y="212" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">short: quiet</text>
+  <text x="540" y="227" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">long: quiet</text>
+  <text x="676" y="220" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e" letter-spacing="1">NOTHING</text>
+
+  <line x1="44" y1="252" x2="716" y2="252" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="276" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">A static threshold gets two of these three wrong. It pages for the blip, because the</text>
+  <text x="44" y="293" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">instantaneous rate was high — and it never notices the trickle, because 0.9% is under 1%.</text>
+  <text x="44" y="318" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">Two windows, and both must agree before anybody is woken.</text>
+</svg>
