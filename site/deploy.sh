@@ -13,7 +13,7 @@
 set -uo pipefail
 
 REPO="$HOME/ventures/j2s-site"
-BRANCH="${J2S_BRANCH:-site/concept-first}"
+BRANCH="${J2S_BRANCH:-main}"
 PY="$HOME/.local/bin/python3.12"
 STATE="$HOME/.local/state/soulful/j2s-deploy"
 mkdir -p "$STATE"
