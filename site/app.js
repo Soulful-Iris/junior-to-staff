@@ -73,9 +73,9 @@
   headingLinks.forEach(a => a.addEventListener('click', e => {
     const node=revealHeading(a.dataset.heading);if(!node)return;e.preventDefault();
     if(mobile())setDrawer(false);
-    history.replaceState(null,'','#'+encodeURIComponent(a.dataset.heading));node.scrollIntoView({block:'start'});
+    history.replaceState(null,'','#'+encodeURIComponent(a.dataset.heading));node.tabIndex=-1;node.focus({preventScroll:true});node.scrollIntoView({block:'start'});
   }));
-  if(location.hash) {const node=revealHeading(decodeURIComponent(location.hash.slice(1)));if(node)requestAnimationFrame(()=>node.scrollIntoView());}
+  if(location.hash) {try{const node=revealHeading(decodeURIComponent(location.hash.slice(1)));if(node)requestAnimationFrame(()=>node.scrollIntoView());}catch{/* An invalid old bookmark must not break the reader. */}}
   const observer = new IntersectionObserver(entries => {
     const hit=entries.find(e=>e.isIntersecting);if(!hit)return;
     headingLinks.forEach(a => a.classList.toggle('current-heading',a.dataset.heading===hit.target.id));
@@ -93,9 +93,9 @@
   }
   motionButton.addEventListener('click',()=>{still=!still;write('engineering-guide:still',still);applyMotion();});
   media.addEventListener('change',()=>{still=media.matches;applyMotion();});applyMotion();
-  document.querySelectorAll('.mer,.figwrap').forEach(figure=>{
+  document.querySelectorAll('.mer,.figwrap,.featured-diagram').forEach(figure=>{
     const img=figure.querySelector('img');if(!img)return;
-    const toolbar=document.createElement('div');toolbar.className='visual-toolbar';
+    const toolbar=document.createElement('div');toolbar.className='visual-toolbar';const hint=document.createElement('span');hint.className='diagram-scroll-hint';hint.textContent='Wide diagram? Swipe to explore.';toolbar.append(hint);
     if(img.dataset.still){const toggle=document.createElement('button');toggle.textContent='Animation / still';toggle.addEventListener('click',()=>{img.src=img.getAttribute('src')===img.dataset.still?img.dataset.motion:img.dataset.still;});toolbar.append(toggle);}
     const zoom=document.createElement('button');zoom.textContent='Fit diagram';zoom.addEventListener('click',()=>{
       const fitted=img.dataset.fit==='true';img.dataset.fit=String(!fitted);img.style.maxWidth=fitted?'':'100%';img.style.minWidth=fitted?'':'0';zoom.textContent=fitted?'Fit diagram':'Actual size';

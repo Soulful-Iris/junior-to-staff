@@ -31,7 +31,7 @@ fi
 git fetch -q origin "$BRANCH" || { log "fetch failed"; exit 1; }
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse "origin/$BRANCH")
-[ "$LOCAL" = "$REMOTE" ] && exit 0
+[ "$LOCAL" = "$REMOTE" ] && [ "$(cat "$STATE/last-deployed" 2>/dev/null)" = "$REMOTE" ] && exit 0
 
 log "deploying $BRANCH ${LOCAL:0:8} -> ${REMOTE:0:8}"
 git checkout -q -B "$BRANCH" "origin/$BRANCH" || { log "checkout failed"; exit 1; }
@@ -73,6 +73,11 @@ fi
 if ! SITE_OUT="$STAGE" "$PY" site/check.py; then
   log "LINK CHECK FAILED, keeping the published site"
   notify_fail "link check"; rm -rf "$STAGE"; exit 1
+fi
+
+if ! SITE_OUT="$STAGE" "$PY" site/check_reading.py; then
+  log "READING CHECK FAILED, keeping the published site"
+  notify_fail "reading check"; rm -rf "$STAGE"; exit 1
 fi
 
 # Swap. The server resolves site/out by path on every request, so the window

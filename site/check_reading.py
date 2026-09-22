@@ -21,6 +21,8 @@ def main():
     assert not any('assessor' in src for src in sequence), 'Answer keys entered candidate sequence'
     bank=json.loads((ROOT/'indexes/problem-bank.json').read_text())
     assert len(bank)==42 and all(p['path'] in sequence for p in bank)
+    briefs=[p for p in sequence if '/projects/' in p and p.endswith('.md')]
+    assert len(briefs)==40, f'Missing standalone briefs: {len(briefs)}'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
     assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
     assert sequence.index(bank[0]['path'])==sequence.index('curriculum/01-code/02-data-structures-algorithms/lessons/01-maps.md')+1
@@ -40,6 +42,10 @@ def main():
         for img in article.find_all('img'):
             if '/assets/mermaid/' in img.get('src',''):diagrams.add(Path(img['src']).name)
             assert img.get('alt'),src
+            if img.get('data-still'):
+                target = img['data-still']
+                resting = OUT/target.lstrip('/') if target.startswith('/') else output_for(src).parent/target
+                assert resting.is_file(),(src,target)
         for panel in article.select('figure.code-file'):
             original=ROOT/panel['data-source'];assert original.is_file(), original
             assert panel.code.get_text()==original.read_text(),original

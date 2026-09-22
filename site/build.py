@@ -374,7 +374,7 @@ def render_mermaid(blocks: dict[str, str]) -> set[str]:
     missing = [h for h in blocks if not (MERMAID_CACHE / f"{h}.svg").exists()]
     if missing:
         chrome = os.environ.get("CHROME_PATH") or next(
-            (str(p) for p in Path.home().glob(".cache/ms-playwright/chromium*/chrome-linux/chrome")), "")
+            (str(p) for p in Path.home().glob(".cache/ms-playwright/chromium*/chrome-*/chrome")), "")
         if not chrome:
             print("  ! no chromium found; diagrams will be skipped", file=sys.stderr)
         else:

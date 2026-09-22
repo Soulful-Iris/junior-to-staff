@@ -1,60 +1,55 @@
-# The site
+# The Engineering Guide
 
-Builds the curriculum into a static site. Live at
-**[guide.soulful-ai.dev](https://guide.soulful-ai.dev)**.
+The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains four parts, 17 chapters, their ordered lessons, and the current lesson's subsections. Every lesson has Previous/Next navigation. The contents is the place to jump elsewhere.
+
+## Build and check
+
+Python 3.12+, Node, and Chromium are required for a fresh build. Install the declared tooling in a virtual environment and the local Node tooling directory:
 
 ```bash
-python3.12 site/build.py    # markdown -> site/out/  (239 pages, 387 diagrams)
-python3.12 site/check.py    # resolve every link in the BUILT output
-python3.12 site/serve.py    # http://127.0.0.1:8901
+python3.12 -m venv /tmp/engineering-guide-venv
+/tmp/engineering-guide-venv/bin/python -m pip install -r site/requirements.txt
+npm install --prefix site/tools
+# Use an existing Chromium executable, or install one with Playwright:
+cd site/tools
+npx playwright install chromium
+cd ../..
+
+/tmp/engineering-guide-venv/bin/python site/build.py
+/tmp/engineering-guide-venv/bin/python site/check.py
+/tmp/engineering-guide-venv/bin/python site/check_reading.py
+/tmp/engineering-guide-venv/bin/python site/serve.py
 ```
 
-No framework, no client-side rendering, nothing to keep patched. Python plus
-the `markdown` package, and Node only for the one-off mermaid render.
+The preview serves at `http://127.0.0.1:8901`. Set `CHROME_PATH` if Chromium lives outside the standard Playwright cache. If required system libraries are unavailable, install them for that browser before rendering. The build refuses to publish missing diagrams. `SITE_OUT` selects a staging directory; the default is `site/out/`. Generated output, browser binaries and tooling dependencies are not committed.
 
-## The four things worth knowing
+With a browser available, run the interaction checks:
 
-**Mermaid is pre-rendered.** `tools/render-mermaid.mjs` loads mermaid once in a
-headless browser and renders all 387 diagrams in about thirty seconds, themed to
-the house palette, cached by content hash so a rebuild costs nothing. Diagrams
-are emitted at natural size rather than scaled to fit: scaling a wide flowchart
-down to the text column shrinks its labels past legibility, so the wide ones
-scroll instead, with a CSS scroll shadow so you can tell.
+```bash
+CHROME_PATH=/path/to/chromium node site/tools/browser-check.mjs
+```
 
-**`<details>` needs `markdown="1"` injected.** Without it the 197 collapsible
-solutions render their insides as raw markdown — tables as pipes, emphasis as
-asterisks — and the build log looks completely fine.
+The browser script starts and stops its own local server. `SITE_SCREENSHOTS` selects a directory for review images; otherwise it uses a temporary directory.
 
-**Links are rewritten, and the checker reads the built pages.** The curriculum
-links to `.md` files, which is correct on GitHub and dead on a website: there
-were 1,421 of them. The mirrored output tree means the rewrite is one mechanical
-rule with no lookups, so a link cannot drift from where its file landed.
-`check.py` walks `site/out` rather than the markdown, because a source-level
-checker passes a build with 1,421 dead links in it. It has a negative control:
-break a link and it goes red.
+## Reading sequence and content
 
-**The curriculum's own vocabulary carries the teaching.** `Changed requirement`,
-`Follow-up N`, `Senior expectation`, `Invariant`, `Redraw challenge` are styled
-as marked blocks rather than left as bold paragraphs, because they are the part
-a reader is here for. 279 of them across the site.
+- `course.py` defines the teaching order over existing source documents. Coding primers are interleaved with the problems they introduce. The five reading-list stages appear in their relevant chapters. Candidate exercises follow the relevant material; assessor keys stay outside the automatic sequence.
+- `reader.py` composes the content and interface. Code and test files are displayed beside their references. References outside a protected answer are placed in an inline disclosure; existing answer disclosures stay closed until the learner opens them. Ordinary cross-links become contextual text, while their full documents remain in the sequence or reference shelf. External citations appear under Sources at the end of the lesson.
+- `build.py` retains Markdown parsing, heading generation and cached Mermaid rendering. Original Markdown, code and visual assets remain untouched.
+- `style.css` and `app.js` provide the reading layout, nested contents, mobile drawer, subsection navigation, search, local progress, copy-code controls and diagram sizing/motion controls.
 
-## Colour
+The build publishes **239 content pages**, **185 guided steps** plus the homepage, and a separate visual reference. All **42 coding problems**, **45 project briefs**, **107 source SVGs** on this site branch and **387 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
 
-Green is the base throughout. Each of the four parts has an accent used only as
-an identity mark — the nav chip, the active item, the page's quote rule — never
-as a theme, so the site reads as one thing. Colour is always redundant with a
-number and a name, never the only channel.
+Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
 
-## The gallery
+## Visuals and accessibility
 
-`/gallery/` is generated from what the pages actually reference, so it cannot
-list a diagram that is not used or miss one that is. 478 of them, grouped by
-part, each thumbnail linking to the lesson rather than to the bare file —
-because a diagram out of its argument is decoration. The repo's own
-`indexes/visuals.md` is a table of "View" links showing no pictures at all,
-which is an odd thing for a page about pictures; it is left alone for GitHub
-and the gallery does the job on the site.
+Mermaid is rendered to SVG before publication and cached by source hash. Wide diagrams and tables scroll within the reading column. Readers can fit a diagram to the column or keep its natural size. Authored animation/still pairs are used where supplied. Older animations receive derived resting views that preserve their original boxes and labels; original assets are never overwritten. The motion preference is retained locally and respects the system's reduced-motion setting.
 
-## Changing the name
+The mobile contents drawer supports Escape, focus containment and return to its opening button. Heading navigation opens an enclosing solution disclosure before moving to the heading. Search stays inside the contents panel. The browser checks exercise these behaviors; they are not a full assistive-technology certification.
 
-`SITE_TITLE`, `SITE_SHORT` and `SITE_LEDE` at the top of `build.py`. One place.
+## Deployment
+
+`deploy.sh` preserves the existing automatic deployment job. It builds into a staging directory, validates the built links and learning flow, and swaps the published directory only after success. It installs the pinned Python requirements into a dedicated virtual environment and the declared Node tools when their manifests change. A failed build remains retryable even after the checkout advances to the new commit. Existing notification behavior is preserved.
+
+See [redesign verification](REDESIGN.md) for the completed checks and their limits.

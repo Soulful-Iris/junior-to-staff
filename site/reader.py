@@ -59,6 +59,7 @@ def compose(b, page, have, by_dest):
             if not any(Path(urlsplit(a.get('href', '')).path).suffix in CODE_SUFFIXES for a in links):
                 paragraph.decompose()
     embedded = set()
+    code_tail = {}
     for a in list(soup.find_all('a')):
         href = a.get('href', '')
         target = local_target(b, page, href)
@@ -86,7 +87,9 @@ def compose(b, page, have, by_dest):
                 enclosure = soup.new_tag('details', attrs={'class': 'inline-reference'})
                 summary = soup.new_tag('summary'); summary.string = 'Inspect source · ' + disk.name
                 enclosure.extend([summary, panel]); panel = enclosure
-            block.insert_after(panel)
+            anchor = code_tail.get(id(block), block)
+            anchor.insert_after(panel)
+            code_tail[id(block)] = panel
             a.replace_with(soup.new_string(label + ' (included below)'))
         elif suffix == '.svg':
             # Static alternatives are inline controls beside their animation.
@@ -233,7 +236,7 @@ def shell(b, page, body, pages, sequence, base):
     current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':len(sequence)},ensure_ascii=True).replace('<','\\u003c')
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}style.css"></head>
 <body class="{'home' if is_home else 'lesson'}"><a class="skip-link" href="#reading">Skip to lesson</a><div class="mobile-bar"><button id="open-contents" aria-expanded="false" aria-controls="sidebar">☰ <span>Contents</span></button><span>The Engineering Guide</span></div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<div class="reading-shell"><header class="reading-bar"><span>{E(subtitle)}</span><div class="reading-controls"><span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}app.js" defer></script></body></html>'''
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar"><span>{E(subtitle)}</span><div class="reading-controls"><span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}app.js" defer></script></body></html>'''
 
 
 def build(b):
@@ -259,7 +262,12 @@ def build(b):
             tree = ET.fromstring(source)
             for parent in tree.iter():
                 for child in list(parent):
-                    if child.tag.split('}')[-1] in ('animate','animateMotion','animateTransform','set'):
+                    tag = child.tag.split('}')[-1]
+                    if tag == 'animateMotion':
+                        start = re.match(r'M\s*([-+\d.]+)[ ,]+([-+\d.]+)', child.get('path',''))
+                        if start:
+                            parent.set('transform', (parent.get('transform','') + f' translate({start[1]} {start[2]})').strip())
+                    if tag in ('animate','animateMotion','animateTransform','set'):
                         parent.remove(child)
             style = ET.SubElement(tree, '{http://www.w3.org/2000/svg}style')
             style.text = '*{animation:none!important;transition:none!important}'
