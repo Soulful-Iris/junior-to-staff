@@ -2,14 +2,14 @@
 
 > Junior tier · each one an afternoon · read [the section](README.md) first
 
-Five projects, rising. No new features in any of them: each one builds an
-instrument, and every instrument points at you. A specification whose precision
+Five projects, rising. No new features in any of them: each builds an
+instrument, and every instrument points at you — a specification whose precision
 you can measure, checks for code you could not have written, asks that provably
-transfer, a review you can repeat when you are tired, and a record of your own
+transfer, a review that stays sharp when you are tired, and a record of your own
 judgment scored a week later.
 
-The section said the job is specifying and verifying. These afternoons are where
-that stops being a slogan.
+The section said the job is now specifying and verifying. These five afternoons
+are where that stops being a slogan.
 
 ![A vague ask fans out into five different but plausible systems. The same ask rewritten as a precise specification produces nearly the same system twice, and the remaining diff is noise. Every place two builds differ is a sentence missing from the spec.](../../../assets/diagrams/spec-fidelity.svg)
 
@@ -29,63 +29,60 @@ two builds are its test.
 
 **The thought process**
 
-The first decision is what gets pinned and what stays free. The workable rule:
-if two correct implementations could differ on it and nobody would notice,
-leave it out; if the difference would reach a user or a caller, pin it. Pin
-everything and the spec is code in worse syntax. Pin nothing and it is a wish.
+The first decision is what gets pinned and what stays free. The rule: if two
+correct implementations could differ on it and nobody would notice, leave it
+out; if the difference would reach a user or a caller, pin it. Pin everything
+and the spec is code in worse syntax. Pin nothing and it is a wish.
 
-Second: what "the same system" means, because you cannot diff source —
-different variable names are not disagreement, different behaviour on the same
-input is. So before the first build you fix the probes: the empty tag, the
-duplicate, the 200-character one, two users tagging one item. Deciding what to
-probe turns out to be discovering what the spec was supposed to pin, which is
-why the probes come first.
+Second: what "the same" means, because you cannot diff source — variable names
+are not disagreement, behaviour on the same input is. So before the first build
+you fix the probes: the empty tag, the duplicate, the 200-character one, two
+users tagging one item. Deciding what to probe is discovering what the spec was
+supposed to pin, which is why the probes come first.
 
-Third: what a divergence means. Not that the model guessed badly — that you
-left a question open and it was answered by coin flip, twice, differently.
-Every behavioural difference is a missing sentence. Add it, run a third
-stranger, watch the fan close.
+Third: a divergence is not the model guessing badly. It is a question you left
+open, answered by coin flip, twice, differently. Every behavioural difference
+is a missing sentence — add it, run a third stranger, watch the fan close.
 
 **How to organise the prompts**
 
-**1 — get the holes listed before paying for them.**
+**1 — the holes, before you pay for them.**
 
 ```
 Read this specification. Do not build it.
 
 List every question you would have to answer yourself because the spec
-does not. Group them: ones where any answer is fine, and ones where I
+does not. Split them: ones where any answer is fine, and ones where I
 would care which answer you picked.
 ```
 
-The second group is your fan-out, visible before it costs anything. Fix the
-cheap holes; re-run until the list contains only questions you are leaving open
-on purpose.
+The second list is your fan-out, visible before it costs anything. Fix the
+cheap holes before anyone builds.
 
 **2 — the build, verbatim, to two fresh sessions.**
 
 ```
 Build exactly what this specification says. Where it is silent, choose
-reasonably — and record every such choice in ASSUMPTIONS.md as you go:
-the question, the answer you picked, the nearest alternative.
+reasonably, and record every choice in ASSUMPTIONS.md: the question,
+your answer, the nearest alternative.
 
 Stop when it runs and the spec's examples pass.
 ```
 
-Fresh means fresh: no shared history, no memory. Check each session ends with
-something that runs and a non-empty `ASSUMPTIONS.md` before comparing anything.
+Fresh means fresh: no shared history, no memory. Each session must end with
+something that runs and a non-empty `ASSUMPTIONS.md`.
 
-**3 — the comparison, which is also a prompt.**
+**3 — the comparison.**
 
 ```
-Here are two builds' answers to the same twelve probes, and both
-ASSUMPTIONS.md files. List every behavioural difference. For each one,
-write the single sentence missing from the spec that would have
+Here are two builds' answers to the same probes, and both
+ASSUMPTIONS.md files. List every behavioural difference, and for each
+write the one sentence missing from the spec that would have
 prevented it. Pin behaviour, not implementation.
 ```
 
-You accept or reject each sentence yourself. The check is a third stranger:
-given the revised spec, the differences you fixed must not reappear.
+Accept or reject each sentence yourself. Then the check: a third stranger,
+given the revised spec, must not reproduce the differences you fixed.
 
 **On AWS**
 
@@ -93,9 +90,9 @@ The stranger must actually be a stranger, and a chat app is not one — it
 carries memory and custom instructions you have stopped seeing. A pinned model
 id behind an API is the clean subject. **Amazon Bedrock** and a provider's own
 API offer the same models; Bedrock earns it when your work already lives in AWS
-— IAM credentials you already have, invocation logging, the cost sitting next
-to the rest of the bill. Otherwise the direct API is simpler. This project
-needs nothing else: the artefact is a text file, and git is its home.
+— IAM credentials you already have, invocation logging, cost sitting next to
+the rest of the bill. Otherwise the direct API is simpler. Nothing else here
+needs AWS: the artefact is a text file, and git is its home.
 
 **What productionising it means**
 
@@ -113,12 +110,12 @@ the distance between two strangers.
 
 **How you would know it is wrong**
 
-- The builds agree on things the spec never mentions. That is leaked context,
-  not a good spec — check the sessions were actually independent.
-- Delete one sentence you know matters and re-run. If the probes surface no
-  divergence, the probe set is too weak to measure anything.
-- The third stranger diverges in a place you already fixed. Your added sentence
-  pinned an implementation detail, not the behaviour.
+- The builds agree on things the spec never mentions. That is leaked context —
+  check the sessions were actually independent.
+- Delete one sentence you know matters and re-run. If no divergence surfaces,
+  the probe set is too weak to measure anything.
+- The third stranger diverges where you already fixed. Your sentence pinned an
+  implementation detail, not the behaviour.
 - An empty `ASSUMPTIONS.md`. The recording failed; it does not mean the spec
   was complete.
 
@@ -140,22 +137,22 @@ you now trust it.
 **The thought process**
 
 Pick the subject by the gap: beyond you to write, not beyond you to *specify*.
-You can state what "no more than five attempts in any sixty-second window"
-means without being able to implement it efficiently. That gap is where a model
-puts you every working day; this afternoon you stand in it deliberately.
+You can state what "five attempts per sixty-second window" means without being
+able to implement it efficiently. That gap is where a model puts you every
+working day; here you stand in it on purpose.
 
 Then the real question: where does truth come from, if not from reading the
-code? Three places. Properties that must hold for every input. An oracle — a
-slower, dumber version you *can* write and read, which must always agree. And
-known answers, worked by hand. Which of the three your behaviour admits is the
-design decision. For the rate limiter the oracle is almost insultingly simple:
-keep every timestamp, count the ones inside the window.
+code? Three places: properties that must hold for every input; an oracle — a
+slower, dumber version you *can* write and read, which must always agree; and
+known answers, worked by hand. Which of the three the behaviour admits is the
+design decision. For the rate limiter the oracle is insultingly simple: keep
+every timestamp, count the ones inside the window.
 
 Last: who checks the checker. Code and tests from the same hand are not two
-opinions — the section already warned you. So the chain has to bottom out in
-something you can actually read, which is why the oracle stays dumb on purpose:
-a clever oracle is just a second implementation you cannot read. And the
-harness must be shown able to fail before its passing means anything.
+opinions, so the chain must bottom out in something you can actually read — the
+oracle stays dumb on purpose, because a clever oracle is just a second
+implementation you cannot read. And the harness must be shown able to fail
+before its passing means anything.
 
 **How to organise the prompts**
 
@@ -171,7 +168,7 @@ not for speed.
 ```
 
 Read the reference until you believe it. If you cannot hold it in your head,
-this step failed — ask for a dumber one.
+ask for a dumber one.
 
 **2 — the implementation, and the harness that compares.**
 
@@ -194,9 +191,8 @@ Produce five variants of the implementation, each with one subtle
 behavioural bug. Number them. Do not tell me which bug is which.
 ```
 
-Run the harness against all five; it has to flag every one. Then ask for the
-reveal. A survivor is not bad luck — it is a map reference for the exact hole
-in your harness. Fix it, re-run, keep the note.
+The harness must flag all five; then ask for the reveal. A survivor is not bad
+luck — it is a map reference for the exact hole in your harness. Fix, re-run.
 
 **On AWS**
 
@@ -208,28 +204,27 @@ what you fan out across **Fargate** tasks — but that is a later tier's problem
 **What productionising it means**
 
 The harness outlives the implementation, and that is the payoff of black-box
-checks: when you regenerate the component, upgrade the model that wrote it, or
-replace it with a library, the same harness re-proves the replacement. Wire it
-into CI, and keep the trust argument next to the code so the next person knows
-what is defended and what is merely assumed.
+checks: regenerate the component, upgrade the model that wrote it, or swap in a
+library, and the same harness re-proves the replacement. Wire it into CI, and
+keep the trust argument next to the code so the next person knows what is
+defended and what is merely assumed.
 
 **The learning**
 
 Trust can be manufactured without comprehension, but only out of parts you can
-comprehend — a dumb oracle, a readable generator, a harness that has been seen
-to catch. After this, "the tests pass" stops being evidence until you know who
-wrote the tests and what they have been shown to catch.
+comprehend — a dumb oracle, a readable generator, a harness seen to catch.
+"The tests pass" stops being evidence until you know who wrote the tests and
+what they have been shown to catch.
 
 **How you would know it is wrong**
 
-- A planted bug survives the harness. That is the harness wrong, precisely
-  there.
+- A planted bug survives the harness. The harness is wrong, precisely there.
 - Break the *oracle* on purpose. If nothing disagrees, the harness is comparing
   nothing.
 - Grep the harness for imports of the implementation's internals. Any hit means
   it is not black-box, and it dies with the first rewrite.
-- Print fifty generated inputs and look. If the timestamps only ever increase,
-  the clock-goes-backwards property was never once exercised.
+- Print fifty generated inputs. If the timestamps only ever increase, the
+  clock-goes-backwards property was never once exercised.
 
 ---
 
@@ -241,30 +236,30 @@ measured answer to whether they hold on work they were not written for.*
 **Build**
 
 Mine three or four of your own real transcripts for the asks you keep retyping.
-Compress them into five to ten named entries — each one a constraint, when it
-applies, and what to check after — then run the library on a task from a
-different area and count what needed editing.
+Compress them into five to ten named entries — a constraint, when it applies,
+what to check after — then run the library on a task from a different area and
+count what needed editing.
 
 **The thought process**
 
 First: what is worth extracting, and it is not sentences. In every ask that
-ever worked for you, one clause did the work — *show me it failing first*, *do
-not mock the database*, *stop when it runs* — and the rest was upholstery. The
-mining question is which clause was load-bearing, and the standard of evidence
-is what the output did differently because of it. Phrasing was the 2023 skill;
-a constraint with a reason attached is the durable one.
+worked, one clause did the work — *show me it failing first*, *do not mock the
+database*, *stop when it runs* — and the rest was upholstery. The mining
+question is which clause was load-bearing, and the evidence is what the output
+did differently because of it. Phrasing was the 2023 skill; a constraint with a
+reason attached is the durable one.
 
 Second: the unit of reuse. Often it is not the ask but the sequence — describe
 it back, then slice, then prove — because ordering is what protects your
-judgment, and a great prompt in the wrong order protects nothing. So the
-library holds both kinds, and a sequence entry names its checkpoints.
+judgment. So the library holds both kinds, and a sequence entry names its
+checkpoints.
 
 Third, what separates a library from a superstition: the transfer test. A
-prompt polished on the task it was written for is fitted to that task, the same
-way a test written after the code asserts whatever the code does. So the
-measure is a holdout — a task from somewhere else, success defined before you
-run. One afternoon establishes "no worse than ad hoc, cheaper to type, and the
-checks fired". That is enough, and more than most people ever establish.
+prompt polished on the task it was written for is fitted to it, the way a test
+written after the code asserts whatever the code does. So the measure is a
+holdout — a task from somewhere else, success defined before you run. One
+afternoon establishes "no worse than ad hoc, cheaper to type, and the checks
+fired", which is more than most people ever establish.
 
 **How to organise the prompts**
 
@@ -278,8 +273,7 @@ citing the exact moment in the transcript where the output changed
 because of it. If you cannot point at a moment, put it at the bottom.
 ```
 
-The check is the citations. A ranking that speaks in generalities gets asked
-again; anything with no moment attached gets cut.
+The check is the citations. Anything with no moment attached gets cut.
 
 **2 — compress into entries.**
 
@@ -289,8 +283,8 @@ constraint doing the work, when it applies, and what I should check
 after using it. Strip everything specific to those three tasks.
 ```
 
-Grep the entries for your project's nouns. Any hit means that entry is still
-fitted, not reusable.
+Grep the entries for your project's nouns. Any hit means still fitted, not
+reusable.
 
 **3 — transfer, then interrogate the misses.**
 
@@ -301,15 +295,15 @@ turn into a blank, or an assumption that should kill the entry?
 Answer per entry: keep, blank it, or delete.
 ```
 
-Every entry ends the afternoon blanked, rewritten, or deleted. No entry
-survives on charm — for each survivor you can name the failure it prevents.
+Every entry ends the afternoon blanked, rewritten, or deleted — none survives
+on charm. For each survivor you can name the failure it prevents.
 
 **On AWS**
 
 Prompts live in git — versioned, diffed and blamed like anything load-bearing.
-**Bedrock Prompt Management** is the managed neighbour, and it earns a place
-when people who do not ship code must edit prompts, or prompts must change at
-runtime without a deploy; a personal library meets neither test. The genuinely
+**Bedrock Prompt Management** is the managed neighbour; it earns a place when
+people who do not ship code must edit prompts, or prompts must change at
+runtime without a deploy. A personal library meets neither test. The genuinely
 useful piece is measurement: run your asks through **Bedrock** with invocation
 logging on and every entry gets token counts in **CloudWatch** — "this ask is
 efficient" becomes a number per call instead of a feeling.
@@ -320,7 +314,7 @@ Libraries rot when models change under them. Date-stamp every entry with the
 model it was measured against, and re-run the transfer test after an upgrade
 the way you re-run tests after a dependency bump. Shared with a team, edits get
 reviewed like code, because a quietly deleted constraint degrades everyone's
-output at once — and nobody's diff shows why.
+output — and nobody's diff shows why.
 
 **The learning**
 
@@ -330,11 +324,10 @@ collapse, you stop collecting phrasings for good.
 
 **How you would know it is wrong**
 
-- An entry whose prevented failure you cannot name. That is decoration with a
-  title.
-- Ablate: run the same task with and without an entry's constraint, in fresh
+- An entry whose prevented failure you cannot name. Decoration with a title.
+- Ablate: run the same task with and without an entry's constraint, fresh
   sessions. Equally good outputs mean the constraint does nothing — or the task
-  was too easy to tell, which is also worth knowing.
+  was too easy to tell.
 - You defined success after seeing the output. That is tinkering with a ledger,
   and the measurement is void.
 - Every entry survived transfer untouched. Your two domains were too close, and
@@ -351,32 +344,31 @@ ten real ones: how often nothing would have caught an accidental change.*
 
 A written procedure plus a small evidence-collecting script that answers three
 questions about any diff: what behaviour changed, what could have changed
-accidentally, and which existing test would catch the accident. Then a log of
-ten real diffs from your own history, and the tally of how often the third
-answer was "none". This is the section's third request turned into equipment.
+accidentally, which existing test would catch the accident. Then a log of ten
+real diffs from your own history, and the tally of how often the third answer
+was "none". This is the section's third request turned into equipment.
 
 **The thought process**
 
-Start with what a harness is *for*, because it is not for replacing your
-reading. It is for making your tenth review of the day as good as your first.
-Attention degrades invisibly; a procedure carries quality through fatigue,
-which is the same reason pilots with twenty years still run the checklist.
+Start with what a harness is *for*: not replacing your reading, but making your
+tenth review of the day as good as your first. Attention degrades invisibly; a
+procedure carries quality through fatigue, which is why pilots with twenty
+years still run the checklist.
 
 Then the middle question, the one that needs machinery. The commit message
 describes the intended change; the accidental one lives in the blast radius —
 every caller of a changed function, every other user of a touched helper or
-config key. That is mechanical, greppable. So the design decision is what
-evidence answers each question, and the script exists to fetch evidence, not to
-hold opinions.
+config key. That is mechanical, greppable. So you decide what evidence answers
+each question, and the script fetches evidence rather than holding opinions.
 
 Third: the last question must end in a test's name or the word "none" — never
-"probably the auth tests". A named test is checkable: break the behaviour and
-watch that test fail. A "none" is checkable too: plant the accident and watch
-the whole suite stay green. And if all ten diffs come back covered, do not
-congratulate the suite yet — ask what the answer would look like if coverage
-were bad. If it looks the same, the harness is agreeing with you, not
-reviewing. In my own record, results shaped exactly like good news have been
-wrong often enough to make that question a reflex.
+"probably the auth tests". A named test is checkable: break the behaviour,
+watch that test fail. A "none" is checkable too: plant the accident, watch the
+suite stay green. And if all ten diffs come back covered, do not congratulate
+the suite — ask what the answer would look like if coverage were bad. If it
+looks the same, the harness is agreeing with you, not reviewing. In my own
+record, results shaped exactly like good news have been wrong often enough to
+make that question a reflex.
 
 **How to organise the prompts**
 
@@ -401,8 +393,8 @@ config key this diff touches, and the tests that exercise any of
 those. Output file:line lists only. No prose, no conclusions.
 ```
 
-Run it on a diff whose blast radius you already know by hand. It must find the
-caller you know about, or it never gets to tell you about the ones you do not.
+Run it on a diff whose blast radius you already know. It must find the caller
+you know about, or it will never tell you about the ones you do not.
 
 **3 — the ten runs.**
 
@@ -413,9 +405,9 @@ If no existing test would catch the accidental change, write NONE
 rather than naming the nearest test.
 ```
 
-Spot-verify two of the NONEs: make the accidental change for real and run the
-suite. A green suite means the NONE was true and your tally is data; anything
-else means the harness missed a test, which also earns a line in the log.
+Spot-verify two NONEs: make the accidental change for real and run the suite.
+Green means the NONE was true and your tally is data; anything else means the
+harness missed a test, which also earns a line in the log.
 
 **On AWS**
 
@@ -429,11 +421,10 @@ comments, it never merges.
 **What productionising it means**
 
 The tally is the real product: a none-rate, tracked over time, that says
-whether the suite is growing with the code or falling behind it. As a pull
-request comment the harness is useful; the failure mode is ritual — people
-reading its answers instead of the diff. Counter that by making it cite
-evidence and ask questions rather than conclude "looks good", and alarm on the
-none-rate rising, which is the one trend it exists to catch.
+whether the suite is growing with the code or falling behind it. The failure
+mode is ritual — people reading the harness's answers instead of the diff — so
+make it cite evidence and ask questions rather than conclude "looks good", and
+alarm on the none-rate rising, the one trend it exists to catch.
 
 **The learning**
 
@@ -444,12 +435,12 @@ a coverage percentage never has.
 
 **How you would know it is wrong**
 
-- Plant an in-passing edit to a shared helper in a test diff. If question two's
-  answer does not list it, the blast-radius logic is decorative.
+- Plant an in-passing edit to a shared helper in a test diff. If question two
+  does not list it, the blast-radius logic is decorative.
 - Verify a named test the way you verify a NONE: break the behaviour; that
   test, specifically, must fail.
-- Run the harness twice on the same diff. Materially different answers mean you
-  built a rumour generator; pin every claim to collector output.
+- Run the harness twice on the same diff. Materially different answers mean a
+  rumour generator; pin every claim to collector output.
 - Ten out of ten covered. Possible — but check the instrument before you
   believe it.
 
@@ -465,33 +456,31 @@ any other way: how many were fine, how many were debt, how many were wrong.*
 The `DECISIONS.md` the section told you to start, run as a full loop: one line
 at every moment you accept something you do not fully understand, across a week
 of real P1 work — then a revisit that ends each entry as *fine*, *debt* or
-*wrong*, with an action attached. The deliverable is the three counts, and what
-you changed because of them.
+*wrong*, with an action attached. The deliverable is the three counts.
 
 **The thought process**
 
 The first decision is the bar for "did not fully understand", and both failure
-directions are real. Too strict, and you are logging every line, which lasts a
-day. Too loose, and the log stays empty — which reads as competence and is
+directions are real. Too strict and you are logging every line, which lasts a
+day. Too loose and the log stays empty — which reads as competence and is
 actually blindness. The workable bar: log it if, had this been wrong, you would
 not have caught it.
 
 Second: an entry has to survive a week, and its reader is future-you, who has
-lost all of this context. So the template is fixed: the commit or file:line,
-the claim you accepted, the check you deferred. "Accepted the retry logic" is
-dead in seven days; "accepted that retrying the fetch is safe because it is
-claimed idempotent — did not verify" can be reopened by a stranger. That is the
-property the spec in project one needed, and it is no coincidence: future-you
-is a fresh session with no context.
+lost this context. So the template is fixed: the commit or file:line, the claim
+you accepted, the check you deferred. "Accepted the retry logic" is dead in
+seven days; "accepted that retrying the fetch is safe because it is claimed
+idempotent — did not verify" can be reopened by a stranger. The same property
+the spec in project one needed, and not by coincidence: future-you is a fresh
+session with no context.
 
-Third: the revisit must not be re-reading and nodding, because you will agree
-with yourself — the same instrument measuring twice. So verdicts cost
-something. *Fine* means you can now explain why it is right. *Debt* means you
-still cannot, and a ticket or a test now exists. *Wrong* means it was
-incorrect, is fixed, and you wrote down what would have caught it sooner. And
-the loop only works if writing an entry is cheaper than pretending to
-understand: one line, no shame attached. A log kept to look good measures
-nothing.
+Third: the revisit must not be re-reading and nodding — you will agree with
+yourself, the same instrument measuring twice. So verdicts cost something.
+*Fine* means you can now explain why it is right. *Debt* means you still
+cannot, and a ticket or test now exists. *Wrong* means it was incorrect, is
+fixed, and you wrote down what would have caught it sooner. And the loop only
+works if an entry is cheaper than pretending to understand: one line, no shame
+attached. A log kept to look good measures nothing.
 
 **How to organise the prompts**
 
@@ -504,9 +493,8 @@ my silence. For each, one line: the choice, the nearest alternative,
 and what would reveal the wrong one.
 ```
 
-If the list comes back empty it is flattering you; ask instead for the three
-most fragile choices in the change. You pick which lines enter the log — the
-model proposes, the log is yours.
+An empty list is flattery; ask instead for the three most fragile choices. You
+pick which lines enter the log — the model proposes, the log is yours.
 
 **2 — the revisit, one week later, in a fresh session.**
 
@@ -517,9 +505,8 @@ contradicted that assumption, and the one check that would settle it.
 End with SETTLED or UNSETTLED. Do not reassure me.
 ```
 
-Fresh session, because it has no stake in defending last week's choices. The
-check: every item ends in something runnable, and you actually run at least
-three of them.
+Fresh session, because it has no stake in defending last week's choices. Every
+item must end in something runnable, and you run at least three.
 
 **3 — the verdicts are yours; the model gets one job.**
 
@@ -546,8 +533,8 @@ is bigger than you.
 
 **What productionising it means**
 
-The log becomes provenance. The next person to touch the codebase reads it and
-learns which parts are load-bearing guesses, which no amount of clean code
+The log becomes provenance. The next person reads it and learns which parts of
+the codebase are load-bearing guesses, which no amount of clean code
 communicates. The counts become a gauge: a *wrong* count that is not shrinking
 means the acceptance bar is too low; an empty week means the bar drifted, not
 that you suddenly understand everything.
@@ -555,9 +542,9 @@ that you suddenly understand everything.
 **The learning**
 
 The section quotes a trial in which developers believed they were faster while
-measurably being slower. That gap does not close with effort; it closes with a
-record. The ratio of fine to debt to wrong is a measurement of your own
-judgment, and until this week you were running on the feeling of it.
+measurably being slower. That gap closes with a record, not with effort. The
+ratio of fine to debt to wrong is a measurement of your own judgment, and until
+this week you were running on the feeling of it.
 
 **How you would know it is wrong**
 
@@ -566,6 +553,6 @@ judgment, and until this week you were running on the feeling of it.
 - Every verdict came back *fine*. You graded your own homework — run the
   strongest-case argument on three of them and see if they hold.
 - Take one real bug from the week and trace it. If the acceptance that caused
-  it is not in the log, the log is measuring diligence, not risk.
+  it is not in the log, the log measures diligence, not risk.
 - An entry you cannot act on at revisit — "accepted some async stuff" — failed
   the future-reader test. Tighten the template, not the intention.
