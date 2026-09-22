@@ -124,7 +124,7 @@ limit you discover the week you need it is an incident.
 
 Add **Compute Optimizer** and **Trusted Advisor** for the right-sizing and
 waste picture, and **CloudWatch** trends for the capacity picture from
-[08 · System design](../08-system-design/)'s project 4. Between them you can
+[08 · System design](../../02-senior/08-system-design/)'s project 4. Between them you can
 usually attach a number to all three of your problems in an afternoon, which is
 the difference between a document people act on and one they nod at.
 
