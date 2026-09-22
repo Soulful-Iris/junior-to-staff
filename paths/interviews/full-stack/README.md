@@ -34,9 +34,9 @@ The outbox relay may publish duplicates. The worker must deduplicate and avoid a
 | Accessibility | Gives controls names, focus behavior, keyboard access, and error announcements | A task works only with a mouse or sight | Complete create/edit/error recovery with keyboard |
 | Virtualization | Limits rendered elements for a large list | Main-thread work freezes scrolling | Profile before adding it; preserve focus and semantics |
 
-![A stale network response is rejected before it can replace current UI state](../../../assets/learning/ui-race-trace.svg)
+![browser race: mechanism and changing state](../../../assets/learning/browser-race.svg)
+[Static diagram](../../../assets/learning/browser-race-still.svg)
 
-[Before/after](../../../assets/learning/ui-race-compare.svg) · [Still](../../../assets/learning/ui-race-still.svg)
 
 ## Worked implementation · search coordinator
 

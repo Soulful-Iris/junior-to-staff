@@ -80,19 +80,6 @@ that is fine. "There is nothing" and "I could not find out" must never look the
 same.
 
 
-### Watch the concept, then trace the implementation
-
-![The newest intent must win the screen: before and after](../../../assets/learning/ui-race-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: a returns late; show stale cat. With it: a is generation 1; discard. These are teaching states, not measured performance.
-
-![The newest intent must win the screen: implementation sequence](../../../assets/learning/ui-race-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/ui-race-still.svg).
-
-**Predict before replaying:** Why keep a generation check even when you abort request A?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

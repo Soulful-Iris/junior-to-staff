@@ -133,19 +133,6 @@ back either. The senior reviewer's question for every change: *if we roll this
 back in an hour, what stays behind?*
 
 
-### Watch the concept, then trace the implementation
-
-![Observe a small rollout before widening it: before and after](../../../assets/learning/canary-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: recover while everyone is impacted. With it: advance or roll back on stated thresholds. These are teaching states, not measured performance.
-
-![Observe a small rollout before widening it: implementation sequence](../../../assets/learning/canary-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/canary-still.svg).
-
-**Predict before replaying:** Which irreversible write would a feature-flag rollback fail to undo?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -85,19 +85,6 @@ courtesy; it is the only point in the loop where a human decides anything at
 all.
 
 
-### Watch the concept, then trace the implementation
-
-![Small changes shorten the feedback loop: before and after](../../../assets/learning/change-loop-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: rollback removes useful work too. With it: revert only the faulty change. These are teaching states, not measured performance.
-
-![Small changes shorten the feedback loop: implementation sequence](../../../assets/learning/change-loop-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/change-loop-still.svg).
-
-**Predict before replaying:** If a patch changes five behaviors, what evidence would let you split it safely?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -105,21 +105,8 @@ route a user's reads to the primary for a window after they write, or pin
 their session.
 
 
-![Cache requests without and with shared loading](../../../assets/learning/cache-mechanism.svg)
+![Cache requests without and with shared loading](../../../assets/learning/cache-coalescing.svg)
 
-### Watch the concept, then trace the implementation
-
-![Share a hot-key load instead of multiplying it: before and after](../../../assets/learning/cache-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: database saturates during cache refill. With it: result fills cache; waiters are released. These are teaching states, not measured performance.
-
-![Share a hot-key load instead of multiplying it: implementation sequence](../../../assets/learning/cache-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/cache-still.svg).
-
-**Predict before replaying:** How many origin queries could ten independent processes still issue?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

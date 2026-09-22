@@ -74,19 +74,6 @@ wrong architecture much faster than you can review it.
 *(Checked 2026-09-21; see [docs/research/senior-craft-2026.md](../../../docs/research/senior-craft-2026.md) for sources and caveats.)*
 
 
-### Watch the concept, then trace the implementation
-
-![A component needs a workload reason: before and after](../../../assets/learning/design-constraints-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: architecture fails a hidden requirement. With it: expire a hot key and measure origin load. These are teaching states, not measured performance.
-
-![A component needs a workload reason: implementation sequence](../../../assets/learning/design-constraints-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/design-constraints-still.svg).
-
-**Predict before replaying:** Which requirement would make you remove this cache?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -120,19 +120,6 @@ stuck forty minutes. And the thing **users feel** — "link added until title
 visible" — the user's unit of work, not your process.
 
 
-### Watch the concept, then trace the implementation
-
-![Carry context across synchronous and queued work: before and after](../../../assets/learning/trace-context-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: user success metric hides unfinished work. With it: completion-age metric exposes failure. These are teaching states, not measured performance.
-
-![Carry context across synchronous and queued work: implementation sequence](../../../assets/learning/trace-context-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/trace-context-still.svg).
-
-**Predict before replaying:** What metric detects jobs never completed despite successful API responses?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

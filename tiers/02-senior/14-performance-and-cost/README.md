@@ -80,19 +80,6 @@ one user, one job cost? Almost nobody can answer it, and the teams that can make
 different decisions.
 
 
-### Watch the concept, then trace the implementation
-
-![Averages can hide the users who wait: before and after](../../../assets/learning/tail-latency-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: slow requests disappear into the average. With it: investigate the slow trace and cause. These are teaching states, not measured performance.
-
-![Averages can hide the users who wait: implementation sequence](../../../assets/learning/tail-latency-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/tail-latency-still.svg).
-
-**Predict before replaying:** Why does improving average latency not necessarily improve the slowest requests?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -12,10 +12,12 @@ Learn the concept, ask for a bounded implementation, then prove the result. The 
 
 Prefer independent projects? Use the [three acts](../../acts/README.md). Use [the detailed workflow](../../docs/HOW-TO-USE.md) for acceptance criteria and prompting habits.
 
-## Use the new visuals actively
+## Learn from the diagrams
 
-Each chapter now has a before/after animation, an implementation sequence, and a still storyboard. Watch once, hide it, and reconstruct the state transitions. The animated highlights represent event order; they are not measured performance or simulations of AWS internals.
-
-Ask an assistant: “Use the chapter's invariant. Give me a small implementation with one deliberately broken variant and a test that distinguishes them. Do not reveal the bug until I have predicted the result.” You still own the prediction and the review.
+The original diagrams remain the visual foundation. Follow moving requests, shrinking budgets, and multiplying retry branches. Use the [coding route](../interviews/coding/README.md) for focused algorithm animations and the [production casebook](../interviews/production/README.md) for AWS failure mechanisms.
 
 [Choose a path](../README.md) · [Switch to interviews](../interviews/README.md)
+
+## Apply the concepts to production failures
+
+Use the [production casebook](../interviews/production/README.md) to review an AI-generated design against recent incident mechanisms. Ask for the invariant, failure injection, recovery behavior, and evidence before accepting a patch.

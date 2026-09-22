@@ -74,19 +74,6 @@ work — making the paved road good, making the decisions clear — is now the t
 that decides whether the rest of it helps or hurts.
 
 
-### Watch the concept, then trace the implementation
-
-![Strategy changes the order of real work: before and after](../../../assets/learning/strategy-sequence-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: no outcome shows whether work helped. With it: measure outcome before the next investment. These are teaching states, not measured performance.
-
-![Strategy changes the order of real work: implementation sequence](../../../assets/learning/strategy-sequence-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/strategy-sequence-still.svg).
-
-**Predict before replaying:** Which project would you stop if the first experiment disproves the strategy?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

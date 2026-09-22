@@ -36,23 +36,22 @@ SQL is a natural start for relational integrity and changing queries. DynamoDB f
 
 Cache-aside reads the cache, reads the database on a miss, then stores the result. This saves repeated work while introducing stale data and another failure mode. Specify a staleness tolerance and TTL. If all clients miss a hot key at once, they can all load the database.
 
-![Concurrent cache misses without and with shared in-flight work](../../../assets/learning/cache-compare.svg)
+![cache coalescing: mechanism and changing state](../../../assets/learning/cache-coalescing.svg)
+[Static diagram](../../../assets/learning/cache-coalescing-still.svg)
 
-[Sequence](../../../assets/learning/cache-trace.svg) · [Still](../../../assets/learning/cache-still.svg)
 
 Single-flight lets same-key requests in a process await one in-flight load. Across processes you need coordination, stale-while-revalidate, or another policy. Jitter spreads expirations; it does not guarantee that one hot key cannot stampede. Cache outage bypass needs admission control so the database survives.
 
 **Implement:** expire one hot key with 100 simultaneous reads; count database loads. **Test:** the loader fails and all waiters are released; the in-flight entry is removed on success and error. **Further:** explain what happens with ten application instances.
 
-![cache: state changes drawn directly](../../../assets/learning/cache-mechanism.svg)
 
 ## 5 · Queues, backpressure, and bounded work
 
 A queue absorbs a burst and separates request acceptance from completion. It does not manufacture processing capacity. If 500 jobs/s arrive and workers finish 300/s, backlog grows 200/s: 12,000 jobs in one minute. Once arrivals stop, draining that backlog at 300/s takes 40 seconds, ignoring variance and retries.
 
-![A buffer grows without admission control; bounded workers and shedding contain overload](../../../assets/learning/bounded-workers-compare.svg)
+![worker slots: mechanism and changing state](../../../assets/learning/worker-slots.svg)
+[Static diagram](../../../assets/learning/worker-slots-still.svg)
 
-[Still](../../../assets/learning/bounded-workers-still.svg)
 
 Bound concurrent work and choose a full policy: reject, delay, or degrade. Monitor oldest-message age, retry rate, and completion latency. A queue-depth graph alone cannot tell whether the oldest item is stuck. Partition fairness matters: one tenant should not consume all workers.
 
@@ -62,9 +61,9 @@ Bound concurrent work and choose a full policy: reject, delay, or degrade. Monit
 
 A caller times out. The server may have committed. Retrying therefore risks duplicate effects. An idempotency key names the logical operation, and a payload digest detects reuse with different input. The deduplication record and effect must be atomic if the guarantee relies on both.
 
-![A lost acknowledgement causes retry; atomic deduplication preserves one effect](../../../assets/learning/idempotency-compare.svg)
+![conditional result: mechanism and changing state](../../../assets/learning/conditional-result.svg)
+[Static diagram](../../../assets/learning/conditional-result-still.svg)
 
-[Sequence](../../../assets/learning/idempotency-trace.svg) · [Still](../../../assets/learning/idempotency-still.svg)
 
 The queue lab stores its deterministic result and operation key in the **same DynamoDB item** using a conditional put. That is a narrow guarantee. If you add an email call before the put, a crash can send twice. If you put first then email, a crash can lose the email. Use destination idempotency or model uncertain outcomes and reconciliation.
 
@@ -102,9 +101,8 @@ Protect session credentials, consider CSRF for cookie-based authenticated mutati
 
 Separate deploy from release. Expand a schema so old and new code both work; deploy compatible writers/readers; backfill with a checkpoint; reconcile; shift reads; remove old fields only after all clients migrate. Dual writes without a consistency mechanism create divergence.
 
-![Compatibility and reconciliation make a migration reversible](../../../assets/learning/migration-compare.svg)
+![Migration: expand, move, verify, and contract](../../../assets/diagrams/migration-phases.svg)
 
-[Sequence](../../../assets/learning/migration-trace.svg) · [Still](../../../assets/learning/migration-still.svg)
 
 A feature flag can reverse routing, but it cannot reverse destructive data transformation. Define the point of no return and the restore path. Include a named owner and a deadline for retiring the old path.
 

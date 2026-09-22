@@ -12,6 +12,7 @@ implement them, and prove that you understand the result.
 | Prepare for junior, senior, or staff interviews | [Path B · Interviews](paths/interviews/README.md) |
 | Learn architecture and implement it on AWS | [Concepts](paths/interviews/architecture/concepts.md) → [designs](paths/interviews/architecture/designs.md) → [AWS labs](paths/interviews/aws/README.md) |
 | Practice Python, TypeScript, and full-stack coding | [Coding](paths/interviews/coding/README.md) → [full stack](paths/interviews/full-stack/README.md) |
+| Understand real production failures | [Production architecture casebook](paths/interviews/production/README.md) |
 | Combine both paths | [Reading map and learning loop](paths/README.md) |
 
 The original chapters and projects below form Path A. Path B adds independent

@@ -1,0 +1,92 @@
+[
+  {
+    "key": "map-lookup",
+    "title": "Remember the complement",
+    "states": 4
+  },
+  {
+    "key": "window-moves",
+    "title": "A window that never moves backward",
+    "states": 4
+  },
+  {
+    "key": "prefix-counts",
+    "title": "One prefix can represent several starts",
+    "states": 4
+  },
+  {
+    "key": "binary-halving",
+    "title": "Keep the first qualifying index",
+    "states": 4
+  },
+  {
+    "key": "bfs-frontier",
+    "title": "A graph becomes distance layers",
+    "states": 4
+  },
+  {
+    "key": "monotonic-stack",
+    "title": "Resolve only what the new value proves",
+    "states": 4
+  },
+  {
+    "key": "dp-choice",
+    "title": "Greedy versus a recurrence",
+    "states": 4
+  },
+  {
+    "key": "lru-order",
+    "title": "A read changes eviction order",
+    "states": 4
+  },
+  {
+    "key": "config-cohorts",
+    "title": "Same defect, different blast radius",
+    "states": 4
+  },
+  {
+    "key": "retry-tree",
+    "title": "Retry ownership changes the call tree",
+    "states": 4
+  },
+  {
+    "key": "rollout-capacity",
+    "title": "Correct code still needs deployment headroom",
+    "states": 4
+  },
+  {
+    "key": "version-projection",
+    "title": "A late event must not rewrite the present",
+    "states": 4
+  },
+  {
+    "key": "partition-skew",
+    "title": "Unused capacity beside a hot partition",
+    "states": 4
+  },
+  {
+    "key": "worker-slots",
+    "title": "A completion releases one slot",
+    "states": 4
+  },
+  {
+    "key": "cache-coalescing",
+    "title": "One miss, one local loader",
+    "states": 4
+  },
+  {
+    "key": "conditional-result",
+    "title": "Duplicate delivery, one stored result",
+    "states": 4
+  },
+  {
+    "key": "direct-upload",
+    "title": "Separate permission from the byte stream",
+    "states": 4
+  },
+  {
+    "key": "browser-race",
+    "title": "The older response arrives last",
+    "states": 4
+  }
+]

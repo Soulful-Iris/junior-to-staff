@@ -90,9 +90,8 @@ flowchart TD
 
 Choose a routing registry with tenant migration state. Expand client contracts first. Capture changes with an outbox or CDC; backfill a consistent baseline and apply ordered updates. Shadow reads compare meaningful values. Move a small tenant only when reconciliation and latency pass. Keep rollback routing and change capture until a stated point of no return.
 
-![Migration state advances only after compatibility and verification gates](../../../assets/learning/migration-trace.svg)
+![Migration: expand, move, verify, and contract](../../../assets/diagrams/migration-phases.svg)
 
-[Before/after](../../../assets/learning/migration-compare.svg) · [Still](../../../assets/learning/migration-still.svg)
 
 **AWS mapping:** RDS source, a target selected by access pattern, DMS/CDC where the supported source/target behavior fits, S3 for checkpoints/export artifacts, CloudWatch for lag and mismatch rate. Validate CDC ordering, schema-change handling, and transaction boundaries before committing to the mechanism.
 

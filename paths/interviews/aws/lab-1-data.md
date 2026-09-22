@@ -2,9 +2,9 @@
 
 A “check then insert” sequence has a race: two callers can both observe absence. A conditional write evaluates absence at the storage boundary.
 
-![Conditional storage rejects the duplicate effect](../../../assets/learning/idempotency-compare.svg)
+![conditional result: mechanism and changing state](../../../assets/learning/conditional-result.svg)
+[Static diagram](../../../assets/learning/conditional-result-still.svg)
 
-[Still](../../../assets/learning/idempotency-still.svg)
 
 Prerequisites: AWS CLI, credentials, selected region, and a unique disposable table name. Commands create billable resources. Run from a terminal where no table with this name already exists.
 

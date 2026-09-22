@@ -101,19 +101,6 @@ For anything streaming, total latency is the wrong number. Users feel
 and set them as product targets.
 
 
-### Watch the concept, then trace the implementation
-
-![Evaluate the answer and the permission boundary: before and after](../../../assets/learning/ai-evaluation-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: a fluent answer leaks protected content. With it: check task quality and leakage separately. These are teaching states, not measured performance.
-
-![Evaluate the answer and the permission boundary: implementation sequence](../../../assets/learning/ai-evaluation-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/ai-evaluation-still.svg).
-
-**Predict before replaying:** Can a prompt alone repair retrieval that already exposed unauthorized context?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -93,19 +93,6 @@ floats cannot represent 0.10 exactly, so money in a `float` drifts by rounding
 until an audit finds it: store integer minor units or a decimal type.
 
 
-### Watch the concept, then trace the implementation
-
-![Put the invariant at the write boundary: before and after](../../../assets/learning/conditional-write-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: b writes stock = 0; two sales. With it: b condition fails; one sale. These are teaching states, not measured performance.
-
-![Put the invariant at the write boundary: implementation sequence](../../../assets/learning/conditional-write-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/conditional-write-still.svg).
-
-**Predict before replaying:** Why is a read followed by a write different from one conditional update?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

@@ -2,9 +2,9 @@
 
 Build a queue worker whose *entire effect* is one conditional DynamoDB result item. Then demonstrate where that guarantee ends. No email, payment, or external side effect is hidden behind the word “idempotent.”
 
-![A conditional result write survives duplicate delivery](../../../../../assets/learning/idempotency-compare.svg)
+![conditional result: mechanism and changing state](../../../../../assets/learning/conditional-result.svg)
+[Static diagram](../../../../../assets/learning/conditional-result-still.svg)
 
-[Sequence](../../../../../assets/learning/idempotency-trace.svg) · [Still](../../../../../assets/learning/idempotency-still.svg)
 
 ## The implementation
 

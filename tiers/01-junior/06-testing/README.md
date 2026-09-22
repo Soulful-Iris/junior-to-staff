@@ -50,19 +50,6 @@ test is worth keeping, ask: what edit would make this go red? If the honest
 answer is "almost none", delete it.
 
 
-### Watch the concept, then trace the implementation
-
-![A test earns trust by detecting a defect: before and after](../../../assets/learning/meaningful-tests-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: broken authorization still passes. With it: assert no protected data is returned. These are teaching states, not measured performance.
-
-![A test earns trust by detecting a defect: implementation sequence](../../../assets/learning/meaningful-tests-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/meaningful-tests-still.svg).
-
-**Predict before replaying:** Can your test distinguish correct behavior from the bug it claims to prevent?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

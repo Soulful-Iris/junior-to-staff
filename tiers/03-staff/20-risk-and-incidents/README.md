@@ -80,19 +80,6 @@ That is what makes it a staff-level tool rather than an SRE one: it converts a
 recurring conflict into a decision made once.
 
 
-### Watch the concept, then trace the implementation
-
-![Stabilize first, then repair the mechanism: before and after](../../../assets/learning/incident-response-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: recovery leaves the same trigger in place. With it: give a prevention action an owner and test. These are teaching states, not measured performance.
-
-![Stabilize first, then repair the mechanism: implementation sequence](../../../assets/learning/incident-response-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/incident-response-still.svg).
-
-**Predict before replaying:** What would prove the follow-up prevents recurrence rather than just documenting it?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

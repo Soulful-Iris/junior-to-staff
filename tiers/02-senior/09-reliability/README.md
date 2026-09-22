@@ -127,19 +127,6 @@ Everything else in this section is loop prevention.
 metastability paper and Netflix's engineering material, 2026-09-21.)*
 
 
-### Watch the concept, then trace the implementation
-
-![Retries consume capacity and time: before and after](../../../assets/learning/retry-budget-compare.svg)
-
-The comparison follows four illustrative states. Without the mechanism: each starts three db attempts: up to 27. With it: at most three db attempts within deadline. These are teaching states, not measured performance.
-
-![Retries consume capacity and time: implementation sequence](../../../assets/learning/retry-budget-trace.svg)
-
-[Still storyboard / reduced-motion alternative](../../../assets/learning/retry-budget-still.svg).
-
-**Predict before replaying:** How does a bounded retry count still overload a dependency during a large outage?
-
-**Try it:** reproduce the final transition in a small example, remove the mechanism, and record the changed outcome. Use the checks later in this chapter to judge the result.
 
 ## What good looks like
 

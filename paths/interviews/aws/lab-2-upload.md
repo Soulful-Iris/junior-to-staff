@@ -2,9 +2,9 @@
 
 A metadata API can authorize an upload without proxying every byte. It returns a short-lived S3 capability for a specific object. The browser uploads directly and later asks the API to finalize the metadata.
 
-![Direct upload separates metadata control from byte transfer](../../../assets/learning/direct-upload-compare.svg)
+![direct upload: mechanism and changing state](../../../assets/learning/direct-upload.svg)
+[Static diagram](../../../assets/learning/direct-upload-still.svg)
 
-[Sequence](../../../assets/learning/direct-upload-trace.svg) · [Still](../../../assets/learning/direct-upload-still.svg)
 
 ## Implement the byte path
 

@@ -40,3 +40,7 @@ Labs 1 and 2 are command-driven exercises with small scripts. Lab 3 includes exe
 These live technical references may predate the research window. They establish service behavior, not recent interview frequency.
 
 [Architecture](../architecture/concepts.md) · [Interview home](../README.md)
+
+## Learn from actual incidents
+
+The [production casebook](../production/README.md) maps five recent incidents to AWS implementation exercises: configuration rollout, retry budgets, deployment headroom, stale status projections, and hot partitions.

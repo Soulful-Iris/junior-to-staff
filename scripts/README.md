@@ -1,17 +1,20 @@
-# Maintain the learning material
-
-From the repository root:
+# Maintain the visuals
 
 ```bash
-python scripts/render_learning.py
-python scripts/render_mechanisms.py
+python scripts/render_visuals.py
 python scripts/check_learning.py
 ```
 
-`learning_storyboards.json` is the editable narrative source for the 21 chapter walkthroughs and six shared interview concepts. Each entry has four before/after states, actors, a four-message implementation trace, and a prediction question. The generator emits two animated SVGs and one static storyboard per entry. `render_mechanisms.py` adds three geometric animations for a sliding window, cache fan-out, and bounded workers.
+The original drawings in `assets/diagrams` are the style reference. `render_visuals.py` draws each added mechanism separately: a moving array window, a frontier graph, a recency list, a retry tree, a task fleet, a request timeline, and other concrete structures.
 
-SVGs use local CSS animation with a 16-second teaching cycle. Reduced-motion preference selects a static final state; linked storyboards retain all four states. No JavaScript, external fonts, remote image services, or hosted player is required. Preview in your target Markdown renderer after changes because animation support varies.
+Each diagram has native SVG animation and a static alternative. The root SVG includes an accessible title and description. Reduced-motion and print styles display the static version. No JavaScript, external fonts, or hosted player is needed. Native SVG animation follows the approach used by the original branch.
 
-`check_learning.py` checks local Markdown paths, accessible SVG metadata, chapter integration, and key lab configuration invariants. It does not validate remote URLs or prove cloud deployment behavior. Run the Python and TypeScript tests listed in [the interview entry point](../paths/interviews/README.md) after code changes.
+To export all four checkpoint SVGs for layout review:
 
-Optional deeper checks: TypeScript `tsc --noEmit --strict` with Node types and `allowImportingTsExtensions`; `cfn-lint` for the SAM template. Record results and limitations in [validation](../paths/interviews/VALIDATION.md).
+```bash
+python scripts/render_visuals.py --frames /tmp/learning-frames
+```
+
+`assets/learning/manifest.json` indexes the generated diagrams. Static rendering is not proof of animation playback. Check published Markdown as well as standalone SVGs; record the result in [validation](../paths/interviews/VALIDATION.md).
+
+`check_learning.py` validates local links, disclosures, SVG metadata/timelines, and key lab settings. It does not test remote URLs, deployed AWS behavior, or the truth of an architectural claim.

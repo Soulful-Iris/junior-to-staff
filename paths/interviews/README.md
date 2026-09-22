@@ -21,6 +21,8 @@ These are this curriculum's practice standards, not universal company level mapp
 5. [Full stack](full-stack/README.md): browser → API → data → background work, accessibility, security, and UI consistency.
 6. [Practice](practice/README.md): timed mocks, scoring, behavioral stories, and improvement loops.
 
+7. [Production architecture casebook](production/README.md): five recent incidents, AWS translations, before/after animations, and recovery exercises.
+
 ## How to study a module
 
 Begin with the question before expanding the solution. Predict the visual, implement from memory, test an adversarial input, then answer one follow-up that changes the constraints. Copying a solution into your editor is the start of study, not its completion.

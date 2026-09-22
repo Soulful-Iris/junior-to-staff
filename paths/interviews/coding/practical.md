@@ -1,14 +1,16 @@
-# Practical coding · make the implementation observable
+# Step 11 · TypeScript practical coding
 
-These are original practice tasks. They train behaviors reported in recent interviews without presenting an exact company question bank.
+Do tasks 1 and 2 first. Then choose debugging or pagination. Each is a separate session. Finish with the [timed mock](mock.md).
+
+**Pass:** preserve result order, cap active work, report partial failures, and prevent stale UI updates.
 
 ## 1 · Bounded API fan-out · 35 minutes
 
 Given inputs and an async operation, return ordered success/failure results while running at most K operations concurrently. Reject invalid K. A failure for one item must not discard others.
 
-![Bounded workers keep active work within capacity](../../../assets/learning/bounded-workers-compare.svg)
+![worker slots: mechanism and changing state](../../../assets/learning/worker-slots.svg)
+[Static diagram](../../../assets/learning/worker-slots-still.svg)
 
-[Sequence](../../../assets/learning/bounded-workers-trace.svg) · [Still](../../../assets/learning/bounded-workers-still.svg)
 
 `Promise.all(items.map(fn))` starts everything immediately. Instead, K workers share a next-index counter; claiming an index occurs synchronously before any await. Completion order can vary, so store each result at its original index. The [reference](typescript.ts) returns settled results after draining started work.
 
@@ -16,15 +18,14 @@ For n items: O(n) scheduling work, O(n) result space, O(min(K,n)) active operati
 
 Tests: track peak active operations, reject item 2, complete item 3 first, use empty input. Go further: add a caller AbortSignal and define whether unstarted items are skipped. A timeout wrapper alone does not cancel the underlying operation.
 
-![bounded-workers: state changes drawn directly](../../../assets/learning/bounded-workers-mechanism.svg)
 
 ## 2 · Search results race · 30 minutes
 
 A user searches “cat,” then “car.” The first request is slower and arrives last. Prevent stale results from replacing the latest search, including when the underlying loader ignores cancellation.
 
-![Older responses can arrive after newer results](../../../assets/learning/ui-race-compare.svg)
+![browser race: mechanism and changing state](../../../assets/learning/browser-race.svg)
+[Static diagram](../../../assets/learning/browser-race-still.svg)
 
-[Sequence](../../../assets/learning/ui-race-trace.svg) · [Still](../../../assets/learning/ui-race-still.svg)
 
 Increment a generation number per request. Capture it in the async operation; render only if it still equals the current generation. Abort previous requests to reduce wasted work, but keep the generation check for correctness. Propagate the current request's failures to the UI. The [reference](typescript.ts) and test simulate a loader that ignores abort.
 
