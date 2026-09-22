@@ -24,7 +24,18 @@
     write(key, progress);
   }
   document.querySelectorAll('[data-complete]').forEach(a => a.addEventListener('click', () => complete(a.dataset.complete)));
-  document.querySelector('[data-finish]')?.addEventListener('click', e => {complete(state.src);e.currentTarget.textContent = 'Completed ✓';});
+  const finishButtons = [...document.querySelectorAll('[data-finish]')];
+  function showFinished() {
+    finishButtons.forEach(button => {
+      button.textContent = 'Completed ✓';
+      button.setAttribute('aria-label', 'Final step completed');
+      button.disabled = true;
+    });
+  }
+  if (progress.completed.includes(state.src)) showFinished();
+  finishButtons.forEach(button => button.addEventListener('click', () => {
+    complete(state.src);showFinished();
+  }));
   document.getElementById('reset-progress')?.addEventListener('click', () => {
     // Local, reversible learning preferences; never touches lesson content.
     write(key, {completed: [], last: null}); location.reload();

@@ -32,3 +32,9 @@ Mobile screenshots reported after deployment showed the new reader markup withou
 The fix binds CSS and JavaScript filenames to SHA-256 content hashes and supplies integrity attributes. Every generated HTML page also embeds its exact release stylesheet, with font URLs rooted correctly for nested lessons. This prevents missing or mismatched external CSS from stripping the layout. The server declares CSS/JavaScript MIME types explicitly and gives immutable caching only to the fingerprinted files. Ordinary HTML continues to require revalidation.
 
 The acceptance checker verifies stylesheet and script hashes, integrity values and the embedded stylesheet on every content page. The browser suite now has **15 passing scenarios**, including explicit MIME/cache checks, blocked external CSS, and an injected stale stylesheet. The negative control removes the embedded stylesheet and reproduces the unpositioned contents tree and visible skip link; the fixed page remains styled. These checks reproduce the failure mode locally, not a verified diagnosis of the inaccessible production cache.
+
+## Sticky navigation follow-up
+
+Previous and Next remain inside the existing sticky header. On mobile, the top bar identifies the current lesson and its chapter/step while scrolling. The final lesson includes a sticky Finish button; both completion buttons stay synchronized and reflect saved completion on reload.
+
+The suite now passes **17 browser scenarios**. Added checks exercise pinned navigation at 320px, 390px, 768px and 1440px, agreement with bottom destinations, progress from sticky Next, and synchronized final-step completion after reload. Mobile screenshots of a scrolled coding lesson and the completed final lesson were inspected. The structural check additionally verifies sticky destinations across the entire sequence; all 60,072 built links resolve. Production deployment and Safari remain outside these local checks.

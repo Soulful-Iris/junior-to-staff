@@ -67,8 +67,14 @@ def main():
             i=sequence.index(src);nav=soup.select_one('.step-navigation');assert nav,src
             if i+1<len(sequence):
                 link=nav.select_one('a.next-step');assert link and link['href'].endswith(pages[sequence[i+1]]['url']),src
+                sticky=soup.select_one('.sticky-next')
+                assert sticky and sticky['href']==link['href'] and sticky['data-complete']==src,src
+            else:
+                assert soup.select_one('.sticky-finish[data-finish]'),src
             if i>0:
                 link=nav.select_one('a.previous-step');assert link and link['href'].endswith(pages[sequence[i-1]]['url']),src
+                sticky=soup.select_one('.sticky-previous')
+                assert sticky and sticky['href']==link['href'],src
             previous_next+=1
     assert not local_jumps,local_jumps[:10]
     assert len(diagrams)==387,len(diagrams)

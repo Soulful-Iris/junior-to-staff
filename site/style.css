@@ -17,12 +17,20 @@
 
 /* The same adjacent lessons remain reachable while reading long explanations. */
 .sticky-sequence{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.sticky-sequence>a,.sticky-disabled{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:34px;padding:5px 12px;border-radius:5px;font-size:11px;white-space:nowrap}
+.sticky-sequence>a,.sticky-sequence>button,.sticky-disabled{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:34px;padding:5px 12px;border-radius:5px;font-size:11px;white-space:nowrap}
 .sticky-previous{border:1px solid var(--line);color:var(--forest)}
 .sticky-previous:hover{background:#eaf0e3}
 .sticky-next{background:var(--forest);color:#fff}
 .sticky-next:hover{background:#345e45}
 .sticky-disabled{color:#83907b;opacity:.7}
 .reading-controls{flex-shrink:0}
+.sticky-sequence>.sticky-finish{border:0;background:var(--forest);color:white}
+.sticky-sequence>.sticky-finish:hover:not(:disabled){background:#345e45}
+[data-finish]:disabled{cursor:default;opacity:.7}
+.mobile-location{min-width:0;text-align:right;line-height:1.35}
+.mobile-page-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:12px}
+.mobile-page-position{display:block;margin-top:3px;font-size:8px;letter-spacing:.5px;color:var(--muted)}
+.mobile-bar{gap:20px}
+.mobile-bar>#open-contents{flex-shrink:0}
 @media(max-width:1100px){.has-sequence #saved-progress{display:none}.has-sequence .reading-controls{gap:12px}}
-@media(max-width:760px){.has-sequence>span{display:none}.has-sequence .reading-controls{width:100%;justify-content:space-between;gap:8px}.sticky-sequence{gap:10px}.sticky-sequence>a,.sticky-disabled{min-height:44px;padding:5px 12px}.sticky-next{border-radius:4px}.has-sequence .reading-controls #motion-toggle{margin-left:auto}}
+@media(max-width:760px){.has-sequence>span{display:none}.has-sequence .reading-controls{width:100%;justify-content:space-between;gap:8px}.sticky-sequence{gap:10px}.sticky-sequence>a,.sticky-sequence>button,.sticky-disabled{min-height:44px;padding:5px 12px}.sticky-next{border-radius:4px}.has-sequence .reading-controls #motion-toggle{margin-left:auto}}

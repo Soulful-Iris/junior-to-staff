@@ -55,8 +55,42 @@ try {
     const completed=await page.evaluate(()=>JSON.parse(localStorage.getItem('engineering-guide:progress:v1')).completed);
     assert.ok(completed.some(s=>s.endsWith('lessons/01-maps.md')));
   });
+  await check('Sticky navigation keeps the lesson in view and follows the same sequence at every screen size',async()=>{
+    for (const width of [320,390,768,1440]) {
+      await page.setViewportSize({width,height:844});await go(sum);
+      await page.evaluate(()=>scrollTo({top:700,behavior:'instant'}));
+      for (const direction of ['previous','next']) {
+        const link=page.locator('.sticky-'+direction);
+        assert.equal(await link.getAttribute('href'),await page.locator('.'+direction+'-step').getAttribute('href'));
+        const box=await link.boundingBox();
+        assert.ok(box.y>=0 && box.y+box.height<=110 && box.x>=0 && box.x+box.width<=width);
+      }
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+      if(width<760){
+        assert.equal(await page.locator('.mobile-page-title').textContent(),await page.locator('h1').textContent());
+        assert.match(await page.locator('.mobile-page-position').textContent(),/CHAPTER 02 · STEP/);
+        await page.screenshot({path:join(shots,`sticky-navigation-${width}.png`)});
+      }
+    }
+    await page.locator('.sticky-next').click();await page.waitForURL(/02-valid-anagram/);
+    assert.ok(await page.evaluate(()=>JSON.parse(localStorage.getItem('engineering-guide:progress:v1')).completed.some(s=>s.includes('01-two-sum'))));
+  });
+  await check('Both final-step controls stay in sync and remember completion after reload',async()=>{
+    const manifest=await (await context.request.get(address+'/course.json')).json();
+    const final=manifest.pages.find(p=>p.src===manifest.sequence.at(-1));
+    await page.setViewportSize({width:320,height:844});await go(final.url);
+    await page.evaluate(()=>scrollTo({top:700,behavior:'instant'}));
+    await page.locator('.sticky-finish').click();
+    for(const button of await page.locator('[data-finish]').all()) {
+      assert.equal(await button.textContent(),'Completed ✓');assert.equal(await button.isDisabled(),true);
+    }
+    await page.reload();assert.equal(await page.locator('.sticky-finish').isDisabled(),true);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    await page.screenshot({path:join(shots,'sticky-completed-mobile.png')});
+    await page.setViewportSize({width:1440,height:1050});
+  });
   await check('Search stays in the left panel and clearing it restores the complete tree',async()=>{
-    await page.keyboard.press('/');assert.equal(await page.locator('#contents-search').evaluate(e=>document.activeElement===e),true);
+    await go();await page.keyboard.press('/');assert.equal(await page.locator('#contents-search').evaluate(e=>document.activeElement===e),true);
     await page.locator('#contents-search').fill('binary search');await page.locator('#search-results a').first().waitFor();
     assert.ok((await page.locator('#search-results a').count())>0);assert.equal(await page.locator('#contents-tree').isVisible(),false);
     await page.locator('#contents-search').fill('');assert.equal(await page.locator('#contents-tree').isVisible(),true);
