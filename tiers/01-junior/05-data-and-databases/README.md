@@ -254,3 +254,28 @@ senior tier alongside isolation levels, locking, replication and
 backups-you-have-actually-restored.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Model ownership before adding indexes
+
+```mermaid
+erDiagram
+  USER ||--o{ MEMBERSHIP : joins
+  GROUP ||--o{ MEMBERSHIP : contains
+  GROUP ||--o{ BOOKMARK : owns
+  USER ||--o{ BOOKMARK : creates
+  BOOKMARK ||--o{ BOOKMARK_TAG : has
+  TAG ||--o{ BOOKMARK_TAG : labels
+  BOOKMARK {
+    uuid id PK
+    uuid group_id FK
+    uuid created_by FK
+    datetime created_at
+    int version
+  }
+```
+
+**Redraw challenge:** Point to the foreign key that bounds a group-scoped read. Then name the index for its ordering.
+
+![Model ownership before adding indexes: mechanism in motion](../../../assets/learning/index-seek.svg)
+
+[Static view](../../../assets/learning/index-seek-still.svg)

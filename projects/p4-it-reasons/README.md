@@ -105,3 +105,21 @@ tempting thing to migrate, because it is the newest and the least certain.
 
 Whatever you choose, P5 is where the guide stops being about building and starts
 being about changing something other people depend on.
+
+## Architecture rehearsal · Keep suggestion quality separate from API uptime
+
+```mermaid
+flowchart TD
+  Saved["Saved page content"] --> Input["Size and content boundary"]
+  Input --> Model["Tag suggestion model"]
+  Model --> Validate["Allowed-tag and schema validation"]
+  Validate --> UI["Suggested tags"]
+  UI --> Human["Accept, edit, or reject"]
+  Human --> DB[("Confirmed tags")]
+  Cases["Fixed evaluation examples"] --> Runner["Evaluation runner"]
+  Runner --> Model
+  Model --> Score["Quality, latency, cost"]
+  Expected["Expected outcomes"] --> Score
+```
+
+**Draw the failure:** If the model returns nonsense with HTTP 200, which box detects the product failure?

@@ -1,5 +1,7 @@
 # Path B · Software engineering interviews
 
+[Practice drawing the architecture](architecture/whiteboard.md) · [Motion gallery](../../assets/learning/README.md)
+
 Understand the concept. Implement the mechanism. Explain the tradeoff under time pressure. Architecture and AWS are the spine; coding and full-stack implementation are a separate, equally necessary area in this path.
 
 ## Start at your level

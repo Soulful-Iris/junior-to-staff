@@ -1,1 +1,142 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc"><title id="title">Keep capacity above incoming demand</title><desc id="desc">STOP TWO BEFORE STARTING START TWO BEFORE STOPPING CAPACITY · DEMAND 850 REQ/S 1,000 → 800 → 1,000 CAPACITY · DEMAND 850 REQ/S 1,000 → 1,200 → 1,000 Correct code can still overload the service during replacement. Toy budget: 100 req/s per task. An 800 req/s fleet builds a 50 req/s backlog at this demand. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/></marker></defs><style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style><rect width="760" height="420" rx="10" fill="#faf9f7"/><text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">KEEP CAPACITY ABOVE INCOMING DEMAND</text><text x="40" y="72" font-size="11" fill="#c2703d" text-anchor="start">STOP TWO BEFORE STARTING</text><text x="425" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">START TWO BEFORE STOPPING</text><rect x="45" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="45" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="121" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="121" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="197" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="197" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="273" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="273" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="45" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="45" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="121" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="121" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="197" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="197" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="273" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="273" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="45" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="1"><rect x="45" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="121" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="1"><rect x="121" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="197" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="0"><rect x="197" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="273" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="0"><rect x="273" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><text x="45" y="266" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY · DEMAND 850 REQ/S</text><rect x="42" y="282" width="240" height="17" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><path d="M246 273 V311" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><text x="45" y="333" font-size="17" fill="#2f6f4e" text-anchor="start">1,000 → 800 → 1,000</text><rect x="430" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="430" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="506" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="506" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="582" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="582" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="658" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="658" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="430" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="430" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="506" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="506" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="582" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="582" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="658" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><rect x="658" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><rect x="430" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="1"><rect x="430" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="506" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="1"><rect x="506" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="582" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="0"><rect x="582" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><rect x="658" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><g opacity="0"><rect x="658" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect></g><text x="430" y="266" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY · DEMAND 850 REQ/S</text><rect x="427" y="282" width="240" height="17" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef"></rect><path d="M631 273 V311" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><text x="430" y="333" font-size="17" fill="#2f6f4e" text-anchor="start">1,000 → 1,200 → 1,000</text><path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Correct code can still overload the service during replacement.</text><text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Toy budget: 100 req/s per task. An 800 req/s fleet builds a 50 req/s backlog at this demand.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Keep capacity above incoming demand</title>
+<desc id="desc">STOP TWO BEFORE STARTING START TWO BEFORE STOPPING CAPACITY · DEMAND 850 REQ/S 1,000 → 800 → 1,000 CAPACITY · DEMAND 850 REQ/S 1,000 → 1,200 → 1,000 Correct code can still overload the service during replacement. Toy budget: 100 req/s per task. An 800 req/s fleet builds a 50 req/s backlog at this demand. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">KEEP CAPACITY ABOVE INCOMING DEMAND</text>
+<text x="40" y="72" font-size="11" fill="#c2703d" text-anchor="start">STOP TWO BEFORE STARTING</text>
+<text x="425" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">START TWO BEFORE STOPPING</text>
+<rect x="45" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="45" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="121" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="121" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="197" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="197" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="273" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="273" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="45" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="45" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="121" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="121" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="197" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="197" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="273" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="273" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="45" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="1">
+<rect x="45" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="121" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="1">
+<rect x="121" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="197" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="0">
+<rect x="197" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="273" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="0">
+<rect x="273" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<text x="45" y="266" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY · DEMAND 850 REQ/S</text>
+<rect x="42" y="282" width="240" height="17" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<path d="M246 273 V311" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="45" y="333" font-size="17" fill="#2f6f4e" text-anchor="start">1,000 → 800 → 1,000</text>
+<rect x="430" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="430" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="506" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="506" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="582" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="582" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="658" y="99" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="658" y="99" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="430" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="430" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="506" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="506" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="582" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="582" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="658" y="147" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="658" y="147" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="430" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="1">
+<rect x="430" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="506" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="1">
+<rect x="506" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="582" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="0">
+<rect x="582" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<rect x="658" y="195" width="59" height="31" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<g opacity="0">
+<rect x="658" y="195" width="59" height="31" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<text x="430" y="266" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY · DEMAND 850 REQ/S</text>
+<rect x="427" y="282" width="240" height="17" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<path d="M631 273 V311" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="430" y="333" font-size="17" fill="#2f6f4e" text-anchor="start">1,000 → 1,200 → 1,000</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Correct code can still overload the service during replacement.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Toy budget: 100 req/s per task. An 800 req/s fleet builds a 50 req/s backlog at this demand.</text>
+</svg>

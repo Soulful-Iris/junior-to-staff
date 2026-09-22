@@ -97,3 +97,21 @@ and deliberate failure of the things it depends on.
 Everything you leave manual in P2 becomes something you have to do by hand while
 the system is misbehaving. That is the actual argument for this project, and it
 is the one nobody believes until the first time it happens.
+
+## Architecture rehearsal · Operational controls around the same application
+
+```mermaid
+flowchart TD
+  Artifact["Versioned build"] --> Runtime["Application runtime"]
+  Config["Environment configuration"] --> Runtime
+  Secrets["Scoped secret store"] --> Runtime
+  Runtime --> DB[("Database")]
+  DB --> Backup[("Backup and restore target")]
+  Runtime --> Signals["Logs, metrics, traces"]
+  Signals --> Alert["Actionable alert"]
+  Alert --> Runbook["Owner + runbook"]
+  Runbook -->|"mitigate"| Runtime
+  Backup --> Drill["Restore drill"]
+```
+
+**Draw the failure:** Erase the author of this project from the team. Can another engineer deploy and recover it?

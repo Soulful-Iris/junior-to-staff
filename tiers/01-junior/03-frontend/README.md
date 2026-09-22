@@ -298,3 +298,23 @@ choose a framework, on purpose: every placement decision above outlives
 whichever one you pick.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Separate browser intent from server truth
+
+```mermaid
+flowchart TD
+  User["User intent"] --> View["Rendered view"]
+  View --> Local["Draft and pending state"]
+  Local --> Request["Request generation"]
+  Request --> API["Authorized API"]
+  API --> DB[("Server-owned facts")]
+  API --> Guard["Current-generation guard"]
+  Guard -->|"current"| View
+  Guard -->|"obsolete"| Drop["Ignore response"]
+```
+
+**Redraw challenge:** Draw two requests completing in reverse order. Which box decides what the user sees?
+
+![Separate browser intent from server truth: mechanism in motion](../../../assets/learning/browser-race.svg)
+
+[Static view](../../../assets/learning/browser-race-still.svg)

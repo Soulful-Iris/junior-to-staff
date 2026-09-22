@@ -191,3 +191,24 @@ in **12 · Delivery**. This section is the minimum that makes P1 reproducible by
 somebody who is not you.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Draw what a deploy is allowed to read
+
+```mermaid
+flowchart TD
+  Commit["Reviewed commit"] --> Build["Build once"]
+  Build --> Artifact["Artifact digest"]
+  Artifact --> Stage["Staging runtime"]
+  Artifact --> Prod["Production runtime"]
+  StageConfig["Staging configuration"] --> Stage
+  ProdConfig["Production configuration"] --> Prod
+  Secret["Scoped secret access"] --> Prod
+  Prod --> Health["Health + version evidence"]
+  Health -->|"bad release"| Prior["Prior artifact"]
+```
+
+**Redraw challenge:** Point to the immutable artifact and the environment-specific inputs. Which one changed?
+
+![Draw what a deploy is allowed to read: mechanism in motion](../../../assets/learning/traffic-shift.svg)
+
+[Static view](../../../assets/learning/traffic-shift-still.svg)

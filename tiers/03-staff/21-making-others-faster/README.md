@@ -179,3 +179,20 @@ guide, that is worth noticing rather than suppressing — it is information, not
 failure.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Make the paved road observable
+
+```mermaid
+flowchart TD
+  Engineer["New change"] --> Template["Small working example"]
+  Template --> Checks["Useful defaults and checks"]
+  Checks --> SelfServe["Self-service deploy"]
+  Checks --> Help["Clear failure and escape hatch"]
+  Help --> Feedback["Friction report"]
+  SelfServe --> Measure["Time to first safe change"]
+  Measure --> Feedback
+  Feedback --> Maintainer["Named maintainer"]
+  Maintainer --> Template
+```
+
+**Redraw challenge:** How does an engineer succeed without privately asking the platform author for help?

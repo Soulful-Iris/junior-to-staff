@@ -273,3 +273,20 @@ is the one worth learning first. Monorepo versus many repos is a staff-tier
 argument about organisations, not a junior decision.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Make a change reviewable
+
+```mermaid
+flowchart TD
+  Intent["Acceptance criteria"] --> Patch["Small patch"]
+  Intent --> Check["Independent checks"]
+  Patch --> CI["Build and tests"]
+  Check --> Review["Reviewer: evidence + diff"]
+  CI --> Review
+  Review -->|"approve"| Release["Versioned artifact"]
+  Review -->|"gap found"| Patch
+  Release --> Observe["Production outcome"]
+  Observe -->|"new evidence"| Intent
+```
+
+**Redraw challenge:** Remove the reviewer box. Which checks still establish behavior, and which judgments disappear?

@@ -185,3 +185,25 @@ resistance is real and mostly a scope problem, which is
 [16 · Scope and leverage](../16-scope-and-leverage/).
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Draw coexistence before drawing cutover
+
+```mermaid
+flowchart TD
+  OldClient["Old clients"] --> Compat["Compatible API"]
+  NewClient["New clients"] --> Compat
+  Compat --> Old[("Old representation")]
+  Compat --> New[("New representation")]
+  Old --> Backfill["Checkpointed backfill"]
+  Backfill --> New
+  Old --> Compare["Value reconciliation"]
+  New --> Compare
+  Compare --> Gate["Cutover evidence"]
+  Gate --> Retire["Retire old path after adoption"]
+```
+
+**Redraw challenge:** Circle every writer that still targets the old representation. What evidence permits retirement?
+
+![Draw coexistence before drawing cutover: mechanism in motion](../../../assets/learning/traffic-shift.svg)
+
+[Static view](../../../assets/learning/traffic-shift-still.svg)

@@ -188,3 +188,20 @@ but they belong with **20 · Risk and incidents** because they are written under
 different pressure.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Keep alternatives and reversal conditions visible
+
+```mermaid
+flowchart TD
+  Goal["Goal + constraints"] --> A["Option A: cost and risks"]
+  Goal --> B["Option B: cost and risks"]
+  Evidence["Measurements + assumptions"] --> Decision["Decision and accountable owner"]
+  A --> Decision
+  B --> Decision
+  Decision --> Plan["Execution + validation"]
+  Decision --> Revisit["Trigger for reopening"]
+  Plan --> Outcome["Observed outcome"]
+  Outcome --> Revisit
+```
+
+**Redraw challenge:** Change one assumption. Can a reader tell whether it reverses the decision?

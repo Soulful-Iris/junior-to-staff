@@ -219,3 +219,19 @@ using a model to help you build. Prompt-phrasing tricks are deliberately absent;
 they were the 2023 skill, and the durable one is specification plus verification.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Keep the author separate from the oracle
+
+```mermaid
+flowchart TD
+  Spec["Behavior + forbidden changes"] --> AI["AI-generated candidate"]
+  Spec --> Cases["Human-chosen boundary cases"]
+  AI --> Sandbox["Isolated execution"]
+  Cases --> Oracle["Expected results"]
+  Sandbox --> Compare["Observed vs expected"]
+  Oracle --> Compare
+  Compare -->|"mismatch"| Spec
+  Compare -->|"evidence"| Review["Human review and acceptance"]
+```
+
+**Redraw challenge:** Show where a plausible explanation can pass while the implementation is still wrong.

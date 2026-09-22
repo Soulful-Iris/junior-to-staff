@@ -197,3 +197,24 @@ This section is about what a staff engineer does with them: the hour it is
 happening, and the week afterwards when everyone has stopped caring.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Separate mitigation from the explanation
+
+```mermaid
+flowchart TD
+  Impact["User impact detected"] --> Command["Incident lead"]
+  Command --> Mitigate["Reversible mitigation"]
+  Command --> Comms["Status and coordination"]
+  Evidence["Timeline and observations"] --> Hypothesis["Testable explanation"]
+  Mitigate --> Recovery["Recovery evidence"]
+  Recovery --> Review["Incident review"]
+  Hypothesis --> Review
+  Review --> Fix["Owned corrective action"]
+  Fix --> Drill["Failure drill proves the change"]
+```
+
+**Redraw challenge:** Which action reduces current harm, and which experiment establishes why it happened?
+
+![Separate mitigation from the explanation: mechanism in motion](../../../assets/learning/circuit-breaker.svg)
+
+[Static view](../../../assets/learning/circuit-breaker-still.svg)

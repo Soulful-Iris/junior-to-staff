@@ -194,3 +194,19 @@ you do the work in this section, the packet writes itself, and if you optimise
 for the packet you will end up preening.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Show who owns the shared constraint
+
+```mermaid
+flowchart TD
+  A["Team A: blocked delivery"] --> Constraint["Shared deployment bottleneck"]
+  B["Team B: repeated incidents"] --> Constraint
+  C["Team C: manual support"] --> Constraint
+  Constraint --> Decision["Named owner + measurable outcome"]
+  Decision --> Platform["Small shared capability"]
+  Platform --> Pilot["One adopting team"]
+  Pilot --> Measure["Lead time and support burden"]
+  Measure -->|"evidence"| Expand["Expand or revise"]
+```
+
+**Redraw challenge:** Replace “build a platform” with the smallest shared constraint and an adoption measure.

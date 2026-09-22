@@ -335,3 +335,25 @@ release goes wrong anyway — detection and response live in
 pipeline in [11 · Security](../11-security/).
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Deploy and release are separate controls
+
+```mermaid
+flowchart TD
+  CI["Tested artifact"] --> Fleet["New runtime version"]
+  Fleet --> Ready["Readiness evidence"]
+  Ready --> Routing["Traffic / feature policy"]
+  Old["Old compatible runtime"] --> Routing
+  Routing --> Users["User cohorts"]
+  Users --> Signals["Errors, latency, business outcome"]
+  Signals -->|"healthy"| Expand["Increase exposure"]
+  Signals -->|"bad"| Rollback["Restore old routing"]
+  Expand --> Routing
+  Rollback --> Routing
+```
+
+**Redraw challenge:** Which change can a flag undo, and which database transformation requires a separate recovery plan?
+
+![Deploy and release are separate controls: mechanism in motion](../../../assets/learning/config-cohorts.svg)
+
+[Static view](../../../assets/learning/config-cohorts-still.svg)

@@ -1,1 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc"><title id="title">Admission follows completion</title><desc id="desc">WAITING THREE ACTIVE SLOTS DONE slot 1 slot 2 slot 3 A job travels into a slot, runs there, then leaves before the next admission. Nine jobs, at most three executing. Concurrency is a resource limit, not a requests-per-second limit. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/></marker></defs><style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style><rect width="760" height="420" rx="10" fill="#faf9f7"/><text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">ADMISSION FOLLOWS COMPLETION</text><text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">WAITING</text><text x="295" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">THREE ACTIVE SLOTS</text><text x="590" y="72" font-size="11" fill="#6d6459" text-anchor="start">DONE</text><path d="M130 122 H304 M430 122 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"></path><rect x="304" y="100" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><text x="367.0" y="127.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 1</text><path d="M130 196 H304 M430 196 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"></path><rect x="304" y="174" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><text x="367.0" y="201.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 2</text><path d="M130 270 H304 M430 270 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"></path><rect x="304" y="248" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7"></rect><text x="367.0" y="275.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 3</text><circle cx="627" cy="119" r="8" fill="#2f6f4e"></circle><circle cx="649" cy="119" r="8" fill="#2f6f4e"></circle><circle cx="671" cy="119" r="8" fill="#2f6f4e"></circle><circle cx="627" cy="193" r="8" fill="#2f6f4e"></circle><circle cx="649" cy="193" r="8" fill="#2f6f4e"></circle><circle cx="671" cy="193" r="8" fill="#2f6f4e"></circle><circle cx="627" cy="267" r="8" fill="#2f6f4e"></circle><circle cx="649" cy="267" r="8" fill="#2f6f4e"></circle><circle cx="671" cy="267" r="8" fill="#2f6f4e"></circle><path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A job travels into a slot, runs there, then leaves before the next admission.</text><text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Nine jobs, at most three executing. Concurrency is a resource limit, not a requests-per-second limit.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Admission follows completion</title>
+<desc id="desc">WAITING THREE ACTIVE SLOTS DONE slot 1 slot 2 slot 3 A job travels into a slot, runs there, then leaves before the next admission. Nine jobs, at most three executing. Concurrency is a resource limit, not a requests-per-second limit. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">ADMISSION FOLLOWS COMPLETION</text>
+<text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">WAITING</text>
+<text x="295" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">THREE ACTIVE SLOTS</text>
+<text x="590" y="72" font-size="11" fill="#6d6459" text-anchor="start">DONE</text>
+<path d="M130 122 H304 M430 122 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="304" y="100" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="367.0" y="127.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 1</text>
+<path d="M130 196 H304 M430 196 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="304" y="174" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="367.0" y="201.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 2</text>
+<path d="M130 270 H304 M430 270 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="304" y="248" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="367.0" y="275.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 3</text>
+<circle cx="627" cy="119" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="119" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="671" cy="119" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="627" cy="193" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="193" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="671" cy="193" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="627" cy="267" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="267" r="8" fill="#2f6f4e">
+</circle>
+<circle cx="671" cy="267" r="8" fill="#2f6f4e">
+</circle>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A job travels into a slot, runs there, then leaves before the next admission.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Nine jobs, at most three executing. Concurrency is a resource limit, not a requests-per-second limit.</text>
+</svg>

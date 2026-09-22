@@ -179,3 +179,20 @@ roadmap tells you what is being built and when, a strategy tells you which
 arguments you are no longer having.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Make strategy a constraint on real decisions
+
+```mermaid
+flowchart TD
+  Pain["Recurring local decisions"] --> Diagnosis["Shared technical constraint"]
+  Diagnosis --> Rule["Guiding policy"]
+  Rule --> A["Investment A"]
+  Rule --> B["Investment B"]
+  Rule --> No["Explicit non-investments"]
+  A --> Evidence["Outcome measures"]
+  B --> Evidence
+  Evidence --> Review["Scheduled strategy review"]
+  Review --> Diagnosis
+```
+
+**Redraw challenge:** Name the attractive project this strategy says no to. If there is none, sharpen the policy.

@@ -210,3 +210,25 @@ benchmarking individual functions is deliberately absent: it is a specialist
 skill and, at this tier, almost always the wrong instrument for the question.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Measure the whole critical path
+
+```mermaid
+flowchart TD
+  Browser["Browser: network + render"] --> API["API: CPU + queue wait"]
+  API --> A["Independent dependency A"]
+  API --> B["Independent dependency B"]
+  A --> Join["Wait for required results"]
+  B --> Join
+  Join --> Reply["Serialize + transfer"]
+  Reply --> Browser
+  API --> Profile["Profile time and resource use"]
+  Profile --> Change["One measured change"]
+  Change --> Compare["Same workload comparison"]
+```
+
+**Redraw challenge:** Identify which calls can overlap. Which resource grows when you increase fan-out?
+
+![Measure the whole critical path: mechanism in motion](../../../assets/learning/io-waterfall.svg)
+
+[Static view](../../../assets/learning/io-waterfall-still.svg)

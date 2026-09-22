@@ -1,5 +1,7 @@
 # junior → staff
 
+[Practice drawing the architecture](paths/interviews/architecture/whiteboard.md) · [Motion gallery](assets/learning/README.md)
+
 Two learning paths from junior to staff: **AI-assisted engineering** and
 **software engineering interviews**. Learn the concepts, see their behavior,
 implement them, and prove that you understand the result.

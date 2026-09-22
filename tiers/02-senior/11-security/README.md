@@ -312,3 +312,23 @@ for secrets and dependencies is
 [07 · Shipping it](../../01-junior/07-shipping-it/), assumed here.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Two authorization questions, two boundaries
+
+```mermaid
+flowchart TD
+  Caller["Application user"] --> Session["Validate identity"]
+  Session --> Object["May this user access this object?"]
+  Object --> Handler["Service code"]
+  Handler --> IAM["What AWS actions may this workload perform?"]
+  IAM --> S3[("Scoped S3 keys")]
+  IAM --> DB[("Database access")]
+  Object -->|"deny"| Forbidden["No object disclosure"]
+  Handler --> Audit["Actor + action + resource"]
+```
+
+**Redraw challenge:** An IAM role can write to a bucket. Why does that not let every signed-in user replace every object?
+
+![Two authorization questions, two boundaries: mechanism in motion](../../../assets/learning/direct-upload.svg)
+
+[Static view](../../../assets/learning/direct-upload-still.svg)

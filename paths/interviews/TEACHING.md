@@ -10,6 +10,8 @@ Keep all labels readable at normal GitHub width. Include descriptive alt text, a
 
 Follow the original `assets/diagrams` examples: geometry carries the explanation, short labels identify state, and motion represents a request, a boundary, or a resource changing. Do not use identical text boxes as a substitute for a mechanism. Keep entry pages short and ordered; move optional detail behind a link or disclosure. Verify actual playback after publishing, in addition to static layout checks.
 
+Static architecture boxes are also a core learning skill. Show databases, caches, load balancers, services, queues, and trust boundaries when they explain the design. Label arrows. Ask the learner to redraw the system, remove a component, and predict the failure. Use ER diagrams for relationships, timelines for latency, and sequence diagrams for races. Preserve the original illustrations; additions should fill a new teaching need.
+
 ## Solution standard
 
 State inputs, outputs, malformed-input policy, invariant, baseline, improved approach, time, auxiliary space, and where the improvement stops working. Use Python for algorithms and TypeScript for browser/async work. Avoid translating every example twice merely to double its length.

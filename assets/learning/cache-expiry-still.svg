@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Expiry jitter spreads the refresh wave</title>
+<desc id="desc">SAME EXPIRY → ONE SPIKE JITTER → SPREAD REFRESH WORK k1 k2 k3 k4 k5 k6 k1 k2 k3 k4 k5 k6 Equal TTLs synchronize misses. Randomized expiry spreads their arrival times. Jitter does not reduce total refresh work. Pair it with coalescing, stale policy, and a load budget. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">EXPIRY JITTER SPREADS THE REFRESH WAVE</text>
+<text x="40" y="72" font-size="11" fill="#c2703d" text-anchor="start">SAME EXPIRY → ONE SPIKE</text>
+<text x="425" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">JITTER → SPREAD REFRESH WORK</text>
+<text x="40" y="110" font-size="12" fill="#6d6459" text-anchor="start">k1</text>
+<path d="M75 105 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="105" r="4" fill="#c2703d">
+</circle>
+<text x="40" y="142" font-size="12" fill="#6d6459" text-anchor="start">k2</text>
+<path d="M75 137 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="137" r="4" fill="#c2703d">
+</circle>
+<text x="40" y="174" font-size="12" fill="#6d6459" text-anchor="start">k3</text>
+<path d="M75 169 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="169" r="4" fill="#c2703d">
+</circle>
+<text x="40" y="206" font-size="12" fill="#6d6459" text-anchor="start">k4</text>
+<path d="M75 201 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="201" r="4" fill="#c2703d">
+</circle>
+<text x="40" y="238" font-size="12" fill="#6d6459" text-anchor="start">k5</text>
+<path d="M75 233 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="233" r="4" fill="#c2703d">
+</circle>
+<text x="40" y="270" font-size="12" fill="#6d6459" text-anchor="start">k6</text>
+<path d="M75 265 H260" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="260" cy="265" r="4" fill="#c2703d">
+</circle>
+<path d="M75 310 H335" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M75 304 H239 Q256 218 263 300 H332" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M75 88 V316" stroke="#1f2b24" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="425" y="110" font-size="12" fill="#6d6459" text-anchor="start">k1</text>
+<path d="M460 105 H525" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="525" cy="105" r="4" fill="#2f6f4e">
+</circle>
+<text x="425" y="142" font-size="12" fill="#6d6459" text-anchor="start">k2</text>
+<path d="M460 137 H555" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="555" cy="137" r="4" fill="#2f6f4e">
+</circle>
+<text x="425" y="174" font-size="12" fill="#6d6459" text-anchor="start">k3</text>
+<path d="M460 169 H585" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="585" cy="169" r="4" fill="#2f6f4e">
+</circle>
+<text x="425" y="206" font-size="12" fill="#6d6459" text-anchor="start">k4</text>
+<path d="M460 201 H615" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="615" cy="201" r="4" fill="#2f6f4e">
+</circle>
+<text x="425" y="238" font-size="12" fill="#6d6459" text-anchor="start">k5</text>
+<path d="M460 233 H645" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="645" cy="233" r="4" fill="#2f6f4e">
+</circle>
+<text x="425" y="270" font-size="12" fill="#6d6459" text-anchor="start">k6</text>
+<path d="M460 265 H675" stroke="#ded9d1" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="675" cy="265" r="4" fill="#2f6f4e">
+</circle>
+<path d="M460 310 H720" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M460 304 Q525 304 540 293 T590 293 T640 293 T715 304" stroke="#2f6f4e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M460 88 V316" stroke="#1f2b24" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Equal TTLs synchronize misses. Randomized expiry spreads their arrival times.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Jitter does not reduce total refresh work. Pair it with coalescing, stale policy, and a load budget.</text>
+</svg>

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Overlap extends the current interval</title>
+<desc id="desc">SORT BY START · MERGE OVERLAPPING CLOSED INTERVALS [1, 4] [3, 6] [8, 10] [1, 6] [8, 10] Extend the current end to max(end, next.end); a gap starts another interval. O(n log n) for sorting, O(n) for the scan. Half-open intervals need an explicit touching policy. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">OVERLAP EXTENDS THE CURRENT INTERVAL</text>
+<g class="moving">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">SORT BY START · MERGE OVERLAPPING CLOSED INTERVALS</text>
+<path d="M137 121 H293" stroke="#2f6f4e" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="137" y="105" font-size="14" fill="#1f2b24" text-anchor="start">[1, 4]</text>
+<path d="M241 178 H397" stroke="#2f6f4e" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="241" y="162" font-size="14" fill="#1f2b24" text-anchor="start">[3, 6]</text>
+<path d="M501 235 H605" stroke="#c2703d" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="501" y="219" font-size="14" fill="#1f2b24" text-anchor="start">[8, 10]</text>
+<path d="M130 306 H690" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="137" y="276" width="260" height="21" rx="2" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+<animate attributeName="width" values="156;156;260;260" keyTimes="0;0.2;0.65;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<rect x="501" y="276" width="104" height="21" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<path d="M293 134 V271" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M397 188 V271" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="167" y="335" font-size="16" fill="#2f6f4e" text-anchor="start">[1, 6]</text>
+<text x="521" y="335" font-size="16" fill="#c2703d" text-anchor="start">[8, 10]</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Extend the current end to max(end, next.end); a gap starts another interval.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">O(n log n) for sorting, O(n) for the scan. Half-open intervals need an explicit touching policy.</text>
+</g>
+<g class="still">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">SORT BY START · MERGE OVERLAPPING CLOSED INTERVALS</text>
+<path d="M137 121 H293" stroke="#2f6f4e" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="137" y="105" font-size="14" fill="#1f2b24" text-anchor="start">[1, 4]</text>
+<path d="M241 178 H397" stroke="#2f6f4e" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="241" y="162" font-size="14" fill="#1f2b24" text-anchor="start">[3, 6]</text>
+<path d="M501 235 H605" stroke="#c2703d" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="501" y="219" font-size="14" fill="#1f2b24" text-anchor="start">[8, 10]</text>
+<path d="M130 306 H690" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="137" y="276" width="260" height="21" rx="2" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="501" y="276" width="104" height="21" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<path d="M293 134 V271" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M397 188 V271" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="167" y="335" font-size="16" fill="#2f6f4e" text-anchor="start">[1, 6]</text>
+<text x="521" y="335" font-size="16" fill="#c2703d" text-anchor="start">[8, 10]</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Extend the current end to max(end, next.end); a gap starts another interval.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">O(n log n) for sorting, O(n) for the scan. Half-open intervals need an explicit touching policy.</text>
+</g>
+</svg>

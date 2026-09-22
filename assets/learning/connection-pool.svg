@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Lease connections within a fixed budget</title>
+<desc id="desc">MANY REQUESTS SHARE A SMALL CONNECTION BUDGET request 1 request 2 request 3 request 4 request 5 request 6 connection 1 connection 2 DB acquire → use → release in finally Bound connections and the wait to acquire one. Always release a checked-out resource. Per-process pools add up across replicas; pool size × replica count must fit the database budget. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">LEASE CONNECTIONS WITHIN A FIXED BUDGET</text>
+<g class="moving">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">MANY REQUESTS SHARE A SMALL CONNECTION BUDGET</text>
+<rect x="40" y="95" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="114.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 1</text>
+<rect x="40" y="132" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="151.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 2</text>
+<rect x="40" y="169" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="188.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 3</text>
+<rect x="40" y="206" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="225.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 4</text>
+<rect x="40" y="243" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="262.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 5</text>
+<rect x="40" y="280" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="299.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 6</text>
+<rect x="309" y="125" width="150" height="50" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="384.0" y="155.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 1</text>
+<path d="M459 150 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 109 L309 150 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.25;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.249;0.25;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 183 L309 150 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.32;0.55;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.319;0.32;0.549;0.55;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 257 L309 150 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.62;0.85;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.619;0.62;0.849;0.85;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="309" y="236" width="150" height="50" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="384.0" y="266.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 2</text>
+<path d="M459 261 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 146 L309 261 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.25;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.249;0.25;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 220 L309 261 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.32;0.55;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.319;0.32;0.549;0.55;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#2f6f4e">
+</circle>
+<animateMotion path="M158 294 L309 261 H459 L635 207" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.62;0.85;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.619;0.62;0.849;0.85;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="635" y="171" width="84" height="70" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="677.0" y="211.0" font-size="14" fill="#1f2b24" text-anchor="middle">DB</text>
+<text x="222" y="324" font-size="18" fill="#2f6f4e" text-anchor="start">acquire → use → release in finally</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Bound connections and the wait to acquire one. Always release a checked-out resource.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Per-process pools add up across replicas; pool size × replica count must fit the database budget.</text>
+</g>
+<g class="still">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">MANY REQUESTS SHARE A SMALL CONNECTION BUDGET</text>
+<rect x="40" y="95" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="114.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 1</text>
+<rect x="40" y="132" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="151.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 2</text>
+<rect x="40" y="169" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="188.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 3</text>
+<rect x="40" y="206" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="225.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 4</text>
+<rect x="40" y="243" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="262.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 5</text>
+<rect x="40" y="280" width="118" height="29" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="99.0" y="299.5" font-size="14" fill="#1f2b24" text-anchor="middle">request 6</text>
+<rect x="309" y="125" width="150" height="50" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="384.0" y="155.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 1</text>
+<path d="M459 150 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="309" y="236" width="150" height="50" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="384.0" y="266.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 2</text>
+<path d="M459 261 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="635" y="171" width="84" height="70" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="677.0" y="211.0" font-size="14" fill="#1f2b24" text-anchor="middle">DB</text>
+<text x="222" y="324" font-size="18" fill="#2f6f4e" text-anchor="start">acquire → use → release in finally</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Bound connections and the wait to acquire one. Always release a checked-out resource.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Per-process pools add up across replicas; pool size × replica count must fit the database budget.</text>
+</g>
+</svg>

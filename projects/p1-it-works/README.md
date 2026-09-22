@@ -114,3 +114,23 @@ without guessing.
 
 So do not skip the boring parts here. Everything you leave loose in P1 is
 something P2 makes you tie down while it is moving.
+
+## Architecture rehearsal · The smallest complete reading-list architecture
+
+```mermaid
+flowchart TD
+  Browser["Browser: reading list UI"] --> API["API: identity + group authorization"]
+  API --> DB[("Users, groups, bookmarks, tags")]
+  API --> Fetch["Fetch title: bounded timeout + URL policy"]
+  Fetch --> Web["External page"]
+  Web --> Fetch
+  Fetch --> API
+  API -->|"save outcome"| Browser
+  Login["Identity provider"] --> API
+```
+
+**Draw the failure:** Draw the failed-title-fetch response. A slow external page must not make every save wait forever.
+
+![Children spend the parents remaining budget](../../assets/learning/deadline-budget.svg)
+
+[Static view](../../assets/learning/deadline-budget-still.svg)

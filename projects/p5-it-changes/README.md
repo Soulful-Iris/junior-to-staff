@@ -101,3 +101,26 @@ in how you work, from P1 to here.
 
 Not what you learned — what you now **do differently**. Those are not the same,
 and the difference between them is roughly the whole subject of this repo.
+
+## Architecture rehearsal · Prove coexistence and retirement
+
+```mermaid
+flowchart TD
+  OldClient["Old client"] --> Compat["Compatibility layer"]
+  NewClient["New client"] --> Compat
+  Compat --> Source[("Authoritative representation")]
+  Source --> Migrate["Backfill + ordered change capture"]
+  Migrate --> Target[("New representation")]
+  Source --> Reconcile["Value-level reconciliation"]
+  Target --> Reconcile
+  Reconcile --> Gate["Cutover gate"]
+  Gate --> Routing["Switch read routing"]
+  Routing --> Adoption["Prove old writers retired"]
+  Adoption --> Remove["Remove compatibility path"]
+```
+
+**Draw the failure:** Define the last reversible step. This is one migration pattern; adapt capture and rollback to your store.
+
+![Move admissions, drain existing work](../../assets/learning/traffic-shift.svg)
+
+[Static view](../../assets/learning/traffic-shift-still.svg)

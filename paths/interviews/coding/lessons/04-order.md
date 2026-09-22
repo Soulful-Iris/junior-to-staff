@@ -10,6 +10,10 @@
 
 Closed: `[1,3] + [3,4] → [1,4]`. Half-open meetings: `[1,3)` and `[3,4)` do not conflict.
 
+![Overlap extends the current interval](../../../../assets/learning/merge-intervals.svg)
+
+[Static view](../../../../assets/learning/merge-intervals-still.svg)
+
 ## Your 45-minute session
 
 1. **5 min:** draw one example and a simple solution.

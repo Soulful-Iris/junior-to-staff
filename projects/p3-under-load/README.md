@@ -103,3 +103,26 @@ to it directly.
 
 The new part in P4 is that its failures are not timeouts. They are plausible
 wrong answers, which nothing in this project would have caught.
+
+## Architecture rehearsal · Separate interactive reads from refresh work
+
+```mermaid
+flowchart TD
+  Browser["Browser"] --> LB["Load balancer"]
+  LB --> API["Stateless APIs"]
+  API --> Cache["Read cache"]
+  API --> DB[("Bookmark database")]
+  API --> Queue["Refresh queue"]
+  Queue --> Workers["Bounded workers"]
+  Workers --> External["External sites: deadlines + rate budget"]
+  Workers --> DB
+  Queue -->|"repeated failure"| DLQ["Dead-letter queue"]
+  Workers --> Invalidate["Invalidate / version cached data"]
+  Invalidate --> Cache
+```
+
+**Draw the failure:** Kill an external dependency. Draw which work continues and where the backlog becomes visible.
+
+![A buffer is a reservoir, not capacity](../../assets/learning/backpressure.svg)
+
+[Static view](../../assets/learning/backpressure-still.svg)

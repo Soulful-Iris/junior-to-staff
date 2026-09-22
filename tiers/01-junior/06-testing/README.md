@@ -197,3 +197,20 @@ the junior tier; it is easier to appreciate once you have felt an example-based
 suite miss something.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Choose the boundary your test proves
+
+```mermaid
+flowchart TD
+  Behavior["Risky behavior"] --> Pure["Unit: pure invariant"]
+  Behavior --> Store["Integration: real store constraints"]
+  Behavior --> Journey["End-to-end: user journey"]
+  Pure --> Fast["Fast precise failure"]
+  Store --> Races["Concurrency and commit behavior"]
+  Journey --> Wiring["Auth, routing, rendering"]
+  Fast --> Evidence["Evidence for this change"]
+  Races --> Evidence
+  Wiring --> Evidence
+```
+
+**Redraw challenge:** Which test would fail if authorization were removed? A happy-path unit test is not enough.

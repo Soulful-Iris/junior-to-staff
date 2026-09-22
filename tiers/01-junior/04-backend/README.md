@@ -261,3 +261,23 @@ is P2. Nothing here is about speed — a backend first has to be right when
 things go wrong, which is most of what a backend is.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Put authority on the server side
+
+```mermaid
+flowchart TD
+  Browser["Untrusted request"] --> Router["Router + input validation"]
+  Router --> Auth["Identity and object authorization"]
+  Auth --> Handler["Business invariant"]
+  Handler --> DB[("Database constraint / transaction")]
+  Handler --> Fetch["Outbound fetch: timeout + URL policy"]
+  Fetch --> External["Untrusted external server"]
+  DB --> Reply["Response after commit"]
+  Reply --> Browser
+```
+
+**Redraw challenge:** Mark the point where a committed write can lose its response. Explain the safe retry.
+
+![Put authority on the server side: mechanism in motion](../../../assets/learning/conditional-result.svg)
+
+[Static view](../../../assets/learning/conditional-result-still.svg)

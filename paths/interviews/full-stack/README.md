@@ -53,6 +53,10 @@ const search = latestOnly(
 
 `latestOnly` is implemented and tested in [typescript.ts](../coding/typescript.ts). Connect failures to an error state with a retry action. Add loading/empty/success states. Validate runtime JSON with a schema or explicit checks; static types alone cannot establish trust in the response. In a component, also abort/invalidate on unmount.
 
+![Independent I/O overlaps; dependent I/O stays ordered](../../../assets/learning/io-waterfall.svg)
+
+[Static view](../../../assets/learning/io-waterfall-still.svg)
+
 ## Backend concepts
 
 Use separate request validation and domain rules. Authorize on the server. Bound pagination and payload size. Return conflict when an expected version is stale. Add a request ID for diagnosis without exposing private data. Do not emit a success status before durable acceptance.

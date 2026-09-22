@@ -106,5 +106,101 @@
     "title": "The older response arrives last",
     "duration_seconds": 7,
     "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "cache-expiry",
+    "title": "Expiry jitter spreads the refresh wave",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "backpressure",
+    "title": "A buffer is a reservoir, not capacity",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "circuit-breaker",
+    "title": "A circuit opens, then probes recovery",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "replication-lag",
+    "title": "Acknowledged here, not visible everywhere",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "transaction-outbox",
+    "title": "Close the commit-to-publish gap",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "deadline-budget",
+    "title": "Children spend the parents remaining budget",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "token-bucket",
+    "title": "Store burst credit, refill over time",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "connection-pool",
+    "title": "Lease connections within a fixed budget",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "traffic-shift",
+    "title": "Move admissions, drain existing work",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "io-waterfall",
+    "title": "Independent work can share the wait",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "heap-sift",
+    "title": "Repair the heap along one branch",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "trie-prefix",
+    "title": "One prefix opens several completions",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "backtracking",
+    "title": "Choose, explore, undo, try the next branch",
+    "duration_seconds": 10,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "merge-intervals",
+    "title": "Overlap extends the current interval",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "index-seek",
+    "title": "A separator eliminates a whole range",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "bulkhead",
+    "title": "Contain the slow neighbor",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
   }
 ]

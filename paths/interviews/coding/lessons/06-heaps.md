@@ -13,6 +13,10 @@ flowchart TD
 
 **The idea:** A heap orders the next candidate, not every element. Dijkstra skips stale entries whose distance is no longer current.
 
+![Repair the heap along one branch](../../../../assets/learning/heap-sift.svg)
+
+[Static view](../../../../assets/learning/heap-sift-still.svg)
+
 ## Your 45-minute session
 
 1. **5 min:** draw one example and a simple solution.

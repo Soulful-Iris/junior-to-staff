@@ -1,8 +1,19 @@
 # Architecture · understand the mechanism before naming a service
 
+[Practice drawing the architecture](whiteboard.md) · [Motion gallery](../../../assets/learning/README.md)
+
 For every component ask: what data enters, what state changes, what waits, who can access it, and what happens if the response disappears? Use the worked designs after you can answer these questions.
 
 ## 1 · Request lifecycle, latency, and capacity
+
+![Independent work can share the wait](../../../assets/learning/io-waterfall.svg)
+
+[Static view](../../../assets/learning/io-waterfall-still.svg)
+
+![Children spend the parents remaining budget](../../../assets/learning/deadline-budget.svg)
+
+[Static view](../../../assets/learning/deadline-budget-still.svg)
+
 
 A browser resolves a name, establishes a secure connection, sends a request, waits for backend work, then renders the result. An API's fast database query does not guarantee a fast page: network setup, payload size, CPU, and rendering also consume the user's budget. Persisted state survives process restarts; in-memory state usually does not.
 
@@ -24,6 +35,15 @@ A cursor based on `(created_at,id)` gives a stable tie-breaker. Offset paginatio
 
 ## 3 · Indexes, storage, and transactions
 
+![A separator eliminates a whole range](../../../assets/learning/index-seek.svg)
+
+[Static view](../../../assets/learning/index-seek-still.svg)
+
+![Acknowledged here, not visible everywhere](../../../assets/learning/replication-lag.svg)
+
+[Static view](../../../assets/learning/replication-lag-still.svg)
+
+
 An index trades additional storage and write work for cheaper reads. A B-tree narrows a key range; it does not make any arbitrary filter O(log n). A composite `(owner_id,created_at,id)` index serves the query above; query predicates and ordering determine which part is usable.
 
 Transactions group changes into a unit with a chosen isolation level. A transaction alone does not imply that two concurrent read-then-write flows cannot oversell. Use an atomic conditional update, an appropriate lock, or serializable isolation with retries. Explain the invariant: available stock never becomes negative.
@@ -33,6 +53,11 @@ SQL is a natural start for relational integrity and changing queries. DynamoDB f
 **Implement:** compare a query plan before/after an index and measure write cost. **Test:** oversell with concurrent buyers. **Further:** explain why adding a cache does not repair the transaction.
 
 ## 4 · Caching and stampedes
+
+![Expiry jitter spreads the refresh wave](../../../assets/learning/cache-expiry.svg)
+
+[Static view](../../../assets/learning/cache-expiry-still.svg)
+
 
 Cache-aside reads the cache, reads the database on a miss, then stores the result. This saves repeated work while introducing stale data and another failure mode. Specify a staleness tolerance and TTL. If all clients miss a hot key at once, they can all load the database.
 
@@ -47,6 +72,15 @@ Single-flight lets same-key requests in a process await one in-flight load. Acro
 
 ## 5 · Queues, backpressure, and bounded work
 
+![A buffer is a reservoir, not capacity](../../../assets/learning/backpressure.svg)
+
+[Static view](../../../assets/learning/backpressure-still.svg)
+
+![Store burst credit, refill over time](../../../assets/learning/token-bucket.svg)
+
+[Static view](../../../assets/learning/token-bucket-still.svg)
+
+
 A queue absorbs a burst and separates request acceptance from completion. It does not manufacture processing capacity. If 500 jobs/s arrive and workers finish 300/s, backlog grows 200/s: 12,000 jobs in one minute. Once arrivals stop, draining that backlog at 300/s takes 40 seconds, ignoring variance and retries.
 
 ![worker slots: mechanism and changing state](../../../assets/learning/worker-slots.svg)
@@ -58,6 +92,11 @@ Bound concurrent work and choose a full policy: reject, delay, or degrade. Monit
 **Implement:** the [AWS queue lab](../aws/labs/job-pipeline/README.md). **Test:** poison jobs retry and move to a dead-letter queue. **Further:** set admission based on an acceptable waiting-time budget rather than an arbitrary queue size.
 
 ## 6 · Idempotency and delivery guarantees
+
+![Close the commit-to-publish gap](../../../assets/learning/transaction-outbox.svg)
+
+[Static view](../../../assets/learning/transaction-outbox-still.svg)
+
 
 A caller times out. The server may have committed. Retrying therefore risks duplicate effects. An idempotency key names the logical operation, and a payload digest detects reuse with different input. The deduplication record and effect must be atomic if the guarantee relies on both.
 
@@ -73,6 +112,11 @@ An outbox transaction removes the gap between a business write and recording the
 
 ## 7 · Scaling, partitioning, and consistency
 
+![Route around a hot key](../../../assets/learning/partition-skew.svg)
+
+[Static view](../../../assets/learning/partition-skew-still.svg)
+
+
 First measure the bottleneck. Improve a query before adding a replica; add replicas before partitioning only when that matches the load. Sharding divides ownership but makes cross-shard joins, rebalancing, and transactions harder. Hashing keys does not eliminate hot-key traffic. Partitioning by tenant can isolate ownership while creating large-tenant hotspots.
 
 Availability-zone redundancy and regional recovery solve different failure scopes. Define RPO (tolerable data loss) and RTO (tolerable recovery time). Async replication can lose acknowledged writes during failover. “Multi-region” is not itself a consistency policy.
@@ -80,6 +124,15 @@ Availability-zone redundancy and regional recovery solve different failure scope
 **Implement:** partition a synthetic workload by tenant and graph the largest partition. **Test:** route 80% of requests to one tenant. **Further:** compare tenant-specific capacity with salting and the read fan-out it creates.
 
 ## 8 · Reliability and observability
+
+![A circuit opens, then probes recovery](../../../assets/learning/circuit-breaker.svg)
+
+[Static view](../../../assets/learning/circuit-breaker-still.svg)
+
+![Contain the slow neighbor](../../../assets/learning/bulkhead.svg)
+
+[Static view](../../../assets/learning/bulkhead-still.svg)
+
 
 Choose the user outcome: successful eligible requests within 500 ms. At 99.9%, the budget is 0.1% of eligible requests. With one million requests, 1,000 can be bad. Do not convert this directly into outage minutes under variable traffic.
 
@@ -99,6 +152,11 @@ Protect session credentials, consider CSRF for cookie-based authenticated mutati
 
 ## 10 · Deployment and migration
 
+![Move admissions, drain existing work](../../../assets/learning/traffic-shift.svg)
+
+[Static view](../../../assets/learning/traffic-shift-still.svg)
+
+
 Separate deploy from release. Expand a schema so old and new code both work; deploy compatible writers/readers; backfill with a checkpoint; reconcile; shift reads; remove old fields only after all clients migrate. Dual writes without a consistency mechanism create divergence.
 
 ![Migration: expand, move, verify, and contract](../../../assets/diagrams/migration-phases.svg)
@@ -117,6 +175,11 @@ Build an evaluation set with task success, unsupported claims, authorization lea
 **Implement:** a fixed test set containing irrelevant, conflicting, and adversarial documents. **Further:** identify which failures are retrieval, generation, or product-policy failures and how you would measure them.
 
 ## 12 · Cost is a design constraint
+
+![Lease connections within a fixed budget](../../../assets/learning/connection-pool.svg)
+
+[Static view](../../../assets/learning/connection-pool-still.svg)
+
 
 Estimate request count, compute duration, storage growth, replication, and egress. Separate steady-state and migration costs. A cheaper service per request may increase engineering effort or operational risk. Use current regional pricing before deploying; examples here use workload arithmetic, not invented dollar prices.
 

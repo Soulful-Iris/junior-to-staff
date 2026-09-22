@@ -229,3 +229,20 @@ security material here is the product-facing slice; the general case is
 **11 · Security**.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Separate retrieval permission from model output
+
+```mermaid
+flowchart TD
+  User["Authenticated task"] --> Retrieve["Permission-scoped retrieval"]
+  Docs[("Documents + access policy")] --> Retrieve
+  Retrieve --> Model["Model: untrusted candidate"]
+  Model --> Validate["Schema and policy checks"]
+  Validate --> Answer["Answer + source evidence"]
+  Model --> ToolGate["Tool authorization boundary"]
+  ToolGate --> Tools["Narrow allowed actions"]
+  Cases["Fixed evaluation cases"] --> Evaluate["Quality, leakage, cost, latency"]
+  Answer --> Evaluate
+```
+
+**Redraw challenge:** Draw the boundary that still holds if retrieved text asks the model to reveal another tenant’s data.

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Contain the slow neighbor</title>
+<desc id="desc">ONE SHARED POOL SEPARATE RESOURCE BUDGETS slow A consumes all slots slow A      healthy B A bulkhead reserves capacity so one slow dependency cannot occupy every slot. Isolation trades some utilization for containment. Shared databases and CPU can still couple the pools. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">CONTAIN THE SLOW NEIGHBOR</text>
+<text x="40" y="73" font-size="11" fill="#c2703d" text-anchor="start">ONE SHARED POOL</text>
+<text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">SEPARATE RESOURCE BUDGETS</text>
+<rect x="64" y="117" width="260" height="185" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<circle cx="87" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="146" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="205" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="264" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="87" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="146" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="205" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="264" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="87" cy="267" r="14" fill="#c2703d">
+</circle>
+<circle cx="146" cy="267" r="14" fill="#c2703d">
+</circle>
+<circle cx="205" cy="267" r="14" fill="#c2703d">
+</circle>
+<circle cx="264" cy="267" r="14" fill="#c2703d">
+</circle>
+<text x="65" y="329" font-size="16" fill="#c2703d" text-anchor="start">slow A consumes all slots</text>
+<rect x="449" y="117" width="260" height="185" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<path d="M579 117 V302" stroke="#1f2b24" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="472" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="531" cy="143" r="14" fill="#c2703d">
+</circle>
+<circle cx="590" cy="143" r="14" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="143" r="14" fill="#2f6f4e">
+</circle>
+<circle cx="472" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="531" cy="205" r="14" fill="#c2703d">
+</circle>
+<circle cx="590" cy="205" r="14" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="205" r="14" fill="#2f6f4e">
+</circle>
+<circle cx="472" cy="267" r="14" fill="#c2703d">
+</circle>
+<circle cx="531" cy="267" r="14" fill="#c2703d">
+</circle>
+<circle cx="590" cy="267" r="14" fill="#2f6f4e">
+</circle>
+<circle cx="649" cy="267" r="14" fill="#2f6f4e">
+</circle>
+<text x="450" y="329" font-size="16" fill="#2f6f4e" text-anchor="start">slow A      healthy B</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A bulkhead reserves capacity so one slow dependency cannot occupy every slot.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Isolation trades some utilization for containment. Shared databases and CPU can still couple the pools.</text>
+</svg>

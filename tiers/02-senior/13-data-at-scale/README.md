@@ -298,3 +298,24 @@ shedding and backups you have actually restored live in
 [09 · Reliability](../09-reliability/).
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Protect the database before adding replicas
+
+```mermaid
+flowchart TD
+  Apps["API replicas"] --> Pool["Per-replica connection pool"]
+  Pool --> Primary[("Primary: writes and fresh reads")]
+  Apps --> Cache["Cache: tolerated staleness"]
+  Cache -->|"miss within budget"| Pool
+  Primary -->|"asynchronous log"| Replica[("Read replica")]
+  Apps -->|"stale reads acceptable"| Replica
+  Pool -->|"acquire timeout"| Shed["Shed load"]
+  Cache -->|"outage"| Gate["Bounded bypass"]
+  Gate --> Pool
+```
+
+**Redraw challenge:** Add ten API replicas. Recalculate the total connection budget before celebrating more capacity.
+
+![Protect the database before adding replicas: mechanism in motion](../../../assets/learning/connection-pool.svg)
+
+[Static view](../../../assets/learning/connection-pool-still.svg)

@@ -281,3 +281,21 @@ real-user monitoring have their own tooling. Audit logs are a security
 artifact, not an observability signal.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Connect evidence without exploding cardinality
+
+```mermaid
+flowchart TD
+  Request["Request / job ID"] --> API["API span"]
+  API --> DB["Database span"]
+  API --> Queue["Producer span"]
+  Queue --> Worker["Worker span link"]
+  API --> Logs["Structured logs: IDs allowed"]
+  Worker --> Logs
+  API --> Metrics["Metrics: bounded dimensions"]
+  Worker --> Metrics
+  DB --> Trace["Sampled trace"]
+  Metrics --> Alert["User impact / completion SLO"]
+```
+
+**Redraw challenge:** A 202 response succeeds but no job completes. Which signal detects the user-visible failure?

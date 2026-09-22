@@ -295,3 +295,24 @@ autoscaling, multi-region failover and incident response are out; chaos
 engineering appears only as this section's game day.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Contain a slow dependency
+
+```mermaid
+flowchart TD
+  In["Incoming demand"] --> Admit["Admission limit"]
+  Admit --> A["Pool A: critical work"]
+  Admit --> B["Pool B: optional work"]
+  A --> Core[("Core data")]
+  B --> Breaker["Circuit breaker"]
+  Breaker --> Slow["Slow dependency"]
+  Slow -->|"failure signal"| Breaker
+  Breaker -->|"open"| Fallback["Explicit degraded response"]
+  Admit -->|"full"| Reject["Reject / defer"]
+```
+
+**Redraw challenge:** Trace why a timeout alone cannot protect an unbounded shared pool.
+
+![Contain a slow dependency: mechanism in motion](../../../assets/learning/bulkhead.svg)
+
+[Static view](../../../assets/learning/bulkhead-still.svg)

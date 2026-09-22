@@ -15,6 +15,14 @@ Trie example: `a → p → p* → l → e*`. Stars mark complete words; `ap` has
 
 **The idea:** Backtracking tracks the current path, then undoes it. A trie shares prefixes but marks complete words explicitly.
 
+![Choose, explore, undo, try the next branch](../../../../assets/learning/backtracking.svg)
+
+[Static view](../../../../assets/learning/backtracking-still.svg)
+
+![One prefix opens several completions](../../../../assets/learning/trie-prefix.svg)
+
+[Static view](../../../../assets/learning/trie-prefix-still.svg)
+
 ## Your 45-minute session
 
 1. **5 min:** draw one example and a simple solution.

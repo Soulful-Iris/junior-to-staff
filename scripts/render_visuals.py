@@ -296,6 +296,200 @@ def browser_race():
     s+=text(308,205,'arrives first',14,GREEN)+text(496,108,'arrives last',14,ORANGE)
     return s+footer('Commit a response only if its generation still matches the current request.','Aborting obsolete work can save resources; the generation guard protects the UI either way.')
 
+def expiry():
+    s=heading(40,72,'SAME EXPIRY → ONE SPIKE',ORANGE)+heading(425,72,'JITTER → SPREAD REFRESH WORK',GREEN)
+    for off in [0,385]:
+        for i in range(6):
+            y=105+i*32;end=260 if not off else 140+i*30
+            s+=text(40+off,y+5,'k'+str(i+1),12,MUTED)
+            s+=path(f'M{75+off} {y} H{end+off}',GRAY,7)
+            s+=dot(end+off,y,4,ORANGE if not off else GREEN)
+        s+=path(f'M{75+off} 310 H{335+off}',GRAY,1,True)
+        if not off:p=f'M{75+off} 304 H{239+off} Q{256+off} 218 {263+off} 300 H{332+off}'
+        else:p=f'M{75+off} 304 Q{140+off} 304 {155+off} 293 T{205+off} 293 T{255+off} 293 T{330+off} 304'
+        s+=path(p,ORANGE if not off else GREEN,2)
+        s+=path(f'M{75+off} 88 V316',INK,1,body=tween('d',[(0,f'M{75+off} 88 V316'),(1,f'M{335+off} 88 V316')]))
+    return s+footer('Equal TTLs synchronize misses. Randomized expiry spreads their arrival times.','Jitter does not reduce total refresh work. Pair it with coalescing, stale policy, and a load budget.')
+
+def backpressure():
+    s=heading(40,73,'UNBOUNDED BUFFER',ORANGE)+heading(425,73,'BOUNDED ADMISSION',GREEN)
+    for off in [0,385]:
+        ident='reservoir'+str(off)+('s' if STILL else 'm')
+        s+=node('defs',{},node('clipPath',{'id':ident},rect(95+off,140,165,156,GRAY,BG)))
+        h=148 if not off else 70
+        waves=node('path',{'d':f'M{80+off} 0 Q{120+off} -10 {160+off} 0 T{240+off} 0 T{300+off} 0 V180 H{80+off} Z','fill':ORANGE if not off else GREEN,'transform':f'translate(0 {296-h})'},'' if STILL else node('animateTransform',{'attributeName':'transform','type':'translate','values':f'0 296;0 {296-h};0 {296-h};0 296','keyTimes':'0;.65;.93;1','dur':f'{DURATION}s','repeatCount':'indefinite'}))
+        s+=node('g',{'clip-path':f'url(#{ident})'},waves)+rect(95+off,140,165,156,GRAY,'none')
+        s+=path(f'M{177+off} 100 V132',GRAY,2,True)+path(f'M{177+off} 298 V330',GREEN,2,True)
+        for i in range(3):s+=pulse(f'M{147+off+i*30} 93 V137',ORANGE if not off else GREEN,i*.12,.3+i*.12)
+        s+=text(95+off,126,'arrival > service',15)+text(100+off,316,'queue',13,MUTED)
+        if off:s+=path(f'M{260+off} 176 H{325+off} V116',ORANGE,2,True)+text(657,100,'429 / 503',12,ORANGE)
+        else:s+=text(42,332,'memory and wait time grow',15,ORANGE)
+    return s+footer('A queue stores a rate mismatch. A bound forces an explicit overload response.','Choose reject, defer, or shed. Watch age as well as depth; autoscaling cannot erase startup delay.')
+
+def breaker():
+    s=heading(40,74,'STOP SPENDING REQUESTS ON A FAILING DEPENDENCY')
+    s+=box(40,137,136,51,'caller')+box(562,137,155,51,'dependency')
+    s+=path('M176 162 H330 M410 162 H562',GRAY,2)
+    s+=dot(330,162,5,INK)+dot(410,162,5,INK)
+    s+=node('g',{'transform':'rotate(-42 330 162)'},path('M330 162 H410',ORANGE,4)+(node('animateTransform',{'attributeName':'transform','type':'rotate','values':'0 330 162;0 330 162;-42 330 162;-42 330 162;0 330 162;0 330 162','keyTimes':'0;.2;.3;.62;.72;1','dur':f'{DURATION}s','repeatCount':'indefinite'}) if not STILL else ''))
+    s+=pulse('M176 162 H562',ORANGE,.02,.17)
+    for i in range(3):s+=pulse('M176 162 H315 Q325 162 325 190 V259 H176',ORANGE,.32+i*.06,.51+i*.06)
+    s+=path('M315 162 Q325 162 325 190 V259 H176',GRAY,1.5,True)+text(45,282,'fail fast while open',16,ORANGE)
+    s+=pulse('M176 162 H562',GREEN,.73,.85)+pulse('M562 177 H420',GREEN,.86,.96)
+    s+=text(410,246,'one probe after cooldown',16,GREEN)
+    s+=text(43,328,'closed  →  open  →  half-open probe  →  closed if healthy',18)
+    return s+footer('An open circuit blocks normal calls. A bounded probe tests recovery.','Thresholds, cooldown, and fallback are policy. A failed probe reopens the circuit.')
+
+def replication():
+    s=heading(40,74,'ASYNC REPLICA · A WRITE ACK DOES NOT MEAN EVERY READER HAS IT')
+    for y,label,last in [(123,'PRIMARY',8),(247,'REPLICA',7)]:
+        s+=heading(40,y,label,GREEN if last==8 else ORANGE)
+        for j in range(5):s+=box(200+j*91,y-25,75,42,'v'+str(4+j),GRAY,BG)
+    s+=rect(561,95,76,48,GREEN,'none')+text(40,157,'acknowledge v8',15,GREEN)
+    s+=path('M600 140 C710 145 710 220 600 222',GREEN,2,True)+pulse('M600 140 C710 145 710 220 600 222',GREEN,.4,.88,6)
+    s+=node('g',{},rect(562,220,75,42,GRAY,BG)+text(599,247,'pending',12,ORANGE,'middle')+tween('opacity',[(0,1),(.86,1),(.9,0),(1,0)]))
+    s+=path('M300 292 H518 V270',ORANGE,1.5,True)+pulse('M300 292 H518 V270',ORANGE,.15,.35)
+    s+=text(42,311,'immediate read can see v7',18,ORANGE)
+    return s+footer('Replication catches up later; route freshness-sensitive reads deliberately.','Options include primary reads or a version watermark. Availability and latency tradeoffs remain.')
+
+def outbox():
+    s=heading(40,73,'ONE DATABASE TRANSACTION · TWO RECORDS')
+    s+=rect(55,98,320,206,GREEN,'none')+box(85,121,255,49,'business row')+box(85,231,255,49,'outbox event')
+    s+=path('M211 170 V231',GRAY,2,True)+pulse('M211 170 V231',GREEN,.08,.28)
+    s+=path('M60 105 V296 H365 V105 Z',GREEN,3,body=tween('stroke-dashoffset',[(0,1020),(.3,0),(1,0)]),dash='1020')
+    s+=box(440,224,112,49,'relay')+box(615,224,108,49,'broker')
+    s+=path('M340 255 H440 M552 249 H615',GRAY,2,True)+pulse('M340 255 H440',GREEN,.34,.5)+pulse('M552 249 H615',GREEN,.51,.66)
+    s+=path('M670 273 V315 H493 V278',ORANGE,1.5,True)+pulse('M493 249 H615',ORANGE,.77,.93)
+    s+=text(427,125,'crash after publish?',16,ORANGE)+text(427,153,'relay may publish again',14,MUTED)
+    return s+footer('Commit the business change and its event together; publish after commit.','The relay can duplicate events. Consumers still need idempotency; the outbox closes the lost-event gap.')
+
+def deadline():
+    s=heading(40,73,'PARENT DEADLINE 300 ms · PASS REMAINING TIME TO CHILDREN')
+    for y,label,start,w,color in [(125,'request',0,600,GREEN),(201,'auth',0,100,GRAY),(277,'database',100,500,ORANGE)]:
+        s+=text(40,y,label,15,color if color!=GRAY else MUTED)+rect(138+start,y-24,w,34,GRAY,BG)
+        stops=[(0,0),(.14,w),(1,w)] if label=='auth' else [(0,0),(.14,0),(.83,w),(1,w)] if label=='database' else [(0,0),(.83,w),(1,w)]
+        s+=rect(138+start,y-24,w,34,color,color,tween('width',stops),2)
+    s+=path('M738 91 V318',ORANGE,2)+text(738,337,'300 ms',13,ORANGE,'end')
+    s+=text(245,183,'auth spent 50 ms',14,MUTED)+text(340,257,'at most 250 ms remain',15,ORANGE)
+    return s+footer('A child inherits the remaining budget, not a fresh full timeout.','Reserve reply/cleanup time too. Cancellation is cooperative; downstream work may outlive the caller.')
+
+def token_bucket():
+    s=heading(40,74,'BURST CAPACITY AND REFILL RATE ARE DIFFERENT LIMITS')
+    s+=node('circle',{'cx':153,'cy':185,'r':67,'fill':'none','stroke':GRAY,'stroke-width':12})
+    s+=node('circle',{'cx':153,'cy':185,'r':67,'fill':'none','stroke':GREEN,'stroke-width':12,'stroke-dasharray':'421','stroke-dashoffset':105,'transform':'rotate(-90 153 185)'},tween('stroke-dashoffset',[(0,421),(.65,0),(.93,0),(1,421)]))
+    s+=text(153,183,'refill',19,GREEN,'middle')+text(153,207,'tokens / sec',13,MUTED,'middle')
+    s+=box(310,115,166,143,'',GRAY,BG)+heading(320,102,'BUCKET CAPACITY: 4')
+    for j in range(4):
+        s+=dot(336+j*37,181,11,GREEN)
+        s+=pulse(f'M{336+j*37} 181 Q{510+j*15} 181 624 259',GREEN,.12+j*.09,.37+j*.09,7)
+    s+=box(546,270,168,46,'admitted requests')+path('M476 127 H624 V198',ORANGE,1.5,True)
+    s+=text(504,105,'no token → reject',15,ORANGE)+pulse('M476 127 H624 V198',ORANGE,.72,.94)
+    return s+footer('A token pays for admission. A burst can use stored tokens, then refill limits arrivals.','Ghost tokens mark bucket slots. Distributed enforcement needs atomic accounting and a clock policy.')
+
+def pool():
+    s=heading(40,74,'MANY REQUESTS SHARE A SMALL CONNECTION BUDGET')
+    for j in range(6):s+=box(40,95+j*37,118,29,'request '+str(j+1),GRAY,BG)
+    for j in range(2):
+        y=150+j*111;s+=box(309,y-25,150,50,'connection '+str(j+1))+path(f'M459 {y} L635 207',GRAY,2,True)
+        for b in range(3):
+            r=j+b*2;p=f'M158 {109+r*37} L309 {y} H459 L635 207';s+=pulse(p,GREEN,.02+b*.3,.25+b*.3,5)
+    s+=box(635,171,84,70,'DB')+text(222,324,'acquire → use → release in finally',18,GREEN)
+    return s+footer('Bound connections and the wait to acquire one. Always release a checked-out resource.','Per-process pools add up across replicas; pool size × replica count must fit the database budget.')
+
+def traffic_shift():
+    s=heading(40,73,'SHIFT TRAFFIC ONLY AFTER THE NEW FLEET IS READY')
+    s+=box(45,158,147,58,'router')+box(510,103,194,58,'blue · old')+box(510,249,194,58,'green · new')
+    top='M192 180 C350 180 340 132 510 132';bottom='M192 196 C350 196 340 278 510 278'
+    s+=path(top,GRAY,1)+path(bottom,GRAY,1)
+    s+=path(top,ORANGE,6,body=tween('stroke-width',[(0,8),(.2,8),(.8,1),(1,1)]))
+    s+=path(bottom,GREEN,6,body=tween('stroke-width',[(0,1),(.2,1),(.8,8),(1,8)]))
+    for i in range(3):s+=pulse(top,ORANGE,.03+i*.11,.25+i*.11)+pulse(bottom,GREEN,.5+i*.1,.73+i*.1)
+    s+=text(294,105,'drain old work',16,ORANGE)+text(289,325,'increase new admissions',16,GREEN)
+    return s+footer('Traffic share moves from blue to green; existing requests still need time to finish.','Health checks are necessary, not sufficient. Observe errors and latency; retain a rollback route.')
+
+def waterfall():
+    s=heading(40,74,'SERIAL: 600 ms',ORANGE)+heading(425,74,'INDEPENDENT PARALLEL: 200 ms',GREEN)
+    for off in [0,385]:
+        ident='sweep'+str(off)+('s' if STILL else 'm')
+        s+=node('defs',{},node('clipPath',{'id':ident},rect(90+off,93,260,225,GRAY,BG,tween('width',[(0,0),(.85,260),(1,260)]))))
+        bars=''
+        for j,label in enumerate(['A','B','C']):
+            y=123+j*65;s+=text(40+off,y+5,label,15)
+            x=90+off+(j*80 if not off else 0);bars+=rect(x,y-17,80,34,GREEN if off else ORANGE,PALE)
+        s+=node('g',{'clip-path':f'url(#{ident})'},bars)
+        s+=path(f'M{90+off} 308 H{350+off}',GRAY,1.5,True)+text(90+off,334,'time →',12,MUTED)
+    return s+footer('Start independent I/O together; total wait approaches the slowest call.','Dependent operations stay ordered. Bound fan-out and handle partial failure; concurrency has a cost.')
+
+def heap_sift():
+    s=heading(40,73,'MIN HEAP · AFTER REMOVING THE ROOT, REPAIR ONE BRANCH')
+    points=[(375,112),(220,213),(530,213),(125,306),(310,306)]
+    for a,b in [(0,1),(0,2),(1,3),(1,4)]:s+=path(f'M{points[a][0]} {points[a][1]} L{points[b][0]} {points[b][1]}',GRAY,2)
+    for x,y in points:s+=node('circle',{'cx':x,'cy':y,'r':25,'fill':BG,'stroke':GRAY,'stroke-width':1.5})
+    s+=moving(dot(0,0,22,ORANGE)+text(0,7,'9',21,BG,'middle'),'M375 112 L220 213 L125 306',[(0,0),(.12,0),(.44,.5828),(.53,.5828),(.84,1),(1,1)])
+    s+=moving(text(0,7,'4',21,GREEN,'middle'),'M220 213 L375 112',[(0,0),(.12,0),(.44,1),(1,1)])
+    s+=moving(text(0,7,'7',21,GREEN,'middle'),'M125 306 L220 213',[(0,0),(.53,0),(.84,1),(1,1)])
+    s+=text(530,220,'6',21,INK,'middle')+text(310,313,'8',21,INK,'middle')
+    if STILL:s+=text(375,119,'4',21,GREEN,'middle')+text(220,220,'7',21,GREEN,'middle')+text(125,313,'9',21,ORANGE,'middle')
+    return s+footer('Swap with the smaller child until the parent is no larger than its children.','One path through a complete binary tree: O(log n). A heap orders parents, not all siblings.')
+
+def trie():
+    s=heading(40,74,'PREFIX "ca" · SHARED CHARACTERS SHARE A PATH')
+    pts=[(90,180,'root'),(235,180,'c'),(385,180,'a'),(560,110,'r'),(560,263,'t'),(685,110,'d')]
+    for a,b in [(0,1),(1,2),(2,3),(2,4),(3,5)]:
+        x,y,_=pts[a];xx,yy,_=pts[b];s+=path(f'M{x} {y} L{xx} {yy}',GRAY,2)
+    s+=path('M90 180 H385',GREEN,4,body=tween('stroke-dashoffset',[(0,295),(.4,0),(1,0)]),dash='295')
+    for x,y,label in pts:s+=dot(x,y,24,GREEN if label in ['c','a'] else GRAY)+text(x,y+5,label,15,BG if label in ['c','a'] else INK,'middle')
+    s+=pulse('M385 180 L560 110 H685',GREEN,.42,.85)+pulse('M385 180 L560 263',ORANGE,.42,.85)
+    s+=text(600,263,'cat',16,ORANGE)+text(620,80,'car / card',16,GREEN)
+    return s+footer('Walk the prefix once, then explore descendants for matching words.','Mark word endings explicitly: car is a word even though card continues. Work includes output size.')
+
+def backtrack():
+    s=heading(40,74,'SUBSETS OF [A, B] · ONE WORKING PATH, COPIED AT LEAVES')
+    pts=[(380,107,'[]'),(215,204,'[A]'),(550,204,'[]'),(100,300,'[A,B]'),(295,300,'[A]'),(475,300,'[B]'),(660,300,'[]')]
+    for a,b in [(0,1),(0,2),(1,3),(1,4),(2,5),(2,6)]:
+        x,y,_=pts[a];xx,yy,_=pts[b];s+=path(f'M{x} {y} L{xx} {yy}',GRAY,1.5)
+    for x,y,label in pts:s+=box(x-40,y-17,80,34,label,GRAY,BG)
+    route='M380 107 L215 204 L100 300 L215 204 L295 300 L215 204 L380 107 L550 204 L475 300 L550 204 L660 300 L550 204 L380 107'
+    s+=pulse(route,GREEN,0,1,6)+text(55,117,'down: choose',14,GREEN)+text(55,146,'up: undo',14,ORANGE)
+    return s+footer('Depth-first traversal returns to a choice point before trying the next branch.','Append → recurse → pop. Copy at a leaf; otherwise every saved answer may alias the same list.')
+
+def intervals():
+    s=heading(40,74,'SORT BY START · MERGE OVERLAPPING CLOSED INTERVALS')
+    for j,(lo,hi) in enumerate([(1,4),(3,6),(8,10)]):
+        y=121+j*57;x=85+lo*52;w=(hi-lo)*52
+        s+=path(f'M{x} {y} H{x+w}',GREEN if j<2 else ORANGE,12)+text(x,y-16,f'[{lo}, {hi}]',14)
+    s+=path('M130 306 H690',GRAY,1.5,True)
+    s+=rect(137,276,260,21,GREEN,PALE,tween('width',[(0,156),(.2,156),(.65,260),(1,260)]),2)+rect(501,276,104,21,ORANGE,PALE)
+    s+=path('M293 134 V271',GRAY,1,True)+path('M397 188 V271',GRAY,1,True)
+    s+=text(167,335,'[1, 6]',16,GREEN)+text(521,335,'[8, 10]',16,ORANGE)
+    return s+footer('Extend the current end to max(end, next.end); a gap starts another interval.','O(n log n) for sorting, O(n) for the scan. Half-open intervals need an explicit touching policy.')
+
+def index_tree():
+    s=heading(40,74,'INDEX SEEK · PRUNE RANGES BEFORE READING ROWS')
+    s+=box(285,92,185,45,'separator: 40')
+    for x,label in [(75,'keys < 40'),(495,'keys ≥ 40')]:s+=box(x,192,185,45,label,GRAY,BG)
+    s+=path('M335 137 L167 192 M422 137 L587 192',GRAY,2)
+    for i in range(6):
+        x=52+i*116;s+=box(x,290,98,36,str(i*10)+'–'+str(i*10+9),GRAY,BG)
+        s+=path(f'M{167 if i<4 else 587} 237 L{x+49} 290',GRAY)
+    s+=pulse('M377 112 L587 213 L565 307',GREEN,.05,.78,6)
+    s+=text(495,160,'seek key 44',18,GREEN)
+    return s+footer('Separators rule out unrelated ranges; the leaf locates the matching entry.','Schematic range tree, not a specific engine page layout. Index order must match the query shape.')
+
+def bulkhead():
+    s=heading(40,73,'ONE SHARED POOL',ORANGE)+heading(425,73,'SEPARATE RESOURCE BUDGETS',GREEN)
+    for off in [0,385]:
+        s+=rect(64+off,117,260,185,GRAY,BG)
+        if off:s+=path(f'M{194+off} 117 V302',INK,3)
+        for j in range(12):
+            x=87+off+(j%4)*59;y=143+(j//4)*62
+            c=ORANGE if not off or j%4<2 else GREEN
+            s+=dot(x,y,14,c, tween('r',[(0,5),(.3,14),(.9,14),(1,5)]))
+        s+=text(65+off,329,'slow A consumes all slots' if not off else 'slow A      healthy B',16,ORANGE if not off else GREEN)
+    return s+footer('A bulkhead reserves capacity so one slow dependency cannot occupy every slot.','Isolation trades some utilization for containment. Shared databases and CPU can still couple the pools.')
+
+EXTRA_SPECS=[('cache-expiry','Expiry jitter spreads the refresh wave',expiry,7),('backpressure','A buffer is a reservoir, not capacity',backpressure,7),('circuit-breaker','A circuit opens, then probes recovery',breaker,8),('replication-lag','Acknowledged here, not visible everywhere',replication,7),('transaction-outbox','Close the commit-to-publish gap',outbox,7),('deadline-budget','Children spend the parents remaining budget',deadline,6),('token-bucket','Store burst credit, refill over time',token_bucket,7),('connection-pool','Lease connections within a fixed budget',pool,8),('traffic-shift','Move admissions, drain existing work',traffic_shift,7),('io-waterfall','Independent work can share the wait',waterfall,6),('heap-sift','Repair the heap along one branch',heap_sift,7),('trie-prefix','One prefix opens several completions',trie,6),('backtracking','Choose, explore, undo, try the next branch',backtrack,10),('merge-intervals','Overlap extends the current interval',intervals,6),('index-seek','A separator eliminates a whole range',index_tree,5),('bulkhead','Contain the slow neighbor',bulkhead,6)]
+
 SPECS=[
 ('map-lookup','Remember the complement',maps,8),('window-moves','A window that never moves backward',window,7),
 ('prefix-counts','Two boundaries, one prefix value',prefix,5),('binary-halving','Keep the first qualifying index',binary,7),
@@ -305,7 +499,7 @@ SPECS=[
 ('rollout-capacity','Keep capacity above incoming demand',capacity,7),('version-projection','A late event meets a version guard',status,7),
 ('partition-skew','Route around a hot key',hotkeys,6),('worker-slots','Admission follows completion',workers,9),
 ('cache-coalescing','One load, six waiting callers',cache,6),('conditional-result','Duplicate delivery, one stored result',idem,7),
-('direct-upload','Separate permission from bytes',upload,7),('browser-race','The older response arrives last',browser_race,7)]
+('direct-upload','Separate permission from bytes',upload,7),('browser-race','The older response arrives last',browser_race,7)] + EXTRA_SPECS
 
 def document(title,body,description):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc"><title id="title">{escape(title)}</title><desc id="desc">{escape(description)}</desc><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0 L7 3.5 L0 7" fill="{MUTED}"/></marker></defs><style>text{{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}}.still{{display:none}}@media(prefers-reduced-motion:reduce){{.moving{{display:none}}.still{{display:inline}}}}@media print{{.moving{{display:none}}.still{{display:inline}}}}</style><rect width="760" height="420" rx="10" fill="{BG}"/>{text(32,35,title.upper(),16,MUTED)}{body}</svg>'''
@@ -320,9 +514,19 @@ def build():
         import re
         labels=' '.join(re.findall(r'<text[^>]*>([^<]+)',static))
         desc=labels+' Motion timing is illustrative, not a production measurement. The loop restart is not a system event.'
-        (OUT/(key+'.svg')).write_text(document(title,'<g class="moving">'+animated+'</g><g class="still">'+static+'</g>',desc)+'\n')
-        (OUT/(key+'-still.svg')).write_text(document(title,static,desc)+'\n')
+        (OUT/(key+'.svg')).write_text(document(title,'<g class="moving">'+animated+'</g><g class="still">'+static+'</g>',desc).replace('><','>\n<')+'\n')
+        (OUT/(key+'-still.svg')).write_text(document(title,static,desc).replace('><','>\n<')+'\n')
         manifest.append({'key':key,'title':title,'duration_seconds':duration,'motion':'continuous geometry and causal path traversal'})
     (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    gallery='# Motion gallery\n\nPersistent diagrams with purposeful motion. Every animation has a readable static alternative. Timing is illustrative.\n\n[Learning paths](../../README.md) · [Draw the architecture](../../paths/interviews/architecture/whiteboard.md) · [Coding route](../../paths/interviews/coding/README.md)\n\n'
+    gallery+=' | Concept | Motion | Static |\n|---|---|---|\n'
+    for item in manifest:
+        k=item['key']; title=item['title']
+        gallery+=f'| {title} | [Play]({k}.svg) | [Still]({k}-still.svg) |\n'
+    for item in manifest:
+        k=item['key']; title=item['title']
+        gallery+=f'\n## {title}\n\n![{title}]({k}.svg)\n\n[Open animation]({k}.svg) · [Static diagram]({k}-still.svg)\n'
+    (OUT/'README.md').write_text(gallery)
+
     print(f'Built {len(SPECS)} motion studies and {len(SPECS)} readable static alternatives.')
 if __name__=='__main__':build()

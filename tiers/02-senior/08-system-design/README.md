@@ -203,3 +203,26 @@ queues, sharding, consistency — are [13 · Data at scale](../13-data-at-scale/
 this section is the thinking that decides which of them you need.
 
 [Choose your learning path](../../../paths/README.md) · [Interview applications](../../../paths/interviews/README.md)
+
+## Draw it from memory · Draw the request path and the work path
+
+```mermaid
+flowchart TD
+  Client["Client"] --> LB["Load balancer"]
+  LB --> A["API replica A"]
+  LB --> B["API replica B"]
+  A --> Cache["Cache: disposable copies"]
+  B --> Cache
+  A --> DB[("Database: source of truth")]
+  B --> DB
+  A --> Q["Durable queue"]
+  B --> Q
+  Q --> Worker["Bounded workers"]
+  Worker --> DB
+```
+
+**Redraw challenge:** Label each arrow with data, timeout, and retry owner. Remove the cache and predict the new bottleneck.
+
+![Draw the request path and the work path: mechanism in motion](../../../assets/learning/backpressure.svg)
+
+[Static view](../../../assets/learning/backpressure-still.svg)
