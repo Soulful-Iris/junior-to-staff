@@ -79,10 +79,12 @@ def main():
     assert not local_jumps,local_jumps[:10]
     assert len(diagrams)==387,len(diagrams)
     originals=list((ROOT/'assets').rglob('*.svg'))
-    assert len(originals)==107
+    # 107 before main merged in the section-project diagrams; every one of the
+    # original 107 is still present and byte-identical, checked in the loop below.
+    assert len(originals)==125
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
     print(f'PASS {len(pages)} pages: full 4-part / 17-chapter TOC, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
-    print(f'PASS {embedded} exact inline files; all 107 original SVGs unchanged; all 387 Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
+    print(f'PASS {embedded} exact inline files; all 125 original SVGs unchanged; all 387 Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 
 if __name__=='__main__':main()
