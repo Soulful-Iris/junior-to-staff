@@ -1,8 +1,48 @@
 # Coding interviews · start here
 
-**Use Python for steps 1–10. Use TypeScript for step 11.** Do these in order; one row is a topic, not a promise that mastery takes one sitting.
+> “I will give you a concrete input and a required output. Explain the contract,
+> show a simple correct approach, then improve it and respond when a constraint
+> changes.” That is the skill this route practices.
 
-## The route
+Start with one individual problem. Write the expected answer for its small
+example before opening the solution. Python is used for algorithms; TypeScript
+is used where browser state and asynchronous APIs are the problem.
+
+## 42 individual problems
+
+- [Foundations: maps, windows, ordered data, pointers, and trees](problems/foundations-index.md).
+- [Advanced structures and reasoning: graphs, caches, parsing, DP, streams, and synchronization](problems/advanced-index.md).
+
+Each page supplies its contract, worked reasoning, visual traces and changed
+requirements, reference implementation, and meaningful tests. Build your own
+solution first; passing the reference tests alone does not assess you. The short
+concept lessons below are prerequisite refreshers, not the full question bank.
+
+
+Follow the stages in order until you can explain and implement the prerequisite.
+Later stages broaden the bank; they are not a claim that every role asks every topic.
+
+| Stage | Problems | What the next stage relies on |
+|---|---|---|
+| 1. Scan and remember | 01–08: maps, windows, prefixes, arrays | State an invariant; separate input size from retained state |
+| 2. Order and boundaries | 09–13: intervals, binary and answer search | Choose closed/half-open semantics and prove each boundary update |
+| 3. Identity and recursion | 14–20: lists and trees | Preserve links; distinguish a returned value from accumulated results |
+| 4. Graphs and retained state | 21–30: scheduling, paths, heaps, caches, trie | Discovery/finality rules; bounded state; operation sequences |
+| 5. Search and recurrence | 31–36: backtracking and four DP exercises | Define a subproblem, dependencies, base cases and proof |
+| 6. Advanced follow-ups | 37–42: monotonic structures, parser, event time, median, queue | Derive changed invariants; choose by role and interview format |
+
+After stages 1–3, add the [importer debugging lab](labs/importer/README.md).
+After stage 4, add [TypeScript fan-out](labs/fan-out/README.md) and the
+[runnable full-stack editor](../full-stack/bookmark-editor/README.md).
+Infrastructure candidates should also implement the [bounded executor](labs/bounded-executor/README.md).
+Alternate familiar practice with [unfamiliar assessed sessions](../practice/README.md).
+
+To verify all supplied Python references without cross-importing their identically
+named modules, run `python scripts/check_curriculum.py --coding-only` from the
+repository root. Run `python scripts/check_curriculum.py` to include the local labs.
+These checks verify reference code; record your own independent attempts separately.
+
+## Concept refreshers
 
 | Step | Learn → implement | You can move on when… |
 |---|---|---|
@@ -21,7 +61,7 @@
 
 ## Start today
 
-Open [step 1](lessons/01-maps.md). Draw → code → test → explain. Reattempt a missed problem the next day before adding another topic.
+Open [Two sum](problems/01-two-sum/README.md). Clarify → trace → code → test → explain. Reattempt a missed problem the next day before adding another topic.
 
 **Junior:** correctness, tests, complexity. **Senior:** add changed constraints and practical integration. **Staff:** keep the same coding fluency; add API ownership, failure boundaries, and migration tradeoffs. These are practice targets, not company-wide leveling rules.
 

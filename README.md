@@ -52,7 +52,8 @@ every section follows.
 
 ## How to use the AI-assisted path
 
-1. **Read a section.** They are written to be read, not skimmed.
+1. **Start with the brief.** Restate the problem, expected result, and invariant
+   before opening the worked explanation.
 2. **Build the slice.** Each section adds one thing to the project you already
    have. Use Claude for it; the section tells you what to ask.
 3. **Run the checks.** Every section has a "how you would know it is wrong".
@@ -70,14 +71,15 @@ Longer version: [docs/HOW-TO-USE.md](docs/HOW-TO-USE.md).
 
 ## The projects, at three scales
 
-The code is the least important part of any of them. What you are practising is
-**deciding what would prove this**, organising the asks that get it built, and
-knowing what it would take to leave the thing running.
+The AI projects practice **deciding what would prove this**, organizing bounded
+implementation requests, and verifying the result. The interview path also
+requires independent coding and debugging. Each project begins with a concrete
+brief, expected behavior, and diagrams that change with follow-up questions.
 
 | scale | where | how many | size |
 |---|---|---|---|
-| **section projects** | `projects.md` beside each section | 5 per section | an afternoon. One section's skill, isolated. |
-| **act projects** | [acts/](acts/) | 5 per act | a weekend. Integrates a whole tier. Pick one of five. |
+| **section projects** | Short `projects.md` indexes linking individual pages | 25 across five supplied sections | One section's skill, isolated. |
+| **act projects** | [acts/](acts/) indexes and individual project pages | 15 across three acts | Integrates a whole tier. Pick one of five. |
 | **the spine** | [projects/](projects/) | 5 total | the whole guide. One system growing, if you prefer continuity to variety. |
 
 An **act** is a tier — junior, senior, staff. Three acts, five projects each at
@@ -119,7 +121,7 @@ whether it runs.
 |---|---|---|
 | 01 | [The change loop](tiers/01-junior/01-the-change-loop/) | how a change gets from an idea into running software, and why review capacity is now the bottleneck |
 | 02 | [Working with an AI that writes the code](tiers/01-junior/02-working-with-an-ai/) | specification and verification — the two skills that did not get cheaper |
-| 03 | [Frontend](tiers/01-junior/03-frontend/) | where rendering happens, where state lives, and accessibility as a legal floor |
+| 03 | [Frontend](tiers/01-junior/03-frontend/) | where rendering happens, where state lives, and keyboard-accessible interactions |
 | 04 | [Backend](tiers/01-junior/04-backend/) | the request lifecycle and every point at which it can stop |
 | 05 | [Data and databases](tiers/01-junior/05-data-and-databases/) | the schema is the part you cannot take back |
 | 06 | [Testing](tiers/01-junior/06-testing/) | making breakage loud instead of silent |

@@ -24,10 +24,9 @@ Practice prompt: **A bookmark service.**
 
 ## Exit checks
 
-- Explain every arrow and write in the design without reading notes.
-- Implement the critical mechanism and make an intentionally broken version fail a test.
-- State time and auxiliary space for coding; identify network, storage, and operational costs for architecture.
-- Respond to a new requirement by changing the design, with a reason.
-- Use [the rubric](../practice/README.md) to identify a concrete next exercise. A score is practice feedback, not a hiring prediction.
+- From a fresh contract, implement a small correct feature, including empty/error states and an ownership failure test.
+- Draw browser, API, database and an index; explain each request and write without naming extra services to avoid the schema.
+- Solve a maps/window/search/tree problem independently and give input-size and auxiliary-space bounds.
+- Repeat a different [candidate exercise](../practice/candidate/coding.md) on a later occasion. Keep failed tests and repairs in the [attempt record](../practice/attempt-record.md); use the rubric to select a prerequisite, not predict a hiring result.
 
 [Interview home](../README.md) · [Recent evidence](../research/README.md)

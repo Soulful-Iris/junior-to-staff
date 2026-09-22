@@ -1,5 +1,11 @@
 # 09 · Search: choose, recurse, undo
 
+> “Find AB on a row [A,B]. Can ABA use the same A again? How would you store many dictionary words that share a prefix?”
+
+AB succeeds; ABA fails under the no-cell-reuse rule. Track choices local to one path, restore them after return, and keep that state separate from a dictionary trie.
+
+This is a short prerequisite lesson. Attempt the complete [word search problem](../problems/32-word-search/README.md), then [trie autocomplete](../problems/30-trie-autocomplete/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Find a word along neighboring cells without reuse; then implement exact word insertion and lookup.
 
 ```mermaid

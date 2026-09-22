@@ -4,6 +4,38 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as ET
+
+def local_state_update(anim, root, parents):
+    """Allow a small logical commit, never discrete geometry or scene replacement.
+
+    Authored opt-in and bounded primitives are a structural guard; Chromium
+    playback must still verify the state changes when its causal motion arrives.
+    """
+    tag=lambda element: element.tag.rsplit('}',1)[-1]
+    if (tag(anim)!='animate' or anim.get('data-state-update')!='true'
+            or anim.get('attributeName') not in {'opacity','visibility','fill'}):
+        return False
+    owner=parents.get(anim)
+    if owner is None or tag(owner) not in {'g','text','path','rect','circle','ellipse','line','polygon','polyline'}:
+        return False
+    if {'moving','still'} & set(owner.get('class','').split()):
+        return False
+    descendants=list(owner.iter())
+    if any(tag(element) in {'svg','image','use','foreignObject'} for element in descendants):
+        return False
+    primitives=[element for element in descendants if tag(element) in
+                {'text','path','rect','circle','ellipse','line','polygon','polyline'}]
+    labels=[element for element in primitives if tag(element)=='text']
+    if (not primitives or len(primitives)>4 or len(labels)>2
+            or sum(len(''.join(element.itertext())) for element in labels)>160):
+        return False
+    return any(
+        (tag(element)=='animateMotion' and element.get('path')) or
+        (tag(element)=='animateTransform' and len(set(element.get('values','').split(';')))>1)
+        for element in root.iter()
+        if element.get('calcMode','linear') in {'linear','spline','paced'}
+    )
+
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
 files=sorted(ROOT.rglob('*.md'))
@@ -22,13 +54,15 @@ for item in manifest:
         p=ROOT/'assets/learning'/f'{item["key"]}{suffix}.svg'
         try:
             root=ET.parse(p).getroot()
+            parents={child:parent for parent in root.iter() for child in parent}
             for tag in ['title','desc']:
                 if root.find('s:'+tag,ns) is None:errors.append(f'{p}: no {tag}')
             if not suffix:
                 if 'prefers-reduced-motion' not in p.read_text():errors.append(f'{p}: no reduced motion')
                 if not root.findall('.//s:animate',ns) and not root.findall('.//s:animateMotion',ns)+root.findall('.//s:animateTransform',ns):errors.append(f'{p}: no native motion')
             for anim in root.findall('.//s:animate',ns)+root.findall('.//s:animateMotion',ns)+root.findall('.//s:animateTransform',ns):
-                if anim.get('calcMode')=='discrete':errors.append(f'{p}: slideshow interpolation is not allowed')
+                if anim.get('calcMode')=='discrete' and not local_state_update(anim,root,parents):
+                    errors.append(f'{p}: slideshow/discrete geometry is not allowed; local logical updates require bounded opt-in and continuous causal motion')
                 if anim.tag.endswith('}animate') and anim.get('attributeName')=='transform':errors.append(f'{p}: use animateTransform or animateMotion for transforms')
                 if anim.tag.endswith('animateMotion') and not anim.get('path'):errors.append(f'{p}: missing motion path')
                 if not anim.get('keyTimes'):continue

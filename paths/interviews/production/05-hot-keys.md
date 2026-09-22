@@ -1,5 +1,33 @@
 # A healthy average can hide an overloaded partition
 
+> “One tenant sends 250 writes/s to a four-partition service with a nominal 400/s total capacity. Their queue grows while fleet utilization looks healthy. Spread independent events without losing retries during a routing change; then preserve strict tenant ordering.”
+
+Constructed interview brief. Prerequisites: hash keys, stable event identity, merge ordering, and capacity arithmetic.
+
+| Contract | Workload / expected outcome |
+|---|---|
+| Baseline | Four independent toy partitions, 100 write units/s each |
+| Skew | One tenant's 250 units/s routes to A → 150 units/s unserved even though offered load is only 62.5% of total nominal capacity |
+| Independent-event target | Four ideal buckets receive 62.5 units/s each |
+| Retry identity | `(event_id, routing_version)` persists across layout changes |
+| Ordered follow-up | A serialized tenant stream needs its own throughput proof |
+| Excluded | Four logical DynamoDB keys do not guarantee four physical partitions or benchmark capacity |
+
+## Baseline to challenge
+
+```mermaid
+flowchart TD
+  Tenant["Tenant: 250 write units/s"] --> Route["Hash tenant ID"]
+  Route --> A["Partition A: capacity 100/s"]
+  Tenant --> Average["Offered load: 62.5% of fleet capacity"]
+  Other["Other partitions: idle"] --> Spare["300/s capacity cannot serve this key"]
+  A --> Queue["Tenant backlog grows 150/s"]
+  Queue --> Failure["Tenant latency fails despite healthy average"]
+```
+
+State whether writes are independent facts or ordered updates. Draw the hottest key rather than an average shard. Compute the deficit, choose a stable identity and routing version, then calculate read fan-out and migration recovery costs. Attempt a replay across four-to-eight buckets before opening the worked design.
+
+
 **Real event:** GitHub Actions, July 9, 2026. A high-volume shard in its runner-provisioning backend became overloaded and could not synchronize reliably across regions. GitHub restored replication health and drained queued work; it reported further workload distribution and recovery protection work. [Primary report, published August 12](https://github.blog/news-insights/company-news/github-availability-report-july-2026/).
 
 
@@ -56,6 +84,23 @@ A tenant admission limit protects neighbors before hot work reaches the shared b
 **Changed requirement:** one customer requires strict ordering of all events. Explain why simply adding buckets is no longer a complete answer, and measure whether batching behind one ordered owner meets the throughput goal.
 
 
+## Follow-ups that change the design
+
+**Senior: change four buckets to eight while retries remain.** Persist each accepted event's routing version and stable identity. Readers temporarily cover both layouts; retries use their original route or an authoritative deduplication record. For ten latest events, naïvely fetching ten from each of eight buckets reads up to eighty candidates before returning ten. A bounded merge limits concurrent reads and preserves continuation state; eight buckets are not eight free queries.
+
+**Lead: strict tenant order.** At one unbatched write per 10 ms, a single ordered owner sustains only 100 events/s; 250/s leaves 150/s behind. If an atomic ordered batch of five genuinely takes the same 10 ms, the ideal ceiling is 500 events/s. That assumption needs measurement, and sequence allocation plus batch commit must preserve order through failover. A tenant-wide ordering requirement cannot be satisfied by distributing unrelated writers and later sorting timestamps.
+
+```mermaid
+flowchart TD
+  Events["Tenant events with stable IDs"] --> Owner["Fenced ordered owner"]
+  Owner --> Sequence["Allocate sequence and batch"]
+  Sequence --> Commit["Atomically commit ordered batch"]
+  Commit --> Consumers["Read committed sequence"]
+  Failover["New owner with higher epoch"] --> Owner
+  Old["Stale owner"] --> Reject["Storage rejects stale epoch"]
+```
+
+This is a build brief. Deliver a deterministic bucket router, retry fixtures across routing versions, bounded latest-events merge and a competing-owner write test. Acceptance: each logical event appears once; old/new layouts remain readable; stale owners cannot append; measured batch latency supports the claimed throughput. During backlog replay reserve fresh-work capacity: at 400/s safe total and 250/s fresh load, only 150/s remains for replay, so 9,000 pending units need at least 60 seconds under ideal distribution. Hot physical placement may make the actual drain slower.
 
 </details>
 

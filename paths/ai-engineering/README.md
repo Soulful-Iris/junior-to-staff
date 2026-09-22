@@ -2,6 +2,22 @@
 
 Learn the concept, ask for a bounded implementation, then prove the result. The original 21 chapters and projects are this path's curriculum.
 
+## Your first engineering conversation
+
+> “A customer saves quantity zero, but the old value stays. An AI supplied the
+> patch and passing tests. What should happen, what assumption is wrong, and
+> what evidence would you require before accepting a repair?”
+
+For this exercise, current `7` plus supplied `0` must save `0`; omitted quantity
+keeps `7`; negative or null input is rejected. Agree on those examples first.
+Then trace the request, name the invariant, ask for a small implementation,
+inspect its diff, and make an intentionally broken version fail the same test.
+
+Start with [the change loop](../../tiers/01-junior/01-the-change-loop/README.md)
+and [working with AI](../../tiers/01-junior/02-working-with-an-ai/README.md).
+Every chapter now opens with a concrete review problem. Project indexes let you
+choose one independently readable brief, with follow-up diagrams and checks.
+
 ## Junior → senior → staff
 
 | Stage | Reading route | Build | Exit demonstration |

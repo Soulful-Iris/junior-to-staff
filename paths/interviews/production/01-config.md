@@ -1,5 +1,31 @@
 # Configuration is executable behavior
 
+> “Twenty routing cohorts accept configuration from one publisher. A syntactically valid update gives one cohort no reachable backends. Keep ordinary requests working, limit the rollout's exposure, and show how an emergency access revocation changes the fallback policy.”
+
+Constructed interview brief; the reported event below is source context. Prerequisites: [contracts](../../../tiers/01-junior/04-backend/README.md) and [reliability](../reliability/README.md).
+
+| Contract | Workload / expected outcome |
+|---|---|
+| Input | Versioned config, twenty cohorts, 1,000 total requests/s; canary carries 300/s |
+| Normal behavior | Version 7 has reachable backends; valid version 8 replaces it only after health validation |
+| Failure | Version 8 has `backends=[]` or unreachable targets → reject activation and keep routing version 7 |
+| Rollout boundary | Missing health data stops promotion; cohort fraction is not request fraction |
+| Excluded | Local exercise does not provision AppConfig or prove independence of actual production cohorts |
+
+## Baseline to challenge
+
+```mermaid
+flowchart TD
+  Editor["Mutable routing config"] --> Broadcast["Publish to all cohorts"]
+  Broadcast --> Parser["Syntax check passes"]
+  Parser --> Routers["All routers activate empty backends"]
+  Routers --> Failure["Requests fail across cohorts"]
+  Broadcast --> Recovery["Recovery uses same discovery service"]
+```
+
+First restate which config fields affect routing versus authorization. Trace one request through version 7, then version 8. Locate the authority for activation and rollback; only then add staging. Calculate request exposure during detection and restoration, and name what an absent metric means. Attempt before opening the worked design.
+
+
 **Real event:** GitHub, July 8, 2026. An automated metadata update changed a runtime value, disrupted discovery, and emptied router backend pools. GitHub restored configuration and service registration; its reported follow-up included immutable metadata, safer rollout, and better empty-pool detection. [Primary report, published August 12](https://github.blog/news-insights/company-news/github-availability-report-july-2026/).
 
 **Recent solution evidence:** Cloudflare's May 1, 2026 update describes progressive configuration rollout, health gates, automatic rollback, and last-good configuration handling. It reports an April 7 recovery drill. This is a recent remediation report; the outages motivating that program were in 2025, outside our recent-incident window. [Primary update](https://blog.cloudflare.com/code-orange-fail-small-complete/).
@@ -54,6 +80,23 @@ A rollback cannot undo already sent messages or external side effects. A last-go
 **Changed requirement:** the update revokes a compromised tenant's access. Write the policy for stale configuration, expiry, and emergency revocation before implementing the fallback.
 
 
+## Follow-ups that change the design
+
+**Senior: skew and detection delay.** One of twenty cohorts carries 300 of 1,000 requests/s. A bad activation takes 60 seconds to detect and 20 to restore. Its traffic exposure bound is `300 × (60+20) = 24,000` requests under constant arrival assumptions, not 5% of fleet requests. Distinguish exposure from actual failures, and count sessions/long-lived connections separately. With no telemetry, promotion stays paused; a timer alone cannot establish recovery.
+
+**Lead: revocation must take effect within five seconds.** A routing fallback retaining version 7 for sixty seconds cannot independently enforce that requirement. Keep the routing fallback scoped; require fresh authorization evidence or fail closed for the affected access boundary. State how the emergency authority remains reachable during discovery failure. Predict the stale decision before revealing the new boundary.
+
+```mermaid
+flowchart TD
+  Request["Incoming request"] --> Auth["Authorization with freshness bound"]
+  Revocation["Independent emergency authority"] --> Auth
+  Auth -->|"allowed and fresh"| Router["Routing uses last healthy version"]
+  Auth -->|"revoked or stale"| Deny["Deny protected access"]
+  Router --> Backends["Reachable backends"]
+  Recovery["Independent recovery access"] --> Router
+```
+
+This is a build brief. Deliver (1) a parser with invalid-input fixtures, (2) an activation state machine plus last-good bootstrap test, (3) a simulated publisher with stop/promotion/rollback logs, and (4) the revocation freshness test. Expected checks: empty/unreachable replacement leaves routing at v7; a supported healthy v8 activates; stale authorization cannot survive its declared five-second bound. Your implementation command belongs in the submitted README; none is supplied by this page.
 
 </details>
 

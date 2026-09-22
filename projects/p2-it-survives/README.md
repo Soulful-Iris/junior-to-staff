@@ -1,5 +1,85 @@
 # P2 · it survives
 
+## The reviewer's brief
+
+> Your reading list works on your laptop. Tomorrow another engineer is on call, the database may be lost, and a new deploy may crash. Make the operating path reproducible and show what a restored system actually contains.
+
+This is a **constructed practice brief**, not an attributed company question.
+Prerequisites: [P1](../p1-it-works/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+
+| Case | Exact input or workload | Expected outcome |
+|---|---|---|
+| Small example | Backup at 12:00 includes items 1–100; acknowledged item 101 is written at 12:03; failure at 12:05. | Restore contains items 1–100; report missing item 101 and the recovery interval instead of claiming zero loss. |
+| Boundary / failure | Application process is live but its required database is unreachable. | Readiness/user-journey evidence shows unavailable; liveness can remain true without triggering pointless restart loops. |
+| Scope | Destructive drills only in scratch infrastructure; RPO and RTO are measured assumptions, not guarantees from one exercise. | Explain any additional assumption before implementing it. |
+
+Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
+
+## Baseline and the failure to explain
+
+```mermaid
+flowchart TD
+ A["Author laptop and remembered commands"] --> D["Deployment"]
+ D --> R["Running app"]
+ R --> B["Untested backup"]
+ B --> Q["Unknown recovery outcome"]
+```
+
+A stored backup and a deploy script do not prove restore correctness or that an unfamiliar operator has sufficient access.
+
+<details>
+<summary>Reveal the approach and decisions</summary>
+
+Inventory artifact/config/secrets/data boundaries, define recovery objectives, and rehearse from a clean environment. The invariant is reproducible serving state with explicitly measured data loss. Separate liveness, readiness and user-journey checks according to what automation should do.
+
+</details>
+
+## Follow-up 1 · A deploy crashes
+
+**Changed requirement:** A candidate version exits immediately. What keeps the previous version available? Predict which boundary must change before opening the design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+Build once, route only to ready instances, preserve the previous artifact and compatible config, and prove rollback by observing served version. Data compatibility remains a separate gate.
+
+```mermaid
+flowchart TD
+ A["Immutable candidate artifact"] --> C["Candidate runtime"]
+ C --> H["Readiness gate"]
+ H -->|fails| O["Keep previous serving version"]
+ H -->|passes| L["Load-balancer admission"]
+```
+
+</details>
+
+## Follow-up 2 · The primary and its credentials are lost
+
+**Changed requirement:** Can an unfamiliar engineer recover without depending on the failed primary? State what evidence would make you reject your first design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+Use independently accessible backup, documented scoped recovery identity and a fresh target. Verify row contents and application behavior before routing traffic; retain evidence of missing acknowledged writes.
+
+```mermaid
+flowchart TD
+ I["Recovery identity"] --> B["Independent backup access"]
+ B --> D["Fresh restore target"]
+ D --> V["Data and journey verification"]
+ V --> R["Controlled traffic restoration"]
+```
+
+</details>
+
+## Evidence to bring to review
+
+Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+
+**Senior expectation:** Have another engineer deploy and restore from the recorded procedure. **Additional lead scope:** Own recovery access, compatibility and measurable RPO/RTO. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+
+## Build and prompt sequence
+
 > Junior → senior · fed by sections 10, 11, 12 · the question is **can someone else run it, and can you fix it at 3am?**
 
 Take the reading list you built in P1. Do not add a single feature to it.
@@ -26,7 +106,7 @@ the point, and it is why this project is the one people skip.
 
 Three sentences each, written down before you build.
 
-1. **What is your health check actually checking?** A 200 from a process that cannot reach its database is worse than no health check, because it makes your automation confident.
+1. **What is each health check for?** Liveness checks whether restarting the process may help; readiness decides admission; a synthetic checks user-visible dependencies. A database outage should fail the relevant readiness/journey check without forcing every live process into a restart loop.
 2. **What do you alert on?** The temptation is "errors". The better question is: what would a user notice, and what would you want to be woken for? Everything else is a dashboard, not a page.
 3. **What is your rollback unit?** The artefact, the config, the database schema? They roll back at different speeds, and a migration usually does not roll back at all.
 4. **What is the blast radius of your CI?** It has credentials and it runs code from pull requests. Those two facts together are the whole supply-chain question in miniature.
@@ -74,7 +154,7 @@ the two numbers that matter and neither is knowable without doing it.
 ## How you would know it is wrong
 
 1. **Destroy your infrastructure and rebuild it from the repo.** Do it in a scratch environment. Whatever you had to do by hand is what is missing from the code.
-2. **Kill the database and watch what your health check says.** If it still reports healthy, your automation is now confidently wrong.
+2. **Kill the database and observe each health signal.** Readiness or the affected journey must show unavailable. Liveness may remain healthy when restarting cannot fix the dependency.
 3. **Break the system on purpose and time yourself** from the moment it broke to the moment you knew. That number is your detection time, and it is probably much worse than you assumed.
 4. **Restore from backup into a scratch environment** and diff it against production. Note the gap in minutes.
 5. **Revoke the credential CI uses** and confirm the deploy fails. Then rotate it properly and confirm it works. Now you know both halves.

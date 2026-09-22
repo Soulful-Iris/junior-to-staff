@@ -2,6 +2,21 @@
 
 > Junior tier · feeds **P1 (it works)**
 
+> **Constructed candidate brief:** “Ana and Ben share a reading list. Ana marks
+> article 7 read; Ben must still see it unread. Model that fact, then show how
+> two concurrent requests preserve it. What would you clarify before writing SQL?”
+
+| Input | Expected result | Boundary |
+|---|---|---|
+| Ana reads article 7 twice | One `(Ana, 7)` read-mark | A database unique constraint rejects duplicates |
+| Ben lists unread articles | Article 7 remains unread | Missing per-person history cannot be invented |
+| List 20 newest items for owner 2 | At most 20 rows ordered by time and ID | Performance must be measured with realistic selectivity |
+
+Start by naming the fact, writing its key, and trying an illegal write. Then
+measure one query, inspect its plan, and change the index only if the evidence
+supports it. The [PostgreSQL lab](../../../paths/interviews/architecture/labs/postgresql/README.md)
+provides schema, seed data, racing sessions, and a separate assessor guide.
+
 ## The one-liner
 
 Code can be rewritten any afternoon. Data has to be carried, live and intact,
@@ -48,27 +63,28 @@ whose key matches. The whole cost lives in *find* — check every row (a scan) o
 seek in something kept sorted (an index). Any join yields to two questions: how
 many rows survive the filters on each side, and how are the matches found.
 
-**4. Keys — and why their order is physical.** A natural key is a real-world
+**4. Keys — and where their order matters.** A natural key is a real-world
 value (an email); a surrogate key is generated and meaningless. Natural keys
-break when the world changes — people change emails — so rows get a surrogate
-key, keeping the real value as a unique column. The primary key lives in a
-B-tree, kept sorted. Fully random UUIDs land each new row on a random page;
-once the index outgrows memory, an insert usually fetches a cold page from disk
-and often splits it. Time-ordered ids land at the same recent edge, on a few
-hot pages already in cache, and rows created together stay stored together —
-what "latest items" queries want. UUIDv7 (RFC 9562, 2024) puts a millisecond
-timestamp in the first 48 bits for this reason; PostgreSQL 18 (released
-25 September 2025; checked 2026-09-21) ships it as `uuidv7()`, at the price
-that an id reveals its row's age. The function is trivia; the idea — identifier
-order is physical — is not.
+break when the world changes — people change emails — so a surrogate can keep
+references stable while a separate unique constraint protects the real value.
+In PostgreSQL, a primary key normally has a B-tree index separate from the
+**heap**, the pages containing row versions. Ordered identifiers can concentrate
+inserts in recent **index** pages; random identifiers spread index access. The
+cache, workload, and page occupancy determine the measured cost. Neither choice
+keeps heap rows sorted by primary key. `CLUSTER` explicitly reorders a heap once;
+later writes do not maintain that ordering. A newest-items query still needs an
+index matching its owner filter and time ordering.
 
 **5. An index is a purchase, and the planner holds the receipt.**
 
 ![One read uses a single sorted index to reach its row in a few page reads; one insert must also write the table and every index on it](../../../assets/diagrams/index-cost.svg)
 
 An index is a sorted copy of chosen columns with pointers back to the rows.
-Reads matching its shape get fast; in exchange, every insert and update writes
-the table *and* every index, and the copies take disk. Whether an index is used
+Reads matching its shape can get faster; inserts maintain the table and its
+applicable indexes, and the copies take disk. An update creates a new row
+version, but PostgreSQL's heap-only tuple (HOT) optimization can avoid new
+ordinary index entries when indexed columns are unchanged and the old page
+has enough room; summarizing indexes have additional rules. Whether an index is used
 is not your call either — the planner decides, from statistics about your
 actual data, and can rightly decide differently at a thousand rows than a
 million. Query-speed arguments are settled by `EXPLAIN`, because intuition does
@@ -181,14 +197,15 @@ the assumption.
 
 ## How you would know it is wrong
 
-1. **Run `EXPLAIN ANALYZE` on your main query and read it.** A sequential scan
-   over the big table under a selective filter means the index is missing or
-   unusable by that query. Estimates off from actuals by orders of magnitude
-   mean stale statistics — plans chosen on fiction.
+1. **Run `EXPLAIN (ANALYZE, BUFFERS)` on your main query.** Compare estimated
+   versus actual rows, heap/index pages, sort work, and time. A sequential scan
+   may correctly beat scattered heap lookups for a broad filter or a tiny table.
+   Large estimate errors invite checking statistics, skew, correlated columns,
+   and parameters; stale statistics are one cause, not the only one.
 2. **Insert 100,000 rows and time the same query.** In PostgreSQL,
    `generate_series` makes seeding a one-liner. Everything is fast at 200 rows;
-   if query time grows in step with table size you are scanning — an indexed
-   lookup should barely move.
+   hold result size and selectivity explicit. An indexed query may still grow
+   with the number of returned rows, heap reads, cache misses, or sorting.
 3. **Kill the process mid-transaction.** Put a sleep between two writes that
    only make sense together, `kill -9` in the gap, restart, count. If half the
    change is visible, those writes were never in one transaction — and now you
@@ -225,8 +242,8 @@ On **P1**, add:
   read-mark for the same person and item, a NULL URL.
 - "Who has read this item" and "what has this person read" are each one query,
   with no schema change between them.
-- The list query's time barely moves between 1,000 and 100,000 rows, and both
-  timings are written down.
+- Plans and timings at small, large, and skewed cardinalities are written down;
+  explain rows visited and returned, rather than requiring a fixed speed ratio.
 - Deleting a user is a decision — cascade or refuse — proven by a test
   (see [06 · Testing](../06-testing/)).
 
@@ -279,3 +296,30 @@ erDiagram
 ![Model ownership before adding indexes: mechanism in motion](../../../assets/learning/index-seek.svg)
 
 [Static view](../../../assets/learning/index-seek-still.svg)
+
+Predict the change before drawing: the baseline stores one global checkbox;
+the corrected model makes the person part of the key.
+
+```mermaid
+flowchart TD
+  Ana["Ana: mark read"] --> Item["Item 7: read=true"]
+  Item --> Ben["Ben: article incorrectly hidden"]
+```
+
+```mermaid
+flowchart TD
+  Write["Ana: mark article 7 read"] --> Pair["Read mark: unique person + item"]
+  Pair --> Heap["Heap: row versions"]
+  Index["B-tree: person + item"] -->|"row location"| Heap
+  Ben["Ben: owner-scoped unread query"] -->|"no Ben mark"| Visible["Article 7 visible"]
+```
+
+**Senior follow-up:** preserve stock and a two-row on-call invariant under racing
+transactions in the lab. **Lead follow-up:** budget lock time and write overhead
+while adding an index. An assessor should ask for the failed schedule before the
+repair, the invariant after it, and an explanation of why a different planner
+choice can be correct.
+
+Technical sources: [PostgreSQL 18 CLUSTER](https://www.postgresql.org/docs/18/sql-cluster.html)
+and [HOT](https://www.postgresql.org/docs/18/storage-hot.html). Live, undated
+technical documentation; accessed 2026-09-22, not recent interview evidence.

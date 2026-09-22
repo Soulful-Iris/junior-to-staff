@@ -2,6 +2,20 @@
 
 > Senior tier · feeds **P4 (it reasons, provably)**
 
+> “Our tag suggestions pass twenty regressions, but a judge with 99% agreement missed a serious failure. The provider now times out. Tell us whether to release and how the reading list remains usable within a 10-cent, one-second task budget.”
+
+Constructed optional AI-product exercise. Work from a contract and a failure model:
+
+| Input / boundary | Expected behavior |
+|---|---|
+| `SQL and CSS`, both tags allowed | Suggest database and frontend; never invent an unauthorized tag |
+| 99 human passes, one failure; judge always passes | 99% agreement, 0% failure recall |
+| Fixed required regressions | May all pass; seeded defects must make relevant checks fail |
+| 4-cent attempts, 10-cent budget | Two attempts at most, including charged failures |
+| Model unavailable | Manual tags remain usable; do not disguise fallback as model quality |
+
+Start by stating the oracle and severity; separate tuning cases from regressions and held-out labels; test sensitivity to a known defect; calculate class-specific metrics; then combine quality with independent permission, cost and latency gates. The [runnable evaluation lab](../../../paths/interviews/evaluations/README.md) supplies cases, real mutants, a fake-provider outage and a separate scored decision.
+
 ## The one-liner
 
 Putting a model inside your product is an engineering problem, not a prompting
@@ -22,9 +36,7 @@ the same disease as a test suite that cannot fail, wearing a model.
 
 **The loud one.** Your assistant can read the user's private data, it processes
 content from the outside world, and it can send things out — an email, a
-request, a tool call. That combination is the whole vulnerability. In the
-documented EchoLeak case, a crafted email was enough to make a corporate
-assistant exfiltrate data with no click from the user at all.
+request, a tool call. That combination creates an exfiltration risk. Treat an external document that requests a tool action as untrusted data. Authorization must remain outside model-generated instructions.
 
 ## The mental model
 
@@ -32,71 +44,52 @@ assistant exfiltrate data with no click from the user at all.
 
 The unit of work is not the prompt. It is **everything the model can see when it
 answers**: instructions, retrieved documents, conversation history, tool
-definitions, and whatever state the workflow carries. Treating a vector database
-as the architecture is the named mistake of the last two years.
+definitions, and whatever state the workflow carries. A vector database alone does not define the data permissions, tool policy or product behavior.
 
-The standard retrieval recipe as of 2026 is hybrid search — keyword and
-embeddings together, merged — then a reranking pass: fetch twenty to fifty
-candidates, send the best three to five. Long context did not remove the need
-for this. Bigger windows cost more, raise time-to-first-token, and recall
-degrades as the window fills, because attention is a finite budget spread over
-everything in it.
+Hybrid keyword/embedding retrieval and reranking are candidates, not an industry-wide prescription or a fixed chunk count. Compare a simple lexical baseline on your corpus, measure recall and relevant-context cost, then add machinery only when the measurements justify it. Larger context can add latency and distract from useful evidence; measure your model and workload.
 
-For an agent rather than a single answer, the current guidance is the opposite
-of "load everything up front": give it lightweight identifiers — file paths,
-URLs, record ids — plus tools to open them, let it fetch what it needs when it
-needs it, compact old turns, and keep notes outside the window.
-
-*(Read from Anthropic's engineering writing and several practitioner sources on
-2026-09-21.)*
+For agents, identifiers plus tools for fetching relevant data can reduce unnecessary context. Compaction and external notes can help long tasks but may lose important state. [Anthropic's context-engineering article](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents), published 2025-09-29, describes those techniques. It is vendor engineering guidance, not evidence that all tasks require them or that all interviews ask them.
 
 ### Evaluation is the part that makes it engineering
 
-The practitioner consensus is **error analysis first**, not metric first. Take
-roughly thirty real traces. Read them by hand. Build a taxonomy of how they
-failed. Count. In one documented case study, three issues accounted for more
-than 60% of failures, and fixing date handling alone moved success from 33% to
-95%.
+Read representative traces, identify concrete failure categories and decide which matter to the product. Thirty traces is a manageable teaching start, not a statistically established minimum. Validate the labels and keep serious errors visible rather than averaging them away.
 
-Only then automate the checks:
+- Use **task-appropriate metrics**: exact match for a finite contract, retrieval recall for retrieval, calibrated graded rubrics where degrees of quality matter. A release gate may threshold a graded metric; explain the operational decision and why the threshold fits the risk.
+- A model judge needs independent human labels, a confusion matrix, failure recall/precision, class balance and severity analysis. **99% agreement can coexist with 0% failure recall** when 99 labels are pass and an always-pass judge misses the only failure.
+- A required regression suite **may pass 100%**. Prove falsifiability by introducing a known defect and observing the relevant check fail. Restore the fix and require those checks to pass.
+- Keep development, regression, challenge and held-out sets distinct. Do not tune against a holdout and continue calling it independent. A supported-use severe failure remains a release blocker even if someone moves it to a challenge set.
 
-- **Binary pass/fail**, not a 1-to-5 score. A dashboard showing "helpfulness:
-  4.2" cannot be acted on and cannot be wrong.
-- If a model is the judge, **the judge is an instrument and needs validating**.
-  Hand-label a set, measure how often the judge agrees with you, and know that
-  number. Judges have documented, quantified weaknesses: candidate order flips a
-  meaningful share of pairwise verdicts, and a 2026 study found no frontier model
-  uniformly reliable as a judge.
-- **A suite that passes 100% is not challenging the system.** That is the same
-  rule as [06 · Testing](../../01-junior/06-testing/), pointed at a model.
+[Airbnb's evaluation engineering report](https://medium.com/airbnb-engineering/eval-driven-development-lessons-from-evaluating-genai-at-scale-e817e5ae5788), published 2026-07-28, discusses combined programmatic, judge and human evaluation. Its examples are product-specific; our lab adds explicit class/severity checks rather than adopting a universal agreement threshold.
+
+### Baseline to challenge: one average controls shipping
+
+```mermaid
+flowchart TD
+  Outputs["Tagger outputs"] --> Judge["Always-pass judge"]
+  Labels["99 human passes and 1 failure"] --> Score["99 percent agreement"]
+  Judge --> Score
+  Score --> Ship["Release hides the missed serious failure"]
+  Labels --> Recall["Failure recall: zero"]
+```
+
+Before continuing, draw a separate required regression gate and a held-out failure-recall gate. Then add a provider outage: a perfect schema result says nothing about cost or total latency. The final chapter diagram adds permission and quality boundaries; the [lab](../../../paths/interviews/evaluations/README.md) develops all three changes.
 
 ### The security model is architectural, not a filter
 
-The organising idea is the **lethal trifecta**: private data, untrusted content,
-and a way to send things out. Any two are survivable. All three is an
-exfiltration channel, whatever your prompt says.
+Private data, untrusted content and outbound actions form a useful threat-model checklist. Removing one route can reduce exfiltration risk, but a count of capabilities does not prove safety: answers themselves may disclose data, and individual tools may modify state.
 
-Detection is not a boundary. A 2025 paper by researchers across several frontier
-labs bypassed all twelve published defences they tested at over 90% success
-using adaptive attacks, and human red-teamers reached 100%. A guardrail that
-blocks 95% of attacks is a failing grade, because the attacker only needs the
-other 5% and gets to keep trying.
-
-What actually holds: cut one leg of the trifecta per session. Least-privilege
-tools. Human approval for consequential actions. And never treat the system
-prompt as a secret or as a security control.
+Enforce permission-scoped retrieval, narrow tool authorization, destination restrictions and confirmation for consequential actions in code. Detection can be another layer, not the sole authority. Test the boundary with an adversarial fixture that asks for another tenant's document; success means the retrieval/tool service denies it even if the model requests it. The original note's attack-success statistics lacked traceable provenance and are retracted in the [claim ledger](../../../docs/research/claim-ledger.md).
 
 ### Cost and latency are product decisions
 
-Per-token prices fell. Per-**task** cost did not, because an agent loop makes
-fifty to two hundred calls. Budget per task, not per request.
+A task may make several model/tool calls. Measure cost per task, including retries and failed calls, rather than assuming per-token prices predict the bill.
 
-The levers, in rough order of payoff: prompt caching (order your prompt
+Options to compare on the measured workload: prompt caching (order your prompt
 static-first so the cacheable prefix is stable), model routing with a measured
 escalation rate, a batch tier for anything not interactive, and a hard spend cap
 per key — because a runaway loop is not a probabilistic risk, it is a Tuesday.
 
-For anything streaming, total latency is the wrong number. Users feel
+For streaming, total completion latency alone misses the early user experience. Users feel
 **time-to-first-token** and then the gap between tokens. Budget those separately
 and set them as product targets.
 
@@ -105,9 +98,9 @@ and set them as product targets.
 ## What good looks like
 
 - You have an eval set built from real failures, and you can say which failure each case came from.
-- You know your judge's agreement rate with a human. It is a number, not a vibe.
-- The suite does not pass 100%, and you know which cases fail and why.
-- Every tool the model can call is one you would be comfortable with a stranger calling, because effectively one can.
+- You know the judge’s confusion matrix, class-specific metrics, severity misses and label provenance.
+- Required regressions pass; known seeded defects make the relevant checks fail. Challenge limitations and held-out results are separately reported.
+- Each tool call checks the authenticated user, resource and action outside the model; retrieved text cannot enlarge permission.
 - Cost is tracked per task and capped in code.
 - You can name what happens when the model is unavailable, and it is not "the page breaks".
 - There is a written answer to "should this be a model at all", and sometimes it is no.
@@ -141,24 +134,24 @@ taxonomy and you get the shape of your problem. Deriving the categories from the
 data rather than from your list is what stops it confirming what you already
 believed.
 
-*What you should get back:* an uneven distribution. Failures cluster; if the
-categories come back evenly sized, they were invented rather than observed.
+*What you should get back:* counts and actual trace examples, with ambiguous labels called out. An even distribution can be real; validate against the data rather than requiring a particular shape.
 
 **Request 2 — build the check that can fail**
 
 ```
-Write an eval for this behaviour as binary pass/fail with a stated rule.
+Define the task-specific oracle and metric, and explain the release threshold.
+Separate development examples, required regressions, challenge cases and holdout.
 
-Then write three cases you expect to FAIL with the current implementation,
-and show me them failing. If all my cases pass, tell me the eval is too
-easy rather than reporting success.
+Run the fixed implementation on required regressions. Then inject three named
+defects, identify the cases that should catch each one, and show those cases fail.
+Restore the fix and show required regressions pass. Do not require current failures.
+For a model judge, compute the confusion matrix, failure recall/precision and
+severity of misses on independent human labels. Report missing classes explicitly.
 ```
 
-*Why:* an eval nobody has seen go red is not evidence. Demanding failing cases
-up front makes the instrument prove itself before you trust it.
+*Why:* a passing regression is useful if it detects the defect it was written for. Challenge coverage and stochastic quality need separate evidence.
 
-*Push back on:* a rubric with degrees of quality in it. You wanted a decision,
-not an opinion.
+*Push back on:* an impressive agreement number without class counts, or a “holdout” used during prompt tuning.
 
 **Request 3 — find the exfiltration path**
 
@@ -173,16 +166,14 @@ untrusted content, and what would leave.
 Do not propose a filter as the fix.
 ```
 
-*Why:* the last line matters. Filtering is the answer a model reaches for and
-the one the research says does not hold. Forbidding it forces an architectural
-answer: remove a capability, split the session, add an approval.
+*Why:* a detector alone cannot authorize a tool call. The checkpoint is an enforced permission boundary and an adversarial fixture that tries to cross it; filtering can remain an additional signal.
 
 ## How you would know it is wrong
 
-1. **Ask what your eval would say about a deliberately broken version.** Swap in a model that returns a fixed string. If your suite still passes anything, that part of it is measuring nothing.
-2. **Measure judge-human agreement on a labelled set.** If you have never done this, your judge's verdicts are unvalidated.
-3. **Reorder the candidates in a pairwise judge** and see how many verdicts flip. That number is your noise floor.
-4. **Run the trifecta test on your own feature** honestly: private data, untrusted input, outbound capability. Two of three is a design. Three is an incident waiting for someone to notice.
+1. **Seed a specific defect.** A constant output should fail content-sensitive cases; it may correctly pass a schema-only check. Require each oracle to detect the class of fault it claims to test.
+2. **Measure judge confusion and severity on independent labels.** Include rare failures; report undefined metrics and sample limits, not only agreement.
+3. **Reorder the candidates in a pairwise judge** and see how many verdicts flip. Report order sensitivity separately from repeated-run stochastic variation; neither alone is a universal noise floor.
+4. **Run the trifecta test on your own feature** honestly: private data, untrusted input, outbound capability. Trace the actual data route and test permission enforcement; counting capabilities is a checklist, not a proof.
 5. **Look at the per-task cost, not the per-call cost**, on your worst-case loop, and check there is a cap that would actually stop it.
 6. **Measure time-to-first-token from the user's side**, not from the API's. The queue in front of the model is part of the latency.
 7. **Turn the model off** and see what your product does. That is your degradation path, whether or not you designed it.
@@ -193,8 +184,8 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 "what should I read next". Small. The feature is not the work.
 
 - Thirty real traces, hand-read, grouped into a failure taxonomy you wrote.
-- An eval set of at least twenty cases, binary, including cases that currently fail.
-- A judge, if you use one, with a measured agreement rate against your own labels.
+- At least twenty required regression cases with a task-appropriate oracle; all may pass after fixing defects. Separate challenge and held-out data.
+- A judge, if used, with a confusion matrix, failure precision/recall, severity misses and independent label provenance.
 - Per-task cost recorded and a hard cap in code.
 - Time-to-first-token measured from the browser.
 - A written trifecta analysis for your own design, with the leg you cut named.
@@ -203,7 +194,7 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 **Acceptance criteria:**
 
 - You can show your eval going red on a deliberately degraded version.
-- You can state your judge's agreement rate, or say plainly that you have no judge.
+- You can compute class-specific judge metrics and severity misses, or state that no judge is used.
 - Turning the model off leaves the product usable.
 - The cost cap has been tested by hitting it.
 
@@ -216,7 +207,7 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 - **error analysis** — reading real failures by hand and building a taxonomy from them. The start of every good eval.
 - **LLM-as-judge** — using a model to grade output. An instrument; needs validating like any other.
 - **lethal trifecta** — private data, untrusted content, and outbound capability in one session.
-- **prompt injection** — instructions smuggled into content the model reads. Not solved, and not solvable by filtering.
+- **prompt injection** — instructions smuggled into content the model reads; enforce permissions independently of model text.
 - **per-task cost** — the real unit once a feature makes many calls per user action.
 - **time-to-first-token** — how long until something appears. The latency users actually feel.
 - **escalation rate** — how often a cheap model hands off to an expensive one. Your routing health metric.

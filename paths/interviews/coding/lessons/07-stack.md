@@ -1,5 +1,11 @@
 # 07 · Stacks: keep unresolved work
 
+> “For [73,74,71,75], return how long each day waits for a strictly warmer one.”
+
+The output is [1,2,1,0]. Equal temperatures do not qualify. Identify the unresolved days before trying to optimize repeated forward scans.
+
+This is a short prerequisite lesson. Attempt the complete [daily temperatures problem](../problems/37-daily-temperatures/README.md), then [largest histogram rectangle](../problems/38-largest-histogram-rectangle/README.md), with their contracts, tests and changed requirements.
+
 **Build:** For each temperature, return days until a strictly warmer day. `[73,74,71,75] → [1,2,1,0]`.
 
 ![Stacks: keep unresolved work](../../../../assets/learning/monotonic-stack.svg)

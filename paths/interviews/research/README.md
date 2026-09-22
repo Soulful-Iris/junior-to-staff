@@ -1,6 +1,6 @@
 # Interview evidence · 2026-09-22 snapshot
 
-**Requested window: 2026-03-22 through 2026-09-22.** This is a dated, qualitative review, not a representative survey. We searched Reddit, LeetCode Discuss, first-person posts, interview-preparation sites, and official employer guidance. Old reports, recycled “2026” titles, unverified dates, and unrelated search results were not used to establish recent trends.
+**Review date: 2026-09-22. Dated evidence boundary: 2025-09-22 or later; preferred window: 2026-03-22 through 2026-09-22.** The selected firsthand-report table below uses the preferred window. Reports outside six months but inside one year may be retained separately with that limitation; older publications do not support recent conclusions. This is a dated, qualitative review, not a representative survey. We searched Reddit, LeetCode Discuss, first-person posts, interview-preparation sites, and official employer guidance. Old reports, recycled “2026” titles, unverified dates, and unrelated search results were not used to establish recent trends.
 
 ## What this evidence supports
 
@@ -51,8 +51,8 @@ These “deeper” columns are our teaching recommendations, informed by the sou
 
 | Lead | Why not used as current evidence |
 |---|---|
-| [Meta E5 offer / problem list](https://leetcode.com/discuss/post/7550296) | February 3, 2026 is outside the requested window |
-| [Meta interview with AI-enabled round](https://leetcode.com/discuss/post/7374944) | November 25, 2025 is outside the window |
+| [Meta E5 offer / problem list](https://leetcode.com/discuss/post/7550296) | February 3, 2026 is within one year but outside the preferred six-month sample; not used to infer current Meta format |
+| [Meta interview with AI-enabled round](https://leetcode.com/discuss/post/7374944) | November 25, 2025 is within one year but outside the preferred sample; no underlying event recency established here |
 | [Stripe backend interview](https://leetcode.com/discuss/post/8372404/) | Useful-looking account, but publication/event date was not exposed in accessible text; no current Stripe claim is based on it |
 | [Google L4 August lead](https://www.reddit.com/r/leetcode/comments/1vwzbg9/google_l4_interview_experience/) | Indexed date and rendered relative age disagree; excluded from dated trend conclusions |
 | Generic “2026” lists and old reports in related-post panels | Title/crawl date does not establish a recent interview |
@@ -65,3 +65,9 @@ These “deeper” columns are our teaching recommendations, informed by the sou
 Before relying on this for a new application, check the recruiter packet. When updating the research, retain the old snapshot and record: source URL, publication date, interview date, company/team/location, level as stated, round type, narrow observation, and confidence. Exclude out-of-window evidence from recent conclusions. Cross-check a pattern across independent accounts before calling it recurring; never fabricate a percentage without a sampling method and denominator.
 
 [Interview home](../README.md) · [Practice](../practice/README.md)
+
+## Trace older research claims before using them
+
+The original research notes are now connected to [a claim-level ledger](../../../docs/research/claim-ledger.md) that distinguishes exact source, primary/secondary status, publication/event/access date, sample/role and curriculum inference. Unsupported statistics and consensus claims are explicitly withdrawn. This does not add named-company interviews to the sample above. Technical documentation and production reports cannot fill a missing recent lead-loop sample.
+
+Run `python docs/research/check_claims.py` for local links and ledger structure; it does not verify source quality or event dates. Before using a company-specific assertion, read the exact source and ask which detail actually changes practice. A newly published repost of an older interview belongs to the older event; an undated live official guide has publication age unknown.

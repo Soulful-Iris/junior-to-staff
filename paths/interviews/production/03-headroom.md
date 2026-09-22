@@ -1,5 +1,31 @@
 # A correct deployment can still cause an outage
 
+> “Ten workers sustain 850 requests/s. A harmless deployment stops two before replacements are ready. Users see rising queue age even after rollback. Calculate a safe rollout, then survive a zone loss while demand grows thirty percent.”
+
+Constructed interview brief. Prerequisites: [capacity and queue arithmetic](../reliability/README.md); no AWS deployment is needed to reason through the numbers.
+
+| Contract | Workload / expected outcome |
+|---|---|
+| Baseline | Ten tasks × 100 requests/s under the agreed latency target = 1,000/s |
+| Failure | Two tasks removed → 800/s; 850/s arrival adds 3,000 queued requests in 60 seconds |
+| Recovery | Restored 1,000/s leaves 150/s spare → ideal 20-second drain |
+| Downstream | 20 connections/task, 250 application connections allowed; full ten-task surge requests 400 |
+| Excluded | Constant-capacity arithmetic is not a measured AWS limit or a proof of p99 latency |
+
+## Baseline to challenge
+
+```mermaid
+flowchart TD
+  Demand["850 requests/s"] --> Queue["Waiting work"]
+  Rollout["Stop two old tasks first"] --> Tasks["Eight ready tasks: 800/s"]
+  Queue --> Tasks
+  Tasks --> DB["Shared database connection budget"]
+  Queue --> Age["50 requests/s accumulate"]
+```
+
+Start with useful completions at the latency objective, not desired replica count. Subtract removed/unready capacity, then calculate arrivals minus completions and catch-up spare throughput. Inspect every shared downstream budget before proposing a larger surge. Predict the first exhausted resource, then open the worked design.
+
+
 **Real event:** GitHub Actions, August 6, 2026. Replacing pods during a routine deployment temporarily removed capacity. Remaining infrastructure saturated; rollback showed the code change itself was not the cause. GitHub added capacity, throttled incoming work, and repaired invalid-job retries that delayed recovery. [Primary report, published September 9](https://github.blog/news-insights/company-news/github-availability-report-august-2026/).
 
 
@@ -56,6 +82,23 @@ In a disposable ECS service, measure readiness after initialization, keep livene
 **Changed requirement:** demand grows 30% while an AZ is unavailable. Recompute the capacity envelope before adjusting autoscaling; show placement capacity, quotas, and startup delay, not only desired replica count.
 
 
+## Follow-ups that change the design
+
+**Senior: startup is slow.** A replacement takes 90 seconds to become ready. Keep the old task until its replacement passes a real readiness check; terminating two first would accumulate `50×90 = 4,500` requests under the toy assumptions. At restored capacity, ideal drain becomes `4500/150 = 30 seconds`. A closed-loop load test may reduce arrivals while waiting; preserve the fixed-rate 850/s workload to expose the deficit.
+
+**Lead: demand grows while one zone is lost.** New arrivals are `850×1.3 = 1,105/s`. With three equal zones and 100/s tasks, at least twelve surviving tasks are needed; use eighteen evenly placed tasks (six per zone), leaving twelve and 1,200/s after loss. Spare recovery throughput is only 95/s. Eighteen 20-connection pools require 360 connections and violate the 250 allocation. Thirteen/task uses 234; a one-task surge uses 247, but the query workload still needs validation. A simultaneous zone loss and rollout needs another explicit budget.
+
+```mermaid
+flowchart TD
+  Envelope["Admit deployment only within capacity envelope"] --> Ready["Start one task and validate readiness"]
+  Connections["Global connection allocation: 250"] --> Ready
+  Ready --> Drain["Drain one old task"]
+  Drain --> Remaining["Reserve zone-loss and catch-up capacity"]
+  Remaining --> Next["Permit next replacement or pause"]
+  Telemetry["Useful throughput, latency, queue age"] --> Envelope
+```
+
+This is a build brief. Submit an open-arrival-rate load harness, readiness/drain handler, resource-envelope calculation and recovery trace. Acceptance: repeat at 850/s with slow warm-up; measure actual queue growth against the model; exceed the connection budget deliberately and show the deployment gate pauses. The arithmetic does not certify real task capacity. Do not create AWS resources unless doing the separately described disposable implementation exercise.
 
 </details>
 

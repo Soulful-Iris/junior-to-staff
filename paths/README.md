@@ -11,12 +11,12 @@ You can follow either independently. The interview path does not require complet
 
 ## The learning loop
 
-1. **Predict.** Look at a visual's starting state. What changes next? Why?
+1. **Frame and predict.** Read the brief before its answer. Name the input, expected output, and constraint; then predict what changes in the first diagram.
 2. **Learn.** Read the explanation and compare the failure with the mechanism that prevents it.
 3. **Implement.** Run an example, change a constraint, and predict the effect before running again.
 4. **Break.** Remove the mechanism and observe the original failure.
 5. **Explain.** Close the page. Draw the request flow, state the invariant, and defend one rejected alternative.
-6. **Revisit.** Repeat the explanation after a day and a week. Log gaps rather than rereading everything.
+6. **Transfer.** Attempt a different problem with the reference closed. Use the [candidate/assessor packs](interviews/practice/README.md) on separate occasions and keep the code, diagrams, and scored evidence. Revisit the prerequisite behind each gap.
 
 ## Switching between paths
 

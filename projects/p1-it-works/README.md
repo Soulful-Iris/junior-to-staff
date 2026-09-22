@@ -1,5 +1,91 @@
 # P1 · it works
 
+## The reviewer's brief
+
+> A small reading group wants to save URLs, see everyone’s items, and track personal reading. A missing title must not lose the saved URL. Build this first version and explain which data the server, browser and external page each control.
+
+This is a **constructed practice brief**, not an attributed company question.
+Prerequisites: [the junior chapters](../../tiers/01-junior/01-the-change-loop/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+
+| Case | Exact input or workload | Expected outcome |
+|---|---|---|
+| Small example | Alice adds URL U as item 7; Bob reads it; Alice marks it read. | Both members can view item 7; only Alice’s read state changes; title failure leaves U saved with a visible outcome. |
+| Boundary / failure | Bob directly sends DELETE item 7, or a URL points to loopback. | Owner check refuses deletion; guarded fetch refuses the internal destination without losing the item. |
+| Scope | One group, persisted data, explicit duplicate policy and accessible forms; no ranking or notifications. | Explain any additional assumption before implementing it. |
+
+Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
+
+## Baseline and the failure to explain
+
+```mermaid
+flowchart TD
+ B["Browser owns all state"] -->|refresh| L["Saved items disappear"]
+ B -->|unchecked URL| F["External title fetch"]
+ F --> H["Failure blocks save"]
+```
+
+The baseline loses state on refresh and makes a remote page an authority over whether local data can be saved.
+
+<details>
+<summary>Reveal the approach and decisions</summary>
+
+First define ownership and the person-item read relation, then persist an authorized item before treating enrichment as optional. Bound and guard fetching. The invariant is durable owner-scoped data with separate personal state; UI checks must be backed by server checks.
+
+</details>
+
+## Follow-up 1 · The title never arrives
+
+**Changed requirement:** A remote page hangs for sixty seconds. How does the save remain useful? Predict which boundary must change before opening the design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+Give the synchronous fetch a small total deadline and save a visible title-failed/pending state. A later durable queue is an explicit next stage; do not leave untracked in-process background work.
+
+```mermaid
+flowchart TD
+ B["Save URL"] --> A["Authorized API"]
+ A --> D["Durable item"]
+ A --> F["Guarded deadline-bound fetch"]
+ F -->|timeout outcome| D
+ D --> R["Saved URL with visible status"]
+```
+
+</details>
+
+## Follow-up 2 · Two people update their read state
+
+**Changed requirement:** Alice and Bob mark item 7 read at the same time. Which rows change? State what evidence would make you reject your first design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+Upsert separate `(user_id,item_id)` read-state rows. Verify group membership at the server and test that reversing either user’s action does not change the other.
+
+```mermaid
+flowchart TD
+ A["Alice marks read"] --> R["Read state keyed by user and item"]
+ B["Bob marks read"] --> R
+ R --> X["Alice, item 7"]
+ R --> Y["Bob, item 7"]
+```
+
+</details>
+
+## Evidence to bring to review
+
+Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+
+**Senior expectation:** Run the clean-clone application, direct authorization checks and accessible main flow. **Additional lead scope:** Explain membership changes and the first operational handoff. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+
+## Supplied mechanism practice
+
+- [Runnable browser/API/store slice](../../paths/interviews/full-stack/bookmark-editor/README.md) — includes its own run command, fixtures and validation limits.
+
+These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+
+## Build and prompt sequence
+
 > Junior tier · fed by sections 01-07 · the question is **can you build the thing at all?**
 
 A shared reading list. People sign in, add a URL, the system fetches the page
@@ -92,7 +178,7 @@ the definition of done, you have delegated the only thing that was yours.
 3. **Grep your own repository for secrets** before every push, and know what you are grepping for.
 4. **Run it from a clean clone in a fresh directory.** The number of projects that only run in the folder they were built in is very large.
 5. **Put a deliberate bug in and watch the suite go red.** If it does not, the suite is decorative. See [06 · Testing](../../tiers/01-junior/06-testing/).
-6. **Tab through the whole flow.** If you cannot add an item using only the keyboard, it does not work for a real group of people, and since June 2025 in the EU that is a legal floor rather than a nicety.
+6. **Tab through the whole flow.** Verify add, error, conflict and focus behavior with a keyboard and the intended accessibility tools. This exercise tests usability; legal scope requires separate jurisdiction-specific review.
 
 ## Break it on purpose
 

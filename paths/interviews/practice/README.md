@@ -1,5 +1,65 @@
 # Practice · turn understanding into visible evidence
 
+> “You have read the worked example. Today you receive an unfamiliar contract,
+> a small codebase and a requirement change. Show what you can implement and defend
+> without seeing the solution. Which uncertainty will you resolve first?”
+
+All assessment prompts here are **constructed**, without company attribution. Training
+timeboxes are not claims about employer round lengths. Keep reference checks separate
+from assessed learner work. A green repository suite tests supplied code; it never
+establishes a candidate's independent skill.
+
+## Start with an observable diagnostic
+
+Choose coding plus practical/debug, then design and the role-specific full-stack or
+infra session. Give the candidate only the linked candidate page and explicitly
+allowed files. The assessor keeps the separate pack closed until its release time.
+For genuine unfamiliarity, another person chooses the variant; a public repository
+cannot technically conceal its answers. If a candidate has read a variant, retire it
+for that candidate and use a changed representation on a later date.
+
+| Session | Candidate material | Assessor-only material |
+|---|---|---|
+| Coding | [Event consumer](candidate/coding.md) | [Follow-ups and anchors](assessor/coding.md) |
+| Practical/debug | [Importer investigation](candidate/practical-debug.md) | [Release schedule and anchors](assessor/practical-debug.md) |
+| Design | [Export service](candidate/design.md) | [Failure/lead constraints](assessor/design.md) |
+| Full stack | [Bookmark repair](candidate/full-stack.md) | [Held-back UI schedules](assessor/full-stack.md) |
+| Infra | [Bounded executor](candidate/infra.md) | [Shutdown/deadlock schedules](assessor/infra.md) |
+
+The pack includes [fully scored senior and lead examples](assessor/scored-examples.md)
+and an [attempt record](attempt-record.md). The examples are fictional calibration
+performances, not claims about a learner or hiring outcome.
+
+```mermaid
+flowchart TD
+  A["Candidate: contract and allowed files"] -->|"independent attempt"| B["Observed code, tests and decisions"]
+  C["Assessor: held-back variant"] -->|"timed changed requirement"| B
+  B -->|"specific evidence"| D["Dimension scores and debrief"]
+```
+
+**Curriculum gate:** on at least two different occasions, complete unfamiliar variants
+with an independent assessor; include both implementation and design/role evidence.
+For senior, seek at least 2 in correctness, implementation, clarification, and
+operations/security on each occasion, with no unresolved core-invariant failure.
+For lead, retain that technical floor and demonstrate 3 in ownership/influence and
+at least one cross-team tradeoff/architecture dimension. A missed gate names the
+next practice task; totals do not cancel a data-loss or authorization failure.
+These thresholds organize learning. They are not validated hiring cutoffs or a pass
+probability, and a solo mock cannot demonstrate real multi-team execution history.
+
+```mermaid
+flowchart TD
+  A["First unfamiliar session"] -->|"observed weakness"| B["Prerequisite practice"]
+  B -->|"different input and representation"| C["Later unfamiliar session"]
+  C -->|"independent evidence on both"| D["Curriculum gate record"]
+  C -->|"invariant still fails"| B
+```
+
+Worked diagnostic: a learner names idempotency but overwrites an equal ID with a
+different payload. Score correctness 0 or 1 according to whether they recover with
+prompting, not 3 for vocabulary. After debrief, use an inventory reservation event
+instead of a transaction import; require the new invariant and a runnable regression.
+
 ## Design mocks
 
 Use [the worked designs](../architecture/designs.md) as prompts before reading their solutions. Record the session or keep a timestamped outline. At minute 25, introduce a changed constraint: ten times the burst, offline clients, stricter consistency, a failed region, or half the budget. Ask the candidate to revise the design, not merely name another service.

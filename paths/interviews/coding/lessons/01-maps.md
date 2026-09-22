@@ -1,5 +1,11 @@
 # 01 · Maps: remember earlier work
 
+> “Given prices [2,7,11,15] and a budget of 9, return two different positions that exactly spend it. Can the same position count twice?”
+
+The result is (0,1); [3] cannot make 6. State which earlier positions are available before choosing a lookup structure.
+
+This is a short prerequisite lesson. Attempt the complete [two sum problem](../problems/01-two-sum/README.md), then [group anagrams](../problems/03-group-anagrams/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Return two distinct indices that sum to a target. Try `[2,7,11,15], 9 → (0,1)`.
 
 ![Maps: remember earlier work](../../../../assets/learning/map-lookup.svg)

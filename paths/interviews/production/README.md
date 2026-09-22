@@ -12,7 +12,7 @@ Start with a real failure. Explain why the original design allowed it, predict t
 | [4 · Stale job status](04-status.md) | GitHub · August 20, 2026 | Projections, outbox, replay, freshness | DynamoDB/Aurora, Kinesis, status API |
 | [5 · Hot partitions](05-hot-keys.md) | GitHub Actions · July 9, 2026 | Key design, ordering, tenant fairness | DynamoDB keys and bounded fan-out |
 
-Each lesson has a mechanism-specific animation, a static alternative, a topology or state diagram, a worked calculation, an implementation exercise, and junior/senior/staff follow-ups. Numbers in our worked examples are deliberately small and reproducible, not company measurements.
+Each lesson starts with a constructed interviewer brief, a workload/expected-behavior contract and an explicit method. It then supplies baseline, corrected and changed-requirement diagrams, the preserved mechanism-specific animation and still, worked calculations, and senior/lead follow-ups. Most implementation exercises are clearly labeled build briefs; the retry case links runnable arithmetic, not a cloud deployment. Numbers in our worked examples are deliberately small and reproducible, not company measurements.
 
 ## Use one case in 45 minutes
 
@@ -34,6 +34,8 @@ For AI-assisted practice: ask for a deliberately flawed implementation of one me
 
 All five selected incidents are within March 22–September 22, 2026. Recent publication does not turn an old incident into a recent one. These reports describe provider observations; they do not establish interview frequency or independent causal proof. AWS mappings and numerical scenarios are curriculum designs, not claims about GitHub's infrastructure. Some source headings and impact-duration summaries disagree; we avoid converting those into precise outage-duration claims.
 
-AWS technical documentation is checked for present behavior and may have an older publication date. Follow the links beside each service claim. No AWS resources were deployed for this casebook.
+AWS technical documentation is official live guidance with publication age unknown; accessed 2026-09-22. It is not counted as recent dated engineering or interview evidence. Follow the links beside each service claim. No AWS resources were deployed for this casebook.
+
+[Unseen incident with raw metrics](../reliability/incident.md) · [Budgeted AI evaluation](../evaluations/README.md) · [Claim-level provenance](../../../docs/research/claim-ledger.md)
 
 [Interview route](../README.md) · [AI engineering route](../../ai-engineering/README.md)

@@ -1,5 +1,33 @@
 # Completed work can have a stale status view
 
+> “A user sees ‘running’ although their job finished. Retrying creates duplicate work, and replay occasionally changes ‘completed’ back to ‘running’. Preserve job identity and monotonic status while showing honest freshness; then handle cancellation racing completion.”
+
+Constructed interview brief. Prerequisites: stable IDs, transactional boundaries, and [queue drain arithmetic](../reliability/README.md).
+
+| Contract | Workload / expected outcome |
+|---|---|
+| Event | `(job=J, version=3, completed)` after running/v2 → completed/v3 |
+| Reordering | running/v2 arrives again → stored completed/v3 remains |
+| Conflict | failed/v3 after completed/v3 → explicit conflict, no silent overwrite |
+| Backlog | 400 updates/s, twenty slots, 200 ms/write → grows 300/s |
+| Recovery | 20 ms/write, same arrivals → 600/s spare; 18,000 items drain in 30 seconds |
+| Excluded | A numeric version alone does not settle business races or make a publish atomic |
+
+## Baseline to challenge
+
+```mermaid
+flowchart TD
+  Worker["Job finishes"] --> Result["Commit result"]
+  Worker --> Publish["Separately publish completion"]
+  Publish --> Projector["Overwrite status on arrival"]
+  Delayed["Late running event"] --> Projector
+  Projector --> UI["UI says running again"]
+  Result --> Gap["Crash before publish loses notification"]
+```
+
+Trace a crash between result and event publication, then a duplicate and a stale update. Decide which store owns the result and version; define an atomic state transition there. Calculate projection lag separately from execution time. Attempt the event sequence before opening the worked design.
+
+
 **Real event:** GitHub Copilot cloud agent, August 20, 2026. Tasks continued completing while a regional managed-database problem delayed status updates. Fixed processing partitions and slow database failover contributed to backlog. GitHub shifted processing and added streaming capacity. [Primary report, published September 9](https://github.blog/news-insights/company-news/github-availability-report-august-2026/).
 
 
@@ -54,6 +82,22 @@ Create a local projector. Deliver `running/v2`, `completed/v3`, `running/v2`, `c
 **Changed requirement:** users may cancel while work completes. Define whether cancellation is a request or a guaranteed terminal state, which side effects can be undone, and who wins the race. A newer integer version cannot choose the business semantics for you.
 
 
+## Follow-ups that change the design
+
+**Senior: finite replay retention.** At observation there are 18,000 pending updates and the oldest is sixty seconds old. If failover adds ninety seconds with zero completions, another `400×90 = 36,000` updates arrive. The resulting 54,000 need `54000/(1000-400) = 90 seconds` to drain after restoration. A conservative retention envelope from the oldest event is therefore `60+90+90 = 240 seconds`, plus margin, under the toy assumptions. Ignoring fresh arrivals during failover would understate the requirement. Hot partitions and slow consumers can extend it; retain until an acknowledged checkpoint where the store supports it.
+
+**Lead: cancellation races completion.** Choose explicit semantics. In this exercise cancel is a request until the authoritative transaction wins. From running/v2, both cancellation and completion attempt a compare-and-set against version 2. Exactly one commits v3; the loser rereads. Completion winning means later cancellation returns “already completed”; cancellation winning denies new execution effects but cannot undo an already external effect. Predict both schedules.
+
+```mermaid
+stateDiagram-v2
+  [*] --> RunningV2
+  RunningV2 --> CompletedV3: completion wins conditional write
+  RunningV2 --> CancelledV3: cancellation wins conditional write
+  CompletedV3 --> CompletedV3: cancel returns already completed
+  CancelledV3 --> CancelledV3: late completion rejected and reconciled
+```
+
+This is a build brief. Submit a local authoritative transaction/outbox, projector and a UI freshness field. Required checks: the five-event sequence above, crash between commit and delivery, replay after checkpoint, both cancellation schedules, and same-version disagreement. A canceled state cannot undo a provider side effect; include reconciliation or clearly exclude external effects. The [reliability incident](../reliability/incident.md) separately assesses raw queue/freshness telemetry without giving the diagnosis first.
 
 </details>
 

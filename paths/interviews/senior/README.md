@@ -25,10 +25,9 @@ Practice prompt: **A notification platform.**
 
 ## Exit checks
 
-- Explain every arrow and write in the design without reading notes.
-- Implement the critical mechanism and make an intentionally broken version fail a test.
-- State time and auxiliary space for coding; identify network, storage, and operational costs for architecture.
-- Respond to a new requirement by changing the design, with a reason.
-- Use [the rubric](../practice/README.md) to identify a concrete next exercise. A score is practice feedback, not a hiring prediction.
+- Implement the [importer](../coding/labs/importer/README.md) against unseen pages and explain replay, conflicts, deadlines and crash recovery.
+- Demonstrate save A/type B and lost acknowledgments in the [editor](../full-stack/bookmark-editor/README.md); draw the changed state and write predicates.
+- During an unfamiliar [design session](../practice/candidate/design.md), calculate capacity, identify the consistency authority, and adapt when a worker crashes after an external effect.
+- Complete two independent unfamiliar occasions using [dimension gates](../practice/README.md). A severe invariant failure cannot be averaged away by polished presentation. Preserve assessor observations and corrected artifacts.
 
 [Interview home](../README.md) · [Recent evidence](../research/README.md)

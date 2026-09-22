@@ -40,6 +40,10 @@ Persistent diagrams with purposeful motion. Every animation has a readable stati
 | Overlap extends the current interval | [Play](merge-intervals.svg) | [Still](merge-intervals-still.svg) |
 | A separator eliminates a whole range | [Play](index-seek.svg) | [Still](index-seek-still.svg) |
 | Contain the slow neighbor | [Play](bulkhead.svg) | [Still](bulkhead-still.svg) |
+| Save the suffix before reversing a link | [Play](linked-pointer-reversal.svg) | [Still](linked-pointer-reversal-still.svg) |
+| Return one branch, combine two locally | [Play](recursion-return-state.svg) | [Still](recursion-return-state-still.svg) |
+| Edit distance advances through solved prefixes | [Play](dp-edit-frontier.svg) | [Still](dp-edit-frontier-still.svg) |
+| Parse the whole input before short-circuit evaluation | [Play](parser-precedence.svg) | [Still](parser-precedence-still.svg) |
 
 ## Remember the complement
 
@@ -244,3 +248,27 @@ Persistent diagrams with purposeful motion. Every animation has a readable stati
 ![Contain the slow neighbor](bulkhead.svg)
 
 [Open animation](bulkhead.svg) · [Static diagram](bulkhead-still.svg)
+
+## Save the suffix before reversing a link
+
+![Save the suffix before reversing a link](linked-pointer-reversal.svg)
+
+[Open animation](linked-pointer-reversal.svg) · [Static diagram](linked-pointer-reversal-still.svg)
+
+## Return one branch, combine two locally
+
+![Return one branch, combine two locally](recursion-return-state.svg)
+
+[Open animation](recursion-return-state.svg) · [Static diagram](recursion-return-state-still.svg)
+
+## Edit distance advances through solved prefixes
+
+![Edit distance advances through solved prefixes](dp-edit-frontier.svg)
+
+[Open animation](dp-edit-frontier.svg) · [Static diagram](dp-edit-frontier-still.svg)
+
+## Parse the whole input before short-circuit evaluation
+
+![Parse the whole input before short-circuit evaluation](parser-precedence.svg)
+
+[Open animation](parser-precedence.svg) · [Static diagram](parser-precedence-still.svg)

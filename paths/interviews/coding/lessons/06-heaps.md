@@ -1,5 +1,11 @@
 # 06 · Heaps: keep the next best candidate
 
+> “A stream is too large to sort after every update. Keep its three largest observations. What does the smallest retained value tell you about a new arrival?”
+
+With retained [4,7,7], discard 2 but admit 9 and remove 4. Then ask why a cheapest tentative route can still have an obsolete heap entry.
+
+This is a short prerequisite lesson. Attempt the complete [top k stream problem](../problems/26-top-k-stream/README.md), then [weighted shortest path](../problems/25-weighted-shortest-path/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Return K frequent values; then compute shortest distances with nonnegative edge weights.
 
 ```mermaid

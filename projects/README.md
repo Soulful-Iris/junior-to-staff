@@ -1,4 +1,4 @@
-# The five projects
+# The five-project spine
 
 One system, built five times over, each time under more pressure.
 
@@ -34,7 +34,9 @@ one without them, because the later projects will have nothing to bite on.
 
 ## How a project works
 
-Each brief has the same five parts:
+Each page now starts with a constructed reviewer brief, exact sample behavior,
+prerequisites, a baseline failure, and two changed-requirement diagrams with
+reasoning kept behind disclosures. The retained build sequence has five parts:
 
 1. **What done means** — the acceptance criteria, written before you start. Not "it feels finished."
 2. **The decisions you are being asked to make** — the architecture points, stated as questions rather than answers, because the reasoning is the learning.
@@ -48,15 +50,35 @@ guessing about.
 
 ## On using an AI for the code
 
-You are expected to. The point of these projects is not typing.
+On the AI-assisted path, direct implementation through the staged prompts and
+verify every stopping point. On the interview path, attempt the brief and
+follow-ups independently before revealing guidance; follow actual interview
+tool rules. These pages are build briefs, not five supplied applications.
 
 But there is a rule that runs through all five: **you must be able to say what
 would make each piece wrong, before you accept it.** If you cannot, you have not
 finished that slice, no matter what the screen shows. Every section gives you
 the specific version of that question for its topic.
 
-The measured backdrop, so this is not a vibe: a 2025 randomised trial found
-experienced developers were **19% slower** using AI tools while believing they
-had been 20% faster. The 2025 Stack Overflow survey found the single largest
-frustration, at 66%, was output that is "almost right, but not quite". Almost
-right is the expensive failure mode, because it survives a skim.
+Passing reference tests checks supplied examples; it does not assess your
+independent work. Use unfamiliar attempts and an independent reviewer to assess
+transfer. A completed project is practice evidence, not a hiring prediction.
+
+## The actual project inventory
+
+There are **45 individually linked project briefs**: 25 section projects in five
+selected sections, 15 act projects, and these five spine stages. The remaining
+sixteen chapter directories have substantive lessons but no five-project set.
+No language variant, hint, or follow-up is counted as another project.
+
+| Collection | Briefs | Ordered index |
+|---|---:|---|
+| Change loop | 5 | [Section projects](../tiers/01-junior/01-the-change-loop/projects.md) |
+| Working with AI | 5 | [Section projects](../tiers/01-junior/02-working-with-an-ai/projects.md) |
+| Backend | 5 | [Section projects](../tiers/01-junior/04-backend/projects.md) |
+| Testing | 5 | [Section projects](../tiers/01-junior/06-testing/projects.md) |
+| Reliability | 5 | [Section projects](../tiers/02-senior/09-reliability/projects.md) |
+| Act 1: junior | 5 | [Act projects](../acts/act-1-junior/README.md) |
+| Act 2: senior | 5 | [Act projects](../acts/act-2-senior/README.md) |
+| Act 3: staff | 5 | [Act projects](../acts/act-3-staff/README.md) |
+| Continuous spine | 5 | P1–P5 in the table above |

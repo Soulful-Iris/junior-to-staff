@@ -1,0 +1,18 @@
+[
+  {
+    "id": "c01",
+    "text": "postgres indexing",
+    "desired": [
+      "database"
+    ],
+    "reason": "synonym absent from baseline"
+  },
+  {
+    "id": "c02",
+    "text": "reintentar solicitudes",
+    "desired": [
+      "reliability"
+    ],
+    "reason": "Spanish unsupported"
+  }
+]

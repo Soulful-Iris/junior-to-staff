@@ -14,10 +14,12 @@ so you can choose the one whose hard part you least want to do, which is where
 the learning is.
 
 The three acts shift in kind as they go. In Act 1 the deliverable is a system.
-In Act 2 it is the same system, survivable, with nothing added that a user can
-see. In Act 3 it is usually a document, a deletion, or somebody else's changed
+In Act 2 it is the same system under operational pressure, with an optional
+AI-feature project that adds user-visible suggestions. In Act 3 it is usually a document, a deletion, or somebody else's changed
 situation — and that is not a softening of the material, it is the job.
 
-Smaller than these: the five projects beside each section, an afternoon each.
+Smaller than these: **25 section briefs across five selected sections** (change
+loop, working with AI, backend, testing, reliability), an afternoon each. The
+other sixteen chapters have lessons but do not currently have five-project sets.
 Larger and continuous: [the spine](../projects/), one system all the way
 through. How all of them are written: [docs/PROJECT-SPEC.md](../docs/PROJECT-SPEC.md).

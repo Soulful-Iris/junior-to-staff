@@ -4,6 +4,29 @@
 
 For every component ask: what data enters, what state changes, what waits, who can access it, and what happens if the response disappears? Use the worked designs after you can answer these questions.
 
+## Practice the boundary before adding boxes
+
+> **Constructed candidate brief:** “Ana saves a bookmark, refreshes the page, and
+> expects her own new value. Traffic increases; the cache expires; a worker
+> pauses; a migration is halfway done. Preserve the same user contract through
+> each change. Which fact or failure would change your next decision?”
+
+| Next boundary | Tiny expected behavior | Runnable or assessed exercise |
+|---|---|---|
+| Concurrent data | Stock 1 admits one reservation | [PostgreSQL schedules and plans](labs/postgresql/README.md) |
+| Cache and replica | One local flight; v8 or explicit unavailable for strict read | [Cache/consistency tests](labs/cache-consistency/README.md) |
+| Cached authorization | Warm revoked A denied, or a stated five-second decision bound | [Revocation](labs/cache-consistency/revocation.md) |
+| Worker/provider | Epoch 1 rejected after epoch 2; lost response stays uncertain | [Recovery lab](labs/recovery-migration/README.md) |
+| Live migration | v2 survives stale v1; deleted data stays deleted | [Migration fixture](labs/recovery-migration/migration.md) |
+| Shard/region change | Stale route rejected; name potentially lost v9 | [Rebalancing and regions](labs/recovery-migration/regions.md) |
+| API contract | String total rejected as malformed provider response | [Local AWS boundary lab](../aws/labs/api-contract/README.md) |
+
+Use the same method across these exercises: state the contract, walk a tiny
+example, identify the invariant and its authority, reproduce the baseline
+failure, move the decision to the boundary that can enforce it, then measure
+resource limits and recovery. Each linked lab supplies baseline/fixed/follow-up
+diagrams and observable assessment; the summaries below supply vocabulary.
+
 ## 1 · Request lifecycle, latency, and capacity
 
 ![Independent work can share the wait](../../../assets/learning/io-waterfall.svg)
@@ -46,6 +69,12 @@ A cursor based on `(created_at,id)` gives a stable tie-breaker. Offset paginatio
 
 An index trades additional storage and write work for cheaper reads. A B-tree narrows a key range; it does not make any arbitrary filter O(log n). A composite `(owner_id,created_at,id)` index serves the query above; query predicates and ordering determine which part is usable.
 
+In PostgreSQL the heap stores row versions separately from B-tree key order.
+Ordered IDs can help index locality without continuously clustering heap rows.
+HOT-eligible updates can avoid new ordinary index entries; not every update
+writes every index. Compare small, large, and skewed plans with actual row and
+buffer counts in the [PostgreSQL lab](labs/postgresql/README.md).
+
 Transactions group changes into a unit with a chosen isolation level. A transaction alone does not imply that two concurrent read-then-write flows cannot oversell. Use an atomic conditional update, an appropriate lock, or serializable isolation with retries. Explain the invariant: available stock never becomes negative.
 
 SQL is a natural start for relational integrity and changing queries. DynamoDB fits known key-based access patterns and explicit partition design. Neither choice removes modelling work. Replicas can serve reads but introduce lag; a read immediately after a write may need primary routing or a stronger read mode.
@@ -65,7 +94,15 @@ Cache-aside reads the cache, reads the database on a miss, then stores the resul
 [Static diagram](../../../assets/learning/cache-coalescing-still.svg)
 
 
-Single-flight lets same-key requests in a process await one in-flight load. Across processes you need coordination, stale-while-revalidate, or another policy. Jitter spreads expirations; it does not guarantee that one hot key cannot stampede. Cache outage bypass needs admission control so the database survives.
+Single-flight lets same-key requests in a process await one in-flight load.
+Across processes, one-loader exclusion requires shared coordination. Serving
+stale values is a freshness policy; refreshes still need coordination if one
+loader is required. Jitter spreads different-key expirations; it does not lock
+one expired key. Cache outage bypass needs rate and concurrency admission so the
+database survives. A finite primary pin cannot guarantee read-your-writes if
+replica lag outlasts it: use authoritative reads or verified session watermarks
+with deadline/fallback. [Executable counterexamples](labs/cache-consistency/README.md)
+check these boundaries separately.
 
 **Implement:** expire one hot key with 100 simultaneous reads; count database loads. **Test:** the loader fails and all waiters are released; the in-flight entry is removed on success and error. **Further:** explain what happens with ten application instances.
 
@@ -108,6 +145,12 @@ The queue lab stores its deterministic result and operation key in the **same Dy
 
 An outbox transaction removes the gap between a business write and recording the intent to publish. The relay can still redeliver. Delivery, processing, and observable effect are different layers of a guarantee.
 
+An expired lease does not stop a paused worker from resuming. Require an atomic
+fencing/version check at the result write. One stored result does not imply one
+remote fetch when a crash can occur before recording completion. The
+[separate recovery extension](labs/recovery-migration/README.md) tests stale owners,
+provider success with lost response, outbox rollback, and dedup retention.
+
 **Test:** commit the result, lose the acknowledgement, retry with the same key; then retry with a different payload. **Further:** decide retention before expiring keys—old retries after expiry can execute again.
 
 ## 7 · Scaling, partitioning, and consistency
@@ -146,6 +189,13 @@ Metrics show aggregate behavior; traces connect dependency work; logs carry deta
 
 Browser state is untrusted input. Enforce object-level authorization at the API and data access boundaries. IAM controls what the service can do to AWS; it does not decide which application user owns an object. Signed upload URLs are temporary capabilities: use short lifetimes, narrow object keys, and server-side ownership records. Validate completion before exposing the object as ready.
 
+Origin-only token authorization is bypassed on shared cache hits. Choose
+authorization on every delivery or an explicit bounded-stale decision policy;
+test the same warmed token after revocation, cache-key isolation, and origin/auth
+outages in [the revocation lab](labs/cache-consistency/revocation.md). A model
+declaration also differs from runtime validation: see the
+[API Gateway contract exercise](../aws/labs/api-contract/README.md).
+
 Protect session credentials, consider CSRF for cookie-based authenticated mutations, use output encoding, and never treat CORS as authorization. Explain how users see authorization failures without leaking another tenant's existence.
 
 **Implement:** a cross-owner access test, an invalid payload test, and an expired capability test. **Further:** carry tenant identity through queue workers and audit logs without trusting submitted tenant IDs.
@@ -158,6 +208,14 @@ Protect session credentials, consider CSRF for cookie-based authenticated mutati
 
 
 Separate deploy from release. Expand a schema so old and new code both work; deploy compatible writers/readers; backfill with a checkpoint; reconcile; shift reads; remove old fields only after all clients migrate. Dual writes without a consistency mechanism create divergence.
+
+Declare the write authority, capture changes durably, apply versions and delete
+tombstones, and repair divergence. Sampled comparison is detection, not repair.
+Rollback after new-only writes needs reverse capture and compatible data. DNS
+TTL and existing connections limit routing reversal; migrated cohorts can gain
+value before full retirement. The [migration fixture](labs/recovery-migration/migration.md)
+executes partial failure, stale backfill, deletion, and replay schedules; the
+[region exercise](labs/recovery-migration/regions.md) makes authority and RPO explicit.
 
 ![Migration: expand, move, verify, and contract](../../../assets/diagrams/migration-phases.svg)
 

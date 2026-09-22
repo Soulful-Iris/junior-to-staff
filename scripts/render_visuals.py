@@ -2,11 +2,14 @@
 
 No shared four-slide timeline. Each study owns its timing and choreography.
 Run the renderer to regenerate animations and their explanatory static alternatives.
+Use --metadata-only to refresh the gallery and manifest without writing any SVG.
+Hand-authored studies are registered here but their SVG bytes are never regenerated.
 """
 from pathlib import Path
 from html import escape
 import json
 import sys
+import argparse
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'assets/learning'
@@ -502,22 +505,44 @@ SPECS=[
 ('cache-coalescing','One load, six waiting callers',cache,6),('conditional-result','Duplicate delivery, one stored result',idem,7),
 ('direct-upload','Separate permission from bytes',upload,7),('browser-race','The older response arrives last',browser_race,7)] + EXTRA_SPECS
 
+# These persistent drawings own their native timelines and are maintained directly.
+# Metadata generation must not pass them through the older fixed-canvas renderer.
+HAND_AUTHORED_SPECS = [
+    ('linked-pointer-reversal', 'Save the suffix before reversing a link', 13,
+     'saved reference arrives before link mutation; variable pointers advance afterward'),
+    ('recursion-return-state', 'Return one branch, combine two locally', 15,
+     'child heights travel upward; parent return state commits after both arrive'),
+    ('dp-edit-frontier', 'Edit distance advances through solved prefixes', 18,
+     'predecessor costs meet at a cell; the frontier advances with two retained rows'),
+    ('parser-precedence', 'Parse the whole input before short-circuit evaluation', 18,
+     'source tokens build precedence structure before a boolean value traverses it'),
+]
+
 def document(title,body,description):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc"><title id="title">{escape(title)}</title><desc id="desc">{escape(description)}</desc><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0 L7 3.5 L0 7" fill="{MUTED}"/></marker></defs><style>text{{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}}.still{{display:none}}@media(prefers-reduced-motion:reduce){{.moving{{display:none}}.still{{display:inline}}}}@media print{{.moving{{display:none}}.still{{display:inline}}}}</style><rect width="760" height="420" rx="10" fill="{BG}"/>{text(32,35,title.upper(),16,MUTED)}{body}</svg>'''
 
-def build():
+def build(metadata_only=False):
     global STILL,DURATION
     OUT.mkdir(parents=True,exist_ok=True)
     manifest=[]
     for key,title,draw,duration in SPECS:
-        DURATION=duration;STILL=False;animated=draw();STILL=True;static=draw()
-        # Full static explanation plus separately authored choreography, no rotating captions.
-        import re
-        labels=' '.join(re.findall(r'<text[^>]*>([^<]+)',static))
-        desc=labels+' Motion timing is illustrative, not a production measurement. The loop restart is not a system event.'
-        (OUT/(key+'.svg')).write_text(document(title,'<g class="moving">'+animated+'</g><g class="still">'+static+'</g>',desc).replace('><','>\n<')+'\n')
-        (OUT/(key+'-still.svg')).write_text(document(title,static,desc).replace('><','>\n<')+'\n')
+        if not metadata_only:
+            DURATION=duration;STILL=False;animated=draw();STILL=True;static=draw()
+            # Full static explanation plus separately authored choreography, no rotating captions.
+            import re
+            labels=' '.join(re.findall(r'<text[^>]*>([^<]+)',static))
+            desc=labels+' Motion timing is illustrative, not a production measurement. The loop restart is not a system event.'
+            (OUT/(key+'.svg')).write_text(document(title,'<g class="moving">'+animated+'</g><g class="still">'+static+'</g>',desc).replace('><','>\n<')+'\n')
+            (OUT/(key+'-still.svg')).write_text(document(title,static,desc).replace('><','>\n<')+'\n')
         manifest.append({'key':key,'title':title,'duration_seconds':duration,'motion':'continuous geometry and causal path traversal'})
+    for key,title,duration,motion in HAND_AUTHORED_SPECS:
+        for suffix in ('.svg', '-still.svg'):
+            if not (OUT/(key+suffix)).is_file():
+                raise FileNotFoundError(f'Hand-authored study must already exist: {key+suffix}')
+        manifest.append({'key':key,'title':title,'duration_seconds':duration,
+                         'motion':motion,'source':'hand-authored'})
+    if len({item['key'] for item in manifest}) != len(manifest):
+        raise ValueError('Motion study keys must be unique')
     (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     gallery='# Motion gallery\n\nPersistent diagrams with purposeful motion. Every animation has a readable static alternative. Timing is illustrative.\n\n[Learning paths](../../README.md) · [Draw the architecture](../../paths/interviews/architecture/whiteboard.md) · [Coding route](../../paths/interviews/coding/README.md)\n\n'
     gallery+=' | Concept | Motion | Static |\n|---|---|---|\n'
@@ -529,5 +554,12 @@ def build():
         gallery+=f'\n## {title}\n\n![{title}]({k}.svg)\n\n[Open animation]({k}.svg) · [Static diagram]({k}-still.svg)\n'
     (OUT/'README.md').write_text(gallery)
 
-    print(f'Built {len(SPECS)} motion studies and {len(SPECS)} readable static alternatives.')
-if __name__=='__main__':build()
+    if metadata_only:
+        print(f'Updated metadata for {len(manifest)} motion studies; no SVG files written.')
+    else:
+        print(f'Built {len(SPECS)} motion/still pairs; preserved {len(HAND_AUTHORED_SPECS)} hand-authored pairs.')
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--metadata-only', action='store_true',
+                        help='refresh manifest/gallery while preserving every SVG byte')
+    build(metadata_only=parser.parse_args().metadata_only)

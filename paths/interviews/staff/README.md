@@ -25,10 +25,9 @@ Practice prompt: **Move a shared platform between data models.**
 
 ## Exit checks
 
-- Explain every arrow and write in the design without reading notes.
-- Implement the critical mechanism and make an intentionally broken version fail a test.
-- State time and auxiliary space for coding; identify network, storage, and operational costs for architecture.
-- Respond to a new requirement by changing the design, with a reason.
-- Use [the rubric](../practice/README.md) to identify a concrete next exercise. A score is practice feedback, not a hiring prediction.
+- Meet the senior implementation gates, including hands-on coding and a failure reproduction; a strategy memo does not replace them.
+- Draw independent producer/consumer rollouts, old/new data ownership, backfill plus tombstones, and a repair path. State when rollback stops being safe.
+- Quantify regional recovery capacity and data-loss limits; assign owners, compatibility tests, stop conditions and retirement evidence across teams.
+- Adapt to two staged constraint changes in the [design assessor pack](../practice/assessor/design.md). Use the [fictional scored lead example](../practice/assessor/scored-examples.md) to calibrate evidence, then record two independently assessed unfamiliar occasions of your own.
 
 [Interview home](../README.md) · [Recent evidence](../research/README.md)

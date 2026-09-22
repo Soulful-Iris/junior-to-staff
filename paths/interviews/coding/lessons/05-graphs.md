@@ -1,5 +1,11 @@
 # 05 · Graphs: visit once, then track prerequisites
 
+> “A deployment must fetch before parsing and parse before saving. Return a legal order, or explain why a newly added dependency makes one impossible.”
+
+An isolated task also belongs in the output. Draw prerequisites before code; distinguish visiting a node from proving all its dependencies have finished.
+
+This is a short prerequisite lesson. Attempt the complete [dependency order problem](../problems/21-dependency-order/README.md), then [grid shortest path](../problems/24-grid-shortest-path/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Count four-connected islands; then return one valid prerequisite order.
 
 ![Graphs: visit once, then track prerequisites](../../../../assets/learning/bfs-frontier.svg)

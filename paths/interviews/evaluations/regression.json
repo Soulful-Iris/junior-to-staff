@@ -1,0 +1,250 @@
+[
+  {
+    "id": "r01",
+    "text": "SQL joins",
+    "expected": [
+      "database"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r02",
+    "text": "DATABASE design",
+    "expected": [
+      "database"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r03",
+    "text": "CSS grid",
+    "expected": [
+      "frontend"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r04",
+    "text": "browser DOM",
+    "expected": [
+      "frontend"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r05",
+    "text": "retry budgets",
+    "expected": [
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r06",
+    "text": "timeout policy",
+    "expected": [
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r07",
+    "text": "SQL and CSS",
+    "expected": [
+      "database",
+      "frontend"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r08",
+    "text": "browser timeout",
+    "expected": [
+      "frontend",
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r09",
+    "text": "database retry",
+    "expected": [
+      "database",
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r10",
+    "text": "SQL CSS retry",
+    "expected": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r11",
+    "text": "",
+    "expected": [],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r12",
+    "text": "cooking soup",
+    "expected": [],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r13",
+    "text": "nosqlword",
+    "expected": [],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r14",
+    "text": "retrystorm",
+    "expected": [],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r15",
+    "text": "timeout.",
+    "expected": [
+      "reliability"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r16",
+    "text": "CSS CSS",
+    "expected": [
+      "frontend"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r17",
+    "text": "sql\ncss",
+    "expected": [
+      "database",
+      "frontend"
+    ],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r18",
+    "text": "sql",
+    "expected": [],
+    "allowed": [],
+    "authorized": true
+  },
+  {
+    "id": "r19",
+    "text": "sql css",
+    "expected": [
+      "frontend"
+    ],
+    "allowed": [
+      "frontend"
+    ],
+    "authorized": true
+  },
+  {
+    "id": "r20",
+    "text": "sql",
+    "expected": [],
+    "allowed": [
+      "database",
+      "frontend",
+      "reliability"
+    ],
+    "authorized": false
+  }
+]

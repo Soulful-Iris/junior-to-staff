@@ -1,5 +1,91 @@
 # P5 · it changes safely
 
+## The reviewer's brief
+
+> Your reading list has old clients, queued refresh jobs and confirmed AI tags. Move bookmark storage without dropping acknowledged writes or reviving deleted items, then retire the old path. How does the hardest consumer constrain rollback?
+
+This is a **constructed practice brief**, not an attributed company question.
+Prerequisites: [P4](../p4-it-reasons/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+
+| Case | Exact input or workload | Expected outcome |
+|---|---|---|
+| Small example | Backfill reads item 7 at v4; live edit produces v5; deletion creates v6 tombstone; v4 arrives last. | Target remains deleted at v6; a delayed backfill cannot overwrite newer live state. |
+| Boundary / failure | An old-store write succeeds while an independent target write fails. | Durable source change capture enables replay/repair; observed divergence is not itself safety. |
+| Scope | Choose authority and compatible readers/writers at each phase; retirement can have benefits beyond earlier cohort gains. | Explain any additional assumption before implementing it. |
+
+Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
+
+## Baseline and the failure to explain
+
+```mermaid
+flowchart TD
+ A["Application write"] --> O["Old store succeeds"]
+ A --> N["New store fails"]
+ O --> X["Acknowledged v5"]
+ N --> Y["Stale v4"]
+```
+
+“Dual-writing is safe” omits the partial-failure and ordering protocol. The migration must retain an authoritative repair source for every acknowledged mutation.
+
+<details>
+<summary>Reveal the approach and decisions</summary>
+
+Write the compatibility matrix, select authority, capture live changes durably, version backfill/replay, and preserve tombstones. Gate read cohorts with semantic comparisons and test rollback against new writes. The invariant is monotonic per-item versions with no lost accepted mutation or resurrection.
+
+</details>
+
+## Follow-up 1 · A delete is missed
+
+**Changed requirement:** Counts match but item 7 is present in the target after deletion. What check was missing? Predict which boundary must change before opening the design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon; name gaps in the source log and resnapshot if history expired.
+
+```mermaid
+flowchart TD
+ S["Source version and tombstone"] --> C["Semantic reconciliation"]
+ T["Target value and version"] --> C
+ C --> R["Version-checked repair"]
+ R --> T
+```
+
+</details>
+
+## Follow-up 2 · Rollback after target-only writes
+
+**Changed requirement:** New writers now create fields the old path cannot read. Can routing alone restore service? State what evidence would make you reject your first design.
+
+<details>
+<summary>Expected reasoning and changed diagram</summary>
+
+No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections; distinguish route admission from data readiness.
+
+```mermaid
+flowchart TD
+ N["Target-only writes"] --> C["Compatibility or reverse projection"]
+ C --> O["Old reader can serve"]
+ R["Routing rollback"] --> O
+ X["No compatible representation"] --> F["Pause and fix forward"]
+```
+
+</details>
+
+## Evidence to bring to review
+
+Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+
+**Senior expectation:** Replay live update/delete fixtures and document a real reversible boundary. **Additional lead scope:** Resolve consumer deadlines, migration cost and honest completion counters. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+
+## Supplied mechanism practice
+
+- [Live migration and rollback fixture](../../paths/interviews/architecture/labs/recovery-migration/migration.md) — includes its own run command, fixtures and validation limits.
+
+These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+
+## Build and prompt sequence
+
 > Staff tier · fed by sections 16, 17, 19, 20 · the question is **can you replace a load-bearing piece without stopping the world?**
 
 The last project is not a feature. It is a **migration** of the system you have
@@ -27,7 +113,7 @@ the document that would let somebody else decide whether to let you do this.
 ## The decisions you are being asked to make
 
 1. **What is the smallest migration that is still genuinely load-bearing?** Too small and it teaches nothing; too large and you will abandon it at 80% and prove the point the hard way.
-2. **Do you run both paths at once, and for how long?** Dual-writing is safe and doubles your failure surface. Cutting over is fast and is a cliff. Say which and why.
+2. **Do you run both paths at once, and for how long?** Independent dual writes can partially fail or reorder. Name the authoritative writer, durable capture, versioned repair and rollback compatibility; then choose a coexistence period and cutover gate.
 3. **How do you verify the new path agrees with the old one?** Shadow reads, comparison in production, a reconciliation job? "We tested it" is not an answer at this scale.
 4. **What is irreversible?** Usually a schema change or a deletion. Find it, and make it the last thing you do rather than the first.
 5. **What would make you stop?** Decide now, while calm. Kill criteria written during an incident are not criteria, they are feelings.
@@ -89,7 +175,7 @@ was never in the formatting.
 
 | do this | what should happen | what it teaches |
 |---|---|---|
-| run the old and new paths on the same input and diff the results | they differ somewhere, and you find out before your users do | shadow comparison is the cheapest safety this project has |
+| run old and new against live updates, deletes and delayed backfill | required invariants match after repair; seeded divergence must be detected | comparison reveals differences; ordered idempotent repair resolves them |
 | abandon the migration at 80% deliberately, for a day | measure what carrying both systems costs you in that day | this is the cost people pay for years without measuring once |
 | roll back mid-migration | you find out what is actually reversible, which is less than you assumed | irreversibility is discovered, not designed, unless you look |
 | have somebody else deploy it | every question they ask is a gap in the document | the document is the artefact, not the code |

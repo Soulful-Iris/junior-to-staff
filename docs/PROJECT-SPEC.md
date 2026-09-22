@@ -13,12 +13,17 @@ Internal spec, 2026-09-21. Bruno's words, which set all of this:
 
 > *"Animations should be everywhere to help understand and visualize lessons."*
 
+The original request above is historical context. The current supplied inventory
+is 25 section projects, 15 act projects, and five spine projects. Sixteen other
+chapter directories do not claim five supplied section projects. Each project
+now lives on its own page, under the [shared teaching standard](LEARNING-EXPERIENCE.md).
+
 ## Three levels, and they do different jobs
 
 | level | where | how many | scale |
 |---|---|---|---|
-| **section projects** | `tiers/<tier>/<section>/projects.md` | 5 per section | an afternoon each. One section's skill, isolated. |
-| **act projects** | `acts/act-<n>-<tier>/README.md` | 5 per act (tier) | a weekend each. Integrates the whole tier. Pick one of the five. |
+| **section projects** | `tiers/<tier>/<section>/projects/<project>.md`, linked by `projects.md` | 25 supplied across five sections | One section's skill, isolated. |
+| **act projects** | `acts/act-<n>-<tier>/projects/<project>.md`, linked by act README | 5 per act, 15 total | Integrates the whole tier. Pick one of five. |
 | **the spine** | `projects/` | 5 total | the whole guide. One system growing, for anyone who prefers continuity to variety. |
 
 An "act" is a tier. His word, and it is the better one: a tier is a rank, an act

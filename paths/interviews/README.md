@@ -4,6 +4,19 @@
 
 Understand the concept. Implement the mechanism. Explain the tradeoff under time pressure. Architecture and AWS are the spine; coding and full-stack implementation are a separate, equally necessary area in this path.
 
+## What the interviewer is asking you to demonstrate
+
+> “A user retries a save after a timeout. Show me the input, the promised state
+> change, and what the retry may safely repeat. Now suppose the first save
+> committed but its response was lost.”
+
+The opening problem is the teaching anchor. Clarify success and failure,
+trace a tiny example, draw or implement a baseline, then change the design only
+when an invariant or measured cost requires it. A useful answer makes its
+assumptions testable. The individual coding problems and project pages supply
+those examples and progressive follow-ups; the assessment packs hold back new
+constraints until after your attempt.
+
 ## Start at your level
 
 | Level | Start here | Architecture target | Coding target |

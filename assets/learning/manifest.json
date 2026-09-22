@@ -202,5 +202,33 @@
     "title": "Contain the slow neighbor",
     "duration_seconds": 6,
     "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "linked-pointer-reversal",
+    "title": "Save the suffix before reversing a link",
+    "duration_seconds": 13,
+    "motion": "saved reference arrives before link mutation; variable pointers advance afterward",
+    "source": "hand-authored"
+  },
+  {
+    "key": "recursion-return-state",
+    "title": "Return one branch, combine two locally",
+    "duration_seconds": 15,
+    "motion": "child heights travel upward; parent return state commits after both arrive",
+    "source": "hand-authored"
+  },
+  {
+    "key": "dp-edit-frontier",
+    "title": "Edit distance advances through solved prefixes",
+    "duration_seconds": 18,
+    "motion": "predecessor costs meet at a cell; the frontier advances with two retained rows",
+    "source": "hand-authored"
+  },
+  {
+    "key": "parser-precedence",
+    "title": "Parse the whole input before short-circuit evaluation",
+    "duration_seconds": 18,
+    "motion": "source tokens build precedence structure before a boolean value traverses it",
+    "source": "hand-authored"
   }
 ]

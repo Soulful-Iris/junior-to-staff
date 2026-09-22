@@ -1,5 +1,11 @@
 # 03 · Prefix sums: count possible starts
 
+> “Count all contiguous transaction ranges that sum to 1 in [1,-1,1]. Negative values and repeated cumulative totals are allowed.”
+
+There are three ranges. Explain why a window based only on whether the sum is too large cannot decide which boundary to move.
+
+This is a short prerequisite lesson. Attempt the complete [subarray sum count problem](../problems/06-subarray-sum-count/README.md), then [product except self](../problems/07-product-except-self/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Count nonempty contiguous ranges summing to K. `[1,-1,1], 1 → 3`.
 
 ![Prefix sums: count possible starts](../../../../assets/learning/prefix-counts.svg)

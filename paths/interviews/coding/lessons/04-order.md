@@ -1,5 +1,11 @@
 # 04 · Sorted data: binary search and intervals
 
+> “Where would target 3 first fit in sorted [1,3,3,8]? Now decide whether bookings ending and starting at time 3 overlap.”
+
+The search returns index 1. Booking policy determines endpoint overlap; write that contract before using either binary search or interval merging.
+
+This is a short prerequisite lesson. Attempt the complete [binary search boundary problem](../problems/11-binary-search-boundary/README.md), then [meeting room capacity](../problems/10-meeting-room-capacity/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Find the first index ≥ target; then merge overlapping closed intervals.
 
 ![Sorted data: binary search and intervals](../../../../assets/learning/binary-halving.svg)

@@ -2,6 +2,28 @@
 
 Build a queue worker whose *entire effect* is one conditional DynamoDB result item. Then demonstrate where that guarantee ends. No email, payment, or external side effect is hidden behind the word “idempotent.”
 
+> **Constructed candidate brief:** “A producer sends operation demo-1 with numbers
+> 1, 2, 3. The store commits 6, but the worker loses the acknowledgment and receives
+> the job again. Preserve the original result. What if demo-1 now carries [9]?”
+
+| Input | Expected result | Boundary |
+|---|---|---|
+| demo-1, [1,2,3], delivered twice | One item, result 6 | Effect and identity in one conditional item |
+| Same ID, [9] | Original 6 retained; conflicting delivery fails | Different intent is not a duplicate success |
+| Store unavailable | Failed batch item retried | No false acknowledgment |
+
+Start with identity and the stored invariant; trace the commit/acknowledgment
+gap; place the result and dedup record in one atomic write; verify matching and
+conflicting replay before adjusting visibility and worker limits.
+
+```mermaid
+flowchart TD
+  Delivery["Queue delivery"] --> Check["Naive check: no prior result"]
+  Check --> Effect["Write effect"]
+  Effect --> Crash["Crash before separate dedup marker"]
+  Crash --> Again["Redelivery can repeat effect"]
+```
+
 ![conditional result: mechanism and changing state](../../../../../assets/learning/conditional-result.svg)
 [Static diagram](../../../../../assets/learning/conditional-result-still.svg)
 
@@ -79,6 +101,27 @@ Do not automatically redrive a DLQ without fixing the cause. Keep original opera
 ## Extend by level
 
 **Junior:** trace one valid and one invalid job; identify persisted versus transient state. **Senior:** add a fake external provider and show why placing it before/after the put creates a crash gap. Add an actual destination idempotency protocol or explicit reconciliation. **Staff:** design tenant quotas, rollout compatibility, replay ownership, recovery objectives, and an admission policy. Label proposed extensions separately from implemented guarantees.
+
+The [separately implemented recovery extension](../../../architecture/labs/recovery-migration/README.md)
+now supplies local tests for stale owners, external success with lost response,
+conflicting payload quarantine, atomic outbox intent, replay-history expiry,
+migration, rebalancing, and regional failure. Its provider/lease models do not
+change this worker's narrow guarantee or prove a deployed external integration.
+
+```mermaid
+flowchart TD
+  Lease["Lease authority: current epoch"] --> Worker["Worker carries epoch + operation ID"]
+  Worker -->|"same operation key"| Provider["External provider: retained idempotency receipt"]
+  Provider -->|"lost response"| Unknown["Uncertain; reconcile or matching replay"]
+  Worker -->|"atomic epoch check"| Result["Protected result store"]
+  Unknown --> Provider
+```
+
+**Assessor:** require the existing local suite to retain result 6 under matching
+redelivery and reject changed intent. Then ask why an expired lease cannot stop
+a paused owner and where the external provider enforces its own idempotency.
+For lead scope, change retention to one day with a seven-day DLQ replay and ask
+for a safe replay policy and owner before allowing a retry.
 
 ## Clean up
 

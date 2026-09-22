@@ -1,5 +1,11 @@
 # 10 · Stateful coding: design an LRU cache
 
+> “Capacity is two entries: put a, put b, get a, then put c. Which key must disappear, and what must remain constant-time?”
+
+Evict b. Lookup and eviction order are different responsibilities; derive the map and pointer invariants before writing get or put.
+
+This is a short prerequisite lesson. Attempt the complete [manual lru cache problem](../problems/28-manual-lru-cache/README.md), then [expiring key value store](../problems/29-expiring-key-value-store/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Implement get and put for a cache with capacity measured in entries.
 
 ![Stateful coding: design an LRU cache](../../../../assets/learning/lru-order.svg)

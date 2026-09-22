@@ -1,5 +1,11 @@
 # 02 · Windows: move boundaries, avoid rescanning
 
+> “Our analyzer receives abba. How long is its longest contiguous span with no repeated character?”
+
+The answer is 2, not 3. Trace what the second b invalidates and why seeing the final a must not move the left boundary backward.
+
+This is a short prerequisite lesson. Attempt the complete [longest unique window problem](../problems/04-longest-unique-window/README.md), then [minimum covering window](../problems/05-minimum-covering-window/README.md), with their contracts, tests and changed requirements.
+
 **Build:** Find the longest substring without repeated characters. `abba → 2`.
 
 ![Windows: move boundaries, avoid rescanning](../../../../assets/learning/window-moves.svg)

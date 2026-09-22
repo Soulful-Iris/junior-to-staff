@@ -2,6 +2,48 @@
 
 > Senior tier · feeds **P3 (it holds under load)**
 
+> **Constructed candidate brief:** “Two hundred readers hit one expired group
+> page on ten API instances. The database has a 100 reads/s spare budget. Keep
+> accepted work within that budget and state what each user sees. Then Ana saves
+> v8 while a replica still holds v7: which reads must see v8?”
+
+| Workload | Expected behavior | Boundary |
+|---|---|---|
+| 200 overlapping same-key misses in one process | One shared load | Successful loader; waiters share one flight |
+| Same workload on ten uncoordinated processes | Up to ten loads | Process-local memory does not coordinate the fleet |
+| 1,000 misses/s, 100 spare origin reads/s | At most 100 admitted origin reads/s | Stale, 429, or 503 for excess, according to policy |
+| Save v8; pin expires at 5s; lag lasts 10s | v8 or an explicit unavailable response for strict reads | A finite pin alone can return v7 at 6s |
+
+Work from one key and one invariant, reproduce the bad interleaving, identify
+where coordination lives, then enforce both a concurrency and a rate budget.
+Run the [cache and consistency lab](../../../paths/interviews/architecture/labs/cache-consistency/README.md)
+before choosing a cache service.
+
+```mermaid
+flowchart TD
+  Readers["200 readers of one key"] --> Cache["Expired cache entry"]
+  Cache -->|"200 independent misses"| Origin["Database: shared connection pool"]
+  Origin --> Wait["Page and sign-in both wait"]
+```
+
+Predict the corrected query count before adding the shared-task boundary. Then
+change the workload to ten instances and place the fleet budget explicitly.
+
+```mermaid
+flowchart TD
+  A["API A: one local flight"] --> Gate["Shared admission: 100/s, 10 active"]
+  B["API B: one local flight"] --> Gate
+  Gate -->|"admitted load"| Origin["Database authority"]
+  Gate -->|"no capacity"| Policy["Authorized bounded stale, 429, or 503"]
+  Origin --> Cache["Populate scoped cache key"]
+```
+
+**Senior follow-up:** cancel the first waiter while followers remain and show
+that shared work and cleanup are correct. **Lead follow-up:** the shared limiter
+is unavailable; choose a fail-closed or preallocated local-budget policy and
+prove the maximum possible fleet load. Copying the full fleet budget into every
+instance is not a safe fallback.
+
 ## The one-liner
 
 Load does not kill systems by filling the disk. It kills them at the connection
@@ -55,23 +97,26 @@ Climb on a measured number; every rung above is dearer and harder to reverse.
    *Invalidation*: the copy can disagree with the truth, and enumerating every
    write that must refresh it is now your job. *The stampede*: when a hot key
    expires, every concurrent reader misses at once and recomputes. The
-   protections are standard: a **single-flight lock** (one recompute; the rest
-   wait or take stale), **stale-while-revalidate** (serve stale now, refresh
-   behind — in HTTP itself since RFC 5861, 2010; checked 2026-09-21), **TTL
-   jitter** (randomised expiry, so keys born together do not die together),
-   **probabilistic early refresh** (a chance of refreshing early, rising near
-   expiry). A cache with none of these is an outage on a timer.
+   mechanisms solve different problems. **Single-flight** shares one in-flight
+   load per key within its coordination boundary. **Stale-while-revalidate**
+   defines a stale response policy; refreshes still need coordination if one
+   loader is required. **TTL jitter** spreads expirations across different keys;
+   **probabilistic early refresh** reduces synchronized refresh risk. Neither
+   jitter nor probability gives deterministic exclusion on one expired key.
 3. **Replicas** — buy read scale and a standby. The bill is **staleness**:
-   replication is asynchronous by default, so a replica is always a little
-   behind, and under load "a little" has no bound. Failover is itself an event
+   asynchronous replication permits a replica to lag; it may also be caught up.
+   Without an enforced bound, lag can exceed any chosen timer. Failover is an event
    that can fail: promote an async replica, and writes the old primary
    acknowledged but never shipped are gone.
 4. **Shard** — splits data across databases by a key; the only rung that buys
-   **write** headroom. The bill: every query must know where to look (routing),
+   partitioned write headroom when the workload permits it. Index tuning,
+   batching, and vertical capacity can also improve writes. The bill: queries
+   must know where to look (routing),
    growth means moving live data (rebalancing), and cross-shard transactions
-   and joins stop being the database's job. PostgreSQL has no native sharding —
-   an extension or your problem. Shard last: it is the one rung with no ladder
-   down.
+   and joins need explicit support. Some distributed databases coordinate
+   cross-shard transactions; their latency and availability costs remain. Plain
+   PostgreSQL does not transparently distribute a table across independent
+   servers. Rebalancing and consolidation need a migration protocol.
 
 **Queues.** A queue buys two things: it absorbs bursts, and it decouples
 failure — the fetcher being down stops fetching, not adding. It bills three:
@@ -101,8 +146,11 @@ system converging. The user who pressed save lives in the meantime: the write
 went to the primary, the next read hit a replica that has not seen it, and the
 edit is gone from the screen. So they save again — now there are two — or stop
 trusting the product. With replica reads, **read-your-writes** is the floor:
-route a user's reads to the primary for a window after they write, or pin
-their session.
+route strict reads to the authoritative primary, or carry a session watermark
+and use only a replica proven to have applied it. Waiting must have a deadline
+and fallback. A finite primary pin is a latency heuristic, not a read-your-writes
+guarantee when lag can outlast it. If the primary fails before async replication,
+the acknowledged write can be lost; session routing cannot restore missing data.
 
 
 ![Cache requests without and with shared loading](../../../assets/learning/cache-coalescing.svg)
@@ -168,24 +216,24 @@ Add caching for the group page. Requirements:
 1. The invalidation story: every write path that must touch this key,
    enumerated. If you cannot enumerate them, say so and fall back to a
    TTL with a stated staleness cost.
-2. Stampede protection: when a hot key expires under 200 concurrent
-   readers, at most one recomputes. Name the mechanism you chose —
-   single-flight lock, stale-while-revalidate, TTL jitter,
-   probabilistic early refresh — and why, then write the test: expire
-   the key under concurrent load and count queries at the database.
-3. Tell me what a user sees when the cache backend is down. The only
-   acceptable answer is "the same page, slower."
+2. Name the coordination scope. For 200 overlapping readers in one
+   process, share one in-flight load; test ten independent instances
+   separately. Jitter spreads different-key expiry; it does not lock
+   one key. State loader failure, cancellation, and lease behavior.
+3. Budget cache-outage bypass: at 1,000 misses/s with only 100 spare
+   origin reads/s, admit at most 100/s and bound concurrent work.
+   Choose authorized bounded-stale responses, 429, or 503 for the
+   remainder. Test actual origin calls and peak in-flight work.
 ```
 
-*Why:* naming the four mechanisms stops get-set-with-a-TTL being sold as
-caching, and requirement 3 stops the cache becoming load-bearing — a
-performance fix turned single point of failure.
+*Why:* the requirements separate response freshness, same-key coordination,
+and downstream survival. A cache outage should not trigger a database outage.
 
 *What you should get back:* code plus a test asserting a count of database
 hits, not a latency. The count is the check that can go red.
 
-*Push back on:* a recompute path with no guard, and any design where
-cache-down means page-down.
+*Push back on:* unlimited bypass or an at-most-one claim with no stated process
+boundary, failure model, or enforcement point.
 
 **Request 3 — a consumer that survives what queues actually do**
 
@@ -222,8 +270,9 @@ Each of these can go red, cheaply:
 
 1. **Expire the hot key under load.** Hold 200 concurrent requests on the page,
    delete the key mid-run, and count queries at the database
-   (`pg_stat_statements`, or a counter in the recompute path). One recompute is
-   a pass. Two hundred is the failure story, rehearsed.
+   (`pg_stat_statements`, or a counter in the recompute path). One successful
+   shared load per process is the local-flight assertion. Test fleet scope,
+   exceptions, cancellation, and outage admission separately.
 2. **Kill the consumer for ten minutes** under write load. Adding items must
    keep working, the backlog must be visible on a graph that existed before the
    test, and you can time the drain after restart. If you learned
@@ -254,8 +303,9 @@ On **P3**, the reading list meets load on purpose:
 
 **Acceptance criteria you can check yourself:**
 
-- Disable the stampede protection and the expire-under-load test goes red with
-  a hit count near your concurrency; enable it and the count returns to one.
+- Disable local sharing and count 200 loads; enable it and count one overlapping
+  load in one process. Ten isolated processes may load ten times. Record the
+  actual scope and test outage rate/concurrency caps and lag beyond stickiness.
 - Ten minutes of dead consumer: adding items still works, and the drain time
   comes from a graph, not a guess.
 - Drop the consumer's unique constraint on a copy and the deliver-twice test

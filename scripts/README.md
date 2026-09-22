@@ -7,6 +7,12 @@ python scripts/check_learning.py
 
 Use [the visual gallery](../assets/learning/README.md) to review the complete set.
 
+For a gallery/manifest refresh that preserves every SVG, run
+`python scripts/render_visuals.py --metadata-only`. The four coding studies
+registered in `HAND_AUTHORED_SPECS` are maintained directly; both renderer modes
+preserve their animated and still files. The default mode regenerates only the
+older studies in `SPECS`. Keep each hand-authored pair present when updating metadata.
+
 The references are `assets/the-arc.svg`, `assets/diagrams/change-loop.svg`, and `assets/diagrams/request-lifecycle.svg`: a persistent drawing, purposeful motion, restrained colors, and labels that remain readable.
 
 - Move the thing the lesson is about: a node, request, frontier, boundary, or capacity budget.
@@ -15,6 +21,17 @@ The references are `assets/the-arc.svg`, `assets/diagrams/change-loop.svg`, and 
 - Keep the entire causal relationship visible. Use a static comparison when simultaneity matters. Movement must add information beyond a color change.
 - Keep timing illustrative and label loop resets that could be mistaken for algorithm behavior.
 - Preserve SVG title/description, a readable `-still.svg`, reduced-motion and print fallbacks. No JavaScript, external fonts, or player is required in the README.
+
+Logical register changes are instantaneous: `b.next` must change when the moving
+reference arrives, rather than crossfade between two targets. A local native
+`animate` may therefore use `calcMode="discrete"` only with
+`data-state-update="true"` for opacity, visibility, or fill. The checker limits
+its owner to four drawing primitives and two short labels, rejects whole-scene
+containers/embedded scenes, and requires accompanying continuous `animateMotion`
+or `animateTransform`. Discrete geometry and unmarked discrete updates remain
+errors. This narrow structural exception does not prove the timing: inspect
+Chromium frames before, during, and after arrival. It does not permit slideshow
+scene swaps or rotating explanatory paragraphs.
 
 Technique coverage now includes clipped queue reservoirs, clipped request waterfalls, path drawing, rotating circuit contacts, radial refill meters, moving list nodes, and changing traffic widths. These techniques encode capacity, time, ownership, or event order; decoration alone is not a reason to animate.
 

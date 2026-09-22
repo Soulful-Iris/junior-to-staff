@@ -1,0 +1,19 @@
+--- a/reference/transport.py
++++ b/reference/transport.py
+@@ -1,4 +1,8 @@
+ """Injected transport owns timeout enforcement; importer owns the total budget."""
++import logging
++logger = logging.getLogger(__name__)
++
++
+ class FakeClock:
+     def __init__(self):
+         self.now = 0.0
+@@ -34,6 +38,7 @@
+         if remaining <= 0:
+             raise TimeoutError("total deadline")
+         response = server.get(cursor, timeout=remaining)
++        logger.info("import attempt=%d status=%d", attempt + 1, response["status"])
+         if clock.now >= deadline:
+             raise TimeoutError("total deadline")
+         status = response["status"]
