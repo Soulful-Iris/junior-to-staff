@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 334" width="760" height="334" role="img" aria-label="One change from written to merged, split into time spent waiting on a machine and time spent waiting on a person. Machine time totals twenty-eight minutes across CI runs and the merge queue. Person time totals twenty-nine hours, almost all of it waiting for a reviewer or waiting for the author to respond. The two bars are drawn to the same scale.">
+  <rect width="760" height="334" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE CHANGE, FROM WRITTEN TO MERGED — SAME SCALE</text>
+
+  <text x="44" y="93" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#1f2b24">waiting on a machine</text>
+  <rect x="180" y="78" width="8" height="22" rx="2" fill="#2f6f4e"/>
+  <text x="198" y="94" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#2f6f4e">28 min</text>
+
+  <text x="44" y="141" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#1f2b24">waiting on a person</text>
+  <rect x="180" y="126" width="480" height="22" rx="2" fill="#c2703d"/>
+  <text x="668" y="142" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#a85d2f">29 h</text>
+
+  <line x1="180" y1="176" x2="660" y2="176" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="180" y="198" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1.2">MACHINE</text>
+  <text x="180" y="218" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">CI on the first push · 8 min</text>
+  <text x="180" y="235" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">CI after the fixes · 8 min</text>
+  <text x="180" y="252" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">merge queue · 12 min</text>
+
+  <text x="430" y="198" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a85d2f" letter-spacing="1.2">PERSON</text>
+  <text x="430" y="218" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">waiting for a reviewer · 19 h</text>
+  <text x="430" y="235" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">the review itself · 25 min</text>
+  <text x="430" y="252" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">author responds · 6 h</text>
+  <text x="430" y="269" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">waiting again · 4 h</text>
+
+  <line x1="44" y1="286" x2="716" y2="286" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="306" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Both numbers are real. Only one of them gets optimised, because it is the one with a graph.</text>
+  <text x="44" y="322" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">The lever is not a faster build. It is whatever makes a change cheaper to judge.</text>
+</svg>
