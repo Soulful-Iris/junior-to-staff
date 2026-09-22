@@ -6,3 +6,4 @@ __pycache__/
 site/out/
 site/tools/node_modules/
 site/.mermaid-cache/
+site/out.*/

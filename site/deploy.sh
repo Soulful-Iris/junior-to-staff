@@ -48,6 +48,23 @@ notify_fail() {
   fi
 }
 
+# Use an isolated, versioned Python environment for the reader dependencies.
+VENV="$STATE/reader-venv"
+REQ_HASH=$(sha256sum site/requirements.txt | cut -d' ' -f1)
+if [ ! -x "$VENV/bin/python" ]; then
+  "$PY" -m venv "$VENV" || { log "VENV FAILED"; notify_fail "dependencies"; exit 1; }
+fi
+if [ "$(cat "$STATE/requirements-hash" 2>/dev/null)" != "$REQ_HASH" ]; then
+  "$VENV/bin/python" -m pip install -r site/requirements.txt || { log "PYTHON DEPENDENCIES FAILED"; notify_fail "dependencies"; exit 1; }
+  echo "$REQ_HASH" > "$STATE/requirements-hash"
+fi
+PY="$VENV/bin/python"
+NODE_HASH=$(sha256sum site/tools/package.json | cut -d' ' -f1)
+if [ "$(cat "$STATE/node-hash" 2>/dev/null)" != "$NODE_HASH" ]; then
+  npm install --prefix site/tools --ignore-scripts --package-lock=false || { log "NODE DEPENDENCIES FAILED"; notify_fail "dependencies"; exit 1; }
+  echo "$NODE_HASH" > "$STATE/node-hash"
+fi
+
 if ! SITE_OUT="$STAGE" "$PY" site/build.py; then
   log "BUILD FAILED, keeping the published site"
   notify_fail "build"; rm -rf "$STAGE"; exit 1

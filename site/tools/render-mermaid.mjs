@@ -18,7 +18,7 @@
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import puppeteer from 'puppeteer-core';
+import { chromium } from 'playwright';
 
 const [manifestPath, outDir] = process.argv.slice(2);
 if (!manifestPath || !outDir) {
@@ -78,12 +78,12 @@ const CONFIG = {
 const chrome = process.env.CHROME_PATH;
 if (!chrome) { console.error('CHROME_PATH not set'); process.exit(2); }
 
-const browser = await puppeteer.launch({
+const browser = await chromium.launch({
   executablePath: chrome,
   args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--font-render-hinting=none'],
 });
 const page = await browser.newPage();
-await page.setViewport({ width: 1400, height: 1200, deviceScaleFactor: 1 });
+await page.setViewportSize({ width: 1400, height: 1200 });
 await page.setContent('<!doctype html><html><body><div id="host"></div></body></html>');
 await page.addScriptTag({ content: mermaidSrc });
 await page.evaluate((cfg) => { window.mermaid.initialize(cfg); }, CONFIG);
@@ -92,10 +92,10 @@ let ok = 0;
 const failures = [];
 for (const d of todo) {
   try {
-    const svg = await page.evaluate(async (code, id) => {
+    const svg = await page.evaluate(async ({code, id}) => {
       const { svg } = await window.mermaid.render(id, code);
       return svg;
-    }, d.code, `m${d.hash.slice(0, 10)}`);
+    }, {code: d.code, id: `m${d.hash.slice(0, 10)}`});
     writeFileSync(join(outDir, `${d.hash}.svg`), svg, 'utf8');
     ok++;
     if (ok % 50 === 0) console.log(`  ${ok}/${todo.length}`);
