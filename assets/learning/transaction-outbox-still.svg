@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Close the commit-to-publish gap</title>
+<desc id="desc">ONE DATABASE TRANSACTION · TWO RECORDS business row outbox event relay broker crash after publish? relay may publish again Commit the business change and its event together; publish after commit. The relay can duplicate events. Consumers still need idempotency; the outbox closes the lost-event gap. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">CLOSE THE COMMIT-TO-PUBLISH GAP</text>
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">ONE DATABASE TRANSACTION · TWO RECORDS</text>
+<rect x="55" y="98" width="320" height="206" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="none">
+</rect>
+<rect x="85" y="121" width="255" height="49" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="212.5" y="150.5" font-size="14" fill="#1f2b24" text-anchor="middle">business row</text>
+<rect x="85" y="231" width="255" height="49" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="212.5" y="260.5" font-size="14" fill="#1f2b24" text-anchor="middle">outbox event</text>
+<path d="M211 170 V231" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M60 105 V296 H365 V105 Z" stroke="#2f6f4e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1020">
+</path>
+<rect x="440" y="224" width="112" height="49" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="496.0" y="253.5" font-size="14" fill="#1f2b24" text-anchor="middle">relay</text>
+<rect x="615" y="224" width="108" height="49" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="669.0" y="253.5" font-size="14" fill="#1f2b24" text-anchor="middle">broker</text>
+<path d="M340 255 H440 M552 249 H615" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M670 273 V315 H493 V278" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="427" y="125" font-size="16" fill="#c2703d" text-anchor="start">crash after publish?</text>
+<text x="427" y="153" font-size="14" fill="#6d6459" text-anchor="start">relay may publish again</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Commit the business change and its event together; publish after commit.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">The relay can duplicate events. Consumers still need idempotency; the outbox closes the lost-event gap.</text>
+</svg>

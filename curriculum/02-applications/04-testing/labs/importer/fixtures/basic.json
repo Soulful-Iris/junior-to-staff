@@ -1,0 +1,4 @@
+{
+  "START": [{"status": 200, "body": {"items": [{"id":"a","amount":"0.29","currency":"USD"},{"id":"b","amount":"-1.10","currency":"USD"}],"nextCursor":"p2"}}],
+  "p2": [{"status":200,"body":{"items":[{"id":"a","amount":"0.29","currency":"USD"},{"id":"c","amount":"0.00","currency":"USD"}],"nextCursor":null}}]
+}

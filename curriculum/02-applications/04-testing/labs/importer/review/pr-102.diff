@@ -1,0 +1,11 @@
+--- a/reference/transport.py
++++ b/reference/transport.py
+@@ -44,7 +44,7 @@
+         if attempt == attempts - 1:
+             raise TimeoutError("attempt budget exhausted")
+         # This exercise's API specifies numeric seconds, not HTTP-date syntax.
+-        delay = response.get("retryAfter", 0.1 * 2**attempt)
++        delay = min(response.get("retryAfter", 0.1 * 2**attempt), 0.05)
+         if isinstance(delay, bool) or not isinstance(delay, (int, float)) or not 0 <= delay < float("inf"):
+             raise ValueError("invalid Retry-After")
+         if clock.now + delay >= deadline:

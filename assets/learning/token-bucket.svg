@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Store burst credit, refill over time</title>
+<desc id="desc">BURST CAPACITY AND REFILL RATE ARE DIFFERENT LIMITS refill tokens / sec BUCKET CAPACITY: 4 admitted requests no token → reject A token pays for admission. A burst can use stored tokens, then refill limits arrivals. Ghost tokens mark bucket slots. Distributed enforcement needs atomic accounting and a clock policy. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">STORE BURST CREDIT, REFILL OVER TIME</text>
+<g class="moving">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">BURST CAPACITY AND REFILL RATE ARE DIFFERENT LIMITS</text>
+<circle cx="153" cy="185" r="67" fill="none" stroke="#ded9d1" stroke-width="12">
+</circle>
+<circle cx="153" cy="185" r="67" fill="none" stroke="#2f6f4e" stroke-width="12" stroke-dasharray="421" stroke-dashoffset="105" transform="rotate(-90 153 185)">
+<animate attributeName="stroke-dashoffset" values="421;0;0;421" keyTimes="0;0.65;0.93;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</circle>
+<text x="153" y="183" font-size="19" fill="#2f6f4e" text-anchor="middle">refill</text>
+<text x="153" y="207" font-size="13" fill="#6d6459" text-anchor="middle">tokens / sec</text>
+<rect x="310" y="115" width="166" height="143" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="393.0" y="191.5" font-size="14" fill="#1f2b24" text-anchor="middle">
+</text>
+<text x="320" y="102" font-size="11" fill="#6d6459" text-anchor="start">BUCKET CAPACITY: 4</text>
+<circle cx="336" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="336" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.119;0.12;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</circle>
+<g>
+<circle cx="0" cy="0" r="7" fill="#2f6f4e">
+</circle>
+<animateMotion path="M336 181 Q510 181 624 259" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.12;0.37;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.119;0.12;0.369;0.37;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<circle cx="373" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="373" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.209;0.21;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</circle>
+<g>
+<circle cx="0" cy="0" r="7" fill="#2f6f4e">
+</circle>
+<animateMotion path="M373 181 Q525 181 624 259" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.21;0.45999999999999996;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.209;0.21;0.45899999999999996;0.45999999999999996;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<circle cx="410" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="410" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.299;0.3;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</circle>
+<g>
+<circle cx="0" cy="0" r="7" fill="#2f6f4e">
+</circle>
+<animateMotion path="M410 181 Q540 181 624 259" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.3;0.55;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.299;0.3;0.549;0.55;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<circle cx="447" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="447" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.389;0.39;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</circle>
+<g>
+<circle cx="0" cy="0" r="7" fill="#2f6f4e">
+</circle>
+<animateMotion path="M447 181 Q555 181 624 259" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.39;0.64;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.389;0.39;0.639;0.64;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="546" y="270" width="168" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="630.0" y="298.0" font-size="14" fill="#1f2b24" text-anchor="middle">admitted requests</text>
+<path d="M476 127 H624 V198" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="504" y="105" font-size="15" fill="#c2703d" text-anchor="start">no token → reject</text>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M476 127 H624 V198" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.72;0.94;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.719;0.72;0.939;0.94;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A token pays for admission. A burst can use stored tokens, then refill limits arrivals.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Ghost tokens mark bucket slots. Distributed enforcement needs atomic accounting and a clock policy.</text>
+</g>
+<g class="still">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">BURST CAPACITY AND REFILL RATE ARE DIFFERENT LIMITS</text>
+<circle cx="153" cy="185" r="67" fill="none" stroke="#ded9d1" stroke-width="12">
+</circle>
+<circle cx="153" cy="185" r="67" fill="none" stroke="#2f6f4e" stroke-width="12" stroke-dasharray="421" stroke-dashoffset="105" transform="rotate(-90 153 185)">
+</circle>
+<text x="153" y="183" font-size="19" fill="#2f6f4e" text-anchor="middle">refill</text>
+<text x="153" y="207" font-size="13" fill="#6d6459" text-anchor="middle">tokens / sec</text>
+<rect x="310" y="115" width="166" height="143" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="393.0" y="191.5" font-size="14" fill="#1f2b24" text-anchor="middle">
+</text>
+<text x="320" y="102" font-size="11" fill="#6d6459" text-anchor="start">BUCKET CAPACITY: 4</text>
+<circle cx="336" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="373" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="410" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="447" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<rect x="546" y="270" width="168" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="630.0" y="298.0" font-size="14" fill="#1f2b24" text-anchor="middle">admitted requests</text>
+<path d="M476 127 H624 V198" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="504" y="105" font-size="15" fill="#c2703d" text-anchor="start">no token → reject</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A token pays for admission. A burst can use stored tokens, then refill limits arrivals.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Ghost tokens mark bucket slots. Distributed enforcement needs atomic accounting and a clock policy.</text>
+</g>
+</svg>

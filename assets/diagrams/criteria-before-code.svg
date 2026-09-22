@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 352" width="760" height="352" role="img" aria-label="Two ways to work with an AI. In the first, you decide what would prove the change works, then ask for it, then it writes the code, then you check against the criterion you already wrote. In the second, you ask, it writes, you read it and it looks right, and only then do you write the test — so the test describes the code it was written from, and cannot disagree with it.">
+  <rect width="760" height="352" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="30" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHO DECIDES WHAT DONE MEANS</text>
+
+  <!-- =============== criteria first =============== -->
+  <text x="44" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e" letter-spacing="1.3">CRITERIA FIRST</text>
+
+  <path d="M 121 88 C 180 56, 520 56, 595 88" fill="none" stroke="#2f6f4e" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M 595 88 l -5.4 -6.4 l 7 -1.6 z" fill="#2f6f4e"/>
+  <text x="358" y="46" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#2f6f4e">the check already existed</text>
+
+  <g fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.3">
+    <rect x="56" y="92" width="130" height="44" rx="7"/>
+    <rect x="214" y="92" width="130" height="44" rx="7"/>
+    <rect x="530" y="92" width="130" height="44" rx="7"/>
+  </g>
+  <rect x="372" y="92" width="130" height="44" rx="7" fill="#f4f2ee" stroke="#8a857d" stroke-width="1.3" stroke-dasharray="5 3"/>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24" text-anchor="middle">
+    <text x="121" y="110">what would</text><text x="121" y="125">prove this?</text>
+    <text x="279" y="110">ask for a change</text><text x="279" y="125">that ends runnable</text>
+    <text x="437" y="110" fill="#6d6459">it writes</text><text x="437" y="125" fill="#6d6459">the code</text>
+    <text x="595" y="110">run the check</text><text x="595" y="125">you already wrote</text>
+  </g>
+  <g stroke="#2f6f4e" stroke-width="1.4" fill="#2f6f4e">
+    <line x1="186" y1="114" x2="208" y2="114"/><path d="M 212 114 l -6 -3.5 l 0 7 z"/>
+    <line x1="344" y1="114" x2="366" y2="114"/><path d="M 370 114 l -6 -3.5 l 0 7 z"/>
+    <line x1="502" y1="114" x2="524" y2="114"/><path d="M 528 114 l -6 -3.5 l 0 7 z"/>
+  </g>
+  <text x="56" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">It can go red, because it was written by somebody who had not seen the answer.</text>
+
+  <line x1="44" y1="178" x2="716" y2="178" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- =============== criteria after =============== -->
+  <text x="44" y="204" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a85d2f" letter-spacing="1.3">CRITERIA AFTER</text>
+
+  <g fill="#faf0e9" stroke="#c2703d" stroke-width="1.3">
+    <rect x="56" y="222" width="130" height="44" rx="7"/>
+    <rect x="530" y="222" width="130" height="44" rx="7"/>
+  </g>
+  <rect x="214" y="222" width="130" height="44" rx="7" fill="#f4f2ee" stroke="#8a857d" stroke-width="1.3" stroke-dasharray="5 3"/>
+  <rect x="372" y="222" width="130" height="44" rx="7" fill="#faf0e9" stroke="#c2703d" stroke-width="1.3"/>
+
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24" text-anchor="middle">
+    <text x="121" y="240">ask for</text><text x="121" y="255">a change</text>
+    <text x="279" y="240" fill="#6d6459">it writes</text><text x="279" y="255" fill="#6d6459">the code</text>
+    <text x="437" y="240">read it,</text><text x="437" y="255">it looks right</text>
+    <text x="595" y="240">now write</text><text x="595" y="255">the test</text>
+  </g>
+  <g stroke="#c2703d" stroke-width="1.4" fill="#c2703d">
+    <line x1="186" y1="244" x2="208" y2="244"/><path d="M 212 244 l -6 -3.5 l 0 7 z"/>
+    <line x1="344" y1="244" x2="366" y2="244"/><path d="M 370 244 l -6 -3.5 l 0 7 z"/>
+    <line x1="502" y1="244" x2="524" y2="244"/><path d="M 528 244 l -6 -3.5 l 0 7 z"/>
+  </g>
+
+  <path d="M 437 270 C 460 300, 570 300, 595 270" fill="none" stroke="#a85d2f" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <path d="M 595 270 l -6.8 3.2 l 1.4 -7 z" fill="#a85d2f"/>
+  <text x="516" y="312" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#a85d2f">the test is written from the code it is testing</text>
+
+  <text x="56" y="290" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a85d2f">It cannot go red.</text>
+
+  <line x1="44" y1="326" x2="716" y2="326" stroke="#ded9d1" stroke-width="1"/>
+  <text x="44" y="346" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Both loops ship. Only one of them can tell you the code is wrong.</text>
+</svg>

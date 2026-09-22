@@ -1,12 +1,7 @@
-Research pass for the guide: what the JUNIOR foundation actually is in 2026, for someone who directs an AI and judges what comes back.
+# Junior foundations: declared scope, not market statistics
 
-The spine of it, once the seven areas were laid side by side: every area has quietly reorganized around READING code rather than writing it. DORA 2025 calls AI an amplifier and names a verification tax; METR's RCT found experienced devs 19% SLOWER with AI while believing they were 20% faster (the perception gap is the junior lesson, not the slowdown); SO 2025 survey: 84% use AI, trust figures conflict across framings (33% trust accuracy vs 46% distrust, verified 2026-09-21; a separate 29% figure circulates), top frustration 'almost right but not quite' at 66%. GitClear: duplication up ~8x, refactoring collapsing, error-masking constructs +47%. So the foundation = judgment infrastructure.
+Reviewed 2026-09-22. The original working note's survey, speed, duplication, adoption and legal claims lacked claim-level source and applicability records. They are withdrawn in the [claim ledger](claim-ledger.md). A current access date does not turn an older experiment into recent evidence; accessibility requirements cannot be generalized to every product and jurisdiction from a slogan.
 
-Surprises worth keeping:
-- Accessibility is now LAW, not polish: EAA enforced since 2025-06-28, WCAG 2.2 AA is the benchmark, FTC fined an overlay vendor. No roadmap I have seen teaches it as a legal floor.
-- Postgres 18 (Sept 2025) added uuidv7() — the platform itself absorbed a classic junior mistake (random UUID PKs wrecking index locality).
-- Lockfiles became security infrastructure after Shai-Hulud (Sept 2025, worm; 2.0 in Nov). CISA advisory exists. But PackageGate (Jan 2026) undermined even the post-worm defenses — teach defense in depth, not a checklist.
-- Tests inverted into the spec you hand the AI. AI-written tests-after assert what the code DOES, not what it SHOULD do; self-referential mock tests pass by construction. That is 'count the instruments' wearing a test runner.
-- GitHub shipped native stacked PRs (public preview July 2026) + merge queues + Copilot review GA — the whole change workflow is reshaping around review capacity as the bottleneck.
+This guide deliberately teaches two abilities: implement and explain independently, and direct/review AI-assisted changes. Reading generated code does not replace writing it on the independent interview route. The instructional sequence is a concrete contract, a tiny example, baseline code, a counterexample, a revised invariant and runnable checks. That is a curriculum decision subject to learner assessment, not a reported industry-wide shift.
 
-Could not fully verify: GraphQL numbers conflict (340% Fortune-500 growth vs 'down from 40% peak') — the agreed shape is retreat to internal federated layers. Did not verify current Node LTS; guide should teach 'check the release schedule' as the skill anyway.
+Version-specific technical lessons use official documentation. For example, C12 in the ledger constrains what we say about PostgreSQL heap layout; do not infer that every random UUID primary key physically randomizes table rows. Platform releases, legal applicability and hiring formats should be checked at the point where they change a real decision.

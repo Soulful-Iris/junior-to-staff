@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">A circuit opens, then probes recovery</title>
+<desc id="desc">STOP SPENDING REQUESTS ON A FAILING DEPENDENCY caller dependency fail fast while open one probe after cooldown closed  →  open  →  half-open probe  →  closed if healthy An open circuit blocks normal calls. A bounded probe tests recovery. Thresholds, cooldown, and fallback are policy. A failed probe reopens the circuit. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">A CIRCUIT OPENS, THEN PROBES RECOVERY</text>
+<g class="moving">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">STOP SPENDING REQUESTS ON A FAILING DEPENDENCY</text>
+<rect x="40" y="137" width="136" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="108.0" y="167.5" font-size="14" fill="#1f2b24" text-anchor="middle">caller</text>
+<rect x="562" y="137" width="155" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="639.5" y="167.5" font-size="14" fill="#1f2b24" text-anchor="middle">dependency</text>
+<path d="M176 162 H330 M410 162 H562" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="330" cy="162" r="5" fill="#1f2b24">
+</circle>
+<circle cx="410" cy="162" r="5" fill="#1f2b24">
+</circle>
+<g transform="rotate(-42 330 162)">
+<path d="M330 162 H410" stroke="#c2703d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<animateTransform attributeName="transform" type="rotate" values="0 330 162;0 330 162;-42 330 162;-42 330 162;0 330 162;0 330 162" keyTimes="0;.2;.3;.62;.72;1" dur="8s" repeatCount="indefinite">
+</animateTransform>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M176 162 H562" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.17;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.169;0.17;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M176 162 H315 Q325 162 325 190 V259 H176" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.32;0.51;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.319;0.32;0.509;0.51;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M176 162 H315 Q325 162 325 190 V259 H176" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.38;0.5700000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.379;0.38;0.5690000000000001;0.5700000000000001;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M176 162 H315 Q325 162 325 190 V259 H176" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.44;0.63;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.439;0.44;0.629;0.63;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M315 162 Q325 162 325 190 V259 H176" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="45" y="282" font-size="16" fill="#c2703d" text-anchor="start">fail fast while open</text>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M176 162 H562" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.73;0.85;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.729;0.73;0.849;0.85;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 177 H420" dur="8s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.86;0.96;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.859;0.86;0.959;0.96;1" dur="8s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="410" y="246" font-size="16" fill="#2f6f4e" text-anchor="start">one probe after cooldown</text>
+<text x="43" y="328" font-size="18" fill="#1f2b24" text-anchor="start">closed  →  open  →  half-open probe  →  closed if healthy</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">An open circuit blocks normal calls. A bounded probe tests recovery.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Thresholds, cooldown, and fallback are policy. A failed probe reopens the circuit.</text>
+</g>
+<g class="still">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">STOP SPENDING REQUESTS ON A FAILING DEPENDENCY</text>
+<rect x="40" y="137" width="136" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="108.0" y="167.5" font-size="14" fill="#1f2b24" text-anchor="middle">caller</text>
+<rect x="562" y="137" width="155" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="639.5" y="167.5" font-size="14" fill="#1f2b24" text-anchor="middle">dependency</text>
+<path d="M176 162 H330 M410 162 H562" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="330" cy="162" r="5" fill="#1f2b24">
+</circle>
+<circle cx="410" cy="162" r="5" fill="#1f2b24">
+</circle>
+<g transform="rotate(-42 330 162)">
+<path d="M330 162 H410" stroke="#c2703d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+</g>
+<path d="M315 162 Q325 162 325 190 V259 H176" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="45" y="282" font-size="16" fill="#c2703d" text-anchor="start">fail fast while open</text>
+<text x="410" y="246" font-size="16" fill="#2f6f4e" text-anchor="start">one probe after cooldown</text>
+<text x="43" y="328" font-size="18" fill="#1f2b24" text-anchor="start">closed  →  open  →  half-open probe  →  closed if healthy</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">An open circuit blocks normal calls. A bounded probe tests recovery.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Thresholds, cooldown, and fallback are policy. A failed probe reopens the circuit.</text>
+</g>
+</svg>

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">One prefix opens several completions</title>
+<desc id="desc">PREFIX &amp;quot;ca&amp;quot; · SHARED CHARACTERS SHARE A PATH root c a r t d cat car / card Walk the prefix once, then explore descendants for matching words. Mark word endings explicitly: car is a word even though card continues. Work includes output size. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">ONE PREFIX OPENS SEVERAL COMPLETIONS</text>
+<g class="moving">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">PREFIX &quot;ca&quot; · SHARED CHARACTERS SHARE A PATH</text>
+<path d="M90 180 L235 180" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M235 180 L385 180" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M385 180 L560 110" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M385 180 L560 263" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M560 110 L685 110" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M90 180 H385" stroke="#2f6f4e" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="295">
+<animate attributeName="stroke-dashoffset" values="295;0;0" keyTimes="0;0.4;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</path>
+<circle cx="90" cy="180" r="24" fill="#ded9d1">
+</circle>
+<text x="90" y="185" font-size="15" fill="#1f2b24" text-anchor="middle">root</text>
+<circle cx="235" cy="180" r="24" fill="#2f6f4e">
+</circle>
+<text x="235" y="185" font-size="15" fill="#faf9f7" text-anchor="middle">c</text>
+<circle cx="385" cy="180" r="24" fill="#2f6f4e">
+</circle>
+<text x="385" y="185" font-size="15" fill="#faf9f7" text-anchor="middle">a</text>
+<circle cx="560" cy="110" r="24" fill="#ded9d1">
+</circle>
+<text x="560" y="115" font-size="15" fill="#1f2b24" text-anchor="middle">r</text>
+<circle cx="560" cy="263" r="24" fill="#ded9d1">
+</circle>
+<text x="560" y="268" font-size="15" fill="#1f2b24" text-anchor="middle">t</text>
+<circle cx="685" cy="110" r="24" fill="#ded9d1">
+</circle>
+<text x="685" y="115" font-size="15" fill="#1f2b24" text-anchor="middle">d</text>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M385 180 L560 110 H685" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.42;0.85;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.419;0.42;0.849;0.85;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M385 180 L560 263" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.42;0.85;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.419;0.42;0.849;0.85;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="600" y="263" font-size="16" fill="#c2703d" text-anchor="start">cat</text>
+<text x="620" y="80" font-size="16" fill="#2f6f4e" text-anchor="start">car / card</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Walk the prefix once, then explore descendants for matching words.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Mark word endings explicitly: car is a word even though card continues. Work includes output size.</text>
+</g>
+<g class="still">
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">PREFIX &quot;ca&quot; · SHARED CHARACTERS SHARE A PATH</text>
+<path d="M90 180 L235 180" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M235 180 L385 180" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M385 180 L560 110" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M385 180 L560 263" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M560 110 L685 110" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M90 180 H385" stroke="#2f6f4e" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="295">
+</path>
+<circle cx="90" cy="180" r="24" fill="#ded9d1">
+</circle>
+<text x="90" y="185" font-size="15" fill="#1f2b24" text-anchor="middle">root</text>
+<circle cx="235" cy="180" r="24" fill="#2f6f4e">
+</circle>
+<text x="235" y="185" font-size="15" fill="#faf9f7" text-anchor="middle">c</text>
+<circle cx="385" cy="180" r="24" fill="#2f6f4e">
+</circle>
+<text x="385" y="185" font-size="15" fill="#faf9f7" text-anchor="middle">a</text>
+<circle cx="560" cy="110" r="24" fill="#ded9d1">
+</circle>
+<text x="560" y="115" font-size="15" fill="#1f2b24" text-anchor="middle">r</text>
+<circle cx="560" cy="263" r="24" fill="#ded9d1">
+</circle>
+<text x="560" y="268" font-size="15" fill="#1f2b24" text-anchor="middle">t</text>
+<circle cx="685" cy="110" r="24" fill="#ded9d1">
+</circle>
+<text x="685" y="115" font-size="15" fill="#1f2b24" text-anchor="middle">d</text>
+<text x="600" y="263" font-size="16" fill="#c2703d" text-anchor="start">cat</text>
+<text x="620" y="80" font-size="16" fill="#2f6f4e" text-anchor="start">car / card</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Walk the prefix once, then explore descendants for matching words.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Mark word endings explicitly: car is a word even though card continues. Work includes output size.</text>
+</g>
+</svg>

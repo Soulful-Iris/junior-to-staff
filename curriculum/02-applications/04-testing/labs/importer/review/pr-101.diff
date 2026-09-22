@@ -1,0 +1,12 @@
+--- a/reference/store.py
++++ b/reference/store.py
+@@ -16,9 +16,6 @@
+     def persist(self, rows):
+         with self.db:
+             for row in rows:
+-                old = self.db.execute("SELECT id,cents,currency FROM transactions WHERE id=?", (row[0],)).fetchone()
+-                if old is not None and old != row:
+-                    raise ValueError("duplicate id with conflicting payload")
+                 self.db.execute("INSERT OR IGNORE INTO transactions VALUES(?,?,?)", row)
+ 
+     def advance(self, cursor):

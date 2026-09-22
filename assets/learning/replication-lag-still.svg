@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Acknowledged here, not visible everywhere</title>
+<desc id="desc">ASYNC REPLICA · A WRITE ACK DOES NOT MEAN EVERY READER HAS IT PRIMARY v4 v5 v6 v7 v8 REPLICA v4 v5 v6 v7 v8 acknowledge v8 pending immediate read can see v7 Replication catches up later; route freshness-sensitive reads deliberately. Options include primary reads or a version watermark. Availability and latency tradeoffs remain. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">ACKNOWLEDGED HERE, NOT VISIBLE EVERYWHERE</text>
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">ASYNC REPLICA · A WRITE ACK DOES NOT MEAN EVERY READER HAS IT</text>
+<text x="40" y="123" font-size="11" fill="#2f6f4e" text-anchor="start">PRIMARY</text>
+<rect x="200" y="98" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="237.5" y="124.0" font-size="14" fill="#1f2b24" text-anchor="middle">v4</text>
+<rect x="291" y="98" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="328.5" y="124.0" font-size="14" fill="#1f2b24" text-anchor="middle">v5</text>
+<rect x="382" y="98" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="419.5" y="124.0" font-size="14" fill="#1f2b24" text-anchor="middle">v6</text>
+<rect x="473" y="98" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="510.5" y="124.0" font-size="14" fill="#1f2b24" text-anchor="middle">v7</text>
+<rect x="564" y="98" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="601.5" y="124.0" font-size="14" fill="#1f2b24" text-anchor="middle">v8</text>
+<text x="40" y="247" font-size="11" fill="#c2703d" text-anchor="start">REPLICA</text>
+<rect x="200" y="222" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="237.5" y="248.0" font-size="14" fill="#1f2b24" text-anchor="middle">v4</text>
+<rect x="291" y="222" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="328.5" y="248.0" font-size="14" fill="#1f2b24" text-anchor="middle">v5</text>
+<rect x="382" y="222" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="419.5" y="248.0" font-size="14" fill="#1f2b24" text-anchor="middle">v6</text>
+<rect x="473" y="222" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="510.5" y="248.0" font-size="14" fill="#1f2b24" text-anchor="middle">v7</text>
+<rect x="564" y="222" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="601.5" y="248.0" font-size="14" fill="#1f2b24" text-anchor="middle">v8</text>
+<rect x="561" y="95" width="76" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="none">
+</rect>
+<text x="40" y="157" font-size="15" fill="#2f6f4e" text-anchor="start">acknowledge v8</text>
+<path d="M600 140 C710 145 710 220 600 222" stroke="#2f6f4e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<rect x="562" y="220" width="75" height="42" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="599" y="247" font-size="12" fill="#c2703d" text-anchor="middle">pending</text>
+</g>
+<path d="M300 292 H518 V270" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="42" y="311" font-size="18" fill="#c2703d" text-anchor="start">immediate read can see v7</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Replication catches up later; route freshness-sensitive reads deliberately.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Options include primary reads or a version watermark. Availability and latency tradeoffs remain.</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">A buffer is a reservoir, not capacity</title>
+<desc id="desc">UNBOUNDED BUFFER BOUNDED ADMISSION arrival &amp;gt; service queue memory and wait time grow arrival &amp;gt; service queue 429 / 503 A queue stores a rate mismatch. A bound forces an explicit overload response. Choose reject, defer, or shed. Watch age as well as depth; autoscaling cannot erase startup delay. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">A BUFFER IS A RESERVOIR, NOT CAPACITY</text>
+<text x="40" y="73" font-size="11" fill="#c2703d" text-anchor="start">UNBOUNDED BUFFER</text>
+<text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">BOUNDED ADMISSION</text>
+<defs>
+<clipPath id="reservoir0s">
+<rect x="95" y="140" width="165" height="156" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+</clipPath>
+</defs>
+<g clip-path="url(#reservoir0s)">
+<path d="M80 0 Q120 -10 160 0 T240 0 T300 0 V180 H80 Z" fill="#c2703d" transform="translate(0 148)">
+</path>
+</g>
+<rect x="95" y="140" width="165" height="156" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="none">
+</rect>
+<path d="M177 100 V132" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M177 298 V330" stroke="#2f6f4e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="95" y="126" font-size="15" fill="#1f2b24" text-anchor="start">arrival &gt; service</text>
+<text x="100" y="316" font-size="13" fill="#6d6459" text-anchor="start">queue</text>
+<text x="42" y="332" font-size="15" fill="#c2703d" text-anchor="start">memory and wait time grow</text>
+<defs>
+<clipPath id="reservoir385s">
+<rect x="480" y="140" width="165" height="156" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+</clipPath>
+</defs>
+<g clip-path="url(#reservoir385s)">
+<path d="M465 0 Q505 -10 545 0 T625 0 T685 0 V180 H465 Z" fill="#2f6f4e" transform="translate(0 226)">
+</path>
+</g>
+<rect x="480" y="140" width="165" height="156" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="none">
+</rect>
+<path d="M562 100 V132" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M562 298 V330" stroke="#2f6f4e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="480" y="126" font-size="15" fill="#1f2b24" text-anchor="start">arrival &gt; service</text>
+<text x="485" y="316" font-size="13" fill="#6d6459" text-anchor="start">queue</text>
+<path d="M645 176 H710 V116" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="657" y="100" font-size="12" fill="#c2703d" text-anchor="start">429 / 503</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A queue stores a rate mismatch. A bound forces an explicit overload response.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Choose reject, defer, or shed. Watch age as well as depth; autoscaling cannot erase startup delay.</text>
+</svg>

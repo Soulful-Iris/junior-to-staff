@@ -1,110 +1,86 @@
-# How to use this
+# How to use the curriculum
 
-The short version is on the front page. This is the longer one, for when you
-want to know why it is shaped like this.
+Start with [the ordered subjects](../curriculum/README.md). Each chapter explains
+what it teaches, what comes before it, and where to continue. The coding,
+project, AWS and assessment indexes point to the same material.
 
-## The one rule
+## Start with the actual problem
 
-**Build the slice. Run the checks.**
+Read the opening brief and contract before the worked answer. State an ordinary
+example, a boundary case and the invariant. Predict the first diagram, then
+implement or draw a simple correct baseline. Use the explanation to check your
+reasoning and identify the repeated work or failed boundary.
 
-Reading a section and agreeing with it produces almost nothing. Every section
-ends with a piece of the running project and a list of checks that can go red.
-Those two are the section; the prose in front of them is preparation.
+Learn a chapter's core concepts before its exercises. You do not need to finish
+all 42 coding problems before building an application. Advanced problems live
+beside the concepts they need, including caching and concurrency. Later-topic
+follow-ups link their dependencies so you can return after learning them.
 
-If you only ever do one thing from this guide, do the "how you would know it is
-wrong" list, on real code, and watch at least one of them fail.
+Testing and ownership checks belong in the first implementation. The dedicated
+testing and security chapters deepen those skills. System design comes before
+CI/CD and infrastructure so service choices follow an understood architecture.
 
-## The order
+## One problem, increasing depth
 
-**The projects are ordered. The sections inside a tier are not, strictly.**
+Work the baseline first, then change the requirement. Senior follow-ups add
+operating constraints and failure behavior. Staff/lead follow-ups add broader
+ownership, compatibility, migration and decisions where the existing problem
+supports that scope. These are criteria within a lesson, not separate reading paths.
 
-P1 through P5 are the same system under increasing pressure, so doing them out
-of order does not work — P3 assumes the delivery pipeline you built in P2, and
-P5 assumes there is something worth migrating.
+Keep the candidate question visible and open the worked answer after an attempt.
+Explain what the changed requirement invalidates, update the diagram or code,
+and make a tempting broken solution fail a test. A supplied reference passing
+its suite is evidence about the reference, not your independent performance.
 
-Within a tier, read in whatever order the work demands. If you are about to add
-a queue, read 13 first. The numbering is a reading order, not a lock.
+## Use AI and keep responsibility for the result
 
-Two exceptions:
+![Two ways to work with an AI. Criteria first: decide what would prove the change works, ask for it, it writes the code, run the check you already wrote — that check can go red. Criteria after: ask, it writes, you read it and it looks right, and only then write the test, which is written from the code it is testing and cannot go red](../assets/diagrams/criteria-before-code.svg)
 
-- **02 · Working with an AI that writes the code** comes before everything,
-  because it is the method the rest of the guide assumes.
-- **16 · Scope and leverage** comes before the rest of the staff tier, because
-  the other five sections are things a staff engineer does and that one is what
-  the job actually is.
+The existing prompts practice specification, bounded implementation and review.
+For an assisted exercise, make a request small enough to end at a runnable
+checkpoint, ask about likely failure modes, inspect the diff and verify it.
+Keep the acceptance criteria established before implementation.
 
-## What "done" means
+For an independent assessment, use only its allowed tools. Close the reference
+and assessor material. If AI is allowed, explain the generated code, catch its
+failures, and own the decisions. [Working with AI](../curriculum/01-code/01-problem-solving/working-with-ai.md)
+and [the first assisted change](../curriculum/01-code/01-problem-solving/ai-assisted-practice.md)
+provide the original method and concrete examples.
 
-Every section and every project states its acceptance criteria before the work.
-That is deliberate: deciding what done looks like *after* you have built
-something is how you end up grading your own homework.
+## Choose an existing project
 
-A criterion is only worth having if you could fail it. "The code is clean" is
-not a criterion. "A fresh clone runs with one command on a machine that has
-never seen this project" is.
+The [project index](../indexes/projects.md) groups 40 standalone briefs by subject.
+Each page preserves its context, reasoning, staged prompts, AWS choices and checks.
+For continuity, use [one reading-list system](../projects/reading-list/README.md)
+through its five existing stages. Those stages depend on their predecessors;
+they are not separate versions chosen by job title.
 
-## How to work with Claude on this
+A project brief describes what you build. A lab that supplies reference code says
+so and provides run commands. Local checks do not require an AWS deployment.
+Follow a lab's explicit setup and scope before using infrastructure; the recorded
+[verification limits](VALIDATION.md) remain in force.
 
-You are expected to. The guide is written for someone who directs rather than
-types, and the sections tell you what to ask.
+## Decide what counts as evidence
 
-Three habits are worth having from the start:
+Set acceptance criteria before building. Run the checks and deliberately break
+the guarantee they claim to protect. Keep code, diagrams, inputs, outputs and
+failed attempts. Use the [assessment packs](../practice/README.md) and
+[attempt record](../practice/attempt-record.md) for unfamiliar sessions on separate
+occasions. The [depth reference](../practice/depth.md) calibrates the same work
+under increasing scope; it is not an employer pass-rate prediction.
 
-**Work in slices that end somewhere runnable.** A slice you can run is a slice
-you can check. Asking for a whole feature at once leaves you with something you
-must accept or debug whole.
+Close the page and reconstruct the explanation, then revisit it after a delay.
+Use what you could not retrieve to choose a prerequisite. Do not substitute
+rereading or a familiar memorized answer for an unfamiliar independent attempt.
 
-**Ask for the failure modes before the solution.** "List the three decisions in
-this design most likely to be wrong" gets you the model's own uncertainty, which
-is the one thing you cannot read off the output.
+## Keep claims and corrections traceable
 
-**Keep the definition of done.** Do not ask what the acceptance criteria should
-be. That is the part that was yours.
+Research retains its original dates, sources and limitations. An undated technical
+reference is not evidence of a recent interview question. Verify dated or
+provider-specific claims before relying on them for a new application.
 
-And the habit the whole guide is organised around: before you accept anything,
-be able to say what would make it wrong. If you cannot, you have not finished,
-whatever the screen shows.
-
-## On rereading
-
-Two things from the learning research are well supported and worth actually
-doing, rather than nodding at:
-
-**Retrieval beats rereading.** Closing the page and writing down what a section
-said, badly, from memory, does more than reading it twice. The effect is
-consistently measured and it is large.
-
-**Spacing beats cramming.** Coming back to a section a week later, once, is
-worth more than reading it three times tonight.
-
-So: after you finish a project, go back to the sections it used and write the
-"how you would know it is wrong" list from memory before looking. What you have
-forgotten is the part you did not really learn.
-
-*(Some popular learning advice is not supported — matching "learning styles" to
-learners does not hold up, and the pyramid of retention percentages that
-circulates in slide decks was fabricated. Ignore both.)*
-
-## What this guide will not do
-
-- **It will not teach you a language or a framework.** Those are well covered
-  elsewhere, they change, and knowing one is not the thing that was missing.
-- **It will not give you interview answers.** System design here is the thinking
-  process, not the ritual.
-- **It will not make you a staff engineer.** The staff tier describes a job and
-  gives you the artefacts to practise. The rest is organisational and takes
-  years, and any guide that claims otherwise is selling something.
-- **It will not stay right forever.** Anything with a date on it was checked on
-  that date. Where something could not be verified, it says so.
-
-## If you find something wrong
-
-Open an issue. Specifically:
-
-- a claim that is out of date — say what you checked and when
-- a check that cannot actually go red
-- a section where the acceptance criteria are not checkable
-- a diagram that restates its paragraph instead of adding to it
-
-Those four are the failure modes this guide is written against. Finding one is
-useful, not rude.
+Report an outdated claim with what you checked and when; an acceptance check that
+cannot fail; an unclear prerequisite; or a diagram that adds no information.
+The curriculum teaches engineering judgment and practice. It does not replace
+all language/framework documentation, real organizational experience or actual
+candidate assessment.

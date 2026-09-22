@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bookmark workshop</title><link rel="stylesheet" href="/style.css"></head>
+<body><main><header><p>LOCAL INTERVIEW WORKSHOP</p><h1>Bookmark editor</h1><p>Save a title while keeping your next idea safe.</p></header>
+<section aria-labelledby="library-title"><h2 id="library-title">Your library</h2><form id="search-form"><label for="search">Search bookmarks</label><div class="row"><input id="search" type="search"><button>Search</button></div></form><p id="list-status" role="status" aria-live="polite"></p><ul id="results"></ul><button id="retry-list" hidden>Retry search</button><button id="more" hidden>Load more</button></section>
+<section id="editor" aria-labelledby="edit-heading" hidden><h2 id="edit-heading">Edit bookmark</h2><p id="confirmed"></p><form id="edit-form"><label for="title">Title</label><input id="title" maxlength="200" required aria-describedby="edit-status"><div class="row"><button id="save">Save title</button><button id="refresh" type="button">Refresh server copy</button><button id="close" type="button">Close editor</button></div></form><p id="edit-status" role="status" aria-live="polite"></p><button id="resolve" hidden>Keep draft and use server version</button></section>
+<footer>Demo identity: Alice · Data persists in the local SQLite file.</footer></main><script type="module" src="/app.js"></script></body></html>

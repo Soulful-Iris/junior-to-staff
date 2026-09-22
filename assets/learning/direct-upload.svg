@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Separate permission from bytes</title>
+<desc id="desc">CONTROL PLANE: PERMISSION · DATA PLANE: BYTES browser API: authorize S3: object metadata scoped, expiring permission large bytes bypass the API Authorize first, return upload permission, then send the byte stream to S3. Finalize only after checking the uploaded object and ownership. Arrow thickness distinguishes bytes. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">SEPARATE PERMISSION FROM BYTES</text>
+<g class="moving">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">CONTROL PLANE: PERMISSION · DATA PLANE: BYTES</text>
+<rect x="45" y="133" width="147" height="55" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="118.5" y="165.5" font-size="14" fill="#1f2b24" text-anchor="middle">browser</text>
+<rect x="498" y="90" width="202" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="599.0" y="120.5" font-size="14" fill="#1f2b24" text-anchor="middle">API: authorize</text>
+<rect x="498" y="270" width="202" height="54" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="599.0" y="302.0" font-size="14" fill="#1f2b24" text-anchor="middle">S3: object</text>
+<path d="M192 144 L498 110" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M498 133 L192 173" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M118 188 V297 H498" stroke="#c2703d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M192 144 L498 110" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.01;0.16;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.009000000000000001;0.01;0.159;0.16;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M498 133 L192 173" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.18;0.36;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.179;0.18;0.359;0.36;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#c2703d">
+</circle>
+<animateMotion path="M118 188 V297 H498" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.38;0.67;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.379;0.38;0.669;0.67;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#c2703d">
+</circle>
+<animateMotion path="M118 188 V297 H498" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.455;0.745;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.454;0.455;0.744;0.745;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#c2703d">
+</circle>
+<animateMotion path="M118 188 V297 H498" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.53;0.8200000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.529;0.53;0.8190000000000001;0.8200000000000001;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#c2703d">
+</circle>
+<animateMotion path="M118 188 V297 H498" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.605;0.895;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.604;0.605;0.894;0.895;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="5" fill="#c2703d">
+</circle>
+<animateMotion path="M118 188 V297 H498" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6799999999999999;0.97;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6789999999999999;0.6799999999999999;0.969;0.97;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="255" y="108" font-size="14" fill="#2f6f4e" text-anchor="start">metadata</text>
+<text x="240" y="183" font-size="14" fill="#2f6f4e" text-anchor="start">scoped, expiring permission</text>
+<text x="166" y="282" font-size="16" fill="#c2703d" text-anchor="start">large bytes bypass the API</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Authorize first, return upload permission, then send the byte stream to S3.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Finalize only after checking the uploaded object and ownership. Arrow thickness distinguishes bytes.</text>
+</g>
+<g class="still">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">CONTROL PLANE: PERMISSION · DATA PLANE: BYTES</text>
+<rect x="45" y="133" width="147" height="55" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="118.5" y="165.5" font-size="14" fill="#1f2b24" text-anchor="middle">browser</text>
+<rect x="498" y="90" width="202" height="51" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="599.0" y="120.5" font-size="14" fill="#1f2b24" text-anchor="middle">API: authorize</text>
+<rect x="498" y="270" width="202" height="54" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="599.0" y="302.0" font-size="14" fill="#1f2b24" text-anchor="middle">S3: object</text>
+<path d="M192 144 L498 110" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M498 133 L192 173" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M118 188 V297 H498" stroke="#c2703d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="255" y="108" font-size="14" fill="#2f6f4e" text-anchor="start">metadata</text>
+<text x="240" y="183" font-size="14" fill="#2f6f4e" text-anchor="start">scoped, expiring permission</text>
+<text x="166" y="282" font-size="16" fill="#c2703d" text-anchor="start">large bytes bypass the API</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Authorize first, return upload permission, then send the byte stream to S3.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Finalize only after checking the uploaded object and ownership. Arrow thickness distinguishes bytes.</text>
+</g>
+</svg>

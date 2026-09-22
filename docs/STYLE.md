@@ -1,18 +1,22 @@
 # How this guide is written
 
-This is the internal spec. Every section follows it, so the guide reads as one
-voice rather than seventeen.
+The [shared learning experience](LEARNING-EXPERIENCE.md) takes precedence for
+problem introductions, explicit expected behavior, project organization, and
+visual follow-ups. Open a lesson as an interviewer or reviewing engineer would:
+explain the situation before asking the reader to solve it. Keep the existing
+AI prompting and verification instruction within that clearer teaching flow.
+
+The original chapter format below preserves the guide's emphasis on specification,
+verification, and practical judgment. [Interview teaching](INTERVIEW-TEACHING.md)
+adds independent implementation and timed assessment within the same curriculum.
 
 ## Who the reader is
 
-Someone who can already make a computer do something, who is going to build most
-of the code by directing an AI, and who needs to be able to **judge what comes
-back**. They are not learning syntax. They are learning what to ask for, what
-good looks like, and how to tell when they have been handed something that looks
-right and is not.
-
-Write for that person. Not for a bootcamp graduate, not for an interviewer, and
-never for another engineer you are trying to impress.
+Someone who needs to understand the mechanism, implement or direct a bounded change,
+and judge whether it is correct. Explain the starting problem and unfamiliar terms.
+For assisted exercises, teach what to ask and how to verify the result. For independent
+exercises, keep the candidate brief separate from the reference and assessor key.
+Write to make the learner's next decision clear.
 
 ## The shape of a section
 

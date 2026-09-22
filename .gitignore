@@ -3,7 +3,7 @@ node_modules/
 __pycache__/
 .venv/
 *.pyc
-
-# The built site. `python3 site/build.py` regenerates it from the markdown,
-# so committing it would only create a second copy that can go stale.
 site/out/
+site/tools/node_modules/
+site/.mermaid-cache/
+site/out.*/

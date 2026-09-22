@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">The older response arrives last</title>
+<desc id="desc">NEWER INTENT WINS · RESPONSES CAN ARRIVE OUT OF ORDER cat · v1 car · v2 UI: car · generation 2 reject obsolete v1 arrives first arrives last Commit a response only if its generation still matches the current request. Aborting obsolete work can save resources; the generation guard protects the UI either way. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">THE OLDER RESPONSE ARRIVES LAST</text>
+<g class="moving">
+<text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">NEWER INTENT WINS · RESPONSES CAN ARRIVE OUT OF ORDER</text>
+<text x="40" y="128" font-size="16" fill="#c2703d" text-anchor="start">cat · v1</text>
+<text x="40" y="226" font-size="16" fill="#2f6f4e" text-anchor="start">car · v2</text>
+<path d="M155 124 H650" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M285 222 H465" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="6" fill="#c2703d">
+</circle>
+<animateMotion path="M155 124 H650" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.8;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.799;0.8;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M285 222 H465" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.24;0.5;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.239;0.24;0.499;0.5;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M465 228 V300 H355" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M465 228 V300 H355" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5;0.64;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.499;0.5;0.639;0.64;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="135" y="278" width="220" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="245.0" y="306.0" font-size="14" fill="#1f2b24" text-anchor="middle">UI: car · generation 2</text>
+<path d="M650 130 V300 H502" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M650 130 V300 H502" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.81;0.96;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.809;0.81;0.959;0.96;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M491 287 l20 26 M511 287 l-20 26" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="526" y="333" font-size="14" fill="#c2703d" text-anchor="start">reject obsolete v1</text>
+<text x="308" y="205" font-size="14" fill="#2f6f4e" text-anchor="start">arrives first</text>
+<text x="496" y="108" font-size="14" fill="#c2703d" text-anchor="start">arrives last</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Commit a response only if its generation still matches the current request.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Aborting obsolete work can save resources; the generation guard protects the UI either way.</text>
+</g>
+<g class="still">
+<text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">NEWER INTENT WINS · RESPONSES CAN ARRIVE OUT OF ORDER</text>
+<text x="40" y="128" font-size="16" fill="#c2703d" text-anchor="start">cat · v1</text>
+<text x="40" y="226" font-size="16" fill="#2f6f4e" text-anchor="start">car · v2</text>
+<path d="M155 124 H650" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M285 222 H465" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M465 228 V300 H355" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="135" y="278" width="220" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="245.0" y="306.0" font-size="14" fill="#1f2b24" text-anchor="middle">UI: car · generation 2</text>
+<path d="M650 130 V300 H502" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M491 287 l20 26 M511 287 l-20 26" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="526" y="333" font-size="14" fill="#c2703d" text-anchor="start">reject obsolete v1</text>
+<text x="308" y="205" font-size="14" fill="#2f6f4e" text-anchor="start">arrives first</text>
+<text x="496" y="108" font-size="14" fill="#c2703d" text-anchor="start">arrives last</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Commit a response only if its generation still matches the current request.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Aborting obsolete work can save resources; the generation guard protects the UI either way.</text>
+</g>
+</svg>

@@ -1,160 +1,39 @@
-# junior → staff
+# The Engineering Interview Curriculum
 
-An end-to-end guide to being a software engineer, for someone who will build
-most of the code by directing an AI and needs to be able to **judge what comes
-back**.
+Learn software engineering through one ordered curriculum. Each concept starts with a concrete problem, then adds the existing follow-up questions that demand deeper implementation, operating judgment, and technical ownership.
 
-![The arc: three tiers and five projects, rising in complexity](assets/the-arc.svg)
+## Start here
 
-Three tiers. Five projects. The same system growing the whole way, rather than
-five unrelated toys.
+[Begin: problem solving and making a change](curriculum/01-code/01-problem-solving/README.md) · [Complete table of contents](curriculum/README.md)
 
-**Read it at [guide.soulful-ai.dev](https://guide.soulful-ai.dev)** — the same
-content with search across all 43 pages, next/previous through the whole arc,
-and the diagrams at full size. Or read it here on GitHub; the links work both
-ways.
-
----
-
-## Why this exists
-
-Most roadmap repos are a list of things to learn with links attached. They go
-stale, nobody finishes them, and they teach the names of technologies rather
-than the judgment that decides between them.
-
-This one is built on a different bet: **the part of engineering that does not
-get automated is knowing what to ask for, what good looks like, and how to tell
-when you have been handed something that is plausible and wrong.** So every
-section here carries four things a roadmap does not:
-
-- the **failure it prevents**, concretely
-- what to **ask Claude for**, in words, and why the ask is shaped that way
-- **how you would know it is wrong** — checks that can actually go red
-- a **slice of the running project**, with acceptance criteria you can check yourself
-
-If every external link in this repo died tomorrow, it would still teach. That is
-the standard it is written to. See [docs/STYLE.md](docs/STYLE.md) for the rules
-every section follows.
-
----
-
-## How to use it
-
-1. **Read a section.** They are written to be read, not skimmed.
-2. **Build the slice.** Each section adds one thing to the project you already
-   have. Use Claude for it; the section tells you what to ask.
-3. **Run the checks.** Every section has a "how you would know it is wrong".
-   Actually run them. A green result you never tried to make go red is not
-   evidence of anything.
-4. **Move on when the acceptance criteria pass**, not when you feel finished.
-
-You do not have to do the tiers in order if you already work at that level. You
-do have to do the projects in order — each one is the previous one under more
-pressure.
-
-Longer version: [docs/HOW-TO-USE.md](docs/HOW-TO-USE.md).
-
----
-
-## The projects, at three scales
-
-The code is the least important part of any of them. What you are practising is
-**deciding what would prove this**, organising the asks that get it built, and
-knowing what it would take to leave the thing running.
-
-| scale | where | how many | size |
-|---|---|---|---|
-| **section projects** | `projects.md` beside each section | 5 per section | an afternoon. One section's skill, isolated. |
-| **act projects** | [acts/](acts/) | 5 per act | a weekend. Integrates a whole tier. Pick one of five. |
-| **the spine** | [projects/](projects/) | 5 total | the whole guide. One system growing, if you prefer continuity to variety. |
-
-An **act** is a tier — junior, senior, staff. Three acts, five projects each at
-the end of them:
-
-- [Act 1 · Junior](acts/act-1-junior/) — build a thing that works
-- [Act 2 · Senior](acts/act-2-senior/) — build a thing that survives
-- [Act 3 · Staff](acts/act-3-staff/) — change what gets built
-
-Every project carries the same seven things: what you build, **the thought
-process** (the decisions, in the order you have to make them), **how to organise
-the prompts** (the literal sequence, each ask ending somewhere checkable),
-**on AWS** (which service, why that one and not the obvious neighbour, and how),
-what productionising it actually means, the learning, and how you would know it
-is wrong.
-
-The spine, if you want one continuous system rather than variety:
-
-| | project | what it proves you can do |
+| Order | Group | Subjects |
 |---|---|---|
-| **P1** | [it works](projects/p1-it-works/) | ship a small full-stack thing with auth, data and tests that bite |
-| **P2** | [it survives](projects/p2-it-survives/) | the same system with CI/CD, infrastructure as code, backups and enough observability to debug it at 3am |
-| **P3** | [it holds under load](projects/p3-under-load/) | queues, caching, idempotency and rate limits, then break it on purpose and measure what happens |
-| **P4** | [it reasons, provably](projects/p4-it-reasons/) | an AI feature with a real evaluation harness, guardrails, and a cost and latency budget |
-| **P5** | [it changes safely](projects/p5-it-changes/) | a migration of the system you built, with a design doc, a rollout plan, kill criteria and a written postmortem |
+| 1 | [Write correct code](curriculum/01-code/README.md) | [Problem solving and AI-assisted engineering](curriculum/01-code/01-problem-solving/README.md) · [Data structures and algorithms](curriculum/01-code/02-data-structures-algorithms/README.md) |
+| 2 | [Build a complete application](curriculum/02-applications/README.md) | [Backend and APIs](curriculum/02-applications/01-backend/README.md) · [Databases and transactions](curriculum/02-applications/02-databases/README.md) · [Frontend and full-stack integration](curriculum/02-applications/03-frontend/README.md) · [Testing, debugging, and code review](curriculum/02-applications/04-testing/README.md) · [Security](curriculum/02-applications/05-security/README.md) |
+| 3 | [Design, ship, and operate the application](curriculum/03-production/README.md) | [System design](curriculum/03-production/01-system-design/README.md) · [CI/CD and progressive delivery](curriculum/03-production/02-delivery/README.md) · [Infrastructure as code and AWS](curriculum/03-production/03-infrastructure/README.md) · [Observability](curriculum/03-production/04-observability/README.md) · [Reliability and incident response](curriculum/03-production/05-reliability/README.md) |
+| 4 | [Scale and evolve the system](curriculum/04-scale-and-evolution/README.md) | [Data at scale](curriculum/04-scale-and-evolution/01-data-at-scale/README.md) · [Performance and cost](curriculum/04-scale-and-evolution/02-performance-cost/README.md) · [AI systems](curriculum/04-scale-and-evolution/03-ai-systems/README.md) · [Migrations and recovery](curriculum/04-scale-and-evolution/04-migrations/README.md) · [Technical decisions and engineering effectiveness](curriculum/04-scale-and-evolution/05-technical-decisions/README.md) |
 
-How all of them are written: [docs/PROJECT-SPEC.md](docs/PROJECT-SPEC.md).
+System design comes before CI/CD and infrastructure. Tests and authorization are practiced from the first examples and deepened in their dedicated chapters. Start with core coding practice; advanced problems remain available beside the concepts they exercise.
 
----
+## Inside each lesson
 
-## The sections
+**Situation → contract → baseline visual → implementation and checks → changed requirements → deeper follow-up.**
 
-### Junior — build a thing that works
+Foundation, senior, and staff/lead expectations live inside the same problem. AI-assisted work practices specification and verification; independent practice develops coding and interview fluency. AWS choices accompany the mechanisms they implement.
 
-You can take a requirement and produce something that runs, and you can tell
-whether it runs.
+## Find existing material
 
-| | section | what it buys you |
-|---|---|---|
-| 01 | [The change loop](tiers/01-junior/01-the-change-loop/) | how a change gets from an idea into running software, and why review capacity is now the bottleneck |
-| 02 | [Working with an AI that writes the code](tiers/01-junior/02-working-with-an-ai/) | specification and verification — the two skills that did not get cheaper |
-| 03 | [Frontend](tiers/01-junior/03-frontend/) | where rendering happens, where state lives, and accessibility as a legal floor |
-| 04 | [Backend](tiers/01-junior/04-backend/) | the request lifecycle and every point at which it can stop |
-| 05 | [Data and databases](tiers/01-junior/05-data-and-databases/) | the schema is the part you cannot take back |
-| 06 | [Testing](tiers/01-junior/06-testing/) | making breakage loud instead of silent |
-| 07 | [Shipping it](tiers/01-junior/07-shipping-it/) | environments, configuration, secrets, and dependencies as attack surface |
+| Find | Contents |
+|---|---|
+| [Coding problems](indexes/coding.md) | All 42 problem, solution, and test bundles, grouped by concept. |
+| [Projects](indexes/projects.md) | 40 standalone briefs and the five stages of one continuing reading-list project. |
+| [System designs](indexes/system-designs.md) | Five existing designs with requirements, diagrams and deeper follow-ups. |
+| [Practical exercises](indexes/practical-exercises.md) | Importer debugging, code review, async work, and full-stack implementation. |
+| [AWS implementations](indexes/aws.md) | Existing service choices, local checks, and optional deployment labs. |
+| [Production cases](indexes/production-cases.md) | Five sourced incidents and their existing learning designs. |
+| [Visual gallery](indexes/visuals.md) | Original diagrams plus 38 motion studies with static alternatives. |
+| [Independent assessment](practice/README.md) | Candidate briefs, separate assessor packs, scored examples and attempt records. |
 
-### Senior — build a thing that survives
+[How to study](docs/HOW-TO-USE.md) · [Research and source limits](docs/research/interview-evidence.md) · [Audit remedies](docs/AUDIT-IMPLEMENTATION.md) · [Validation](docs/VALIDATION.md) · [Reorganization and preservation](docs/REORGANIZATION.md)
 
-It keeps working under load, when a dependency fails, when somebody else changes
-it, and at three in the morning while you are asleep.
-
-| | section | what it buys you |
-|---|---|---|
-| 08 | [System design](tiers/02-senior/08-system-design/) | the thinking process, not the interview ritual |
-| 09 | [Reliability](tiers/02-senior/09-reliability/) | SLOs, error budgets, degradation, backpressure, idempotency |
-| 10 | [Observability](tiers/02-senior/10-observability/) | answering "what happened?" without guessing, and what that costs |
-| 11 | [Security](tiers/02-senior/11-security/) | authorisation, secrets, and the supply chain you did not know you had |
-| 12 | [Delivery](tiers/02-senior/12-delivery/) | CI/CD, infrastructure as code, progressive rollout |
-| 13 | [Data at scale](tiers/02-senior/13-data-at-scale/) | caching, queues, consistency, and what actually breaks first |
-| 14 | [Performance and cost](tiers/02-senior/14-performance-and-cost/) | finding both, and the fact that they are the same skill |
-| 15 | [AI systems](tiers/02-senior/15-ai-systems/) | retrieval, evaluation harnesses, guardrails, cost and latency budgets |
-
-### Staff — change what gets built
-
-Your leverage stops being the code you write. It becomes the decisions you make
-and the engineers you make faster.
-
-| | section | what it buys you |
-|---|---|---|
-| 16 | [Scope and leverage](tiers/03-staff/16-scope-and-leverage/) | what actually changes at staff, and the four archetypes |
-| 17 | [Writing that decides](tiers/03-staff/17-writing-that-decides/) | design docs and RFCs: non-goals, alternatives, and why the trade-offs are the content |
-| 18 | [Technical strategy](tiers/03-staff/18-technical-strategy/) | synthesising strategy from real decisions, and why a good vision is boring |
-| 19 | [Migrations](tiers/03-staff/19-migrations/) | de-risk, enable, **finish** — and why most are abandoned at 80% |
-| 20 | [Risk and incidents](tiers/03-staff/20-risk-and-incidents/) | operating under failure, and postmortems that change something |
-| 21 | [Making other engineers faster](tiers/03-staff/21-making-others-faster/) | sponsorship versus mentorship, platform quality, and glue work |
-
----
-
-## Status
-
-Under construction, in the open. Sections land one at a time and each one is
-complete when it lands — there are no stubs pretending to be chapters. A section
-with no link next to it is not written yet, and is not pretending to be.
-
-Written and checked: **21 of 21 sections**, each with **five projects** of its
-own; **3 of 3 act projects sets** (five weekend projects per tier); the
-five-project spine indexed, P1 complete. 125 projects, 46 diagrams.
-Last updated 2026-09-22.
-
-Nothing here is "production-ready" by assertion. Where something is unverified,
-it says so.
+This branch reorganizes the completed material. Project briefs remain build assignments unless they explicitly supply runnable code. Reference checks do not establish interview readiness; PostgreSQL execution and live AWS deployment retain their documented verification limits.

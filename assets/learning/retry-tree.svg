@@ -1,0 +1,596 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Retries multiply across layers</title>
+<desc id="desc">RETRIES AT THREE LAYERS ONE RETRY OWNER API service data client up to 27 calls API service data client up to 3 calls Three total attempts at each layer can multiply into 3 × 3 × 3 leaf calls. Assign retry ownership; bound attempts and elapsed time. Jitter limits synchronized retries. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">RETRIES MULTIPLY ACROSS LAYERS</text>
+<g class="moving">
+<text x="40" y="72" font-size="11" fill="#c2703d" text-anchor="start">RETRIES AT THREE LAYERS</text>
+<text x="435" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">ONE RETRY OWNER</text>
+<rect x="110" y="97" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="119.0" font-size="14" fill="#1f2b24" text-anchor="middle">API</text>
+<rect x="110" y="177" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="199.0" font-size="14" fill="#1f2b24" text-anchor="middle">service</text>
+<rect x="110" y="257" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="279.0" font-size="14" fill="#1f2b24" text-anchor="middle">data client</text>
+<path d="M177 131 Q105.0 143 105.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 131 Q105.0 143 105.0 160" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.26;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.259;0.26;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 131 Q175.0 143 175.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 131 Q175.0 143 175.0 160" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.021;0.261;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.02;0.021;0.26;0.261;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 131 Q245.0 143 245.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 131 Q245.0 143 245.0 160" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.022;0.262;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.020999999999999998;0.022;0.261;0.262;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q81.66666666666667 223 81.66666666666667 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q81.66666666666667 223 81.66666666666667 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30000000000000004;0.54;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.29900000000000004;0.30000000000000004;0.539;0.54;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q105.0 223 105.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q105.0 223 105.0 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30100000000000005;0.541;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30000000000000004;0.30100000000000005;0.54;0.541;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q128.33333333333334 223 128.33333333333334 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q128.33333333333334 223 128.33333333333334 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30200000000000005;0.542;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30100000000000005;0.30200000000000005;0.541;0.542;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q151.66666666666669 223 151.66666666666669 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q151.66666666666669 223 151.66666666666669 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30300000000000005;0.543;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30200000000000005;0.30300000000000005;0.542;0.543;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q175.0 223 175.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q175.0 223 175.0 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30400000000000005;0.544;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30300000000000005;0.30400000000000005;0.543;0.544;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q198.33333333333334 223 198.33333333333334 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q198.33333333333334 223 198.33333333333334 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30500000000000005;0.545;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30400000000000005;0.30500000000000005;0.544;0.545;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q221.66666666666666 223 221.66666666666666 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q221.66666666666666 223 221.66666666666666 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30600000000000005;0.546;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30500000000000005;0.30600000000000005;0.545;0.546;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q245.0 223 245.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q245.0 223 245.0 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30700000000000005;0.547;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30600000000000005;0.30700000000000005;0.546;0.547;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 211 Q268.33333333333337 223 268.33333333333337 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 211 Q268.33333333333337 223 268.33333333333337 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30800000000000005;0.548;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.30700000000000005;0.30800000000000005;0.547;0.548;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q73.88888888888889 303 73.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q73.88888888888889 303 73.88888888888889 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5800000000000001;0.8200000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5790000000000001;0.5800000000000001;0.8190000000000001;0.8200000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q81.66666666666667 303 81.66666666666667 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q81.66666666666667 303 81.66666666666667 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5810000000000001;0.8210000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5800000000000001;0.5810000000000001;0.8200000000000001;0.8210000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q89.44444444444444 303 89.44444444444444 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q89.44444444444444 303 89.44444444444444 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5820000000000001;0.8220000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5810000000000001;0.5820000000000001;0.8210000000000001;0.8220000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q97.22222222222223 303 97.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q97.22222222222223 303 97.22222222222223 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5830000000000001;0.8230000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5820000000000001;0.5830000000000001;0.8220000000000001;0.8230000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q105.0 303 105.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q105.0 303 105.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5840000000000001;0.8240000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5830000000000001;0.5840000000000001;0.8230000000000001;0.8240000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q112.77777777777777 303 112.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q112.77777777777777 303 112.77777777777777 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5850000000000001;0.8250000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5840000000000001;0.5850000000000001;0.8240000000000001;0.8250000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q120.55555555555556 303 120.55555555555556 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q120.55555555555556 303 120.55555555555556 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5860000000000001;0.8260000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5850000000000001;0.5860000000000001;0.8250000000000001;0.8260000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q128.33333333333334 303 128.33333333333334 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q128.33333333333334 303 128.33333333333334 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5870000000000001;0.8270000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5860000000000001;0.5870000000000001;0.8260000000000001;0.8270000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q136.11111111111111 303 136.11111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q136.11111111111111 303 136.11111111111111 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5880000000000001;0.8280000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5870000000000001;0.5880000000000001;0.8270000000000001;0.8280000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q143.88888888888889 303 143.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q143.88888888888889 303 143.88888888888889 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5890000000000001;0.8290000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5880000000000001;0.5890000000000001;0.8280000000000001;0.8290000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q151.66666666666669 303 151.66666666666669 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q151.66666666666669 303 151.66666666666669 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5900000000000001;0.8300000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5890000000000001;0.5900000000000001;0.8290000000000001;0.8300000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q159.44444444444446 303 159.44444444444446 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q159.44444444444446 303 159.44444444444446 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5910000000000001;0.8310000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5900000000000001;0.5910000000000001;0.8300000000000001;0.8310000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q167.22222222222223 303 167.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q167.22222222222223 303 167.22222222222223 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5920000000000001;0.8320000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5910000000000001;0.5920000000000001;0.8310000000000001;0.8320000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q175.0 303 175.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q175.0 303 175.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5930000000000001;0.8330000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5920000000000001;0.5930000000000001;0.8320000000000001;0.8330000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q182.77777777777777 303 182.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q182.77777777777777 303 182.77777777777777 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5940000000000001;0.8340000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5930000000000001;0.5940000000000001;0.8330000000000001;0.8340000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q190.55555555555554 303 190.55555555555554 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q190.55555555555554 303 190.55555555555554 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5950000000000001;0.8350000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5940000000000001;0.5950000000000001;0.8340000000000001;0.8350000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q198.33333333333334 303 198.33333333333334 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q198.33333333333334 303 198.33333333333334 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5960000000000001;0.8360000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5950000000000001;0.5960000000000001;0.8350000000000001;0.8360000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q206.11111111111111 303 206.11111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q206.11111111111111 303 206.11111111111111 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5970000000000001;0.8370000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5960000000000001;0.5970000000000001;0.8360000000000001;0.8370000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q213.88888888888889 303 213.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q213.88888888888889 303 213.88888888888889 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5980000000000001;0.8380000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5970000000000001;0.5980000000000001;0.8370000000000001;0.8380000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q221.66666666666666 303 221.66666666666666 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q221.66666666666666 303 221.66666666666666 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5990000000000001;0.8390000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5980000000000001;0.5990000000000001;0.8380000000000001;0.8390000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q229.44444444444446 303 229.44444444444446 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q229.44444444444446 303 229.44444444444446 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6000000000000001;0.8400000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5990000000000001;0.6000000000000001;0.8390000000000001;0.8400000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q237.22222222222223 303 237.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q237.22222222222223 303 237.22222222222223 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6010000000000001;0.8410000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6000000000000001;0.6010000000000001;0.8400000000000001;0.8410000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q245.0 303 245.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q245.0 303 245.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6020000000000001;0.8420000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6010000000000001;0.6020000000000001;0.8410000000000001;0.8420000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q252.77777777777777 303 252.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q252.77777777777777 303 252.77777777777777 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6030000000000001;0.8430000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6020000000000001;0.6030000000000001;0.8420000000000001;0.8430000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q260.55555555555554 303 260.55555555555554 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q260.55555555555554 303 260.55555555555554 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6040000000000001;0.8440000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6030000000000001;0.6040000000000001;0.8430000000000001;0.8440000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q268.33333333333337 303 268.33333333333337 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q268.33333333333337 303 268.33333333333337 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6050000000000001;0.8450000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6040000000000001;0.6050000000000001;0.8440000000000001;0.8450000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M177 291 Q276.1111111111111 303 276.1111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#c2703d">
+</circle>
+<animateMotion path="M177 291 Q276.1111111111111 303 276.1111111111111 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6060000000000001;0.8460000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6050000000000001;0.6060000000000001;0.8450000000000001;0.8460000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="177" y="338" font-size="20" fill="#c2703d" text-anchor="middle">up to 27 calls</text>
+<rect x="495" y="97" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="119.0" font-size="14" fill="#1f2b24" text-anchor="middle">API</text>
+<rect x="495" y="177" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="199.0" font-size="14" fill="#1f2b24" text-anchor="middle">service</text>
+<rect x="495" y="257" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="279.0" font-size="14" fill="#1f2b24" text-anchor="middle">data client</text>
+<path d="M562 131 Q560.0 143 560.0 160" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 131 Q560.0 143 560.0 160" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.02;0.26;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.259;0.26;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M562 211 Q560.0 223 560.0 240" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 211 Q560.0 223 560.0 240" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.30000000000000004;0.54;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.29900000000000004;0.30000000000000004;0.539;0.54;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M562 291 Q490.0 303 490.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 291 Q490.0 303 490.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5800000000000001;0.8200000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5790000000000001;0.5800000000000001;0.8190000000000001;0.8200000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M562 291 Q560.0 303 560.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 291 Q560.0 303 560.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5810000000000001;0.8210000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5800000000000001;0.5810000000000001;0.8200000000000001;0.8210000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M562 291 Q630.0 303 630.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<g>
+<circle cx="0" cy="0" r="2.6" fill="#2f6f4e">
+</circle>
+<animateMotion path="M562 291 Q630.0 303 630.0 320" dur="5s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5820000000000001;0.8220000000000001;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5810000000000001;0.5820000000000001;0.8210000000000001;0.8220000000000001;1" dur="5s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="562" y="338" font-size="20" fill="#2f6f4e" text-anchor="middle">up to 3 calls</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Three total attempts at each layer can multiply into 3 × 3 × 3 leaf calls.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Assign retry ownership; bound attempts and elapsed time. Jitter limits synchronized retries.</text>
+</g>
+<g class="still">
+<text x="40" y="72" font-size="11" fill="#c2703d" text-anchor="start">RETRIES AT THREE LAYERS</text>
+<text x="435" y="72" font-size="11" fill="#2f6f4e" text-anchor="start">ONE RETRY OWNER</text>
+<rect x="110" y="97" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="119.0" font-size="14" fill="#1f2b24" text-anchor="middle">API</text>
+<rect x="110" y="177" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="199.0" font-size="14" fill="#1f2b24" text-anchor="middle">service</text>
+<rect x="110" y="257" width="135" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="177.5" y="279.0" font-size="14" fill="#1f2b24" text-anchor="middle">data client</text>
+<path d="M177 131 Q105.0 143 105.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 131 Q175.0 143 175.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 131 Q245.0 143 245.0 160" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q81.66666666666667 223 81.66666666666667 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q105.0 223 105.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q128.33333333333334 223 128.33333333333334 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q151.66666666666669 223 151.66666666666669 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q175.0 223 175.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q198.33333333333334 223 198.33333333333334 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q221.66666666666666 223 221.66666666666666 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q245.0 223 245.0 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 211 Q268.33333333333337 223 268.33333333333337 240" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q73.88888888888889 303 73.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q81.66666666666667 303 81.66666666666667 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q89.44444444444444 303 89.44444444444444 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q97.22222222222223 303 97.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q105.0 303 105.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q112.77777777777777 303 112.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q120.55555555555556 303 120.55555555555556 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q128.33333333333334 303 128.33333333333334 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q136.11111111111111 303 136.11111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q143.88888888888889 303 143.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q151.66666666666669 303 151.66666666666669 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q159.44444444444446 303 159.44444444444446 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q167.22222222222223 303 167.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q175.0 303 175.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q182.77777777777777 303 182.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q190.55555555555554 303 190.55555555555554 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q198.33333333333334 303 198.33333333333334 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q206.11111111111111 303 206.11111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q213.88888888888889 303 213.88888888888889 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q221.66666666666666 303 221.66666666666666 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q229.44444444444446 303 229.44444444444446 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q237.22222222222223 303 237.22222222222223 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q245.0 303 245.0 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q252.77777777777777 303 252.77777777777777 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q260.55555555555554 303 260.55555555555554 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q268.33333333333337 303 268.33333333333337 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M177 291 Q276.1111111111111 303 276.1111111111111 320" stroke="#c2703d" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="177" y="338" font-size="20" fill="#c2703d" text-anchor="middle">up to 27 calls</text>
+<rect x="495" y="97" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="119.0" font-size="14" fill="#1f2b24" text-anchor="middle">API</text>
+<rect x="495" y="177" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="199.0" font-size="14" fill="#1f2b24" text-anchor="middle">service</text>
+<rect x="495" y="257" width="135" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="562.5" y="279.0" font-size="14" fill="#1f2b24" text-anchor="middle">data client</text>
+<path d="M562 131 Q560.0 143 560.0 160" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M562 211 Q560.0 223 560.0 240" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M562 291 Q490.0 303 490.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M562 291 Q560.0 303 560.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M562 291 Q630.0 303 630.0 320" stroke="#2f6f4e" stroke-width="0.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="562" y="338" font-size="20" fill="#2f6f4e" text-anchor="middle">up to 3 calls</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Three total attempts at each layer can multiply into 3 × 3 × 3 leaf calls.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Assign retry ownership; bound attempts and elapsed time. Jitter limits synchronized retries.</text>
+</g>
+</svg>

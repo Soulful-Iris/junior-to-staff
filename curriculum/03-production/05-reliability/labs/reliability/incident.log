@@ -1,0 +1,9 @@
+# Constructed trace fragments; sampled, not exhaustive counters.
+02:00 dependency latency alert; no deployment identified in supplied change log
+02:03 request=req-17 layer=client attempt=1 result=timeout
+02:04 request=req-17 layer=client attempt=2 result=queued
+02:04 request=req-17 layer=sdk attempt=1 result=timeout
+02:05 request=req-17 layer=sdk attempt=2 result=queued
+04:00 dependency latency returned to baseline; worker slots still occupied
+05:00 operator disabled outer retries; offered attempt rate fell
+05:10 status-read endpoint success recovered; asynchronous work backlog remains

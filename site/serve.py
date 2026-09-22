@@ -10,6 +10,7 @@ there is nothing here that can lose data.
 import functools
 import http.server
 import os
+import re
 import socketserver
 import sys
 from pathlib import Path
@@ -22,12 +23,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # Python's mimetypes does not know woff2 and falls back to
     # application/octet-stream, which some browsers refuse to use as a font.
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
-                      ".woff2": "font/woff2", ".svg": "image/svg+xml"}
+                      ".woff2": "font/woff2", ".svg": "image/svg+xml",
+                      ".css": "text/css", ".js": "text/javascript"}
 
     def end_headers(self):
         # The SVGs and fonts are content-addressed by nothing, so keep the
         # cache short enough that a rebuild shows up without a hard refresh.
-        if self.path.startswith("/assets/") or self.path.startswith("/fonts/"):
+        if re.fullmatch(r"/reader-(?:css|js)\.[0-9a-f]{16}\.(?:css|js)", self.path):
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+        elif self.path.startswith("/assets/") or self.path.startswith("/fonts/"):
             self.send_header("Cache-Control", "public, max-age=3600")
         else:
             self.send_header("Cache-Control", "no-cache")

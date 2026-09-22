@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Move the node, preserve its identity</title>
+<desc id="desc">CAPACITY 2 · START WITH [A, B], THEN get(A) LEAST RECENT MOST RECENT B A Next put(C): evict B, then append C. Move the existing A node to the most-recent end. No new slot is added. A hash map locates the node; a doubly linked list unlinks and appends it in O(1). Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">MOVE THE NODE, PRESERVE ITS IDENTITY</text>
+<g class="moving">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY 2 · START WITH [A, B], THEN get(A)</text>
+<text x="92" y="108" font-size="11" fill="#6d6459" text-anchor="start">LEAST RECENT</text>
+<text x="510" y="108" font-size="11" fill="#2f6f4e" text-anchor="start">MOST RECENT</text>
+<path d="M210 187 H510" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M585 216 V285 H155 V216" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<rect x="-60" y="-23" width="120" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="0.0" y="5.0" font-size="14" fill="#1f2b24" text-anchor="middle">A</text>
+<animateMotion path="M150 187 C150 87 580 87 580 187" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.1;0.52;1" keyPoints="0;0;1;1">
+</animateMotion>
+</g>
+<g>
+<rect x="-60" y="-23" width="120" height="46" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="0.0" y="5.0" font-size="14" fill="#1f2b24" text-anchor="middle">B</text>
+<animateMotion path="M580 187 H150" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.15;0.52;1" keyPoints="0;0;1;1">
+</animateMotion>
+</g>
+<text x="45" y="321" font-size="20" fill="#1f2b24" text-anchor="start">Next put(C): evict B, then append C.</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Move the existing A node to the most-recent end. No new slot is added.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">A hash map locates the node; a doubly linked list unlinks and appends it in O(1).</text>
+</g>
+<g class="still">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">CAPACITY 2 · START WITH [A, B], THEN get(A)</text>
+<text x="92" y="108" font-size="11" fill="#6d6459" text-anchor="start">LEAST RECENT</text>
+<text x="510" y="108" font-size="11" fill="#2f6f4e" text-anchor="start">MOST RECENT</text>
+<path d="M210 187 H510" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M585 216 V285 H155 V216" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<rect x="90" y="164" width="120" height="46" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="150.0" y="192.0" font-size="14" fill="#1f2b24" text-anchor="middle">B</text>
+<rect x="520" y="164" width="120" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="580.0" y="192.0" font-size="14" fill="#1f2b24" text-anchor="middle">A</text>
+<text x="45" y="321" font-size="20" fill="#1f2b24" text-anchor="start">Next put(C): evict B, then append C.</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Move the existing A node to the most-recent end. No new slot is added.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">A hash map locates the node; a doubly linked list unlinks and appends it in O(1).</text>
+</g>
+</svg>

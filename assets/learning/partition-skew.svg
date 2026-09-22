@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Route around a hot key</title>
+<desc id="desc">ONE HOT KEY FOUR INDEPENDENT BUCKETS A B C D 250 / 0 / 0 / 0 A B C D 62.5 each Route independent writes across keys; one hot key cannot use its idle neighbors. Bars grow to arrival rates, not stored bytes. Black line = 100 units/s; logical ≠ physical partition. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">ROUTE AROUND A HOT KEY</text>
+<g class="moving">
+<text x="40" y="73" font-size="11" fill="#c2703d" text-anchor="start">ONE HOT KEY</text>
+<text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">FOUR INDEPENDENT BUCKETS</text>
+<rect x="52" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="59" y="155" width="37" height="150" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+<animate attributeName="height" values="0;0;150;150;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;155;155;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M52 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="77" y="337" font-size="13" fill="#6d6459" text-anchor="middle">A</text>
+<g>
+<circle cx="0" cy="0" r="3" fill="#c2703d">
+</circle>
+<animateMotion path="M80 99 Q77 113 77 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;1" keyPoints="0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.449;0.45;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#c2703d">
+</circle>
+<animateMotion path="M165 99 Q77 113 77 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.17;0.62;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.169;0.17;0.619;0.62;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#c2703d">
+</circle>
+<animateMotion path="M250 99 Q77 113 77 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.34;0.79;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.339;0.34;0.789;0.79;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="128" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="135" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+<animate attributeName="height" values="0;0;0;0;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;305;305;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M128 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="153" y="337" font-size="13" fill="#6d6459" text-anchor="middle">B</text>
+<rect x="204" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="211" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+<animate attributeName="height" values="0;0;0;0;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;305;305;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M204 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="229" y="337" font-size="13" fill="#6d6459" text-anchor="middle">C</text>
+<rect x="280" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="287" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+<animate attributeName="height" values="0;0;0;0;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;305;305;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M280 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="305" y="337" font-size="13" fill="#6d6459" text-anchor="middle">D</text>
+<text x="45" y="96" font-size="15" fill="#1f2b24" text-anchor="start">250 / 0 / 0 / 0</text>
+<rect x="437" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="444" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+<animate attributeName="height" values="0;0;37.5;37.5;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;267.5;267.5;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M437 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="462" y="337" font-size="13" fill="#6d6459" text-anchor="middle">A</text>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M465 99 Q462 113 462 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;1" keyPoints="0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.449;0.45;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M550 99 Q462 113 462 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.17;0.62;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.169;0.17;0.619;0.62;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M635 99 Q462 113 462 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.34;0.79;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.339;0.34;0.789;0.79;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="513" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="520" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+<animate attributeName="height" values="0;0;37.5;37.5;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;267.5;267.5;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M513 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="538" y="337" font-size="13" fill="#6d6459" text-anchor="middle">B</text>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M465 99 Q538 113 538 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;1" keyPoints="0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.449;0.45;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M550 99 Q538 113 538 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.17;0.62;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.169;0.17;0.619;0.62;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M635 99 Q538 113 538 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.34;0.79;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.339;0.34;0.789;0.79;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="589" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="596" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+<animate attributeName="height" values="0;0;37.5;37.5;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;267.5;267.5;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M589 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="614" y="337" font-size="13" fill="#6d6459" text-anchor="middle">C</text>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M465 99 Q614 113 614 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;1" keyPoints="0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.449;0.45;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M550 99 Q614 113 614 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.17;0.62;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.169;0.17;0.619;0.62;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M635 99 Q614 113 614 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.34;0.79;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.339;0.34;0.789;0.79;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<rect x="665" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="672" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+<animate attributeName="height" values="0;0;37.5;37.5;0" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+<animate attributeName="y" values="305;305;267.5;267.5;305" keyTimes="0;0.12;0.72;0.95;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</rect>
+<path d="M665 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="690" y="337" font-size="13" fill="#6d6459" text-anchor="middle">D</text>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M465 99 Q690 113 690 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.45;1" keyPoints="0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.449;0.45;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M550 99 Q690 113 690 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.17;0.62;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.169;0.17;0.619;0.62;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="3" fill="#2f6f4e">
+</circle>
+<animateMotion path="M635 99 Q690 113 690 153" dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.34;0.79;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.339;0.34;0.789;0.79;1" dur="6s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="430" y="96" font-size="15" fill="#1f2b24" text-anchor="start">62.5 each</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Route independent writes across keys; one hot key cannot use its idle neighbors.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Bars grow to arrival rates, not stored bytes. Black line = 100 units/s; logical ≠ physical partition.</text>
+</g>
+<g class="still">
+<text x="40" y="73" font-size="11" fill="#c2703d" text-anchor="start">ONE HOT KEY</text>
+<text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">FOUR INDEPENDENT BUCKETS</text>
+<rect x="52" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="59" y="155" width="37" height="150" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+</rect>
+<path d="M52 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="77" y="337" font-size="13" fill="#6d6459" text-anchor="middle">A</text>
+<rect x="128" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="135" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+</rect>
+<path d="M128 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="153" y="337" font-size="13" fill="#6d6459" text-anchor="middle">B</text>
+<rect x="204" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="211" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+</rect>
+<path d="M204 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="229" y="337" font-size="13" fill="#6d6459" text-anchor="middle">C</text>
+<rect x="280" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="287" y="305" width="37" height="0" rx="0" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+</rect>
+<path d="M280 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="305" y="337" font-size="13" fill="#6d6459" text-anchor="middle">D</text>
+<text x="45" y="96" font-size="15" fill="#1f2b24" text-anchor="start">250 / 0 / 0 / 0</text>
+<rect x="437" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="444" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+</rect>
+<path d="M437 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="462" y="337" font-size="13" fill="#6d6459" text-anchor="middle">A</text>
+<rect x="513" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="520" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+</rect>
+<path d="M513 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="538" y="337" font-size="13" fill="#6d6459" text-anchor="middle">B</text>
+<rect x="589" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="596" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+</rect>
+<path d="M589 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="614" y="337" font-size="13" fill="#6d6459" text-anchor="middle">C</text>
+<rect x="665" y="165" width="51" height="146" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="672" y="267.5" width="37" height="37.5" rx="0" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+</rect>
+<path d="M665 245 h51" stroke="#1f2b24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="690" y="337" font-size="13" fill="#6d6459" text-anchor="middle">D</text>
+<text x="430" y="96" font-size="15" fill="#1f2b24" text-anchor="start">62.5 each</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Route independent writes across keys; one hot key cannot use its idle neighbors.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Bars grow to arrival rates, not stored bytes. Black line = 100 units/s; logical ≠ physical partition.</text>
+</g>
+</svg>

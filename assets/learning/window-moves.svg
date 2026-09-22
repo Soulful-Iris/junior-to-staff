@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">A window that never moves backward</title>
+<desc id="desc">a 0 b 1 b 2 a 3 LONGEST SUBSTRING WITH NO REPEATED CHARACTER L R duplicate b left = max(left, last_seen[char] + 1) Extend right. On a duplicate, move left past its previous occurrence. The final a was already outside the window. Best length stays 2. Loop reset is not an algorithm step. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">A WINDOW THAT NEVER MOVES BACKWARD</text>
+<g class="moving">
+<rect x="160" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="196.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">a</text>
+<text x="196.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">0</text>
+<rect x="260" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="296.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">b</text>
+<text x="296.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">1</text>
+<rect x="360" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="396.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">b</text>
+<text x="396.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">2</text>
+<rect x="460" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="496.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">a</text>
+<text x="496.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">3</text>
+<text x="45" y="78" font-size="11" fill="#6d6459" text-anchor="start">LONGEST SUBSTRING WITH NO REPEATED CHARACTER</text>
+<rect x="354" y="121" width="184" height="66" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="none">
+<animate attributeName="x" values="154;154;354;354;154" keyTimes="0;0.37;0.5;0.94;1" dur="7s" repeatCount="indefinite" calcMode="spline" keySplines=".42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1">
+</animate>
+<animate attributeName="width" values="84;84;184;184;284;84;84;184;184;84" keyTimes="0;0.12;0.25;0.31;0.37;0.5;0.61;0.75;0.94;1" dur="7s" repeatCount="indefinite" calcMode="spline" keySplines=".42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1">
+</animate>
+</rect>
+<text x="360" y="229" font-size="18" fill="#2f6f4e" text-anchor="start">L<animate attributeName="x" values="160;160;360;360;160" keyTimes="0;0.37;0.5;0.94;1" dur="7s" repeatCount="indefinite" calcMode="spline" keySplines=".42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1">
+</animate>
+</text>
+<text x="510" y="253" font-size="18" fill="#c2703d" text-anchor="start">R<animate attributeName="x" values="210;210;310;310;410;410;510;510;210" keyTimes="0;0.12;0.25;0.31;0.37;0.61;0.75;0.94;1" dur="7s" repeatCount="indefinite" calcMode="spline" keySplines=".42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1;.42 0 .2 1">
+</animate>
+</text>
+<path d="M292 111 Q342 67 392 111" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="342" y="94" font-size="13" fill="#c2703d" text-anchor="middle">duplicate b</text>
+<text x="45" y="304" font-size="20" fill="#2f6f4e" text-anchor="start">left = max(left, last_seen[char] + 1)</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Extend right. On a duplicate, move left past its previous occurrence.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">The final a was already outside the window. Best length stays 2. Loop reset is not an algorithm step.</text>
+</g>
+<g class="still">
+<rect x="160" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="196.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">a</text>
+<text x="196.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">0</text>
+<rect x="260" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="296.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">b</text>
+<text x="296.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">1</text>
+<rect x="360" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="396.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">b</text>
+<text x="396.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">2</text>
+<rect x="460" y="130" width="72" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="496.0" y="160" font-size="21" fill="#1f2b24" text-anchor="middle">a</text>
+<text x="496.0" y="120" font-size="11" fill="#6d6459" text-anchor="middle">3</text>
+<text x="45" y="78" font-size="11" fill="#6d6459" text-anchor="start">LONGEST SUBSTRING WITH NO REPEATED CHARACTER</text>
+<rect x="354" y="121" width="184" height="66" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="none">
+</rect>
+<text x="360" y="229" font-size="18" fill="#2f6f4e" text-anchor="start">L</text>
+<text x="510" y="253" font-size="18" fill="#c2703d" text-anchor="start">R</text>
+<path d="M292 111 Q342 67 392 111" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="342" y="94" font-size="13" fill="#c2703d" text-anchor="middle">duplicate b</text>
+<text x="45" y="304" font-size="20" fill="#2f6f4e" text-anchor="start">left = max(left, last_seen[char] + 1)</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Extend right. On a duplicate, move left past its previous occurrence.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">The final a was already outside the window. Best length stays 2. Loop reset is not an algorithm step.</text>
+</g>
+</svg>

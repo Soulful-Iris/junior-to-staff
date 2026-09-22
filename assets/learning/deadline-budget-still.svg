@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Children spend the parent&#x27;s remaining budget</title>
+<desc id="desc">PARENT DEADLINE 300 ms · PASS REMAINING TIME TO CHILDREN request auth database 300 ms auth spent 50 ms at most 250 ms remain A child inherits the remaining budget, not a fresh full timeout. Reserve reply/cleanup time too. Cancellation is cooperative; downstream work may outlive the caller. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">CHILDREN SPEND THE PARENT&#x27;S REMAINING BUDGET</text>
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">PARENT DEADLINE 300 ms · PASS REMAINING TIME TO CHILDREN</text>
+<text x="40" y="125" font-size="15" fill="#2f6f4e" text-anchor="start">request</text>
+<rect x="138" y="101" width="600" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="138" y="101" width="600" height="34" rx="2" stroke="#2f6f4e" stroke-width="1.5" fill="#2f6f4e">
+</rect>
+<text x="40" y="201" font-size="15" fill="#6d6459" text-anchor="start">auth</text>
+<rect x="138" y="177" width="100" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="138" y="177" width="100" height="34" rx="2" stroke="#ded9d1" stroke-width="1.5" fill="#ded9d1">
+</rect>
+<text x="40" y="277" font-size="15" fill="#c2703d" text-anchor="start">database</text>
+<rect x="238" y="253" width="500" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<rect x="238" y="253" width="500" height="34" rx="2" stroke="#c2703d" stroke-width="1.5" fill="#c2703d">
+</rect>
+<path d="M738 91 V318" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="738" y="337" font-size="13" fill="#c2703d" text-anchor="end">300 ms</text>
+<text x="245" y="183" font-size="14" fill="#6d6459" text-anchor="start">auth spent 50 ms</text>
+<text x="340" y="244" font-size="15" fill="#c2703d" text-anchor="start">at most 250 ms remain</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">A child inherits the remaining budget, not a fresh full timeout.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Reserve reply/cleanup time too. Cancellation is cooperative; downstream work may outlive the caller.</text>
+</svg>

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">A late event meets a version guard</title>
+<desc id="desc">THE RESULT AND ITS STATUS VIEW ARE SEPARATE BOUNDARIES result: done completion log status view completed · v3 late v2 Apply only when incoming version &amp;gt; stored version. The completion advances the view. The later arrival of v2 does not undo it. A repeated version is a no-op only when its payload agrees; disagreement is a conflict. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">A LATE EVENT MEETS A VERSION GUARD</text>
+<g class="moving">
+<text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">THE RESULT AND ITS STATUS VIEW ARE SEPARATE BOUNDARIES</text>
+<rect x="40" y="101" width="155" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="117.5" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">result: done</text>
+<rect x="289" y="101" width="166" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="372.0" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">completion log</text>
+<rect x="550" y="101" width="170" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="635.0" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">status view</text>
+<path d="M195 125 H289 M455 125 H550" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M195 125 H289" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.01;0.2;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.009000000000000001;0.01;0.199;0.2;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<path d="M365 149 V200 H634 V149" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M365 149 V200 H634 V149" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.22;0.57;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.219;0.22;0.569;0.57;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="410" y="190" font-size="15" fill="#2f6f4e" text-anchor="start">completed · v3</text>
+<path d="M180 268 H590 V222" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M180 268 H590 V222" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.59;0.88;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.589;0.59;0.879;0.88;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="42" y="274" font-size="17" fill="#c2703d" text-anchor="start">late v2</text>
+<path d="M578 220 l24 16 M602 220 l-24 16" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="40" y="326" font-size="20" fill="#2f6f4e" text-anchor="start">Apply only when incoming version &gt; stored version.</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">The completion advances the view. The later arrival of v2 does not undo it.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">A repeated version is a no-op only when its payload agrees; disagreement is a conflict.</text>
+</g>
+<g class="still">
+<text x="40" y="72" font-size="11" fill="#6d6459" text-anchor="start">THE RESULT AND ITS STATUS VIEW ARE SEPARATE BOUNDARIES</text>
+<rect x="40" y="101" width="155" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="117.5" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">result: done</text>
+<rect x="289" y="101" width="166" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="372.0" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">completion log</text>
+<rect x="550" y="101" width="170" height="48" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="635.0" y="130.0" font-size="14" fill="#1f2b24" text-anchor="middle">status view</text>
+<path d="M195 125 H289 M455 125 H550" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M365 149 V200 H634 V149" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="410" y="190" font-size="15" fill="#2f6f4e" text-anchor="start">completed · v3</text>
+<path d="M180 268 H590 V222" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="42" y="274" font-size="17" fill="#c2703d" text-anchor="start">late v2</text>
+<path d="M578 220 l24 16 M602 220 l-24 16" stroke="#c2703d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="40" y="326" font-size="20" fill="#2f6f4e" text-anchor="start">Apply only when incoming version &gt; stored version.</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">The completion advances the view. The later arrival of v2 does not undo it.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">A repeated version is a no-op only when its payload agrees; disagreement is a conflict.</text>
+</g>
+</svg>

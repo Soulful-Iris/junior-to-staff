@@ -1,0 +1,234 @@
+[
+  {
+    "key": "map-lookup",
+    "title": "Remember the complement",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "window-moves",
+    "title": "A window that never moves backward",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "prefix-counts",
+    "title": "Two boundaries, one prefix value",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "binary-halving",
+    "title": "Keep the first qualifying index",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "bfs-frontier",
+    "title": "A graph becomes distance layers",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "monotonic-stack",
+    "title": "A warmer day empties the stack",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "dp-choice",
+    "title": "Candidates flow into a minimum",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "lru-order",
+    "title": "Move the node, preserve its identity",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "config-cohorts",
+    "title": "Contain the configuration failure",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "retry-tree",
+    "title": "Retries multiply across layers",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "rollout-capacity",
+    "title": "Keep capacity above incoming demand",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "version-projection",
+    "title": "A late event meets a version guard",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "partition-skew",
+    "title": "Route around a hot key",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "worker-slots",
+    "title": "Admission follows completion",
+    "duration_seconds": 9,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "cache-coalescing",
+    "title": "One load, six waiting callers",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "conditional-result",
+    "title": "Duplicate delivery, one stored result",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "direct-upload",
+    "title": "Separate permission from bytes",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "browser-race",
+    "title": "The older response arrives last",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "cache-expiry",
+    "title": "Expiry jitter spreads the refresh wave",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "backpressure",
+    "title": "A buffer is a reservoir, not capacity",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "circuit-breaker",
+    "title": "A circuit opens, then probes recovery",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "replication-lag",
+    "title": "Acknowledged here, not visible everywhere",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "transaction-outbox",
+    "title": "Close the commit-to-publish gap",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "deadline-budget",
+    "title": "Children spend the parent's remaining budget",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "token-bucket",
+    "title": "Store burst credit, refill over time",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "connection-pool",
+    "title": "Lease connections within a fixed budget",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "traffic-shift",
+    "title": "Move admissions, drain existing work",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "io-waterfall",
+    "title": "Independent work can share the wait",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "heap-sift",
+    "title": "Repair the heap along one branch",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "trie-prefix",
+    "title": "One prefix opens several completions",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "backtracking",
+    "title": "Choose, explore, undo, try the next branch",
+    "duration_seconds": 10,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "merge-intervals",
+    "title": "Overlap extends the current interval",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "index-seek",
+    "title": "A separator eliminates a whole range",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "bulkhead",
+    "title": "Contain the slow neighbor",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
+  },
+  {
+    "key": "linked-pointer-reversal",
+    "title": "Save the suffix before reversing a link",
+    "duration_seconds": 13,
+    "motion": "saved reference arrives before link mutation; variable pointers advance afterward",
+    "source": "hand-authored"
+  },
+  {
+    "key": "recursion-return-state",
+    "title": "Return one branch, combine two locally",
+    "duration_seconds": 15,
+    "motion": "child heights travel upward; parent return state commits after both arrive",
+    "source": "hand-authored"
+  },
+  {
+    "key": "dp-edit-frontier",
+    "title": "Edit distance advances through solved prefixes",
+    "duration_seconds": 18,
+    "motion": "predecessor costs meet at a cell; the frontier advances with two retained rows",
+    "source": "hand-authored"
+  },
+  {
+    "key": "parser-precedence",
+    "title": "Parse the whole input before short-circuit evaluation",
+    "duration_seconds": 18,
+    "motion": "source tokens build precedence structure before a boolean value traverses it",
+    "source": "hand-authored"
+  }
+]

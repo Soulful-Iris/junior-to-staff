@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Repair the heap along one branch</title>
+<desc id="desc">MIN HEAP · AFTER REMOVING THE ROOT, REPAIR ONE BRANCH 6 8 4 7 9 Swap with the smaller child until the parent is no larger than its children. One path through a complete binary tree: O(log n). A heap orders parents, not all siblings. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">REPAIR THE HEAP ALONG ONE BRANCH</text>
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">MIN HEAP · AFTER REMOVING THE ROOT, REPAIR ONE BRANCH</text>
+<path d="M375 112 L220 213" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M375 112 L530 213" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M220 213 L125 306" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M220 213 L310 306" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<circle cx="375" cy="112" r="25" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="220" cy="213" r="25" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="530" cy="213" r="25" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="125" cy="306" r="25" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<circle cx="310" cy="306" r="25" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
+<text x="530" y="220" font-size="21" fill="#1f2b24" text-anchor="middle">6</text>
+<text x="310" y="313" font-size="21" fill="#1f2b24" text-anchor="middle">8</text>
+<text x="375" y="119" font-size="21" fill="#2f6f4e" text-anchor="middle">4</text>
+<text x="220" y="220" font-size="21" fill="#2f6f4e" text-anchor="middle">7</text>
+<text x="125" y="313" font-size="21" fill="#c2703d" text-anchor="middle">9</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Swap with the smaller child until the parent is no larger than its children.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">One path through a complete binary tree: O(log n). A heap orders parents, not all siblings.</text>
+</svg>

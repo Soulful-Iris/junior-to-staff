@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Independent work can share the wait</title>
+<desc id="desc">SERIAL: 600 ms INDEPENDENT PARALLEL: 200 ms A B C time → A B C time → Start independent I/O together; total wait approaches the slowest call. Dependent operations stay ordered. Bound fan-out and handle partial failure; concurrency has a cost. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">INDEPENDENT WORK CAN SHARE THE WAIT</text>
+<text x="40" y="74" font-size="11" fill="#c2703d" text-anchor="start">SERIAL: 600 ms</text>
+<text x="425" y="74" font-size="11" fill="#2f6f4e" text-anchor="start">INDEPENDENT PARALLEL: 200 ms</text>
+<defs>
+<clipPath id="sweep0s">
+<rect x="90" y="93" width="260" height="225" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+</clipPath>
+</defs>
+<text x="40" y="128" font-size="15" fill="#1f2b24" text-anchor="start">A</text>
+<text x="40" y="193" font-size="15" fill="#1f2b24" text-anchor="start">B</text>
+<text x="40" y="258" font-size="15" fill="#1f2b24" text-anchor="start">C</text>
+<g clip-path="url(#sweep0s)">
+<rect x="90" y="106" width="80" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="170" y="171" width="80" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="250" y="236" width="80" height="34" rx="5" stroke="#c2703d" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<path d="M90 308 H350" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="90" y="334" font-size="12" fill="#6d6459" text-anchor="start">time →</text>
+<defs>
+<clipPath id="sweep385s">
+<rect x="475" y="93" width="260" height="225" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+</clipPath>
+</defs>
+<text x="425" y="128" font-size="15" fill="#1f2b24" text-anchor="start">A</text>
+<text x="425" y="193" font-size="15" fill="#1f2b24" text-anchor="start">B</text>
+<text x="425" y="258" font-size="15" fill="#1f2b24" text-anchor="start">C</text>
+<g clip-path="url(#sweep385s)">
+<rect x="475" y="106" width="80" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="475" y="171" width="80" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<rect x="475" y="236" width="80" height="34" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+</g>
+<path d="M475 308 H735" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<text x="475" y="334" font-size="12" fill="#6d6459" text-anchor="start">time →</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Start independent I/O together; total wait approaches the slowest call.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Dependent operations stay ordered. Bound fan-out and handle partial failure; concurrency has a cost.</text>
+</svg>

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Move admissions, drain existing work</title>
+<desc id="desc">SHIFT TRAFFIC ONLY AFTER THE NEW FLEET IS READY router blue · old green · new drain old work increase new admissions Traffic share moves from blue to green; existing requests still need time to finish. Health checks are necessary, not sufficient. Observe errors and latency; retain a rollback route. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">MOVE ADMISSIONS, DRAIN EXISTING WORK</text>
+<g class="moving">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">SHIFT TRAFFIC ONLY AFTER THE NEW FLEET IS READY</text>
+<rect x="45" y="158" width="147" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="118.5" y="192.0" font-size="14" fill="#1f2b24" text-anchor="middle">router</text>
+<rect x="510" y="103" width="194" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="607.0" y="137.0" font-size="14" fill="#1f2b24" text-anchor="middle">blue · old</text>
+<rect x="510" y="249" width="194" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="607.0" y="283.0" font-size="14" fill="#1f2b24" text-anchor="middle">green · new</text>
+<path d="M192 180 C350 180 340 132 510 132" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M192 196 C350 196 340 278 510 278" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M192 180 C350 180 340 132 510 132" stroke="#c2703d" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<animate attributeName="stroke-width" values="8;8;1;1" keyTimes="0;0.2;0.8;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</path>
+<path d="M192 196 C350 196 340 278 510 278" stroke="#2f6f4e" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<animate attributeName="stroke-width" values="1;1;8;8" keyTimes="0;0.2;0.8;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</path>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M192 180 C350 180 340 132 510 132" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.03;0.25;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.028999999999999998;0.03;0.249;0.25;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M192 196 C350 196 340 278 510 278" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.5;0.73;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.499;0.5;0.729;0.73;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M192 180 C350 180 340 132 510 132" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.14;0.36;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.139;0.14;0.359;0.36;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M192 196 C350 196 340 278 510 278" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6;0.83;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.599;0.6;0.829;0.83;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#c2703d">
+</circle>
+<animateMotion path="M192 180 C350 180 340 132 510 132" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.25;0.47;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.249;0.25;0.469;0.47;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<g>
+<circle cx="0" cy="0" r="4" fill="#2f6f4e">
+</circle>
+<animateMotion path="M192 196 C350 196 340 278 510 278" dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.7;0.9299999999999999;1" keyPoints="0;0;1;1">
+</animateMotion>
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.699;0.7;0.9289999999999999;0.9299999999999999;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
+</g>
+<text x="294" y="105" font-size="16" fill="#c2703d" text-anchor="start">drain old work</text>
+<text x="289" y="325" font-size="16" fill="#2f6f4e" text-anchor="start">increase new admissions</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Traffic share moves from blue to green; existing requests still need time to finish.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Health checks are necessary, not sufficient. Observe errors and latency; retain a rollback route.</text>
+</g>
+<g class="still">
+<text x="40" y="73" font-size="11" fill="#6d6459" text-anchor="start">SHIFT TRAFFIC ONLY AFTER THE NEW FLEET IS READY</text>
+<rect x="45" y="158" width="147" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="118.5" y="192.0" font-size="14" fill="#1f2b24" text-anchor="middle">router</text>
+<rect x="510" y="103" width="194" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="607.0" y="137.0" font-size="14" fill="#1f2b24" text-anchor="middle">blue · old</text>
+<rect x="510" y="249" width="194" height="58" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
+</rect>
+<text x="607.0" y="283.0" font-size="14" fill="#1f2b24" text-anchor="middle">green · new</text>
+<path d="M192 180 C350 180 340 132 510 132" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M192 196 C350 196 340 278 510 278" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M192 180 C350 180 340 132 510 132" stroke="#c2703d" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M192 196 C350 196 340 278 510 278" stroke="#2f6f4e" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="294" y="105" font-size="16" fill="#c2703d" text-anchor="start">drain old work</text>
+<text x="289" y="325" font-size="16" fill="#2f6f4e" text-anchor="start">increase new admissions</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Traffic share moves from blue to green; existing requests still need time to finish.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Health checks are necessary, not sufficient. Observe errors and latency; retain a rollback route.</text>
+</g>
+</svg>

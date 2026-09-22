@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
+<title id="title">Choose, explore, undo, try the next branch</title>
+<desc id="desc">SUBSETS OF [A, B] · ONE WORKING PATH, COPIED AT LEAVES [] [A] [] [A,B] [A] [B] [] down: choose up: undo Depth-first traversal returns to a choice point before trying the next branch. Append → recurse → pop. Copy at a leaf; otherwise every saved answer may alias the same list. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+<path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
+</marker>
+</defs>
+<style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
+<rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">CHOOSE, EXPLORE, UNDO, TRY THE NEXT BRANCH</text>
+<text x="40" y="74" font-size="11" fill="#6d6459" text-anchor="start">SUBSETS OF [A, B] · ONE WORKING PATH, COPIED AT LEAVES</text>
+<path d="M380 107 L215 204" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M380 107 L550 204" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M215 204 L100 300" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M215 204 L295 300" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M550 204 L475 300" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M550 204 L660 300" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<rect x="340" y="90" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="380.0" y="112.0" font-size="14" fill="#1f2b24" text-anchor="middle">[]</text>
+<rect x="175" y="187" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="215.0" y="209.0" font-size="14" fill="#1f2b24" text-anchor="middle">[A]</text>
+<rect x="510" y="187" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="550.0" y="209.0" font-size="14" fill="#1f2b24" text-anchor="middle">[]</text>
+<rect x="60" y="283" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="100.0" y="305.0" font-size="14" fill="#1f2b24" text-anchor="middle">[A,B]</text>
+<rect x="255" y="283" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="295.0" y="305.0" font-size="14" fill="#1f2b24" text-anchor="middle">[A]</text>
+<rect x="435" y="283" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="475.0" y="305.0" font-size="14" fill="#1f2b24" text-anchor="middle">[B]</text>
+<rect x="620" y="283" width="80" height="34" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
+</rect>
+<text x="660.0" y="305.0" font-size="14" fill="#1f2b24" text-anchor="middle">[]</text>
+<text x="55" y="117" font-size="14" fill="#2f6f4e" text-anchor="start">down: choose</text>
+<text x="55" y="146" font-size="14" fill="#c2703d" text-anchor="start">up: undo</text>
+<path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">Depth-first traversal returns to a choice point before trying the next branch.</text>
+<text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Append → recurse → pop. Copy at a leaf; otherwise every saved answer may alias the same list.</text>
+</svg>

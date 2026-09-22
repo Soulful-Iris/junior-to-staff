@@ -1,57 +1,61 @@
-# The website
+# The Engineering Guide
 
-The guide reads fine on GitHub. This turns the same markdown into something
-you can search, page through, and read on a phone.
+The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains four parts, 17 chapters, their ordered lessons, and the current lesson's subsections. Every lesson has Previous/Next navigation. The contents is the place to jump elsewhere.
 
-Live at **[guide.soulful-ai.dev](https://guide.soulful-ai.dev)**.
+## Build and check
 
-```bash
-python3 site/build.py      # markdown -> site/out/  (43 pages)
-python3 site/serve.py      # http://127.0.0.1:8901
-```
-
-No build step beyond Python and the `markdown` package. No JavaScript
-framework, no node_modules, nothing to keep patched.
-
-## Two decisions worth knowing about
-
-**The output mirrors the repo tree.** `tiers/01-junior/06-testing/README.md`
-becomes `tiers/01-junior/06-testing/index.html`. That is not tidiness. It means
-every relative link already written in the markdown resolves without being
-rewritten, so the site and GitHub cannot drift apart — there is no link-rewriting
-step to get subtly wrong.
-
-**The search index carries the prose, not just the titles.** A 105,000-word
-guide where search only matches headings is a table of contents with extra
-steps. `search.json` is 490 KB and is fetched on the first keystroke, not on
-page load, so it costs nothing until you use it. Matching prefers whole words:
-without that, `rds` scores 32 pages because it is inside *words* and *records*,
-and the two pages actually about RDS are buried.
-
-## The site is not committed
-
-`site/out/` is gitignored. It is generated, so a committed copy would be a
-second source of truth that goes stale the first time someone edits a section
-and forgets to rebuild.
-
-## Running it as a service
-
-`units/j2s-site.service` is a systemd user unit — `Restart=always`, static
-files only, bound to localhost. Nothing here can lose data; the worst failure is
-a dead bookmark.
+Python 3.12+, Node, and Chromium are required for a fresh build. Install the declared tooling in a virtual environment and the local Node tooling directory:
 
 ```bash
-cp units/j2s-site.service ~/.config/systemd/user/
-systemctl --user enable --now j2s-site.service
+python3.12 -m venv /tmp/engineering-guide-venv
+/tmp/engineering-guide-venv/bin/python -m pip install -r site/requirements.txt
+npm install --prefix site/tools
+# Use an existing Chromium executable, or install one with Playwright:
+cd site/tools
+npx playwright install chromium
+cd ../..
+
+/tmp/engineering-guide-venv/bin/python site/build.py
+/tmp/engineering-guide-venv/bin/python site/check.py
+/tmp/engineering-guide-venv/bin/python site/check_reading.py
+/tmp/engineering-guide-venv/bin/python site/serve.py
 ```
 
-## Changing how it looks
+The preview serves at `http://127.0.0.1:8901`. Set `CHROME_PATH` if Chromium lives outside the standard Playwright cache. If required system libraries are unavailable, install them for that browser before rendering. The build refuses to publish missing diagrams. `SITE_OUT` selects a staging directory; the default is `site/out/`. Generated output, browser binaries and tooling dependencies are not committed.
 
-The CSS and JS live inside `build.py` as two string constants, `CSS` and `JS`.
-One file, one build, no asset pipeline.
+With a browser available, run the interaction checks:
 
-`JS` is a **raw** string. It has to be: without the `r`, Python eats the
-backslashes and the word-boundary `\b` in the search regex ships as `\b` — the
-backspace character — and every search silently returns nothing. It looks
-identical in the source and it is completely broken. Test the built file, not
-the algorithm.
+```bash
+CHROME_PATH=/path/to/chromium node site/tools/browser-check.mjs
+```
+
+The browser script starts and stops its own local server. `SITE_SCREENSHOTS` selects a directory for review images; otherwise it uses a temporary directory.
+
+## Reading sequence and content
+
+- `course.py` defines the teaching order over existing source documents. Coding primers are interleaved with the problems they introduce. The five reading-list stages appear in their relevant chapters. Candidate exercises follow the relevant material; assessor keys stay outside the automatic sequence.
+- `reader.py` composes the content and interface. Code and test files are displayed beside their references. References outside a protected answer are placed in an inline disclosure; existing answer disclosures stay closed until the learner opens them. Ordinary cross-links become contextual text, while their full documents remain in the sequence or reference shelf. External citations appear under Sources at the end of the lesson.
+- `build.py` retains Markdown parsing, heading generation and cached Mermaid rendering. Original Markdown, code and visual assets remain untouched.
+- `style.css` and `app.js` provide the reading layout, nested contents, mobile drawer, subsection navigation, search, local progress, copy-code controls and diagram sizing/motion controls.
+
+The build publishes **239 content pages**, **185 guided steps** plus the homepage, and a separate visual reference. All **42 coding problems**, **45 project briefs**, **107 source SVGs** on this site branch and **387 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
+
+Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
+
+Previous and Next remain pinned above the lesson on desktop and mobile, with the same destinations as the bottom controls. The mobile header retains the current lesson title and chapter/step while scrolling. On the final lesson, either Finish control marks completion; both controls reflect the saved state when revisiting.
+
+## Visuals and accessibility
+
+Mermaid is rendered to SVG before publication and cached by source hash. Wide diagrams and tables scroll within the reading column. Readers can fit a diagram to the column or keep its natural size. Authored animation/still pairs are used where supplied. Older animations receive derived resting views that preserve their original boxes and labels; original assets are never overwritten. The motion preference is retained locally and respects the system's reduced-motion setting.
+
+The mobile contents drawer supports Escape, focus containment and return to its opening button. Heading navigation opens an enclosing solution disclosure before moving to the heading. Search stays inside the contents panel. The browser checks exercise these behaviors; they are not a full assistive-technology certification.
+
+## Deployment
+
+`deploy.sh` preserves the existing automatic deployment job. It builds into a staging directory, validates the built links and learning flow, and swaps the published directory only after success. It installs the pinned Python requirements into a dedicated virtual environment and the declared Node tools when their manifests change. A failed build remains retryable even after the checkout advances to the new commit. Existing notification behavior is preserved.
+
+See [redesign verification](REDESIGN.md) for the completed checks and their limits.
+
+## Release assets
+
+Generated pages use `reader-css.<content-hash>.css` and `reader-js.<content-hash>.js` with integrity attributes. The matching stylesheet is also embedded in each page, so stale or unavailable external CSS cannot strip the reading layout. Font URLs in this embedded copy are rooted at `SITE_BASE`. The build writes `reader-assets.json`; the acceptance check verifies it against every generated content page. The mobile browser suite includes stale-stylesheet and missing-stylesheet regressions.
