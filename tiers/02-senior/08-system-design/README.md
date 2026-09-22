@@ -2,6 +2,60 @@
 
 > Senior tier · feeds **P3 (it holds under load)**
 
+## At the whiteboard
+
+> “Design a bookmark service. We have 1,000 reads/s and 20 writes/s at peak,
+> 100,000 users, and a two-second freshness target for shared lists. Start with
+> the smallest design you can defend. What information would change it?”
+
+These are constructed workload inputs. A read lists one owner's most recent
+20 bookmarks; a write must never modify another owner's data. Ask about item
+size, retention, burst length, latency percentiles, and whether the freshness
+target permits stale data after a write. State assumptions before naming AWS.
+
+| Example | Expected behavior |
+|---|---|
+| Owner A reads 20 items | Stable order by creation time and unique ID |
+| Owner B submits A's item ID | Denied at the write boundary |
+| Write succeeds, response is lost | Retry has an explicit duplicate policy |
+| Cache fails at 1,000 reads/s | Storage load remains within an agreed budget |
+
+```mermaid
+flowchart TD
+  Browser[Browser] --> API[Application API]
+  API --> Auth[Identity and ownership check]
+  Auth --> DB[(Relational store)]
+  DB --> Index[Owner and ordered item index]
+```
+
+## Build the argument
+
+1. Write the read/write contracts and ownership invariant. A fast unauthorized
+   response still fails the problem.
+2. Calculate storage and traffic from explicit sizes and retention. Do not
+   multiply peak requests by every second of a month unless peak is continuous.
+3. Start with the API and indexed store. Identify the measured bottleneck before
+   adding independent failure modes.
+4. Add caching only with a freshness, invalidation, and cache-down admission
+   policy. Explain what each arrow is allowed to promise.
+
+**Follow-up:** “Read traffic rises tenfold but writes stay constant.” Redraw the
+read path, then ask whether a hot tenant defeats a global average.
+
+```mermaid
+flowchart TD
+  LB[Load balancer] --> API[Stateless API instances]
+  API --> Cache[(Owner scoped cache)]
+  Cache -->|bounded misses| Gate[Origin admission]
+  Gate --> DB[(Authoritative store)]
+  API -->|authorized writes| DB
+  DB -->|version or invalidation| Cache
+```
+
+Senior depth is a coherent baseline that survives this change. Lead depth adds
+owners, rollout measurements, cost attribution, and a policy when one tenant
+consumes the shared budget. Practice drawing before opening the examples below.
+
 ## The one-liner
 
 System design is not drawing boxes. It is the process of working out what must

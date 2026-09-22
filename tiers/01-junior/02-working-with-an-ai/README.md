@@ -2,6 +2,61 @@
 
 > Junior tier · feeds **every project in this guide**
 
+## At the whiteboard
+
+> “An assistant implemented quantity updates and supplied passing tests. A
+> customer says they cannot save zero. What would you specify and check before
+> trusting the implementation?”
+
+This lesson is about making a generated answer **falsifiable**: a wrong behavior
+must produce evidence you can recognize, even when its explanation sounds good.
+
+| Request with current quantity `7` | Expected result for this exercise |
+|---|---|
+| `{ "quantity": 0 }` | Save `0` |
+| `{}` | Keep `7` |
+| `{ "quantity": -1 }` | Reject; keep `7` |
+| `{ "quantity": null }` | Reject; keep `7` |
+
+**Ask first:** does missing mean “unchanged,” and are null and zero different?
+Those are product decisions, not choices to delegate silently to generated code.
+
+```mermaid
+flowchart TD
+  Wish[Vague feature request] --> Code[Generated implementation]
+  Code --> Tests[Tests copied from behavior]
+  Tests --> Green[Green even when contract is wrong]
+  User[Customer saves zero] --> Failure[Wrong stored quantity]
+  Code --> Failure
+```
+
+## Reason through the review
+
+1. Write the four cases above independently. They define what the code owes you.
+2. Ask for the smallest change and its assumptions. `value || current` cannot
+   distinguish zero from absence; `??` still needs the chosen null validation.
+3. Run the cases through the real request boundary, where JSON has no TypeScript
+   guarantee. A type annotation does not validate incoming data.
+4. Deliberately restore the defect. At least the zero test must fail; otherwise
+   the test did not exercise the behavior you thought it did.
+
+**Follow-up:** “Both implementation and tests came from the same assistant.
+What evidence is independent?” Add a separately authored contract and a mutation
+check to the picture.
+
+```mermaid
+flowchart TD
+  Contract[Human agreed examples] --> Tests[Independent contract tests]
+  Request[Bounded AI request] --> Code[Small candidate patch]
+  Code --> Tests
+  Mutant[Known wrong zero handling] --> Tests
+  Tests --> Decision[Accept only explained evidence]
+```
+
+The goal is to explain why the patch satisfies the contract, not to collect a
+reassuring assistant review. Use the same task unaided when preparing for coding
+rounds; follow the actual interview's tool rules.
+
 ## The one-liner
 
 If a model writes most of your code, your job is no longer typing. It is
@@ -22,29 +77,14 @@ logged at debug level, so the failure that will bite you in three weeks is
 already invisible. None of that is visible in a skim, and a skim is what you gave
 it, because it looked like code you would have written.
 
-The measured version of this, so it is not folklore:
+The zero-quantity example above supplies a direct experiment: a plausible patch
+can pass tests that repeat its assumption while failing an independently agreed
+case. That is enough to justify the verification method here. Older productivity
+surveys do not establish what your team or today's tools will do; see the
+[research notes and their limits](../../../docs/research/junior-foundation-research-2026.md).
 
-- A 2025 randomised controlled trial by METR found experienced open-source
-  developers were **19% slower** on their own repositories using AI tooling — and
-  believed they had been about 20% *faster*. The perception gap is the finding.
-- The 2025 Stack Overflow developer survey (49,009 respondents) found **84%**
-  use or plan to use AI tools, and at the same time **more developers actively
-  distrust the accuracy of the output (46%) than trust it (33%)** — distrust up
-  from 31% the year before, with only 3% saying they highly trust it. The single
-  most common frustration, at **66%**, was output that is "almost right, but not
-  quite". Experienced developers are the most sceptical of all.
-- GitClear's analysis of large commit corpora reports code duplication rising
-  sharply and refactoring collapsing as a share of changes.
-- Google's DORA 2025 report frames AI as an **amplifier**: it magnifies whatever
-  your existing practice is, good or bad, and it adds a verification tax that
-  somebody has to pay.
-
-*(Checked 2026-09-21. Re-check before quoting these; the METR result in
-particular is one trial on experienced developers in familiar repositories, not a
-law of nature.)*
-
-**"Almost right" is the expensive failure mode**, because obviously-wrong output
-costs you nothing. You see it and ask again.
+Measure your own cycle from specification to accepted behavior, including review
+and rework. Record defects caught, not just generated lines or green checks.
 
 ## The mental model
 

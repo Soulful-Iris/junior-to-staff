@@ -2,13 +2,68 @@
 
 > Junior tier · feeds **P1 (it works)**
 
+## At the whiteboard
+
+> “A checkout fix also renames thirty files and changes the database schema.
+> Ten percent of checkouts now fail. Show me how you would make the next change
+> easy to review, diagnose, and reverse.”
+
+You are learning the **change loop**: the evidence connecting a request to the
+code that is running. Start with one observable behavior, not a large diff.
+
+| Given | Expected evidence |
+|---|---|
+| Price `1999` cents, discount `200` cents | Checkout total is `1799` cents |
+| A rename unrelated to that total | Separate mechanical change with unchanged tests |
+| A deployment of the price fix | Running commit and matching test result are identifiable |
+| A schema change the old code cannot read | A compatibility plan before any claim of rollback |
+
+**Ask first:** what changed for the customer, and which part can be safely undone?
+
+```mermaid
+flowchart TD
+  Change[Mixed change] --> Price[Price behavior]
+  Change --> Rename[Thirty renames]
+  Change --> Schema[Schema removal]
+  Price --> Review[Review and rollback coupled]
+  Rename --> Review
+  Schema --> Review
+```
+
+## Reason through the first change
+
+1. Write the `1999 - 200 = 1799` example before asking an AI to edit. It is an
+   independent prediction against which to judge the result.
+2. Separate the price behavior from mechanical renames. The reviewer can now
+   find the decision that changes money.
+3. Keep the old and new schema readable during rollout. A Git revert cannot
+   restore a deleted column's data.
+4. Record the commit, test, and deployment together. Reproduce the failing
+   checkout before accepting the next patch.
+
+**Follow-up:** “The new version wrote a field the old version ignores. Can you
+roll back?” Draw the compatibility boundary before answering.
+
+```mermaid
+flowchart TD
+  Expand[Add compatible field] --> Old[Old application]
+  Expand --> New[New application]
+  Old --> Shared[(Compatible schema)]
+  New --> Shared
+  Shared --> Verify[Verify and observe]
+  Verify --> Contract[Remove old field later]
+```
+
+The stronger answer separates reversing code, reversing traffic, and recovering
+data. In the AI path, ask for a small diff and evidence for each boundary. In an
+interview, explain and implement the smallest behavior change yourself first.
+
 ## The one-liner
 
 A change is not the edit you made; it is the trip that edit takes — commit,
 review, merge, run — and the record it leaves behind. That loop, not the file,
-is the unit of engineering. In 2026 the expensive half of the loop is no longer
-writing the code but judging it; this section is about running the loop so
-judgment stays possible.
+is the unit of engineering. This section makes the loop inspectable, including when an AI produces the
+code faster than a reviewer can evaluate it.
 
 ## The failure it prevents
 
@@ -53,27 +108,15 @@ read; spread it over two thousand and each line gets a glance — which is how a
 rounding change hides inside a rename. Small batches also fail better: a bad
 small change reverts cleanly, a bad big one has grown roots.
 
-**The bottleneck moved, and 2026's tooling is the evidence.** Producing code
-stopped being the slow part. Stack Overflow's 2025 survey (about 49,000
-developers): 84% use or plan to use AI tools, and the most-cited frustration,
-at 66%, is solutions "almost right, but not quite". METR's randomized
-trial (July 2025) found experienced open-source developers 19% slower with AI
-on their own mature repos — while believing they had been 20% faster.
-Generation feels like speed; verification is where the time goes; your sense
-of progress is not an instrument. GitClear found duplicated code blocks
-up roughly 8x during 2024, copy/paste exceeding refactoring moves for the
-first time, and DORA 2025 calls AI an amplifier of whatever system it lands
-in. (All figures checked 2026-09-21.) More code, cheaper, of uneven quality —
-all arriving at the same narrow gate.
+**Review has its own capacity limit.** Generating a patch quickly does not tell
+us how long it takes to understand, test, or safely release it. Measure those
+stages separately on your own changes. A generated test may simply restate the
+implementation's mistake; the agreed examples must remain an independent input.
 
-So the platform rebuilt itself around that gate. **Merge queues** (generally
-available on GitHub since July 2023) land approved changes one at a time
-against the latest main, so nobody babysits a merge. **AI first-pass review**
-(Copilot code review, generally available April 2025) puts a machine read on
-every PR before a human spends attention. **Stacked pull requests** (public
-preview 2026-07-30) let a large feature land as a chain of small, individually
-judgeable diffs. (Dates checked 2026-09-21.) Three features, one premise:
-review capacity is the constraint; everything else queues behind it.
+A merge queue can test a proposed combined state before landing changes.
+Separating a large feature into independently reviewable changes can make its
+assumptions easier to inspect. Neither mechanism removes the need to understand
+compatibility, failures, or the actual guarantee of the configured checks.
 
 **Which leaves the skill: reading a diff.** Not top to bottom: state the claim
 first — what does the message say this does — then sort every hunk into

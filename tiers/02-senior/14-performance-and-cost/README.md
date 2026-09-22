@@ -2,6 +2,62 @@
 
 > Senior tier · feeds **P3 (it holds under load)**
 
+## At the whiteboard
+
+> “A list endpoint takes 900 ms. An engineer made one helper four times faster,
+> but the endpoint barely improved. Show me the measurements you want before
+> proposing the next optimization.”
+
+Performance work starts with attribution: which operation accounts for elapsed
+time, resource consumption, and user-visible delay under the actual workload?
+
+| Sequential teaching request | Before | After helper optimization |
+|---|---:|---:|
+| Helper | 40 ms | 10 ms |
+| Repeated database lookups | 800 ms | 800 ms |
+| Remaining work | 60 ms | 60 ms |
+| Total | 900 ms | 870 ms |
+
+The endpoint improves by about 3.3%, not fourfold. **Ask first:** are these
+operations sequential, and which percentile and workload produced the numbers?
+
+```mermaid
+flowchart TD
+  Page[Page of 40 items] --> Loop[Per-item lookup loop]
+  Loop --> Q1[Lookup item 1]
+  Loop --> Q2[Lookup item 2]
+  Loop --> Q40[Lookup item 40]
+  Q1 --> DB[(Same database)]
+  Q2 --> DB
+  Q40 --> DB
+```
+
+## Choose an optimization you can evaluate
+
+1. Capture a trace or profile and query count under representative data sizes.
+2. Identify repeated work: fetch related records in a bounded batch rather than
+   issuing one query per item, while preserving ownership and output order.
+3. Compare before and after on the same workload. Report latency distribution,
+   CPU, queries, transferred bytes, and errors, not only a microbenchmark.
+4. Attribute cost per useful operation. Fewer CPU seconds may not reduce a bill
+   dominated by idle capacity, storage, or data transfer.
+
+**Follow-up:** “The page can now contain 100,000 items.” A single unbounded batch
+is not the fix; add pagination and bounded batch size, then remeasure.
+
+```mermaid
+flowchart TD
+  Request[Stable page cursor] --> API[Page size cap]
+  API --> Batch[Bounded related-record query]
+  Batch --> DB[(Owner and cursor index)]
+  DB --> Assemble[Preserve requested order]
+  Assemble --> Page[Bounded response plus next cursor]
+```
+
+Senior depth explains the bottleneck and verifies the result. Lead depth includes
+capacity forecasts, workload isolation, budgets, and the ongoing cost of the
+optimization itself.
+
 ## The one-liner
 
 Performance and cost are the same skill pointed at different units. Both are
@@ -57,9 +113,9 @@ in a dashboard.
 
 Profiling used to be something you did locally, on a synthetic workload, hoping
 it resembled production. eBPF-based profilers changed that: they sample the
-whole machine from the kernel, always on, in production, at around **1% CPU
-overhead** — a figure the tool vendors publish and one worth verifying against
-your own workload rather than taking on faith.
+whole machine from the kernel in production. Overhead depends on the profiler,
+sampling configuration, workload, and environment. Measure CPU, latency, dropped
+samples, and storage before accepting an always-on budget.
 
 What that buys you is the thing that was previously impossible: **a diff flame
 graph between two versions.** Not "is this fast" but "what did this release

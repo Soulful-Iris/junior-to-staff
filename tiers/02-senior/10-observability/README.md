@@ -2,6 +2,64 @@
 
 > Senior tier · feeds **P2 (it survives)**
 
+## At the whiteboard
+
+> “A customer's save takes 1.2 seconds, while the overall dashboard is green.
+> You cannot reproduce it locally. What must already be recorded to locate the
+> delay without adding a new log and waiting for it to happen again?”
+
+You need evidence connecting one operation across boundaries. A metric counts
+events; a trace connects timed work; a log records a particular event's context.
+
+| Teaching trace | Measured duration |
+|---|---:|
+| Whole save request | 1,200 ms |
+| Authorization | 30 ms |
+| Database span | 1,050 ms |
+| Other work and gaps | 120 ms |
+
+**Ask first:** is the database time execution, connection waiting, or both?
+Nested spans overlap; adding every span duration can double-count wall time.
+
+```mermaid
+flowchart TD
+  Request[One slow save] --> API[API total 1200 ms]
+  API --> Auth[Auth 30 ms]
+  API --> DB[Database span 1050 ms]
+  API --> Gaps[Other work and gaps 120 ms]
+  DB --> Unknown[Pool wait or query execution?]
+```
+
+## Investigate with evidence
+
+1. Find one affected request ID and its trace. A population average cannot
+   explain why this particular request waited.
+2. Separate connection acquisition from query execution. That distinction
+   changes whether you investigate pool saturation or a query plan.
+3. Correlate a safe tenant identifier, query fingerprint, version, and outcome.
+   Avoid secrets and uncontrolled identifiers in metric label dimensions.
+4. Confirm the hypothesis on another slow trace, then compare after a change.
+   A faster isolated sample is weak evidence without a comparable workload.
+
+**Follow-up:** “Only one service propagates the trace ID.” Show the missing
+relationship, then repair context propagation across the queue boundary.
+
+```mermaid
+sequenceDiagram
+  participant API as API
+  participant Q as Queue
+  participant W as Worker
+  participant DB as Database
+  API->>Q: job plus trace context
+  Q->>W: delivery and linked operation
+  W->>DB: span for connection wait and query
+  DB-->>W: result and recorded outcome
+```
+
+Explain sampling loss, cardinality cost, and retention before declaring the
+system observable. A lead also decides which team owns a broken telemetry link
+and how useful evidence remains available during an incident.
+
 ## The one-liner
 
 Monitoring answers the questions you thought of in advance: is it up, is it
@@ -61,14 +119,15 @@ sampling may have dropped the one you need, and an uninstrumented hop is a gap
 blamed on the caller. A trace nobody propagated across a boundary is two
 traces, silent about the boundary — where the problem usually is.
 
-### The substrate is a standard now
+### Keep instrumentation separate from its destination
 
-OpenTelemetry graduated from the CNCF in May 2026 (announced 21 May; checked on
-opentelemetry.io, 2026-09-21): one API and wire format for all three signals,
-vendor plugged in at the exporter. Instrument against the OpenTelemetry API,
-never a vendor SDK: instrumentation ends up in every file of every service, the
-part you cannot afford to rewrite to change vendors. A fourth signal, profiles,
-was in alpha at graduation; don't build on it yet.
+Use stable semantic attributes and propagate trace context across boundaries.
+An OpenTelemetry-compatible instrumentation layer and collector can separate
+application instrumentation from telemetry backends. Check the specific language,
+signal, and exporter support you need; one component's maturity does not prove
+that every integration is ready. Vendor-specific capabilities may still be useful
+when their benefits justify the coupling. Demonstrate the context and export path
+with a real request rather than relying on a project's maturity label.
 
 ### The cardinality trap
 

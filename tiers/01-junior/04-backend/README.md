@@ -2,6 +2,62 @@
 
 > Junior tier · feeds **P1 (it works)**
 
+## At the whiteboard
+
+> “Our save-link API fetches the page title before replying. One destination
+> accepts connections but never answers. Soon nobody can save a link. Where
+> would you put time and capacity limits, and what would the API promise?”
+
+A backend converts an untrusted request into an authorized state change. Every
+dependency wait consumes a budget; choosing no budget still creates behavior.
+
+| Teaching workload | Expected behavior |
+|---|---|
+| `POST /links` with a valid owned URL | Validate and durably record accepted work |
+| Title server takes `30 s`; API budget is `500 ms` | Do not hold the API open for `30 s` |
+| Same operation key repeated with same payload | Return the recorded operation result |
+| Same key with different URL | Reject the conflict; do not silently reuse it |
+
+These are exercise requirements, not AWS limits. **Ask first:** must the title be
+ready before acceptance, or can it appear later?
+
+```mermaid
+flowchart TD
+  Client[Client] --> API[API workers]
+  API --> Remote[Unbounded title fetch]
+  Remote --> Waiting[Workers occupied]
+  Waiting --> Other[Other saves cannot start]
+```
+
+## Reason through the boundary
+
+1. Decide whether acceptance means “stored” or “fully enriched.” Return a job
+   identifier only after the promised durable state exists.
+2. Validate URL and ownership before work. Restrict outbound destinations so a
+   public URL field cannot fetch internal services.
+3. Move optional enrichment behind a bounded queue and explicit worker deadline.
+   A queue absorbs a burst; it does not fix a permanent arrival-rate overload.
+4. Test a hanging destination, duplicate delivery, and a crash after saving the
+   result. Define what can repeat and what remains atomic.
+
+**Follow-up:** “Traffic doubles while title workers are stalled. Does the queue
+make us safe?” Draw admission and recovery; backlog growth still needs a bound.
+
+```mermaid
+flowchart TD
+  Client[Client] --> Admission[Validate and admit within budget]
+  Admission --> DB[(Operation record)]
+  DB --> Queue[Durable work queue]
+  Queue --> Workers[Bounded workers with deadlines]
+  Workers --> Remote[Allowed external pages]
+  Workers --> Result[(Versioned result)]
+  Queue --> Reject[Age and backlog policy]
+```
+
+AWS's SQS and Lambda are possible implementations of these boxes; the invariant
+and failure policy come first. Keep external fetching distinct from the narrower
+atomic-result guarantee in the queue lab.
+
 ## The one-liner
 
 The backend is where a click becomes a row in a database — the code that takes

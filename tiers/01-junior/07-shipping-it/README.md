@@ -2,6 +2,62 @@
 
 > Junior tier · feeds **P1 (it works)** and sets up **P2 (it survives)**
 
+## At the whiteboard
+
+> “The app runs on one engineer's laptop. We need a teammate to deploy the same
+> version tomorrow without their shell history or private configuration. What
+> artifacts and checks make that possible?”
+
+Shipping means connecting a known source revision to a running artifact and its
+configuration. A successful manual command is only one observation.
+
+| Given | Expected evidence |
+|---|---|
+| Source commit `abc123` | Build records that exact revision and dependency lock |
+| Build artifact digest `D1` | Staging and production promote the same artifact |
+| A changed secret | Rotation works without rebuilding source or committing the secret |
+| A failed readiness check | New traffic is held back; the previous version remains available |
+
+**Ask first:** what configuration varies by environment, what holds persistent
+data, and can the old application still read the new schema?
+
+```mermaid
+flowchart TD
+  Laptop[One laptop] --> Server[Manually edited server]
+  Shell[Unrecorded shell commands] --> Server
+  Secret[Local secret file] --> Server
+  Server --> Unknown[Running state cannot be reconstructed]
+```
+
+## Reason through a reproducible release
+
+1. Build an immutable artifact from a recorded commit. Rebuilding separately
+   for each environment can introduce a different dependency or file.
+2. Supply configuration and short-lived credentials at the appropriate boundary.
+   Give the runtime only the permissions its operation needs.
+3. Run a readiness check that reaches necessary dependencies. A process merely
+   listening on a port has not proved it can serve the important request.
+4. Rehearse rollback using a schema-compatible version and verify the actual
+   running artifact, not just the pipeline's success badge.
+
+**Follow-up:** “The deploy succeeded but database credentials were rotated.
+Which part of your diagram should change?” The secret binding and its reload or
+restart policy change; the application artifact need not.
+
+```mermaid
+flowchart TD
+  Commit[Recorded commit] --> Build[Reproducible build]
+  Build --> Artifact[Immutable artifact]
+  Artifact --> Stage[Staging verification]
+  Stage --> Runtime[Production runtime]
+  Config[Environment config and secret binding] --> Runtime
+  Runtime --> Ready[Readiness and revision evidence]
+```
+
+In AWS terms, a container registry, deployment service, and secret store can fill
+these roles. Choose their permissions and recovery behavior explicitly before
+asking an AI to produce deployment configuration.
+
 ## The one-liner
 
 Shipping is making the thing exist somewhere other than your laptop, in a way

@@ -2,6 +2,61 @@
 
 > Junior tier · feeds **P1 (it works)** and everything after it
 
+## At the whiteboard
+
+> “Changing an email works in the UI, but the same customer can no longer log
+> in. The email-update test is green. What behavior did the test fail to protect,
+> and which boundary would your next test cross?”
+
+Tests are experiments with predictions. The important question is which wrong
+behavior would make each experiment fail.
+
+| Given | Expected observation |
+|---|---|
+| Account uses `Ada@Example.com` | Defined case-normalization policy applies consistently |
+| User confirms change to `ada@new.example` | The new address can authenticate |
+| Update succeeds but login reads a different representation | Integration test fails |
+| A known-broken normalizer is installed | At least one contract test turns red |
+
+**Ask first:** is email comparison case-sensitive in this product, and is an
+unconfirmed address allowed to replace the login identity? Agree before coding.
+
+```mermaid
+flowchart TD
+  Update[Update handler] --> Mock[Mock store]
+  Mock --> Green[Isolated test passes]
+  Login[Login handler] --> Real[(Real stored identity)]
+  Update -. untested contract .-> Real
+  Real --> Failure[Customer cannot sign in]
+```
+
+## Reason through the test boundary
+
+1. Write the user journey and policy first. A test that only checks the handler's
+   returned message does not prove the account is usable.
+2. Use a unit test for normalization rules, a real-store integration test for
+   the shared representation, and one end-to-end journey for the visible flow.
+3. Control unrelated nondeterminism such as mail delivery; keep the database
+   boundary real when database behavior is the claim under test.
+4. Inject the inconsistent normalizer. Observe the expected failure before
+   accepting the repaired suite.
+
+**Follow-up:** “The provider renamed `email` to `address`. Both teams' unit tests
+pass. What additional contract would detect the mismatch?”
+
+```mermaid
+flowchart TD
+  Schema[Reviewed shared contract] --> Provider[Provider response check]
+  Schema --> Consumer[Consumer expectation check]
+  Provider --> Integration[Real boundary fixture]
+  Consumer --> Integration
+  Integration --> Journey[Update then sign in]
+```
+
+The shared contract must not be copied into two tests that can drift separately.
+Ask an AI for tests against the agreed examples, then show which planted defect
+each test catches.
+
 ## The one-liner
 
 Tests are how you find out that a change broke something, without a person

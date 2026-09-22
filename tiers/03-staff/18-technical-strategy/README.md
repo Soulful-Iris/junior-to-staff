@@ -2,6 +2,60 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “Five teams repeatedly choose different solutions for the same service needs.
+> Operations now maintains five deployment paths. Should we standardize? Show
+> the rule that makes the next team's decision easier without blocking a
+> genuinely different workload.”
+
+Technical strategy is a set of decisions that guides future work. A roadmap
+lists work; strategy explains why that work is the useful direction.
+
+| Teaching observation | Expected decision evidence |
+|---|---|
+| Five deployment paths | Measured support effort and distinct requirements |
+| Four ordinary HTTP services | A supported default if requirements align |
+| One long-running specialized workload | An explicit evaluated exception |
+| New services continue appearing | A discoverable decision rule and owner |
+
+```mermaid
+flowchart TD
+  TeamA[Team A] --> PathA[Deployment path A]
+  TeamB[Team B] --> PathB[Deployment path B]
+  TeamC[Team C] --> PathC[Deployment path C]
+  PathA --> Ops[Fragmented operational support]
+  PathB --> Ops
+  PathC --> Ops
+```
+
+## Derive a useful default
+
+1. Collect repeated decisions and failures before choosing a platform. Count
+   actual maintenance and onboarding costs rather than aesthetic inconsistency.
+2. Separate common constraints from genuine exceptions. Define a default for
+   the common case with a reason someone can challenge.
+3. Pilot one existing service, including migration and rollback. A blank demo
+   does not reveal adoption friction.
+4. Measure whether teams can ship and operate more independently. Revisit a
+   default when its assumptions change; exceptions need evidence and an owner.
+
+**Follow-up:** “The specialized team cannot meet its latency goal on the default.”
+Add an exception route with a support contract instead of silently forcing it in.
+
+```mermaid
+flowchart TD
+  Need[Service requirements] --> Fit{Fits default contract?}
+  Fit -->|yes| Default[Supported deployment path]
+  Fit -->|no| Review[Measured exception review]
+  Review --> Special[Owned specialized path]
+  Default --> Metrics[Delivery and incident outcomes]
+  Special --> Metrics
+```
+
+Lead depth is the rule, migration sequence, ownership, and feedback mechanism.
+The number of teams adopting a tool is insufficient if their delivery worsens.
+
 ## The one-liner
 
 Strategy is not a plan and it is not a wish. It is the small set of decisions

@@ -2,6 +2,59 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “Every deployment waits for one engineer who understands the pipeline.
+> They work harder each month, yet delivery gets slower. What would you change,
+> and how would you tell whether the change actually helps the team?”
+
+The goal is to remove a repeatable dependency on one person's attention while
+preserving safe decisions. A new document alone does not establish that outcome.
+
+| Teaching baseline | Expected evidence after intervention |
+|---|---|
+| Six routine deploys wait for one reviewer | Teammates can execute routine cases independently |
+| One unusual schema change needs judgment | Escalation still reaches an accountable owner |
+| Runbook exists | A new teammate completes a supervised rehearsal |
+| Review queue shrinks | Failures, rework, and workload have not merely moved elsewhere |
+
+```mermaid
+flowchart TD
+  A[Team A deploy] --> Expert[One expert's attention]
+  B[Team B deploy] --> Expert
+  C[Team C deploy] --> Expert
+  Expert --> Queue[Waiting work]
+  Expert --> Interrupt[Repeated interruptions]
+```
+
+## Remove the dependency deliberately
+
+1. Categorize interruptions and observe a teammate attempting the work. Find
+   which missing information or unsafe default forces escalation.
+2. Automate mechanical checks and teach the decision boundary. Record why a
+   check matters, the failure it detects, and when it is insufficient.
+3. Let another engineer lead a real rehearsal while you observe. Repair the
+   confusing step, not the learner's confidence.
+4. Measure independent completions, recovery, and the exception workload. Keep
+   ownership and support explicit so the improvement outlives its author.
+
+**Follow-up:** “The self-service path refuses a legitimate unusual migration.”
+Draw an exception with review evidence instead of removing the guardrail.
+
+```mermaid
+flowchart TD
+  Engineer[Engineer] --> Checks[Explainable automated checks]
+  Checks -->|routine| Deploy[Self service deploy]
+  Checks -->|outside contract| Review[Owned exception review]
+  Review --> Evidence[Risk and recovery evidence]
+  Evidence --> Deploy
+  Deploy --> Feedback[Outcome improves guide and checks]
+```
+
+Senior evidence includes a reliable tool and clear explanation. Lead/staff
+evidence includes adoption, reduced coordination cost, and peers who can make
+the right decisions without you. Credit those peers' work explicitly.
+
 ## The one-liner
 
 The last thing the staff tier asks of you is the hardest to measure: your output

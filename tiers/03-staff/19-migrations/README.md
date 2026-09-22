@@ -2,13 +2,72 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “We are replacing an event store while reads and writes continue. The old
+> write succeeds and the new write times out. What do we return, which copy is
+> authoritative, and how will we find and repair the difference?”
+
+A migration must preserve a defined contract while versions and stores coexist.
+Two writes are not one atomic operation merely because they share a function.
+
+| Event | Expected policy to specify |
+|---|---|
+| Old store accepts event `e7`; new store is unavailable | Durable record of replication work |
+| Change `v8` arrives before replayed `v7` | Older replay cannot overwrite newer state |
+| A record is deleted during backfill | Tombstone or equivalent deletion semantics survive |
+| Read cutover fails | Reversal has a defined data and routing boundary |
+
+```mermaid
+sequenceDiagram
+  participant W as Writer
+  participant Old as Old store
+  participant New as New store
+  W->>Old: write e7
+  Old-->>W: accepted
+  W->>New: write e7
+  New-->>W: timeout, outcome uncertain
+  Note over W,New: Independent writes may diverge
+```
+
+## Establish authority before cutover
+
+1. Choose an authoritative write path and a durable change-capture boundary.
+   Sampling detects some divergence; it does not itself repair missing writes.
+2. Backfill from a defined snapshot or watermark while replaying changes with
+   version and deletion rules. Make both stages restartable.
+3. Compare invariants and representative workloads. Define repair, catch-up,
+   and the evidence required before switching reads.
+4. Stop old writes and retire compatibility only after rollback requirements
+   expire. Track intermediate benefits separately from retirement savings.
+
+**Follow-up:** “The new store already accepts writes. Can a DNS change instantly
+restore the old system?” No: account for new data, resolver TTLs, and established
+connections before claiming a rollback bound.
+
+```mermaid
+flowchart TD
+  Writer[Authoritative writer] --> Old[(Old store)]
+  Old --> Capture[Durable change capture]
+  Capture --> Replay[Versioned replay and tombstones]
+  Replay --> New[(New store)]
+  Old --> Compare[Compare and repair]
+  New --> Compare
+  Compare --> Gate[Explicit cutover gate]
+```
+
+Senior depth makes partial failure and replay safe. Lead depth coordinates
+consumer versions, owners, staged value, stop conditions, and actual retirement.
+
 ## The one-liner
 
 A migration is how you replace a load-bearing piece of a system that is
 currently holding people up. It is the only thing that reliably reduces
 technical debt at scale, and it has one property that makes it different from
-every other project: **the value arrives entirely at the end.** Stop at 80% and
-you have paid the whole cost and bought nothing.
+every other project: **retirement value depends on finishing.** Partial rollout can already reduce
+latency, incidents, or capacity costs, while unfinished coexistence still carries
+compatibility and operational costs. Track both intermediate gains and the work
+required to remove the old system.
 
 ## The failure it prevents
 
@@ -31,7 +90,11 @@ nobody was ever promoted for deleting the old thing.
 
 Will Larson's framing is the one that has held up, and it is three phases.
 
-![The three phases of a migration and where the cost is paid: de-risk, enable, finish, with the payoff arriving only at the end and the 80% abandonment point marked](../../../assets/diagrams/migration-phases.svg)
+![Original migration phases illustration: de-risk, enable, and finish, with the abandonment risk marked](../../../assets/diagrams/migration-phases.svg)
+
+Read the original payoff annotation as **retirement savings**, not every benefit
+of migration. A migrated cohort may already gain capacity, lower latency, or fewer
+incidents. Measure those gains alongside the remaining cost of running both paths.
 
 **De-risk.** Prove the new thing works on the hardest case, not the easiest one.
 This is counterintuitive and it is the whole phase. Migrating the simplest
@@ -174,7 +237,8 @@ not a cosmetic swap.
 - **codemod** — a program that rewrites code mechanically. The difference between a migration and a request.
 - **deprecation** — announcing that something is going away. Worthless without a mechanical block behind it.
 - **kill criteria** — what you will observe that makes you stop. Decided in advance.
-- **the last 20%** — the unglamorous remainder where all of the value is.
+- **the last 20%** — the remaining adoption and retirement work that releases the
+  cost of maintaining the old path; earlier stages may already deliver benefits.
 
 ---
 

@@ -2,6 +2,60 @@
 
 > Senior tier · feeds **P2 (it survives)**
 
+## At the whiteboard
+
+> “Version B reads a new required field. Half our instances still run version A,
+> which never writes it. We need to release without stopping traffic. What is
+> your sequence, and what observation would stop the rollout?”
+
+Delivery coordinates versions that coexist. Passing each version's isolated
+tests does not prove the pair can safely share data or messages.
+
+| Stage | Expected compatibility |
+|---|---|
+| Add optional field | A continues to work |
+| Deploy B that tolerates missing field | A and B can serve together |
+| Backfill and verify | Missing-field count reaches the agreed target |
+| Require field, retire A | Old writers are prevented before enforcement |
+
+**Ask first:** can A still be running in a job, mobile client, rollback artifact,
+or another region? “All web pods updated” may not answer the question.
+
+```mermaid
+flowchart TD
+  A[Old writer omits field] --> DB[(Shared schema)]
+  B[New reader requires field] --> DB
+  DB --> Failure[Mixed versions violate contract]
+```
+
+## Sequence the compatibility work
+
+1. Expand the accepted contract before requiring new data. Specify defaults or
+   read fallback deliberately; do not manufacture a misleading value.
+2. Deploy a compatible reader/writer and observe errors by version and cohort.
+3. Backfill with a restartable checkpoint and validate representative records,
+   including the awkward historical rows.
+4. Stop old writers, rehearse rollback boundaries, and only then contract the
+   schema. Deleting data may require restore or forward repair instead of revert.
+
+**Follow-up:** “Error rate rises only in the first one-percent cohort.” Draw
+which traffic can be stopped while preserving an artifact and schema that work.
+
+```mermaid
+flowchart TD
+  Traffic[Incoming traffic] --> Gate[Release cohort gate]
+  Gate --> A[Compatible old version]
+  Gate --> B[New version]
+  A --> DB[(Expanded schema)]
+  B --> DB
+  B --> Observe[Errors and latency by cohort]
+  Observe -->|stop condition| Gate
+```
+
+A strong answer distinguishes deploying code, exposing behavior, and enforcing a
+new data contract. Lead depth adds the owner and completion criteria for each
+stage, including consumers outside the releasing team.
+
 ## The one-liner
 
 [07 · Shipping it](../../01-junior/07-shipping-it/) made one deploy

@@ -2,6 +2,55 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “A team proposes replacing a relational database with a key-value store.
+> The document lists benefits but never names a workload or alternative. What
+> would you need in order to approve, reject, or narrow the proposal?”
+
+A decision document records why one choice fits a stated problem. Its expected
+output is a decision with assumptions and an accountable next action.
+
+| Constructed requirement | Evidence the document needs |
+|---|---|
+| Point reads must meet a measured latency target | Current baseline and representative test |
+| Two related records must change together | Exact transaction or invariant boundary |
+| Team has one month | Migration, operational, and rollback effort |
+| Existing system may already suffice | Strongest version of the keep-and-improve alternative |
+
+```mermaid
+flowchart TD
+  Choice[Proposed new store] --> Benefits[Benefit list]
+  Benefits --> Debate[Opinions repeat]
+  Missing[No workload or alternatives] --> Debate
+```
+
+## Make the decision reviewable
+
+1. State the current failure and non-goals. A technology preference is not the
+   problem statement.
+2. Compare the existing design, an incremental repair, and replacement against
+   the same workload, correctness, operational, and delivery constraints.
+3. Name the assumption with the largest consequence and a cheap test that could
+   invalidate it. Put evidence beside the claim it supports.
+4. Record decision owner, dissent, review date, rollout stages, and kill criteria.
+   Approval is not evidence that the hypothesis remains true forever.
+
+**Follow-up:** “A new access pattern needs a cross-record invariant.” Redraw the
+decision path: does new evidence fit the decision's scope or trigger review?
+
+```mermaid
+flowchart TD
+  New[New requirement] --> Assumption{Within recorded assumptions?}
+  Assumption -->|yes| Execute[Apply decision with owner]
+  Assumption -->|no| Compare[Re-evaluate alternatives]
+  Compare --> Experiment[Targeted invariant experiment]
+  Experiment --> Record[Updated decision and migration impact]
+```
+
+Practice defending the rejected alternative first. Lead depth appears in how
+the document coordinates affected teams and keeps compatibility work owned.
+
 ## The one-liner
 
 At staff level the artefact is usually a document, and the document has one job:

@@ -2,6 +2,67 @@
 
 > Junior tier · feeds **P1 (it works)**
 
+## At the whiteboard
+
+> “A user searches for `cat`, then `car`. The `car` response arrives first, but
+> the screen later switches back to cats. Explain what state the page needs and
+> how you would prove the older response cannot replace the newer intent.”
+
+The frontend owns the user's **current intent** while the server owns confirmed
+data. These are different facts; a response arriving last is not necessarily new.
+
+| Event | Expected visible result |
+|---|---|
+| Search `cat`, generation `1` | Loading for `cat` |
+| Search `car`, generation `2` | Loading for `car` |
+| Generation `2` succeeds | Show cars |
+| Generation `1` succeeds afterward | Continue showing cars |
+
+**Ask first:** should old results remain visible while loading, and what should
+the user see when the current request fails?
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant UI as Search UI
+  participant API as Search API
+  U->>UI: cat then car
+  UI->>API: request 1 and request 2
+  API-->>UI: response 2, cars
+  API-->>UI: response 1, cats
+  UI-->>U: Wrong if every arrival replaces state
+```
+
+## Reason through the state
+
+1. Assign each new intent a generation. A response may commit only if its
+   generation still matches the current intent.
+2. Keep loading, success, empty, and failure explicit. An empty array is not a
+   network failure, and a disabled button is not server-side deduplication.
+3. Abort old work to save resources, but retain the generation check because a
+   loader may ignore cancellation.
+4. Test reverse completion and keyboard interaction, not only fast successful
+   responses on your own machine.
+
+**Follow-up:** “The current search fails while an older one succeeds. Can the
+older success clear the error?” No: the same generation rule owns every terminal
+state, not just the result list.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Loading: new intent
+  Loading --> Results: current success
+  Loading --> Empty: current empty result
+  Loading --> Error: current failure
+  Loading --> Loading: ignore stale completion
+  Error --> Loading: retry
+  Results --> Loading: new search
+  Empty --> Loading: new search
+```
+
+Before asking an AI to build the component, write this transition contract. For
+interview practice, implement the coordinator and explain what unmount changes.
+
 ## The one-liner
 
 The frontend is the part of your system that runs on hardware you did not
@@ -83,14 +144,11 @@ same.
 
 ## What good looks like
 
-One property here is a legal floor, not a preference. The European
-Accessibility Act (Directive (EU) 2019/882) has applied to products and
-services sold into the EU since 28 June 2025, and the benchmark is WCAG 2.2
-AA — the current W3C Recommendation, adopted by the updated European standard
-EN 301 549 v4.1.1 (published 2026-09-02, its Official Journal citation still
-pending). All checked 2026-09-21. At AA that means, among other things: text
-contrast of at least 4.5:1 (3:1 for large text), a visible focus indicator, and
-interactive targets of at least 24×24 CSS pixels.
+Accessibility is part of the behavior you must test: operate the page by
+keyboard, keep focus visible, label controls, announce errors and asynchronous
+status, and verify contrast and target usability. The exercises below assess
+those concrete interactions. A generic checklist does not establish legal
+compliance for every product, market, or user need.
 
 Done well:
 

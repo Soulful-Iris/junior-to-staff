@@ -2,6 +2,59 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “Three teams each spend a day a week repairing incompatible event payloads.
+> You can fix this week's failures or propose a shared contract. How do you
+> decide whether the broader intervention is worth its cost?”
+
+Scope is the boundary of the problem you own. Broader scope helps only if it
+changes a repeated outcome; creating a platform is not automatically leverage.
+
+| Constructed input | What to establish |
+|---|---|
+| Three teams, one day/week each on repair | Verify the baseline and causes |
+| Proposal costs six team-days initially | Include maintenance and migration work |
+| Teams deploy independently | Define backward compatibility and ownership |
+| One consumer cannot migrate this quarter | Preserve a supported bridge or narrow scope |
+
+```mermaid
+flowchart TD
+  Producer[Event producer] --> A[Team A custom adapter]
+  Producer --> B[Team B custom adapter]
+  Producer --> C[Team C custom adapter]
+  A --> Repair[Repeated compatibility repair]
+  B --> Repair
+  C --> Repair
+```
+
+## Decide where to intervene
+
+1. Inspect examples of actual repair work. If causes differ, one abstraction
+   may hide incompatible requirements rather than remove repetition.
+2. Define a small shared contract and a versioning rule; retain domain-specific
+   behavior with its owner.
+3. Pilot with the hardest representative consumer. Measure repair hours and
+   change lead time, including adoption effort.
+4. Assign ownership, support boundaries, and a stop condition. A shared service
+   without an owner can become a new bottleneck.
+
+**Follow-up:** “The pilot helps two teams but slows the third.” Draw the allowed
+exception and the evidence that would justify convergence later.
+
+```mermaid
+flowchart TD
+  Producer[Versioned producer contract] --> Shared[Shared validation and compatibility]
+  Shared --> A[Team A consumer]
+  Shared --> B[Team B consumer]
+  Producer --> Bridge[Owned compatibility bridge]
+  Bridge --> C[Team C distinct requirement]
+```
+
+Senior evidence is a sound implementation and measured local result. Lead/staff
+evidence adds an agreed cross-team decision, adoption, and sustained outcomes.
+A solo exercise practices the reasoning; it cannot manufacture that history.
+
 ## The one-liner
 
 Staff is not senior with more years on it. It is a different job, and the change

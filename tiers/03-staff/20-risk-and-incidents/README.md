@@ -2,6 +2,59 @@
 
 > Staff tier · feeds **P5 (it changes safely)**
 
+## At the whiteboard
+
+> “After a rollout, error rate rises from 0.2% to 8% and the queue grows by
+> 400 jobs each minute. You have incomplete logs. What do you do in the first
+> ten minutes, and how do you avoid making recovery harder?”
+
+An incident response is a sequence of decisions under uncertainty. Mitigating
+harm and explaining the initiating defect can proceed on different timelines.
+
+| Constructed observation | Expected response |
+|---|---|
+| New cohort fails more than old cohort | Check comparability; consider pausing exposure |
+| Arrival `1,000/min`, completion `600/min` | Backlog grows `400/min`; bound new admission |
+| Ten minutes at that difference | About `4,000` additional jobs, absent drops/retries |
+| No trusted evidence for data corruption | Do not perform speculative destructive repair |
+
+```mermaid
+flowchart TD
+  Deploy[New rollout] --> Errors[More request failures]
+  Errors --> Retry[Client retries]
+  Retry --> Load[Higher offered load]
+  Load --> Queue[Growing backlog]
+  Queue --> Errors
+```
+
+## Separate mitigation from diagnosis
+
+1. Establish impact, an incident coordinator, and a timeline. Record hypotheses
+   as hypotheses, with the observation that would reject each.
+2. Pause the likely amplifier: release exposure, retry pressure, or admission.
+   Choose a reversible action with an owner and a clear expected observation.
+3. Preserve diagnostic evidence and data correctness while restoring service.
+   Check whether replay after recovery will overload the repaired dependency.
+4. Verify recovery through user operations and backlog age, not only a green
+   process health check. Assign durable corrective actions and rehearse them.
+
+**Follow-up:** “The dependency recovers, and every retry fires at once.” Add a
+recovery budget and show how useful traffic competes with catch-up work.
+
+```mermaid
+flowchart TD
+  Live[New work] --> Admission[Admission budget]
+  Backlog[Queued retries] --> Replay[Rate limited recovery]
+  Admission --> Capacity[Shared dependency capacity]
+  Replay --> Capacity
+  Capacity --> Observe[Success, latency, oldest job age]
+  Observe -->|adjust safely| Replay
+```
+
+Lead depth includes communication, competing risks, ownership, and evidence that
+the follow-up changed behavior. Avoid a single-person hero narrative in your
+project defense; explain your decisions and the team's contributions accurately.
+
 ## The one-liner
 
 Incidents are not a failure of engineering. They are the normal operating

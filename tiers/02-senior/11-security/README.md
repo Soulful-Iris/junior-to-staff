@@ -2,6 +2,60 @@
 
 > Senior tier · feeds **P2 (it survives)**
 
+## At the whiteboard
+
+> “The UI hides the delete button for other users' bookmarks. Someone sends
+> the HTTP request directly and deletes another user's item. Where should the
+> permission decision live, and how would you test it?”
+
+Authentication establishes identity; authorization decides whether that identity
+may perform this operation on this resource. A hidden control enforces neither.
+
+| Request | Expected result |
+|---|---|
+| Alice deletes Alice's item `42` | Authorized deletion |
+| Bob deletes Alice's item `42` | Denied; item remains |
+| Request claims `owner=Alice` in JSON | Ignore as identity evidence |
+| Logged-out request names item `42` | Reject before exposing protected data |
+
+**Ask first:** should unauthorized and nonexistent items have the same external
+response, and can an administrator act for another account?
+
+```mermaid
+flowchart TD
+  UI[UI hides button] --> API[Delete by item ID]
+  Attacker[Direct HTTP request] --> API
+  API --> DB[(Unscoped item delete)]
+  DB --> Lost[Another owner's data removed]
+```
+
+## Place the trust boundary
+
+1. Derive the actor from verified authentication, never a caller-supplied owner
+   field. Validate inputs without treating validation as authorization.
+2. Enforce ownership at the resource operation: delete where both item ID and
+   allowed owner match. Check the affected-row result.
+3. Decide external error behavior without leaking unnecessary resource details;
+   record a useful internal audit event without credentials or private payloads.
+4. Test with two real identities, direct HTTP calls, and unchanged storage after
+   denial. A UI-only test misses the exploit.
+
+**Follow-up:** “Support can delete on a customer's behalf.” Add explicit policy,
+scope, and audit evidence rather than bypassing the original check.
+
+```mermaid
+flowchart TD
+  Request[Authenticated request] --> Policy[Owner or scoped support permission]
+  Policy -->|allow| Write[Conditional resource operation]
+  Policy -->|deny| Deny[No state change]
+  Write --> DB[(Tenant scoped data)]
+  Write --> Audit[Actor, target, reason, outcome]
+```
+
+Senior depth includes concurrent state changes and every alternative API route.
+Lead depth includes permission lifecycle, emergency access, and verifying that
+cached delivery and background jobs honor the same policy.
+
 ## The one-liner
 
 Security, as an application engineer practises it, is four questions asked of
@@ -40,10 +94,8 @@ Most senior security work is hunting the second path.
 
 **Authentication** answers *who is this*. Its parts — password storage,
 sessions, MFA, recovery — are the same everywhere, so do not build them: use a
-maintained library or provider, with passkeys as the mainstream front door —
-roughly five billion in use and 48% of the top-100 sites in May 2026, by the
-FIDO Alliance's own figures; support thins sharply below the biggest sites
-*(checked 2026-09-21)*. What still breaks is the edges someone built anyway:
+maintained library or provider and evaluate passkeys against your account
+recovery and client-support requirements. What still breaks is the edges someone built anyway:
 password reset, session lifetime, the OAuth callback. Say one thing precisely:
 **OAuth 2.1 is an IETF Internet-Draft, not a standard** — revision 16, dated
 3 September 2026, not yet submitted to the IESG *(datatracker, checked
@@ -95,11 +147,10 @@ identity federation, a CI job or service proves what it is with a short-lived
 OIDC token from its platform and exchanges it for cloud credentials that live
 minutes. Nothing stored, nothing to leak, nothing outliving its owner.
 
-The case is measured: GitGuardian retested secrets it found leaked on public
-GitHub in 2022, and more than 64% were still valid in January 2026 — four years
-on *(their March 2026 report, the vendor's own dataset; checked 2026-09-21)*.
-Long-lived credentials outlive their maker, the ticket that justified them, and
-everyone's memory that they exist.
+A leaked credential remains useful until it expires or is revoked. Test the
+revocation path, remove unused credentials, and keep a named owner and intended
+lifetime for each remaining long-lived secret. Short-lived credentials still
+need tightly scoped permissions: they can be abused while valid.
 
 ### The supply chain, past the basics
 
