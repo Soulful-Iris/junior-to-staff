@@ -86,6 +86,7 @@ KINDS = {
     "practice": ("practice", "Mock interview"),
     "index":    ("index",    "Index"),
     "concept":  ("concept",  ""),
+    "company":  ("company studio", "Senior interview rehearsal"),
 }
 
 SECTION_DIRS = {"problems": "problem", "labs": "lab", "projects": "project",
@@ -139,6 +140,8 @@ def prose_of(text: str) -> str:
 
 def kind_for(rel: Path) -> str:
     parts = rel.parts
+    if parts[0] == "companies":
+        return "company"
     if parts[0] == "practice":
         return "practice"
     if parts[0] == "indexes":
@@ -299,7 +302,7 @@ def collect() -> list[dict]:
         add(f.relative_to(ROOT), kind="practice", group=None, subject=None,
             area="assessor")
 
-    for d in ("indexes", "practice", "projects", "docs", "scripts"):
+    for d in ("indexes", "practice", "projects", "docs", "scripts", "companies"):
         base = ROOT / d
         if not base.is_dir():
             continue

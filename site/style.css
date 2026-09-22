@@ -36,3 +36,41 @@
 @media(max-width:760px){.has-sequence>span{display:none}.has-sequence .reading-controls{width:100%;justify-content:space-between;gap:8px}.sticky-sequence{gap:10px}.sticky-sequence>a,.sticky-sequence>button,.sticky-disabled{min-height:44px;padding:5px 12px}.sticky-next{border-radius:4px}.has-sequence .reading-controls #motion-toggle{margin-left:auto}}
 
 @media (pointer:coarse){.toc-link{padding:13px 11px}.toc-lessons>.toc-link{padding:14px 9px}.toc-headings a{padding:15px 4px 15px 8px}.overview{padding:14px 12px}.toc-link.part-intro{padding:14px 11px}.mobile-bar button{padding:10px 12px}.mobile-close{min-height:44px;min-width:44px}.identity{min-height:44px}.rail-footer button,.reading-controls button,.visual-toolbar button,.copy-code{min-height:44px}.toc-chapter>summary{padding:13px 8px}.contents-label button{padding:10px 12px;margin:-10px -6px}.rail-footer button{padding:11px 0}.visual-toolbar button{padding:10px 6px}.reading-controls button{padding:11px 14px}}
+
+/* The elective studio is a distinct room at the end of the same book. */
+.company-area{border-top:1px solid #d1dbd0;margin-top:28px;padding-top:26px}
+.company-area>h2{color:#355349;letter-spacing:1.05px}
+.company-area>.part-intro{margin-left:0;border:1px solid #d4e1d3;background:#eaf2e8;border-radius:6px;padding:12px 11px;font-weight:600}
+.company-area .toc-chapter{border-bottom:1px solid #e0e7df}
+.company-area .toc-chapter>summary{font-weight:600}
+.company-page{--forest:#31554a}
+.company-page .lesson-body{max-width:860px}
+.company-page .lesson-body>h1{font-size:clamp(36px,4vw,53px);letter-spacing:-1.5px;line-height:1.1;border-bottom:1px solid #d8e1dc;padding-bottom:27px}
+.company-page .lesson-body>h2{border-top:1px solid #dce4df;padding-top:29px;margin-top:53px}
+.company-page .lesson-body>h2:first-of-type{border-top:0;padding-top:0}
+.company-page .lesson-body>h2+.figwrap{margin-top:24px}
+.company-page .figwrap{background:#f4f8f4;border-color:#d9e5dc;padding:8px;box-shadow:0 10px 25px #294c3b0a}
+.company-page .figwrap img{border-radius:8px}
+.company-page .tablewrap{border:1px solid #dee6df;border-radius:8px;overflow:auto;box-shadow:0 8px 22px #27473708}
+.company-page .tablewrap table{min-width:620px;margin:0}
+.company-page .tablewrap tr:nth-child(even){background:#f5f8f4}
+.company-page .tablewrap th{background:#edf3eb;position:sticky;top:0}
+.company-page .lesson-body blockquote{border-color:#91ad91;background:#edf4e9}
+.studio-hero{background:linear-gradient(120deg,#203e36,#31594b 70%,#46765b);border-radius:16px;color:#f6faef;padding:30px 34px;margin:29px 0 40px;box-shadow:0 18px 35px #1c473b1c}
+.studio-hero p{font:400 clamp(19px,2.5vw,27px)/1.38 var(--serif);max-width:710px;margin:16px 0 24px;color:#f3f8ee}
+.studio-eyebrow{font:600 10px var(--sans);letter-spacing:2px;color:#bed7bc}
+.studio-key{display:flex;flex-wrap:wrap;gap:9px}
+.studio-key span{border:1px solid #a4bda399;border-radius:30px;padding:5px 11px;font-size:10px;color:#deecdc}
+.studio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:22px 0 36px}
+.studio-card{--brand:#42584a;display:flex;flex-direction:column;min-height:245px;padding:21px 23px;border:1px solid #dbe1d9;border-top:4px solid var(--brand);border-radius:9px;background:#fff;color:#24332b;transition:transform .18s,box-shadow .18s;box-shadow:0 8px 20px #243c3209}
+.studio-card:hover,.studio-card:focus-visible{transform:translateY(-3px);box-shadow:0 16px 30px #243c321c}
+.studio-card .studio-brand{display:flex;align-items:center;gap:11px;color:var(--brand);font-size:16px;font-weight:700;line-height:1.3}
+.studio-card svg{width:31px;height:31px;flex:none}
+.studio-card strong{font:400 20px/1.2 var(--serif);margin:21px 0 10px}
+.studio-card small{font-size:11px;line-height:1.65;color:#58655c}
+.studio-pressure{font-size:10px;font-weight:600;color:#3b5145;margin-top:13px}
+.studio-confidence{font-size:9px;letter-spacing:.3px;color:#697c6f;margin-top:14px}
+.studio-card .card-arrow{display:block;margin-top:auto;padding-top:17px;color:var(--brand);font-size:11px;font-weight:650}
+.openai-card{--brand:#2b6555}.reddit-card{--brand:#d45e36}.meta-card{--brand:#4774c6}.db-card{--brand:#ae5b35}.observe-card{--brand:#217c81}
+@media(max-width:760px){.studio-grid{grid-template-columns:1fr;gap:12px}.studio-card{min-height:0;padding:18px}.studio-card strong{margin-top:15px}.studio-hero{padding:23px 20px;margin-top:16px}.studio-hero p{font-size:20px}.company-page .lesson-body>h1{font-size:36px}.company-page .figwrap img{min-width:560px}}
+@media(prefers-reduced-motion:reduce){.studio-card{transition:none}}

@@ -60,6 +60,10 @@ def organize(pages):
                 p['sub'] = n
                 p['step_count'] = len(children)
             sequence.extend(children)
+    # An elective company studio follows the core book, with its own linear
+    # next/previous sequence. The reference shelf remains outside that path.
+    sequence.extend(by_src[f'companies/{name}'] for name in
+                    ('README.md', 'openai.md', 'reddit.md', 'meta.md', 'databricks.md', 'observe.md'))
     assert len({p['src'] for p in sequence}) == len(sequence)
     for n, page in enumerate(sequence):
         page['position'] = n

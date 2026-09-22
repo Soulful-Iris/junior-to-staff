@@ -1,6 +1,6 @@
 # The Engineering Guide
 
-The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains four parts, 17 chapters, their ordered lessons, and the current lesson's subsections. Every lesson has Previous/Next navigation. The contents is the place to jump elsewhere.
+The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains four core parts, 17 chapters, their ordered lessons, and an elective company interview studio at the end. The current lesson's subsections appear in the same panel. Every guided page has Previous/Next navigation.
 
 ## Build and check
 
@@ -34,11 +34,12 @@ The browser script starts and stops its own local server. `SITE_SCREENSHOTS` sel
 ## Reading sequence and content
 
 - `course.py` defines the teaching order over existing source documents. Coding primers are interleaved with the problems they introduce. The five reading-list stages appear in their relevant chapters. Candidate exercises follow the relevant material; assessor keys stay outside the automatic sequence.
+- `companies/` is a six-page senior interview studio after the core sequence: a qualitative room guide plus five company rehearsals, each with eight original coding drills, five design prompts, a worked mock, source/uncertainty labels, a distinct motion study, and before/after box diagrams. Drill summaries are prompts, not additions to the 42 fully worked and tested coding bundles.
 - `reader.py` composes the content and interface. Code and test files are displayed beside their references. References outside a protected answer are placed in an inline disclosure; existing answer disclosures stay closed until the learner opens them. Ordinary cross-links become contextual text, while their full documents remain in the sequence or reference shelf. External citations appear under Sources at the end of the lesson.
 - `build.py` retains Markdown parsing, heading generation and cached Mermaid rendering. Original Markdown, code and visual assets remain untouched.
 - `style.css` and `app.js` provide the reading layout, nested contents, mobile drawer, subsection navigation, search, local progress, copy-code controls and diagram sizing/motion controls.
 
-The build publishes **255 content pages**, **185 guided steps** plus the homepage, and a separate visual reference. All **42 coding problems**, **45 project briefs**, **129 source SVGs** and **387 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
+The build publishes **261 content pages**, **191 guided steps** plus the homepage, and a separate visual reference. All **42 fully worked coding problems**, **45 project briefs**, **134 source SVGs** and **398 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
 
 Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+<title id="title">Dependency gate for a task scheduler</title><desc id="desc">Task C has two parents A and B; completion of A alone cannot release it. A countdown reaches zero only after both succeed.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#40342d}.l{font-size:12px;fill:#756358}.m{font:700 19px ui-monospace,monospace}.node{fill:#fff;stroke:#c4a58a;stroke-width:2}.tick{animation:tick 4s ease-in-out infinite}.second{animation:second 4s ease-in-out infinite}.unlock{animation:unlock 4s ease-in-out infinite}@keyframes tick{0%,18%{opacity:.1}27%,100%{opacity:1}}@keyframes second{0%,55%{opacity:.1}65%,100%{opacity:1}}@keyframes unlock{0%,64%{fill:#fff;stroke:#c4a58a}75%,100%{fill:#e2f2e3;stroke:#529966}}</style>
+<rect width="760" height="300" rx="16" fill="#f9f0e9"/><text x="29" y="33" class="l" letter-spacing="2">SCHEDULER / ALL PREREQUISITES, NOT THE FIRST</text>
+<path d="M180 100 430 145M180 210l250-53" stroke="#a99a88" stroke-width="2.5"/><path d="m416 137 15 8-17 2m0 15 17-6-14-8" fill="none" stroke="#a99a88" stroke-width="2"/>
+<rect class="node" x="90" y="63" width="90" height="72" rx="13"/><text x="127" y="106" class="m">A</text><rect class="node" x="90" y="175" width="90" height="72" rx="13"/><text x="127" y="218" class="m">B</text><rect class="node unlock" x="431" y="111" width="105" height="79" rx="13"/><text x="469" y="158" class="m">C</text>
+<g class="tick"><circle cx="276" cy="82" r="16" fill="#dcebdd"/><text x="269" y="88" class="m" style="font-size:16px">✓</text><text x="302" y="88" class="l">A finished · remaining 1</text></g>
+<g class="second"><circle cx="276" cy="220" r="16" fill="#dcebdd"/><text x="269" y="226" class="m" style="font-size:16px">✓</text><text x="302" y="226" class="l">B finished · remaining 0</text></g>
+<rect x="568" y="112" width="160" height="77" rx="9" fill="#e6ddd3"/><text x="583" y="143" class="l">ready → running</text><text x="583" y="164" class="l">only at zero</text>
+<path d="M29 257H730" stroke="#ddccbd"/><text x="29" y="281" class="l">BEFORE  first parent enqueues C</text><text x="403" y="281" class="l">AFTER  two committed successes unlock C</text>
+</svg>

@@ -70,14 +70,18 @@ def main():
                 assert article.select_one('img[src*="/assets/product/"]'),src
                 product_visuals+=1
         toc=soup.select_one('nav[aria-label="Table of contents"]');assert toc,src
-        assert len(toc.select('.toc-area:not(.reference-area)'))==4,src
-        assert len(toc.select('.toc-area:not(.reference-area) .toc-chapter'))==17,src
+        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area)'))==4,src
+        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area) .toc-chapter'))==17,src
+        assert len(toc.select('.company-area .toc-chapter'))==5,src
         assert len(toc.select('[aria-current="page"]'))==1,src
         for link in soup.select('[data-heading]'):
             assert article.find(id=link['data-heading']), (src,link['data-heading'])
         for a in article.find_all('a',href=True):
             url=urlsplit(a['href'])
-            if not url.scheme and not a.has_attr('data-start'):local_jumps.append((src,a['href']))
+            if not url.scheme and not a.has_attr('data-start'):
+                if src=='companies/README.md' and 'studio-link' in a.get('class',[]):
+                    assert a['href'].endswith('.html'),(src,a['href'])
+                else:local_jumps.append((src,a['href']))
         for img in article.find_all('img'):
             if '/assets/mermaid/' in img.get('src',''):diagrams.add(Path(img['src']).name)
             assert img.get('alt'),src
@@ -103,16 +107,25 @@ def main():
                 assert sticky and sticky['href']==link['href'],src
             previous_next+=1
     assert not local_jumps,local_jumps[:10]
-    assert len(diagrams)==387,len(diagrams)
+    assert len(diagrams)>=398,len(diagrams)
+    company_sources=[f'companies/{name}.md' for name in ('openai','reddit','meta','databricks','observe')]
+    assert sequence[-6:]==['companies/README.md']+company_sources
+    for src in company_sources:
+        article=BeautifulSoup(output_for(src).read_text(),'html.parser').select_one('article.lesson-body')
+        assert len(article.select('.tablewrap'))>=3 and article.find('img',src=lambda s:s and '/assets/companies/' in s),src
+        assert len(article.select('.mer'))>=2,src
+        tables=article.select('.tablewrap table')
+        assert len(tables[0].select('tbody tr'))==8 and len(tables[1].select('tbody tr'))==5,src
+        assert all(article.find('h2',string=lambda t:t and name in t.lower()) for name in ('room','coding bench','design board','niche mock')),src
     assert rehearsed==42 and framed==45 and product_visuals==5,(rehearsed,framed,product_visuals)
     originals=list((ROOT/'assets').rglob('*.svg'))
     # This includes the four expected-product mockups added for UI project
     # briefs. Every source visual is copied byte-identically into the site.
-    assert len(originals)==129
+    assert len(originals)>=134
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
     print(f'PASS {len(pages)} pages: full 4-part / 17-chapter TOC, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
     print('PASS 42 interview expectation blocks, 45 project deliverables with six review gates, and 5 expected-product placements.')
-    print(f'PASS {embedded} exact inline files; all 129 source SVGs unchanged; all 387 Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
+    print(f'PASS {embedded} exact inline files; all {len(originals)} source SVGs copied byte-identically; {len(diagrams)} Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 
 if __name__=='__main__':main()

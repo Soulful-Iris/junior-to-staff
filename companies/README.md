@@ -1,0 +1,36 @@
+# Company interview studio
+
+Five senior software-engineering rehearsals. Start with the room, then work through each company's coding bench, design board, and a timed mock. Product roles are the default; where public evidence is thinner, the exercises are explicitly product-inspired, **not leaked interview questions**.
+
+<div class="studio-hero"><span class="studio-eyebrow">FIELD NOTES / SEPTEMBER 2026</span><p>Learn the shape of the conversation. Then draw the boxes, state an invariant, write the smallest correct thing, and defend what happens when the requirement changes.</p><div class="studio-key"><span>◆ Official format</span><span>◒ Candidate report</span><span>◇ Original simulation</span></div></div>
+
+## How the room feels
+
+This is a qualitative preparation map, **not** a measured difficulty ranking. “Pressure” means the *kind* of decisions worth rehearsing; team, level, interviewer, and loop differ. Do not infer a company-wide question frequency from a few internet reports.
+
+<div class="studio-grid">
+<a href="openai.md" class="studio-card openai-card"><span class="studio-brand"><svg viewBox="0 0 40 40" role="img" aria-label="OpenAI-inspired six-loop mark"><path d="M20 5c5-3 10 0 11 4 5 1 7 6 5 10 3 5 0 10-4 11-1 5-6 7-10 5-5 3-10 0-11-4-5-1-7-6-5-10-3-5 0-10 4-11 1-5 6-7 10-5Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m9 13 11-6 12 7v12l-12 7-12-7V14m1 12 22-12M8 14l24 12M20 7v26" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>OpenAI</span><strong>Build with changing requirements.</strong><small>Official format: coding / technical formats vary; tests, performance, collaboration matter. Rehearse ambiguous streaming and correctness.</small><span class="studio-pressure">Practice pressure · changing constraints</span><span class="studio-confidence">◆ Official format · ◇ Practice prompts</span><span class="card-arrow">Explore rehearsal ↗</span></a>
+<a href="reddit.md" class="studio-card reddit-card"><span class="studio-brand"><svg viewBox="0 0 40 40" role="img" aria-label="Reddit-inspired conversation mark"><path d="M8 16c-4 5-2 16 12 17 15-1 17-12 12-17M13 23h1m12 0h1M15 28c4 3 7 3 11 0M22 12l2-7 8 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="7" cy="16" r="3" fill="currentColor"/><circle cx="33" cy="16" r="3" fill="currentColor"/></svg>Reddit</span><strong>Communities, ranking, and trust.</strong><small>Senior product loop specifics unverified. Practice feed, comment, vote, and moderation decisions under live writes.</small><span class="studio-pressure">Practice pressure · live ranking and safety</span><span class="studio-confidence">◇ Product-inspired · loop unknown</span><span class="card-arrow">Explore rehearsal ↗</span></a>
+<a href="meta.md" class="studio-card meta-card"><span class="studio-brand"><svg viewBox="0 0 40 40" role="img" aria-label="Meta-inspired infinity mark"><path d="M5 25C8 12 13 6 19 17l3 6c7 14 12 5 14-3 2-10-5-13-11-3l-6 9C13 35 7 30 5 25Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></svg>Meta</span><strong>Fast code, crisp design.</strong><small>Official guide describes coding, design, behavioral rounds. An E5 infra anecdote adds staged AI coding; it is not a product-loop guarantee.</small><span class="studio-pressure">Practice pressure · compressed coding time</span><span class="studio-confidence">◆ Official guide · ◒ Infra report</span><span class="card-arrow">Explore rehearsal ↗</span></a>
+<a href="databricks.md" class="studio-card db-card"><span class="studio-brand"><svg viewBox="0 0 40 40" role="img" aria-label="Databricks-inspired stacked data mark"><path d="m5 12 15-7 15 7-15 7L5 12Zm0 7 15 7 15-7M5 26l15 7 15-7" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linejoin="round"/></svg>Databricks</span><strong>Data systems with invariants.</strong><small>One recent anonymized report mentions dependency scheduling, a multithreaded logger, and bookshop design. Treat as examples, not a syllabus.</small><span class="studio-pressure">Practice pressure · dependency + concurrency</span><span class="studio-confidence">◒ Single anonymized report · ◇ Simulations</span><span class="card-arrow">Explore rehearsal ↗</span></a>
+<a href="observe.md" class="studio-card observe-card"><span class="studio-brand"><svg viewBox="0 0 40 40" role="img" aria-label="Observe-inspired telemetry mark"><circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="currentColor"/><path d="M5 20h8l4-8 6 17 4-9h8" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>Observe Inc.</span><strong>Find the signal in the flood.</strong><small>No reliable recent senior loop report found. Product-inspired observability exercises, with sources and unknowns made explicit.</small><span class="studio-pressure">Practice pressure · late, noisy telemetry</span><span class="studio-confidence">◇ Product-inspired · loop unknown</span><span class="card-arrow">Explore rehearsal ↗</span></a>
+</div>
+
+## The exercise, not the rumor
+
+Each company page contains **eight coding drills and five design briefs**. They are a curated practice bank, not a list of “most-asked” questions: public reports cannot support a company-wide frequency claim. A worked mock then models clarifying questions, expected values, failures, a box diagram, and harder follow-ups. Use the left contents or simply **Next** to read them in sequence.
+
+```mermaid
+flowchart LR
+ A["Read the brief"] --> B["Ask for constraints"]
+ B --> C["Draw the first boxes"]
+ C --> D["Name the failure"]
+ D --> E["Change the design"]
+ E --> F["Test the invariant"]
+```
+
+**Evidence policy.** Checked 22 September 2026. Official guidance can establish a published format, not your team's exact loop. Self-reports are dated anecdotes, not verified transcripts. Original drills are labeled as such. Ask your recruiter for role, round, allowed AI tools, language, design focus, and whether you may use a whiteboard; these details may change.
+
+The illustrated brand marks are unofficial visual cues; this independent guide is not affiliated with or endorsed by the companies.
+
+The [OpenAI interview guide](https://openai.com/interview-guide/) and [Meta full-loop guide](https://d3no4ktch0fdq4.cloudfront.net/public/course/files/Meta_SWE_full_loop_guide.pdf) establish only their respective published guidance. A [Meta E5 infra candidate account](https://www.reddit.com/r/leetcode/comments/1pfmd8u/my_meta_e5_infra_interview_experience_coding_ai/) and an [anonymized Databricks candidate account](https://www.interviewquery.com/guides/databricks-software-engineer) are lower-confidence examples; the latter page edits and summarizes reports. [Reddit's product](https://redditinc.com/) and [Observe's product](https://www.observeinc.com/) inform simulations, not interview-format claims.

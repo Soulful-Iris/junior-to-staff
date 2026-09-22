@@ -58,7 +58,7 @@ def compose(b, page, have, by_dest):
         for a in links: remainder = remainder.replace(a.get_text(' ', strip=True), '')
         if not re.sub(r'[\s·|.,:—–-]', '', remainder) and all(local_target(b, page, a.get('href', '')) is not None for a in links):
             # Code/fixtures are instructional; leave them for inline expansion.
-            if not any(Path(urlsplit(a.get('href', '')).path).suffix in CODE_SUFFIXES for a in links):
+            if page['src'] != 'companies/README.md' and not any(Path(urlsplit(a.get('href', '')).path).suffix in CODE_SUFFIXES for a in links):
                 paragraph.decompose()
     embedded = set()
     code_tail = {}
@@ -101,6 +101,8 @@ def compose(b, page, have, by_dest):
                 img = soup.new_tag('img', src=href, alt=label, loading='lazy')
                 a.replace_with(img)
             else: a.unwrap()
+        elif page['src'] == 'companies/README.md' and target in by_dest and target.startswith('companies/'):
+            a['class'] = list(set(a.get('class', [])) | {'studio-link'})
         elif target in by_dest or target.endswith('/index.html') or suffix in ('.html', ''):
             target_page = by_dest.get(target) or by_dest.get(target.rstrip('/') + '/index.html')
             span = soup.new_tag('span', attrs={'class': 'concept-reference'})
@@ -179,7 +181,7 @@ def toc(pages, sequence, current, base):
             result.append('</div></details>')
         result.append('</section>')
     members={p['src'] for p in sequence}
-    extra=[p for p in pages if p['src'] not in members]
+    extra=[p for p in pages if p['src'] not in members and not p['src'].startswith('companies/')]
     result.append('<section class="toc-area reference-area"><h2>REFERENCE SHELF</h2><p class="shelf-note">Indexes, assessment keys & source notes</p>')
     for title, predicate in [
         ('Concept references & indexes',lambda p:p['src'].startswith(('curriculum/','indexes/','projects/'))),
@@ -191,6 +193,19 @@ def toc(pages, sequence, current, base):
         result.append(f'<details class="toc-chapter" {"open" if opened else ""}><summary><span>{title}</span><span class="chevron">›</span></summary><div class="toc-lessons">')
         result.extend(link(p) for p in items); result.append('</div></details>')
     result.append(f'<a class="toc-link" href="{base}gallery/">Visual reference</a>')
+    studio=[p for p in sequence if p['src'].startswith('companies/')]
+    result.append('</section><section class="toc-area company-area"><h2><span>05</span> COMPANY INTERVIEW STUDIO</h2>')
+    result.append(link(studio[0], 'Start here · the interview room', 'part-intro'))
+    for p in studio[1:]:
+        active = current['src'] == p['src']
+        result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span>{E(p["title"])}</span><span class="chevron">›</span></summary><div class="toc-lessons">')
+        result.append(link(p, 'Open company rehearsal'))
+        if active and p.get('headings'):
+            result.append('<ol class="toc-headings">')
+            for h in p['headings']:
+                result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
+            result.append('</ol>')
+        result.append('</div></details>')
     result.append('</section></div><div class="rail-footer"><span class="status-dot"></span>YOUR PLACE IS SAVED ON THIS DEVICE<button id="reset-progress">Reset progress</button></div>')
     return ''.join(result)
 
@@ -225,8 +240,8 @@ def shell(b, page, body, pages, sequence, base):
     prev=sequence[position-1] if position is not None and position>0 else None
     nxt=sequence[position+1] if position is not None and position+1<len(sequence) else None
     is_home=page['kind']=='home'
-    subtitle = 'Curriculum overview' if is_home else (f'PART {page.get("gnum", "")} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
-    meta= 'THE ENGINEERING GUIDE' if is_home else (f'CHAPTER {page["chapter"]:02} · STEP {page["sub"]:02} OF {page["step_count"]:02}' if page.get('sub') else f'PART {page["gnum"]:02}' if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
+    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'PART {page.get("gnum", "")} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
+    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'CHAPTER {page["chapter"]:02} · STEP {page["sub"]:02} OF {page["step_count"]:02}' if page.get('sub') else f'PART {page["gnum"]:02}' if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
     nav=''
     if position is not None:
         previous=(f'<a class="previous-step" href="{href(base,prev)}"><span>← PREVIOUS</span><strong>{E(prev["title"])}</strong></a>' if prev else '<span></span>')
@@ -251,7 +266,7 @@ def shell(b, page, body, pages, sequence, base):
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'
                        f'<span class="mobile-page-position">{"Guided curriculum" if is_home else meta}</span></span>')
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
-<body class="{'home' if is_home else 'lesson'}"><a class="skip-link" href="#reading">Skip to lesson</a><div class="mobile-bar"><button id="open-contents" aria-expanded="false" aria-controls="sidebar">☰ <span>Contents</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
+<body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">Skip to lesson</a><div class="mobile-bar"><button id="open-contents" aria-expanded="false" aria-controls="sidebar">☰ <span>Contents</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
 <noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
 
 
@@ -310,7 +325,7 @@ def build(b):
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)
-    for folder in ('curriculum','projects','practice','docs','scripts','indexes'):
+    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies'):
         for f in (b.ROOT/folder).rglob('*'):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
             rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)

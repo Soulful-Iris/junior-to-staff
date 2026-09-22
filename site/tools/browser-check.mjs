@@ -26,8 +26,9 @@ try {
   const sum='/curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/';
   await check('Homepage explains the journey and shows the full nested contents',async()=>{
     await go();assert.match(await page.locator('h1').textContent(),/Build the judgment/);
-    assert.equal(await page.locator('.toc-area:not(.reference-area)').count(),4);
-    assert.equal(await page.locator('.toc-area:not(.reference-area) .toc-chapter').count(),17);
+    assert.equal(await page.locator('.toc-area:not(.reference-area):not(.company-area)').count(),4);
+    assert.equal(await page.locator('.toc-area:not(.reference-area):not(.company-area) .toc-chapter').count(),17);
+    assert.equal(await page.locator('.company-area .toc-chapter').count(),5);
     assert.equal(await page.locator('.toc-area h2').first().evaluate(e=>getComputedStyle(e).fontSize),'10px');
     assert.equal(await page.locator('.lesson-body a:not([data-start])').count(),0);
     await page.screenshot({path:join(shots,'home-desktop.png'),fullPage:true});
@@ -41,7 +42,26 @@ try {
     assert.equal(await page.locator('figure.code-file[data-source$="test_solution.py"]').count(),1);
     await page.screenshot({path:join(shots,'problem-desktop.png'),fullPage:true});
   });
+  await check('Company studio preserves five direct profile links and the sequential path',async()=>{
+    await go('/companies/');
+    assert.equal(await page.locator('.studio-card.studio-link').count(),5);
+    assert.equal(await page.locator('.next-step').getAttribute('href'),'/companies/openai.html');
+    assert.equal(await page.locator('.company-area [aria-current="page"]').count(),1);
+    await page.screenshot({path:join(shots,'studio-desktop.png'),fullPage:true});
+    await page.locator('.studio-card').first().click();await page.waitForURL(address+'/companies/openai.html');
+    assert.equal(await page.locator('article .tablewrap').count()>=3,true);
+    assert.equal(await page.locator('article img[src*="assets/companies/openai-stream.svg"]').count(),1);
+    assert.equal(await page.locator('.next-step').getAttribute('href'),'/companies/reddit.html');
+    await page.setViewportSize({width:390,height:844});await go('/companies/');
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    await page.screenshot({path:join(shots,'studio-mobile.png'),fullPage:true});
+    await go('/companies/observe.html');
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    await page.screenshot({path:join(shots,'observe-mobile.png'),fullPage:true});
+    await page.setViewportSize({width:1440,height:1050});
+  });
   await check('Subsection navigation reveals its closed answer and keeps the same page',async()=>{
+    await go(sum);
     const follow=page.locator('[data-heading]').filter({hasText:'Follow-up 1'}).first();
     await follow.click();assert.ok(await page.locator('.lesson-body details').first().evaluate(e=>e.open));
     assert.ok(page.url().startsWith(address+sum+'#'));
