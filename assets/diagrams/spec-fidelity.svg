@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" width="760" height="330" role="img" aria-label="A vague ask fans out into five different plausible implementations scattered apart. A precise ask, with its constraints named, converges on two nearly identical results. The fan-out versus the convergence is the difference precision buys.">
+  <rect width="760" height="330" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ASK THE SAME THING TWICE AND SEE HOW FAR APART THE ANSWERS LAND</text>
+
+  <!-- vague -->
+  <text x="44" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#a85d2f" letter-spacing="1.4">VAGUE</text>
+  <rect x="44" y="78" width="132" height="44" rx="4" fill="#faf9f7" stroke="#c2703d" stroke-width="1.6"/>
+  <text x="110" y="97" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">"add caching"</text>
+  <text x="110" y="113" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">no constraints named</text>
+
+  <g stroke="#c2703d" stroke-width="1.1" fill="none" opacity="0.8">
+    <path d="M 176 100 C 230 100, 250 46, 306 44"/>
+    <path d="M 176 100 C 230 100, 250 76, 306 74"/>
+    <path d="M 176 100 C 230 100, 250 104, 306 104"/>
+    <path d="M 176 100 C 230 100, 250 132, 306 134"/>
+    <path d="M 176 100 C 230 100, 250 160, 306 164"/>
+  </g>
+  <g fill="#faf9f7" stroke="#c2703d" stroke-width="1.3">
+    <rect x="306" y="32" width="124" height="24" rx="3"/>
+    <rect x="306" y="62" width="124" height="24" rx="3"/>
+    <rect x="306" y="92" width="124" height="24" rx="3"/>
+    <rect x="306" y="122" width="124" height="24" rx="3"/>
+    <rect x="306" y="152" width="124" height="24" rx="3"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d6459">
+    <text x="314" y="48">in-process, no ttl</text>
+    <text x="314" y="78">redis, no eviction</text>
+    <text x="314" y="108">http headers only</text>
+    <text x="314" y="138">memoised per request</text>
+    <text x="314" y="168">a whole new service</text>
+  </g>
+  <text x="452" y="92" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">all five are defensible.</text>
+  <text x="452" y="108" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">you did not choose any</text>
+  <text x="452" y="124" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">of them.</text>
+
+  <line x1="44" y1="196" x2="716" y2="196" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- precise -->
+  <text x="44" y="224" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e" letter-spacing="1.4">PRECISE</text>
+  <rect x="44" y="236" width="132" height="58" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="110" y="255" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">cache this query</text>
+  <text x="110" y="270" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">60s ttl · single-flight</text>
+  <text x="110" y="284" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10" fill="#6d6459">stale ok · show me a miss</text>
+
+  <g stroke="#2f6f4e" stroke-width="1.2" fill="none">
+    <path d="M 176 258 C 240 258, 260 244, 306 242"/>
+    <path d="M 176 272 C 240 272, 260 286, 306 288"/>
+  </g>
+  <g fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4">
+    <rect x="306" y="230" width="124" height="24" rx="3"/>
+    <rect x="306" y="276" width="124" height="24" rx="3"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="10.5" fill="#3f3b36">
+    <text x="314" y="246">run one</text>
+    <text x="314" y="292">run two</text>
+  </g>
+  <text x="452" y="252" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">nearly the same twice, and</text>
+  <text x="452" y="268" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">the difference between them</text>
+  <text x="452" y="284" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">is a thing you forgot to say</text>
+</svg>
