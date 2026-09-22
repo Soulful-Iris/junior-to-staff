@@ -1,0 +1,10 @@
+[Unit]
+Description=junior-to-staff reading site
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/python3.12 %h/ventures/junior-to-staff/site/serve.py 8901
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=default.target

@@ -9,6 +9,11 @@ back**.
 Three tiers. Five projects. The same system growing the whole way, rather than
 five unrelated toys.
 
+**Read it at [guide.soulful-ai.dev](https://guide.soulful-ai.dev)** — the same
+content with search across all 43 pages, next/previous through the whole arc,
+and the diagrams at full size. Or read it here on GitHub; the links work both
+ways.
+
 ---
 
 ## Why this exists
