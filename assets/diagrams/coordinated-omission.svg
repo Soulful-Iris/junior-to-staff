@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 328" width="760" height="328" role="img" aria-label="Two load generators against the same server during the same one-second stall. The open-loop generator sends requests on schedule, so five requests go out during the stall and all of them record a slow time, giving a p99 of 940 milliseconds. The closed-loop generator has four threads that each wait for a reply, so nothing at all is sent during the stall and its p99 reads 210 milliseconds — a healthy number produced by not sending the requests that would have been slow.">
+  <rect width="760" height="328" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE SAME STALL, MEASURED TWICE</text>
+
+  <rect x="340" y="58" width="110" height="180" fill="#c2703d" opacity="0.09"/>
+  <text x="395" y="52" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#a85d2f" letter-spacing="1">SERVER STALLED · 1s</text>
+
+  <!-- ================= open loop ================= -->
+  <text x="44" y="94" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e" letter-spacing="1.2">OPEN LOOP</text>
+  <text x="44" y="110" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">sent on schedule</text>
+
+  <g stroke="#2f6f4e" stroke-width="2">
+    <line x1="210" y1="92" x2="210" y2="114"/><line x1="232.5" y1="92" x2="232.5" y2="114"/>
+    <line x1="255" y1="92" x2="255" y2="114"/><line x1="277.5" y1="92" x2="277.5" y2="114"/>
+    <line x1="300" y1="92" x2="300" y2="114"/><line x1="322.5" y1="92" x2="322.5" y2="114"/>
+    <line x1="457.5" y1="92" x2="457.5" y2="114"/><line x1="480" y1="92" x2="480" y2="114"/>
+    <line x1="502.5" y1="92" x2="502.5" y2="114"/><line x1="525" y1="92" x2="525" y2="114"/>
+    <line x1="547.5" y1="92" x2="547.5" y2="114"/><line x1="570" y1="92" x2="570" y2="114"/>
+  </g>
+  <g stroke="#c2703d" stroke-width="2">
+    <line x1="345" y1="92" x2="345" y2="114"/><line x1="367.5" y1="92" x2="367.5" y2="114"/>
+    <line x1="390" y1="92" x2="390" y2="114"/><line x1="412.5" y1="92" x2="412.5" y2="114"/>
+    <line x1="435" y1="92" x2="435" y2="114"/>
+  </g>
+  <text x="340" y="132" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#a85d2f">5 sent into the stall, all slow</text>
+  <text x="596" y="107" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#a85d2f">p99 940ms</text>
+
+  <!-- ================= closed loop ================= -->
+  <text x="44" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#a85d2f" letter-spacing="1.2">CLOSED LOOP</text>
+  <text x="44" y="206" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">4 threads, each waits</text>
+
+  <g stroke="#2f6f4e" stroke-width="2">
+    <line x1="210" y1="188" x2="210" y2="210"/><line x1="232.5" y1="188" x2="232.5" y2="210"/>
+    <line x1="255" y1="188" x2="255" y2="210"/><line x1="277.5" y1="188" x2="277.5" y2="210"/>
+    <line x1="300" y1="188" x2="300" y2="210"/><line x1="322.5" y1="188" x2="322.5" y2="210"/>
+    <line x1="457.5" y1="188" x2="457.5" y2="210"/><line x1="480" y1="188" x2="480" y2="210"/>
+    <line x1="502.5" y1="188" x2="502.5" y2="210"/><line x1="525" y1="188" x2="525" y2="210"/>
+    <line x1="547.5" y1="188" x2="547.5" y2="210"/><line x1="570" y1="188" x2="570" y2="210"/>
+  </g>
+  <line x1="340" y1="199" x2="450" y2="199" stroke="#c9c3b8" stroke-width="1" stroke-dasharray="3 4"/>
+  <text x="340" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#a85d2f">nothing sent — every thread is waiting</text>
+  <text x="596" y="203" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#2f6f4e">p99 210ms</text>
+
+  <!-- time moving through both rows -->
+  <line x1="210" y1="84" x2="210" y2="216" stroke="#c2703d" stroke-width="1.4" opacity="0">
+    <animate attributeName="x1" values="210;590;590;210" keyTimes="0;0.8;1;1" dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="210;590;590;210" keyTimes="0;0.8;1;1" dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.4;0.4;0;0" keyTimes="0;0.04;0.8;0.87;1" dur="9s" repeatCount="indefinite"/>
+  </line>
+
+  <line x1="44" y1="256" x2="716" y2="256" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="278" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Same server, same stall. The bottom generator reported a healthy tail because it never sent</text>
+  <text x="44" y="295" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">the requests that would have been slow — it was busy waiting for the slow ones.</text>
+  <text x="44" y="316" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">A closed-loop test measures a system it accidentally protected from load. Real users do not wait.</text>
+</svg>
