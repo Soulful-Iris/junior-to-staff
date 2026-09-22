@@ -51,19 +51,39 @@ Longer version: [docs/HOW-TO-USE.md](docs/HOW-TO-USE.md).
 
 ---
 
-## The five projects
+## The projects, at three scales
+
+The code is the least important part of any of them. What you are practising is
+**deciding what would prove this**, organising the asks that get it built, and
+knowing what it would take to leave the thing running.
+
+| scale | where | how many | size |
+|---|---|---|---|
+| **section projects** | `projects.md` beside each section | 5 per section | an afternoon. One section's skill, isolated. |
+| **act projects** | [acts/](acts/) | 5 per act | a weekend. Integrates a whole tier. Pick one of five. |
+| **the spine** | [projects/](projects/) | 5 total | the whole guide. One system growing, if you prefer continuity to variety. |
+
+An **act** is a tier — junior, senior, staff. Three acts, five projects each at
+the end of them.
+
+Every project carries the same seven things: what you build, **the thought
+process** (the decisions, in the order you have to make them), **how to organise
+the prompts** (the literal sequence, each ask ending somewhere checkable),
+**on AWS** (which service, why that one and not the obvious neighbour, and how),
+what productionising it actually means, the learning, and how you would know it
+is wrong.
+
+The spine, if you want one continuous system rather than variety:
 
 | | project | what it proves you can do |
 |---|---|---|
-| **P1** | it works | ship a small full-stack thing with auth, data and tests that bite |
-| **P2** | it survives | the same system with CI/CD, infrastructure as code, backups and enough observability to debug it at 3am |
-| **P3** | it holds under load | queues, caching, idempotency and rate limits, then break it on purpose and measure what happens |
-| **P4** | it reasons, provably | an AI feature with a real evaluation harness, guardrails, and a cost and latency budget |
-| **P5** | it changes safely | a migration of the system you built, with a design doc, a rollout plan, kill criteria and a written postmortem |
+| **P1** | [it works](projects/p1-it-works/) | ship a small full-stack thing with auth, data and tests that bite |
+| **P2** | [it survives](projects/p2-it-survives/) | the same system with CI/CD, infrastructure as code, backups and enough observability to debug it at 3am |
+| **P3** | [it holds under load](projects/p3-under-load/) | queues, caching, idempotency and rate limits, then break it on purpose and measure what happens |
+| **P4** | [it reasons, provably](projects/p4-it-reasons/) | an AI feature with a real evaluation harness, guardrails, and a cost and latency budget |
+| **P5** | [it changes safely](projects/p5-it-changes/) | a migration of the system you built, with a design doc, a rollout plan, kill criteria and a written postmortem |
 
-Each project has its own brief in [projects/](projects/) with scope, acceptance
-criteria, the architecture decisions you are being asked to make, and the
-failures you should deliberately induce.
+How all of them are written: [docs/PROJECT-SPEC.md](docs/PROJECT-SPEC.md).
 
 ---
 

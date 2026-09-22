@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 310" width="760" height="310" role="img" aria-label="The shape shared by every act one system: a browser talking to an API, the API owning a store, and one call out to a service you do not control. A request travels browser to API to store and back. The outside call is marked in a warm colour as the part that will be slow, hostile or absent.">
+  <rect width="760" height="310" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">EVERY ONE OF THE FIVE IS THIS SHAPE</text>
+
+  <!-- browser -->
+  <rect x="44" y="96" width="120" height="58" rx="5" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="104" y="121" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">browser</text>
+  <text x="104" y="139" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">you do not control it</text>
+
+  <!-- api -->
+  <rect x="248" y="96" width="140" height="58" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.8"/>
+  <text x="318" y="121" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">your api</text>
+  <text x="318" y="139" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">where every rule must live</text>
+
+  <!-- store -->
+  <rect x="472" y="96" width="126" height="58" rx="5" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="535" y="121" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">the store</text>
+  <text x="535" y="139" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">outlives the code</text>
+
+  <line x1="164" y1="125" x2="242" y2="125" stroke="#2f6f4e" stroke-width="1.4"/>
+  <polygon points="248,125 239,121 239,129" fill="#2f6f4e"/>
+  <line x1="388" y1="125" x2="466" y2="125" stroke="#2f6f4e" stroke-width="1.4"/>
+  <polygon points="472,125 463,121 463,129" fill="#2f6f4e"/>
+
+  <!-- the outside dependency -->
+  <rect x="248" y="212" width="200" height="54" rx="5" fill="#faf9f7" stroke="#c2703d" stroke-width="1.8" stroke-dasharray="6 4"/>
+  <text x="348" y="236" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#a85d2f">somebody else's computer</text>
+  <text x="348" y="253" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#6d6459">a page, a model, a mail sender</text>
+
+  <line x1="318" y1="154" x2="318" y2="206" stroke="#c2703d" stroke-width="1.6"/>
+  <polygon points="318,212 313,202 323,202" fill="#c2703d"/>
+
+  <text x="470" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">this is the one that will be slow,</text>
+  <text x="470" y="245" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">hostile or simply gone. Your</text>
+  <text x="470" y="262" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#a85d2f">timeout, your decision.</text>
+
+  <text x="44" y="70" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Identity, a store, a list, and one call you do not own. The list is never the hard part.</text>
+
+  <circle r="4.5" fill="#c2703d">
+    <animateMotion dur="7s" repeatCount="indefinite" calcMode="linear"
+      path="M 164 125 L 318 125 L 472 125 L 318 125 L 164 125"/>
+  </circle>
+</svg>
