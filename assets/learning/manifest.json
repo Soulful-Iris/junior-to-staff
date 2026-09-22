@@ -2,91 +2,109 @@
   {
     "key": "map-lookup",
     "title": "Remember the complement",
-    "states": 4
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "window-moves",
     "title": "A window that never moves backward",
-    "states": 4
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "prefix-counts",
-    "title": "One prefix can represent several starts",
-    "states": 4
+    "title": "Two boundaries, one prefix value",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "binary-halving",
     "title": "Keep the first qualifying index",
-    "states": 4
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "bfs-frontier",
     "title": "A graph becomes distance layers",
-    "states": 4
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "monotonic-stack",
-    "title": "Resolve only what the new value proves",
-    "states": 4
+    "title": "A warmer day empties the stack",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "dp-choice",
-    "title": "Greedy versus a recurrence",
-    "states": 4
+    "title": "Candidates flow into a minimum",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "lru-order",
-    "title": "A read changes eviction order",
-    "states": 4
+    "title": "Move the node, preserve its identity",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "config-cohorts",
-    "title": "Same defect, different blast radius",
-    "states": 4
+    "title": "Contain the configuration failure",
+    "duration_seconds": 8,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "retry-tree",
-    "title": "Retry ownership changes the call tree",
-    "states": 4
+    "title": "Retries multiply across layers",
+    "duration_seconds": 5,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "rollout-capacity",
-    "title": "Correct code still needs deployment headroom",
-    "states": 4
+    "title": "Keep capacity above incoming demand",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "version-projection",
-    "title": "A late event must not rewrite the present",
-    "states": 4
+    "title": "A late event meets a version guard",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "partition-skew",
-    "title": "Unused capacity beside a hot partition",
-    "states": 4
+    "title": "Route around a hot key",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "worker-slots",
-    "title": "A completion releases one slot",
-    "states": 4
+    "title": "Admission follows completion",
+    "duration_seconds": 9,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "cache-coalescing",
-    "title": "One miss, one local loader",
-    "states": 4
+    "title": "One load, six waiting callers",
+    "duration_seconds": 6,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "conditional-result",
     "title": "Duplicate delivery, one stored result",
-    "states": 4
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "direct-upload",
-    "title": "Separate permission from the byte stream",
-    "states": 4
+    "title": "Separate permission from bytes",
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   },
   {
     "key": "browser-race",
     "title": "The older response arrives last",
-    "states": 4
+    "duration_seconds": 7,
+    "motion": "continuous geometry and causal path traversal"
   }
 ]

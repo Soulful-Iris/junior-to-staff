@@ -12,8 +12,8 @@ The original chapter diagrams remain intact. The repeated text-slide additions h
 - Strict TypeScript type checking: passed with `tsc --noEmit --strict`, Node types, and `allowImportingTsExtensions`.
 - AWS template: passed `cfn-lint`, including SAM transformation/schema checks.
 - Local link and SVG/configuration checks: passed; reproduce with `python scripts/check_learning.py`.
-- Replacement visuals: all static views and four state checkpoints per mechanism rendered locally for layout review. Native SVG animation timelines pass structural checks.
-- Browser playback of the replacement assets: pending verification after this checkpoint is published. Previous CSS-slide playback was not established; those assets have been removed.
+- Motion redesign: all 18 animations and 18 static alternatives rebuilt. Persistent labels replace rotating captions; each mechanism has its own continuous timeline. Static contact-sheet review and native timeline checks passed.
+- Browser playback of this motion redesign: awaiting published-branch checks. Static rendering alone is not counted as playback verification.
 - AWS resources were not deployed; live IAM, regional quotas, queue timing, alarms, and cleanup still require the learner's disposable-account validation.
 - Interview research is a qualitative snapshot for March 22–September 22, 2026. See the explicit company/level gaps and excluded dates in [research](research/README.md). No statistically supported “most asked” ranking is claimed.
 

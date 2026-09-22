@@ -6,7 +6,7 @@ import sys
 import xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
-files=[ROOT/'README.md']+list((ROOT/'docs').glob('*.md'))+list((ROOT/'paths').rglob('*.md'))+list((ROOT/'tiers').glob('*/*/README.md'))+[ROOT/'scripts/README.md']
+files=[ROOT/'README.md']+list((ROOT/'docs').glob('*.md'))+list((ROOT/'paths').rglob('*.md'))+list((ROOT/'tiers').glob('*/*/README.md'))+[ROOT/'scripts/README.md',ROOT/'assets/learning/README.md']
 for path in files:
     content=path.read_text();prose=re.sub(r'```.*?```','',content,flags=re.S)
     for target in re.findall(r'!?\[[^\]]*\]\(([^)]+)\)',prose):
@@ -27,10 +27,17 @@ for item in manifest:
             if not suffix:
                 if 'prefers-reduced-motion' not in p.read_text():errors.append(f'{p}: no reduced motion')
                 if not root.findall('.//s:animate',ns) and not root.findall('.//s:animateMotion',ns):errors.append(f'{p}: no native motion')
-            for anim in root.findall('.//s:animate',ns):
-                values=anim.get('values','').split(';');times=[float(x) for x in anim.get('keyTimes','').split(';')]
+            for anim in root.findall('.//s:animate',ns)+root.findall('.//s:animateMotion',ns):
+                if anim.get('calcMode')=='discrete':errors.append(f'{p}: slideshow interpolation is not allowed')
+                if anim.get('attributeName')=='transform':errors.append(f'{p}: use animateTransform or animateMotion for transforms')
+                if anim.tag.endswith('animateMotion') and not anim.get('path'):errors.append(f'{p}: missing motion path')
+                if not anim.get('keyTimes'):continue
+                values=anim.get('values',anim.get('keyPoints','')).split(';');times=[float(x) for x in anim.get('keyTimes','').split(';')]
                 if len(values)!=len(times) or times[0]!=0 or times[-1]!=1 or times!=sorted(set(times)):
                     errors.append(f'{p}: invalid timeline')
+                if anim.get('calcMode')=='spline':
+                    curves=anim.get('keySplines','').split(';')
+                    if len(curves)!=len(times)-1 or any(len(c.split())!=4 for c in curves):errors.append(f'{p}: invalid easing')
         except Exception as e:errors.append(f'{p}: {e}')
 template=json.loads((ROOT/'paths/interviews/aws/labs/job-pipeline/template.yaml').read_text())
 props=template['Resources']['Worker']['Properties'];event=props['Events']['JobsEvent']['Properties']
