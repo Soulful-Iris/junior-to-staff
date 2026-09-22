@@ -13,21 +13,19 @@ Internal spec, 2026-09-21. Bruno's words, which set all of this:
 
 > *"Animations should be everywhere to help understand and visualize lessons."*
 
-The original request above is historical context. The current supplied inventory
-is 25 section projects, 15 act projects, and five spine projects. Sixteen other
-chapter directories do not claim five supplied section projects. Each project
-now lives on its own page, under the [shared teaching standard](LEARNING-EXPERIENCE.md).
+The original request above is historical context. The supplied 45 briefs are retained:
+40 standalone projects (formerly 25 section and 15 act briefs) and five stages of one
+continuing reading-list system. They are organized by engineering subject in the
+[project index](../indexes/projects.md), with one [capstone home](../projects/reading-list/README.md).
+Each brief retains its scenario, staged prompts, AWS choices, checks and visual follow-ups.
+A build brief is not a supplied runnable application unless it explicitly includes code.
 
-## Three levels, and they do different jobs
+## Where a project belongs
 
-| level | where | how many | scale |
-|---|---|---|---|
-| **section projects** | `tiers/<tier>/<section>/projects/<project>.md`, linked by `projects.md` | 25 supplied across five sections | One section's skill, isolated. |
-| **act projects** | `acts/act-<n>-<tier>/projects/<project>.md`, linked by act README | 5 per act, 15 total | Integrates the whole tier. Pick one of five. |
-| **the spine** | `projects/` | 5 total | the whole guide. One system growing, for anyone who prefers continuity to variety. |
-
-An "act" is a tier. His word, and it is the better one: a tier is a rank, an act
-is a stretch of work with a shape.
+Place a standalone project under the subject it exercises. Its baseline and deeper
+follow-ups stay on that page; job level does not select a second copy. The continuing
+reading-list project has one home and five implementation stages. Indexes and chapter
+pages link to the canonical brief. Preserve [the shared teaching standard](LEARNING-EXPERIENCE.md).
 
 ## The shape of a section project
 

@@ -4,9 +4,9 @@ Reviewed 2026-09-22. This replaces the former “condensed from primary sources�
 
 ## Retained mechanisms
 
-Reliability claims C01–C03 support user-facing ratios, careful retry semantics and recovery feedback. The teaching arithmetic is constructed: a million eligible requests with ten thousand failures produces 99% success and consumes ten 99.9% request budgets, regardless of a short outage duration. Three total attempts at three layers gives 27 leaf attempts; three retries after the original gives 64. The [runnable reliability lab](../../paths/interviews/reliability/README.md) verifies those countermodels and adds an unfamiliar incident with raw metrics.
+Reliability claims C01–C03 support user-facing ratios, careful retry semantics and recovery feedback. The teaching arithmetic is constructed: a million eligible requests with ten thousand failures produces 99% success and consumes ten 99.9% request budgets, regardless of a short outage duration. Three total attempts at three layers gives 27 leaf attempts; three retries after the original gives 64. The [runnable reliability lab](../../curriculum/03-production/05-reliability/labs/reliability/README.md) verifies those countermodels and adds an unfamiliar incident with raw metrics.
 
-Recent primary incident reports C04–C06 supply [production case](../../paths/interviews/production/README.md) context. They document operator observations, not hiring frequency, universal safe settings, or independent causal proof. AWS service mappings, workloads, diagrams of proposed designs and acceptance thresholds are curriculum constructions.
+Recent primary incident reports C04–C06 supply [production case](../../indexes/production-cases.md) context. They document operator observations, not hiring frequency, universal safe settings, or independent causal proof. AWS service mappings, workloads, diagrams of proposed designs and acceptance thresholds are curriculum constructions.
 
 For data/observability, C11–C13 support narrow version-specific semantics. Conditional object writes do not grant a multi-object transaction. PostgreSQL heap layout does not follow every primary-key choice. SDK/specification stability must be checked per component. Exact market shares, overhead guarantees and “default” platforms have been removed rather than promoted from untraceable notes.
 

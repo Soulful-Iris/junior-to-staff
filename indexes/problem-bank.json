@@ -1,0 +1,254 @@
+[
+  {
+    "number": 1,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum",
+    "title": "Two sum: remember the useful past"
+  },
+  {
+    "number": 2,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram",
+    "title": "Valid anagram: equality of multiplicities"
+  },
+  {
+    "number": 3,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams",
+    "title": "Group anagrams: canonical keys"
+  },
+  {
+    "number": 4,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window",
+    "title": "Longest unique window: move the boundary forward"
+  },
+  {
+    "number": 5,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window",
+    "title": "Minimum covering window: track unmet demand"
+  },
+  {
+    "number": 6,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count",
+    "title": "Count target-sum subarrays: differences of prefixes"
+  },
+  {
+    "number": 7,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self",
+    "title": "Product except self: combine independent summaries"
+  },
+  {
+    "number": 8,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive",
+    "title": "Longest consecutive run: expand only from starts"
+  },
+  {
+    "number": 9,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals",
+    "title": "Merge intervals: preserve the covered set"
+  },
+  {
+    "number": 10,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity",
+    "title": "Meeting room capacity: count simultaneous demand"
+  },
+  {
+    "number": 11,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary",
+    "title": "Binary search boundary: find the first true position"
+  },
+  {
+    "number": 12,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search",
+    "title": "Rotated array search: identify the ordered half"
+  },
+  {
+    "number": 13,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity",
+    "title": "Shipping capacity: search a feasible answer"
+  },
+  {
+    "number": 14,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list",
+    "title": "Reverse a linked list: keep the unprocessed suffix reachable"
+  },
+  {
+    "number": 15,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry",
+    "title": "Cycle entry: relative motion and identity"
+  },
+  {
+    "number": 16,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists",
+    "title": "Merge sorted lists: splice only a safe frontier"
+  },
+  {
+    "number": 17,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order",
+    "title": "Tree level order: keep the next frontier separate"
+  },
+  {
+    "number": 18,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst",
+    "title": "Validate a BST: carry every ancestor constraint"
+  },
+  {
+    "number": 19,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor",
+    "title": "Lowest common ancestor: return presence as well as a candidate"
+  },
+  {
+    "number": 20,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter",
+    "title": "Tree diameter: return one branch, combine two locally"
+  },
+  {
+    "number": 21,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order",
+    "title": "Dependency order"
+  },
+  {
+    "number": 22,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder",
+    "title": "Word ladder"
+  },
+  {
+    "number": 23,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity",
+    "title": "Connectivity under added links"
+  },
+  {
+    "number": 24,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path",
+    "title": "Shortest path through a grid"
+  },
+  {
+    "number": 25,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path",
+    "title": "Cheapest route with nonnegative costs"
+  },
+  {
+    "number": 26,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream",
+    "title": "Top k observations in a stream"
+  },
+  {
+    "number": 27,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams",
+    "title": "Merge k sorted streams"
+  },
+  {
+    "number": 28,
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache/README.md",
+    "directory": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache",
+    "title": "Implement LRU without an ordered-map helper"
+  },
+  {
+    "number": 29,
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store/README.md",
+    "directory": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store",
+    "title": "Expiring key-value store"
+  },
+  {
+    "number": 30,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete",
+    "title": "Prefix autocomplete"
+  },
+  {
+    "number": 31,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search",
+    "title": "Search for unique combinations"
+  },
+  {
+    "number": 32,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search",
+    "title": "Find a word without reusing a cell"
+  },
+  {
+    "number": 33,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change",
+    "title": "Minimum coins with a witness"
+  },
+  {
+    "number": 34,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence",
+    "title": "Longest increasing subsequence"
+  },
+  {
+    "number": 35,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance",
+    "title": "Edit distance"
+  },
+  {
+    "number": 36,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways",
+    "title": "Count valid digit decodings"
+  },
+  {
+    "number": 37,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures",
+    "title": "Days until a warmer temperature"
+  },
+  {
+    "number": 38,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle",
+    "title": "Largest rectangle in a histogram"
+  },
+  {
+    "number": 39,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator",
+    "title": "Parse and evaluate a policy expression"
+  },
+  {
+    "number": 40,
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows/README.md",
+    "directory": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows",
+    "title": "Count event-time windows with late arrivals"
+  },
+  {
+    "number": 41,
+    "path": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median/README.md",
+    "directory": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median",
+    "title": "Maintain an exact streaming median"
+  },
+  {
+    "number": 42,
+    "path": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/README.md",
+    "directory": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue",
+    "title": "Bounded blocking queue with shutdown"
+  }
+]

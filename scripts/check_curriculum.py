@@ -21,14 +21,19 @@ def main():
     parser.add_argument("--coding-only", action="store_true")
     parser.add_argument("--report", type=Path, help="Optional JSON result outside source files")
     args = parser.parse_args()
-    base = ROOT / "paths/interviews"
-    search = base / "coding/problems" if args.coding_only else base
-    directories = sorted({path.parent for path in search.rglob("test_*.py")})
+    base = ROOT / "curriculum"
+    if args.coding_only:
+        bank = json.loads((ROOT / "indexes/problem-bank.json").read_text())
+        directories = [ROOT / item["directory"] for item in bank]
+        if len(directories) != 42 or len(set(directories)) != 42:
+            raise SystemExit("The problem registry must contain 42 distinct bundles")
+    else:
+        directories = sorted({path.parent for path in base.rglob("test_*.py")})
     commands = [(str(path.relative_to(ROOT)), [sys.executable, "-m", "unittest", "discover", "-s", str(path), "-v"])
                 for path in directories]
     if not args.coding_only:
         commands.append(("practice/assessor/heldback_importer.py",
-                         [sys.executable, str(base / "practice/assessor/heldback_importer.py"), "--package", "reference", "-v"]))
+                         [sys.executable, str(ROOT / "practice/assessor/heldback_importer.py"), "--package", "reference", "-v"]))
     results = []
     for name, command in commands:
         try:

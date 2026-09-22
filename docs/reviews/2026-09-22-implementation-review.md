@@ -2,7 +2,7 @@
 
 > Integration note: this report preserves the independent reviewer’s observations
 > and the test counts at each review stage. Subsequent integrated validation passed
-> 209 methods across 55 suites; see [the final validation record](../../paths/interviews/VALIDATION.md).
+> 209 methods across 55 suites; see [the final validation record](../VALIDATION.md).
 > The editor evidence and diagram review mentioned as finishing below are now complete.
 > The small F1 calibration concern is also resolved: the first follow-up now requires
 > deduplication across calls and stable returned snapshots, rather than another
@@ -48,7 +48,7 @@ The teaching format is visible in the actual pages, not only the standard: impor
 - Importer reference: same command in importer directory — **10 tests passed** before the money correction; direct precision counterexamples then failed as described; corrected direct repros now reject both inputs.
 - Editor HTTP/SQLite: `python -m unittest discover -s tests -p 'test_*.py' -v` with bytecode disabled — **5 tests passed** before the title correction; corrected padded-title direct repro returns 400.
 - Real Chromium targeted query-failure scenario — defect reproduced, then fix verified against current TypeScript and temporary real HTTP/SQLite server. Runtime: supplied Chromium plus Playwright, no AWS or production resources.
-- Assessor held-back importer pack: `python paths/interviews/practice/assessor/heldback_importer.py --package reference -v` — **4 tests passed**, covering multi-hop cycle, total transport/retry budget, crash/reopen normalized replay, and late malformed-page atomicity.
+- Assessor held-back importer pack: `python practice/assessor/heldback_importer.py --package reference -v` — **4 tests passed**, covering multi-hop cycle, total transport/retry budget, crash/reopen normalized replay, and late malformed-page atomicity.
 - Review patch harness: `python -m unittest discover -s review -p 'test_*.py' -v` in importer directory — **3 tests passed**, including actual patch application and targeted broken/preserved behavior.
 
 Limits: this is the requested focused review, not a repeat whole-repository audit or new interview research. Code and assessments were still changing during review. I did not demand a production auth system, create/delete editor features, a frontend framework, distributed executor, strict fairness, or other scope excluded by the new contracts.

@@ -1,6 +1,6 @@
 # Teach the problem before the solution
 
-This standard applies to **both paths**. A reader should hear a clear problem,
+This standard applies to **the whole curriculum**. A reader should hear a clear problem,
 see concrete behavior, and learn how to make the next decision. A list of terms,
 an unexplained animation, or a project assignment without a starting point does
 not meet the standard.
@@ -14,9 +14,7 @@ Begin each substantive lesson or project with an interviewer-style brief:
 > drawing, what would you clarify?”
 
 Make that brief specific to the subject. Name the user, operation, current
-behavior, and desired outcome. Explain unfamiliar terms when introduced. In the
-AI path, the learner plays the engineer directing and reviewing implementation;
-in the interview path, the learner implements and explains independently first.
+behavior, and desired outcome. Explain unfamiliar terms when introduced. In assisted practice, the learner directs and reviews implementation. In independent practice, the learner implements and explains first. These are exercise modes within the same lesson.
 
 Follow with a small contract table: inputs or workload, expected output, boundary
 behavior, and deliberately excluded scope. Example numbers are teaching inputs,
@@ -60,7 +58,7 @@ Mermaid diagrams must also be rendered and inspected, not only syntax-checked.
 
 ## One project, one page
 
-Each of the existing section and act projects gets its own Markdown page. Keep
+Each of the existing subject projects gets its own Markdown page. Keep
 the former bundled page as a short index with a suggested order, prerequisites,
 and the property each project demonstrates. Preserve useful existing teaching,
 working AI prompt sequences, AWS choices, and checks during the move. Repair
@@ -75,7 +73,7 @@ A project page contains:
   statement that this is a build brief, with staged deliverables and checks.
 - Two or more follow-up questions with changed assumptions, expected reasoning,
   and diagrams showing the resulting change.
-- AI-path prompts that each end at a verifiable checkpoint; interview-path
+- AI-assisted prompts that each end at a verifiable checkpoint; independent-practice
   instructions that keep the candidate brief separate from the solution.
 - Senior expectations, additional lead scope where relevant, and observable
   acceptance checks. Completion is practice evidence, not a hiring prediction.
@@ -91,14 +89,14 @@ concepts before using them. Use Python for algorithms and TypeScript for browser
 and asynchronous work where it serves the lesson.
 
 Keep answers behind a separate link or disclosure. Provide an ordered progression
-and role-specific detours, then an unfamiliar assessment. A green reference test
+and concept-specific follow-ups, then an unfamiliar assessment. A green reference test
 suite verifies supplied code; it does not assess the reader.
 
 ## Audit closure and evidence
 
 Track every finding from [issue #1](https://github.com/Soulful-Iris/junior-to-staff/issues/1)
-in [AUDIT-IMPLEMENTATION.md](AUDIT-IMPLEMENTATION.md). Corrections must reach both
-paths, including project briefs and illustrations that repeat the claim. Each
+in [AUDIT-IMPLEMENTATION.md](AUDIT-IMPLEMENTATION.md). Corrections must reach the whole
+curriculum, including project briefs and illustrations that repeat the claim. Each
 finding needs concrete changed files, a check of the failed guarantee or missing
 skill, and an honest account of validation limits.
 
@@ -107,3 +105,12 @@ or later**, for this review. Separate publication dates from interview dates and
 undated official guidance. Technical documentation supports behavior, not a claim
 that a company asks a question. All newly constructed practice prompts must be
 identified as constructed; never imply company attribution without evidence.
+
+## One subject home, increasing depth
+
+Use the ordered groups and subject chapters in [the curriculum](../curriculum/README.md).
+Each concept, problem and project has one canonical home. Baselines, senior operating
+constraints and staff/lead ownership questions stay together. Name the prerequisite
+for a later-topic follow-up and link to it. Difficulty is not a second directory tree.
+Indexes provide alternative ways to find the same material; they do not copy solutions.
+AI-assisted practice and independent assessment use the same technical foundations.

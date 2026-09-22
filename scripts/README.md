@@ -37,7 +37,7 @@ Technique coverage now includes clipped queue reservoirs, clipped request waterf
 
 References: [clipping](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/clipPath), [transform animation](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/animateTransform), [path drawing](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/stroke-dashoffset), [SVG image restrictions](https://developer.mozilla.org/en-US/docs/Web/SVG/Guides/SVG_as_an_image), [SVG motion paths](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/animateMotion), [spline interpolation](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/keySplines). Figma's motion workflow also distinguishes a resting screenshot from animation verification; neither XML validation nor static rendering proves playback.
 
-`check_learning.py` checks links, disclosures, native motion timelines, easing, and lab settings. Inspect the published SVGs and Markdown at multiple times; record what was actually checked in [validation](../paths/interviews/VALIDATION.md). Check event order, intermediate geometry, readable labels, reset behavior, and static alternatives. Tests do not validate deployed AWS behavior or architectural claims.
+`check_learning.py` checks links, disclosures, native motion timelines, easing, and lab settings. Inspect the published SVGs and Markdown at multiple times; record what was actually checked in [validation](../docs/VALIDATION.md). Check event order, intermediate geometry, readable labels, reset behavior, and static alternatives. Tests do not validate deployed AWS behavior or architectural claims.
 
 
 ## Render Markdown diagrams
@@ -74,3 +74,7 @@ modules cannot shadow one another. A 90-second suite limit bounds accidental han
 The importer starter intentionally contains defects; default checks use its reference.
 The full-stack README documents separate browser and TypeScript commands, and the
 PostgreSQL lab documents its real two-session runtime gate.
+
+## Verify the reorganization
+
+`python scripts/check_organization.py` compares the recorded source commit with the reorganized curriculum: source-file coverage, all coding bundles and project briefs, unchanged SVGs and Mermaid blocks, and preserved non-Markdown artifacts. Fetch the source history first if using a shallow clone. Navigation prose and the four path-dependent helpers remain review items.

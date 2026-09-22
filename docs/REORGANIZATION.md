@@ -34,4 +34,19 @@ Difficulty increases inside each lesson; seniority does not select a separate re
 - Verify content coverage, unchanged visual/diagram content, links and runnable references.
 - Carry forward the unexecuted PostgreSQL and live-AWS verification limits.
 
-Checkpoint 1 records the mapping before moving the files. Completion evidence follows after verification.
+## Completed move
+
+The first pushed checkpoint recorded the source map. The structural checkpoint moves existing lessons and rebuilds the root, four group indexes, 17 subject indexes and reference indexes. The original source branch stays at its existing commit. Seniority is an assessment depth, and AI-assisted work is a practice mode within the curriculum.
+
+After the move:
+
+- All 477 source files have recorded destinations; all 42 problem bundles and 45 project briefs are present.
+- All 105 SVGs and all 387 Mermaid blocks match the source exactly.
+- 149 other non-Markdown artifacts are byte-identical. Four test/render helpers have reviewed path changes.
+- The Python runner passed 55 suites / 209 methods; its coding subset passed 42 suites / 126 methods.
+- Five shared TypeScript tests, strict application type checking, the build and seven browser scenarios passed.
+- The link checker resolved 2,269 relative links; the learning checker passed 240 Markdown files, 76 mechanism SVGs and lab invariants. The provenance checker passed 13 claim IDs and 16 local links.
+
+Reproduce preservation checks with `python scripts/check_organization.py`. Source hashes and destinations are recorded in the map above. The source commit must be fetched for comparison. See [validation](VALIDATION.md) for retained execution limits and the source branch's historical visual-rendering evidence.
+
+Navigation prose, path references and scope labels were adapted to the new sequence. No algorithm implementation, technical diagram, research claim or supplied project specification was replaced with new material.

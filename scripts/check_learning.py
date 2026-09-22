@@ -73,7 +73,7 @@ for item in manifest:
                     curves=anim.get('keySplines','').split(';')
                     if len(curves)!=len(times)-1 or any(len(c.split())!=4 for c in curves):errors.append(f'{p}: invalid easing')
         except Exception as e:errors.append(f'{p}: {e}')
-template=json.loads((ROOT/'paths/interviews/aws/labs/job-pipeline/template.yaml').read_text())
+template=json.loads((ROOT/'curriculum/03-production/03-infrastructure/aws/labs/job-pipeline/template.yaml').read_text())
 props=template['Resources']['Worker']['Properties'];event=props['Events']['JobsEvent']['Properties']
 assert event['FunctionResponseTypes']==['ReportBatchItemFailures']
 assert template['Resources']['Jobs']['Properties']['VisibilityTimeout']>=6*props['Timeout']

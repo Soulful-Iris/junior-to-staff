@@ -544,7 +544,7 @@ def build(metadata_only=False):
     if len({item['key'] for item in manifest}) != len(manifest):
         raise ValueError('Motion study keys must be unique')
     (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    gallery='# Motion gallery\n\nPersistent diagrams with purposeful motion. Every animation has a readable static alternative. Timing is illustrative.\n\n[Learning paths](../../README.md) · [Draw the architecture](../../paths/interviews/architecture/whiteboard.md) · [Coding route](../../paths/interviews/coding/README.md)\n\n'
+    gallery='# Motion gallery\n\nPersistent diagrams with purposeful motion. Every animation has a readable static alternative. Timing is illustrative.\n\n[Curriculum](../../curriculum/README.md) · [Draw the architecture](../../curriculum/03-production/01-system-design/whiteboard.md) · [Coding route](../../curriculum/01-code/02-data-structures-algorithms/README.md)\n\n'
     gallery+=' | Concept | Motion | Static |\n|---|---|---|\n'
     for item in manifest:
         k=item['key']; title=item['title']

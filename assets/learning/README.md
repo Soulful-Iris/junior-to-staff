@@ -2,7 +2,7 @@
 
 Persistent diagrams with purposeful motion. Every animation has a readable static alternative. Timing is illustrative.
 
-[Learning paths](../../README.md) · [Draw the architecture](../../paths/interviews/architecture/whiteboard.md) · [Coding route](../../paths/interviews/coding/README.md)
+[Learning paths](../../README.md) · [Draw the architecture](../../curriculum/03-production/01-system-design/whiteboard.md) · [Coding route](../../curriculum/01-code/02-data-structures-algorithms/practice-sequence.md)
 
  | Concept | Motion | Static |
 |---|---|---|
