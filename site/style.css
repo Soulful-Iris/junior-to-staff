@@ -14,3 +14,15 @@
 .diagram-scroll-hint{margin-right:auto;display:none}@media(max-width:760px){.diagram-scroll-hint{display:block;font-size:9px}.featured-diagram+.visual-toolbar{margin:8px 0 0}.visual-toolbar{align-items:center;gap:7px;flex-wrap:wrap}}
 
 .featured-diagram+.visual-toolbar{margin:8px 0 0}
+
+/* The same adjacent lessons remain reachable while reading long explanations. */
+.sticky-sequence{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sticky-sequence>a,.sticky-disabled{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:34px;padding:5px 12px;border-radius:5px;font-size:11px;white-space:nowrap}
+.sticky-previous{border:1px solid var(--line);color:var(--forest)}
+.sticky-previous:hover{background:#eaf0e3}
+.sticky-next{background:var(--forest);color:#fff}
+.sticky-next:hover{background:#345e45}
+.sticky-disabled{color:#83907b;opacity:.7}
+.reading-controls{flex-shrink:0}
+@media(max-width:1100px){.has-sequence #saved-progress{display:none}.has-sequence .reading-controls{gap:12px}}
+@media(max-width:760px){.has-sequence>span{display:none}.has-sequence .reading-controls{width:100%;justify-content:space-between;gap:8px}.sticky-sequence{gap:10px}.sticky-sequence>a,.sticky-disabled{min-height:44px;padding:5px 12px}.sticky-next{border-radius:4px}.has-sequence .reading-controls #motion-toggle{margin-left:auto}}
