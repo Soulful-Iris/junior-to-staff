@@ -15,6 +15,42 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Hostname resolves publicly during checking but privately during connection. | Connect only to the vetted address while preserving the hostname for Host and TLS verification. |
 | Scope | HTTP/HTTPS, at most three redirects, one-megabyte response, inherited total deadline. | Explain any additional assumption before implementing it. |
 
+<!-- project-expectation:start -->
+
+## What you are expected to hand over
+
+**The finished artifact:** One guarded HTTP client that everything in P1 fetches through: scheme allowlist, resolve-then-connect to the exact address that was vetted, refusals for private, loopback, link-local and metadata addresses, every redirect re-vetted, plus project 2's deadline and a size cap. Refusals are coded 4xxs, and the item still saves with…
+
+Treat that sentence as a review contract, not an inspiration. A reviewable
+submission contains all of the following:
+
+- the narrow working slice or decision artifact described above, reproducible
+  from a clean checkout with assumptions stated;
+- captured proof of the normal flow **and** the boundary/failure row above;
+- tests, probes, or metrics that can go red when the important guarantee breaks;
+- a short decision record naming ownership, excluded scope, and the first
+  operational limit; and
+- a changed contract, diagram, and new evidence for each follow-up—not only a
+  paragraph claiming the original design still works.
+
+### How the review conversation gets harder
+
+| Review gate | The interviewer changes | Expected response |
+|---|---|---|
+| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Senior · DNS returns mixed addresses | One hostname returns both a public IPv4 and private IPv6 address. What does your policy do? Predict which boundary must change before opening the design. | For this exercise reject mixed unsafe answers rather than relying on client selection order. Test IPv4-mapped IPv6 and redirects with the same canonical address policy. |
+| Lead · A future worker reuses fetching | The queued worker gains new credentials and network routes. Is the guard enough? State what evidence would make you reject your first design. | Reuse the same client and add restricted egress and least-privilege credentials. Application validation and network isolation protect different boundaries; neither proves the other. |
+| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
+| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+
+Before implementation, say the baseline invariant, the owner of each piece of
+state, and what the user sees when the named dependency or assumption fails. That
+five-minute explanation is part of the project: if it is vague, the build is not
+ready to begin.
+
+<!-- project-expectation:end -->
+
 Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
 
 ## Baseline and the failure to explain

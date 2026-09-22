@@ -15,6 +15,42 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Old field is replaced by objects before clients migrate. | The saved old-client fixture fails; do not infer compatibility from provider unit tests. |
 | Scope | An additive example; new enum values and strict consumers still need compatibility tests. | Explain any additional assumption before implementing it. |
 
+<!-- project-expectation:start -->
+
+## What you are expected to hand over
+
+**The finished artifact:** Yesterday's client, recorded and turned into a compatibility test. One real change made additively — the new shape beside the old. The old shape marked with Deprecation and Sunset headers and a real date, and telemetry plus a consumer inventory that state what old usage can and cannot be observed.
+
+Treat that sentence as a review contract, not an inspiration. A reviewable
+submission contains all of the following:
+
+- the narrow working slice or decision artifact described above, reproducible
+  from a clean checkout with assumptions stated;
+- captured proof of the normal flow **and** the boundary/failure row above;
+- tests, probes, or metrics that can go red when the important guarantee breaks;
+- a short decision record naming ownership, excluded scope, and the first
+  operational limit; and
+- a changed contract, diagram, and new evidence for each follow-up—not only a
+  paragraph claiming the original design still works.
+
+### How the review conversation gets harder
+
+| Review gate | The interviewer changes | Expected response |
+|---|---|---|
+| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Senior · Usage cannot be seen | Both clients call the same URL, and the server cannot tell which JSON field they read. How do you measure retirement? Predict which boundary must change before opening the design. | Use explicit version/capability telemetry where feasible, client inventories and owner acknowledgments. Endpoint traffic alone cannot reveal field access; the removal decision must name uninstrumented and offline clients. |
+| Lead · A team misses the sunset | One consumer cannot migrate before the announced date. Must the compatibility test turn green on removal anyway? State what evidence would make you reject your first design. | No. A date is a policy input, not evidence of safety. Choose extended support, a versioned endpoint, or explicit accepted breakage with an owner; revise the go/no-go gate accordingly. |
+| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
+| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+
+Before implementation, say the baseline invariant, the owner of each piece of
+state, and what the user sees when the named dependency or assumption fails. That
+five-minute explanation is part of the project: if it is vague, the build is not
+ready to begin.
+
+<!-- project-expectation:end -->
+
 Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
 
 ## Baseline and the failure to explain

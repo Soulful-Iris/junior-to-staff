@@ -38,7 +38,7 @@ The browser script starts and stops its own local server. `SITE_SCREENSHOTS` sel
 - `build.py` retains Markdown parsing, heading generation and cached Mermaid rendering. Original Markdown, code and visual assets remain untouched.
 - `style.css` and `app.js` provide the reading layout, nested contents, mobile drawer, subsection navigation, search, local progress, copy-code controls and diagram sizing/motion controls.
 
-The build publishes **239 content pages**, **185 guided steps** plus the homepage, and a separate visual reference. All **42 coding problems**, **45 project briefs**, **107 source SVGs** on this site branch and **387 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
+The build publishes **255 content pages**, **185 guided steps** plus the homepage, and a separate visual reference. All **42 coding problems**, **45 project briefs**, **129 source SVGs** and **387 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
 
 Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
 

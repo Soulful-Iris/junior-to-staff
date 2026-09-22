@@ -15,6 +15,42 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | The memo says “always use one database” without addressing replay or isolation. | Reject the universal; the exceptional workload is a concrete counterexample. |
 | Scope | An engineering strategy artifact, not a new service or invented industry consensus. | Explain any additional assumption before implementing it. |
 
+<!-- project-expectation:start -->
+
+## What you are expected to hand over
+
+**The finished artifact:** Read back the real decisions you made across Acts 1 and 2. Find the one you kept making from scratch. Write it once, with its reasoning and its cost. Then cite it in the next decision and see whether the argument got shorter.
+
+Treat that sentence as a review contract, not an inspiration. A reviewable
+submission contains all of the following:
+
+- the narrow working slice or decision artifact described above, reproducible
+  from a clean checkout with assumptions stated;
+- captured proof of the normal flow **and** the boundary/failure row above;
+- tests, probes, or metrics that can go red when the important guarantee breaks;
+- a short decision record naming ownership, excluded scope, and the first
+  operational limit; and
+- a changed contract, diagram, and new evidence for each follow-up—not only a
+  paragraph claiming the original design still works.
+
+### How the review conversation gets harder
+
+| Review gate | The interviewer changes | Expected response |
+|---|---|---|
+| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Senior · A new workload breaks the default | A team needs independently replayable events rather than current row state. Should enforcement block the design? Predict which boundary must change before opening the design. | Route it through a documented exception review that names the mismatched constraint and maintenance owner. Do not make a default impossible to challenge; measure exception recurrence as feedback on the policy. |
+| Lead · The evidence expires | A managed service changes a relevant capability six months later. Which part of the memo changes? State what evidence would make you reject your first design. | Separate stable invariants from dated capability/cost observations. Reverify the source, update the constraint and rerun the decision comparison; a recent access date does not make an old study recent evidence. |
+| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
+| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+
+Before implementation, say the baseline invariant, the owner of each piece of
+state, and what the user sees when the named dependency or assumption fails. That
+five-minute explanation is part of the project: if it is vague, the build is not
+ready to begin.
+
+<!-- project-expectation:end -->
+
 Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
 
 ## Baseline and the failure to explain

@@ -15,6 +15,42 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Only one user ID is affected but metrics aggregate all traffic. | Use bounded cohort metrics plus trace/log queries by ID; do not create one unbounded metric series per user. |
 | Scope | Request-weighted SLO with explicit missing-data and no-traffic behavior. | Explain any additional assumption before implementing it. |
 
+<!-- project-expectation:start -->
+
+## What you are expected to hand over
+
+**The finished artifact:** Telemetry good enough that an unfamiliar person can answer "what happened to this request?" without adding a log line and redeploying — plus an SLO, an alert that fires once and usefully, and a measured detection time.
+
+Treat that sentence as a review contract, not an inspiration. A reviewable
+submission contains all of the following:
+
+- the narrow working slice or decision artifact described above, reproducible
+  from a clean checkout with assumptions stated;
+- captured proof of the normal flow **and** the boundary/failure row above;
+- tests, probes, or metrics that can go red when the important guarantee breaks;
+- a short decision record naming ownership, excluded scope, and the first
+  operational limit; and
+- a changed contract, diagram, and new evidence for each follow-up—not only a
+  paragraph claiming the original design still works.
+
+### How the review conversation gets harder
+
+| Review gate | The interviewer changes | Expected response |
+|---|---|---|
+| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Senior · An async boundary appears | The user request ends before the worker starts. Which trace relationship do you preserve? Predict which boundary must change before opening the design. | Link the enqueue span to the job and each worker attempt. Show queue wait separately from execution; a retry must not overwrite the first attempt’s evidence. |
+| Lead · Telemetry disappears | The collector fails while the application continues. How does the responder distinguish healthy traffic from silence? State what evidence would make you reject your first design. | Use an independently observed heartbeat and delivery/drop counters, and state what remains unknowable. Do not score undefined good/total as 100% availability. |
+| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
+| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+
+Before implementation, say the baseline invariant, the owner of each piece of
+state, and what the user sees when the named dependency or assumption fails. That
+five-minute explanation is part of the project: if it is vague, the build is not
+ready to begin.
+
+<!-- project-expectation:end -->
+
 Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
 
 ## Baseline and the failure to explain

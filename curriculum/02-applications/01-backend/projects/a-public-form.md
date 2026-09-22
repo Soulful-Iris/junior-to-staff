@@ -15,6 +15,44 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Client-side validation is bypassed; K is reused with a different payload. | Reject malformed input and conflicting key reuse at the server; no new row. |
 | Scope | CSV import behavior varies by spreadsheet; use typed XLSX or explicit text-import instructions when exact text preservation is required. | Explain any additional assumption before implementing it. |
 
+<!-- project-expectation:start -->
+
+## What you are expected to hand over
+
+**The finished artifact:** A public, accessible form that validates on both sides, survives duplicate submission, makes rejection useful, and gives its authenticated owner a safe export.
+
+![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/public-form.svg)
+
+Treat that sentence as a review contract, not an inspiration. A reviewable
+submission contains all of the following:
+
+- the narrow working slice or decision artifact described above, reproducible
+  from a clean checkout with assumptions stated;
+- captured proof of the normal flow **and** the boundary/failure row above;
+- tests, probes, or metrics that can go red when the important guarantee breaks;
+- a short decision record naming ownership, excluded scope, and the first
+  operational limit; and
+- a changed contract, diagram, and new evidence for each follow-up—not only a
+  paragraph claiming the original design still works.
+
+### How the review conversation gets harder
+
+| Review gate | The interviewer changes | Expected response |
+|---|---|---|
+| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Senior · A school shares one IP | Two hundred legitimate users submit behind the same NAT. What does per-IP throttling do? Predict which boundary must change before opening the design. | It can block the school. Combine coarse abuse limits with fairer account/session or challenge policies where possible, and measure legitimate rejection. Managed throttles reduce load but are not exact hard spending caps. |
+| Lead · The export contains private data | A download link is forwarded to another person. What authorizes access? State what evidence would make you reject your first design. | Check owner authorization before issuing a short-lived private object URL, or authorize every delivery for stricter revocation. Record that a signed URL remains usable until expiry unless an additional revocation mechanism exists. |
+| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
+| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+
+Before implementation, say the baseline invariant, the owner of each piece of
+state, and what the user sees when the named dependency or assumption fails. That
+five-minute explanation is part of the project: if it is vague, the build is not
+ready to begin.
+
+<!-- project-expectation:end -->
+
 Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
 
 ## Baseline and the failure to explain

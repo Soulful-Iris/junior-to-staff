@@ -25,13 +25,24 @@ def main():
     assert len(sequence)==len(set(sequence))
     assert not any('assessor' in src for src in sequence), 'Answer keys entered candidate sequence'
     bank=json.loads((ROOT/'indexes/problem-bank.json').read_text())
+    problem_sources={p['path'] for p in bank}
     assert len(bank)==42 and all(p['path'] in sequence for p in bank)
     briefs=[p for p in sequence if '/projects/' in p and p.endswith('.md')]
     assert len(briefs)==40, f'Missing standalone briefs: {len(briefs)}'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
     assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
     assert sequence.index(bank[0]['path'])==sequence.index('curriculum/01-code/02-data-structures-algorithms/lessons/01-maps.md')+1
-    diagrams=set(); embedded=0; local_jumps=[]; previous_next=0
+    project_sources={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum').rglob('*.md') if '/projects/' in p.as_posix()}
+    project_sources|={str(p.relative_to(ROOT)) for p in (ROOT/'projects/reading-list/stages').rglob('README.md')}
+    assert len(project_sources)==45
+    expected_product_pages={
+        'curriculum/02-applications/01-backend/projects/a-public-form.md',
+        'curriculum/02-applications/02-databases/projects/a-receipt-tracker.md',
+        'curriculum/02-applications/03-frontend/projects/a-shared-reading-list.md',
+        'curriculum/02-applications/05-security/projects/a-shift-schedule.md',
+        'projects/reading-list/stages/01-it-works/README.md',
+    }
+    diagrams=set(); embedded=0; local_jumps=[]; previous_next=0; rehearsed=0; framed=0; product_visuals=0
     for src,p in pages.items():
         soup=BeautifulSoup(output_for(src).read_text(),'html.parser')
         css = soup.find('link', rel='stylesheet')
@@ -43,6 +54,21 @@ def main():
         assert js and js['src'].endswith(assets['js']['file']), src
         assert js['integrity'] == assets['js']['integrity'], src
         article=soup.select_one('article.lesson-body');assert article,src
+        if src in problem_sources:
+            heading=next((h for h in article.find_all('h2') if h.get_text(strip=True)=='What the interviewer expects'),None)
+            assert heading,src
+            scenario=next((h for h in article.find_all('h3') if h.get_text(strip=True)=='Test-case scenarios to settle before coding'),None)
+            assert scenario and scenario.find_next('table') and len(scenario.find_next('table').select('tr'))-1>=6,src
+            rehearsed+=1
+        if src in project_sources:
+            heading=next((h for h in article.find_all('h2') if h.get_text(strip=True)=='What you are expected to hand over'),None)
+            assert heading,src
+            gates=next((h for h in article.find_all('h3') if h.get_text(strip=True)=='How the review conversation gets harder'),None)
+            assert gates and gates.find_next('table') and len(gates.find_next('table').select('tr'))-1==6,src
+            framed+=1
+            if src in expected_product_pages:
+                assert article.select_one('img[src*="/assets/product/"]'),src
+                product_visuals+=1
         toc=soup.select_one('nav[aria-label="Table of contents"]');assert toc,src
         assert len(toc.select('.toc-area:not(.reference-area)'))==4,src
         assert len(toc.select('.toc-area:not(.reference-area) .toc-chapter'))==17,src
@@ -78,13 +104,15 @@ def main():
             previous_next+=1
     assert not local_jumps,local_jumps[:10]
     assert len(diagrams)==387,len(diagrams)
+    assert rehearsed==42 and framed==45 and product_visuals==5,(rehearsed,framed,product_visuals)
     originals=list((ROOT/'assets').rglob('*.svg'))
-    # 107 before main merged in the section-project diagrams; every one of the
-    # original 107 is still present and byte-identical, checked in the loop below.
-    assert len(originals)==125
+    # This includes the four expected-product mockups added for UI project
+    # briefs. Every source visual is copied byte-identically into the site.
+    assert len(originals)==129
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
     print(f'PASS {len(pages)} pages: full 4-part / 17-chapter TOC, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
-    print(f'PASS {embedded} exact inline files; all 125 original SVGs unchanged; all 387 Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
+    print('PASS 42 interview expectation blocks, 45 project deliverables with six review gates, and 5 expected-product placements.')
+    print(f'PASS {embedded} exact inline files; all 129 source SVGs unchanged; all 387 Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 
 if __name__=='__main__':main()

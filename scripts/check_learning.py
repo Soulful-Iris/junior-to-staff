@@ -63,6 +63,19 @@ for item in problem_bank:
         errors.append(f'{path}: incomplete expectation headings')
     scenario_rows=[line for line in block.splitlines() if line.startswith('| ')][1:]
     if len(scenario_rows)<6:errors.append(f'{path}: fewer than six explicit test-case scenarios')
+
+project_files=sorted([path for path in (ROOT/'curriculum').rglob('*.md') if '/projects/' in path.as_posix()]
+                     + list((ROOT/'projects/reading-list/stages').rglob('README.md')))
+if len(project_files)!=45:errors.append(f'expected 45 project briefs, found {len(project_files)}')
+for path in project_files:
+    content=path.read_text();start='<!-- project-expectation:start -->';end='<!-- project-expectation:end -->'
+    if content.count(start)!=1 or content.count(end)!=1:
+        errors.append(f'{path}: expected one project expectation block');continue
+    block=content.split(start,1)[1].split(end,1)[0]
+    if '## What you are expected to hand over' not in block or '### How the review conversation gets harder' not in block:
+        errors.append(f'{path}: incomplete project expectation headings')
+    review_rows=[line for line in block.splitlines() if line.startswith('| ')][1:]
+    if len(review_rows)!=6:errors.append(f'{path}: expected six review gates, found {len(review_rows)}')
 ns={'s':'http://www.w3.org/2000/svg'}
 manifest=json.loads((ROOT/'assets/learning/manifest.json').read_text())
 for item in manifest:

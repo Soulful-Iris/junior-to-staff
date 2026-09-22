@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+  <title id="title">Expected shared reading list end product</title>
+  <desc id="desc">A polished reading-list application showing a group library, saved links, tags, owner actions, and different read states for Alice and Bob.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-15%" width="120%" height="140%"><feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#183326" flood-opacity=".13"/></filter>
+    <style>
+      text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;fill:#20352a}text[fill="#fff"]{fill:#fff}.muted{fill:#728076}.tiny{font-size:11px}.small{font-size:13px}.body{font-size:15px}.label{font-size:10px;font-weight:700;letter-spacing:1.1px}.heading{font-family:Georgia,serif;font-size:28px}.title{font-size:16px;font-weight:700}.line{stroke:#dce3d7}.green{fill:#2f6049}.sage{fill:#e9efe4}.paper{fill:#fbfcf8}.amber{fill:#f5ead8}.white{fill:#fff}
+    </style>
+  </defs>
+  <rect width="1000" height="620" rx="28" fill="#eef2e9"/>
+  <text x="52" y="43" class="label muted">EXPECTED PRODUCT · MAIN WORKFLOW</text>
+  <text x="52" y="76" class="heading">One shared list. Personal state stays personal.</text>
+  <g filter="url(#shadow)">
+    <rect x="52" y="105" width="896" height="465" rx="14" class="paper"/>
+    <path d="M52 151h896" class="line"/>
+    <circle cx="78" cy="128" r="6" fill="#d98374"/><circle cx="98" cy="128" r="6" fill="#d9b967"/><circle cx="118" cy="128" r="6" fill="#7da379"/>
+    <rect x="360" y="118" width="282" height="20" rx="10" fill="#edf0ea"/><text x="448" y="132" class="tiny muted">reading.local/group/design</text>
+    <rect x="52" y="151" width="207" height="419" fill="#f1f4ed"/>
+    <text x="75" y="190" class="label muted">YOUR GROUPS</text>
+    <rect x="67" y="208" width="177" height="46" rx="8" fill="#dfe9da"/>
+    <circle cx="89" cy="231" r="11" class="green"/><text x="108" y="228" class="small" font-weight="700">Design Book Club</text><text x="108" y="244" class="tiny muted">8 members · 24 links</text>
+    <text x="75" y="288" class="label muted">VIEWS</text>
+    <text x="79" y="321" class="small">All links</text><text x="211" y="321" class="tiny muted">24</text>
+    <text x="79" y="352" class="small">Unread by me</text><text x="211" y="352" class="tiny muted">7</text>
+    <text x="79" y="383" class="small">Added by me</text><text x="211" y="383" class="tiny muted">5</text>
+    <path d="M75 416h153" class="line"/>
+    <circle cx="91" cy="455" r="16" fill="#c88762"/><text x="84" y="460" fill="#fff" class="small">A</text><text x="117" y="451" class="small" font-weight="700">Alice</text><text x="117" y="468" class="tiny muted">Signed in</text>
+    <g transform="translate(285 177)">
+      <text class="label muted">DESIGN BOOK CLUB</text><text y="35" class="heading">What we’re reading</text>
+      <rect x="480" y="0" width="143" height="42" rx="7" class="green"/><text x="513" y="26" class="small" fill="#fff" font-weight="700">+ Add a link</text>
+      <g transform="translate(0 66)">
+        <rect width="404" height="96" rx="9" class="white" stroke="#d7dfd2"/>
+        <rect x="16" y="17" width="56" height="56" rx="7" fill="#dfe8f1"/><path d="M28 57l12-17 10 11 9-14" fill="none" stroke="#567b8b" stroke-width="3"/>
+        <text x="87" y="29" class="tiny muted">martinfowler.com</text><text x="87" y="51" class="title">Distributed systems patterns</text>
+        <rect x="87" y="65" width="71" height="20" rx="10" class="sage"/><text x="100" y="79" class="tiny">systems</text>
+        <circle cx="363" cy="33" r="12" fill="#c88762"/><text x="358" y="37" class="tiny" fill="#fff">A</text><text x="331" y="74" class="tiny muted">owner</text>
+      </g>
+      <g transform="translate(0 174)">
+        <rect width="404" height="96" rx="9" class="white" stroke="#d7dfd2"/>
+        <rect x="16" y="17" width="56" height="56" rx="7" fill="#eee5d4"/><text x="34" y="53" font-family="Georgia" font-size="28" fill="#926a39">T</text>
+        <text x="87" y="29" class="tiny muted">increment.com</text><text x="87" y="51" class="title">Calm software architecture</text>
+        <rect x="87" y="65" width="50" height="20" rx="10" class="amber"/><text x="100" y="79" class="tiny">craft</text>
+        <circle cx="363" cy="33" r="12" fill="#55799b"/><text x="358" y="37" class="tiny" fill="#fff">B</text><text x="333" y="74" class="tiny muted">Bob</text>
+      </g>
+      <g transform="translate(0 282)">
+        <rect width="404" height="96" rx="9" class="white" stroke="#d7dfd2"/>
+        <rect x="16" y="17" width="56" height="56" rx="7" fill="#e7e3ed"/><path d="M30 36h28M30 46h22M30 56h17" stroke="#75698a" stroke-width="3"/>
+        <text x="87" y="29" class="tiny muted">title unavailable · URL saved</text><text x="87" y="51" class="title">A resilient link with no title</text>
+        <rect x="87" y="65" width="98" height="20" rx="10" fill="#f3e1de"/><text x="99" y="79" class="tiny">fetch failed</text>
+      </g>
+      <g transform="translate(426 66)">
+        <rect width="197" height="206" rx="10" fill="#f4f6f0" stroke="#d5ddd0"/>
+        <text x="18" y="29" class="label muted">ITEM 7 · YOUR VIEW</text>
+        <text x="18" y="61" class="small" font-weight="700">Personal read state</text>
+        <rect x="18" y="78" width="161" height="38" rx="7" fill="#dce9d9"/><circle cx="38" cy="97" r="9" class="green"/><path d="M34 97l3 3 6-7" fill="none" stroke="#fff" stroke-width="2"/><text x="56" y="101" class="small">Alice · read</text>
+        <rect x="18" y="124" width="161" height="38" rx="7" fill="#fff" stroke="#d8ded4"/><circle cx="38" cy="143" r="9" fill="#fff" stroke="#75847a"/><text x="56" y="147" class="small">Bob · unread</text>
+        <text x="18" y="188" class="tiny muted">One item · two user-item rows</text>
+        <path d="M-14 96H8" stroke="#b16c43" stroke-width="2"/><circle cx="-14" cy="96" r="3" fill="#b16c43"/>
+      </g>
+      <g transform="translate(426 288)">
+        <rect width="197" height="90" rx="10" fill="#fff7eb" stroke="#ead5b7"/>
+        <text x="16" y="27" class="label" fill="#9b6b34">AUTHORIZATION</text><text x="16" y="51" class="small">Edit &amp; delete appear only</text><text x="16" y="70" class="small">for the owner—and the API checks.</text>
+      </g>
+    </g>
+  </g>
+  <text x="52" y="602" class="tiny muted">The image is an acceptance target, not a required visual style. Preserve the behaviors and ownership boundaries.</text>
+</svg>
