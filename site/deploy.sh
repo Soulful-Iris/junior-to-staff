@@ -34,7 +34,12 @@ REMOTE=$(git rev-parse "origin/$BRANCH")
 [ "$LOCAL" = "$REMOTE" ] && [ "$(cat "$STATE/last-deployed" 2>/dev/null)" = "$REMOTE" ] && exit 0
 
 log "deploying $BRANCH ${LOCAL:0:8} -> ${REMOTE:0:8}"
-git checkout -q -B "$BRANCH" "origin/$BRANCH" || { log "checkout failed"; exit 1; }
+# Detach rather than checking the branch out. A branch can only be checked out
+# in one worktree at a time, so `checkout -B` fails outright the moment the
+# same branch is open anywhere else in the repo — which is a publishing outage
+# caused by something entirely unrelated to publishing. The tree is all this
+# needs; it never needs to own the branch name.
+git checkout -q --detach "origin/$BRANCH" || { log "checkout failed"; exit 1; }
 
 STAGE="$REPO/site/out.stage"
 rm -rf "$STAGE"
