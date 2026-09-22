@@ -34,6 +34,8 @@ its suite is evidence about the reference, not your independent performance.
 
 ## Use AI and keep responsibility for the result
 
+![Two ways to work with an AI. Criteria first: decide what would prove the change works, ask for it, it writes the code, run the check you already wrote — that check can go red. Criteria after: ask, it writes, you read it and it looks right, and only then write the test, which is written from the code it is testing and cannot go red](../assets/diagrams/criteria-before-code.svg)
+
 The existing prompts practice specification, bounded implementation and review.
 For an assisted exercise, make a request small enough to end at a runnable
 checkpoint, ask about likely failure modes, inspect the diff and verify it.

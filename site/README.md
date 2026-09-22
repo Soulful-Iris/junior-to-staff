@@ -45,6 +45,16 @@ an identity mark — the nav chip, the active item, the page's quote rule — ne
 as a theme, so the site reads as one thing. Colour is always redundant with a
 number and a name, never the only channel.
 
+## The gallery
+
+`/gallery/` is generated from what the pages actually reference, so it cannot
+list a diagram that is not used or miss one that is. 478 of them, grouped by
+part, each thumbnail linking to the lesson rather than to the bare file —
+because a diagram out of its argument is decoration. The repo's own
+`indexes/visuals.md` is a table of "View" links showing no pictures at all,
+which is an odd thing for a page about pictures; it is left alone for GitHub
+and the gallery does the job on the site.
+
 ## Changing the name
 
 `SITE_TITLE`, `SITE_SHORT` and `SITE_LEDE` at the top of `build.py`. One place.

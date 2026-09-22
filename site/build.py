@@ -52,11 +52,12 @@ OUT = Path(__file__).resolve().parent / "out"
 TOOLS = Path(__file__).resolve().parent / "tools"
 MERMAID_CACHE = Path(__file__).resolve().parent / ".mermaid-cache"
 
-SITE_TITLE = "The Engineering Interview Curriculum"
-SITE_SHORT = "interview curriculum"
+SITE_TITLE = "Software engineering, in depth"
+SITE_SHORT = "software engineering, in depth"
 SITE_LEDE = (
-    "Seventeen subjects, each starting from a concrete problem and ending in the "
-    "follow-up questions an interviewer actually asks."
+    "A learning guide that starts every concept from a concrete problem and goes as "
+    "deep as the follow-ups take it. For interviews, for the job, and for directing "
+    "an AI without losing the judgment."
 )
 
 # ---------------------------------------------------------------- content map
@@ -597,6 +598,7 @@ a:hover{color:var(--ink)}
 .hero{padding:48px 28px 0; max-width:var(--wide); margin:0 auto}
 .hero h1{font-size:42px; line-height:1.1; margin:0 0 14px; letter-spacing:-.02em}
 .hero .lede{font-size:20px; line-height:1.55; color:var(--muted); max-width:36em; margin:0 0 26px}
+.heroimg{margin:0 0 30px; border:1px solid var(--rule)}
 .hero .how{background:var(--paper); border:1px solid var(--rule); border-radius:10px;
   padding:18px 20px; margin:0 0 34px; font-size:16px; max-width:40em}
 .hero .how b{display:block; margin-bottom:6px; font-size:14px; letter-spacing:.04em;
@@ -799,7 +801,7 @@ def rail_html(pages, current, base) -> str:
                         ("Projects", "indexes/projects.html"),
                         ("AWS implementations", "indexes/aws.html"),
                         ("Production cases", "indexes/production-cases.html"),
-                        ("Visual gallery", "indexes/visuals.html"),
+                        ("Every visual", "gallery/"),
                         ("Mock interviews", "practice/"),
                         ("How to study", "docs/HOW-TO-USE.html"),
                         ("Full contents", "curriculum/")]:
@@ -894,7 +896,7 @@ def home_shell(page, body, pages, base) -> str:
         ("Mock interviews", "candidate and assessor packs", "practice/"),
         ("Production cases", "five real incidents", "indexes/production-cases.html"),
         ("AWS implementations", "service choices and why", "indexes/aws.html"),
-        ("Visual gallery", "every diagram in one place", "indexes/visuals.html"),
+        ("Every visual", "every diagram, linked to its lesson", "gallery/"),
     ]:
         strip.append(f'<a href="{base}{href}">{label}<small>{sub}</small></a>')
 
@@ -918,15 +920,118 @@ def home_shell(page, body, pages, base) -> str:
 <div class="how"><b>How each concept is taught</b>
 Situation, then the contract it has to satisfy, then a diagram of the mechanism,
 then your implementation and its checks. Then the requirement changes, and the
-follow-up questions go deeper: failure behaviour, operations, scope, and
-compatibility. The depth lives inside the question rather than in a separate
-chapter.</div>
+follow-up questions go deeper. The depth lives inside the question rather than
+in a separate chapter, which is why there is no ladder to climb here — just one
+problem you keep being asked harder things about.</div>
+<div class="mer heroimg"><img src="{base}assets/diagrams/same-problem-three-depths.svg"
+ alt="One problem, a bookmark service, answered at three depths: foundation, then
+ operating constraints, then broader ownership, each adding to the same answer"></div>
 </header>
 <section class="groups">{''.join(cards)}</section>
 <section class="strip">{''.join(strip)}</section>
 <div class="col">{body}</div>
 </div></div></div>
 <script>var BASE="{base}";</script><script src="app.js"></script>
+</body></html>
+"""
+
+
+
+# ------------------------------------------------------------------- gallery
+
+def gallery_page(pages, have, base) -> str:
+    """Every visual in the curriculum, grouped, each linking to its lesson.
+
+    The repo's own visuals index is a table of "View" links and shows no
+    pictures at all, which is an odd thing for a page about pictures. This one
+    is generated from what the pages actually reference, so it cannot list a
+    diagram that is not used or miss one that is — and every thumbnail goes to
+    the lesson rather than to the bare SVG, because a diagram out of its
+    argument is decoration.
+    """
+    IMG = re.compile(r"!\[[^\]]*\]\(([^)]+\.svg)\)")
+    buckets: dict[str, list] = {}
+    seen_pairs = set()
+
+    for p in pages:
+        gkey = p.get("group") or "_other"
+        label = GROUPS[gkey][0] if gkey in GROUPS else "Reference and practice"
+        colour = GROUPS[gkey][1] if gkey in GROUPS else "#6d6459"
+        depth = len(Path(dest_for(p["src"])).parts) - 1
+
+        assets = []
+        for m in IMG.finditer(p["text"]):
+            src = m.group(1)
+            resolved = os.path.normpath(os.path.join(os.path.dirname(p["src"]), src))
+            assets.append(resolved.replace(os.sep, "/"))
+        for m in MERMAID_RE.finditer(p["text"]):
+            h = hashlib.sha256(m.group(1).strip().encode()).hexdigest()[:16]
+            if h in have:
+                assets.append(f"assets/mermaid/{h}.svg")
+
+        for a in assets:
+            key = (a, p["url"])
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+            buckets.setdefault(label, (colour, []))[1].append((a, p))
+
+    order = [GROUPS[g][0] for g in GROUPS] + ["Reference and practice"]
+    sections = []
+    total = 0
+    for label in order:
+        if label not in buckets:
+            continue
+        colour, items = buckets[label]
+        total += len(items)
+        cards = "".join(
+            f'<a class="gcell" href="{base.rstrip("/")}{pg["url"]}" title="{esc(pg["title"])}">'
+            f'<img src="{base}{a}" loading="lazy" alt="">'
+            f'<span>{esc(pg["title"])}</span></a>'
+            for a, pg in items)
+        sections.append(
+            f'<h2 style="--accent:{colour}">{esc(label)} '
+            f'<small>{len(items)}</small></h2><div class="grid">{cards}</div>')
+
+    body = (f'<h1>Every visual</h1><p class="lede">{total} diagrams across the '
+            f'curriculum, in reading order. Each one links to the lesson it '
+            f'belongs to rather than to the file, because a diagram out of its '
+            f'argument is decoration.</p>' + "".join(sections))
+
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Every visual · {esc(SITE_SHORT)}</title>
+<meta name="description" content="{total} diagrams across the curriculum, each linked to its lesson.">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="{base}style.css">
+<style>
+.col{{max-width:1180px}}
+.lede{{color:var(--muted); font-size:17px; max-width:var(--measure)}}
+.col h2{{border-bottom:2px solid var(--accent); color:var(--ink)}}
+.col h2 small{{font:12px ui-monospace,monospace; color:var(--muted); font-weight:400}}
+.grid{{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; margin:18px 0 42px}}
+.gcell{{display:block; background:var(--paper); border:1px solid var(--rule); border-radius:9px;
+  padding:11px; text-decoration:none; color:var(--ink); overflow:hidden}}
+.gcell:hover{{border-color:var(--accent)}}
+.gcell img{{width:100%; height:120px; object-fit:contain; object-position:center; display:block}}
+.gcell span{{display:block; font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:12px; color:var(--muted); margin-top:9px; line-height:1.35;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}}
+@media (max-width:900px){{.grid{{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+  .gcell img{{height:90px}}}}
+</style>
+</head><body>
+<div class="bar"><button id="menu" aria-expanded="false" aria-controls="rail">Contents</button>
+<div class="here">Every visual</div></div>
+<div class="frame">
+<nav class="rail" id="rail" aria-label="Curriculum">{rail_html(pages, '/gallery/', base)}</nav>
+<div class="main"><div class="sheet"><div class="col">
+<div class="crumb"><a href="{base}">Home</a></div>
+{body}
+</div></div></div></div>
+<script>var BASE="{base}";</script><script src="{base}app.js"></script>
 </body></html>
 """
 
@@ -1015,6 +1120,9 @@ def main() -> int:
                       "s": p["summary"][:200],
                       "h": " ".join(toc),
                       "b": prose_of(p["text"])})
+
+    (OUT / "gallery").mkdir(parents=True, exist_ok=True)
+    (OUT / "gallery" / "index.html").write_text(gallery_page(pages, have, base), encoding="utf-8")
 
     (OUT / "search.json").write_text(json.dumps(index, separators=(",", ":")), encoding="utf-8")
     print(f"built {len(pages)} pages, {len(have)} diagrams, {copied} code files -> {OUT}")

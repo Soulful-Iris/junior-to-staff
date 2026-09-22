@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 396" width="760" height="396" role="img" aria-label="One problem, a bookmark service, answered at three depths. Foundation: one API, one database, an ownership check, stable pagination and one justified index, answering whether it works and stays correct for the wrong user. Operating constraints adds consistency, overload, authorization, data access, recovery and rollout, answering what happens when it is busy and when a dependency dies. Broader ownership adds scope, compatibility, a migration path, who else it breaks and what it costs to reverse, answering whether you can change it without stopping the world.">
+  <rect width="760" height="396" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="30" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE PROBLEM. THE DEPTH IS IN THE FOLLOW-UPS.</text>
+  <rect x="44" y="46" width="248" height="24" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.2"/>
+  <text x="58" y="62" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">the question: a bookmark service</text>
+
+  <!-- the interviewer walking down -->
+  <line x1="36" y1="96" x2="36" y2="340" stroke="#ded9d1" stroke-width="1"/>
+  <path d="M 30 100 l 12 0 l -6 9 z" fill="#c2703d" opacity="0.85">
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 84;0 84;0 168;0 168;0 0"
+                      keyTimes="0;0.28;0.34;0.62;0.68;0.95;1" dur="12s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- ===================== band 1 ===================== -->
+  <rect x="48" y="90" width="4" height="72" rx="2" fill="#2f6f4e"/>
+  <text x="62" y="108" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#1f2b24">Foundation</text>
+  <text x="62" y="124" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">the baseline answer</text>
+
+  <g fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.1">
+    <rect x="196" y="93" width="61" height="23" rx="11.5"/>
+    <rect x="265" y="93" width="92" height="23" rx="11.5"/>
+    <rect x="365" y="93" width="111" height="23" rx="11.5"/>
+    <rect x="196" y="124" width="123" height="23" rx="11.5"/>
+    <rect x="327" y="124" width="136" height="23" rx="11.5"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">
+    <text x="226.5" y="109" text-anchor="middle">one API</text>
+    <text x="311" y="109" text-anchor="middle">one database</text>
+    <text x="420.5" y="109" text-anchor="middle">ownership check</text>
+    <text x="257.5" y="140" text-anchor="middle">stable pagination</text>
+    <text x="395" y="140" text-anchor="middle">one justified index</text>
+  </g>
+  <text x="492" y="112" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">Does it work, and is it still</text>
+  <text x="492" y="128" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#2f6f4e">correct for the wrong user?</text>
+
+  <!-- ===================== band 2 ===================== -->
+  <rect x="48" y="174" width="4" height="72" rx="2" fill="#a8682f"/>
+  <text x="62" y="192" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#1f2b24">Operating</text>
+  <text x="62" y="207" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#1f2b24">constraints</text>
+  <text x="62" y="223" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">and everything above</text>
+
+  <g fill="#f9efe7" stroke="#a8682f" stroke-width="1.1">
+    <rect x="196" y="177" width="86" height="23" rx="11.5"/>
+    <rect x="290" y="177" width="68" height="23" rx="11.5"/>
+    <rect x="366" y="177" width="99" height="23" rx="11.5"/>
+    <rect x="196" y="208" width="86" height="23" rx="11.5"/>
+    <rect x="290" y="208" width="68" height="23" rx="11.5"/>
+    <rect x="366" y="208" width="61" height="23" rx="11.5"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">
+    <text x="239" y="193" text-anchor="middle">consistency</text>
+    <text x="324" y="193" text-anchor="middle">overload</text>
+    <text x="415.5" y="193" text-anchor="middle">authorization</text>
+    <text x="239" y="224" text-anchor="middle">data access</text>
+    <text x="324" y="224" text-anchor="middle">recovery</text>
+    <text x="396.5" y="224" text-anchor="middle">rollout</text>
+  </g>
+  <text x="492" y="196" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a8682f">What happens when it is busy,</text>
+  <text x="492" y="212" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#a8682f">and when a dependency dies?</text>
+
+  <!-- ===================== band 3 ===================== -->
+  <rect x="48" y="258" width="4" height="72" rx="2" fill="#6f4a7d"/>
+  <text x="62" y="276" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#1f2b24">Broader</text>
+  <text x="62" y="291" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#1f2b24">ownership</text>
+  <text x="62" y="307" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">and everything above</text>
+
+  <g fill="#f2eef5" stroke="#6f4a7d" stroke-width="1.1">
+    <rect x="196" y="261" width="56" height="23" rx="11.5"/>
+    <rect x="260" y="261" width="99" height="23" rx="11.5"/>
+    <rect x="367" y="261" width="105" height="23" rx="11.5"/>
+    <rect x="196" y="292" width="130" height="23" rx="11.5"/>
+    <rect x="334" y="292" width="119" height="23" rx="11.5"/>
+  </g>
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#1f2b24">
+    <text x="224" y="277" text-anchor="middle">scope</text>
+    <text x="309.5" y="277" text-anchor="middle">compatibility</text>
+    <text x="419.5" y="277" text-anchor="middle">migration path</text>
+    <text x="261" y="308" text-anchor="middle">who else it breaks</text>
+    <text x="393.5" y="308" text-anchor="middle">cost to reverse</text>
+  </g>
+  <text x="492" y="280" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6f4a7d">Can you change it without</text>
+  <text x="492" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6f4a7d">stopping the world, and who pays?</text>
+
+  <line x1="44" y1="350" x2="716" y2="350" stroke="#ded9d1" stroke-width="1"/>
+  <text x="44" y="372" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Nobody moves you to a harder question. They keep asking about the same one until you</text>
+  <text x="44" y="389" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">run out of answer, and where you run out is the whole signal.</text>
+</svg>

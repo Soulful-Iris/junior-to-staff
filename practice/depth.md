@@ -2,6 +2,8 @@
 
 These are assessment checkpoints for one curriculum. Foundation, operating constraints, and broader ownership are follow-ups within the same lesson; they are not separate reading paths. Use the [curriculum](../curriculum/README.md) for learning order. The preserved level expectations below are practice criteria, not company-wide hiring rules.
 
+![One problem, a bookmark service, answered at three depths: foundation adds one API, one database, an ownership check, stable pagination and one justified index; operating constraints adds consistency, overload, authorization, data access, recovery and rollout; broader ownership adds scope, compatibility, a migration path, who else it breaks and what it costs to reverse](../assets/diagrams/same-problem-three-depths.svg)
+
 <a id="junior"></a>
 
 ## Foundation
