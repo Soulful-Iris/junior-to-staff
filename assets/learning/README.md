@@ -29,7 +29,7 @@ Persistent diagrams with purposeful motion. Every animation has a readable stati
 | A circuit opens, then probes recovery | [Play](circuit-breaker.svg) | [Still](circuit-breaker-still.svg) |
 | Acknowledged here, not visible everywhere | [Play](replication-lag.svg) | [Still](replication-lag-still.svg) |
 | Close the commit-to-publish gap | [Play](transaction-outbox.svg) | [Still](transaction-outbox-still.svg) |
-| Children spend the parents remaining budget | [Play](deadline-budget.svg) | [Still](deadline-budget-still.svg) |
+| Children spend the parent's remaining budget | [Play](deadline-budget.svg) | [Still](deadline-budget-still.svg) |
 | Store burst credit, refill over time | [Play](token-bucket.svg) | [Still](token-bucket-still.svg) |
 | Lease connections within a fixed budget | [Play](connection-pool.svg) | [Still](connection-pool-still.svg) |
 | Move admissions, drain existing work | [Play](traffic-shift.svg) | [Still](traffic-shift-still.svg) |
@@ -179,9 +179,9 @@ Persistent diagrams with purposeful motion. Every animation has a readable stati
 
 [Open animation](transaction-outbox.svg) · [Static diagram](transaction-outbox-still.svg)
 
-## Children spend the parents remaining budget
+## Children spend the parent's remaining budget
 
-![Children spend the parents remaining budget](deadline-budget.svg)
+![Children spend the parent's remaining budget](deadline-budget.svg)
 
 [Open animation](deadline-budget.svg) · [Static diagram](deadline-budget-still.svg)
 

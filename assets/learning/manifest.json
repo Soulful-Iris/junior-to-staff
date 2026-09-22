@@ -139,7 +139,7 @@
   },
   {
     "key": "deadline-budget",
-    "title": "Children spend the parents remaining budget",
+    "title": "Children spend the parent's remaining budget",
     "duration_seconds": 6,
     "motion": "continuous geometry and causal path traversal"
   },

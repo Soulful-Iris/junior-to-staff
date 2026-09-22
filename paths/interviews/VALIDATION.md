@@ -13,7 +13,9 @@ The original chapter diagrams remain intact. The repeated text-slide additions h
 - AWS template: passed `cfn-lint`, including SAM transformation/schema checks.
 - Local link and SVG/configuration checks: passed; reproduce with `python scripts/check_learning.py`.
 - Motion redesign: all 18 earlier animations and static alternatives rebuilt, plus 16 new animations and static alternatives. Persistent labels replace rotating captions; each mechanism has its own continuous timeline. Static contact-sheet review and native timeline checks passed.
-- Published browser sampling confirmed intermediate moving geometry for the window, worker admission, and cache convergence. Full-set playback review is in progress; static views are not counted as playback verification.
+- Published browser playback: sampled 28 browser screenshots for each of all 34 animations at commit `3a03171`. Every study showed changing rendered pixels; intermediate geometry was visually reviewed. Samples span roughly 1.6–1.8 seconds per study, not every frame of every loop or a cross-browser compatibility matrix.
+- GitHub Markdown rendering: the progressive whiteboard diagrams render as boxes, arrows, and database cylinders. Representative published SVG embeds were also reviewed.
+- Review corrections: separated heap swap paths, moved budget labels off bars, clarified connection wiring and token consumption, moved slot labels away from moving jobs, and kept bulkhead markers inside their boundaries.
 - AWS resources were not deployed; live IAM, regional quotas, queue timing, alarms, and cleanup still require the learner's disposable-account validation.
 - Interview research is a qualitative snapshot for March 22–September 22, 2026. See the explicit company/level gaps and excluded dates in [research](research/README.md). No statistically supported “most asked” ranking is claimed.
 

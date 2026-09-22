@@ -23,12 +23,13 @@ flowchart TD
   Browser["Browser"] --> LB["Load balancer"]
   LB --> A["API A"]
   LB --> B["API B"]
-  A -->|"lookup owner-scoped key"| Cache["Cache: disposable copy"]
+  A -->|"lookup / populate scoped key"| Cache["Cache: disposable copy"]
   B --> Cache
   Cache -->|"hit"| Reply["Return cached value"]
   A -->|"miss within load budget"| DB[("Database")]
   B -->|"miss within load budget"| DB
-  DB -->|"populate + TTL"| Cache
+  DB -->|"query result"| A
+  DB -->|"query result"| B
 ```
 
 **Break it:** remove the cache. Can the database survive the bypass traffic? Add coalescing and admission limits where they actually coordinate work.

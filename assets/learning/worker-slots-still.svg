@@ -16,17 +16,23 @@
 </path>
 <rect x="304" y="100" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
-<text x="367.0" y="127.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 1</text>
+<text x="367.0" y="127.0" font-size="14" fill="#1f2b24" text-anchor="middle">
+</text>
+<text x="311" y="127" font-size="12" fill="#6d6459" text-anchor="start">slot 1</text>
 <path d="M130 196 H304 M430 196 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
 <rect x="304" y="174" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
-<text x="367.0" y="201.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 2</text>
+<text x="367.0" y="201.0" font-size="14" fill="#1f2b24" text-anchor="middle">
+</text>
+<text x="311" y="201" font-size="12" fill="#6d6459" text-anchor="start">slot 2</text>
 <path d="M130 270 H304 M430 270 H615" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
 <rect x="304" y="248" width="126" height="44" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
-<text x="367.0" y="275.0" font-size="14" fill="#1f2b24" text-anchor="middle">slot 3</text>
+<text x="367.0" y="275.0" font-size="14" fill="#1f2b24" text-anchor="middle">
+</text>
+<text x="311" y="275" font-size="12" fill="#6d6459" text-anchor="start">slot 3</text>
 <circle cx="627" cy="119" r="8" fill="#2f6f4e">
 </circle>
 <circle cx="649" cy="119" r="8" fill="#2f6f4e">

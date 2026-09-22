@@ -14,51 +14,51 @@
 <text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">SEPARATE RESOURCE BUDGETS</text>
 <rect x="64" y="117" width="260" height="185" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
-<circle cx="87" cy="143" r="14" fill="#c2703d">
+<circle cx="95" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="146" cy="143" r="14" fill="#c2703d">
+<circle cx="157" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="205" cy="143" r="14" fill="#c2703d">
+<circle cx="219" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="264" cy="143" r="14" fill="#c2703d">
+<circle cx="281" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="87" cy="205" r="14" fill="#c2703d">
+<circle cx="95" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="146" cy="205" r="14" fill="#c2703d">
+<circle cx="157" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="205" cy="205" r="14" fill="#c2703d">
+<circle cx="219" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="264" cy="205" r="14" fill="#c2703d">
+<circle cx="281" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="87" cy="267" r="14" fill="#c2703d">
+<circle cx="95" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="146" cy="267" r="14" fill="#c2703d">
+<circle cx="157" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="205" cy="267" r="14" fill="#c2703d">
+<circle cx="219" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="264" cy="267" r="14" fill="#c2703d">
+<circle cx="281" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
@@ -67,51 +67,51 @@
 </rect>
 <path d="M579 117 V302" stroke="#1f2b24" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
 </path>
-<circle cx="472" cy="143" r="14" fill="#c2703d">
+<circle cx="480" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="531" cy="143" r="14" fill="#c2703d">
+<circle cx="542" cy="143" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="590" cy="143" r="14" fill="#2f6f4e">
+<circle cx="604" cy="143" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="649" cy="143" r="14" fill="#2f6f4e">
+<circle cx="666" cy="143" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="472" cy="205" r="14" fill="#c2703d">
+<circle cx="480" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="531" cy="205" r="14" fill="#c2703d">
+<circle cx="542" cy="205" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="590" cy="205" r="14" fill="#2f6f4e">
+<circle cx="604" cy="205" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="649" cy="205" r="14" fill="#2f6f4e">
+<circle cx="666" cy="205" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="472" cy="267" r="14" fill="#c2703d">
+<circle cx="480" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="531" cy="267" r="14" fill="#c2703d">
+<circle cx="542" cy="267" r="14" fill="#c2703d">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="590" cy="267" r="14" fill="#2f6f4e">
+<circle cx="604" cy="267" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
-<circle cx="649" cy="267" r="14" fill="#2f6f4e">
+<circle cx="666" cy="267" r="14" fill="#2f6f4e">
 <animate attributeName="r" values="5;14;14;5" keyTimes="0;0.3;0.9;1" dur="6s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </circle>
@@ -126,58 +126,58 @@
 <text x="425" y="73" font-size="11" fill="#2f6f4e" text-anchor="start">SEPARATE RESOURCE BUDGETS</text>
 <rect x="64" y="117" width="260" height="185" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
-<circle cx="87" cy="143" r="14" fill="#c2703d">
+<circle cx="95" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="146" cy="143" r="14" fill="#c2703d">
+<circle cx="157" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="205" cy="143" r="14" fill="#c2703d">
+<circle cx="219" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="264" cy="143" r="14" fill="#c2703d">
+<circle cx="281" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="87" cy="205" r="14" fill="#c2703d">
+<circle cx="95" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="146" cy="205" r="14" fill="#c2703d">
+<circle cx="157" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="205" cy="205" r="14" fill="#c2703d">
+<circle cx="219" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="264" cy="205" r="14" fill="#c2703d">
+<circle cx="281" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="87" cy="267" r="14" fill="#c2703d">
+<circle cx="95" cy="267" r="14" fill="#c2703d">
 </circle>
-<circle cx="146" cy="267" r="14" fill="#c2703d">
+<circle cx="157" cy="267" r="14" fill="#c2703d">
 </circle>
-<circle cx="205" cy="267" r="14" fill="#c2703d">
+<circle cx="219" cy="267" r="14" fill="#c2703d">
 </circle>
-<circle cx="264" cy="267" r="14" fill="#c2703d">
+<circle cx="281" cy="267" r="14" fill="#c2703d">
 </circle>
 <text x="65" y="329" font-size="16" fill="#c2703d" text-anchor="start">slow A consumes all slots</text>
 <rect x="449" y="117" width="260" height="185" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
 <path d="M579 117 V302" stroke="#1f2b24" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
 </path>
-<circle cx="472" cy="143" r="14" fill="#c2703d">
+<circle cx="480" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="531" cy="143" r="14" fill="#c2703d">
+<circle cx="542" cy="143" r="14" fill="#c2703d">
 </circle>
-<circle cx="590" cy="143" r="14" fill="#2f6f4e">
+<circle cx="604" cy="143" r="14" fill="#2f6f4e">
 </circle>
-<circle cx="649" cy="143" r="14" fill="#2f6f4e">
+<circle cx="666" cy="143" r="14" fill="#2f6f4e">
 </circle>
-<circle cx="472" cy="205" r="14" fill="#c2703d">
+<circle cx="480" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="531" cy="205" r="14" fill="#c2703d">
+<circle cx="542" cy="205" r="14" fill="#c2703d">
 </circle>
-<circle cx="590" cy="205" r="14" fill="#2f6f4e">
+<circle cx="604" cy="205" r="14" fill="#2f6f4e">
 </circle>
-<circle cx="649" cy="205" r="14" fill="#2f6f4e">
+<circle cx="666" cy="205" r="14" fill="#2f6f4e">
 </circle>
-<circle cx="472" cy="267" r="14" fill="#c2703d">
+<circle cx="480" cy="267" r="14" fill="#c2703d">
 </circle>
-<circle cx="531" cy="267" r="14" fill="#c2703d">
+<circle cx="542" cy="267" r="14" fill="#c2703d">
 </circle>
-<circle cx="590" cy="267" r="14" fill="#2f6f4e">
+<circle cx="604" cy="267" r="14" fill="#2f6f4e">
 </circle>
-<circle cx="649" cy="267" r="14" fill="#2f6f4e">
+<circle cx="666" cy="267" r="14" fill="#2f6f4e">
 </circle>
 <text x="450" y="329" font-size="16" fill="#2f6f4e" text-anchor="start">slow A      healthy B</text>
 <path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">

@@ -24,7 +24,11 @@
 <text x="393.0" y="191.5" font-size="14" fill="#1f2b24" text-anchor="middle">
 </text>
 <text x="320" y="102" font-size="11" fill="#6d6459" text-anchor="start">BUCKET CAPACITY: 4</text>
+<circle cx="336" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
 <circle cx="336" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.119;0.12;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
 </circle>
 <g>
 <circle cx="0" cy="0" r="7" fill="#2f6f4e">
@@ -34,7 +38,11 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.119;0.12;0.369;0.37;1" dur="7s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<circle cx="373" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
 <circle cx="373" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.209;0.21;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
 </circle>
 <g>
 <circle cx="0" cy="0" r="7" fill="#2f6f4e">
@@ -44,7 +52,11 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.209;0.21;0.45899999999999996;0.45999999999999996;1" dur="7s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<circle cx="410" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
 <circle cx="410" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.299;0.3;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
 </circle>
 <g>
 <circle cx="0" cy="0" r="7" fill="#2f6f4e">
@@ -54,7 +66,11 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.299;0.3;0.549;0.55;1" dur="7s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<circle cx="447" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
+</circle>
 <circle cx="447" cy="181" r="11" fill="#2f6f4e">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.389;0.39;1" dur="7s" repeatCount="indefinite" calcMode="linear">
+</animate>
 </circle>
 <g>
 <circle cx="0" cy="0" r="7" fill="#2f6f4e">
@@ -96,13 +112,13 @@
 <text x="393.0" y="191.5" font-size="14" fill="#1f2b24" text-anchor="middle">
 </text>
 <text x="320" y="102" font-size="11" fill="#6d6459" text-anchor="start">BUCKET CAPACITY: 4</text>
-<circle cx="336" cy="181" r="11" fill="#2f6f4e">
+<circle cx="336" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
 </circle>
-<circle cx="373" cy="181" r="11" fill="#2f6f4e">
+<circle cx="373" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
 </circle>
-<circle cx="410" cy="181" r="11" fill="#2f6f4e">
+<circle cx="410" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
 </circle>
-<circle cx="447" cy="181" r="11" fill="#2f6f4e">
+<circle cx="447" cy="181" r="11" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.5">
 </circle>
 <rect x="546" y="270" width="168" height="46" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
 </rect>

@@ -34,6 +34,8 @@
 <text x="384.0" y="155.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 1</text>
 <path d="M459 150 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
+<path d="M158 109 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -42,6 +44,8 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.249;0.25;1" dur="8s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<path d="M158 183 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -50,6 +54,8 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.319;0.32;0.549;0.55;1" dur="8s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<path d="M158 257 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -63,6 +69,8 @@
 <text x="384.0" y="266.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 2</text>
 <path d="M459 261 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
+<path d="M158 146 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -71,6 +79,8 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.019;0.02;0.249;0.25;1" dur="8s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<path d="M158 220 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -79,6 +89,8 @@
 <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.319;0.32;0.549;0.55;1" dur="8s" repeatCount="indefinite" calcMode="linear">
 </animate>
 </g>
+<path d="M158 294 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <g>
 <circle cx="0" cy="0" r="5" fill="#2f6f4e">
 </circle>
@@ -121,10 +133,22 @@
 <text x="384.0" y="155.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 1</text>
 <path d="M459 150 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
+<path d="M158 109 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M158 183 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M158 257 L309 150" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
 <rect x="309" y="236" width="150" height="50" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
 </rect>
 <text x="384.0" y="266.0" font-size="14" fill="#1f2b24" text-anchor="middle">connection 2</text>
 <path d="M459 261 L635 207" stroke="#ded9d1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
+</path>
+<path d="M158 146 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M158 220 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
+</path>
+<path d="M158 294 L309 261" stroke="#ded9d1" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round">
 </path>
 <rect x="635" y="171" width="84" height="70" rx="5" stroke="#2f6f4e" stroke-width="1.5" fill="#eef2ef">
 </rect>

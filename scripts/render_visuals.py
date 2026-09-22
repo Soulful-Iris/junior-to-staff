@@ -235,7 +235,7 @@ def workers():
     s=heading(40,72,'WAITING')+heading(295,72,'THREE ACTIVE SLOTS',GREEN)+heading(590,72,'DONE')
     for r in range(3):
         y=122+r*74
-        s+=path(f'M130 {y} H304 M430 {y} H615',GRAY,1.5,True)+box(304,y-22,126,44,'slot '+str(r+1),GRAY,BG)
+        s+=path(f'M130 {y} H304 M430 {y} H615',GRAY,1.5,True)+box(304,y-22,126,44,'',GRAY,BG)+text(311,y+5,'slot '+str(r+1),12,MUTED)
         for batch in range(3):
             y0=111+r*74+batch*17;end=.29+batch*.3;start=batch*.3
             body=dot(0,0,9,GREEN)+text(0,4,1+r+batch*3,10,BG,'middle')
@@ -370,7 +370,7 @@ def deadline():
         stops=[(0,0),(.14,w),(1,w)] if label=='auth' else [(0,0),(.14,0),(.83,w),(1,w)] if label=='database' else [(0,0),(.83,w),(1,w)]
         s+=rect(138+start,y-24,w,34,color,color,tween('width',stops),2)
     s+=path('M738 91 V318',ORANGE,2)+text(738,337,'300 ms',13,ORANGE,'end')
-    s+=text(245,183,'auth spent 50 ms',14,MUTED)+text(340,257,'at most 250 ms remain',15,ORANGE)
+    s+=text(245,183,'auth spent 50 ms',14,MUTED)+text(340,244,'at most 250 ms remain',15,ORANGE)
     return s+footer('A child inherits the remaining budget, not a fresh full timeout.','Reserve reply/cleanup time too. Cancellation is cooperative; downstream work may outlive the caller.')
 
 def token_bucket():
@@ -380,7 +380,8 @@ def token_bucket():
     s+=text(153,183,'refill',19,GREEN,'middle')+text(153,207,'tokens / sec',13,MUTED,'middle')
     s+=box(310,115,166,143,'',GRAY,BG)+heading(320,102,'BUCKET CAPACITY: 4')
     for j in range(4):
-        s+=dot(336+j*37,181,11,GREEN)
+        s+=node('circle',{'cx':336+j*37,'cy':181,'r':11,'fill':BG,'stroke':GRAY,'stroke-width':1.5})
+        if not STILL:s+=dot(336+j*37,181,11,GREEN,tween('opacity',[(0,1),(.119+j*.09,1),(.12+j*.09,0),(1,0)]))
         s+=pulse(f'M{336+j*37} 181 Q{510+j*15} 181 624 259',GREEN,.12+j*.09,.37+j*.09,7)
     s+=box(546,270,168,46,'admitted requests')+path('M476 127 H624 V198',ORANGE,1.5,True)
     s+=text(504,105,'no token → reject',15,ORANGE)+pulse('M476 127 H624 V198',ORANGE,.72,.94)
@@ -392,7 +393,7 @@ def pool():
     for j in range(2):
         y=150+j*111;s+=box(309,y-25,150,50,'connection '+str(j+1))+path(f'M459 {y} L635 207',GRAY,2,True)
         for b in range(3):
-            r=j+b*2;p=f'M158 {109+r*37} L309 {y} H459 L635 207';s+=pulse(p,GREEN,.02+b*.3,.25+b*.3,5)
+            r=j+b*2;p=f'M158 {109+r*37} L309 {y} H459 L635 207';s+=path(f'M158 {109+r*37} L309 {y}',GRAY,1)+pulse(p,GREEN,.02+b*.3,.25+b*.3,5)
     s+=box(635,171,84,70,'DB')+text(222,324,'acquire → use → release in finally',18,GREEN)
     return s+footer('Bound connections and the wait to acquire one. Always release a checked-out resource.','Per-process pools add up across replicas; pool size × replica count must fit the database budget.')
 
@@ -426,8 +427,8 @@ def heap_sift():
     for a,b in [(0,1),(0,2),(1,3),(1,4)]:s+=path(f'M{points[a][0]} {points[a][1]} L{points[b][0]} {points[b][1]}',GRAY,2)
     for x,y in points:s+=node('circle',{'cx':x,'cy':y,'r':25,'fill':BG,'stroke':GRAY,'stroke-width':1.5})
     s+=moving(dot(0,0,22,ORANGE)+text(0,7,'9',21,BG,'middle'),'M375 112 L220 213 L125 306',[(0,0),(.12,0),(.44,.5828),(.53,.5828),(.84,1),(1,1)])
-    s+=moving(text(0,7,'4',21,GREEN,'middle'),'M220 213 L375 112',[(0,0),(.12,0),(.44,1),(1,1)])
-    s+=moving(text(0,7,'7',21,GREEN,'middle'),'M125 306 L220 213',[(0,0),(.53,0),(.84,1),(1,1)])
+    s+=moving(text(0,7,'4',21,GREEN,'middle'),'M220 213 Q255 100 375 112',[(0,0),(.12,0),(.44,1),(1,1)])
+    s+=moving(text(0,7,'7',21,GREEN,'middle'),'M125 306 Q105 225 220 213',[(0,0),(.53,0),(.84,1),(1,1)])
     s+=text(530,220,'6',21,INK,'middle')+text(310,313,'8',21,INK,'middle')
     if STILL:s+=text(375,119,'4',21,GREEN,'middle')+text(220,220,'7',21,GREEN,'middle')+text(125,313,'9',21,ORANGE,'middle')
     return s+footer('Swap with the smaller child until the parent is no larger than its children.','One path through a complete binary tree: O(log n). A heap orders parents, not all siblings.')
@@ -482,13 +483,13 @@ def bulkhead():
         s+=rect(64+off,117,260,185,GRAY,BG)
         if off:s+=path(f'M{194+off} 117 V302',INK,3)
         for j in range(12):
-            x=87+off+(j%4)*59;y=143+(j//4)*62
+            x=95+off+(j%4)*62;y=143+(j//4)*62
             c=ORANGE if not off or j%4<2 else GREEN
             s+=dot(x,y,14,c, tween('r',[(0,5),(.3,14),(.9,14),(1,5)]))
         s+=text(65+off,329,'slow A consumes all slots' if not off else 'slow A      healthy B',16,ORANGE if not off else GREEN)
     return s+footer('A bulkhead reserves capacity so one slow dependency cannot occupy every slot.','Isolation trades some utilization for containment. Shared databases and CPU can still couple the pools.')
 
-EXTRA_SPECS=[('cache-expiry','Expiry jitter spreads the refresh wave',expiry,7),('backpressure','A buffer is a reservoir, not capacity',backpressure,7),('circuit-breaker','A circuit opens, then probes recovery',breaker,8),('replication-lag','Acknowledged here, not visible everywhere',replication,7),('transaction-outbox','Close the commit-to-publish gap',outbox,7),('deadline-budget','Children spend the parents remaining budget',deadline,6),('token-bucket','Store burst credit, refill over time',token_bucket,7),('connection-pool','Lease connections within a fixed budget',pool,8),('traffic-shift','Move admissions, drain existing work',traffic_shift,7),('io-waterfall','Independent work can share the wait',waterfall,6),('heap-sift','Repair the heap along one branch',heap_sift,7),('trie-prefix','One prefix opens several completions',trie,6),('backtracking','Choose, explore, undo, try the next branch',backtrack,10),('merge-intervals','Overlap extends the current interval',intervals,6),('index-seek','A separator eliminates a whole range',index_tree,5),('bulkhead','Contain the slow neighbor',bulkhead,6)]
+EXTRA_SPECS=[('cache-expiry','Expiry jitter spreads the refresh wave',expiry,7),('backpressure','A buffer is a reservoir, not capacity',backpressure,7),('circuit-breaker','A circuit opens, then probes recovery',breaker,8),('replication-lag','Acknowledged here, not visible everywhere',replication,7),('transaction-outbox','Close the commit-to-publish gap',outbox,7),('deadline-budget',"Children spend the parent's remaining budget",deadline,6),('token-bucket','Store burst credit, refill over time',token_bucket,7),('connection-pool','Lease connections within a fixed budget',pool,8),('traffic-shift','Move admissions, drain existing work',traffic_shift,7),('io-waterfall','Independent work can share the wait',waterfall,6),('heap-sift','Repair the heap along one branch',heap_sift,7),('trie-prefix','One prefix opens several completions',trie,6),('backtracking','Choose, explore, undo, try the next branch',backtrack,10),('merge-intervals','Overlap extends the current interval',intervals,6),('index-seek','A separator eliminates a whole range',index_tree,5),('bulkhead','Contain the slow neighbor',bulkhead,6)]
 
 SPECS=[
 ('map-lookup','Remember the complement',maps,8),('window-moves','A window that never moves backward',window,7),
