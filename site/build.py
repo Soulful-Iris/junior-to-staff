@@ -91,9 +91,17 @@ SECTION_DIRS = {"problems": "problem", "labs": "lab", "projects": "project",
                 "cases": "case", "lessons": "lesson", "aws": "aws"}
 
 
+LEAD_NUM = re.compile(r"^\d+[.)]\s+")
+
+
 def first_heading(text: str) -> str:
     m = re.search(r"^#\s+(.+)$", text, re.M)
-    return re.sub(r"[*`\[\]]|\(.*?\)", "", m.group(1)).strip() if m else "Untitled"
+    t = re.sub(r"[*`\[\]]|\(.*?\)", "", m.group(1)).strip() if m else "Untitled"
+    # Sub-chapter titles arrive numbered from the file they came from, and two
+    # project sets in one chapter produce 1,2,3,4,5 followed by 4,5 again. The
+    # chapter number and the sub-chapter position are the only numbering the
+    # reader should see, and this build assigns both.
+    return LEAD_NUM.sub("", t)
 
 
 def summary_of(text: str) -> str:
@@ -171,12 +179,23 @@ CHAPTER_BLURBS: dict[str, str] = {}
 def collect() -> list[dict]:
     """Every page we publish, in reading order.
 
-    Reading order is the point of this curriculum, so it is built explicitly
-    rather than falling out of a directory walk: group, then subject, then the
-    subject's own pages, then its problems and labs and projects.
+    The shape is a book and the reading order says so:
+
+        home
+        Part 1 — what this part is for
+          Chapter 1 — the context and the teaching
+            1.1, 1.2, ...  the problems, labs and projects of chapter 1
+          Chapter 2
+            2.1, 2.2, ...
+        Part 2 — ...
+
+    Parts are back in the sequence as short intros. They are not a gate: the
+    contents page still reaches any chapter in one click. They are there so
+    that reading straight through has a moment that says "this is what the
+    next two chapters are for", which is what a book does and what jumping
+    from chapter 2 straight into part 2 does not.
     """
     pages: list[dict] = []
-    extras: list[dict] = []
     chapter_no = [0]
 
     def add(src: Path, **kw):
@@ -190,35 +209,44 @@ def collect() -> list[dict]:
         gpath = ROOT / "curriculum" / gdir
         if not gpath.is_dir():
             continue
-        # The part README is still BUILT (the markdown links to it), but it is
-        # not a stop in the reading sequence: he should not have to click
-        # "Part 1" to reach chapter 1. Home goes straight to chapter 1, and
-        # next walks 1 to 17 without a gate between parts.
-        extras.append({"src": f"curriculum/{gdir}/README.md", "kind": "group",
-                       "title": gname, "group": gdir, "subject": None, "gnum": gi})
+        add(Path("curriculum") / gdir / "README.md", kind="group",
+            title=gname, group=gdir, subject=None, gnum=gi)
 
         for sdir in sorted(p for p in gpath.iterdir() if p.is_dir()):
             srel = Path("curriculum") / gdir / sdir.name
             chapter_no[0] += 1
+            ch = chapter_no[0]
             add(srel / "README.md", kind="subject", group=gdir, subject=sdir.name,
-                gnum=gi, chapter=chapter_no[0],
+                gnum=gi, chapter=ch,
                 blurb=CHAPTER_BLURBS.get(f"{gdir}/{sdir.name}", ""))
 
-            # loose concept pages in the subject, alphabetical so the order is
-            # stable across rebuilds
-            for f in sorted(sdir.glob("*.md")):
-                if f.name == "README.md":
-                    continue
-                add(srel / f.name, kind="concept", group=gdir, subject=sdir.name, gnum=gi)
+            # Sub-chapters, in the order a reader should meet them: read the
+            # concepts, work the lessons and problems, then the labs and the
+            # bigger builds. Numbered N.M so a page knows where it sits.
+            sub_no = [0]
 
-            # then the practice material, in a deliberate order
-            for sub in ("lessons", "problems", "labs", "cases", "projects", "aws"):
-                d = sdir / sub
+            def sub(src: Path, kind: str, section: str):
+                sub_no[0] += 1
+                add(src, kind=kind, group=gdir, subject=sdir.name, gnum=gi,
+                    chapter=ch, sub=sub_no[0], section=section)
+
+            for f in sorted(sdir.glob("*.md")):
+                if f.name != "README.md":
+                    sub(srel / f.name, "concept", "Concepts")
+
+            for dirname, kind, section in (
+                ("lessons", "lesson", "Worked lessons"),
+                ("problems", "problem", "Problems"),
+                ("labs", "lab", "Labs"),
+                ("cases", "case", "Production cases"),
+                ("aws", "aws", "AWS"),
+                ("projects", "project", "Projects"),
+            ):
+                d = sdir / dirname
                 if not d.is_dir():
                     continue
                 for f in sorted(d.rglob("*.md")):
-                    add(f.relative_to(ROOT), kind=SECTION_DIRS.get(sub, "concept"),
-                        group=gdir, subject=sdir.name, gnum=gi)
+                    sub(f.relative_to(ROOT), kind, section)
 
     for extra in ("curriculum/README.md",):
         add(Path(extra), kind="toc", group=None, subject=None)
@@ -246,7 +274,7 @@ def collect() -> list[dict]:
 
     subject_titles = {}
     group_titles = {g: v[0] for g, v in GROUPS.items()}
-    for p in ordered + extras:
+    for p in ordered:
         text = (ROOT / p["src"]).read_text(encoding="utf-8")
         p["text"] = text
         p.setdefault("title", first_heading(text))
@@ -254,10 +282,10 @@ def collect() -> list[dict]:
         p["url"] = url_for(p["src"])
         if p["kind"] == "subject":
             subject_titles[(p["group"], p["subject"])] = p["title"]
-    for p in ordered + extras:
+    for p in ordered:
         p["subject_title"] = subject_titles.get((p.get("group"), p.get("subject")), "")
         p["group_title"] = group_titles.get(p.get("group"), "")
-    return ordered, extras
+    return ordered
 
 
 def url_for(src: str) -> str:
@@ -496,14 +524,21 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
 .search input{width:100%; padding:7px 10px; border:1px solid var(--rule); border-radius:6px;
   background:var(--paper); color:var(--ink); font:inherit; font-size:13.5px}
 .search input::placeholder{color:#93a09a}
-.tocjump{display:block; margin:0 0 12px; font-size:12px; letter-spacing:.06em;
+.tocjump{display:block; margin:0 0 14px; font-size:12px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--muted); text-decoration:none; font-weight:600}
 .tocjump:hover{color:var(--green)}
-.part{margin:18px 0 6px; font-size:11px; font-weight:600; letter-spacing:.08em;
-  text-transform:uppercase; color:var(--gc); padding-left:2px}
-.part:first-of-type{margin-top:4px}
-.rail ol.chapters{list-style:none; margin:0; padding:0}
-.rail ol.chapters:empty{display:none}
+
+/* part -> chapter -> sub-chapter, and the indentation says so */
+.part{margin:20px 0 4px}
+.part:first-of-type{margin-top:6px}
+.part a{display:block; color:var(--ink); text-decoration:none; font-weight:600;
+  font-size:13.5px; padding:4px 8px; border-radius:5px; border-left:3px solid var(--gc)}
+.part a:hover{background:var(--green-tint)}
+.part a[aria-current]{background:var(--gc); color:var(--paper)}
+.part .pn{display:block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--gc); font-weight:700; margin-bottom:1px}
+.part a[aria-current] .pn{color:var(--paper); opacity:.8}
+.rail ol.chapters{list-style:none; margin:0; padding:0 0 0 11px}
 .rail li{margin:1px 0}
 .rail a.item{display:flex; gap:9px; align-items:baseline; padding:4px 9px 4px 6px;
   border-radius:5px; color:var(--ink); text-decoration:none}
@@ -513,12 +548,16 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
 .rail a.item:hover .n{color:var(--gc)}
 .rail a.item[aria-current]{background:var(--gc,var(--green)); color:var(--paper)}
 .rail a.item[aria-current] .n{color:var(--paper); opacity:.72}
-.rail .leaf{list-style:none; margin:2px 0 6px; padding:0 0 0 12px;
+.rail .leaf{list-style:none; margin:3px 0 8px; padding:0 0 0 14px;
   border-left:1px solid var(--rule)}
-.rail .leaf a{display:block; padding:2px 8px; color:var(--muted);
+.rail .leaf .secl{font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:#a3aea7; margin:7px 0 2px; padding-left:6px}
+.rail .leaf a{display:flex; gap:7px; padding:2px 7px; color:var(--muted);
   text-decoration:none; font-size:12.5px; border-radius:4px}
+.rail .leaf a .sn{font-variant-numeric:tabular-nums; color:#a3aea7; min-width:2.1em}
 .rail .leaf a:hover{color:var(--ink); background:var(--green-tint)}
 .rail .leaf a[aria-current]{color:var(--ink); font-weight:600}
+.rail .leaf a[aria-current] .sn{color:var(--gc)}
 .rail .ext{margin-top:24px; padding-top:14px; border-top:1px solid var(--rule); font-size:12.5px}
 .rail .ext a{display:block; margin:5px 0; color:var(--muted); text-decoration:none}
 .rail .ext a:hover{color:var(--green)}
@@ -648,12 +687,38 @@ a:hover{color:var(--ink); text-decoration-color:currentColor}
   font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
 .start:hover{background:var(--ink); color:var(--paper)}
 .toc{max-width:var(--wide); margin:8px auto 40px; padding:0 28px}
-.parth{display:flex; align-items:baseline; justify-content:space-between; gap:14px;
-  margin:34px 0 4px; padding-bottom:6px; border-bottom:2px solid var(--gc);
-  font-size:19px; letter-spacing:-.005em}
-.parth a{font-size:12.5px; font-weight:400; color:var(--muted); text-decoration:none;
+.toch{font-size:14px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  margin:34px 0 4px; padding-bottom:8px; border-bottom:1px solid var(--rule);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.partblock{margin:30px 0 0}
+.pnum{display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--gc); font-weight:700; margin-bottom:2px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.partspan{margin:0 0 14px; font-size:13px; color:var(--muted);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.chn{display:flex; flex-direction:column; align-items:center; min-width:3.4em;
   font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
-  white-space:nowrap}
+  font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.chn b{font-size:22px; line-height:1.05; font-weight:600; color:var(--gc); letter-spacing:0}
+
+.inchapter{margin:52px 0 0; padding-top:26px; border-top:1px solid var(--rule);
+  max-width:var(--wide)}
+.inchapter h2{margin:0 0 4px; border:0; padding:0; font-size:21px}
+.sech{margin:22px 0 8px; font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); font-weight:600;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.sublist{display:grid; gap:6px}
+.subrow{display:flex; gap:13px; align-items:baseline; padding:10px 14px;
+  background:var(--paper); border:1px solid var(--rule); border-radius:8px;
+  text-decoration:none; color:var(--ink); font-size:16px}
+.subrow:hover{border-color:var(--accent); background:#fff}
+.subrow .sn{font-variant-numeric:tabular-nums; color:var(--accent); font-weight:600;
+  min-width:2.6em; font-size:14px;
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.badge.b-sub{background:var(--accent); color:var(--paper); margin-right:5px}
+.parth{margin:0 0 4px; padding-bottom:8px; border-bottom:2px solid var(--gc);
+  font-size:22px; letter-spacing:-.008em}
+.parth a{color:var(--ink); text-decoration:none}
 .parth a:hover{color:var(--gc)}
 .partb{margin:0 0 14px; color:var(--muted); font-size:15px; max-width:44em}
 .chlist{display:grid; gap:8px}
@@ -824,47 +889,52 @@ def esc(s: str) -> str:
 
 
 def rail_html(pages, current, base) -> str:
-    """A flat list of seventeen numbered chapters.
+    """Part, then chapter, then sub-chapter, and the nesting is visible.
 
-    The parts are headings, not a level you navigate through. Making them
-    clickable meant two clicks to reach chapter one, and the reader's mental
-    model is a book: intro, then chapter to chapter.
+    The previous version was a flat list of seventeen chapters, which reached
+    everything in one click and lost every sense of where you were. Parts are
+    headings you can open, chapters sit inside them, and the chapter you are
+    reading shows its sub-chapters. Nothing here needs a click to pass through.
     """
-    chapters = [p for p in pages if p["kind"] == "subject"]
-
     out = [
         f'<a class="brand" href="{base}">{esc(SITE_SHORT)}'
         f'<small>every concept, its follow-ups, and the architecture behind it</small></a>',
         '<div class="search"><label class="sr" for="q"></label>'
         '<input id="q" type="search" placeholder="Search everything  /" '
         'autocomplete="off" spellcheck="false"><div id="results"></div></div>',
-        f'<a class="tocjump" href="{base}">Contents</a>',
-        '<ol class="chapters">',
+        f'<a class="tocjump" href="{base}">Table of contents</a>',
     ]
-    last_group = None
-    for ch in chapters:
-        if ch["group"] != last_group:
-            last_group = ch["group"]
-            gname, gc, _ = GROUPS[last_group]
-            out.append(f'</ol><div class="part" style="--gc:{gc}">{esc(gname)}</div><ol class="chapters">')
-        cur = ' aria-current="page"' if ch["url"] == current else ""
-        gc = GROUPS[ch["group"]][1]
-        out.append(
-            f'<li style="--gc:{gc}"><a class="item" href="{base.rstrip("/")}{ch["url"]}"{cur}>'
-            f'<span class="n">{ch["chapter"]}</span><span>{esc(ch["title"])}</span></a>')
-        if current.startswith(ch["url"]):
-            leaves = [q for q in pages
-                      if q.get("subject") == ch["subject"] and q["group"] == ch["group"]
-                      and q["kind"] != "subject"]
-            if leaves:
-                out.append('<ul class="leaf">')
-                for lp in leaves:
-                    lc = ' aria-current="page"' if lp["url"] == current else ""
-                    out.append(f'<li><a href="{base.rstrip("/")}{lp["url"]}"{lc}>'
-                               f'{esc(lp["title"])}</a></li>')
-                out.append("</ul>")
-        out.append("</li>")
-    out.append("</ol>")
+    for gi, (gdir, (gname, gc, _)) in enumerate(GROUPS.items(), 1):
+        gp = next((q for q in pages if q["kind"] == "group" and q["group"] == gdir), None)
+        if not gp:
+            continue
+        gcur = ' aria-current="page"' if gp["url"] == current else ""
+        out.append(f'<div class="part" style="--gc:{gc}">'
+                   f'<a href="{base.rstrip("/")}{gp["url"]}"{gcur}>'
+                   f'<span class="pn">Part {gi}</span>{esc(gname)}</a></div>')
+        out.append(f'<ol class="chapters" style="--gc:{gc}">')
+        for ch in [q for q in pages if q["kind"] == "subject" and q["group"] == gdir]:
+            cur = ' aria-current="page"' if ch["url"] == current else ""
+            out.append(
+                f'<li><a class="item" href="{base.rstrip("/")}{ch["url"]}"{cur}>'
+                f'<span class="n">{ch["chapter"]}</span><span>{esc(ch["title"])}</span></a>')
+            if current.startswith(ch["url"]):
+                leaves = [q for q in pages if q.get("chapter") == ch["chapter"] and q.get("sub")]
+                if leaves:
+                    out.append('<ul class="leaf">')
+                    last = None
+                    for lp in leaves:
+                        if lp["section"] != last:
+                            last = lp["section"]
+                            out.append(f'<li class="secl">{esc(last)}</li>')
+                        lc = ' aria-current="page"' if lp["url"] == current else ""
+                        out.append(
+                            f'<li><a href="{base.rstrip("/")}{lp["url"]}"{lc}>'
+                            f'<span class="sn">{ch["chapter"]}.{lp["sub"]}</span>'
+                            f'{esc(lp["title"])}</a></li>')
+                    out.append("</ul>")
+            out.append("</li>")
+        out.append("</ol>")
 
     out.append('<div class="ext">')
     for label, href in [("Every visual", "gallery/"),
@@ -905,19 +975,48 @@ def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
     kind, note = KINDS.get(page["kind"], ("", ""))
     badge = (f'<span class="badge b-{kind}">{kind}</span>'
              if kind and kind not in ("concept", "") else "")
-    if page["kind"] == "subject":
-        total = sum(1 for q in pages if q["kind"] == "subject")
-        badge = (f'<span class="badge b-chapter">chapter {page["chapter"]} '
-                 f'of {total}</span>')
-        note = ""  # the page opens with its own subtitle; printing it here too
-                   # is the duplication the style rules call decoration
+
+    total_ch = sum(1 for q in pages if q["kind"] == "subject")
+    if page["kind"] == "group":
+        badge = f'<span class="badge b-chapter">Part {page["gnum"]} of {len(GROUPS)}</span>'
+        note = ""
+    elif page["kind"] == "subject":
+        badge = f'<span class="badge b-chapter">Chapter {page["chapter"]} of {total_ch}</span>'
+        note = ""
+    elif page.get("sub"):
+        badge = (f'<span class="badge b-sub">{page["chapter"]}.{page["sub"]}</span>'
+                 f'<span class="badge b-{kind}">{kind}</span>')
+
     kindnote = f'<p class="kindnote">{esc(note)}</p>' if note else ""
 
-    # Name the chapter when the step crosses into one, so reading straight
-    # through feels like a book rather than like 235 adjacent files.
+    # A chapter lists its own sub-chapters, grouped, so the chapter page is the
+    # context and the sub-chapters are the work.
+    inchapter = ""
+    if page["kind"] == "subject":
+        leaves = [q for q in pages if q.get("chapter") == page["chapter"] and q.get("sub")]
+        if leaves:
+            rows, last = [], None
+            for lp in leaves:
+                if lp["section"] != last:
+                    if last is not None:
+                        rows.append("</div>")
+                    last = lp["section"]
+                    rows.append(f'<h3 class="sech">{esc(last)}</h3><div class="sublist">')
+                rows.append(
+                    f'<a class="subrow" href="{base.rstrip("/")}{lp["url"]}">'
+                    f'<span class="sn">{page["chapter"]}.{lp["sub"]}</span>'
+                    f'<span>{esc(lp["title"])}</span></a>')
+            rows.append("</div>")
+            inchapter = (f'<section class="inchapter"><h2>In this chapter</h2>'
+                         f'{"".join(rows)}</section>')
+
     def label(q, word):
+        if q.get("kind") == "group":
+            return f"{word} · part {q['gnum']}"
         if q.get("kind") == "subject":
             return f"{word} · chapter {q['chapter']}"
+        if q.get("sub"):
+            return f"{word} · {q['chapter']}.{q['sub']}"
         return word
 
     nav = []
@@ -945,13 +1044,14 @@ def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
 <div class="bar"><button id="menu" aria-expanded="false" aria-controls="rail">Contents</button>
 <div class="here">{esc(page['title'])}</div></div>
 <div class="frame">
-<nav class="rail" id="rail" aria-label="Curriculum">{rail_html(pages, page['url'], base)}</nav>
+<nav class="rail" id="rail" aria-label="Contents">{rail_html(pages, page['url'], base)}</nav>
 <div class="main"><div class="sheet"><div class="col">
 {crumb_for(page, pages, base)}
 {badge}
 {kindnote}
 {chips}
 {body}
+{inchapter}
 <nav class="nextprev">{''.join(nav)}</nav>
 </div></div></div></div>
 <script>var BASE="{base}";</script><script src="{up}app.js"></script>
@@ -962,44 +1062,44 @@ def shell(page, body, pages, prev, nxt, base, depth, chips="") -> str:
 def home_shell(page, body, pages, base) -> str:
     chapters = [p for p in pages if p["kind"] == "subject"]
 
-    # what is actually inside each chapter, counted rather than described
     def inside(ch):
-        leaves = [q for q in pages
-                  if q.get("subject") == ch["subject"] and q["group"] == ch["group"]
-                  and q["kind"] != "subject"]
+        leaves = [q for q in pages if q.get("chapter") == ch["chapter"] and q.get("sub")]
         counts: dict[str, int] = {}
         for q in leaves:
-            counts[q["kind"]] = counts.get(q["kind"], 0) + 1
-        order = ["concept", "lesson", "problem", "lab", "project", "case", "aws"]
-        names = {"concept": "concepts", "lesson": "lessons", "problem": "problems",
-                 "lab": "labs", "project": "projects", "case": "cases", "aws": "AWS labs"}
-        return " · ".join(f"{counts[k]} {names[k]}" for k in order if counts.get(k))
+            counts[q["section"]] = counts.get(q["section"], 0) + 1
+        def name(k, v):
+            label = k.lower()
+            return f"{v} {label if v != 1 else label.rstrip('s')}"
+        return " · ".join(name(k, v) for k, v in counts.items())
 
     toc = []
-    last_group = None
-    for ch in chapters:
-        if ch["group"] != last_group:
-            if last_group is not None:
-                toc.append("</div>")
-            last_group = ch["group"]
-            gname, gc, gblurb = GROUPS[last_group]
-            gp = f"{base}curriculum/{last_group}/"
-            toc.append(
-                f'<h2 class="parth" style="--gc:{gc}"><span>{esc(gname)}</span>'
-                f'<a href="{gp}">about this part</a></h2>'
-                f'<p class="partb">{esc(gblurb)}</p><div class="chlist">')
-        gc = GROUPS[ch["group"]][1]
+    for gi, (gdir, (gname, gc, gblurb)) in enumerate(GROUPS.items(), 1):
+        gp = next((q for q in pages if q["kind"] == "group" and q["group"] == gdir), None)
+        if not gp:
+            continue
+        chs = [c for c in chapters if c["group"] == gdir]
+        span = (f"Chapters {chs[0]['chapter']}\u2013{chs[-1]['chapter']}"
+                if len(chs) > 1 else f"Chapter {chs[0]['chapter']}") if chs else ""
         toc.append(
-            f'<a class="ch" style="--gc:{gc}" href="{base.rstrip("/")}{ch["url"]}">'
-            f'<span class="chn">{ch["chapter"]}</span>'
-            f'<span class="cht"><b>{esc(ch["title"])}</b>'
-            f'<em>{esc(ch["blurb"])}</em>'
-            f'<small>{inside(ch)}</small></span></a>')
-    toc.append("</div>")
+            f'<section class="partblock" style="--gc:{gc}">'
+            f'<h2 class="parth"><span class="pnum">Part {gi}</span>'
+            f'<a href="{base.rstrip("/")}{gp["url"]}">{esc(gname)}</a></h2>'
+            f'<p class="partb">{esc(gblurb)}</p>'
+            f'<p class="partspan">{span} &middot; '
+            f'<a href="{base.rstrip("/")}{gp["url"]}">read the part introduction</a></p>'
+            f'<div class="chlist">')
+        for ch in chs:
+            toc.append(
+                f'<a class="ch" href="{base.rstrip("/")}{ch["url"]}">'
+                f'<span class="chn">Chapter<b>{ch["chapter"]}</b></span>'
+                f'<span class="cht"><b>{esc(ch["title"])}</b>'
+                f'<em>{esc(ch["blurb"])}</em>'
+                f'<small>{inside(ch)}</small></span></a>')
+        toc.append("</div></section>")
 
-    first = chapters[0] if chapters else None
+    first = next((q for q in pages if q["kind"] == "group"), None)
     startlink = (f'<a class="start" href="{base.rstrip("/")}{first["url"]}">'
-                 f'Start with chapter 1: {esc(first["title"])}</a>') if first else ""
+                 f'Start reading</a>') if first else ""
 
     strip = []
     for label, sub, href in [
@@ -1041,7 +1141,7 @@ problem you keep being asked harder things about.</div>
 {startlink}
 </header>
 <section class="strip">{''.join(strip)}</section>
-<section class="toc">{''.join(toc)}</section>
+<section class="toc"><h2 class="toch">Contents</h2>{''.join(toc)}</section>
 <div class="col">{body}</div>
 </div></div></div>
 <script>var BASE="{base}";</script><script src="app.js"></script>
@@ -1152,10 +1252,10 @@ def gallery_page(pages, have, base) -> str:
 def main() -> int:
     base = os.environ.get("SITE_BASE", "/")
     CHAPTER_BLURBS.update(chapter_blurbs())
-    pages, extras = collect()
+    pages = collect()
     print(f"collected {len(pages)} pages")
 
-    blocks = mermaid_blocks(pages + extras)
+    blocks = mermaid_blocks(pages)
     print(f"mermaid: {len(blocks)} unique diagrams")
     have = render_mermaid(blocks)
 
@@ -1211,8 +1311,7 @@ def main() -> int:
             encoding="utf-8")
 
     index = []
-    for i, p in enumerate(pages + extras):
-        in_sequence = i < len(pages)
+    for i, p in enumerate(pages):
         rel = dest_for(p["src"])
         dest = OUT / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -1220,8 +1319,8 @@ def main() -> int:
         body, toc = render_body(p["text"], have, depth)
         body, chips = lift_crumb(body, p)
 
-        prev = pages[i - 1] if in_sequence and i > 0 else None
-        nxt = pages[i + 1] if in_sequence and i < len(pages) - 1 else None
+        prev = pages[i - 1] if i > 0 else None
+        nxt = pages[i + 1] if i < len(pages) - 1 else None
 
         if p["kind"] == "home":
             body = re.sub(r"^<h1[^>]*>.*?</h1>\s*", "", body, count=1, flags=re.S)
