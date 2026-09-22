@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 372" width="760" height="372" role="img" aria-label="Four disaster-recovery postures compared after a region goes dark at time zero. Backup and restore is serving again after about twenty-four hours, loses hours of data and costs least. Pilot light, with replicas on and compute off, recovers in about an hour and loses minutes. Warm standby, a scaled-down copy already running, recovers in about fifteen minutes. Active-active, both regions serving, recovers in about a minute and loses almost nothing, at the highest cost.">
+  <rect width="760" height="372" rx="10" fill="#faf9f7"/>
+
+  <text x="44" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">IF US-EAST-1 GOES DARK — FOUR POSTURES, FOUR BILLS</text>
+
+  <!-- column headers -->
+  <text x="210" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a89f93" letter-spacing="1.2">TIME TO SERVING AGAIN</text>
+  <text x="575" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a89f93" letter-spacing="1.2">DATA LOST</text>
+  <text x="672" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a89f93" letter-spacing="1.2">COST</text>
+
+  <!-- time axis -->
+  <text x="210" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">0</text>
+  <text x="245" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">1 min</text>
+  <text x="300" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">15 min</text>
+  <text x="360" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">1 h</text>
+  <text x="430" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">4 h</text>
+  <text x="545" y="86" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#8a857d">24 h</text>
+  <line x1="210" y1="96" x2="560" y2="96" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="245" y1="91" x2="245" y2="96" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="300" y1="91" x2="300" y2="96" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="360" y1="91" x2="360" y2="96" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="430" y1="91" x2="430" y2="96" stroke="#ded9d1" stroke-width="1"/>
+  <line x1="545" y1="91" x2="545" y2="96" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- the moment the region goes dark -->
+  <line x1="210" y1="92" x2="210" y2="276" stroke="#a85d2f" stroke-width="1.2" stroke-dasharray="3 3"/>
+
+  <!-- the sweeping now-line -->
+  <line x1="210" y1="104" x2="210" y2="272" stroke="#c2703d" stroke-width="1.6" opacity="0">
+    <animate attributeName="x1" values="210;560;560;210" keyTimes="0;0.8;1;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="210;560;560;210" keyTimes="0;0.8;1;1" dur="12s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.5;0.5;0;0" keyTimes="0;0.04;0.8;0.86;1" dur="12s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- row 1: backup and restore -->
+  <text x="44" y="122" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Backup and restore</text>
+  <text x="44" y="137" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">restore from snapshot</text>
+  <rect x="210" y="115" width="335" height="22" rx="3" fill="#c2703d" opacity="0.28"/>
+  <circle cx="545" cy="126" r="5" fill="#c2703d">
+    <animate attributeName="fill" values="#c2703d;#c2703d;#2f6f4e;#2f6f4e;#c2703d" keyTimes="0;0.756;0.776;0.98;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <text x="575" y="130" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">hours</text>
+  <rect x="672" y="121" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="684" y="121" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="696" y="121" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="708" y="121" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- row 2: pilot light -->
+  <text x="44" y="166" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Pilot light</text>
+  <text x="44" y="181" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">replicas on, compute off</text>
+  <rect x="210" y="159" width="150" height="22" rx="3" fill="#c2703d" opacity="0.28"/>
+  <circle cx="360" cy="170" r="5" fill="#c2703d">
+    <animate attributeName="fill" values="#c2703d;#c2703d;#2f6f4e;#2f6f4e;#c2703d" keyTimes="0;0.332;0.352;0.98;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <text x="575" y="174" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">minutes</text>
+  <rect x="672" y="165" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="684" y="165" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="696" y="165" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="708" y="165" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- row 3: warm standby -->
+  <text x="44" y="210" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Warm standby</text>
+  <text x="44" y="225" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">scaled-down copy running</text>
+  <rect x="210" y="203" width="90" height="22" rx="3" fill="#c2703d" opacity="0.28"/>
+  <circle cx="300" cy="214" r="5" fill="#c2703d">
+    <animate attributeName="fill" values="#c2703d;#c2703d;#2f6f4e;#2f6f4e;#c2703d" keyTimes="0;0.196;0.216;0.98;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <text x="575" y="218" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">seconds</text>
+  <rect x="672" y="209" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="684" y="209" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="696" y="209" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="708" y="209" width="8" height="9" rx="1.5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1"/>
+
+  <!-- row 4: active / active -->
+  <text x="44" y="254" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Active / active</text>
+  <text x="44" y="269" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#8a857d">both regions serving</text>
+  <rect x="210" y="247" width="35" height="22" rx="3" fill="#c2703d" opacity="0.28"/>
+  <circle cx="245" cy="258" r="5" fill="#c2703d">
+    <animate attributeName="fill" values="#c2703d;#c2703d;#2f6f4e;#2f6f4e;#c2703d" keyTimes="0;0.07;0.09;0.98;1" dur="12s" repeatCount="indefinite"/>
+  </circle>
+  <text x="575" y="262" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#6d6459">almost none</text>
+  <rect x="672" y="253" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="684" y="253" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="696" y="253" width="8" height="9" rx="1.5" fill="#c2703d"/>
+  <rect x="708" y="253" width="8" height="9" rx="1.5" fill="#c2703d"/>
+
+  <line x1="44" y1="292" x2="716" y2="292" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="44" y="316" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Nobody buys active/active for the outage. They buy it because the same machinery carries</text>
+  <text x="44" y="333" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">traffic every ordinary day — which is also the only reason they know it works.</text>
+  <text x="44" y="356" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#a85d2f">The posture you can afford is the one you have rehearsed. An untested backup is a wish.</text>
+</svg>
