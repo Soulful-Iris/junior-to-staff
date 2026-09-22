@@ -2,7 +2,7 @@
 
 Reproduce a defect, build a check that catches it, and assess a proposed repair.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

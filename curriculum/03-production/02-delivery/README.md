@@ -2,7 +2,7 @@
 
 Build once, verify compatibility, and release a change with stop conditions.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

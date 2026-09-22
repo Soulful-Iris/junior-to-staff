@@ -2,7 +2,7 @@
 
 Model authoritative data, explain a query plan, and protect concurrent writes.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

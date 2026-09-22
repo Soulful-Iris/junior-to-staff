@@ -2,7 +2,7 @@
 
 Budget failures, bound overload, and recover from evidence.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

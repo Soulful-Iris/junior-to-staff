@@ -2,7 +2,7 @@
 
 Choose a representation, explain its invariant, and test time and space bounds.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

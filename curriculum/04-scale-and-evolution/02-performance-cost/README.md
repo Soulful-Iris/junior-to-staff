@@ -2,7 +2,7 @@
 
 Measure the bottleneck and defend an improvement with resource and cost evidence.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

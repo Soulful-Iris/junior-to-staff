@@ -2,7 +2,7 @@
 
 Move live data and clients through compatibility, reconciliation, rollback, and retirement.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

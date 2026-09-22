@@ -2,7 +2,7 @@
 
 Use logs, metrics, and traces to answer a concrete system question.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

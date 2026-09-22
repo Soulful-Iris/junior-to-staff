@@ -2,7 +2,7 @@
 
 Trace a request, define its contract, and coordinate bounded work.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

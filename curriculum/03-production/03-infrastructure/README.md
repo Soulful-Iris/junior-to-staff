@@ -2,7 +2,7 @@
 
 Map a mechanism to explicit infrastructure, permissions, and operational limits.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

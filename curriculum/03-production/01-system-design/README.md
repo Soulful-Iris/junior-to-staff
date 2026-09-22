@@ -2,7 +2,7 @@
 
 Turn requirements and workload estimates into an explainable architecture.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

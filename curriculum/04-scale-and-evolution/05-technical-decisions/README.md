@@ -2,7 +2,7 @@
 
 Make options, ownership, adoption, and cross-team decisions explicit.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

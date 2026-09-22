@@ -2,7 +2,7 @@
 
 Evaluate an AI feature, protect permissions, and enforce quality and task budgets.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

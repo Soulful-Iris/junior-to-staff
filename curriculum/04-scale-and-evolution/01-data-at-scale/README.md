@@ -2,7 +2,7 @@
 
 Reason about caches, replication, partitioning, streams, and coordination scope.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 

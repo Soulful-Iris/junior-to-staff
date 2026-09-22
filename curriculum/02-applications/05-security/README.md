@@ -2,7 +2,7 @@
 
 Enforce identity, ownership, and trust boundaries beyond the interface.
 
-[Curriculum](../../README.md) · [Group overview](../README.md)
+[Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
 
