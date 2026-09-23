@@ -1,0 +1,51 @@
+name: Repository verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Record source and runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/verification"
+          git rev-parse HEAD > "$RUNNER_TEMP/verification/source-commit.txt"
+          python3 --version > "$RUNNER_TEMP/verification/runtime.txt"
+          python3 -c 'import sqlite3; print("SQLite", sqlite3.sqlite_version)' >> "$RUNNER_TEMP/verification/runtime.txt"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/verification/source.tar"
+      - name: Curriculum reference suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_curriculum.py --report "$RUNNER_TEMP/verification/python-results.json" 2>&1 | tee "$RUNNER_TEMP/verification/python.log"
+      - name: AI reference suites
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s examples/ai-systems -v 2>&1 | tee "$RUNNER_TEMP/verification/ai.log"
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: verification-${{ github.sha }}
+          path: ${{ runner.temp }}/verification/
+          if-no-files-found: error
+          retention-days: 7
