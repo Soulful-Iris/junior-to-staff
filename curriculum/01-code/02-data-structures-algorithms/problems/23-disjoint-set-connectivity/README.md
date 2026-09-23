@@ -15,7 +15,7 @@ structure stores a partition: every vertex belongs to exactly one component.
 | Input | Fixed vertices `0..n-1`; `union(a,b)`, `connected(a,b)`, `find(a)` |
 | Output | Union returns whether two components merged; connectivity returns a boolean |
 | Boundaries | Self/repeated links do not change component count; n=0 is valid |
-| Failure | Negative size raises `ValueError`; unknown vertex raises `IndexError` |
+| Failure | Negative/noninteger size (including bool) raises `ValueError`; noninteger or unknown vertex raises `IndexError` |
 | Scope | Links only added; no route reconstruction, removals, or concurrency |
 
 ## The tool before the challenge

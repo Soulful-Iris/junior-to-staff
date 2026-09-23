@@ -3,14 +3,14 @@
 
 class DisjointSet:
     def __init__(self, n):
-        if not isinstance(n, int) or n < 0:
+        if type(n) is not int or n < 0:
             raise ValueError("nonnegative integer size required")
         self.parent = list(range(n))
         self.size = [1] * n
         self.components = n
 
     def _check(self, node):
-        if not isinstance(node, int) or not 0 <= node < len(self.parent):
+        if type(node) is not int or not 0 <= node < len(self.parent):
             raise IndexError("unknown node")
 
     def find(self, node):
