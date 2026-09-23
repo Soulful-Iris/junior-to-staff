@@ -1,10 +1,10 @@
 # 01 · The change loop — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [the section](../../../curriculum/01-code/01-problem-solving/change-loop.md) first
 
 Five projects, rising. Each isolates a different thing the change loop is
 for, and each ends with a number or a proof you did not have before. None adds
-a feature to [P1](../../../projects/p1-it-works/): the loop is machinery, and
+a feature to [P1](../../../projects/reading-list/stages/01-it-works/README.md): the loop is machinery, and
 you study machinery by running your own work through it and watching what it
 refuses.
 
@@ -185,7 +185,7 @@ OIDC role — it scales to zero between review clicks.
 **What productionising it means**
 
 Stacks are a practice, not a trick: GitHub's native stacked PRs (in preview,
-per [the section](README.md)) or plain rebase discipline; the recurring
+per [the section](../../../curriculum/01-code/01-problem-solving/change-loop.md)) or plain rebase discipline; the recurring
 cost is keeping the stack rebased when review changes a bottom layer.
 Previews need a reaper wired to PR close — idle previews are money and attack
 surface.
@@ -378,7 +378,7 @@ one style comment is a breach.
 
 **On AWS**
 
-The zero-setup pass is GitHub-side, covered in [the section](README.md). The
+The zero-setup pass is GitHub-side, covered in [the section](../../../curriculum/01-code/01-problem-solving/change-loop.md). The
 AWS version exists for when the diff must not leave your boundary: run the
 model through **Bedrock** from a small **Lambda** on the PR webhook, assuming
 an **OIDC** role. Bedrock rides IAM, so no vendor API key sits in repository
@@ -494,7 +494,7 @@ private free for twelve months, checked 2026-09-22); everything else in
 The queue gets metrics — depth, time-in-queue, ejection rate — a queue nobody
 watches is a delay nobody can explain. Flakiness is now existential:
 one flaky test ejects innocent PRs and stalls every merge behind them; the
-quarantine rule from [testing](../06-testing/) stops being optional.
+quarantine rule from [testing](../../../curriculum/02-applications/04-testing/README.md) stops being optional.
 
 **The learning**
 
