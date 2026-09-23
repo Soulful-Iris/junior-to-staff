@@ -54,6 +54,14 @@ for number, batch in enumerate(payload['batches'], 1):
     changed = []
     for edit in batch['edits']:
         path = checked_path(edit['path'])
+        if 'generated' in edit:
+            name = edit['generated']
+            if not isinstance(name, str) or Path(name).name != name:
+                raise ValueError('Generated input must be a basename')
+            data = (out / 'generated' / name).read_bytes()
+            if hashlib.sha256(data).hexdigest() != edit['sha256']:
+                raise ValueError('Generated input differs from reviewed bytes')
+            edit = {**edit, 'content': data.decode('utf-8')}
         if 'content' in edit:
             if path.exists():
                 raise ValueError(f'New file already exists: {edit["path"]}')
