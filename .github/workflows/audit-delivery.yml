@@ -1,0 +1,39 @@
+name: Audited chapter delivery
+on:
+  push:
+    branches: [audit-delivery-20260923]
+    paths: [.audit-delivery/batch.json]
+permissions:
+  contents: read
+concurrency:
+  group: audited-chapter-delivery
+  cancel-in-progress: false
+jobs:
+  deliver:
+    if: github.repository == 'Soulful-Iris/junior-to-staff'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve reviewed delivery instructions outside checkout
+        run: |
+          mkdir -p "$RUNNER_TEMP/audit-delivery"
+          cp .audit-delivery/runner.py "$RUNNER_TEMP/audit-delivery/runner.py"
+          cp .audit-delivery/batch.json "$RUNNER_TEMP/audit-delivery/batch.json"
+      - name: Apply exact reviewed edits, test, then fast-forward main per chapter
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 "$RUNNER_TEMP/audit-delivery/runner.py" "$RUNNER_TEMP/audit-delivery/batch.json"
+      - name: Preserve per-chapter receipts and command logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: audit-delivery-${{ github.run_id }}
+          path: ${{ runner.temp }}/audit-delivery/
+          retention-days: 7
+          if-no-files-found: error
