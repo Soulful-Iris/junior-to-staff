@@ -1,0 +1,66 @@
+{
+  "assets/design-interview/ad-click-aggregator-before.svg": {
+    "sha256": "d455cd1505117f514c6429333f6c9038dd1ed0d5295f8833cb250d2068c8a6f8",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/api-gateway-platform-before.svg": {
+    "sha256": "b1358eb9179bdc4ae362fc918fc5b730bc143310d97e17a06e37df5dc0d2867f",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/calendar-availability-before.svg": {
+    "sha256": "68394ea7ca4e52432636cb0e38ed1bb5bef61021bf28fd946b3d6c84ab9da97c",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/distributed-cache-before.svg": {
+    "sha256": "9931706b54d962d7b610bf9df9b489891b6fdf230a572b4e0efa7c75ea634837",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/distributed-key-value-store-before.svg": {
+    "sha256": "91ff80948ebc073b9ec7de0800f47c5dcc6b39eb739410e73a93f66e7b163859",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/food-delivery-marketplace-before.svg": {
+    "sha256": "fa3ba00e03763d4f0408b360f1d7d93ded3841e609ac42571a5ce58fb0a87931",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/job-scheduler-before.svg": {
+    "sha256": "5499aac03facc44c0c3be39558c1ee33b034487b55794bd130d8c58e5bbf4631",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/metrics-platform-before.svg": {
+    "sha256": "10ed2ff527dd4ce956526dd8e33e458f4d56ffde027a2e7f927b5b203b1d5dbb",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/news-aggregator-before.svg": {
+    "sha256": "9ff110f8d7f6a124da6a07295721eb2f9e03c90660ca054915c28b3ccc1d68d1",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/online-judge-before.svg": {
+    "sha256": "e324ace25a6ae373709191b7be77d512ebfc86293619c8107b9db825d6ca0adf",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/rideshare-dispatch-before.svg": {
+    "sha256": "59d36931ec391cbcb9450b21e06566b6cf4628e201089e87bb01acdcfd703ded",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/typeahead-search-before.svg": {
+    "sha256": "d002823c549407904b8790c2bc65532f7ac2df83b3c1e970861df87d5111c767",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/url-shortener-before.svg": {
+    "sha256": "18265ace4c3f15f185b7a8e91c00ec9decccc934bb65282216ed532dc5a55265",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/video-streaming-platform-before.svg": {
+    "sha256": "d48629413128fcd6f58f0e9aad7046110210127c76a6f62b4d5c15e6c0ab004e",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/design-interview/web-crawler-before.svg": {
+    "sha256": "3b44caf91cb81d482eed2cca4e66f4663d4095e7dc735167f59c45466b524c1f",
+    "review": "Static render and three independent failure/repair rows inspected; not a deployed-system test."
+  },
+  "assets/diagrams/retry-amplification.svg": {
+    "sha256": "74932c8961d8266b68d076d43bc31e48bcad8b06c0907bb19cd007eb1d0b4208",
+    "review": "Static render inspected: three total attempts per layer permit up to 27 leaf calls; no claim of simultaneous retries."
+  }
+}
