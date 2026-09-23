@@ -172,8 +172,8 @@ real users with real data, and that fixture is most of the work.
 
 Third, and this is the distinction that catches a subtle class of bug: **404
 and 403 are both acceptable refusals and they leak different things.** Returning
-403 confirms the object exists, which is an information leak in some products
-and completely fine in others. Decide deliberately and assert on whichever you
+A response difference can reveal existence if it distinguishes a real forbidden
+object from a missing one. A uniform 403 policy does not by itself confirm existence. Decide deliberately and assert on whichever you
 chose, because an endpoint that silently switched from one to the other has
 changed behaviour nobody reviewed.
 
@@ -184,8 +184,9 @@ automatically in scope and automatically fails until someone writes its
 fixture.
 
 Fifth, and this is the acceptance test for the suite itself: **break a check on
-purpose and watch it go red.** A test suite that has never failed is a suite you
-have no evidence about.
+purpose and watch it go red.** Name the fault this control detects. A correct post-hoc
+contract test is still evidence; observing the planted defect fail adds evidence
+about that test's sensitivity, not a universal chronology requirement.
 
 **How to organise the prompts**
 
