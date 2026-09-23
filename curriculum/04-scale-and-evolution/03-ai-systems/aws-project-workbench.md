@@ -128,6 +128,25 @@ Immediately querying may return `NOT_FOUND`; query again after the worker has pr
 - Token limits and concurrency limits constrain individual work. They do not impose an account-wide dollar cap. Calculate cost from actual token usage, current model prices, retries, and storage; add a shared admission budget before exposing a public service.
 - Run `sam delete --stack-name ai-project-workbench` after the lab. The artifact bucket is deliberately **retained**, including versions; explicitly remove the retained data and bucket when you no longer need it. Export your evidence before deleting the table.
 
+## Disposable-account acceptance record
+
+**Not executed for this audit.** Use a nonproduction account with a named owner.
+Before deploying, record the commit, AWS account/principal, profile, region,
+fixture/model mode, stack parameters and a cleanup deadline. Stop if the account
+or region is not the one approved for the exercise. Never put credentials in
+that record.
+
+| Gate | Exercise and evidence to keep |
+|---|---|
+| Identity and IAM | Confirm caller identity. From a dedicated role without access, attempt function invocation and a protected storage write; require denial and unchanged state. Retain sanitized request IDs, not credentials. |
+| Queue and alarm | Send a deliberately malformed fixture; observe receive attempts, DLQ arrival and alarm state. Attach an owned notification destination and verify actual receipt separately. Redrive only after correction, keeping the operation ID so replay cannot duplicate an effect. |
+| Limits and cost | Start in fixture mode with a fixed request count and concurrency limit. Record queue age, attempts, token usage when enabled, storage and estimated/actual cost separately. A billing alert is not a hard spend stop; disable admission at the exercise limit. |
+| Recovery | Repeat a completed operation, interrupt an attempt and verify the published result pointer. Preserve the failing input category and recovery outcome without raw sensitive documents. |
+| Removal | Export evidence, delete the stack, then inspect retained resources. Empty **all object versions and delete markers**, across every listing page, before deleting the retained bucket. Verify the bucket and intended stack resources are gone; a delete request or an empty current-object listing is not proof of cleanup. |
+
+Mark each gate passed, failed or not run with its timestamp and evidence. Keep
+live-account results separate from the local and mocked test reports above.
+
 ## Inspect the actual implementation
 
 The projects share infrastructure adapters so you can follow the state contract across all four workflows. Domain functions remain separately named inside the application.
