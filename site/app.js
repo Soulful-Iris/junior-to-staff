@@ -114,8 +114,14 @@
   });
   document.querySelectorAll('pre').forEach(pre=>{
     const code=pre.querySelector('code');if(!code)return;
-    const button=document.createElement('button');button.className='copy-code';button.textContent='Copy';button.setAttribute('aria-label','Copy code');
-    button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(code.textContent);button.textContent='Copied';}catch{button.textContent='Select code to copy';}setTimeout(()=>button.textContent='Copy',1800);});pre.append(button);
+    const wrapper=document.createElement('div');wrapper.className='code-example';
+    const toolbar=document.createElement('div');toolbar.className='code-actions';
+    const label=document.createElement('span');label.className='code-label';
+    const language=[...code.classList].find(name=>name.startsWith('language-'))?.slice(9);
+    label.textContent=language?`${language.toUpperCase()} EXAMPLE`:'CODE EXAMPLE';
+    const button=document.createElement('button');button.type='button';button.className='copy-code';button.textContent='Copy code';button.setAttribute('aria-label',language?`Copy ${language} code`:'Copy code');
+    button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(code.textContent);button.textContent='Copied';}catch{button.textContent='Copy unavailable';}setTimeout(()=>button.textContent='Copy code',1800);});
+    toolbar.append(label,button);pre.before(wrapper);wrapper.append(toolbar,pre);
   });
   const search=document.getElementById('contents-search'), results=document.getElementById('search-results'), tree=document.getElementById('contents-tree');
   let searchData, pending, searchRevision=0;

@@ -74,3 +74,13 @@
 .openai-card{--brand:#2b6555}.reddit-card{--brand:#d45e36}.meta-card{--brand:#4774c6}.db-card{--brand:#ae5b35}.observe-card{--brand:#217c81}
 @media(max-width:760px){.studio-grid{grid-template-columns:1fr;gap:12px}.studio-card{min-height:0;padding:18px}.studio-card strong{margin-top:15px}.studio-hero{padding:23px 20px;margin-top:16px}.studio-hero p{font-size:20px}.company-page .lesson-body>h1{font-size:36px}.company-page .figwrap img{min-width:560px}}
 @media(prefers-reduced-motion:reduce){.studio-card{transition:none}}
+
+/* Code controls live in their own row so focus never scrolls the code sideways. */
+.lesson-body .code-example{min-width:0;max-width:100%;margin:22px 0}
+.lesson-body .code-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:39px;margin:0 0 8px}
+.lesson-body .code-label{font-size:10px;font-weight:700;letter-spacing:.12em;color:#68766c}
+.lesson-body .code-example pre{max-width:100%;margin:0;overscroll-behavior-x:contain}
+.code-actions .copy-code{position:static;flex:none;opacity:1;min-height:36px;padding:6px 13px;border:1px solid #cbd7c9;border-radius:5px;background:#f2f6ef;color:#274d39;font-size:12px;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s}
+.code-actions .copy-code:hover,.code-actions .copy-code:focus-visible{background:#e3eee0;border-color:#91b496}
+@media(max-width:760px){.lesson-body .code-actions{min-height:44px}.code-actions .copy-code{min-height:44px}}
+@media print{.lesson-body .code-actions{display:none}.lesson-body .code-example{margin:22px 0}}
