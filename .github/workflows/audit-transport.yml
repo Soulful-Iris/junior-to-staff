@@ -1,0 +1,39 @@
+name: Verified audit chapter pushes
+on:
+  push:
+    branches: [audit-remediation-transport-20260923]
+    paths: [maintenance/batch.json]
+permissions:
+  contents: write
+concurrency:
+  group: audit-remediation-main
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'Soulful-Iris/junior-to-staff'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: transport
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+          path: repo
+          persist-credentials: false
+      - name: Install isolated mock-test dependencies
+        run: python3 -m pip install -r repo/examples/ai-systems/requirements-test.txt
+      - name: Apply reviewed chapters and push only passing commits
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 transport/maintenance/apply_batch.py --root repo --batch transport/maintenance/batch.json --evidence "$RUNNER_TEMP/audit-evidence"
+      - name: Preserve per-chapter results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: audit-chapters-${{ github.run_id }}
+          path: ${{ runner.temp }}/audit-evidence/
+          if-no-files-found: error
+          retention-days: 7
