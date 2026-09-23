@@ -1,35 +1,39 @@
 #!/usr/bin/env python3.12
-"""Serve the built site.
-
-    python3.12 site/serve.py [port]
-
-Static files only, no application. If this process dies the worst case is a
-dead bookmark, which is why it is a systemd unit with Restart=always and why
-there is nothing here that can lose data.
-"""
+"""Serve the current static release; retain fingerprinted assets for old pages."""
 import functools
 import http.server
-import os
 import re
 import socketserver
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit, unquote
 
 ROOT = Path(__file__).resolve().parent / "out"
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8901
+IMMUTABLE = re.compile(r"(?:reader-(?:css|js)\.[0-9a-f]{16}\.(?:css|js)|assets/mermaid/[0-9a-f]{16,64}\.svg)")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
-    # Python's mimetypes does not know woff2 and falls back to
-    # application/octet-stream, which some browsers refuse to use as a font.
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
                       ".woff2": "font/woff2", ".svg": "image/svg+xml",
                       ".css": "text/css", ".js": "text/javascript"}
 
+    def translate_path(self, path):
+        current = Path(super().translate_path(path))
+        if current.is_file() or current.is_dir():
+            return str(current)
+        relative = unquote(urlsplit(path).path).lstrip('/')
+        # Only fingerprinted assets may fall back; never serve old HTML or an
+        # arbitrary traversal path from a retained release.
+        if IMMUTABLE.fullmatch(relative):
+            releases = Path(self.directory).absolute().parent / '.releases'
+            for release in sorted(releases.glob('*'), reverse=True):
+                candidate = release / relative
+                if candidate.is_file():
+                    return str(candidate)
+        return str(current)
+
     def end_headers(self):
-        # The SVGs and fonts are content-addressed by nothing, so keep the
-        # cache short enough that a rebuild shows up without a hard refresh.
-        if re.fullmatch(r"/reader-(?:css|js)\.[0-9a-f]{16}\.(?:css|js)", self.path):
+        if IMMUTABLE.fullmatch(unquote(urlsplit(self.path).path).lstrip('/')):
             self.send_header("Cache-Control", "public, max-age=31536000, immutable")
         elif self.path.startswith("/assets/") or self.path.startswith("/fonts/"):
             self.send_header("Cache-Control", "public, max-age=3600")
@@ -53,10 +57,10 @@ def main():
     if not ROOT.is_dir():
         print(f"no build at {ROOT} — run site/build.py first", file=sys.stderr)
         return 1
-    os.chdir(ROOT)
     handler = functools.partial(Handler, directory=str(ROOT))
-    with Server(("127.0.0.1", PORT), handler) as httpd:
-        print(f"serving {ROOT} on 127.0.0.1:{PORT}", flush=True)
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8901
+    with Server(("127.0.0.1", port), handler) as httpd:
+        print(f"serving {ROOT} on 127.0.0.1:{port}", flush=True)
         httpd.serve_forever()
     return 0
 
