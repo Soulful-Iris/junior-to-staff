@@ -11,143 +11,62 @@ The through-line is the section's test — **can you explain the last weird
 thing one user experienced without shipping new code to find out?** Every
 project here moves that answer closer to yes, and project 2 measures it.
 
-![The same work seen twice: with the trace context inside the queue message the API and worker spans form one trace with the queue wait visible as a gap; with the header dropped they become two unrelated traces and the wait is invisible to both](../../../assets/diagrams/trace-across-the-queue.svg)
+![One producer and consumer can share a trace; explicit span links are another valid causal model. Queue timestamps measure residence separately.](../../../assets/diagrams/trace-across-the-queue.svg)
 
 ---
 
-### 1. One request's story, all the way across the queue
+### 1. One request's story, across the queue
 
-*You end up able to paste one trace id into one search and see every span and every log line that one request caused, including the work that happened minutes later on another machine.*
+*Trace one request through HTTP, publication, queue residence and worker processing.
+A worker may continue the producer's trace or start a linked trace; explain the choice.*
 
 **Build**
 
-Instrument one service with OpenTelemetry — traces, metrics, structured logs —
-and propagate context across every boundary including the queue in both
-directions. Then prove it: pick one real request, follow it to the worker, and
-walk back from one of its log lines to the trace and the user.
+Instrument one API and one consumer with OpenTelemetry. Carry the producer's
+context in supported message metadata. Record enqueue/receive times and stable
+operation/message IDs so retries and queue residence can be investigated even
+when traces are sampled out. Keep domain IDs out of unbounded metric labels.
 
-**The thought process**
+| Boundary | Show the relationship | Check |
+|---|---|---|
+| HTTP request → publish | Producer span and message context | Follow one request to its published work |
+| Message → one consumer | Parent/child or an explicit span link | Explain the chosen causal relationship |
+| Batch or delayed processing | Links to each relevant producer | Do not invent one parent for independent messages |
+| Redelivery | New attempt span, same operation identity | Distinguish another attempt from another business effect |
 
-The first decision is **where the id is born**. It has to be created at the
-edge, before anything can fail, and it has to be the same id the trace uses —
-not a second correlation id you invented alongside it. Two ids means two
-searches and a join you do by eye at 3am.
+A gap between timestamps is not automatically measured queue latency. Record
+publish and receive times and account for clock skew; separate queue residence
+from worker execution. A missing trace ID does not make every background log
+useless: include the correlation fields actually available and protect sensitive data.
 
-Second: **HTTP propagation is nearly free and queue propagation is not.**
-Automatic instrumentation handles inbound and outbound HTTP because the
-context has an obvious home: a header. A queue message has no header slot you
-did not build, so the context must be put *into the message* by the producer
-and pulled out by the consumer. This is the hop that is missing in almost
-every system I have looked at, and it is exactly the hop where the interesting
-latency lives.
+**Choose and test the model**
 
-Third, and it is a genuine modelling question: **is the worker's work a child
-span or a linked trace?** A child span keeps one tree and makes the queue wait
-visible as a gap, which is what you want when the work is part of serving the
-user. A *span link* is the right answer when one message fans out to many
-consumers, or when the delay is hours and a single trace would be absurd.
-Picking child-span by default is right for a work queue; knowing links exist
-is what stops you forcing the wrong shape later.
+For a single message and consumer, draw both parent/child and linked-trace
+variants. Pick one, show how your backend navigates it, then deliberately remove
+that causal connection. The negative control should lose that connection, not
+prove that separate trace IDs are inherently wrong.
 
-Fourth: **logs are only telemetry once they carry the id.** A structured log
-without a trace id is a diary entry — true, timestamped, about somebody, and
-connectable to nothing.
-
-**How to organise the prompts**
-
-```
-Instrument this service with OpenTelemetry: traces, metrics, logs.
-
-Rules:
-- Application code imports the OpenTelemetry API only. No vendor SDK
-  outside one exporter config file.
-- Propagate context across every boundary: inbound HTTP, outbound
-  HTTP, the database, and the queue in BOTH directions.
-- Every log line is structured and carries the trace id.
-
-Show me where in the code the context enters the queue message and
-where it comes back out.
-```
-
-The last line is the acceptance test. Ask for instrumentation and you get
-instrumentation; ask to be shown the queue hop and you find out whether it was
-done.
-
-```
-Should the worker's span be a child of the producer's span, or a
-linked trace? Argue both for MY case — one message, one consumer,
-seconds of delay — and tell me what each choice makes easy to see and
-what it hides.
-```
-
-```
-Now break it on purpose: drop the context from the message. Show me
-what the trace looks like before and after, and what specifically
-becomes unanswerable.
-```
-
-Breaking it deliberately is what turns "there is a trace id in the message"
-into knowing what its absence costs. It also proves your instruments can tell
-propagation from coincidence — two traces that happen to be adjacent in time
-look fine on a dashboard.
-
-```
-Take one real request id from my logs. Walk me from that log line to
-the trace, to the slowest span, to the attributes on that span. If any
-step requires a second search or a manual join, tell me which.
+```text
+request → producer → message → consumer attempt → saved result
+                    └── context / message ID ──┘
+redelivery: same operation ID, new attempt (not a new business effect)
 ```
 
 **On AWS**
 
-The AWS-native path for OpenTelemetry is **AWS Distro for OpenTelemetry
-(ADOT)** — an upstream distribution, so you are still writing against the
-OpenTelemetry API and your code stays portable, which is the rule that matters.
-On Lambda it ships as a layer; on ECS and EKS it runs as a sidecar or
-daemonset collector.
+Use the chapter's OpenTelemetry collector/exporter setup. With SQS, application
+message attributes can carry context independently of the domain body. Verify
+what your instrumentation actually injects and extracts rather than assuming a
+queue adapter does it. In structured logs, include trace/span IDs when a span is
+active, plus a stable operation ID where useful. Do not log tokens or raw payloads.
 
-Where the data lands is the choice worth understanding. **X-Ray** is the
-long-standing AWS trace backend and it is cheap and adequate for exactly this
-project. **CloudWatch Application Signals** is the newer, higher-level layer
-built on OpenTelemetry that gives you service-level views and SLO tracking
-without wiring dashboards by hand — the reason to know it by name is that it
-is the answer to "we have traces but nobody looks at them". Against those:
-sending OTLP to a third-party backend, which you may well want later, and the
-argument for ADOT now is that switching is a config file rather than a rewrite.
+**Acceptance**
 
-For the queue hop specifically, **SQS** gives you message *attributes*, which
-is where the `traceparent` belongs — not in the body, because the body is your
-domain payload and putting transport metadata in it couples the two. If you
-are on **EventBridge**, the trace context goes in the event `detail` or a
-dedicated field, and EventBridge does not do it for you.
-
-For logs: emit JSON to **CloudWatch Logs** and query with **Logs Insights**,
-whose `filter` on a trace id field is the whole "walk back from a log line"
-workflow. If you want metrics out of the same write, **EMF** (embedded metric
-format) lets one structured log line produce CloudWatch metrics — one write,
-both signals.
-
-**What productionising it means**
-
-Every request has an id created at the edge, and it is the trace id rather
-than a second one. The id appears on every log line, every span, and every
-error report, including the ones from the worker on the other side of the
-queue. The exporter is configured in exactly one file. And somebody who is not
-you can go from a user complaint to that user's trace without asking you how.
-
-**The learning**
-
-The correlation id is the whole product. Traces, logs and metrics are three
-views of the same events, and what makes them a system rather than three tools
-is that one id joins them — which means the id's weakest hop is the system's
-weakest hop, and the weakest hop is always the one without a header slot.
-
-**How you would know it is wrong**
-
-- Drop the traceparent on one hop and watch the trace split in two. If it looks identical, nothing was propagating and you were reading coincidence.
-- Follow one request to the worker. If the worker's spans carry a different trace id, the queue hop is not instrumented no matter what the code says.
-- Grep for a log line written during an error. If it has no trace id, that is the line you will be reading at 3am.
-- Check the imports in application code. Any vendor SDK outside the exporter config is portability you have already lost.
-- Ask someone else to find a specific request from its id, without help. Time them.
+A reader can start at the API request, find the matching consumer attempt and
+saved result, and distinguish queue wait from processing time. Repeat with a
+redelivery and a sampled-out trace. In a batch, preserve each message's causal
+link. Dropping context is a deliberate negative control; a correctly linked
+trace with a different ID must still pass.
 
 ---
 

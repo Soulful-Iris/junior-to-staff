@@ -216,7 +216,7 @@ Everything else in observability is in service of that one measurement.
 **Stage it**
 
 1. The four questions, and the minimum instrumentation that answers them.
-2. One trace, end to end, with a correlation id in every log.
+2. One request followed end to end through parent/child spans or explicit links, with the available correlation fields in its logs.
 3. An SLO, a burn-rate alert, and a written budget policy.
 4. A measured detection time, before and after.
 
