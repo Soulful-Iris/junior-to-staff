@@ -19,6 +19,21 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 Search is a discovery view, not inventory authority. Index restaurant location and catalog for fast filtering; recheck opening state, price and stock at checkout. Persist an order state machine (CREATED → ACCEPTED → PREPARING → PICKED_UP → DELIVERED) and keep payment/courier side effects idempotent. A nearby result is not a confirmed order.
 
+### Follow one order across the boundaries
+
+| Arrow | Commit / acknowledgement meaning | Retry and recovery |
+|---|---|---|
+| Authenticated shopper → checkout (`order_key`, menu version, items) | Aurora transaction conditionally decrements available stock and creates reservation, order, replay result and outbox. A stale price returns conflict before payment. | Same key + same request returns the stored result; different request conflicts. |
+| Outbox relay → EventBridge → restaurant queue (`order_id`, version) | Database commit accepted the order request; queue acknowledgement is not restaurant acceptance. | Relay retries; restaurant transition is conditional on current order version. |
+| Payment worker → provider (`payment_intent_id`) | Authorization reserves funds; capture occurs only after restaurant acceptance. | Reconcile timeout with the same provider key; do not switch providers while the first outcome is unknown. |
+| Restaurant response → order authority | Accept or a two-minute timeout wins one conditional state transition. | Timeout releases stock and queues authorization void. A late capture requires a durable, idempotent refund operation. |
+
+Each worker authenticates with a role limited to its queue and domain records; shopper identity cannot be taken from the queued body without validating its trusted origin. Keep provider deadlines shorter than the operation deadline and persist uncertainty instead of labelling it failure.
+
+**Freshness budget (exercise target):** change detection 5 s + queue delay 5 s + indexing 15 s + visibility 5 s = **30 s**. If backlog breaks that budget, label discovery stale; checkout still reads current authority. At 2 million shoppers refreshing once per 30 s, budget roughly **66,667 discovery reads/s**, before bursts.
+
+**Failure trace:** stock/order/outbox commit → relay crashes → shopper retries. Return the original order; relay later publishes its existing event. Deliver that event twice and timeout the restaurant: assert one stock release and one void/refund intent, not a second order.
+
 **First diagram:** Draw search projection, checkout authority, restaurant acceptance, courier assignment, and customer status as separate boxes.
 
 ![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/food-delivery-marketplace-aws.svg)
@@ -26,9 +41,9 @@ Search is a discovery view, not inventory authority. Index restaurant location a
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon OpenSearch Service** / search index | Filter and rank current restaurant/menu candidates. | Aurora spatial queries at modest data size. |
-| **Amazon Location Service** / nearby geometry | Find restaurants and estimate route distance. | OpenSearch geo queries for combined custom filters. |
+| **Amazon Location Service** / route and ETA | Estimate routes for locations supplied by the owned restaurant index; it is not the authority for our menus, stock or filters. | Another routing provider; keep owned catalog search in OpenSearch or Aurora spatial queries. |
 | **Amazon Aurora** / order + stock authority | Transactionally validate price, stock and order creation. | DynamoDB conditional item updates for key-oriented inventory. |
-| **Amazon EventBridge** / order event routing | Fan out accepted order changes to restaurant and courier workflows. | SNS when simple topic broadcast is enough. |
+| **Amazon EventBridge** / order event routing | Route changes sent by the transactional outbox relay; routing does not close the database/publish gap. | SNS when simple topic broadcast is enough. |
 | **Amazon SQS** / work queue | Buffer assignment/retry work independently. | Step Functions when long-lived workflow state is the main need. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
