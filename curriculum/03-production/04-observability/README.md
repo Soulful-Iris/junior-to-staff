@@ -16,6 +16,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 |---|---|
 | 1 | [Observability](logs-metrics-traces.md) |
 | 2 | [Slow request: the healthy average hid a timeout](problems/slow-request.md) |
+| 3 | [Metrics platform: query the right time window](problems/metrics-platform.md) |
 
 ## Go deeper on the same problem
 

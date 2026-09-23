@@ -27,6 +27,16 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 11 | [Notification platform](problems/notification-platform.md) |
 | 12 | [Collaborative editor: two people edit the same sentence](problems/collaborative-editor.md) |
 | 13 | [Webhook delivery: a timeout is not a rejection](problems/webhook-delivery.md) |
+| 14 | [URL shortener: who owns the code?](problems/url-shortener.md) |
+| 15 | [Ride sharing: one driver, one accepted ride](problems/rideshare-dispatch.md) |
+| 16 | [Food delivery: quote the right nearby options](problems/food-delivery-marketplace.md) |
+| 17 | [Calendar: reserve time without hiding conflicts](problems/calendar-availability.md) |
+| 18 | [Video streaming: keep playback smooth at the edge](problems/video-streaming-platform.md) |
+| 19 | [News aggregator: freshness without a write storm](problems/news-aggregator.md) |
+| 20 | [API gateway: route safely across many teams](problems/api-gateway-platform.md) |
+| 21 | [Online judge: untrusted code gets a small box](problems/online-judge.md) |
+
+Each of these 15 pages links to a current community interview-question catalog entry. The catalog tags candidate reports with companies, but usually omits interview dates. Treat these as widely listed prompt types, not verified reports from the past year or a current company rubric. See the [source review and recency limits](../../../docs/research/interview-design-problem-set-2026.md).
 
 Work through each problem from its opening brief. First draw the failing design and identify which component decides the disputed state. Use the paired architecture and event-timeline diagrams to test the design; explain the senior and staff changes before checking a service name. The later chapters return to these boundaries under observability, outages, large data, AI serving, and regional recovery.
 

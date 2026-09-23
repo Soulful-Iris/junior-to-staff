@@ -60,6 +60,8 @@ These “deeper” columns are our teaching recommendations, informed by the sou
 
 **Coverage gaps:** no adequately verified recent junior-specific or named-company staff-loop sample; limited geographic coverage; no reliable Meta/Stripe/Microsoft recent question-frequency data. The junior and staff routes therefore use clearly marked practice standards and current official/general evidence, not invented company intelligence. This snapshot is useful but does not satisfy a statistical “what is most asked across top companies” claim.
 
+The separate [system-design prompt catalog review](interview-design-problem-set-2026.md) adds 15 commonly cataloged architecture prompt types for practice. Its live user-submitted entries do not expose individual interview dates, so they are **not counted** in this recent-evidence sample and do not close the recency or frequency gaps above.
+
 ## Refresh procedure
 
 Before relying on this for a new application, check the recruiter packet. When updating the research, retain the old snapshot and record: source URL, publication date, interview date, company/team/location, level as stated, round type, narrow observation, and confidence. Exclude out-of-window evidence from recent conclusions. Cross-check a pattern across independent accounts before calling it recurring; never fabricate a percentage without a sampling method and denominator.

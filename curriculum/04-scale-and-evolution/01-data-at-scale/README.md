@@ -27,6 +27,11 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 11 | [Document search: results must follow permissions](problems/document-search.md) |
 | 12 | [Trending counts: the spike that breaks one partition](problems/trending-counts.md) |
 | 13 | [Event ingestion: change a schema without losing yesterday](problems/event-ingestion.md) |
+| 14 | [Web crawler: be fast without attacking one site](problems/web-crawler.md) |
+| 15 | [Typeahead: useful suggestions before the next keystroke](problems/typeahead-search.md) |
+| 16 | [Distributed cache: recover when one shard leaves](problems/distributed-cache.md) |
+| 17 | [Key-value store: acknowledge only what survives](problems/distributed-key-value-store.md) |
+| 18 | [Ad click aggregator: count late events once](problems/ad-click-aggregator.md) |
 
 ## Go deeper on the same problem
 

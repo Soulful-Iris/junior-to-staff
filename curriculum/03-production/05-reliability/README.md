@@ -20,6 +20,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 4 | [Risk and incidents](risk-and-incidents.md) |
 | 5 | [Incident desk: the page cleared, the queue did not](labs/reliability/incident.md) |
 | 6 | [Durable jobs: the queue drained, the work did not](problems/durable-jobs.md) |
+| 7 | [Job scheduler: fire once on time, recover after a crash](problems/job-scheduler.md) |
 
 ## Go deeper on the same problem
 
