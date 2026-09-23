@@ -67,6 +67,7 @@ compared exact source paths, not a minimum count. Real PostgreSQL sessions,
 TypeScript/browser execution, live AWS, production model quality and fresh
 external-source verification remain separate evidence categories.
 
-The ZIP also contains website, dependency-locking, publishing and broader
-certification work. Those are outside the final learning-content scope; this
-record does **not** claim blanket closure of all 73 audit entries.
+This record describes the learning-content pass. The subsequent reader,
+dependency-locking, publication and verification fixes are recorded in
+[audit results](AUDIT-RESULTS.md). Neither record claims that optional live-cloud
+or other external certification gates ran.

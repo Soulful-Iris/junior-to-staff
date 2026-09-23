@@ -1,12 +1,15 @@
 # Scope and validation
 
+**Current audit implementation and reproducible gates:** [audit results](AUDIT-RESULTS.md).
+The dated measurements below are historical; they do not certify later commits.
+
 Recorded **2026-09-22** for `feature/concept-first-curriculum`, reorganized from `4d4a42f` on `feature/visual-learning-interview-paths`. One curriculum contains four groups and 17 subject chapters. It preserves all **42 coding problems**, **45 project briefs** (40 standalone and five stages of one continuing project), all 21 original substantive lessons, practical labs, the local browser/API/SQLite slice, five system designs, five production cases and the existing research. Supplied reference code, build briefs and independent assessment remain distinct.
 
 ## Reorganization verification
 
 After relocation, the integrated Python run passed **55 suites / 209 test methods**; the relocated coding registry passed **42 suites / 126 methods**. The application build, strict TypeScript check, five shared TypeScript tests and all **seven real HTTP/SQLite browser scenarios** passed at their new paths.
 
-`python scripts/check_organization.py` compares the recorded source inventory with this branch: **477 source files accounted for, 42 complete problem bundles, 45 project briefs, all 105 source SVGs byte-identical and all 387 Mermaid blocks identical**. Non-Markdown source artifacts are unchanged except four reviewed path-dependent test/render helpers. Navigation and introductory scope/link prose were edited; this is not a new audit of technical claims. The source commit must be available locally to run this check.
+`python scripts/check_organization.py --historical`, at the original reorganization checkout, compares the recorded source inventory with that checkout: **477 source files accounted for, 42 complete problem bundles, 45 project briefs, all 105 source SVGs byte-identical and all 387 Mermaid blocks identical**. Non-Markdown source artifacts are unchanged except four reviewed path-dependent test/render helpers. Navigation and introductory scope/link prose were edited; this is not a new audit of technical claims. The source commit must be available locally to run this check.
 
 The visual-rendering evidence later in this document belongs to the source branch. Unchanged visual bytes and diagram source were checked here; no new full rendering pass is claimed. PostgreSQL server execution and live AWS deployment remain unverified.
 
