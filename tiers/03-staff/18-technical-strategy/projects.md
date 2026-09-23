@@ -1,6 +1,6 @@
 # 18 · Technical strategy — five projects
 
-> Staff tier · each one an afternoon · read [the section](README.md) first
+> Staff tier · each one an afternoon · read [the section](../../../curriculum/04-scale-and-evolution/05-technical-decisions/technical-strategy.md) first
 
 Five projects, built in the section's order: find the decision you keep making,
 make it cost something, pave it so the right way is the easy way, try to
@@ -434,7 +434,7 @@ have.
 The first idea is the section's sharpest test: **if nothing and nobody objects,
 it is advisory — and advisory strategy is a description of what people already
 felt like doing.** This is not cynicism. It is the same standard applied to
-strategy that [06 · Testing](../../01-junior/06-testing/) applies to tests: a
+strategy that [06 · Testing](../../../curriculum/02-applications/04-testing/README.md) applies to tests: a
 check that cannot fail is not a check.
 
 Second, the diagnostic value is in *which* thing objected, and the three
