@@ -16,7 +16,7 @@
  * manifest.json: [{ "hash": "...", "code": "flowchart TD\n..." }, ...]
  * writes <outdir>/<hash>.svg for each, skipping ones that already exist.
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
 
@@ -96,7 +96,10 @@ for (const d of todo) {
       const { svg } = await window.mermaid.render(id, code);
       return svg;
     }, {code: d.code, id: `m${d.hash.slice(0, 10)}`});
-    writeFileSync(join(outDir, `${d.hash}.svg`), svg, 'utf8');
+    const output = join(outDir, `${d.hash}.svg`);
+    const temporary = output + `.${process.pid}.tmp`;
+    writeFileSync(temporary, svg, 'utf8');
+    renameSync(temporary, output);
     ok++;
     if (ok % 50 === 0) console.log(`  ${ok}/${todo.length}`);
   } catch (e) {

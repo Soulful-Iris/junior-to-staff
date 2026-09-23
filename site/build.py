@@ -46,6 +46,8 @@ import sys
 from pathlib import Path
 
 import markdown
+from functools import lru_cache
+import diagram_cache
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = Path(os.environ.get("SITE_OUT")) if os.environ.get("SITE_OUT") \
@@ -358,12 +360,33 @@ def dest_for(src: str) -> str:
 MERMAID_RE = re.compile(r"```mermaid\n(.*?)```", re.S)
 
 
+@lru_cache(maxsize=1)
+def renderer_inputs() -> dict:
+    chrome = os.environ.get("CHROME_PATH") or next(
+        (str(p) for p in Path.home().glob(".cache/ms-playwright/chromium*/chrome-*/chrome")), "")
+    if not chrome:
+        raise RuntimeError("Chromium is required; set CHROME_PATH. No preview fallback in a release build.")
+    browser = subprocess.check_output([chrome, "--version"], text=True).strip()
+    node = subprocess.check_output(["node", "--version"], text=True).strip()
+    # Font bytes, not installation paths, are part of the renderer environment.
+    fonts = subprocess.check_output(["fc-list", "--format", "%{file}\n"], text=True).splitlines()
+    font_hashes = sorted({hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in fonts})
+    return {"renderer": hashlib.sha256((TOOLS / "render-mermaid.mjs").read_bytes()).hexdigest(),
+            "lock": hashlib.sha256((TOOLS / "package-lock.json").read_bytes()).hexdigest(),
+            "browser": browser, "node": node,
+            "fonts": hashlib.sha256("\n".join(font_hashes).encode()).hexdigest()}
+
+
+def diagram_key(code: str) -> str:
+    return diagram_cache.key(code, renderer_inputs())
+
+
 def mermaid_blocks(pages) -> dict[str, str]:
     out: dict[str, str] = {}
     for p in pages:
         for m in MERMAID_RE.finditer(p["text"]):
             code = m.group(1).strip()
-            out[hashlib.sha256(code.encode()).hexdigest()[:16]] = code
+            out[diagram_key(code)] = code
     return out
 
 
@@ -374,22 +397,25 @@ def render_mermaid(blocks: dict[str, str]) -> set[str]:
     mf = MERMAID_CACHE / "_manifest.json"
     mf.write_text(json.dumps(manifest), encoding="utf-8")
 
-    missing = [h for h in blocks if not (MERMAID_CACHE / f"{h}.svg").exists()]
+    (MERMAID_CACHE / "_inputs.json").write_text(json.dumps(renderer_inputs(), indent=2) + "\n")
+    missing = [h for h in blocks if not diagram_cache.valid_svg(MERMAID_CACHE / f"{h}.svg")]
+    for h in missing:
+        (MERMAID_CACHE / f"{h}.svg").unlink(missing_ok=True)
     if missing:
         chrome = os.environ.get("CHROME_PATH") or next(
             (str(p) for p in Path.home().glob(".cache/ms-playwright/chromium*/chrome-*/chrome")), "")
         if not chrome:
-            print("  ! no chromium found; diagrams will be skipped", file=sys.stderr)
+            raise RuntimeError("No Chromium available for required diagram rendering")
         else:
             env = dict(os.environ, CHROME_PATH=chrome)
             sysroot = Path.home() / "sysroot"
             if sysroot.is_dir():
                 env["LD_LIBRARY_PATH"] = f"{sysroot}/usr/lib64:{sysroot}/lib64:" + env.get("LD_LIBRARY_PATH", "")
             r = subprocess.run(["node", str(TOOLS / "render-mermaid.mjs"), str(mf), str(MERMAID_CACHE)],
-                               env=env, capture_output=True, text=True)
+                               env=env, capture_output=True, text=True, check=True)
             for line in (r.stdout + r.stderr).strip().splitlines():
                 print(f"  {line}")
-    have = {h for h in blocks if (MERMAID_CACHE / f"{h}.svg").exists()}
+    have = {h for h in blocks if diagram_cache.valid_svg(MERMAID_CACHE / f"{h}.svg")}
     if len(have) != len(blocks):
         print(f"  ! {len(blocks) - len(have)} diagrams missing an SVG", file=sys.stderr)
     return have
@@ -400,9 +426,9 @@ def substitute_mermaid(text: str, have: set[str], depth: int) -> str:
     up = "../" * depth
     def repl(m):
         code = m.group(1).strip()
-        h = hashlib.sha256(code.encode()).hexdigest()[:16]
+        h = diagram_key(code)
         if h not in have:
-            return m.group(0)
+            raise RuntimeError(f"Required diagram missing: {h}")
         return (f'\n<div class="mer"><img src="{up}assets/mermaid/{h}.svg" '
                 f'alt="Diagram" loading="lazy"></div>\n')
     return MERMAID_RE.sub(repl, text)
