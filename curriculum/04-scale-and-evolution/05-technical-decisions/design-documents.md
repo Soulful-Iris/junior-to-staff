@@ -53,191 +53,72 @@ flowchart TD
 Practice defending the rejected alternative first. Lead depth appears in how
 the document coordinates affected teams and keeps compatibility work owned.
 
-## The one-liner
+## Make the decision inspectable
 
-At staff level the artefact is usually a document, and the document has one job:
-**cause a decision, and make it stay decided.** A design doc that only describes
-a design has failed at the thing it was for, however good the design is.
+![A decision document needs goals, non-goals and honest alternatives, not only an API inventory.](../../../assets/diagrams/design-doc-weight.svg)
 
-## The failure it prevents
+A design document may include specifications and implementation detail. Its
+**decision section** should let a reader reconstruct the problem, alternatives,
+chosen contract and conditions for revisiting it. Documenting a past decision is
+also useful; do not misrepresent it as a review performed before implementation.
 
-A team spends three weeks arguing about a datastore. Somebody eventually
-decides, in a meeting, and the work starts. Four months later a new engineer
-asks why they are using that datastore, nobody can reconstruct the reasoning,
-and the argument runs again from the beginning — this time with less information,
-because the people who held the context have moved on.
+| Section | Question it must answer |
+|---|---|
+| Context and goals | What fails now, for whom, under which measured workload? |
+| Non-goals | What is outside this change, and what compatibility remains? |
+| Options | Why keep, repair or replace the current design? |
+| Decision | Who decides, based on what evidence and remaining assumptions? |
+| Execution | Who owns migration, validation, support and recovery? |
+| Revisit | What new fact, failure or review date reopens the decision? |
 
-Nothing was written down. Or something was written down and it was a
-description: here are the services, here are the endpoints, here is the schema.
-All true, all useless, because none of it says **what else was considered and
-why it lost.**
+Non-goals define boundaries; they do not need to disappoint anyone. Include the
+relevant alternatives, not a ceremonial quota. A product or technical constraint
+may rule an option out quickly; explain that constraint.
 
-The cost of that is not the three weeks. It is that the decision has to be
-re-made every time it is questioned, forever, and it gets cheaper each time to
-just change it.
+## Worked review: the same contract, different proposals
 
-## The mental model
+Suppose checkout must commit an order and reserve its final inventory unit
+together. A replacement proposal shows independent writes to two stores.
 
-A design doc is not a specification and it is not documentation. It is an
-argument, written down before the work, aimed at the people who could stop it or
-be harmed by it.
+| Review input | Supported outcome |
+|---|---|
+| Independent writes, no reservation protocol or recovery | Request changes: demonstrate the crash boundary and enforce the invariant |
+| A transaction enforces the invariant; workload, limits and recovery are documented | Approval unchanged can be correct; record the evidence inspected |
+| A benchmark improves reads but omits checkout writes | Do not infer checkout safety or capacity from that benchmark |
 
-![What carries the weight in a design document: goals and non-goals, and alternatives considered, versus the API listing people over-invest in](../../../assets/diagrams/design-doc-weight.svg)
+A review's value is a justified decision, not the number of edited sentences or
+people who changed their minds. Use **labeled faulty fixtures** to test whether a
+review process detects defects. Do not invent defects in real proposals to make
+the process look rigorous.
 
-The convention most widely copied is Google's, described publicly by Malte Ubl:
-informal, typically three to twenty pages, written **before** the code. Context,
-goals and non-goals, the design, alternatives considered. The trade-offs are the
-content. An API listing is not a design doc; it is the appendix of one.
+## A focused review prompt
 
-Two parts do almost all the work, and both are the parts people skip.
-
-**Non-goals.** What you are deliberately not doing. This is the single highest
-value paragraph in the document, because it is what lets a reviewer stop
-worrying. Without it every reader supplies their own scope and objects to
-something you never intended to build.
-
-**Alternatives considered.** Where the credibility lives. If you cannot argue
-the rejected option better than its advocates would, you have not finished
-deciding — you have finished preferring. A weak steelman is visible from a long
-way off, and it is the fastest way to lose a room.
-
-### The RFC, which is the same thing with a process attached
-
-At organisations past a certain size the document gets a lifecycle: a template,
-**named approvers** rather than a vague audience, and a broadcast so people who
-would be affected can object before rather than after. Uber's engineering
-writing describes scaling exactly this from tens to thousands of engineers.
-
-The detail worth internalising: **disagreement during review is cheap early
-warning that the project itself will slip.** It is not an obstacle to route
-around. An objection that surfaces in week one costs an afternoon; the same
-objection in month four costs the project.
-
-*(Read from published engineering writing on 2026-09-21.)*
-
-
-
-## What good looks like
-
-- A reader who was not in any of the conversations can say back what is being decided and why.
-- Non-goals define specific excluded work; stakeholders can agree with them.
-- The rejected alternatives are argued at their strongest, with a named reason each lost.
-- The approvers are named people, and they know they are approvers.
-- It is short enough to be read in one sitting by someone who did not want to read it.
-- The accountable decision, reasons and review outcome are recorded. Approval without changes is valid.
-
-Done badly:
-
-- A description of the design with no alternatives, which reads as "I already built this in my head."
-- Non-goals missing, so the review is about scope rather than about the decision.
-- Written after the implementation, to document rather than to decide.
-- Circulated to "the team" rather than to people, so nobody is accountable for reading it.
-- So long that the objections arrive from people who only read the first page.
-- Passive voice covering who decided and who is responsible.
-
-## Ask Claude for this
-
-**Request 1 — the steelman, written against you**
-
-```
-Here is my proposal and the alternative I rejected.
-
-Argue for the alternative as strongly as you can. Assume its advocate is
-better informed than me. What do they know about the constraints, the
-team, or the cost that I have not accounted for?
-
-Do not balance it. Argue one side.
+```text
+State the decision and its supported contract.
+Compare the strongest plausible alternative under the same workload.
+Locate the most consequential assumption and the evidence for it.
+Recommend approval, changes, a bounded experiment, or rejection, with reasons.
+Approval without edits is allowed. Do not fabricate evidence or objections.
 ```
 
-*Why it is asked that way:* "do not balance it" is the whole instruction. A
-model's default is a fair-minded comparison table, which is exactly the thing
-that makes an alternatives section weak. You want the argument you will actually
-face in the room.
+A reviewer can be wrong too. Resolve disputed claims through a reproducer,
+measurement or explicit product decision, rather than treating agreement as proof.
 
-*What you should get back:* at least one point you had not considered. If there
-is nothing, either the alternative really is bad — say so plainly in the doc and
-why — or you have not given it enough context to argue with.
+## P5 acceptance
 
-**Request 2 — find the objections before the meeting**
+Write the migration decision before expanding live exposure. A reader should be
+able to state what changes, what remains supported, why the alternative lost,
+who owns the next action and what stops rollout. Keep it as short as those
+answers permit; move long schemas or measurements to linked evidence.
 
-```
-Here is the document. List, by role or team, everyone whose work this makes
-harder. For each: what they lose, the objection they will raise, and how
-likely that objection is to stop this.
+Revisit the record after the change. Compare predicted failures and costs with
+what actually happened. New evidence may justify changing a well-founded earlier
+decision; a document should preserve reasoning, not prohibit learning.
 
-Then tell me which one I should go and talk to before I send it.
-```
+**Words to keep:** *non-goal* is a scope boundary; *alternative* is a plausible
+competing choice; *approver* owns a decision; *kill criterion* stops expansion.
 
-*Why:* the last question converts analysis into an action, and going to that
-person first is most of what being effective at staff level actually looks like.
-A document that surprises someone whose work it damages will be fought on
-principle rather than on merit.
-
-**Request 3 — cut it without losing the argument**
-
-```
-This document is too long. Cut it by 40% without removing any
-non-goal or any alternative.
-
-Tell me what you cut and what you think was load-bearing that I will
-disagree about losing.
-```
-
-*Why:* protecting the two sections that carry the weight forces the cuts to come
-out of the parts people over-write — background, implementation detail,
-restatements. The second sentence is what makes it a review rather than a
-compression.
-
-**What to keep for yourself:** the decision. Do not ask a model which option to
-pick. It will answer, fluently, and you will have outsourced the only part of
-the document that was yours.
-
-## How you would know it is wrong
-
-1. **Give it to someone outside the project and ask them to state the decision back.** If they cannot, the document is wrong, not the reader.
-2. **Test a non-goal against a concrete request.** Can a reviewer tell whether the request is excluded and why? Agreement does not invalidate the boundary.
-3. **Show the alternatives section to somebody who prefers one of the rejected options.** If they say "that is not why I would have argued for it", you have a strawman.
-4. **Count the named approvers.** If the answer is zero, nothing is being decided, whatever the document says.
-5. **Look for the decision in passive voice.** "It was decided" means nobody decided. Find the sentence with a person in it.
-6. **Six months later, go back and read it.** Did the thing that actually went wrong appear anywhere in it? That is the only real calibration you will ever get, and almost nobody collects it.
-
-## Your slice of the project
-
-For **P5**, write the design doc for the migration before you touch anything:
-
-- Context: what exists now and why it is a problem, with a number in it.
-- Goals, and at least three non-goals.
-- The design, briefly.
-- **Two alternatives, each argued at its strongest**, with a stated reason each lost.
-- The rollout plan and the kill criteria: what you will see that makes you stop.
-- Named approvers.
-
-Keep it under four pages.
-
-**Acceptance criteria:**
-
-- Somebody who has not seen your system reads it and tells you back what is being decided, what is out of scope, and what you rejected.
-- Reviewers can explain the assumptions and alternatives they checked, with approval, changes or dissent recorded. No cosmetic edit is required.
-
-## Words you now own
-
-- **design doc** — a written argument for a decision, made before the work, aimed at the people who could stop it.
-- **non-goal** — something deliberately out of scope. The highest-value paragraph in the document.
-- **alternatives considered** — the rejected options, argued honestly. Where credibility lives.
-- **steelman** — the strongest form of the argument against you.
-- **RFC** — a design doc with a process: template, named approvers, broadcast, a window for objection.
-- **approver** — a named person accountable for reading and deciding. Not "the team".
-- **kill criteria** — what you will observe that makes you stop. Decided in advance, when you are calm.
-- **the passive voice problem** — writing that hides who decided and who is responsible.
-
----
-
-**Not covered here:** strategy and vision. Recurring decisions are one useful input —
-that is [Technical strategy](technical-strategy.md). Postmortems are writing that decides too,
-but they belong with **20 · Risk and incidents** because they are written under
-different pressure.
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
+[Technical strategy](technical-strategy.md) · [Migration method](../04-migrations/migration-method.md)
 
 ## Draw it from memory · Keep alternatives and reversal conditions visible
 
