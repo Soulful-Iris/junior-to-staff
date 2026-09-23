@@ -8,51 +8,50 @@
 
 ## First, what is a map?
 
-A **map** stores a value under a key so you can look up that key later. Python calls it a **dictionary** (`dict`). Here the key is a number we saw earlier, and the stored value is its *first index* in the list. Name the dictionary for both sides of that relationship and the rule for repeated values: `first_index_by_value`. It works for prices, transaction amounts, or any list of numbers. Braces create a dictionary; a colon separates a key from its value:
+A **map** stores a value under a key so you can look up that key later. Python calls it a **dictionary** (`dict`). Here the dictionary holds *pending matches*: when we see `2` and need a total of `9`, index `0` is waiting for a future `7`. The key is the value that would complete a pair; the stored value is the earlier item's index. Braces create a dictionary; a colon separates a key from its value:
 
 ```python
-first_index_by_value = {}
-first_index_by_value[2] = 0
-print(first_index_by_value)       # {2: 0}
-print(2 in first_index_by_value)  # True
-print(first_index_by_value[2])    # 0
+pending_matches = {}
+pending_matches[7] = 0
+print(pending_matches)       # {7: 0}
+print(7 in pending_matches)  # True
+print(pending_matches[7])    # 0
 ```
 
-This is different from a list: `prices[0]` means “the value *at index* 0”; `first_index_by_value[2]` means “the *first index saved under value* 2.” The keys come from input values, not from list indices. The name describes `value → first index`; `first_position` describes only the right-hand side, so a reader has to reconstruct the key from surrounding code. If the requirement changes to the *most recent* occurrence, the name and update rule must change together.
+This is different from a list: `prices[0]` retrieves the earlier value `2`; `pending_matches[7]` answers “who is waiting for a `7`?” and retrieves index `0`. The dictionary records unfinished work rather than a second copy of the input. The same idea works for prices, transactions, or any stream of numbers.
 
 ## Watch the question change at each position
 
-At position `j`, the value is `value`. The missing value is `target - value`, called its **complement**. Before processing `j`, the dictionary contains only positions smaller than `j`. Ask whether that missing value is a key; if it is, return the stored earlier position and `j`.
+At index `j`, ask whether the current `value` completes any earlier pending match. If it does, return the earlier index and `j`. Otherwise, save what this value will need later: `target - value`, called its **complement**.
 
-| Current position `j` | Value | Missing value `9 - value` | Dictionary *before* lookup | Decision |
-| ---: | ---: | ---: | --- | --- |
-| 0 | 2 | 7 | `{}` | No 7 yet; save `{2: 0}`. |
-| 1 | 7 | 2 | `{2: 0}` | Key 2 exists at position 0; return `(0, 1)`. |
+| Current index `j` | Value | Dictionary *before* lookup | Decision |
+| ---: | ---: | --- | --- |
+| 0 | 2 | `{}` | Nobody needs 2 yet; save `9 - 2 = 7 → 0`. |
+| 1 | 7 | `{7: 0}` | Index 0 was waiting for 7; return `(0, 1)`. |
 
-The values 11 and 15 are never visited: the first valid right-hand position is 1. **Lookup comes before insertion** so that `[3]` with target 6 does not falsely match position 0 to itself. With `[3, 3]`, the first 3 is saved at 0 and the second 3 finds it at 1.
+The values 11 and 15 are never visited: the first valid right-hand index is 1. **Lookup comes before insertion** so that `[3]` with target 6 does not falsely match index 0 to itself. With `[3, 3]`, the first 3 records `3 → 0` and the second 3 finds it at index 1.
 
 ![Maps: remember earlier work](../../../../assets/learning/map-lookup.svg)
 
 [Static diagram](../../../../assets/learning/map-lookup-still.svg)
 
-**Read the picture:** The numbered boxes on the left are list positions 0–3, holding the prices. The large box on the right is the **Python dictionary**: `2 → 0` means “value 2 was first seen at position 0.” The green arrow saves that entry; the orange arrow looks for 2 when the current value is 7. The returning arrow carries the two *positions*, `(0, 1)`. Pause the motion after each arrow and predict what is in the dictionary.
+**Read the picture:** The numbered boxes on the left are indices 0–3, holding the prices. The large box on the right is the **Python dictionary**: `7 → 0` means “index 0 is waiting for a 7.” The green arrow saves that pending match; the orange arrow checks it when 7 arrives. The returning arrow carries the two *indices*, `(0, 1)`. Pause the motion after each arrow and predict what is in the dictionary.
 
 ## From a direct search to the dictionary
 
-The simple approach tries each pair of different positions. The map saves the earliest position for each value, which also makes the answer deterministic if a value repeats. This short snippet shows the main idea; the full problem also validates input types.
+The simple approach tries each pair of distinct indices. This map remembers which future value would complete each earlier item. This short snippet shows the main idea; the full problem also validates input types.
 
 ```python
 def two_sum(prices: list[int], target: int) -> tuple[int, int] | None:
-    first_index_by_value: dict[int, int] = {}
-    for j, value in enumerate(prices):  # j is the current position
-        complement = target - value
-        if complement in first_index_by_value:
-            return first_index_by_value[complement], j
-        first_index_by_value.setdefault(value, j)
-    return None                          # examined every position; no pair
+    pending_matches: dict[int, int] = {}
+    for j, value in enumerate(prices):
+        if value in pending_matches:
+            return pending_matches[value], j
+        pending_matches.setdefault(target - value, j)
+    return None
 ```
 
-`j` is the right-hand index in the requested pair; that short name is useful inside this small loop. `complement` names the value needed to finish the sum. `setdefault(value, j)` adds the key only if absent. Without that guard, overwriting an earlier index can break the contract “smallest earlier index.” This name and update rule together express the invariant: **before each lookup, the dictionary maps each previously seen value to its earliest index**. The complete [two sum problem](../problems/01-two-sum/README.md) adds validation and more difficult tie cases.
+`setdefault(target - value, j)` saves a pending match only if nobody is waiting for that value already. This keeps the *earliest* eligible index if values repeat. Before each lookup, the dictionary holds only needs created by **earlier** indices; insertion after lookup prevents reusing the current item. The complete [two sum problem](../problems/01-two-sum/README.md) adds validation and more difficult tie cases.
 
 ## Try inputs that could break your answer
 
@@ -73,14 +72,14 @@ For the full problem, `True` is not accepted as an integer despite Python normal
 
 `n` means the number of prices. Trying all pairs can check roughly `n × (n − 1) / 2` pairs, so we say **O(n²) time**: work grows approximately with the square of input size. The dictionary version visits each position once and normally makes one quick hash lookup and at most one insertion per position: **expected O(n) time**. In the worst no-answer case it may remember every distinct value: **O(n) extra space**. “Extra” excludes the input list; it counts the dictionary. Hash lookups are *expected* fast, not a promise against pathological collisions.
 
-**Before moving on:** Point to the dictionary key and value in `{2: 0}`. Trace `[3, 3]` aloud and explain why reversing lookup/insertion would falsely accept `[3]`.
+**Before moving on:** Say what `7 → 0` means. Trace `[3, 3]` aloud and explain why reversing lookup/insertion would falsely accept `[3]`.
 
 **Changed requirement:** Return every matching pair. Explain why one saved index per value may no longer suffice.
 
 <details>
 <summary>After attempting: reference and explanation</summary>
 
-First predict `[3, 3, 3]`, target 6: `(0, 1)`, `(0, 2)`, `(1, 2)`. One saved index for value 3 loses two pairs. A dictionary of **lists of earlier indices** can retain them; generating `p` pairs takes at least O(p) output work. Compare the validated `two_sum` in [algorithms.py](../algorithms.py). Reimplement tomorrow without copying.
+First predict `[3, 3, 3]`, target 6: `(0, 1)`, `(0, 2)`, `(1, 2)`. One waiting index for value 3 loses two pairs. Store a **list of waiting indices** for each needed value instead; generating `p` pairs takes at least O(p) output work. Compare the validated [two sum solution](../problems/01-two-sum/solution.py). Reimplement tomorrow without copying.
 
 </details>
 

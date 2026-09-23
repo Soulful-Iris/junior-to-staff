@@ -18,13 +18,13 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 
 ## The tool before the challenge
 
-A Python map is a `dict`: a value used as a key points to the earliest index where it appeared. For `[3, 3]`, the second 3 can find the first 3; a one-item `[3]` cannot reuse itself. Name the state for the mapping and the tie rule: `first_index_by_value`.
+A Python map is a `dict`. Here it tracks unfinished matches: a `3` at index 0 with target `6` is waiting for another `3`. The second 3 completes the pair; a one-item `[3]` cannot reuse itself.
 ```python
-first_index_by_value = {3: 0}
-print(3 in first_index_by_value)  # True
-print(first_index_by_value[3])    # 0
+pending_matches = {3: 0}     # need 3; return index 0 if it arrives
+print(3 in pending_matches)  # True
+print(pending_matches[3])    # 0
 ```
-Trace the dictionary *before* processing each position. The name describes `value → first index` regardless of whether the input is prices or transaction amounts. If the contract asks for **all** pairs, a single index per value no longer holds enough state; the name and stored type must change. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
+Trace the dictionary *before* processing each position. A key is the **future value needed**; its value is the earliest index waiting for it. If the contract asks for **all** pairs, each needed value must retain a list of waiting indices instead. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
 
 <!-- interview-rehearsal:start -->
 
@@ -70,21 +70,22 @@ your state means before saying which data structure stores it.
 
 Start with each possible right endpoint `j`, then try all earlier `i` in order.
 That baseline directly implements the tie rule but performs O(n²) comparisons.
-A candidate should identify the precise repeated question: “Have I already seen
-`target - nums[j]`, and where was its earliest occurrence?” A map answers that
-question without rescanning the prefix. A map associates a key with one stored
-value; here an amount maps to its earliest index, not its frequency.
+A candidate should identify the precise repeated question: “Is someone waiting
+for `nums[j]`, and which earlier index was first?” `pending_matches` answers
+that question without rescanning the prefix. A needed future value maps to
+the earliest earlier index waiting for it.
 
-| j / value | Needed | Map before lookup | Result / next map |
+| j / value | Check pending key | Map before lookup | Result / next map |
 |---|---:|---|---|
-| 0 / 3 | 3 | `{}` | no pair; `{3: 0}` |
+| 0 / 3 | 3 | `{}` | no pair; save `6 - 3 = 3 → 0` |
 | 1 / 3 | 3 | `{3: 0}` | return `(0, 1)` |
 
-The invariant is that, before processing `j`, the map contains exactly the
-distinct amounts in `nums[:j]`, each at its earliest index. Lookup **before**
-insertion prevents using `j` twice. Keeping the first index preserves the second
-tie rule; returning on the first successful right endpoint preserves the first.
-If lookup fails, adding only a previously unseen amount extends the invariant.
+The invariant is that, before processing `j`, the map contains the value needed
+to complete each earlier item, with the earliest waiting index for each needed
+value. Lookup **before** insertion prevents using `j` twice. Keeping the first
+waiting index preserves the second tie rule; returning on the first successful
+right endpoint preserves the first. If lookup fails, record this item's needed
+future value unless an earlier index is already waiting for it.
 If every lookup fails, every eligible pair was ruled out when its right endpoint
 was visited. Hash lookup has expected constant cost, so validation plus search
 cost expected O(n) time and O(n) auxiliary space; adversarial hash behavior is
@@ -93,7 +94,7 @@ not a promised worst-case O(n) bound. No result-size term is needed for one pair
 ### Follow-up 1: return every index pair
 
 Predict the state change before reading the table. Storing one index now loses
-answers. Map each amount to **all** prior indices and emit a pair for each match.
+answers. Map each needed future value to **all** waiting indices and emit a pair for each match.
 For `[3, 3, 3]`, target 6:
 
 | Right index | Stored matching indices | Newly emitted pairs |

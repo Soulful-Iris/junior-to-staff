@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc">
 <title id="title">Remember the complement</title>
-<desc id="desc">TARGET 9 · LOOK UP BEFORE INSERTING 2 0 7 1 11 2 15 3 EARLIER VALUE → INDEX insert 2 → 0 2 → 0 7 needs 2: one lookup return (0, 1) The second value finds work remembered from the first. Expected O(n) time · O(n) space · lookup first prevents using one item twice. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc>
+<desc id="desc">For a target of 9, seeing 2 at index 0 stores the unfinished match 7 → 0 in a Python dictionary. When 7 arrives at index 1, the lookup finds that pending match and returns (0, 1). Looking up before inserting prevents reuse of one item. Expected O(n) time and O(n) extra space.</desc>
 <defs>
 <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
 <path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/>
@@ -8,7 +8,7 @@
 </defs>
 <style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style>
 <rect width="760" height="420" rx="10" fill="#faf9f7"/>
-<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">REMEMBER THE COMPLEMENT</text>
+<text x="32" y="35" font-size="16" fill="#6d6459" text-anchor="start">KEEP PENDING MATCHES</text>
 <text x="45" y="74" font-size="11" fill="#6d6459" text-anchor="start">TARGET 9 · LOOK UP BEFORE INSERTING</text>
 <rect x="45" y="100" width="60" height="48" rx="5" stroke="#ded9d1" stroke-width="1.5" fill="#faf9f7">
 </rect>
@@ -30,19 +30,19 @@
 </rect>
 <text x="590.0" y="177.5" font-size="14" fill="#1f2b24" text-anchor="middle">
 </text>
-<text x="496" y="119" font-size="11" fill="#6d6459" text-anchor="start">PYTHON DICT: VALUE → FIRST INDEX</text>
+<text x="496" y="119" font-size="11" fill="#6d6459" text-anchor="start">NEEDED VALUE → WAITING INDEX</text>
 <path d="M75 151 V208 Q75 222 90 222 H510 V165" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
-<text x="130" y="212" font-size="14" fill="#2f6f4e" text-anchor="start">insert 2 → 0</text>
-<text x="500" y="170" font-size="23" fill="#2f6f4e" text-anchor="start">2 → 0</text>
+<text x="130" y="212" font-size="14" fill="#2f6f4e" text-anchor="start">2 awaits 7: store 7 → 0</text>
+<text x="500" y="170" font-size="23" fill="#2f6f4e" text-anchor="start">7 → 0</text>
 <path d="M157 151 V282 H665 V183" stroke="#c2703d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
-<text x="215" y="275" font-size="14" fill="#c2703d" text-anchor="start">7 needs 2: one lookup</text>
+<text x="215" y="275" font-size="14" fill="#c2703d" text-anchor="start">7 arrives: find its waiting match</text>
 <path d="M475 185 H387 V320 H75 V170" stroke="#2f6f4e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)">
 </path>
 <text x="445" y="317" font-size="19" fill="#2f6f4e" text-anchor="start">return (0, 1)</text>
 <path d="M32 350 H728" stroke="#ded9d1" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
 </path>
-<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">The second value finds work remembered from the first.</text>
+<text x="32" y="379" font-size="15" fill="#1f2b24" text-anchor="start">The second value completes a match saved by the first.</text>
 <text x="32" y="402" font-size="13" fill="#6d6459" text-anchor="start">Expected O(n) time · O(n) space · lookup first prevents using one item twice.</text>
 </svg>

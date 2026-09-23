@@ -6,10 +6,9 @@ def two_sum(nums, target):
     _integers(nums)
     if type(target) is not int:
         raise ValueError("target must be an integer")
-    first_index_by_value = {}
+    pending_matches = {}
     for j, value in enumerate(nums):
-        complement = target - value
-        if complement in first_index_by_value:
-            return first_index_by_value[complement], j
-        first_index_by_value.setdefault(value, j)
+        if value in pending_matches:
+            return pending_matches[value], j
+        pending_matches.setdefault(target - value, j)
     return None
