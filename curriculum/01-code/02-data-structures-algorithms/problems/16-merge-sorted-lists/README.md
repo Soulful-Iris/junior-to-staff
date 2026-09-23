@@ -16,21 +16,30 @@ Constructed practice problem; no company attribution. Prerequisites: [reversing 
 | Invalid input | Malformed links, cycles, unsorted/noninteger values, or shared nodes raise `ValueError` before mutation |
 | Excluded | Persistent input chains and concurrent access during splicing |
 
+## The tool before the challenge
+
+Merging two linked lists is a pointer operation. A **dummy head** is a temporary node before the output, so the first real append uses the same code as every later append:
+```python
+dummy = Node(0)
+tail = dummy
+# After choosing one input node:
+tail.next = chosen
+tail = tail.next
+```
+Given `1 → 4` and `2 → 3`, the output is `1 → 2 → 3 → 4`. Keep the unchosen input suffix reachable; decide how equal values are ordered and whether old nodes may be reused.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Head of one merged chain using exactly all original node identities.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +52,7 @@ unless the contract explicitly permits it.
 | Shared node | two inputs converge on one object | `ValueError` before mutation | Splicing shared ownership can create corruption. |
 | Unsorted/malformed | a descending link or cycle | `ValueError` before mutation | Validate the whole reachable inputs. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

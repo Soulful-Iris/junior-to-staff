@@ -19,21 +19,29 @@ the allowed next moves depend on which cells the current path already consumed.
 | Failure | Ragged board or invalid cells/word type raise `ValueError` |
 | Scope | No diagonal moves, wildcard characters, mutation, or all-path enumeration |
 
+## The tool before the challenge
+
+Backtracking marks only cells in the **current candidate path**. Restore a mark before exploring another start; otherwise one failed path can poison a valid one:
+```python
+used = set()
+used.add((0, 0))      # choose a cell
+# explore neighbors here
+used.remove((0, 0))   # undo when returning
+```
+On the one-row board `[["A","B"]]`, `"AB"` is present but `"ABA"` is impossible without reusing the only A. State whether diagonal movement is allowed.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Boolean existence of an orthogonal path with no repeated cell.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +54,7 @@ unless the contract explicitly permits it.
 | Empty board | nonempty word | `False` | Valid but unsatisfiable. |
 | Invalid/atomic | ragged board or multi-character cell | `ValueError`; board unchanged | Validation and restoration are observable. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

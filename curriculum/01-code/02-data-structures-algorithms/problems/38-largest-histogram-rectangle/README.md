@@ -19,21 +19,30 @@ bar. A stack can retain heights whose right boundary has not yet been discovered
 | Failure | Negative/noninteger heights raise `ValueError`; input unchanged |
 | Scope | Area only; no witness coordinates or variable widths |
 
+## The tool before the challenge
+
+For a histogram bar, the largest rectangle using that bar's height extends until a **shorter** bar stops it on each side. An increasing-height stack keeps starts unresolved:
+```python
+heights = [2, 1, 2]
+stack = [(0, 2)]  # (start index, height) for unresolved bars
+start, height = stack.pop()  # at index 1, height 1 ends the 2-bar
+print(height * (1 - start))  # 2: height 2 across width 1
+stack.append((start, 1))    # height 1 can reach back to index 0
+```
+The best rectangle here has area 3 (height 1 across all three bars), not area 4. Flush remaining bars after the final input, often with a sentinel height 0.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Maximum integer area under a contiguous interval.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +55,7 @@ unless the contract explicitly permits it.
 | Final flush | `[1,2,3]` | `4` | Remaining bars need a virtual right boundary. |
 | Invalid/atomic | negative or noninteger height | `ValueError`; input unchanged | Histogram geometry assumes nonnegative integers. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

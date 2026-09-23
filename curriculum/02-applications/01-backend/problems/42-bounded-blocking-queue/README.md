@@ -23,21 +23,30 @@ lets a thread release a mutex while waiting, then reacquire it before checking s
 | Drain/cancel | Drain permits existing gets; cancel returns removed items; closed-empty get raises `QueueClosed` |
 | Scope | One process; no fairness, task execution, acknowledgement, or cross-replica limit |
 
+## The tool before the challenge
+
+A condition variable lets a thread sleep **while releasing the lock**, then reacquire it to inspect state. Waking does not reserve a slot or item: another thread may have taken it.
+```python
+with condition:
+    while len(items) >= capacity and not closed:
+        condition.wait()  # releases and reacquires the mutex
+    if closed:
+        raise QueueClosed()
+```
+For capacity 1 containing A, a put(B) blocks until A is removed *or* shutdown rejects it. Use a loop, a single deadline across wakes, and explicit drain/cancel behavior.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Preserve FIFO and bounded capacity while giving every put, get, timeout, drain, and cancellation race the documented outcome.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -50,9 +59,7 @@ unless the contract explicitly permits it.
 | Drain/cancel | close with items present | drain serves them; cancel returns/removes them | Shutdown policy is explicit and first call wins. |
 | Race safety | competing producers/consumers plus spurious wakeups | no loss/duplication; deadline budget not reset | Concurrency tests target schedules, not only values. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

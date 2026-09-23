@@ -19,21 +19,28 @@ reading at write plus TTL. A monotonic clock advances without wall-clock correct
 | Cleanup | `purge()` removes all entries expired at one sampled instant and returns count |
 | Failure/scope | Invalid TTL raises `ValueError` without overwriting; no persistence/concurrency |
 
+## The tool before the challenge
+
+A TTL entry needs both a value and an **expiry instant** from a chosen clock. Compare the clock on read; background cleanup alone cannot promise expired data stays hidden:
+```python
+value, expires_at = "hello", 105.0
+now = 105.0
+print(now >= expires_at)  # True: expired at the boundary
+```
+If an old expiry event runs after a new value replaces the key, it must not delete the replacement. Track a generation or compare the stored expiry before deleting.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `get` returns live value or raises `KeyError`; delete reports live removal.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -44,11 +51,9 @@ unless the contract explicitly permits it.
 | Stored None | live key maps to `None` | `get` returns `None` | A miss needs an exception, not a sentinel. |
 | Zero TTL | put with TTL 0 | key is immediately absent | No transient live interval exists. |
 | Overwrite invalid | live key then put invalid TTL | `ValueError`; old value/deadline remain | Validation is atomic. |
-| Purge sample | several deadlines around one injected time | remove exactly all expired keys | Read the clock once for a coherent purge. |
+| Purge sample | a expires at 104, b at 105, c at 106; injected now=105 | `purge()` returns `2`; c remains | The boundary is expired, and one clock sample decides all entries. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

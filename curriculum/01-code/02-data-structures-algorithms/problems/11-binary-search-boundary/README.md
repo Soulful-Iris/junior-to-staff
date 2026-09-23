@@ -16,21 +16,29 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 | Invalid input | Invalid types or unsorted input raise `ValueError` after validation |
 | Excluded | Concurrent mutation and automatic sorting; the checked wrapper costs O(n) |
 
+## The tool before the challenge
+
+Lower bound means the *first* index whose value is at least the target, including the insertion position `len(nums)` when none exists:
+```python
+nums = [1, 2, 2, 5]
+lo, hi = 0, len(nums)  # potential answer is in [lo, hi)
+mid = (lo + hi) // 2
+print(mid, nums[mid])  # 2, 2; still search LEFT for the first 2
+```
+The answer for target 2 is index 1. [Walk the full boundary loop](../../lessons/04-order.md) and explain why `hi = mid` keeps mid eligible.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** First index whose value is at least target, or `len(nums)` if none.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +51,7 @@ unless the contract explicitly permits it.
 | Before left | `[2,4]`, target `1` | `0` | Nothing is proven smaller. |
 | Invalid/atomic | `[3,1]`, target `2` | `ValueError`; input unchanged | Checked input must actually be sorted. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

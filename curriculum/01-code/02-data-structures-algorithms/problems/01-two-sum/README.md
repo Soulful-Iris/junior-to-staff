@@ -16,21 +16,28 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 | Invalid input | `ValueError` for invalid container, element, or target type |
 | Excluded | Approximate floating-point money and distributed reconciliation |
 
+## The tool before the challenge
+
+A Python map is a `dict`: a value used as a key points to the earliest index where it appeared. For `[3, 3]`, the second 3 can find the first 3; a one-item `[3]` cannot reuse itself.
+```python
+earliest = {3: 0}          # value -> first index
+print(3 in earliest)       # True
+print(earliest[3])         # 0
+```
+Trace the dictionary *before* processing each position. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `(i, j)` with `i < j`; choose smallest `j`, then smallest `i`; otherwise `None`.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +50,7 @@ unless the contract explicitly permits it.
 | Tie rule | `[1, 4, 2, 3]`, target `5` | `(0, 1)` | Smallest right index wins before later pairs. |
 | Invalid/atomic | `[True, 2]`, target `3` | `ValueError`; input unchanged | Python booleans must not silently count as integers. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

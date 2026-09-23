@@ -19,21 +19,29 @@ source exposes the smallest value that source could contribute next.
 | Failure | Nonsorted or noninteger values raise `ValueError` when consumed |
 | Scope | Synchronous iterators; no I/O deadlines or atomic all-or-nothing export |
 
+## The tool before the challenge
+
+When merging k already sorted input streams, only their **current heads** can be the next output. Put one head per nonempty stream in a heap with a tie-breaking stream ID:
+```python
+from heapq import heappush
+heap = []
+heappush(heap, (1, 0))  # value 1 from stream 0
+heappush(heap, (1, 1))  # equal value from stream 1
+```
+After popping a head, advance only that stream and push its next item. Streams `[1,3]` and `[1,2]` merge to `[1,1,2,3]`, duplicates included.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Lazy ascending iterator preserving every occurrence, including ties.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +54,7 @@ unless the contract explicitly permits it.
 | Laziness | a source raises if read past requested prefix | only necessary values consumed | Do not materialize all streams. |
 | Late invalid order | source yields 3 then 2 | `ValueError` when 2 is consumed | Iterator validation occurs at the observable boundary. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -18,36 +18,41 @@ than stored. Breadth-first search visits states by increasing number of moves.
 | Boundaries | Equal endpoints return `[start]`; repeated dictionary entries collapse |
 | Failure/scope | Invalid lengths/characters raise `ValueError`; no insertions or deletions |
 
+## The tool before the challenge
+
+A **word ladder** is a shortest-path problem: two words are adjacent only when exactly one position differs. BFS explores transformations in increasing number of changes:
+```python
+from collections import deque
+queue = deque([("cat", 0)])
+visited = {"cat"}  # mark on enqueue so a word is not queued twice
+```
+If the dictionary contains `cat, cot, cog, dog`, then `cat → cot → cog → dog` uses three changes. Say whether the count includes words or edges.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** A shortest endpoint-inclusive list, or `[]` when impossible.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
 | Case | Exact input or state | Expected result | What it is testing |
 |---|---|---|---|
-| Representative | `hit` to `cog` through standard dictionary | a shortest endpoint-inclusive path | BFS returns minimum transformations. |
+| Representative | start `hit`, end `cog`, words `{hot,dot,dog,lot,log,cog}` | `[hit,hot,dot,dog,cog]` or the equally short path via `lot,log` | Four changes, five returned words. |
 | Same endpoint | `same` to `same` | `["same"]` | Zero transformations still includes the endpoint. |
-| Missing end | end absent from dictionary | `[]` | A different end must be admitted. |
-| Unreachable | valid words split into components | `[]` | Valid input need not have a solution. |
+| Missing end | `hit` to `cog`, words `{hot,dot,dog}` | `[]` | A different end must be admitted. |
+| Unreachable | `hit` to `cog`, words `{hot,cog}` | `[]` | Both are valid words but not connected. |
 | Duplicates | dictionary repeats a word | same path semantics | Repeated entries do not create states. |
 | Invalid | mixed lengths or non-lowercase ASCII | `ValueError` | Neighbor generation depends on the alphabet contract. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

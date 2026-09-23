@@ -16,21 +16,27 @@ Constructed practice problem; no company attribution. Prerequisites: [interval e
 | Invalid input | Invalid container/pair/type or nonpositive duration raises `ValueError` |
 | Excluded | Room features, travel buffers, recurring meetings, or actual room IDs |
 
+## The tool before the challenge
+
+A meeting interval `[start,end)` occupies its start and frees the room at its end. So `[9,10)` and `[10,11)` need one room; sharing a boundary is not overlap.
+```python
+meetings = [(9,10), (10,11)]
+print(meetings[0][1] <= meetings[1][0])  # True: reuse is legal
+```
+State the endpoint policy before sorting arrivals and departures. The *maximum simultaneous occupancy* sets the required room count.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Nonnegative integer: maximum simultaneous half-open meetings.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +49,7 @@ unless the contract explicitly permits it.
 | Nested | `[(0,10),(2,3),(4,5)]` | `2` | Peak concurrency is not number of meetings. |
 | Invalid/atomic | `[(4,4)]` | `ValueError`; input unchanged | Zero-duration entries are outside the contract. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -16,21 +16,27 @@ Constructed practice problem; no company attribution. Prerequisites: [tree struc
 | Invalid input | Invalid values/links, cycles, or shared nodes raise `ValueError`; ordering violations return `False` |
 | Excluded | Balancing guarantees and duplicate-placement policies |
 
+## The tool before the challenge
+
+For a binary search tree, a node must satisfy **every ancestor's** bounds, not merely its direct parent's comparison. Carry a permissible range down the recursion:
+```python
+def allowed(value, lower, upper):
+    return lower < value < upper  # strict: duplicates are invalid here
+```
+A right child 6 under root 5 looks locally fine, but if it lies inside left subtree rooted at 3 it violates the root's upper bound of 5.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Boolean for strict BST ordering; equal values anywhere cannot satisfy strict ordering.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +49,7 @@ unless the contract explicitly permits it.
 | Invalid value | a node contains `True` | `ValueError` | Boolean is excluded despite integer inheritance. |
 | Invalid topology | cycle or shared child | `ValueError` | Ordering failure does not hide structural corruption. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

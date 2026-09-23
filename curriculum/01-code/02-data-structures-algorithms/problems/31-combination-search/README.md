@@ -20,36 +20,42 @@ representations rather than removing duplicates after generating them.
 | Boundaries | Target 0 gives `[[]]`; impossible target gives `[]` |
 | Failure/scope | Zero/negative/noninteger candidates raise `ValueError`; no negative sizes |
 
+## The tool before the challenge
+
+Backtracking tries one choice, explores it, then **undoes** it before trying a sibling. Sort candidates and only choose indices at or after the current start to avoid generating permutations of the same combination:
+```python
+path = [2, 2]
+remaining = 3
+path.append(3)  # [2,2,3], remaining 0: emit a COPY
+path.pop()      # restore [2,2] for the next choice
+```
+With candidates `[2,3,6,7,2]` and target 7, expect `[[2,2,3],[7]]`. Positive sizes ensure remaining capacity decreases.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** All nondecreasing combinations summing to target, in lexical order.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
 | Case | Exact input or state | Expected result | What it is testing |
 |---|---|---|---|
 | Representative | `[2,3,6,7,2]`, target 7 | `[[2,2,3],[7]]` | Duplicate candidates collapse; reuse remains legal. |
-| Zero target | any valid candidates, target 0 | `[[]]` | One empty combination reaches zero. |
+| Zero target | candidates `[2,3]`, target `0` | `[[]]` | One empty combination reaches zero. |
 | Impossible | `[4,6]`, target 5 | `[]` | No witness is not an exception. |
-| Lexical order | several valid combinations | sorted nondecreasing combinations | Determinism is part of output. |
+| Lexical order | candidates `[2,3,5]`, target `8` | `[[2,2,2,2],[2,3,3],[3,5]]` | Each combination is nondecreasing; output is lexically ordered. |
 | No mutation | unsorted candidate input | same input after return | Search works on owned normalized state. |
 | Invalid | zero/negative/bool candidate or negative target | `ValueError` | Nonpositive choices could break termination. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

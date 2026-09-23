@@ -16,21 +16,28 @@ Constructed practice problem; no company attribution. Prerequisites: [state inva
 | Invalid input | Malformed links or cycles raise `ValueError` before any mutation |
 | Excluded | Shared ownership guarantees and concurrent readers/writers during reversal |
 
+## The tool before the challenge
+
+A linked-list node holds a value and a reference to the **next node**, not a Python list index. Reversal changes links; saving `next` first keeps the unprocessed suffix reachable:
+```python
+next_node = current.next
+current.next = previous
+previous, current = current, next_node
+```
+For `1 → 2 → 3 → None`, the new head must yield `3 → 2 → 1 → None`. Draw the three pointers and test the empty and one-node lists.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** New head of the reversed chain using exactly the original node identities.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +50,7 @@ unless the contract explicitly permits it.
 | Cycle | `a → b → a` | `ValueError` before mutation | Validation must not partially destroy the structure. |
 | Malformed link | reachable `next` is not Node/None | `ValueError` before mutation | Atomic rejection is observable behavior. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

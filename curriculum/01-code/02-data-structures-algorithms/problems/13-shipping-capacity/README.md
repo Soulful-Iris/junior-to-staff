@@ -16,21 +16,27 @@ Constructed practice problem; no company attribution. Prerequisites: [binary sea
 | Invalid input | Invalid types, nonpositive weights, or nonpositive days raise `ValueError` |
 | Excluded | Reordering, per-day capacity variation, and fractional package weights |
 
+## The tool before the challenge
+
+Search an *answer* when larger proposed answers can never become infeasible. Here a capacity `C` is feasible if the ordered packages can be split into at most the allowed number of days without exceeding `C` on a day.
+```python
+weights = [3, 2, 4]
+low, high = max(weights), sum(weights)  # 4 and 9
+```
+For two days, capacity 5 works as `[3,2] | [4]`; capacity 4 does not. Prove the feasibility test is monotone before binary searching.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Smallest capacity that ships all packages in order in at most `days`.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +49,7 @@ unless the contract explicitly permits it.
 | No splitting | `[8,1,1]`, days `2` | `8` | A package is indivisible. |
 | Invalid/atomic | zero weight or nonpositive days | `ValueError`; input unchanged | Validate before feasibility search. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

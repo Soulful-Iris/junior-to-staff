@@ -19,21 +19,30 @@ exposes the largest lower-half value; Python's min-heap can represent it by nega
 | Failure | Empty median or noninteger observation raises `ValueError` |
 | Scope | All history, append only; no window removal, approximation, or constant-memory promise |
 
+## The tool before the challenge
+
+The median splits sorted values into two halves. Two heaps can maintain that split incrementally: a max-heap for the lower half (Python uses negated numbers) and a min-heap for the upper:
+```python
+from heapq import heappush
+lower, upper = [], []
+heappush(lower, -3)  # lower-half maximum is -lower[0] = 3
+heappush(upper, 7)   # upper-half minimum is upper[0] = 7
+print((-lower[0] + upper[0]) / 2)  # 5.0
+```
+After each add, rebalance sizes and enforce every lower value ≤ every upper value. Ask how the contract represents half-integer medians.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `median()` returns an exact `fractions.Fraction`.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +55,7 @@ unless the contract explicitly permits it.
 | Huge integers | two values beyond float precision | exact `Fraction` | Do not overflow or round through float. |
 | Invalid/atomic | boolean/noninteger observation | `ValueError`; prior median unchanged | Heap balance survives rejected input. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

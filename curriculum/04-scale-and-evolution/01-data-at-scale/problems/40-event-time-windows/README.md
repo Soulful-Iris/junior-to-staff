@@ -21,21 +21,28 @@ this exercise does not infer it from local wall time or the largest event seen.
 | Boundary | Close when `end+L <= watermark`; equal watermarks are idempotent |
 | Failure/scope | Decreasing watermark/invalid numbers raise `ValueError`; duplicates count, no retractions |
 
+## The tool before the challenge
+
+Event time belongs to the event; **arrival time** is when your process sees it. Tumbling windows have fixed boundaries, often `[start,end)`, so an event exactly at 60 goes in the next 60-second window:
+```python
+window_size = 60
+print((59 // window_size) * window_size)  # 0
+print((60 // window_size) * window_size)  # 60
+```
+A watermark is a stated belief about how late events can arrive; it does not change an event's timestamp. Work through duplicate IDs and a late arrival after finalization.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Accept or reject each event against the watermark and emit every newly closed, nonempty window exactly once in start order.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -48,9 +55,7 @@ unless the contract explicitly permits it.
 | Duplicates/empty | same timestamp twice; untouched windows | duplicates count; empty windows omitted | Events are observations, not unique IDs. |
 | Invalid/atomic | decreasing watermark or bad number | `ValueError`; watermark/state unchanged | Failed control input cannot move time backward. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

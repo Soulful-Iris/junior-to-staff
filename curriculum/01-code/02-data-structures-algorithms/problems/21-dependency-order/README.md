@@ -19,21 +19,27 @@ means **a must finish before b can start**. An incoming-edge count is called ind
 | Failure | Unknown IDs, duplicate task IDs, or a cycle raise `ValueError` |
 | Scope | Planning only; durations, retries, and parallel execution excluded |
 
+## The tool before the challenge
+
+Dependencies form directed arrows `prerequisite → task`. `indegree[task]` counts unfinished prerequisites; a task joins the ready queue exactly when that count reaches zero:
+```python
+from collections import deque
+ready = deque(t for t in tasks if indegree[t] == 0)
+```
+For `A→C` and `B→C`, C waits for *both*. Dedupe repeated edges before incrementing indegree; unfinished nodes after the queue empties indicate a cycle.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Every task once in a valid order; ties follow input/edge discovery order.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +52,7 @@ unless the contract explicitly permits it.
 | Unknown task | edge mentions undeclared task | `ValueError` | The graph is closed over declared IDs. |
 | Long chain | thousands of serial tasks | every task once without recursion failure | Work should be O(V+E). |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

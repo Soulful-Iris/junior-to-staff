@@ -21,21 +21,27 @@ structure's meaning; combining these jobs carelessly hides syntax errors.
 | Failure | Malformed input raises `ValueError` with location; no host-language evaluation |
 | Limits/scope | At most 65,536 characters, 4,096 tokens, 100 nested parentheses; no calls/NOT |
 
+## The tool before the challenge
+
+An expression evaluator has two jobs: turn characters into tokens, then interpret tokens according to precedence and parentheses. Do not call Python `eval` on a user-supplied policy:
+```python
+expression = "age >= 18"
+tokens = ["age", ">=", "18"]  # illustrative token values
+```
+Ask whether `AND` binds more tightly than `OR`, how missing fields behave, and which operators are permitted. A parser should reject a trailing unexpected token rather than silently accept part of the input.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Return the exact Boolean value defined by the fully parsed policy, or raise `ValueError` for malformed or over-budget input.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -48,9 +54,7 @@ unless the contract explicitly permits it.
 | Quoted content | string literal containing spaces/escaped quote/OR text | one decoded literal token | Splitting on whitespace or keywords is wrong. |
 | Resource/type boundary | too many tokens/depth or mismatched scalar type | `ValueError` for limits; comparison false for type mismatch | Syntax admission and evaluation semantics differ. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

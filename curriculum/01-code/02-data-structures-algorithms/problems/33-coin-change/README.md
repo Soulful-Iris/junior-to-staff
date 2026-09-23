@@ -20,36 +20,41 @@ selected along a particular search path.
 | Failure | Nonpositive/noninteger coin or negative/noninteger amount raises `ValueError` |
 | Scope | Unlimited stock, equal per-coin cost; input remains unchanged |
 
+## The tool before the challenge
+
+Dynamic programming saves the best answer for each smaller amount. For coins `[1,3,4]`, amount 6, a greedy `4+1+1` uses three; `3+3` uses two:
+```python
+best = [float("inf")] * 7
+best[0] = 0
+best[3] = min(best[3], best[0] + 1)  # one coin makes 3
+```
+The full contract returns a **witness** as well as count, so save which coin produced each improving state; reconstruct from amount 6.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `(minimum_count, list_of_coins)`; any optimal witness.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
 | Case | Exact input or state | Expected result | What it is testing |
 |---|---|---|---|
 | Greedy trap | `[1,3,4]`, amount 6 | `(2,[3,3])` | Largest-first is not generally optimal. |
-| Zero amount | any valid coins, amount 0 | `(0,[])` | The empty witness is optimal. |
+| Zero amount | coins `[1,2]`, amount `0` | `(0,[])` | The empty witness is optimal. |
 | Impossible | `[2]`, amount 3 | `(-1,[])` | No witness has a distinct result. |
 | Duplicate coins | `[1,1,3]` | same answer as unique denominations | Input duplicates add no choice. |
-| Tied optimum | multiple minimum witnesses | any stated optimal witness | Do not promise an unspecified tie. |
+| Tied optimum | coins `[1,2,3]`, amount `4` | `(2,[1,3])` or `(2,[2,2])` | Two optimal witnesses; tie order is unspecified. |
 | Invalid/atomic | nonpositive coin or negative amount | `ValueError`; input unchanged | DP states require positive progress. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

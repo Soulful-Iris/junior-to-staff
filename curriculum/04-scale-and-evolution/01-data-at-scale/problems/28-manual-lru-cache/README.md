@@ -19,21 +19,27 @@ pointers, allowing removal from the middle when the node is already known.
 | Zero capacity | Every put returns its input as immediately evicted; retains nothing |
 | Failure/scope | Invalid capacity raises `ValueError`; single-threaded, entry count only |
 
+## The tool before the challenge
+
+An LRU cache evicts the entry least recently **used** by either a read or write. A hash map finds a node by key; a doubly linked list changes its recency position in constant time:
+```python
+# Concept: key -> node; head is most recent, tail is eviction candidate
+nodes = {"a": node_a, "b": node_b}
+```
+For capacity 2: put a, put b, get a, put c must evict b. State which pointers change for moving a node and for deleting the old tail.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `get` returns value; `put` returns evicted `(key,value)` or `None`.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +52,7 @@ unless the contract explicitly permits it.
 | Zero capacity | put a into capacity 0 | returns a as immediately evicted | The structure retains nothing. |
 | Invalid construction | negative/noninteger capacity | `ValueError` | Capacity is validated once. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

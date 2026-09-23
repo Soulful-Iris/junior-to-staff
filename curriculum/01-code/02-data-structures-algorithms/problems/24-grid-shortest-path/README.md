@@ -19,36 +19,41 @@ supplies neighbors implicitly, so no separate adjacency list is necessary.
 | Failure | Empty/ragged grid, other cell values, or out-of-bounds endpoints raise `ValueError` |
 | Scope | No diagonal moves, weighted terrain, moving walls, or input mutation |
 
+## The tool before the challenge
+
+A grid cell is a coordinate `(row, column)`. Move only to legal four-neighbors and mark a cell when enqueueing it so two paths do not each queue it:
+```python
+neighbors = [(r-1,c), (r+1,c), (r,c-1), (r,c+1)]
+from collections import deque
+queue = deque([(start, 0)])  # coordinate, distance in moves
+```
+On `[[0,0],[1,0]]`, start (0,0), goal (1,1), the shortest route takes 2 moves through (0,1); diagonal shortcuts do not count.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Endpoint-inclusive shortest coordinate list; any shortest route accepted.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
 | Case | Exact input or state | Expected result | What it is testing |
 |---|---|---|---|
-| Representative | open grid with a wall forcing a detour | an endpoint-inclusive shortest coordinate path | BFS discovers by distance layers. |
+| Representative | `[[0,1,0],[0,1,0],[0,0,0]]`, `(0,0)` to `(0,2)` | `[(0,0),(1,0),(2,0),(2,1),(2,2),(1,2),(0,2)]` | Six moves around the wall. |
 | Same endpoint | open start equals goal | one-coordinate path | Distance zero still includes the point. |
 | Blocked endpoint | start or goal cell is 1 | `[]` | Blocked is valid input but unsolvable. |
-| Unreachable | walls separate the endpoints | `[]` | Failure is not an exception. |
+| Unreachable | `[[0,1,0]]`, `(0,0)` to `(0,2)` | `[]` | Wall separates the only route. |
 | Tie | two equal shortest routes | either valid shortest route | Do not overfit an unspecified tie. |
 | Invalid/atomic | empty/ragged grid or bad coordinate | `ValueError`; grid unchanged | Validate shape and bounds. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

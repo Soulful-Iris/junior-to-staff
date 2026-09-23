@@ -19,21 +19,29 @@ not be contiguous. Strict increase means equal consecutive chosen values are inv
 | Failure | Noninteger values raise `ValueError`; input is not mutated |
 | Scope | One witness; no count of witnesses or streaming deletions |
 
+## The tool before the challenge
+
+For longest *strictly increasing* subsequence, elements may skip positions; that differs from a contiguous window. A `tails` array stores the smallest possible ending value for an increasing subsequence of each length:
+```python
+from bisect import bisect_left
+tails = [2, 5]
+i = bisect_left(tails, 3)  # 1; replace tail 5 with 3
+tails[i] = 3
+```
+`tails` is a compact summary, not necessarily a subsequence of the original input. Keep predecessor links if the output needs an actual witness.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Values forming any longest strictly increasing subsequence.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,12 +51,10 @@ unless the contract explicitly permits it.
 | Empty | `[]` | `[]` | No witness exists. |
 | All equal | `[2,2,2]` | one `2` | Increasing is strict. |
 | Decreasing | `[5,4,3]` | any one value allowed by tie contract | Best length can be one. |
-| Tails warning | sequence where tails array mixes predecessors | a reconstructed valid subsequence | Optimization state is not automatically the witness. |
+| Tails warning | `[3,5,6,2,4]` | `[3,5,6]` (length 3), **not** the possible tails array `[2,4,6]` | Value 6 preceded 2 and 4; tails are not one actual subsequence. |
 | Invalid/atomic | noninteger/bool element | `ValueError`; input unchanged | Validate before reconstruction state. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

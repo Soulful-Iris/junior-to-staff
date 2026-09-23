@@ -18,21 +18,28 @@ structure stores a partition: every vertex belongs to exactly one component.
 | Failure | Negative size raises `ValueError`; unknown vertex raises `IndexError` |
 | Scope | Links only added; no route reconstruction, removals, or concurrency |
 
+## The tool before the challenge
+
+A disjoint-set structure answers whether two items belong to the same connected group as new edges are added. Each group has one **representative**:
+```python
+parent = {"A":"A", "B":"B", "C":"C"}
+parent["B"] = "A"  # union A and B in this tiny example
+print(parent["A"] == parent["B"])  # True
+```
+A full `find` follows parent links and compresses paths; the snippet only illustrates storage. Adding B–C later must connect A and C transitively, not merely the last pair.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Union returns whether two components merged; connectivity returns a boolean.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -45,9 +52,7 @@ unless the contract explicitly permits it.
 | Empty universe | `n=0` | construction succeeds; any lookup is out of range | Empty is valid, phantom vertices are not. |
 | Bounds | negative or `n` index | `IndexError`; state unchanged | Python negative indexing is not allowed here. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

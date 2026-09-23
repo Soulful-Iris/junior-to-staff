@@ -19,21 +19,29 @@ partially ordered; reading that array is not the same as a sorted answer.
 | Failure | Negative/noninteger k or noninteger sample raises `ValueError` |
 | Scope | All history; fixed k; no deletion, timestamps, or distinct-only semantics |
 
+## The tool before the challenge
+
+A Python `heapq` is a min-heap; its root is the **smallest retained winner**. That makes it suitable for keeping the k *largest* observations:
+```python
+import heapq
+heap = [4, 7, 7]
+heapq.heapify(heap)
+print(heap[0])  # 4, the cutoff for a new arrival
+```
+For k=3, incoming 2 is discarded and incoming 9 replaces 4, giving `[9,7,7]` when sorted for presentation. Duplicate observations count separately.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `largest()` returns up to k values in descending order.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +54,7 @@ unless the contract explicitly permits it.
 | Zero k | add any values to k=0 | `[]` | Nothing is retained. |
 | Invalid/atomic | boolean sample or negative k | `ValueError`; prior snapshot unchanged | Failed input must not corrupt retained state. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

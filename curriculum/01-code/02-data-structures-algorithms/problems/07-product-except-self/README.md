@@ -16,21 +16,29 @@ Constructed practice problem; no company attribution. Prerequisites: [prefix sum
 | Invalid input | Invalid container or element raises `ValueError` |
 | Excluded | Division, floating-point stability, fixed-width integer arithmetic |
 
+## The tool before the challenge
+
+The answer at position `i` is everything *before* it multiplied by everything *after* it. Two independent passes avoid division, which breaks on zeros:
+```python
+nums = [2, 3, 4]
+left_product = [1, 2, 6]  # product strictly before each position
+right_product = [12, 4, 1]  # product strictly after each position
+print([a*b for a,b in zip(left_product,right_product)])  # [12, 8, 6]
+```
+At index 1, neither side includes its own 3. Predict the result with one zero and with two zeros before reading the solution.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** New list where output i is the product over every position except i.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +51,7 @@ unless the contract explicitly permits it.
 | Negative values | `[-1,2,-3]` | `[-6,3,-2]` | Signs follow ordinary integer multiplication. |
 | Invalid/atomic | `[1,False]` | `ValueError`; input unchanged | No division or silent boolean coercion. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

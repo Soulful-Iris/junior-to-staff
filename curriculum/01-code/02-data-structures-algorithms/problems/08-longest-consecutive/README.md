@@ -16,21 +16,28 @@ Constructed practice problem; no company attribution. Prerequisites: [map/set me
 | Invalid input | Invalid container or element raises `ValueError` |
 | Excluded | Returning all runs, requiring input adjacency, or mutating input |
 
+## The tool before the challenge
+
+A set answers membership questions but does not order numbers. Count a consecutive run only from a value whose predecessor is absent:
+```python
+values = {1, 2, 3, 8}
+print(1 - 1 not in values)  # True: start a run
+print(2 - 1 not in values)  # False: already inside one
+```
+For `[3,2,1,8,2]`, the longest run has length 3, despite unsorted input and duplicate 2. Define whether duplicates count as separate run positions.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Length of longest set of values `a, a+1, ..., b`.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +50,7 @@ unless the contract explicitly permits it.
 | Separated values | `[1,3,5]` | `1` | Input adjacency is irrelevant. |
 | Invalid/atomic | noninteger or boolean element | `ValueError`; input unchanged | Validate before building the set. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

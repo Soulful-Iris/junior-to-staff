@@ -19,21 +19,28 @@ count partitions; we do not need to construct the potentially numerous strings.
 | Boundaries | Empty public input returns 0; impossible nonempty input returns 0 |
 | Failure/scope | Other characters/types raise `ValueError`; no wildcard/modulus |
 
+## The tool before the challenge
+
+A digit string may decode a single digit `1..9` or a two-digit number `10..26`. Zero cannot stand alone; count ways by checking the last one or two digits:
+```python
+digits = "226"
+print(1 <= int(digits[-1]) <= 9)   # True: 6 is a letter
+print(10 <= int(digits[-2:]) <= 26)  # True: 26 is a letter
+```
+`"226"` has three decodings: `2|2|6`, `22|6`, `2|26`. `"06"` has none; do not interpret a leading zero as 6.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Exact number of partitions into codes 1..26.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +53,7 @@ unless the contract explicitly permits it.
 | Empty public input | `""` | `0` | Public semantics differ from the DP empty suffix base. |
 | Invalid/large | nondigit raises; long valid digits return exact integer | no truncation or modulus | Separate validation from arbitrary-size counting. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

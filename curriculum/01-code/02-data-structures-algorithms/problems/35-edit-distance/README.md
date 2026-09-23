@@ -20,21 +20,28 @@ points, which may differ from user-perceived characters.
 | Failure | Nonstrings raise `ValueError` |
 | Scope | Distance only; no edit script, normalization, transposition, or weighted costs |
 
+## The tool before the challenge
+
+Edit distance asks the fewest insertions, deletions, or substitutions that transform one string into another. A DP cell `dp[i][j]` summarizes the first `i` source and first `j` target characters:
+```python
+source, target = "cat", "cut"
+same = source[1] == target[1]   # False: a vs u
+substitution_cost = 0 if same else 1
+```
+`"cat" → "cut"` needs one substitution. Empty source to `"cut"` needs three insertions; those empty-prefix cells are base cases, not special patches at the end.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Minimum unit-cost insertion/deletion/replacement count.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -47,9 +54,7 @@ unless the contract explicitly permits it.
 | Unicode | strings compared by Python code point | distance over exact code points | No implicit normalization/grapheme logic. |
 | Invalid | either input non-string | `ValueError` | The API does not stringify values. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

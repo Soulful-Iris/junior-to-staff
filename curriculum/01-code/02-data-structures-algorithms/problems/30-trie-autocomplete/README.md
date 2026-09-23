@@ -19,21 +19,27 @@ A terminal marker records a complete word independently of whether children exis
 | Failure | Invalid characters/empty added word/negative limit raise `ValueError` |
 | Scope | Exact prefix, fixed alphabet; no popularity, fuzzy matching, or removal |
 
+## The tool before the challenge
+
+A trie stores one character per edge. Reaching a node for prefix `"ap"` does not mean `"ap"` was inserted as a complete word; terminal markers are separate:
+```python
+node = {"children": {"p": {"children": {}, "end": True}}, "end": False}
+print(node["end"])  # False: this node is a prefix only
+```
+Inserted `car, card, cat`; query prefix `car` with limit 5 gives `["car","card"]` in lexical order. Describe when sorted traversal stops.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Up to limit unique matching words, ascending lexicographic order.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +52,7 @@ unless the contract explicitly permits it.
 | No match/zero limit | prefix z or limit 0 | `[]` | Both are normal results. |
 | Invalid | uppercase/empty added word or negative limit | `ValueError` | The fixed alphabet contract is enforced. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -16,21 +16,27 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 | Invalid input | Malformed pairs, bool/noninteger endpoints, or `start >= end` raise `ValueError` |
 | Excluded | Time zones, recurring events, and preserving event identities |
 
+## The tool before the challenge
+
+An interval has two endpoints. This problem uses **closed** endpoints: `[1,3]` and `[3,4]` share 3 and merge. Sorting by start gives one current merged boundary:
+```python
+intervals = [[3, 4], [1, 3]]
+print(sorted(intervals))  # [[1, 3], [3, 4]]
+```
+Compare the next start with the current end; extending with `max` matters for a fully nested interval. Calendar meetings may instead be half-open.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** New sorted list of `(start, end)` half-open intervals; touching intervals merge.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +49,7 @@ unless the contract explicitly permits it.
 | Nested/duplicate | `[(1,10),(2,3),(1,10)]` | `[(1,10)]` | Contained coverage adds no new range. |
 | Invalid/atomic | `[(3,3)]` or malformed pair | `ValueError`; input unchanged | Reject zero duration and bad structure. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

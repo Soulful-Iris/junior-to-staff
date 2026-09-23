@@ -18,21 +18,30 @@ cost; **relaxing** an edge means replacing a known cost when that edge improves 
 | Failure | Missing vertices or negative/nonfinite weights raise `ValueError` |
 | Scope | Directed, static graph; numeric cost arithmetic; no negative edges |
 
+## The tool before the challenge
+
+When edges have nonnegative weights, a FIFO queue is insufficient: the earliest discovered route might cost more. A min-heap orders tentative distances:
+```python
+from heapq import heappush, heappop
+heap = [(0, "A")]
+heappush(heap, (10, "B"))
+heappush(heap, (1, "C"))
+print(heappop(heap))  # (0, 'A'); then C before B
+```
+If A→B costs 10, A→C costs 1 and C→B costs 1, the best cost to B is 2. Skip stale entries when a cheaper route has already been recorded.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** `(minimum_cost, endpoint-inclusive_path)`; any tied shortest path.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -45,9 +54,7 @@ unless the contract explicitly permits it.
 | Huge integers | weights beyond float precision | exact integer total | Do not coerce costs to float. |
 | Invalid anywhere | negative/nonfinite edge in disconnected component | `ValueError` | Whole-graph validation is not traversal-dependent. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

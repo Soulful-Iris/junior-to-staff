@@ -19,21 +19,29 @@ to settle several answers. Store indices because the answer is an index differen
 | Failure | Noninteger temperatures raise `ValueError`; input unchanged |
 | Scope | One complete series; no circular wraparound or minimum-rise threshold |
 
+## The tool before the challenge
+
+A stack is a Python list whose last element is the next one removed. Store **unresolved day indices**, not temperatures, so you can compute waiting days:
+```python
+temps = [73, 74]
+waiting = [0]
+earlier = waiting.pop()  # 0, because 74 is warmer than 73
+print(1 - earlier)        # wait 1 day
+```
+`[73,74,71,75]` gives `[1,2,1,0]`; equal temperatures are *not* strictly warmer. [Trace the whole stack](../../lessons/07-stack.md).
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Same-length list of waits to the first strictly warmer future day.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -46,9 +54,7 @@ unless the contract explicitly permits it.
 | Negative | `[-2,-1]` | `[1,0]` | Temperature sign is irrelevant. |
 | Invalid/atomic | noninteger/bool element | `ValueError`; input unchanged | Validation precedes stack mutation. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -16,21 +16,28 @@ Constructed practice problem; no company attribution. Prerequisites: [node ident
 | Invalid input | Malformed child links, cycles, or a child shared by multiple parents raise `ValueError` |
 | Excluded | DAG traversal and concurrent topology changes; output stores value references |
 
+## The tool before the challenge
+
+Breadth-first traversal uses a FIFO queue so every node at depth `d` is visited before nodes at `d+1`. Freeze the current queue length before processing one level:
+```python
+from collections import deque
+queue = deque([root])
+level_size = len(queue)  # children appended later belong to next level
+```
+For root 1 with children 2 and 3, return `[[1], [2,3]]`. An empty tree returns `[]`, not a list containing an empty level.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Lists of values by depth, in left-to-right order; root is depth 0.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +50,7 @@ unless the contract explicitly permits it.
 | Shared child | left and right reference same node | `ValueError` | The input must be a tree, not a DAG. |
 | Cycle/malformed | child returns to ancestor or invalid object | `ValueError`; no mutation | Traversal must terminate safely. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -16,21 +16,29 @@ Constructed practice problem; no company attribution. Prerequisites: [maps](../0
 | Invalid input | Non-string raises `ValueError` |
 | Excluded | Grapheme indexing, normalization, and noncontiguous subsequences |
 
+## The tool before the challenge
+
+A window is a contiguous slice `text[left:right+1]`. Keep the left boundary from moving backward when a repeated character was seen *outside* the current window:
+```python
+last_seen = {"a": 0}
+left = 2
+left = max(left, last_seen.get("a", -1) + 1)
+print(left)  # 2, not 1
+```
+For `"abba"` the longest answer is `"ab"` or `"ba"`, length 2. [Trace all four steps](../../lessons/02-windows.md) before coding.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
 
-The opening scenario is the product context; the table above is the callable
-contract. Your job is to connect them. Before coding, say what the output means,
-walk one normal case and one case that could disprove a tempting shortcut, then
-name the invariant your implementation will preserve. Start with a correct
-baseline, improve it deliberately, and derive time and space from actual work.
+The interviewer gives you the scenario and the contract above. Explain what a
+successful call returns, walk one row from the table below, and name what your
+state means *before* choosing a data structure.
 
 **Done means:** Half-open `(start, end)` indices; `text[start:end]` is longest unique run.
 
-Passing the happy path alone is not done; your answer
-must make a deliberate decision for every scenario below without mutating input
-unless the contract explicitly permits it.
+Now predict each output before looking at the reference; invalid input should
+leave any existing state unchanged unless the contract says otherwise.
 
 ### Test-case scenarios to settle before coding
 
@@ -43,9 +51,7 @@ unless the contract explicitly permits it.
 | Exact code points | `"aA"` | `(0, 2)` | Case-sensitive symbols are distinct. |
 | Invalid | non-string input | `ValueError` | The API does not coerce collections to text. |
 
-Do not merely list these cases in an interview. For each one, point to the branch,
-state transition, or invariant that makes the expected result inevitable. If your
-design cannot explain a row, the design is not finished yet.
+For each row, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 
