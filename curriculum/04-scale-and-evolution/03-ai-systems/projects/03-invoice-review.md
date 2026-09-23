@@ -10,11 +10,19 @@
 
 ## Establish the contract
 
-The reference supports one unambiguous `TOTAL USD amount` per record, integer cents between 1 and 100,000, and source text up to 8,000 characters. These limits make it possible to explain and test every accepted result. The model's claimed confidence is not an acceptance criterion.
+The reference supports one standalone `TOTAL` marker per record, source text up
+to 8,000 characters, and integer cents between 1 and 100,000. Its complete field
+runs from `TOTAL` to a semicolon, line ending, or end of input. After trimming
+trailing spaces/tabs, it must be `TOTAL USD digits.two_digits`: spaces/tabs
+between words, one to six ASCII digits before the decimal, exactly two after.
+An unsupported suffix is reviewed, not silently truncated. The model's claimed
+confidence is not an acceptance criterion.
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
 | Valid invoice | ID `invoice-17`, text `ACME invoice 17. TOTAL USD 12.50` | `ACCEPTED`, `currency: USD`, `total_cents: 1250`, exact evidence |
+| Numeric suffix | `TOTAL USD 12.345`, `12.34e2`, or `12.34.99` | `REVIEW_REQUIRED`; never accept the `12.34` prefix |
+| Invalid second total | `TOTAL USD 12.50; TOTAL unreadable` | `REVIEW_REQUIRED`; a malformed second marker is still ambiguous |
 | Redelivery | Same ID and same source text | Same saved result; no second model call after the result is committed |
 | Changed payload | Same ID, text changed to `TOTAL USD 13.00` | Conflict; do not overwrite the original record |
 | Missing currency | Text `TOTAL 12.50` | `REVIEW_REQUIRED`, `data: null` |
@@ -49,8 +57,8 @@ The reference supports one unambiguous `TOTAL USD amount` per record, integer ce
 1. **Assign a stable record ID.** A producer retries with the same ID and unchanged source. Hash the source so an ID reused for different data becomes a conflict.
 2. **Check the result registry first.** If the record already has a terminal outcome with the same hash, return it. This avoids a new inference call on ordinary redelivery.
 3. **Extract once per attempt.** Request a JSON object. The model cannot write directly to DynamoDB or acknowledge the queue.
-4. **Validate the application contract.** Require USD, a positive bounded integer amount, an exact evidence substring, one final total, and agreement between source amount and extracted cents. Schema shape alone is insufficient.
-5. **Save the artifact.** Write the result object to S3, then conditionally publish its pointer and status in DynamoDB. An interrupted attempt may leave an unreferenced artifact; readers use the registry as authority.
+4. **Validate the complete source field.** `invoice_fields.source_total` checks the original text independently of the model-selected span. Require USD, bounded integer cents, one standalone total marker, and exact agreement with the complete validated evidence. A substring that stops before an extra decimal digit or exponent is not valid evidence.
+5. **Publish complete bytes before the pointer.** On AWS, write the content-derived S3 object, then conditionally publish its pointer and status in DynamoDB. Locally, sync a same-filesystem temporary file, publish it without replacing an existing object, sync the directory, then commit the SQLite pointer. Existing bytes are verified, never reopened for truncation. Filesystem durability support is a local prerequisite.
 6. **Acknowledge terminal outcomes.** Both `ACCEPTED` and `REVIEW_REQUIRED` are successfully processed messages. Model/network failures propagate to the worker's partial-batch failure response.
 7. **Read by record ID.** Operators query the result endpoint; they do not infer completion from the producer's successful `SendMessage` call.
 
@@ -66,6 +74,18 @@ if existing:
 ```
 
 The complete `invoice_extract` implementation adds validation, artifact storage, and a conditional create. Two simultaneous first attempts can both call the model; only one result wins publication. This provides one committed result, not a guarantee of one billed inference call.
+
+| Interrupted step | What a reader can observe |
+|---|---|
+| Before object publication | No new result; existing committed results remain intact |
+| After object publication, before registry commit | Complete unreferenced object; not a published result |
+| Duplicate write after a result is committed | The same intact object and saved result; no truncating reopen |
+
+Worker logs contain a hashed message reference, a bounded category and retry
+decision, not invoice text, exception text or model output. `ACCEPTED` and
+`REVIEW_REQUIRED` are acknowledged. Provider/storage failure, malformed messages
+and changed-ID conflicts are reported for retry/redrive; a permanent producer
+error needs correction before redrive, not an infinite retry loop.
 
 ## Run the complete local session
 
@@ -124,4 +144,4 @@ Bring a saved accepted result, a review result, a duplicate-delivery trace, a pa
 
 ## Research behind the design
 
-Reviewed September 23, 2026. AWS documents [Lambda/SQS retries and partial-batch responses](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html), [Bedrock structured outputs](https://docs.aws.amazon.com/bedrock/latest/userguide/structured-output.html), [batch input identities](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-data.html), and [per-record batch outputs and errors](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-results.html). Managed batch inference is an extension; the deployed reference uses SQS plus Converse calls. Its narrow invoice validator is original teaching code.
+Reviewed September 23, 2026. AWS documents [Lambda/SQS retries and partial-batch responses](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html), [Bedrock structured outputs](https://docs.aws.amazon.com/bedrock/latest/userguide/structured-output.html), [batch input identities](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-data.html), and [per-record batch outputs and errors](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-results.html). Managed batch inference is an extension; the AWS reference is configured for SQS plus Converse calls; no live deployment is implied by the local tests. Its narrow invoice validator is original teaching code.
