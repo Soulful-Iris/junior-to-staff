@@ -13,7 +13,7 @@ partially ordered; reading that array is not the same as a sorted answer.
 
 | Contract | Required behavior |
 |---|---|
-| Input | Nonnegative integer k; integer observations through `add(value)` |
+| Input | Nonnegative integer k; integer observations through `add(value)`; bool excluded |
 | Output | `largest()` returns up to k values in descending order |
 | Boundaries | Duplicates count; k=0 retains nothing; negative samples allowed |
 | Failure | Negative/noninteger k or noninteger sample raises `ValueError` |

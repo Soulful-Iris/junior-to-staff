@@ -4,13 +4,13 @@ import heapq
 
 class TopK:
     def __init__(self, k):
-        if not isinstance(k, int) or k < 0:
+        if type(k) is not int or k < 0:
             raise ValueError("k must be a nonnegative integer")
         self.k = k
         self._top_k = []
 
     def add(self, value):
-        if not isinstance(value, int):
+        if type(value) is not int:
             raise ValueError("integer observations required")
         if self.k == 0:
             return
