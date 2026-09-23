@@ -294,18 +294,33 @@ compromised yesterday has no CVE yet.
    code change or a meeting, you found the work.
 4. **Read the expiry on the credential CI uses.** Months means a stored key,
    whatever the dashboard calls it. Federation credentials live minutes.
-5. **Try the bypass you believe is closed.** If trusted publishing is meant to
-   be the only publish path, a dry-run token publish should be refused. axios's
-   attacker found that check unrun.
-6. **Count last week's authorisation denials.** Zero is not clean — the
-   internet probes everything; it means denials are not logged, and the check
-   cannot go red.
+5. **Test the actual publish authorization boundary.** Inspect registry policy
+   and active credentials, then revoke unwanted token paths. A local package
+   build or `--dry-run` does not prove server rejection. An actual denied-publish
+   experiment requires explicit authorization and a disposable package/account;
+   record the client version and server policy. Never test on a real package
+   merely because this lesson describes the check.
+6. **Generate a known denial.** Send a cross-owner request with a safe request ID;
+   verify protected state is unchanged and find that event through the collector
+   and query path. Zero observed events alone proves neither safety nor missing
+   logging. Disable the collector in a disposable test: authorization should
+   still deny while the telemetry check fails.
 7. **Age your newest production dependency.** If nobody can answer inside a
    minute, there is no cooldown, whatever the policy document says.
 
 > The standing rule: **a check that cannot fail is not a check.** "We have
 > never had an authorisation incident" and "we would not know if we had"
-> produce identical dashboards.
+> can produce identical dashboards.
+
+| Controlled request | Protected write | Expected evidence |
+|---|---|---|
+| Owner, allowed operation | Commits | Success and safe operation ID |
+| Wrong owner, collector healthy | Denied, no change | Denial event found by request ID |
+| Wrong owner, collector disabled in test | Still denied, no change | Missing telemetry detected separately |
+
+Use synthetic IDs and reason codes; do not log credentials, private payloads or
+raw policy inputs. These are separate policy and telemetry experiments, not a
+claim that a production collector or registry was exercised here.
 
 ## Your slice of the project
 
