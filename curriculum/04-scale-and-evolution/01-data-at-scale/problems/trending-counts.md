@@ -17,6 +17,10 @@ Assume 500,000 events/s peak globally, a 30-second refresh target, and a two-min
 
 Each input has event ID, topic ID, event timestamp, and receipt timestamp. Partition hot topics into deterministic or randomly salted partial counters, then merge into windows; make the top-ten projection derived and repairable. If event IDs are deduplicated, state retention and the cost of keeping them. A watermark says when you consider an event-time window complete; early results are provisional until lateness closes. Ties need a stable topic-ID rule. A continuously changing ranking cannot promise the same top ten across two simultaneous reads without a snapshot version.
 
+![A hundred partial counters distribute one hot topic before an event-time merge](../../../../assets/design-practice/trending-counts-deep.svg)
+
+Only three of the hundred partials are drawn. The 1,000 events/s per shard is an average, not an automatic maximum; the hash/salt distribution and slowest partition still need measurement.
+
 ![Late arrival corrects a provisional count after the first top-ten read](../../../../assets/design-practice/trending-counts-trace.svg)
 
 **Senior follow-up:** One input partition goes idle while the rest advance. Explain the global watermark bottleneck and an idle-partition policy. Show what correction a user sees when #10 becomes #11 after a late event.

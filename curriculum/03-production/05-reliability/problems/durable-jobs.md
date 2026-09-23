@@ -17,6 +17,10 @@ Assume 500 ordinary exports/minute, 20-second average processing time, and a 60-
 
 Create a durable job record keyed by customer and request identity; record ACCEPTED, RUNNING, SUCCEEDED or FAILED with attempt/lease information. Queue messages ask workers to make progress; status comes from the job store. Write outputs under a stable job-derived key and verify the expected checksum/version before marking success. A delivery may be repeated even while an earlier worker is running. Fence stale workers with a generation/version check at the authoritative status write. If a side effect cannot be idempotent, reconcile it explicitly.
 
+![Queue grows when 500 arrivals per minute exceed 150 completions per minute](../../../../assets/design-practice/durable-jobs-deep.svg)
+
+The bars show a trend, not a measured forecast. At the stated steady rates the backlog grows by **350 jobs each minute**; after ten minutes that is 3,500 waiting jobs before cancellations, retries, or changes in service time. An overload policy must address admitted work before the oldest age runs away.
+
 ![Completed output followed by lost acknowledgement and duplicate delivery](../../../../assets/design-practice/durable-jobs-trace.svg)
 
 **Senior follow-up:** At 500/min and 20 seconds per job, Little's-law concurrency estimate is roughly 167 occupied worker slots for zero queue growth at steady load. If the system can run only 50 tasks, derive the queue growth and make the wait visible. Apply per-tenant fairness and a bounded retention/expiry policy.

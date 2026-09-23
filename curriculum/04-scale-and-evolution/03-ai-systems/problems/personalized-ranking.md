@@ -17,6 +17,10 @@ Assume 40,000 peak recommendation requests/s, two-second fresh interaction signa
 
 Candidate retrieval, current eligibility/ownership, feature lookup, ranking, and final filters have separate responsibilities. Allocate an end-to-end latency budget including network, P95 feature fetch, inference, and serialization, with room for variance; 250 ms is a request deadline, not five separate 250-ms allowances. Version both model and features, propagate experiment assignment deterministically, log exposure only after an item was actually shown. Preserve a safe default path when ranking is unavailable.
 
+![An end-to-end 250 millisecond latency budget across candidate lookup, features, rank, eligibility, and network](../../../../assets/design-practice/personalized-ranking-deep.svg)
+
+The allocation adds to 250 ms. If the feature call needs 170 instead of its allotted 100 ms, the whole path overruns unless a timeout triggers fallback early. The chart's 20 ms slack is a teaching budget, not a guarantee that independent P95 stages combine into a P95 request.
+
 ![The feature lookup exhausts the remaining budget and triggers a safe fallback](../../../../assets/design-practice/personalized-ranking-trace.svg)
 
 **Senior follow-up:** A rollout raises average CTR 3% while a small language cohort experiences a 20% complaint rise. Define evaluation slices, minimum sample size, rollback signals, and an owner for the trade-off. Explain why the offline metric cannot substitute for an online guardrail.

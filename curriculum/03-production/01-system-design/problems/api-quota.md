@@ -19,6 +19,10 @@ The decision must have one authority per `(organization, policy, period)` at the
 
 The simplest correct version writes a conditional counter for each organization and period. Serialize competing admissions through one owner or use an atomic conditional update. Daily and minute counters form **two constraints**: if checking the first spends it and the second rejects, you need an atomic joint decision, a reservation/compensation policy, or a carefully documented approximation. A fast cache can reduce reads, but an eventually synchronized cache cannot promise an exact hard quota by itself.
 
+![Two requests converge on one atomic quota decision](../../../../assets/design-practice/api-quota-deep.svg)
+
+Read the fork: A and B arrive independently. One successful conditional decrement changes the state; the other must observe a failed condition. Redraw this with two independent local counters and locate the extra admitted request.
+
 ![A pair of competing requests and the one atomic admission point](../../../../assets/design-practice/api-quota-trace.svg)
 
 ## Draw, test, change

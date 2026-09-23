@@ -17,6 +17,10 @@ Assume 20 million daily readers, 15,000 ordinary writes/s, 120,000 peak read req
 
 Fanout on write copies or indexes each ordinary post into follower feed candidates. For a 500-follower account one post entails roughly 500 feed insertions. For eight million followers, four posts would imply 32 million candidate insertions in a minute. A hybrid design writes the post once, fanouts ordinary accounts, and merges popular-account posts at read time. Mark thresholds as measured operational choices; the 500/8m distinction is illustrative.
 
+![A source post splits into ordinary write fanout and viral read-time merge](../../../../assets/design-practice/social-feed-deep.svg)
+
+The fork shows why average follower count is a bad capacity input. Work for the viral branch moves to reads, so also estimate what happens to read amplification when many followed popular authors post at once.
+
 ![Publication, delayed fanout, read-time merge, and privacy check](../../../../assets/design-practice/social-feed-trace.svg)
 
 ## What each store owns

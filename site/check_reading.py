@@ -46,6 +46,8 @@ def main():
             assert source in sequence and sequence.index(introduction)<sequence.index(source), source
             article=BeautifulSoup(output_for(source).read_text(),'html.parser').select_one('article.lesson-body')
             assert len(article.select('img[src*="/assets/design-practice/"]')) >= 2, source
+            assert article.select_one('.task-brief blockquote'), source
+            assert len(article.select('.example-card')) >= 3, source
             words=article.get_text(' ',strip=True)
             assert 'Senior follow-up' in words and 'Staff follow-up' in words,source
     foundations=[p for p in sequence if '/02-data-structures-algorithms/lessons/' in p]

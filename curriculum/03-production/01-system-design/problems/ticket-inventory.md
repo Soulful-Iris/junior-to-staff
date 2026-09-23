@@ -19,6 +19,10 @@ At any instant, a seat can have at most one live owner or hold. Keep authoritati
 
 Queue or waiting-room admission can keep the sale alive under burst, but it does not fix seat correctness. Partition seats by event or seat ID, protect popular sections from hot partitions, and decide if selecting adjacent seats requires one atomic reservation of all requested seats. If not supported, reject the group or explicitly offer partial seats; never silently split a paid order.
 
+![Seat state machine with a conditional hold, guarded confirmation, and late payment repair](../../../../assets/design-practice/ticket-inventory-deep.svg)
+
+Trace the orange path separately: expiry releases only hold `h1` if it still owns the seat. A payment arriving after expiry requires a refund or repair record; it cannot change AVAILABLE directly to SOLD based on an obsolete hold.
+
 ![Hold, payment, timeout, and confirmation compete for the same seat](../../../../assets/design-practice/ticket-inventory-trace.svg)
 
 ## Follow the failure instead of guessing

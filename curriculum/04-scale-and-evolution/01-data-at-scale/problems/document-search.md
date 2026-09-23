@@ -17,6 +17,10 @@ Assume 30 million documents, 15,000 updates/minute, and 3,000 search requests/s.
 
 The source store owns document content and version; an index owns searchable tokens and perhaps embeddings; an authorization source owns current read rights. Updates flow through a durable change stream and idempotent versioned indexing. A keyword index retrieves exact terms; semantic/vector retrieval helps with paraphrases but changes ranking and cost. Merge candidates and rank them after checking authorization for **each result before exposing title or snippet**. Index-time ACL filtering alone can leave a revocation gap. Keep document and ACL versions in cache keys or revalidate at read time according to the one-minute contract.
 
+![Twenty search hits pass through the current access decision before snippets are shown](../../../../assets/design-practice/document-search-deep.svg)
+
+The search index can be two minutes behind and still meet its freshness target. The authorization check has the stricter one-minute revocation rule. If ACL lookup fails, the design must choose an explicit unavailable/partial response without leaking snippets.
+
 ![Document edit and permission revocation race with index refresh](../../../../assets/design-practice/document-search-trace.svg)
 
 **Senior follow-up:** A backfill is 90% complete and new changes continue arriving. Define snapshot watermark, catch-up stream, version comparisons, cutover gates, and rollback. Measure ingestion age separately from query latency.

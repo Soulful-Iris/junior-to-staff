@@ -46,7 +46,7 @@ def local_target(b, page, href):
 def frame_practice(soup, page):
     """Present contracts and examples without hiding canonical source content."""
     source = page['src']
-    problem = '/problems/' in source and source.endswith('/README.md')
+    problem = '/problems/' in source and source.endswith('.md')
     project = '/projects/' in source or source.startswith('projects/reading-list/stages/')
     foundation = '/lessons/' in source and '/02-data-structures-algorithms/' in source
     if not (problem or project or foundation):
@@ -65,11 +65,14 @@ def frame_practice(soup, page):
         headers = [th.get_text(' ', strip=True) for th in table.select('thead th')]
         if not headers or len(headers) < 2:
             continue
-        expected = next((i for i, value in enumerate(headers) if value.lower().startswith('expected')), None)
+        expected = next((i for i, value in enumerate(headers)
+                         if value.lower().startswith(('expected', 'required result',
+                                                     'required decision', 'visible result',
+                                                     'observable result'))), None)
         if expected is None:
             continue
-        case_column = headers[0].lower() == 'case'
-        if not (case_column or foundation):
+        case_column = len(headers) > 2 and headers[0].lower() in {'case', 'example', 'request'}
+        if not (case_column or foundation or problem):
             continue
         input_column = 1 if case_column else 0
         if expected == input_column:

@@ -17,6 +17,10 @@ Assume 3,000 writes/s, a 15-minute recovery-time target, and an *initial* propos
 
 RPO bounds lost accepted data; RTO bounds service restoration. If an acknowledgment happens before the second durable copy commits, zero acknowledged-write loss is false under total regional loss. Options include cross-Region synchronous or strongly consistent commit at higher latency/availability cost, explicitly accepting nonzero RPO, or changing what 200 means. Draw the exact acknowledgement point and name the owner of writes in each Region. DNS or health checks change routing, not data durability.
 
+![Region A acknowledges version nine before Region B receives it](../../../../assets/design-practice/regional-failover-deep.svg)
+
+Follow the two outgoing paths from A: the customer gets 200, while replication toward B remains incomplete. If A fails there, B has v8. Place a new acknowledgment boundary after the necessary durable copies if zero lost acknowledged writes is the required outcome.
+
 ![Version nine is acknowledged, disappears during failover, then returns with the old Region](../../../../assets/design-practice/regional-failover-trace.svg)
 
 **Senior follow-up:** A is partitioned rather than destroyed; both Regions can reach some clients. Fence the old writer before promoting B and define behavior when fencing cannot be confirmed. Use an epoch or lease with write-time enforcement; observing a lease in a monitoring dashboard does not prevent a stale process writing.
