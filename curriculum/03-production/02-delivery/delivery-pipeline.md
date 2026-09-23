@@ -89,44 +89,37 @@ reasonable. The loop is a machine for maximising blast radius.
 
 The same bug in a team that deploys many times a day is a different event: the
 suspect is one small diff that landed an hour ago, the canary flags the error
-rate while exposure is still 1%, and the way back is switching a flag off.
-Nothing about that team is more careful. Their batches are smaller.
+rate while exposure is still 1%. Switching the flag off stops new exposure;
+in-flight work and committed effects still need their own recovery plan. Small
+batches help isolate a change, but do not make a dangerous change safe.
 
 ## The mental model
 
-**Batch size is the risk dial.** The instinct says deploys are risk events, so
-have fewer. But a deploy's danger is proportional to what changed: a small
-change can be reviewed honestly, blamed quickly — it broke now, and only one
-thing is new — and undone cheaply. And machinery used daily is rehearsed
-machinery, where a quarterly deploy is opening night performed by people out
-of practice. The counterintuitive part is measured, not asserted: DORA's
-research programme has found repeatedly that speed and stability are not a
-trade-off — the same teams score well on both, and low performers score badly
-on both (checked at dora.dev, 2026-09-21). You do not buy stability by slowing
-down. You buy it by shrinking the batch; frequency is what falls out.
+**Small batches make evidence easier to inspect.** A small change is usually
+easier to review, diagnose and reverse than an unrelated bundle of changes.
+Risk is not proportional to line count: one authorization rule or destructive
+migration can have a large blast radius. Use independent tests, compatible
+rollouts and a rehearsed recovery path; frequency alone proves none of these.
 
-**Deploy and release are different events.** A *deploy* puts a new artefact on
-servers, dark. A *release* routes users onto the new path. Progressive
-delivery is doing the second in slices: a **canary** — the new version taking
-a small share of real traffic, watched against the baseline for errors and
-latency — then a percentage rollout, 1%, 10%, 100%, usually with a **feature
-flag** as the switch. Splitting the events is what makes going back cheap:
-undoing a release is flipping a flag in seconds; undoing a deploy means moving
-artefacts. It also shrinks the cost of being wrong to whatever slice was
-exposed, and it is the only honest way to test in production — the one
-environment whose traffic you did not invent.
+**Deploy and release are different events.** A *deploy* puts an artifact on
+servers; a *release* exposes behavior to users. Compatible code can deploy with
+a feature off, then a **canary** or percentage rollout can expose 1%, 10% and
+100%, watching errors, latency and delayed jobs at each step. Deploying dark
+still runs startup code and may change resource use: test that path too.
 
-![One deploy puts v2 on every server with the feature off; the release then moves users onto the new path in slices — 1%, then 10%, then 100% — and at any step the way back is switching the flag off in seconds, while the artefact stays where it is.](../../../assets/diagrams/deploy-vs-release.svg)
+![Deploy compatible code, then release to increasing cohorts. Turning the flag off stops new exposure, not already committed effects.](../../../assets/diagrams/deploy-vs-release.svg)
 
-**A feature flag is a fork in your code with a timer on it.** While the flag
-exists, two programs share one file, and every flag multiplies the paths a
-request can take. So a flag is created with three things or not at all: an
-owner, a removal date, and a definition of done that says *removed*, not "at
-100%". Without them, flags accumulate into a codebase where nobody dares
-delete the `temp_` check from three years ago because nobody knows who is
-still behind it. OpenFeature — a CNCF incubating project, checked 2026-09-21 —
-standardises the flag API so you are not welded to one vendor; it cannot
-standardise the discipline.
+| Recovery action | What it changes | What it cannot undo |
+|---|---|---|
+| Turn the flag off | New requests use the supported control path after config propagation | An admitted job or committed row |
+| Drain or cancel work | In-flight jobs follow their documented cancellation boundary | An external effect already committed |
+| Repair effects | A versioned repair, refund or compensating event addresses persisted effects | Recall an email or erase an event another service consumed |
+
+**A flag needs a lifecycle, not always a removal date.** A temporary release
+flag has an owner, removal date and cleanup diff. A long-lived operational
+control has an owner, review date and tests for both states. Keep the supported
+paths and schema compatible throughout the declared rollback window. Retiring
+the old path closes that window; document the repair/roll-forward plan first.
 
 **The pipeline is the most privileged system you own.** It holds credentials
 to production, and it runs code that arrives in pull requests — dependency
@@ -182,7 +175,7 @@ runbook. But be precise about what rolls back: the artefact does; several
 things never do. A migration that dropped a column cannot be un-run, which is
 why schema changes are written **expand/contract** — add the new alongside the
 old, ship code that works with both, remove the old only when nothing running
-needs it — so the previous version of the code always still works. Sent
+needs it, including versions supported during the rollback window. Sent
 emails, charged cards, and events other systems already consumed do not roll
 back either. The senior reviewer's question for every change: *if we roll this
 back in an hour, what stays behind?*
@@ -200,8 +193,8 @@ back in an hour, what stays behind?*
   has been recreated from the repo at least once.
 - You can deploy dark and release by percentage; the two events sometimes
   happen on different days, and that surprises nobody.
-- Every flag has an owner and a removal date, and the count of live flags goes
-  down as well as up.
+- Temporary release flags have owners and removal dates; operational flags
+  have owners, review dates and tested enabled/disabled behavior.
 - Rollback is one action; the last rehearsal has a date and a duration.
 - Migrations are expand/contract: the previous version of the code runs
   against the current schema, and someone has proved it.
@@ -257,7 +250,8 @@ previous version run correctly against the current schema.
 
 For each step, state what deploys, what migrates, and what breaks
 if we roll back at exactly this point. If the answer is ever
-"rollback breaks", the sequence is wrong.
+"rollback breaks", identify the explicit compatibility-retirement gate and
+the tested repair or roll-forward path. Before that gate, preserve rollback.
 ```
 
 *Why:* the both-versions rule is the constraint doing the work. Without it you
@@ -365,8 +359,8 @@ On **P2**, the reading list from P1 gets its delivery machinery:
   instead of to everyone at once.
 - **canary** — the new version taking a small share of real traffic, watched
   against the old.
-- **feature flag** — a runtime switch between code paths. A fork with an owner
-  and a removal date, or a liability.
+- **feature flag** — a runtime switch between code paths with a named owner
+  and lifecycle: removal for temporary release flags, review for operational controls.
 - **merge queue** — tests changes combined, in landing order, so main only
   receives what passed together.
 - **infrastructure as code** — the repo as the description of reality, applied
@@ -407,7 +401,7 @@ flowchart TD
   Rollback --> Routing
 ```
 
-**Redraw challenge:** Which change can a flag undo, and which database transformation requires a separate recovery plan?
+**Redraw challenge:** Which new requests does flag-off redirect? Trace an admitted job, a committed new-schema row and an emitted event; give each a drain, cancel or repair outcome.
 
 ![Deploy and release are separate controls: mechanism in motion](../../../assets/learning/config-cohorts.svg)
 
