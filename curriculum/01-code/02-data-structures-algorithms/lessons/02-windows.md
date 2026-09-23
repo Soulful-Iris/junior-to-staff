@@ -6,9 +6,9 @@
 
 The answer is 2, not 3. Trace what the second b invalidates and why seeing the final a must not move the left boundary backward.
 
-This is a short prerequisite lesson. Attempt the complete [longest unique window problem](../problems/04-longest-unique-window/README.md), then [minimum covering window](../problems/05-minimum-covering-window/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Find the longest substring without repeated characters. `abba → 2`.
+**Working example:** Find the longest substring without repeated characters. `abba → 2`.
 
 ![Windows: move boundaries, avoid rescanning](../../../../assets/learning/window-moves.svg)
 
@@ -46,12 +46,9 @@ last_seen[char] = right
 
 `get(char, -1)` returns −1 when the key has not appeared. That makes a first occurrence keep `left` at 0. Write these three lines in this order: move the boundary, measure the valid window, then record the current position.
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `longest_unique` without the reference.
-3. **10 min:** use the exact input/output table below; trace the first and last rows by hand.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Repeatedly check substrings: up to O(n³). Last-seen window: O(n) time, O(u) space for u distinct characters.
 
@@ -75,5 +72,3 @@ Here `n` is the number of characters and `u` is the number of *distinct* charact
 Compare `longest_unique` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](01-maps.md) · [Next: Prefix sums: count possible starts](03-prefix.md)

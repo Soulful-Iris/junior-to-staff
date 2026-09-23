@@ -18,13 +18,13 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 
 ## The tool before the challenge
 
-A Python map is a `dict`. Here it tracks unfinished matches: a `3` at index 0 with target `6` is waiting for another `3`. The second 3 completes the pair; a one-item `[3]` cannot reuse itself.
+A Python map is a `dict`. Here it remembers earlier values and their positions. A `3` at index 0 can pair with a later `3` to total `6`; a one-item `[3]` cannot reuse itself.
 ```python
-pending_matches = {3: 0}     # need 3; return index 0 if it arrives
-print(3 in pending_matches)  # True
-print(pending_matches[3])    # 0
+visited = {3: 0}     # value 3 appeared at index 0
+print(3 in visited)  # True
+print(visited[3])    # 0
 ```
-Trace the dictionary *before* processing each position. A key is the **future value needed**; its value is the earliest index waiting for it. If the contract asks for **all** pairs, each needed value must retain a list of waiting indices instead. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
+Trace the dictionary *before* processing each position. A key is an **earlier value**; its stored index is that value's first occurrence. If the contract asks for **all** pairs, retain every earlier index per value instead. The foundations chapter covers map operations; this problem adds tie order and invalid inputs.
 
 <!-- interview-rehearsal:start -->
 
@@ -46,7 +46,8 @@ leave any existing state unchanged unless the contract says otherwise.
 | Representative | `[2, 7, 11, 15]`, target `9` | `(0, 1)` | A prior complement should be found. |
 | Repeated value | `[3, 3]`, target `6` | `(0, 1)` | Two positions may hold the same value. |
 | No answer | `[1, 2, 3]`, target `20` | `None` | Absence is part of the return contract. |
-| Too little input | `[]` and `[9]` | `None` for both | One position cannot be reused. |
+| Empty input | `nums=[]`, `target=9` | `None` | There are no positions to pair. |
+| Only one item | `nums=[3]`, `target=6` | `None` | One position cannot be reused. |
 | Tie rule | `[1, 4, 2, 3]`, target `5` | `(0, 1)` | Smallest right index wins before later pairs. |
 | Invalid/atomic | `[True, 2]`, target `3` | `ValueError`; input unchanged | Python booleans must not silently count as integers. |
 
@@ -70,22 +71,20 @@ your state means before saying which data structure stores it.
 
 Start with each possible right endpoint `j`, then try all earlier `i` in order.
 That baseline directly implements the tie rule but performs O(n²) comparisons.
-A candidate should identify the precise repeated question: “Is someone waiting
-for `nums[j]`, and which earlier index was first?” `pending_matches` answers
-that question without rescanning the prefix. A needed future value maps to
-the earliest earlier index waiting for it.
+A candidate should identify the repeated question: “Did `target - nums[j]`
+appear earlier, and where did it first appear?” `visited` answers that question
+without rescanning the prefix. Each encountered value maps to its first index.
 
-| j / value | Check pending key | Map before lookup | Result / next map |
+| j / value | Look up complement | Map before lookup | Result / next map |
 |---|---:|---|---|
-| 0 / 3 | 3 | `{}` | no pair; save `6 - 3 = 3 → 0` |
+| 0 / 3 | 3 | `{}` | no pair; remember `3 → 0` |
 | 1 / 3 | 3 | `{3: 0}` | return `(0, 1)` |
 
-The invariant is that, before processing `j`, the map contains the value needed
-to complete each earlier item, with the earliest waiting index for each needed
-value. Lookup **before** insertion prevents using `j` twice. Keeping the first
-waiting index preserves the second tie rule; returning on the first successful
-right endpoint preserves the first. If lookup fails, record this item's needed
-future value unless an earlier index is already waiting for it.
+The invariant is that, before processing `j`, the map contains each earlier
+value and its first index. Lookup **before** insertion prevents using `j`
+twice. Keeping the first index preserves the second tie rule; returning on
+the first successful right endpoint preserves the first. If lookup fails,
+record this value and index unless the value already has an earlier index.
 If every lookup fails, every eligible pair was ruled out when its right endpoint
 was visited. Hash lookup has expected constant cost, so validation plus search
 cost expected O(n) time and O(n) auxiliary space; adversarial hash behavior is
@@ -94,7 +93,7 @@ not a promised worst-case O(n) bound. No result-size term is needed for one pair
 ### Follow-up 1: return every index pair
 
 Predict the state change before reading the table. Storing one index now loses
-answers. Map each needed future value to **all** waiting indices and emit a pair for each match.
+answers. Map each encountered value to **all** earlier indices and emit a pair for each complement match.
 For `[3, 3, 3]`, target 6:
 
 | Right index | Stored matching indices | Newly emitted pairs |

@@ -6,9 +6,9 @@
 
 With retained [4,7,7], discard 2 but admit 9 and remove 4. Then ask why a cheapest tentative route can still have an obsolete heap entry.
 
-This is a short prerequisite lesson. Attempt the complete [top k stream problem](../problems/26-top-k-stream/README.md), then [weighted shortest path](../problems/25-weighted-shortest-path/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Return the K **largest observations** (duplicates count), then compute shortest distances with nonnegative edge weights. “Largest” is different from “most frequent”: a value seen once can be largest.
+**Working example:** Return the K **largest observations** (duplicates count), then compute shortest distances with nonnegative edge weights. “Largest” is different from “most frequent”: a value seen once can be largest.
 
 ```mermaid
 flowchart TD
@@ -42,12 +42,9 @@ Before the 9 arrives, the retained values are `[4, 7, 7]`; arrival 2 loses to th
 
 [Static view](../../../../assets/learning/heap-sift-still.svg)
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `top_k_frequent, shortest_paths` without the reference.
-3. **10 min:** use the concrete cases below, keeping stream and graph outputs separate.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Top k largest stream: O(n log(k+1)) updates, O(k) retained space. Lazy-heap Dijkstra: O(V + E log(E+1)) time, O(V+E) space.
 
@@ -73,5 +70,3 @@ For the *largest-observations stream*, each of `n` arrivals costs at most O(log(
 Compare `top_k_frequent, shortest_paths` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](05-graphs.md) · [Next: Stacks: keep unresolved work](07-stack.md)

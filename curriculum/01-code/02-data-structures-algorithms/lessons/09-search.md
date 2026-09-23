@@ -6,9 +6,9 @@
 
 AB succeeds; ABA fails under the no-cell-reuse rule. Track choices local to one path, restore them after return, and keep that state separate from a dictionary trie.
 
-This is a short prerequisite lesson. Attempt the complete [word search problem](../problems/32-word-search/README.md), then [trie autocomplete](../problems/30-trie-autocomplete/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Find a word along neighboring cells without reuse; then implement exact word insertion and lookup.
+**Working example:** Find a word along neighboring cells without reuse; then implement exact word insertion and lookup.
 
 ```mermaid
 flowchart TD
@@ -55,12 +55,9 @@ root["children"]["a"] = {"children": {}, "end": False}
 
 [Static view](../../../../assets/learning/trie-prefix-still.svg)
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `word_exists, Trie` without the reference.
-3. **10 min:** check the exact search and trie examples below.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Word search: O(rows × cols × 4^L) conservative time, O(L) working space. Trie lookup: O(L).
 
@@ -85,5 +82,3 @@ For `r×c` grid cells and word length `L`, a conservative search bound is O(r×c
 Compare `word_exists, Trie` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](08-dp.md) · [Next: Stateful coding: design an LRU cache](../../../04-scale-and-evolution/01-data-at-scale/cache-order.md)

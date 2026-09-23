@@ -4,7 +4,7 @@ The redesign targets `site/concept-first` and incorporates the branch's automati
 
 ## Learning experience
 
-- Four parts and all 17 chapters are available in the left contents on every page. Expanding a chapter reveals its learning sections and ordered steps. The current lesson exposes its own heading hierarchy.
+- Four parts and all 18 chapters are available in the left contents on every page. Expanding a chapter reveals its learning sections and ordered steps. The current lesson exposes its own heading hierarchy.
 - Homepage → part introduction → chapter introduction → lessons, exercises, projects and assessment form one sequence. Previous and Next agree at every boundary.
 - Coding refreshers immediately precede relevant problems. All 42 coding bundles and all five continuing-project stages are in the guided sequence.
 - Full reference implementations and tests appear inside their lesson. Reference disclosures protect independent attempts; subsection navigation can reveal a requested explanation in place.

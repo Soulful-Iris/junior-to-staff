@@ -6,9 +6,9 @@
 
 There are three ranges. Explain why a window based only on whether the sum is too large cannot decide which boundary to move.
 
-This is a short prerequisite lesson. Attempt the complete [subarray sum count problem](../problems/06-subarray-sum-count/README.md), then [product except self](../problems/07-product-except-self/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Count nonempty contiguous ranges summing to K. `[1,-1,1], 1 → 3`.
+**Working example:** Count nonempty contiguous ranges summing to K. `[1,-1,1], 1 → 3`.
 
 ![Prefix sums: count possible starts](../../../../assets/learning/prefix-counts.svg)
 
@@ -41,12 +41,9 @@ This dictionary maps **prefix total → number of earlier times we saw it**. A s
 
 **Read the animation:** the counter on the right is not an index map. It records the *frequency* of a prefix total. Notice the current total is counted only after its matches to earlier totals, excluding an empty range made by using the current state twice.
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `subarray_sum` without the reference.
-3. **10 min:** verify the input/output table below and identify each returned range.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Running sum from each start: O(n²). Frequency map: expected O(n) time and O(n) space.
 
@@ -70,5 +67,3 @@ This dictionary maps **prefix total → number of earlier times we saw it**. A s
 Compare `subarray_sum` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](02-windows.md) · [Next: Sorted data: binary search and intervals](04-order.md)

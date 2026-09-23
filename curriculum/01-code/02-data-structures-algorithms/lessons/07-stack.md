@@ -6,9 +6,9 @@
 
 The output is [1,2,1,0]. Equal temperatures do not qualify. Identify the unresolved days before trying to optimize repeated forward scans.
 
-This is a short prerequisite lesson. Attempt the complete [daily temperatures problem](../problems/37-daily-temperatures/README.md), then [largest histogram rectangle](../problems/38-largest-histogram-rectangle/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** For each temperature, return days until a strictly warmer day. `[73,74,71,75] → [1,2,1,0]`.
+**Working example:** For each temperature, return days until a strictly warmer day. `[73,74,71,75] → [1,2,1,0]`.
 
 ![Stacks: keep unresolved work](../../../../assets/learning/monotonic-stack.svg)
 
@@ -41,12 +41,9 @@ At 74, day 0 is resolved. At 75, both 71 (day 2) and 74 (day 1) are popped. Equa
 | 2 / 71 | `[1, 2]` | `[1, 0, 0, 0]` |
 | 3 / 75 | `[3]` | `[1, 2, 1, 0]` |
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `daily_temperatures` without the reference.
-3. **10 min:** check the input/output cases below, including strict equality.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Scan forward for each day: O(n²). Monotonic stack: O(n) time and O(n) space.
 
@@ -70,5 +67,3 @@ The `while` loop looks nested, but each of `n` indices enters the stack once and
 Compare `daily_temperatures` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](06-heaps.md) · [Next: Dynamic programming: define a smaller problem](08-dp.md)

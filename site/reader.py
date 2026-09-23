@@ -43,6 +43,79 @@ def local_target(b, page, href):
     except ValueError: return None
 
 
+def frame_practice(soup, page):
+    """Present contracts and examples without hiding canonical source content."""
+    source = page['src']
+    problem = '/problems/' in source and source.endswith('/README.md')
+    project = '/projects/' in source or source.startswith('projects/reading-list/stages/')
+    foundation = '/lessons/' in source and '/02-data-structures-algorithms/' in source
+    if not (problem or project or foundation):
+        return
+    if problem or project:
+        brief = soup.find('blockquote')
+        if brief:
+            panel = soup.new_tag('section', attrs={'class': 'task-brief', 'aria-label': 'Project brief' if project else 'Problem brief'})
+            label = soup.new_tag('div', attrs={'class': 'task-label'})
+            label.string = 'YOUR PROJECT' if project else 'THE PROBLEM'
+            brief.wrap(panel)
+            panel.insert(0, label)
+    # Input/output examples are stacked pairs on small screens. Comparison,
+    # trace, and contract tables remain tables: their columns are meaningful.
+    for table in list(soup.find_all('table')):
+        headers = [th.get_text(' ', strip=True) for th in table.select('thead th')]
+        if not headers or len(headers) < 2:
+            continue
+        expected = next((i for i, value in enumerate(headers) if value.lower().startswith('expected')), None)
+        if expected is None:
+            continue
+        case_column = headers[0].lower() == 'case'
+        if not (case_column or foundation):
+            continue
+        input_column = 1 if case_column else 0
+        if expected == input_column:
+            continue
+        cards = soup.new_tag('div', attrs={'class': 'example-cards', 'role': 'list', 'aria-label': 'Inputs and expected results'})
+        for number, row in enumerate(table.select('tbody tr'), 1):
+            cells = row.find_all('td', recursive=False)
+            if len(cells) != len(headers):
+                raise ValueError(f'Malformed example row in {source}')
+            card = soup.new_tag('section', attrs={'class': 'example-card', 'role': 'listitem'})
+            title = soup.new_tag('h4', attrs={'class': 'example-title'})
+            title.string = f'{number:02} · ' + (cells[0].get_text(' ', strip=True) if case_column else 'Try this input')
+            card.append(title)
+            pair = soup.new_tag('dl', attrs={'class': 'example-pair'})
+            for index, label in [(input_column, 'Input / starting state'), (expected, 'Expected result')]:
+                item = soup.new_tag('div', attrs={'class': 'example-value'})
+                term = soup.new_tag('dt'); term.string = label
+                value = soup.new_tag('dd')
+                for child in list(cells[index].contents): value.append(child.extract())
+                item.extend([term, value]); pair.append(item)
+            card.append(pair)
+            remaining = [i for i in range(len(cells)) if i not in {input_column, expected} and not (case_column and i == 0)]
+            for index in remaining:
+                note = soup.new_tag('p', attrs={'class': 'example-reason'})
+                label = soup.new_tag('strong'); label.string = headers[index] + ': '
+                note.append(label)
+                for child in list(cells[index].contents): note.append(child.extract())
+                card.append(note)
+            cards.append(card)
+        enclosure = table.parent if 'tablewrap' in table.parent.get('class', []) else table
+        enclosure.replace_with(cards)
+    if problem:
+        heading = next((h for h in soup.find_all('h2') if h.get_text(strip=True) == 'The tool before the challenge'), None)
+        if heading:
+            refresher = soup.new_tag('details', attrs={'class': 'concept-refresher'})
+            summary = soup.new_tag('summary'); summary.string = 'Optional refresher · the underlying tool'
+            refresher.append(summary)
+            heading.insert_before(refresher)
+            node = heading.next_sibling
+            while node is not None and getattr(node, 'name', None) not in {'h2', 'h3'}:
+                following = node.next_sibling
+                refresher.append(node.extract())
+                node = following
+            heading.decompose()
+
+
 def compose(b, page, have, by_dest):
     depth = len(Path(b.dest_for(page['src'])).parts) - 1
     text = prepare_text(page['text'])
@@ -142,6 +215,7 @@ def compose(b, page, have, by_dest):
         for url, label in sources:
             li = soup.new_tag('li'); a = soup.new_tag('a', href=url, target='_blank', rel='noopener noreferrer'); a.string=label; li.append(a); ul.append(li)
         details.append(ul); soup.append(details)
+    frame_practice(soup, page)
     headings = []
     for heading in soup.find_all(['h2', 'h3']):
         if heading.get('id'): headings.append({'id': heading['id'], 'title': heading.get_text(' ', strip=True), 'level': int(heading.name[1])})
@@ -215,7 +289,7 @@ def overview(b, sequence, base):
 <h1>Build the judgment.<br><em>Then write the code.</em></h1>
 <p class="hero-lede">Understand the problem. Make the trade-offs. Build something that holds up.<br class="desktop-only"> One guided journey from your first correct solution to systems you can defend.</p>
 <div class="hero-actions"><a class="primary-button" data-start href="{href(base,sequence[1])}">Start learning <span aria-hidden="true">↗</span></a><span>One sequence. Deeper questions at every step.</span></div>
-<div class="hero-stats"><div><strong>17</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>45</strong><span>project briefs</span></div></div></header>
+<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>45</strong><span>project briefs</span></div></div></header>
 <section class="home-mechanism"><div class="section-label">01 / THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
 <section class="journey-section"><div class="section-label">02 / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">0{i}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for i,(name,desc,detail) in enumerate([
 ('Write correct code','Clarify a problem. Work with AI deliberately. Choose a data structure and defend its invariant.','Problem solving · Algorithms'),

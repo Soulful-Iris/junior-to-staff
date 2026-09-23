@@ -74,9 +74,9 @@ def cells(vals,x=55,y=120,step=90,w=65):
 
 def maps():
     s=heading(45,74,'TARGET 9 · LOOK UP BEFORE INSERTING')+cells([2,7,11,15],45,100,82,60)
-    s+=box(475,95,230,155,'',GRAY,BG)+heading(496,119,'EARLIER VALUE → INDEX')
+    s+=box(475,95,230,155,'',GRAY,BG)+heading(496,119,'VISITED · VALUE → INDEX')
     s+=path('M75 151 V208 Q75 222 90 222 H510 V165',GREEN,1.5,True)
-    s+=text(130,212,'insert 2 → 0',14,GREEN)
+    s+=text(130,212,'remember 2 → 0',14,GREEN)
     s+=reveal(text(500,170,'2 → 0',23,GREEN),.25)
     s+=moving(text(0,5,'2',19,GREEN,'middle'),'M75 125 V222 H510 V165',[(0,0),(.04,0),(.28,1),(1,1)],[(0,1),(.28,1),(.3,0),(1,0)])
     s+=path('M157 151 V282 H665 V183',ORANGE,1.5,True)+text(215,275,'7 needs 2: one lookup',14,ORANGE)

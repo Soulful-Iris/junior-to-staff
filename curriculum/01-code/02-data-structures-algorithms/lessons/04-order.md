@@ -6,9 +6,9 @@
 
 The search returns index 1. Booking policy determines endpoint overlap; write that contract before using either binary search or interval merging.
 
-This is a short prerequisite lesson. Attempt the complete [binary search boundary problem](../problems/11-binary-search-boundary/README.md), then [meeting room capacity](../problems/10-meeting-room-capacity/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Find the first index ≥ target; then merge overlapping closed intervals.
+**Working example:** Find the first index ≥ target; then merge overlapping closed intervals.
 
 ![Sorted data: binary search and intervals](../../../../assets/learning/binary-halving.svg)
 
@@ -42,12 +42,9 @@ Python's slice notation `[lo, hi)` includes `lo` but excludes `hi`. The same *en
 
 [Static view](../../../../assets/learning/merge-intervals-still.svg)
 
-## Your 45-minute session
+## Check the mechanism
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `lower_bound, merge_intervals` without the reference.
-3. **10 min:** check the exact examples below; say which endpoint convention each interval uses.
-4. **5 min:** explain the cost and answer the changed requirement.
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** Search: O(log n) time, O(1) space on sorted data. Merge: O(n log n) time, O(n) space including the sorted copy.
 
@@ -72,5 +69,3 @@ For search, halving `n` candidates about `log₂ n` times gives O(log n) compari
 Compare `lower_bound, merge_intervals` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](03-prefix.md) · [Next: Graphs: visit once, then track prerequisites](05-graphs.md)

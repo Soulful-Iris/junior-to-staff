@@ -4,11 +4,12 @@ from heapq import heappop, heappush, nlargest
 
 
 def two_sum(nums, target):
-    pending_matches = {}
+    visited = {}
     for j, value in enumerate(nums):
-        if value in pending_matches:
-            return pending_matches[value], j
-        pending_matches.setdefault(target - value, j)
+        complement = target - value
+        if complement in visited:
+            return visited[complement], j
+        visited.setdefault(value, j)
     return None
 
 

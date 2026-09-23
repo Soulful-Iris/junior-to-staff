@@ -31,7 +31,10 @@ def main():
     assert len(briefs)==40, f'Missing standalone briefs: {len(briefs)}'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
     assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
-    assert sequence.index(bank[0]['path'])==sequence.index('curriculum/01-code/02-data-structures-algorithms/lessons/01-maps.md')+1
+    foundations=[p for p in sequence if '/02-data-structures-algorithms/lessons/' in p]
+    assert len(foundations)==23
+    assert max(map(sequence.index,foundations)) < min(sequence.index(p['path']) for p in bank)
+    assert sequence[sequence.index(foundations[-1])+1]=='curriculum/01-code/03-coding-practice/README.md'
     project_sources={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum').rglob('*.md') if '/projects/' in p.as_posix()}
     project_sources|={str(p.relative_to(ROOT)) for p in (ROOT/'projects/reading-list/stages').rglob('README.md')}
     assert len(project_sources)==45
@@ -58,9 +61,14 @@ def main():
             heading=next((h for h in article.find_all('h2') if h.get_text(strip=True)=='What the interviewer expects'),None)
             assert heading,src
             scenario=next((h for h in article.find_all('h3') if h.get_text(strip=True)=='Test-case scenarios to settle before coding'),None)
-            assert scenario and scenario.find_next('table') and len(scenario.find_next('table').select('tr'))-1>=6,src
+            assert scenario and len(scenario.find_next('div',class_='example-cards').select('.example-card'))>=6,src
+            assert article.select_one('.task-brief blockquote'),src
+            assert article.select_one('details.concept-refresher:not([open])'),src
+            for card in article.select('.example-card'):
+                assert len(card.select('.example-pair dt'))==2 and len(card.select('.example-pair dd'))==2,src
             rehearsed+=1
         if src in project_sources:
+            assert article.select_one('.task-brief blockquote') and len(article.select('.example-card'))>=3,src
             heading=next((h for h in article.find_all('h2') if h.get_text(strip=True)=='What you are expected to hand over'),None)
             assert heading,src
             gates=next((h for h in article.find_all('h3') if h.get_text(strip=True)=='How the review conversation gets harder'),None)
@@ -71,7 +79,7 @@ def main():
                 product_visuals+=1
         toc=soup.select_one('nav[aria-label="Table of contents"]');assert toc,src
         assert len(toc.select('.toc-area:not(.reference-area):not(.company-area)'))==4,src
-        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area) .toc-chapter'))==17,src
+        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area) .toc-chapter'))==18,src
         assert len(toc.select('.company-area .toc-chapter'))==5,src
         assert len(toc.select('[aria-current="page"]'))==1,src
         for link in soup.select('[data-heading]'):
@@ -124,7 +132,7 @@ def main():
     assert len(originals)>=134
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
-    print(f'PASS {len(pages)} pages: full 4-part / 17-chapter TOC, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
+    print(f'PASS {len(pages)} pages: full 4-part / 18-chapter TOC, 23 foundations before practice, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
     print('PASS 42 interview expectation blocks, 45 project deliverables with six review gates, and 5 expected-product placements.')
     print(f'PASS {embedded} exact inline files; all {len(originals)} source SVGs copied byte-identically; {len(diagrams)} Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 

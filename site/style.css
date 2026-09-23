@@ -84,3 +84,22 @@
 .code-actions .copy-code:hover,.code-actions .copy-code:focus-visible{background:#e3eee0;border-color:#91b496}
 @media(max-width:760px){.lesson-body .code-actions{min-height:44px}.code-actions .copy-code{min-height:44px}}
 @media print{.lesson-body .code-actions{display:none}.lesson-body .code-example{margin:22px 0}}
+
+/* A brief is the entry point; concrete examples are readable without swiping. */
+.lesson-body .task-brief{margin:24px 0 30px;padding:25px 28px;border:1px solid #bdcebc;border-left:5px solid #37684c;border-radius:10px;background:linear-gradient(120deg,#edf4e9,#fafbf7);box-shadow:0 8px 24px #25442b06}
+.task-label{font:700 10px/1.5 var(--sans);letter-spacing:.15em;color:#3e634c;margin-bottom:13px}
+.lesson-body .task-brief blockquote{margin:0;padding:0;border:0;background:none;border-radius:0}
+.lesson-body .task-brief blockquote p{font:400 23px/1.55 var(--serif);color:#253e30;margin:0;max-width:none}
+.example-cards{display:grid;gap:16px;margin:25px 0 32px;min-width:0}
+.example-card{min-width:0;border:1px solid #d4ded0;border-radius:9px;overflow:hidden;background:#fbfcf9}
+.lesson-body .example-title{font:650 13px/1.5 var(--sans);color:#35523c;margin:0;padding:13px 19px;background:#edf2e8;border-bottom:1px solid #dce4d5}
+.example-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin:0}
+.example-value{min-width:0;padding:18px 19px}
+.example-value+.example-value{border-left:1px solid #e0e6d9;background:#f4f7f0}
+.example-value dt{font:650 10px/1.5 var(--sans);letter-spacing:.07em;text-transform:uppercase;color:#61735b;margin-bottom:9px}
+.example-value dd{margin:0;font-size:14px;line-height:1.7;overflow-wrap:anywhere;color:#263d2d}
+.example-value code{white-space:normal;overflow-wrap:anywhere;font-size:13px}
+.lesson-body .example-reason{margin:0;padding:13px 19px;border-top:1px solid #e0e6d9;font-size:13px;line-height:1.65;color:#53624d;max-width:none}
+.lesson-body details.concept-refresher{background:#fafbf7;border-style:dashed;margin:25px 0}
+@media(max-width:760px){.lesson-body .task-brief{padding:20px 18px}.lesson-body .task-brief blockquote p{font-size:21px}.example-pair{grid-template-columns:minmax(0,1fr)}.example-value+.example-value{border-left:0;border-top:1px solid #e0e6d9}.example-value{padding:15px 17px}.lesson-body .example-title,.lesson-body .example-reason{padding-left:17px;padding-right:17px}}
+@media print{.example-card,.task-brief{break-inside:avoid;box-shadow:none}}

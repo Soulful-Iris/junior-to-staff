@@ -24,17 +24,20 @@ try {
   async function go(path='/'){await page.goto(address+path);await page.evaluate(()=>document.fonts.ready);}
   const maps='/curriculum/01-code/02-data-structures-algorithms/lessons/01-maps.html';
   const sum='/curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum/';
+  const practiceStart='/curriculum/01-code/02-data-structures-algorithms/practice-sequence.html';
   await check('Homepage explains the journey and shows the full nested contents',async()=>{
     await go();assert.match(await page.locator('h1').textContent(),/Build the judgment/);
     assert.equal(await page.locator('.toc-area:not(.reference-area):not(.company-area)').count(),4);
-    assert.equal(await page.locator('.toc-area:not(.reference-area):not(.company-area) .toc-chapter').count(),17);
+    assert.equal(await page.locator('.toc-area:not(.reference-area):not(.company-area) .toc-chapter').count(),18);
     assert.equal(await page.locator('.company-area .toc-chapter').count(),5);
     assert.equal(await page.locator('.toc-area h2').first().evaluate(e=>getComputedStyle(e).fontSize),'10px');
     assert.equal(await page.locator('.lesson-body a:not([data-start])').count(),0);
     await page.screenshot({path:join(shots,'home-desktop.png'),fullPage:true});
   });
-  await check('A primer leads directly to its problem, with references inside the lesson',async()=>{
-    await go(maps);assert.equal(await page.locator('.next-step').getAttribute('href'),sum);
+  await check('Foundations precede practice, with references inside each problem',async()=>{
+    await go(maps);assert.match(await page.locator('.next-step').getAttribute('href'),/07-stack.html$/);
+    await page.locator('.next-step').click();
+    await go(practiceStart);assert.equal(await page.locator('.next-step').getAttribute('href'),sum);
     await page.locator('.next-step').click();await page.waitForURL(address+sum);
     assert.match(await page.locator('h1').textContent(),/Two sum/);
     assert.equal(await page.locator('.lesson-body details').first().getAttribute('open'),null);
@@ -63,15 +66,15 @@ try {
   await check('Subsection navigation reveals its closed answer and keeps the same page',async()=>{
     await go(sum);
     const follow=page.locator('[data-heading]').filter({hasText:'Follow-up 1'}).first();
-    await follow.click();assert.ok(await page.locator('.lesson-body details').first().evaluate(e=>e.open));
+    await follow.click();assert.ok(await page.locator('.lesson-body details:not(.concept-refresher)').filter({has:page.locator('h3', {hasText:'Follow-up 1'})}).evaluate(e=>e.open));
     assert.ok(page.url().startsWith(address+sum+'#'));
     await page.waitForFunction(()=>[...document.querySelectorAll('h3')].some(e=>e.textContent.includes('Follow-up 1')&&e.getBoundingClientRect().top>50&&e.getBoundingClientRect().top<180));
     await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:join(shots,'worked-lesson-desktop.png'),fullPage:true});
   });
   await check('Previous and Next agree, and progress resumes on the homepage',async()=>{
-    await page.locator('.previous-step').click();await page.waitForURL(address+maps);
+    await page.locator('.previous-step').click();await page.waitForURL(address+practiceStart);
     await go();assert.match(await page.locator('[data-start]').textContent(),/Continue learning/);
-    assert.equal(await page.locator('[data-start]').getAttribute('href'),maps);
+    assert.equal(await page.locator('[data-start]').getAttribute('href'),practiceStart);
     const completed=await page.evaluate(()=>JSON.parse(localStorage.getItem('engineering-guide:progress:v1')).completed);
     assert.ok(completed.some(s=>s.endsWith('lessons/01-maps.md')));
   });
@@ -88,7 +91,7 @@ try {
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
       if(width<760){
         assert.equal(await page.locator('.mobile-page-title').textContent(),await page.locator('h1').textContent());
-        assert.match(await page.locator('.mobile-page-position').textContent(),/CHAPTER 02 · STEP/);
+        assert.match(await page.locator('.mobile-page-position').textContent(),/CHAPTER 03 · STEP/);
         await page.screenshot({path:join(shots,`sticky-navigation-${width}.png`)});
       }
     }

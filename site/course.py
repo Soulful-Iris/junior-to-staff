@@ -7,31 +7,44 @@ context. Every source page is still published and available in the contents.
 from pathlib import Path
 
 NAV_NAMES = {'projects.md', 'ai-projects.md', 'change-projects.md', 'foundations-index.md', 'advanced-index.md'}
+FOUNDATION_ORDER = [
+    ('Cost and basic collections', ['00-cost', '10-sequences', '11-sets', '01-maps']),
+    ('Order and linked structures', ['07-stack', '12-queues', '13-linked-lists', '14-trees', '06-heaps', '15-tries']),
+    ('Connections', ['05-graphs', '16-union-find', '21-weighted-paths']),
+    ('Algorithms that narrow the work', ['22-sorting', '04-order', '17-two-pointers', '02-windows', '03-prefix', '18-greedy']),
+    ('Search, reuse, and selection', ['09-search', '08-dp', '19-bits', '20-choose']),
+]
 CODING_ORDER = [
-    ('Scan and remember', ['practice-sequence.md', 'lessons/01-maps.md', 1, 2, 3, 'lessons/02-windows.md', 4, 5, 'lessons/03-prefix.md', 6, 7, 8]),
-    ('Order and boundaries', ['lessons/04-order.md', 9, 10, 11, 12, 13]),
+    ('Scan and remember', ['practice-sequence.md', 1, 2, 3, 4, 5, 6, 7, 8]),
+    ('Order and boundaries', [9, 10, 11, 12, 13]),
     ('Identity and recursion', [14, 15, 16, 17, 18, 19, 20]),
-    ('Graphs and retained state', ['lessons/05-graphs.md', 21, 22, 23, 24, 'lessons/06-heaps.md', 25, 26, 27, 30]),
-    ('Search and recurrence', ['lessons/09-search.md', 31, 32, 'lessons/08-dp.md', 33, 34, 35, 36]),
-    ('Stacks, parsing, and streams', ['lessons/07-stack.md', 37, 38, 39, 41]),
+    ('Graphs and retained state', [21, 22, 23, 24, 25, 26, 27, 30]),
+    ('Search and recurrence', [31, 32, 33, 34, 35, 36]),
+    ('Stacks, parsing, and streams', [37, 38, 39, 41]),
     ('Consolidate and assess', ['pattern-notes.md', 'reference.md']),
 ]
 # These existing standalone materials were previously outside the reading flow.
 INSERT = {
-    2: ['practice/coding-mock.md', 'practice/candidate/coding.md'],
-    5: ['projects/reading-list/stages/01-it-works/README.md', 'practice/candidate/full-stack.md'],
-    6: ['practice/candidate/practical-debug.md'],
-    8: ['practice/candidate/design.md'],
-    10: ['practice/candidate/infra.md'],
-    12: ['projects/reading-list/stages/02-it-survives/README.md'],
-    13: ['projects/reading-list/stages/03-under-load/README.md'],
-    15: ['projects/reading-list/stages/04-it-reasons/README.md'],
-    16: ['projects/reading-list/stages/05-it-changes/README.md'],
+    3: ['practice/coding-mock.md', 'practice/candidate/coding.md'],
+    6: ['projects/reading-list/stages/01-it-works/README.md', 'practice/candidate/full-stack.md'],
+    7: ['practice/candidate/practical-debug.md'],
+    9: ['practice/candidate/design.md'],
+    11: ['practice/candidate/infra.md'],
+    13: ['projects/reading-list/stages/02-it-survives/README.md'],
+    14: ['projects/reading-list/stages/03-under-load/README.md'],
+    16: ['projects/reading-list/stages/04-it-reasons/README.md'],
+    17: ['projects/reading-list/stages/05-it-changes/README.md'],
 }
 
 
 def organize(pages):
     by_src = {p['src']: p for p in pages}
+    # Preserve published lesson URLs while separating teaching from rehearsal.
+    practice = by_src['curriculum/01-code/03-coding-practice/README.md']
+    for p in pages:
+        if p.get('chapter') == 2 and p.get('sub') and '/lessons/' not in p['src']:
+            p.update(chapter=practice['chapter'], subject=practice['subject'],
+                     subject_title=practice['title'])
     sequence = [pages[0]]
     for group in [p for p in pages if p['kind'] == 'group']:
         sequence.append(group)
@@ -40,7 +53,17 @@ def organize(pages):
             sequence.append(chapter)
             children = [p for p in pages if p.get('chapter') == number and p.get('sub') and Path(p['src']).name not in NAV_NAMES]
             if number == 2:
-                prefix = str(Path(chapter['src']).parent) + '/'
+                prefix = str(Path(chapter['src']).parent) + '/lessons/'
+                ordered = []
+                for label, stems in FOUNDATION_ORDER:
+                    for stem in stems:
+                        p = by_src[prefix + stem + '.md']
+                        p['section'] = label
+                        ordered.append(p)
+                assert {p['src'] for p in children} == {p['src'] for p in ordered}, 'Unsequenced foundations'
+                children = ordered
+            if number == 3:
+                prefix = 'curriculum/01-code/02-data-structures-algorithms/'
                 ordered = []
                 for label, keys in CODING_ORDER:
                     for key in keys:

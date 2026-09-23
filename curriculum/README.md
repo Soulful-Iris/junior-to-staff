@@ -7,7 +7,8 @@ One curriculum organized by engineering subjects and prerequisites. Start with p
 | Chapter | What you learn |
 |---|---|
 | [Problem solving and AI-assisted engineering](01-code/01-problem-solving/README.md) | Clarify a requirement, make a bounded change, and verify the result. |
-| [Data structures and algorithms](01-code/02-data-structures-algorithms/README.md) | Choose a representation, explain its invariant, and test time and space bounds. |
+| [Data structures and algorithms](01-code/02-data-structures-algorithms/README.md) | Learn the shared structures, operations, costs, and algorithm patterns before practice. |
+| [Coding practice](01-code/03-coding-practice/README.md) | Solve a clear problem, verify its examples, and defend the solution under follow-ups. |
 
 ## Build a complete application
 

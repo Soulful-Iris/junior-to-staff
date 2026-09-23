@@ -1,42 +1,29 @@
 # Data structures and algorithms
 
-Choose a representation, explain its invariant, and test time and space bounds.
+Learn the structures and algorithms before using them in a coding interview.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
 
-## Before this chapter
+## What this chapter gives you
 
-[Problem solving and AI-assisted engineering](../01-problem-solving/README.md)
+A map, a queue, or a heap solves a particular kind of repeated work. Learn each tool's operations, trace its state, and see what it costs. Small code examples and diagrams make the mechanism visible. You do not need to solve a full interview problem at every step.
 
-Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
+Start after **Problem solving and AI-assisted engineering**. Read the five sections in order; the next chapter puts these tools to work in complete coding problems.
 
 ## Learn in this order
 
-| Step | Existing lesson or exercise |
-|---|---|
-| 1 | [Coding interviews · start here](practice-sequence.md) |
-| 2 | [Maps: remember earlier work](lessons/01-maps.md) |
-| 3 | [Windows: move boundaries, avoid rescanning](lessons/02-windows.md) |
-| 4 | [Prefix sums: count possible starts](lessons/03-prefix.md) |
-| 5 | [Sorted data: binary search and intervals](lessons/04-order.md) |
-| 6 | [Graphs: visit once, then track prerequisites](lessons/05-graphs.md) |
-| 7 | [Heaps: keep the next best candidate](lessons/06-heaps.md) |
-| 8 | [Stacks: keep unresolved work](lessons/07-stack.md) |
-| 9 | [Dynamic programming: define a smaller problem](lessons/08-dp.md) |
-| 10 | [Search: choose, recurse, undo](lessons/09-search.md) |
-| 11 | [Coding foundations · complete practice problems](problems/foundations-index.md) |
-| 12 | [Advanced coding progression](problems/advanced-index.md) |
-| 13 | [Coding reference · contracts and complexity](reference.md) |
-| 14 | [Why the patterns work](pattern-notes.md) |
+| Section | Subsections, in learning order | What you will be able to do |
+|---|---|---|
+| Cost and basic collections | [Time and space](lessons/00-cost.md), [arrays and strings](lessons/10-sequences.md), [sets](lessons/11-sets.md), [maps](lessons/01-maps.md) | Count work, distinguish position from identity, and replace repeated scans with lookup. |
+| Order and linked structures | [Stacks](lessons/07-stack.md), [queues](lessons/12-queues.md), [linked lists](lessons/13-linked-lists.md), [trees](lessons/14-trees.md), [heaps](lessons/06-heaps.md), [tries](lessons/15-tries.md) | Preserve the order, relationships, or priorities a problem needs. |
+| Connections | [Graphs, BFS, DFS, and dependencies](lessons/05-graphs.md), [union-find](lessons/16-union-find.md), [weighted paths](lessons/21-weighted-paths.md) | Traverse safely, track components, and distinguish fewest hops from cheapest routes. |
+| Narrowing the work | [Sorting](lessons/22-sorting.md), [binary search and intervals](lessons/04-order.md), [two pointers](lessons/17-two-pointers.md), [windows](lessons/02-windows.md), [prefix totals](lessons/03-prefix.md), [greedy choices](lessons/18-greedy.md) | Prove which candidates can be discarded and which work can be reused. |
+| Search and reuse | [Backtracking](lessons/09-search.md), [dynamic programming](lessons/08-dp.md), [bits](lessons/19-bits.md), [choosing a tool](lessons/20-choose.md) | Define search state, reuse smaller answers, and choose from the tools deliberately. |
 
-Start with the core problems associated with each concept, then continue to applications. The complete problem bank is an index, not a requirement to solve all 42 before building a feature. Stateful and concurrency problems live with their system concepts.
+## Before moving into practice
 
-## Go deeper on the same problem
+Given a small example, draw the state after each operation. Name the assumption that makes the algorithm correct. Explain time and extra memory separately. Identify an input that would invalidate the assumption.
 
-Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
+You can revisit a folded refresher inside each coding problem. The main reading flow will assume these foundations rather than introduce the same structure repeatedly.
 
-Related prerequisites for deeper follow-ups: [Backend and APIs](../../02-applications/01-backend/README.md) · [Data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
-
-[Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
-
-Next chapter: [Backend and APIs](../../02-applications/01-backend/README.md).
+Next chapter: [Coding practice: solve, explain, extend](../03-coding-practice/README.md).

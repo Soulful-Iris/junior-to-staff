@@ -6,9 +6,9 @@
 
 An isolated task also belongs in the output. Draw prerequisites before code; distinguish visiting a node from proving all its dependencies have finished.
 
-This is a short prerequisite lesson. Attempt the complete [dependency order problem](../problems/21-dependency-order/README.md), then [grid shortest path](../problems/24-grid-shortest-path/README.md), with their contracts, tests and changed requirements.
+The coding-practice chapter will apply this tool to complete problems. Here, focus on the mechanism and trace how its state changes.
 
-**Build:** Count four-connected islands; then return one valid prerequisite order.
+**Working example:** Count four-connected islands; then return one valid prerequisite order.
 
 ![Graphs: visit once, then track prerequisites](../../../../assets/learning/bfs-frontier.svg)
 
@@ -16,9 +16,9 @@ This is a short prerequisite lesson. Attempt the complete [dependency order prob
 
 **The idea:** BFS marks on enqueue. Dependency scheduling admits only vertices with zero remaining prerequisites.
 
-## First, what is a graph and a queue?
+## Represent connections, then choose a traversal
 
-A **graph** has nodes (tasks or cells) and edges (relationships). For `fetch → parse → save`, each arrow means the left task must finish before the right one can run. Breadth-first search (BFS) visits neighbors a layer at a time using a **queue**: new items join at the back and old items leave from the front.
+A **graph** has nodes (tasks or cells) and edges (relationships). For `fetch → parse → save`, each arrow means the left task must finish before the right one can run. Breadth-first search (BFS) visits neighbors a layer at a time using the FIFO queue from the earlier lesson.
 
 ```python
 from collections import deque
@@ -45,12 +45,52 @@ flowchart TD
   C --> D
 ```
 
-## Your 45-minute session
+## BFS and DFS: change the frontier order
 
-1. **5 min:** draw one example and a simple solution.
-2. **25 min:** implement `islands, course_order` without the reference.
-3. **10 min:** run the input/output table below; include the duplicate-edge case.
-4. **5 min:** explain the cost and answer the changed requirement.
+An adjacency map stores each node's neighbors. This example is directed: A can reach B and C, and both can reach D.
+
+```python
+from collections import deque
+
+graph = {"A": ["B", "C"], "B": ["D"], "C": ["D"], "D": []}
+frontier = deque(["A"])
+visited = {"A"}
+order = []
+while frontier:
+    node = frontier.popleft()
+    order.append(node)
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            visited.add(neighbor)
+            frontier.append(neighbor)
+print(order)  # ["A", "B", "C", "D"]
+```
+
+After A, the queue is `[B, C]`. Processing B adds D: `[C, D]`. Processing C does not add D again because D was marked when discovered. Storing each node's distance when first discovered gives shortest hop counts in an unweighted graph.
+
+**Depth-first search (DFS)** follows one branch before returning to alternatives. A stack supplies that order:
+
+```python
+frontier = ["A"]
+visited = set()
+order = []
+while frontier:
+    node = frontier.pop()
+    if node in visited:
+        continue
+    visited.add(node)
+    order.append(node)
+    frontier.extend(reversed(graph[node]))
+print(order)  # ["A", "B", "D", "C"]
+```
+
+Reversing neighbors makes the leftmost neighbor run first in this stack example. Multiple pending entries can exist, but each node is expanded only once; the stack can hold O(E) entries. A recursive DFS instead retains the active call path, up to O(V) frames. Neither traversal's `visited` set alone detects a directed cycle: cycle detection needs active-versus-finished state, or the dependency-count method above. A DFS order is not generally a shortest path or a valid prerequisite order.
+
+Both traversals take O(V+E) time over reachable nodes and edges with an adjacency list. To traverse a disconnected graph completely, start again from every unvisited node. The weighted-path lesson later changes the frontier from arrival order to cost order.
+
+## Check the mechanism
+
+Predict each expected result, then trace the state that produces it. Explain the boundary case before opening the reference.
 
 **Cost:** BFS/topological order: O(V+E) time and O(V+E) space. A grid has O(rows × cols) vertices and edges.
 
@@ -75,5 +115,3 @@ flowchart TD
 Compare `islands, course_order` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>
-
-[Previous](04-order.md) · [Next: Heaps: keep the next best candidate](06-heaps.md)
