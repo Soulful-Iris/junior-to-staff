@@ -25,11 +25,13 @@ The demo gate requires at least six cases, all three labels, at least one severe
 | Missing category | Six billing cases with distinct IDs | Report is ineligible despite six passing answers |
 | Model outage | Every inference request fails | Zero passes; ineligible report |
 | Competing promotion | Operator read revision 0; another promotion creates revision 1 | Stale promotion conflicts |
+| Repeat promotion | Active release-2, previous release-1, revision 2; promote release-2 with revision 2 | No-op: retain revision 2 and previous release-1 |
 | Rollback | Active release-2, previous release-1, revision 2 | Active release-1, revision 3 |
+| Changed prompt, same model ID | Call `classifier.predict` against an old report | Refuse the unrecognized candidate; reevaluate or load the matching runtime |
 
 ## Understand the evidence chain
 
-A **dataset hash** identifies the exact labeled cases used. A **candidate identifier** records which model configuration produced the outputs. A **report** preserves per-case evidence, including severe failures. A **release pointer** is a small mutable record identifying the approved report. Keep evidence immutable while allowing the pointer to change under concurrency control.
+A **dataset hash** identifies the exact labeled cases used. A **candidate identifier** hashes the checked runtime manifest: source bytes, exact classifier prompt, model identifier, inference configuration, retrieval marker and policy. `AI_SOURCE_COMMIT` can add the build commit; source-byte identity is checked even when that optional field is absent. A **report** preserves per-case evidence, including severe failures. A **release pointer** is a small mutable record identifying the approved report. Keep evidence immutable while allowing the pointer to change under concurrency control.
 
 ![Before a high average and mutable alias; after coverage checks, recorded evidence, and versioned promotion](../../../../assets/ai-projects/evaluation-before.svg)
 
@@ -49,12 +51,12 @@ A **dataset hash** identifies the exact labeled cases used. A **candidate identi
 ## Implement the path from cases to rollback
 
 1. **Validate the dataset.** Require distinct case IDs, bounded text, recognized expected labels, and explicit boolean severity. Reject malformed evidence before spending model calls.
-2. **Identify the candidate.** Record the configured model identifier. The local candidate is explicitly named `fixture-v1`. The live candidate uses the configured Bedrock model ID.
+2. **Identify the complete candidate.** `candidate.py` hashes the shipped implementation files and records prompt/configuration identity. The local model is named `fixture-v1`; the Bedrock adapter records its configured model ID. The evaluator checks identity again after the run so a changed candidate cannot silently share one report.
 3. **Run each case.** The model receives the case text, not its expected label or severity. Malformed outputs and provider errors count as failures.
 4. **Score by case.** Preserve expected label, actual label, pass/fail and severity. Compute passed count, severe misses and category coverage separately.
 5. **Register the report.** Save a content-addressed artifact and conditionally create an immutable run ID. Reusing a run ID conflicts rather than rewriting history.
-6. **Promote deliberately.** Read the release revision. Only an eligible report can become active, and only if the revision still matches. Preserve the prior active report ID.
-7. **Roll back explicitly.** Swap active and previous under the same revision rule. The old report and its dataset identity remain available.
+6. **Promote deliberately.** Read the release revision. Only an eligible report can become active, and only if the revision still matches. Preserve the previous **distinct** active report. Re-promoting the active report with a current revision is a no-op; a stale revision still conflicts.
+7. **Roll back explicitly.** Swap active and previous under the same revision rule. The old report and its dataset identity remain available. `classifier.predict` only serves when the running candidate matches that active report; pointer rollback does not install old code or reconfigure Bedrock.
 
 ![Animated evidence flow from independent labels to candidate outputs, scoring and conditional release](../../../../assets/ai-projects/evaluation-flow.svg)
 
@@ -83,11 +85,28 @@ Run `cloud_smoke.py evaluation --function "$AI_FUNCTION"` from the workbench dir
 
 ## Follow-up: model version, prompt version, and live traffic diverge
 
-A passing report is useful only if it identifies the thing actually being served. The reference records model ID, dataset hash and gate policy. Its fixed prompt is part of the checked-out code. A production registry should additionally pin the source commit, exact prompt/configuration hash, retrieval version if applicable, and model/inference configuration.
+A passing report is useful only if it identifies the thing actually being served.
+The supplied `classifier.predict` consumer now resolves the active report and
+compares its candidate manifest with the running implementation. It also rechecks
+release revision and candidate identity after inference. A changed prompt under
+the same model name fails that check. Dataset and policy remain part of the
+immutable evaluation evidence; a model alias alone is not a reproducibility guarantee.
+
+```text
+release-1 → promote → revision 1
+release-2 → promote → revision 2, previous release-1
+release-2 → promote again → revision 2, previous still release-1
+rollback → revision 3, active release-1
+classifier.predict → serve only if this runtime matches release-1
+```
+
+Both fixture releases in the demo evaluate the same runtime. For different
+runtimes, rollback requires loading the matching code/configuration separately.
+The consumer fails closed instead of pretending a registry write redeploys it.
 
 ![Quality, category coverage and release authority converge before promotion](../../../../assets/ai-projects/evaluation-mechanism.svg)
 
-**Senior follow-up:** implement a consumer that resolves the active report and refuses to serve an unrecognized configuration. Add per-category latency and cost, independent held-out datasets, repeated stochastic runs, and a comparison against the current baseline. A new release must not pass a suite for a different runtime.
+**Senior follow-up:** extend the supplied identity-checking consumer with an explicit runtime loader/deployment boundary. Add per-category latency and cost, independent held-out datasets, repeated stochastic runs, and comparison with the current baseline. A new runtime must not borrow approval from an old report.
 
 **Staff follow-up:** add a canary rollout with exposure accounting, delayed quality signals, rollback authority and ownership. A registry pointer does not automatically roll back downstream data changes. Design compatible output schemas and a reconciliation plan for effects created by the failed release.
 
@@ -105,7 +124,7 @@ A passing report is useful only if it identifies the thing actually being served
 
 **What if the model alias changes behind the same name?** Pin the most specific supported version and record configuration. Re-evaluate changes. The reference's model ID alone is not a universal reproducibility guarantee.
 
-**Does rollback change Bedrock automatically?** No. It changes the registry's active report. A serving consumer must read and apply that decision. The supplied project tests registry behavior end to end; serving integration is the senior extension.
+**Does rollback change Bedrock automatically?** No. It changes the active report. The supplied `classifier.predict` consumer enforces that decision by refusing a mismatched runtime. Installing a different runtime or changing cloud traffic is a separate deployment integration, not a side effect of swapping report IDs.
 
 **Should evaluation failures be retried until they pass?** No. That selects favorable outputs and hides stochastic failure rates. Predefine retry rules for infrastructure faults and record every attempt used in the decision.
 
