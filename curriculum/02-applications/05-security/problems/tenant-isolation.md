@@ -28,6 +28,28 @@ Derive tenant identity from authenticated claims and membership, never a caller-
 | SQS tenant-aware worker | Preserve tenant context and budgets in asynchronous jobs | Per-tenant queues for stronger rate isolation and operational cost |
 
 An IAM leading-key policy can provide defense in depth for correctly mapped sessions; an application role shared by all tenants does not magically make IAM understand end-user identity. Treat signed URLs as bearer capabilities until expiry and minimize their lifetime.
+A tenant prefix partitions keys; it neither authenticates a caller nor proves
+current object permission. A versioned cache key is safe only when its version
+comes from trusted permission state, not a caller or stale search result.
+
+```mermaid
+flowchart LR
+  Caller[Authenticated caller] --> Membership[Current tenant membership]
+  Membership --> ACL[Current object permission]
+  ACL -->|allowed| Cache[Tenant-scoped cache or store]
+  ACL -->|denied or unavailable| Stop[No sensitive content]
+```
+
+For this exercise, check permission on every sensitive read and fail unavailable
+when the authority cannot be consulted. A bounded authorization cache is a
+**different** contract: name its maximum age and include propagation/clock delay.
+Already issued bearer downloads remain usable until their enforced expiry unless
+a read-time broker or revocation-aware edge checks them. Do not promise instant
+revocation from an application check that the download route bypasses.
+
+**Drill:** warm search, snippet, cache, export and direct-download routes; pause
+indexing, revoke access and repeat each read. Distinguish a storage-key test, an
+IAM-session isolation test and an application ACL test. None replaces the others.
 
 ![A single missing tenant prefix crosses the query, cache, and worker lanes](../../../../assets/design-next/tenant-isolation-detail.svg)
 
