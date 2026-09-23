@@ -16,8 +16,12 @@ A terminal marker records a complete word independently of whether children exis
 | Input | Nonempty lowercase ASCII words; `add(word)` and `suggest(prefix,limit)` |
 | Output | Up to limit unique matching words, ascending lexicographic order |
 | Boundaries | Empty prefix means all words; zero limit/no match gives `[]`; duplicate adds collapse |
-| Failure | Invalid characters/empty added word/negative limit raise `ValueError` |
+| Failure | Nonstring/invalid characters/empty added word, or noninteger/negative limit (bool excluded), raise `ValueError` |
 | Scope | Exact prefix, fixed alphabet; no popularity, fuzzy matching, or removal |
+
+`Trie(words)` accepts an iterable of word strings, including an empty iterable;
+a bare string or noniterable raises `ValueError`. `add` and `suggest` validate
+before changing state.
 
 ## The tool before the challenge
 

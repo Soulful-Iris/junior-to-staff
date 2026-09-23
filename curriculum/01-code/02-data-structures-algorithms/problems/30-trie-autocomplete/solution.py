@@ -10,13 +10,19 @@ class Node:
 
 class Trie:
     def __init__(self, words=()):
+        if isinstance(words, (str, bytes)):
+            raise ValueError("expected an iterable of words, not one string")
+        try:
+            words = iter(words)
+        except TypeError as exc:
+            raise ValueError("expected an iterable of words") from exc
         self.root = Node()
         for word in words:
             self.add(word)
 
     @staticmethod
     def _validate(text, allow_empty=False):
-        if (not text and not allow_empty) or any(c not in ascii_lowercase for c in text):
+        if not isinstance(text, str) or (not text and not allow_empty) or any(c not in ascii_lowercase for c in text):
             raise ValueError("lowercase ASCII words required")
 
     def add(self, word):
@@ -30,7 +36,7 @@ class Trie:
 
     def suggest(self, prefix, limit=5):
         self._validate(prefix, allow_empty=True)
-        if not isinstance(limit, int) or limit < 0:
+        if type(limit) is not int or limit < 0:
             raise ValueError("nonnegative integer limit required")
         if limit == 0:
             return []
