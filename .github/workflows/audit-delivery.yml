@@ -25,11 +25,24 @@ jobs:
           mkdir -p "$RUNNER_TEMP/audit-delivery"
           cp .audit-delivery/runner.py "$RUNNER_TEMP/audit-delivery/runner.py"
           python3 - <<'PY'
-          import base64, json, os, zlib
+          import base64, json, os, re, subprocess, zlib
           from pathlib import Path
-          data = json.loads(Path('.audit-delivery/batch.json').read_text())
-          if 'zlib_base64' in data:
-              data = json.loads(zlib.decompress(base64.b64decode(data['zlib_base64'], validate=True)))
+          def decode(data):
+              if 'zlib_base64' in data:
+                  return json.loads(zlib.decompress(base64.b64decode(data['zlib_base64'], validate=True)))
+              return data
+          data = decode(json.loads(Path('.audit-delivery/batch.json').read_text()))
+          if 'source_commit' in data:
+              sha = data['source_commit']
+              if not re.fullmatch('[0-9a-f]{40}', sha):
+                  raise ValueError('Full reviewed source commit required')
+              source = decode(json.loads(subprocess.check_output(['git', 'show', sha + ':.audit-delivery/batch.json'], text=True)))
+              selected = []
+              for item in data['selection']:
+                  batch = source['batches'][item['index']]
+                  batch['tree'] = item['tree']
+                  selected.append(batch)
+              data = {'base': data['base'], 'batches': selected}
           Path(os.environ['RUNNER_TEMP'], 'audit-delivery', 'batch.json').write_text(json.dumps(data))
           PY
       - name: Apply exact reviewed edits, test, then fast-forward main per chapter
@@ -41,7 +54,7 @@ jobs:
         run: |
           git archive --format=tar HEAD > "$RUNNER_TEMP/audit-delivery/source.tar"
           git rev-parse HEAD > "$RUNNER_TEMP/audit-delivery/source-commit.txt"
-          git log -80 --format='%H %s' > "$RUNNER_TEMP/audit-delivery/commits.txt"
+          git log -100 --format='%H %s' > "$RUNNER_TEMP/audit-delivery/commits.txt"
       - name: Preserve per-chapter receipts and command logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
