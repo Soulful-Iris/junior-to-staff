@@ -40,7 +40,7 @@ Treat `path` as mutable workspace owned by the current recursion branch. Append,
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** All nondecreasing combinations summing to target, in lexical order.
@@ -59,7 +59,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | No mutation | unsorted candidate input | same input after return | Search works on owned normalized state. |
 | Invalid | zero/negative/bool candidate or negative target | `ValueError` | Nonpositive choices could break termination. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

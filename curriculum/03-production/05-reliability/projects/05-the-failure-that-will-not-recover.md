@@ -26,7 +26,7 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 **The finished artifact:** Induce a metastable failure: overload the system, remove the overload, and watch it stay broken. Then find the mechanism and fix it.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The cache is cold | Cache loss sends 1,000 reads/s to a database that can handle 100/s. Should every miss bypass? Predict which boundary must change before opening the design. | No. Bound refresh/bypass work, coalesce within an explicit scope, and serve authorized bounded-stale data or return 429/503. TTL jitter alone cannot protect a single expired hot key. |
 | Lead · Expired work has business value | A job expired by latency policy but represents a payment request. May the worker drop it? State what evidence would make you reject your first design. | Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation; acknowledge/drop only according to the business contract. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

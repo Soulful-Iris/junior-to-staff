@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** Telemetry good enough that an unfamiliar person can answer "what happened to this request?" without adding a log line and redeploying — plus an SLO, an alert that fires once and usefully, and a measured detection time.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · An async boundary appears | The user request ends before the worker starts. Which trace relationship do you preserve? Predict which boundary must change before opening the design. | Link the enqueue span to the job and each worker attempt. Show queue wait separately from execution; a retry must not overwrite the first attempt’s evidence. |
 | Lead · Telemetry disappears | The collector fails while the application continues. How does the responder distinguish healthy traffic from silence? State what evidence would make you reject your first design. | Use an independently observed heartbeat and delivery/drop counters, and state what remains unknowable. Do not score undefined good/total as 100% availability. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

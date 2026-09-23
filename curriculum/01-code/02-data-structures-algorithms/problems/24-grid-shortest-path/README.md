@@ -38,7 +38,7 @@ Store coordinates `(row, col)` in the queue and a separate `visited_cells` set; 
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Endpoint-inclusive shortest coordinate list; any shortest route accepted.
@@ -57,7 +57,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Tie | two equal shortest routes | either valid shortest route | Do not overfit an unspecified tie. |
 | Invalid/atomic | empty/ragged grid or bad coordinate | `ValueError`; grid unchanged | Validate shape and bounds. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

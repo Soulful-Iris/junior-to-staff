@@ -40,7 +40,7 @@ Key aggregates by `(entity, window_start)`, not by arrival minute; otherwise lat
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Accept or reject each event against the watermark and emit every newly closed, nonempty window exactly once in start order.
@@ -59,7 +59,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Duplicates/empty | same timestamp twice; untouched windows | duplicates count; empty windows omitted | Events are observations, not unique IDs. |
 | Invalid/atomic | decreasing watermark or bad number | `ValueError`; watermark/state unchanged | Failed control input cannot move time backward. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

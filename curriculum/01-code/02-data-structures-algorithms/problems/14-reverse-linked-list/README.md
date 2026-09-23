@@ -35,7 +35,7 @@ For `1 → 2 → 3 → None`, the new head must yield `3 → 2 → 1 → None`. 
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** New head of the reversed chain using exactly the original node identities.
@@ -54,7 +54,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Cycle | `a → b → a` | `ValueError` before mutation | Validation must not partially destroy the structure. |
 | Malformed link | reachable `next` is not Node/None | `ValueError` before mutation | Atomic rejection is observable behavior. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

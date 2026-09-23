@@ -39,7 +39,7 @@ tails[i] = 3
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Values forming any longest strictly increasing subsequence.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Tails warning | `[3,5,6,2,4]` | `[3,5,6]` (length 3), **not** the possible tails array `[2,4,6]` | Value 6 preceded 2 and 4; tails are not one actual subsequence. |
 | Invalid/atomic | noninteger/bool element | `ValueError`; input unchanged | Validate before reconstruction state. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

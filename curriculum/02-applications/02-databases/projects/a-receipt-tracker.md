@@ -38,7 +38,7 @@ Use integer minor units with an explicit currency and scale; do not label `1999`
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/receipt-tracker.svg)
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -46,8 +46,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The upload is retried | The phone loses the completion response and submits the same upload ID twice. What is counted? Predict which boundary must change before opening the design. | Use an owner-scoped upload identity, verify object metadata and finalize idempotently. A repeated completion must not create another receipt or queue an unbounded duplicate extraction. |
 | Lead · Several currencies | The month contains USD 19.99 and JPY 500. What does the summary show? State what evidence would make you reject your first design. | Group totals by currency unless conversion is explicitly requested. Conversion needs rate source, rate date, rounding and audit trail; adding 1999 and 500 would combine different units. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

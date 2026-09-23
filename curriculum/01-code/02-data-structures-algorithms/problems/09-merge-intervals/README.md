@@ -34,7 +34,7 @@ Make a sorted **copy** of the intervals if the caller retains ownership of its i
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** New sorted list of `(start, end)` half-open intervals; touching intervals merge.
@@ -53,7 +53,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Nested/duplicate | `[(1,10),(2,3),(1,10)]` | `[(1,10)]` | Contained coverage adds no new range. |
 | Invalid/atomic | `[(3,3)]` or malformed pair | `ValueError`; input unchanged | Reject zero duration and bad structure. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

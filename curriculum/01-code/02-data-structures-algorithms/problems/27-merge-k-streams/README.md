@@ -39,7 +39,7 @@ Heap entries carry `(value, stream_id)` so equal values have a deterministic tie
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Lazy ascending iterator preserving every occurrence, including ties.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Laziness | a source raises if read past requested prefix | only necessary values consumed | Do not materialize all streams. |
 | Late invalid order | source yields 3 then 2 | `ValueError` when 2 is consumed | Iterator validation occurs at the observable boundary. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

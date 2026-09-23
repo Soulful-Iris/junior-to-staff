@@ -36,7 +36,7 @@ Start with three boxes labeled **items**, **group membership**, and **read state
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/shared-reading-list.svg)
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -44,8 +44,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The title never arrives | A remote page hangs for sixty seconds. How does the save remain useful? Predict which boundary must change before opening the design. | Give the synchronous fetch a small total deadline and save a visible title-failed/pending state. A later durable queue is an explicit next stage; do not leave untracked in-process background work. |
 | Lead · Two people update their read state | Alice and Bob mark item 7 read at the same time. Which rows change? State what evidence would make you reject your first design. | Upsert separate (userid,itemid) read-state rows. Verify group membership at the server and test that reversing either user’s action does not change the other. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

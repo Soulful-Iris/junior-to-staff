@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** Take the outside call from your initial application — the page fetch, the vision model, the mail sender — and make every failure mode of it a designed behaviour rather than an accident. Then turn the dependency off and use the product.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The provider recovers | The breaker opens, then probes recovery. How many requests probe at once? Predict which boundary must change before opening the design. | Use a bounded half-open probe set, not all waiting callers. Close only according to tested success criteria; a failed probe returns to the open state while the fallback remains usable. |
 | Lead · Everything is high priority | Critical arrivals exceed capacity even after optional work is disabled. What gives? State what evidence would make you reject your first design. | Bound interactive admission too. Choose finite queueing or fast overload response, reserve recovery capacity, and report denied critical work; priority cannot guarantee service beyond capacity. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

@@ -31,7 +31,7 @@ Trace the dictionary *before* processing each position. A key is an **earlier va
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `(i, j)` with `i < j`; choose smallest `j`, then smallest `i`; otherwise `None`.
@@ -51,7 +51,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Tie rule | `[1, 4, 2, 3]`, target `5` | `(0, 1)` | Smallest right index wins before later pairs. |
 | Invalid/atomic | `[True, 2]`, target `3` | `ValueError`; input unchanged | Python booleans must not silently count as integers. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -36,7 +36,7 @@ For `[1,-1,1]`, target 1, the answer is 3 ranges, not 2. [See the three exact ra
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Integer count of nonempty index ranges with the target sum.
@@ -55,7 +55,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | No match | `[1,2]`, target `9` | `0` | The result is a count, never `None`. |
 | Invalid/atomic | boolean element or target | `ValueError`; input unchanged | Exact integer validation matters. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

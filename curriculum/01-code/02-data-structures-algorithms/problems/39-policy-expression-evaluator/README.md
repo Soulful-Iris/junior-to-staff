@@ -40,7 +40,7 @@ Give lexing, parsing, and evaluation separate responsibilities. A token includes
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Return the exact Boolean value defined by the fully parsed policy, or raise `ValueError` for malformed or over-budget input.
@@ -60,7 +60,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Type boundary | `tier != 2`, record `{"tier": "2"}` | `False` | Mismatched scalar types make both comparisons false. |
 | Token limit | `'a==TRUE OR ' * 2049 + 'a==TRUE'`, record `{"a": True}` | `ValueError` | Exceeds the 4,096-token admission limit before evaluation. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -36,7 +36,7 @@ For `"abba"` the longest answer is `"ab"` or `"ba"`, length 2. [Trace all four s
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Half-open `(start, end)` indices; `text[start:end]` is longest unique run.
@@ -55,7 +55,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Exact code points | `"aA"` | `(0, 2)` | Case-sensitive symbols are distinct. |
 | Invalid | non-string input | `ValueError` | The API does not coerce collections to text. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

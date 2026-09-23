@@ -35,7 +35,7 @@ Keep `lo`, `mid`, and `hi` as indices, never as values; compare `nums[lo]` and `
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Index in the supplied array, or `-1` if absent.
@@ -54,7 +54,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Singleton | `[1]`, target `1` / `2` | `0` / `-1` | Both smallest success and failure paths matter. |
 | Invalid/atomic | duplicates or invalid rotation | `ValueError`; input unchanged | The ordered-half proof relies on the contract. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

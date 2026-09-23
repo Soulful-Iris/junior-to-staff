@@ -38,7 +38,7 @@ Store `expires_at` from a specified clock and compare it on **every read**; clea
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `get` returns live value or raises `KeyError`; delete reports live removal.
@@ -57,7 +57,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Overwrite invalid | live key then put invalid TTL | `ValueError`; old value/deadline remain | Validation is atomic. |
 | Purge sample | a expires at 104, b at 105, c at 106; injected now=105 | `purge()` returns `2`; c remains | The boundary is expired, and one clock sample decides all entries. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

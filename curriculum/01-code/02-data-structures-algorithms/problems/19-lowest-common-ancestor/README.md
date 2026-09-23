@@ -34,7 +34,7 @@ A returned candidate alone cannot prove both requested nodes exist. Carry `found
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Lowest common ancestor node by identity if both are reachable; otherwise `None`.
@@ -53,7 +53,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Equal values | different nodes share values | identity-based ancestor | Values cannot substitute for node identity. |
 | Invalid topology | cycle/shared child/malformed query | `ValueError` | Validate even when an answer seems discoverable early. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -44,7 +44,7 @@ Separate `closed` from `items`: shutdown may reject new puts while still permitt
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Preserve FIFO and bounded capacity while giving every put, get, timeout, drain, and cancellation race the documented outcome.
@@ -63,7 +63,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Drain/cancel | close with items present | drain serves them; cancel returns/removes them | Shutdown policy is explicit and first call wins. |
 | Race safety | competing producers/consumers plus spurious wakeups | no loss/duplication; deadline budget not reset | Concurrency tests target schedules, not only values. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -26,7 +26,7 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 **The finished artifact:** One specification for one small, real feature — tagging from P1 is the right size. Hand the identical document to two fresh sessions with no other context, let each build it, and compare what comes back. The spec is the deliverable; the two builds are its test.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · A third implementation | A third engineer uses a different framework. What do you compare? Predict which boundary must change before opening the design. | Run the same black-box probes against each implementation. Compare status, data, and side effects; ignore file layout and variable names. |
 | Lead · The product rule changes | Users now need case-preserving display with case-insensitive uniqueness. Which field changes? State what evidence would make you reject your first design. | Separate normalized identity from display text. Define whether the first or latest spelling wins; retain a migration example for the existing ai value. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

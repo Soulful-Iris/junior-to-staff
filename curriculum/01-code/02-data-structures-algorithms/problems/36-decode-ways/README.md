@@ -38,7 +38,7 @@ print(10 <= int(digits[-2:]) <= 26)  # True: 26 is a letter
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Exact number of partitions into codes 1..26.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Invalid input | `"1x"` | `ValueError` | Malformed text differs from an impossible digit sequence. |
 | Large exact count | `"1111111111"` (ten ones) | `89` | Count every partition exactly; no modulus or truncation. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

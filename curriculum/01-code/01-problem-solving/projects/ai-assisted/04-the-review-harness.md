@@ -26,7 +26,7 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 **The finished artifact:** A written procedure plus a small script that collects evidence and answers three questions of any diff: what behaviour changed, what could have changed accidentally, which existing test would catch the accident. Run it on ten real diffs from your history and tally how often the third answer is "none".
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · Prove a named test | The tool says testlimitzero catches an inverted condition. How do you verify that statement? Predict which boundary must change before opening the design. | Introduce that condition on an isolated branch and run the named test. Capture the failure and restore the tree; a passing mutant disproves the coverage claim. |
 | Lead · The change crosses a service | The parser determines an outbound payload used by an independently deployed consumer. What evidence is missing? State what evidence would make you reject your first design. | Add the consumer contract and a provider negative fixture. Local references cannot enumerate deployed clients; identify a contract owner and document unknown consumers. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

@@ -36,7 +36,7 @@ State the output order contract before building groups. Two equal keys must shar
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** List of groups; group order follows first occurrence; words retain input order.
@@ -55,7 +55,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Stable order | `["tan","eat","nat","tea"]` | groups and members follow first appearance | Sorting the final answer changes the contract. |
 | Invalid/atomic | `["ok", 7]` | `ValueError`; input unchanged | Validate the whole batch. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

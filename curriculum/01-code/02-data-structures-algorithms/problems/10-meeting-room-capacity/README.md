@@ -34,7 +34,7 @@ At equal timestamps, `end` frees a room before `start` occupies it. At time 10, 
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Nonnegative integer: maximum simultaneous half-open meetings.
@@ -53,7 +53,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Nested | `[(0,10),(2,3),(4,5)]` | `2` | Peak concurrency is not number of meetings. |
 | Invalid/atomic | `[(4,4)]` | `ValueError`; input unchanged | Zero-duration entries are outside the contract. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

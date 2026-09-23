@@ -26,7 +26,7 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 **The finished artifact:** Split P1's link-fetching into a second service with an HTTP interface. Then write the contract: a machine-readable description of what the caller sends and what the callee promises, and a test on each side that checks itself against that same file.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The request content type differs | A caller sends text/plain and a malformed numeric query parameter. Which gateway checks apply? Predict which boundary must change before opening the design. | REST basic validation checks required parameter presence/nonblank values, not numeric formats. Body validation requires a matching model or a deliberate $default/reject policy. Validate domain types in the handler. |
 | Lead · The provider evolves | Add an optional field while an old consumer remains deployed. What should fail? State what evidence would make you reject your first design. | The compatible addition should pass agreed consumer tolerance checks. Removing a required field or changing its meaning must fail. Include strict-consumer behavior explicitly instead of assuming all additions are harmless. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

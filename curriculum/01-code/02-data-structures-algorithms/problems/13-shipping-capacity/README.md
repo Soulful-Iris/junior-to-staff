@@ -34,7 +34,7 @@ Extract a predicate named `can_ship_with_capacity(capacity)` whose only job is t
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Smallest capacity that ships all packages in order in at most `days`.
@@ -53,7 +53,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | No splitting | `[8,1,1]`, days `2` | `8` | A package is indivisible. |
 | Invalid/atomic | zero weight or nonpositive days | `ValueError`; input unchanged | Validate before feasibility search. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

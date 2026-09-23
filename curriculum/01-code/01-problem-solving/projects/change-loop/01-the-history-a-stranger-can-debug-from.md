@@ -26,7 +26,7 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 **The finished artifact:** Take a real week of your P1 history — the honest one with wip in it. On a copy, rewrite it into the sequence you would want at 3am: same final code, different story. Then the experiment: a reader with no context gets one line and one question — why is this here — against each version, timed.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · A shared branch already exists | A teammate has based two commits on the old history. How do you run the drill safely? Predict which boundary must change before opening the design. | Keep the shared reference stable and create a separate rehearsal branch. Compare trees there; use improved messages only on future shared work. The expected outcome is zero forced updates to the teammate’s base. |
 | Lead · The explanation lives outside Git | The decision cites a benchmark file that will disappear. What must survive a year? State what evidence would make you reject your first design. | Attach the input, units, observed result, and a stable artifact identifier to the decision record. A narrative with a broken evidence link is not recoverable. Re-run the stranger exercise from an offline clone or exported bundle. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

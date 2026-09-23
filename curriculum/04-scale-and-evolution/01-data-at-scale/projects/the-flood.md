@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** Move the slow work off the request onto a bounded queue, make the work idempotent, rate-limit the entrances, then flood it on purpose and record what broke first.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · A worker pauses past visibility | A second worker completes before the first resumes. What stops the stale completion? Predict which boundary must change before opening the design. | Condition writes on the current fencing generation and job state. The old process may still execute; only the destination boundary can reject its stale mutation. |
 | Lead · The backlog must drain | After the burst, arrivals return to 5/s with completion 20/s. How long to drain 300 jobs? State what evidence would make you reject your first design. | Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs; stop scale-out at the database budget instead of scaling blindly on depth. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

@@ -37,7 +37,7 @@ The dummy node owns only the output **assembly point**; decide whether you splic
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Head of one merged chain using exactly all original node identities.
@@ -56,7 +56,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Shared node | two inputs converge on one object | `ValueError` before mutation | Splicing shared ownership can create corruption. |
 | Unsorted/malformed | a descending link or cycle | `ValueError` before mutation | Validate the whole reachable inputs. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

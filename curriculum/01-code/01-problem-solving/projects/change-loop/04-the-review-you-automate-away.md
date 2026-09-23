@@ -26,7 +26,7 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 **The finished artifact:** A corpus of real review comments — project 2 supplies plenty — sorted into what a machine could have said and what needed a person. Then the machine layer: a formatter that rewrites, a linter and import order that enforce, an AI first pass constrained by contract. Then the count, re-run on your next five PRs.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The repository is already large | Turning on a formatter touches 500 files. How do reviewers retain a useful history? Predict which boundary must change before opening the design. | Land one behavior-preserving mechanical change and a separate enforcement change. Existing tests should remain unmodified. Record formatter version and exclude unrelated fixes so blame and rollback remain interpretable. |
 | Lead · The AI endpoint is unavailable | The model is down during an urgent security patch. Should the patch wait? State what evidence would make you reject your first design. | Choose and document an advisory fail-open policy with a human reviewer for this exercise. Deterministic gates still run. Record the skipped AI pass, then compare later findings; its absence must not silently become a behavioral approval. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

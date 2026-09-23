@@ -26,7 +26,7 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 **The finished artifact:** Classify your requests into three priorities, then shed the lowest first when the system is short of capacity. Load it until shedding starts, and verify from the outside that the high-priority class kept working.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · Critical traffic exceeds capacity | All 120 requests/s are critical. How does the design remain live? Predict which boundary must change before opening the design. | Reserve a bounded critical queue only if the latency budget allows it, then shed excess. Record denied critical work explicitly; inspect absolute arrival/capacity evidence before blaming classification. |
 | Lead · Work costs differ | An export takes 100 times the database work of a save. Are request-count limits enough? State what evidence would make you reject your first design. | Use separate concurrency/work budgets and per-tenant fairness. The shared database budget constrains all classes; protect control and recovery operations too. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

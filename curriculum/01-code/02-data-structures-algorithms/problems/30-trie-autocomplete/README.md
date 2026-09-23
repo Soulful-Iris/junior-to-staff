@@ -37,7 +37,7 @@ A node's children map describes paths; its `is_terminal` flag answers whether th
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Up to limit unique matching words, ascending lexicographic order.
@@ -56,7 +56,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | No match/zero limit | prefix z or limit 0 | `[]` | Both are normal results. |
 | Invalid | uppercase/empty added word or negative limit | `ValueError` | The fixed alphabet contract is enforced. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

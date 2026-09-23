@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** A pipeline where merging means deploying, the infrastructure is described in the repository, releases are separate from deploys, and rolling back is one action you have actually taken.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · A PR changes CI | An untrusted pull request edits the deploy script. May it receive the production role? Predict which boundary must change before opening the design. | No. Run untrusted checks without privileged credentials; deploy only the reviewed immutable artifact from a protected workflow with narrowly scoped OIDC trust. |
 | Lead · Rollback follows new writes | The new version has accepted data the old reader cannot understand. What recovery remains? State what evidence would make you reject your first design. | Use a prebuilt compatibility adapter/reverse projection or fix forward; otherwise pause the new write path and reconcile. The rollout gate must test a v1 read of a v2 write, not merely version labels. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

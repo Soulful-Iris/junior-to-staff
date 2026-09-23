@@ -39,7 +39,7 @@ The full contract returns a **witness** as well as count, so save which coin pro
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `(minimum_count, list_of_coins)`; any optimal witness.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Tied optimum | coins `[1,2,3]`, amount `4` | `(2,[1,3])` or `(2,[2,2])` | Two optimal witnesses; tie order is unspecified. |
 | Invalid/atomic | nonpositive coin or negative amount | `ValueError`; input unchanged | DP states require positive progress. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

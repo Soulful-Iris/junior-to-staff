@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** A list of URLs, a weekly check of each, a record of what changed, and a message when something breaks.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · Many URLs share one host | Ten workers each apply a local one-request limit. Can the host receive ten simultaneous requests? Predict which boundary must change before opening the design. | Yes. Coordinate per-host admission across the active workers or partition host ownership with explicit leases; local concurrency is not a fleet guarantee. Honor bounded Retry-After and revalidate redirects. |
 | Lead · Email succeeded but acknowledgment vanished | The notification worker retries after losing its provider response. Can you promise one email? State what evidence would make you reject your first design. | Only with provider-supported deduplication or equivalent protocol. Persist notification state and key; otherwise expose the possible duplicate and reconcile unknown outcomes instead of equating one stored transition with one delivery. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

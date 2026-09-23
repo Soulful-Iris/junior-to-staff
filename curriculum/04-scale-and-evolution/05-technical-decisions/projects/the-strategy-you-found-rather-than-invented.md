@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** Read back the real decisions you made across Acts 1 and 2. Find the one you kept making from scratch. Write it once, with its reasoning and its cost. Then cite it in the next decision and see whether the argument got shorter.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · A new workload breaks the default | A team needs independently replayable events rather than current row state. Should enforcement block the design? Predict which boundary must change before opening the design. | Route it through a documented exception review that names the mismatched constraint and maintenance owner. Do not make a default impossible to challenge; measure exception recurrence as feedback on the policy. |
 | Lead · The evidence expires | A managed service changes a relevant capability six months later. Which part of the memo changes? State what evidence would make you reject your first design. | Separate stable invariants from dated capability/cost observations. Reverify the source, update the constraint and rerun the decision comparison; a recent access date does not make an old study recent evidence. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

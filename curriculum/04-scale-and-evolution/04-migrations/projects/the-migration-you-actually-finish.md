@@ -26,7 +26,7 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 **The finished artifact:** Replace something load-bearing in your operating application — how items are stored, how authentication works, the job runner — with the full apparatus around it: a design doc, the hardest case first, a mechanical block on new usage, a remaining-work counter, and the deletion.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The backfill meets live writes | How do you combine snapshot v1 with live v2 and delete v3 without losing either? Predict which boundary must change before opening the design. | Apply only increasing versions and retain tombstones for the replay horizon. Track checkpoint coverage, source counts/checksums and semantic mismatches. A counter at zero needs a blind-spot analysis, including dynamic consumers and delayed/offline writers. |
 | Lead · A team cannot cut over | One team must keep old clients for a quarter; DNS caches last 300 seconds. What can rollback promise? State what evidence would make you reject your first design. | Preserve old/new data compatibility and choose explicit cohorts. Load-balancer admission, DNS propagation and existing connection drain have different timing. Keep partial gains measurable, but retire duplicated maintenance only after consumers and replay obligations are gone. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

@@ -40,7 +40,7 @@ Each stack entry means `(earliest_start, height)` for a bar that has not met a s
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Maximum integer area under a contiguous interval.
@@ -59,7 +59,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Final flush | `[1,2,3]` | `4` | Remaining bars need a virtual right boundary. |
 | Invalid/atomic | negative or noninteger height | `ValueError`; input unchanged | Histogram geometry assumes nonnegative integers. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

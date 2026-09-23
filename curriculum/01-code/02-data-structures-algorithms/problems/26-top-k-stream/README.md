@@ -39,7 +39,7 @@ The min-heap stores only the `k` largest observations seen so far; its root is t
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `largest()` returns up to k values in descending order.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Zero k | add any values to k=0 | `[]` | Nothing is retained. |
 | Invalid/atomic | boolean sample or negative k | `ValueError`; prior snapshot unchanged | Failed input must not corrupt retained state. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

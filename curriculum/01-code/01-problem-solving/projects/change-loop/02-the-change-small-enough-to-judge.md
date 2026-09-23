@@ -26,7 +26,7 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 **The finished artifact:** One real P1 feature — tagging is the right size: a rename, a migration, behaviour, UI — built twice from one plan: as a single PR, and as a stack of five layers, each green and runnable alone. Two bugs planted blind in both at the same spots. Review both forms, timed; open the sealed answers last.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The work stops halfway | Funding disappears after the schema stage. Can that stage remain deployed for a month? Predict which boundary must change before opening the design. | Use an additive nullable field or a safe default while existing readers remain compatible. Defer deleting or requiring the field. Verify both the old reader and old writer against the new schema. |
 | Lead · A lower stage changes | Review changes the validation API after the UI branch already exists. Which checks become stale? State what evidence would make you reject your first design. | Rebase dependent layers and rerun their integration checks against the revised base. Reuse artifacts only when their input commit is unchanged; do not transfer a green result across a new dependency graph. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

@@ -26,7 +26,7 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 **The finished artifact:** Ask for something genuinely past your ability to produce — a sliding-window rate limiter for P1's sign-in is the classic; a URL canonicaliser works too. Then build the apparatus that would catch it being wrong: properties, a dumb reference implementation, adversarial inputs, a one-page trust argument.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · The clock moves backward | The wall clock jumps from 60 to 55. What should happen? Predict which boundary must change before opening the design. | Use a monotonic elapsed clock for local rate accounting or reject non-monotonic test input by contract. Do not silently let expired history reappear. Verify the chosen policy explicitly. |
 | Lead · Ten replicas | Ten API processes share one account limit. Does a process-local harness prove fleet safety? State what evidence would make you reject your first design. | No. Put atomic admission at shared authority or divide quotas with a documented weaker guarantee. Test simultaneous arrivals at the shared boundary and count accepted requests across all replicas. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

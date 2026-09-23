@@ -37,7 +37,7 @@ The dictionary maps **cache key → list node**; the linked list orders recency,
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `get` returns value; `put` returns evicted `(key,value)` or `None`.
@@ -56,7 +56,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Zero capacity | put a into capacity 0 | returns a as immediately evicted | The structure retains nothing. |
 | Invalid construction | negative/noninteger capacity | `ValueError` | Capacity is validated once. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

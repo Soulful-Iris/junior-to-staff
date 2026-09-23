@@ -39,7 +39,7 @@ If A→B costs 10, A→C costs 1 and C→B costs 1, the best cost to B is 2. Ski
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** `(minimum_cost, endpoint-inclusive_path)`; any tied shortest path.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Huge integers | weights beyond float precision | exact integer total | Do not coerce costs to float. |
 | Invalid anywhere | negative/nonfinite edge in disconnected component | `ValueError` | Whole-graph validation is not traversal-dependent. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -34,7 +34,7 @@ Separate the two quantities: `height_from_node` is one downward branch that a pa
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Diameter measured in edges, as a nonnegative integer.
@@ -53,7 +53,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Off-root maximum | long path entirely within one subtree | that subtree distance | Do not require the global root to be crossed. |
 | Invalid topology | cycle or shared child | `ValueError` | Tree assumptions are enforced. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

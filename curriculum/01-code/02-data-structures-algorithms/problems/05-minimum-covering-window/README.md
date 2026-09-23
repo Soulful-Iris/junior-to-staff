@@ -35,7 +35,7 @@ Keep the requested counts separate from the mutable `remaining_by_character`. Th
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Shortest half-open `(start, end)`, earliest start on ties; `None` if impossible.
@@ -54,7 +54,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Tie | two equal-length valid windows | the one with the smallest start | State the deterministic result before coding. |
 | Invalid | either argument is not a string | `ValueError` | Validation precedes scanning. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

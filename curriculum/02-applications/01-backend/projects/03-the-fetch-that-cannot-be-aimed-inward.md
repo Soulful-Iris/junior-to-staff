@@ -26,7 +26,7 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 **The finished artifact:** One guarded HTTP client that everything in P1 fetches through: scheme allowlist, resolve-then-connect to the exact address that was vetted, refusals for private, loopback, link-local and metadata addresses, every redirect re-vetted, plus project 2's deadline and a size cap. Refusals are coded 4xxs, and the item still saves with…
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · DNS returns mixed addresses | One hostname returns both a public IPv4 and private IPv6 address. What does your policy do? Predict which boundary must change before opening the design. | For this exercise reject mixed unsafe answers rather than relying on client selection order. Test IPv4-mapped IPv6 and redirects with the same canonical address policy. |
 | Lead · A future worker reuses fetching | The queued worker gains new credentials and network routes. Is the guard enough? State what evidence would make you reject your first design. | Reuse the same client and add restricted egress and least-privilege credentials. Application validation and network isolation protect different boundaries; neither proves the other. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

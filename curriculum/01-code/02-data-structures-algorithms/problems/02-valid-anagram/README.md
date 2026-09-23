@@ -35,7 +35,7 @@ The dictionary key is a Unicode code point; its value is the number of occurrenc
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Boolean: each code point appears equally often.
@@ -54,7 +54,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Unicode form | precomposed `"é"` vs `"é"` | `False` | Normalization is explicitly outside the baseline. |
 | Invalid | `None`, `""` | `ValueError` | Reject the contract violation before counting. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

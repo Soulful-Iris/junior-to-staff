@@ -39,7 +39,7 @@ On the one-row board `[["A","B"]]`, `"AB"` is present but `"ABA"` is impossible 
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Boolean existence of an orthogonal path with no repeated cell.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Empty board | nonempty word | `False` | Valid but unsatisfiable. |
 | Invalid/atomic | ragged board or multi-character cell | `ValueError`; board unchanged | Validation and restoration are observable. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

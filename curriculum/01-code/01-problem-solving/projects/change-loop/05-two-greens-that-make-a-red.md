@@ -26,7 +26,7 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 **The finished artifact:** PR A changes a function's contract. PR B, branched before A landed, adds a new call site written against the old contract, in a different file. No textual conflict; both green on their own base; together they break main. Then a merge queue — real or hand-rolled — catches the second one before main ever sees it.
 
 Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the table above. Include one check that turns red when the guarantee
+failure from the examples above. Include one check that turns red when the guarantee
 breaks, the state owner, and the first operational limit. For each follow-up,
 change the diagram **and** the evidence before claiming the design still works.
 
@@ -34,8 +34,8 @@ change the diagram **and** the evidence before claiming the design still works.
 
 | Review gate | The interviewer changes | Expected response |
 |---|---|---|
-| Baseline | Run the small example from the table above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure row above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
+| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
+| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
 | Senior · Main changes during CI | A third commit lands while the speculative check is running. May the old result be reused? Predict which boundary must change before opening the design. | Recompute the speculative tree and rerun checks affected by the new base. Compare tree or input hashes explicitly; a commit’s unchanged PR head says nothing about dependency changes on main. |
 | Lead · The suite is flaky | The correct integration test fails 10% of the time due to leaked fixture state. Does a retry establish correctness? State what evidence would make you reject your first design. | Reproduce fixture contamination and isolate state before trusting the queue. Track ejection reasons. A retry may gather diagnostic evidence but does not repair the oracle; the merge queue amplifies flaky gates into team-wide delay. |
 | Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |

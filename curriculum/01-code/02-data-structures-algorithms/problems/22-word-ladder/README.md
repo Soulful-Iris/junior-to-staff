@@ -37,7 +37,7 @@ The queue holds `(word, number_of_changes)` and `visited` marks words **on enque
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** A shortest endpoint-inclusive list, or `[]` when impossible.
@@ -56,7 +56,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Duplicates | dictionary repeats a word | same path semantics | Repeated entries do not create states. |
 | Invalid | mixed lengths or non-lowercase ASCII | `ValueError` | Neighbor generation depends on the alphabet contract. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

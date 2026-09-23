@@ -39,7 +39,7 @@ Let `distance[i][j]` mean the cost for two **prefixes**, rather than an unexplai
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** Minimum unit-cost insertion/deletion/replacement count.
@@ -58,7 +58,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Unicode | strings compared by Python code point | distance over exact code points | No implicit normalization/grapheme logic. |
 | Invalid | either input non-string | `ValueError` | The API does not stringify values. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 

@@ -36,7 +36,7 @@ Use `lo` as the first index not yet ruled out and `hi` as the exclusive upper bo
 ## What the interviewer expects
 
 The interviewer gives you the scenario and the contract above. Explain what a
-successful call returns, walk one row from the table below, and name what your
+successful call returns, walk through one example below, and name what your
 state means *before* choosing a data structure.
 
 **Done means:** First index whose value is at least target, or `len(nums)` if none.
@@ -55,7 +55,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Before left | `[2,4]`, target `1` | `0` | Nothing is proven smaller. |
 | Invalid/atomic | `[3,1]`, target `2` | `ValueError`; input unchanged | Checked input must actually be sorted. |
 
-For each row, show which branch or state change produces that result.
+For each case, show which branch or state change produces that result.
 
 <!-- interview-rehearsal:end -->
 
