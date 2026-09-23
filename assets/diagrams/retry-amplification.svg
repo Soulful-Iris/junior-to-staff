@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" width="760" height="540" role="img" aria-label="One click becomes twenty-seven calls: each of three layers three total attempts, so one request at the edge fans out to three at the service, nine at the data client, and twenty-seven at the already-slow database">
   <rect width="760" height="540" rx="10" fill="#faf9f7"/>
 
-  <text x="40" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE CLICK BECOMES TWENTY-SEVEN CALLS</text>
+  <text x="40" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE CLICK CAN CAUSE TWENTY-SEVEN CALLS</text>
 
   <!-- the one legitimate request -->
   <rect x="250" y="56" width="120" height="36" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.5"/>
@@ -27,9 +27,9 @@
     <text x="310" y="363">sees 9 · sends up to 27</text>
   </g>
   <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">
-    <text x="422" y="161">RETRIES ×3</text>
-    <text x="422" y="257">RETRIES ×3</text>
-    <text x="422" y="353">RETRIES ×3</text>
+    <text x="422" y="161">ATTEMPTS ×3</text>
+    <text x="422" y="257">ATTEMPTS ×3</text>
+    <text x="422" y="353">ATTEMPTS ×3</text>
   </g>
 
   <!-- the multiplication, drawn -->
@@ -86,7 +86,7 @@
   <text x="310" y="474" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#c2703d">already slow — now hit 27 times for one click</text>
 
   <!-- the arithmetic, run down the right edge -->
-  <text x="600" y="100" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">CALLS IN FLIGHT</text>
+  <text x="600" y="100" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1.2">ATTEMPTS / LAYER</text>
   <g text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
     <text x="600" y="119" font-size="14" fill="#2f6f4e">1</text>
     <text x="600" y="161" font-size="10" fill="#8a857d">×3</text>
@@ -97,6 +97,6 @@
     <text x="600" y="414" font-size="30" font-weight="600" fill="#c2703d">27</text>
   </g>
 
-  <text x="40" y="512" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Each layer three total attempts — a reasonable policy, locally. Multiplied through the</text>
-  <text x="40" y="529" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">stack, one click is 27 calls at a database that was already struggling at one.</text>
+  <text x="40" y="512" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">Three total attempts per layer, including the original, allow up to</text>
+  <text x="40" y="529" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#3f3b36">3 × 3 × 3 = 27 dependency calls. A shared deadline may stop them sooner.</text>
 </svg>
