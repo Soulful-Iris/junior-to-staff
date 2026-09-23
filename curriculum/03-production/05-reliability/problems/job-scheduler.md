@@ -17,6 +17,33 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 Separate the schedule definition, due-time index, execution record and worker queue. Partition by due-time bucket to find work efficiently, but spread hot minutes and large tenants. Claim a job with a lease and fencing/version token; if a worker outlives the lease, it cannot overwrite a newer result. Exactly-once side effects need downstream idempotency or reconciliation, not a queue label.
 
+### Define the occurrence before dispatch
+
+An occurrence key is `(schedule_id, schedule_version, intended_fire_instant)`,
+not a worker attempt ID. Store the timezone and recurrence rule that produced
+that instant. For a wall-clock schedule, define spring gaps and autumn folds;
+this exercise skips nonexistent local times and runs once at the first instant
+for a repeated local time. A fixed UTC interval has different semantics.
+
+| Race / outage | Chosen baseline contract |
+|---|---|
+| Trigger delivered twice | Conditional create of the occurrence and its dispatch outbox; one execution record |
+| Schedule edited | New version governs future occurrences; old pending occurrences are explicitly cancelled or retained by the edit request |
+| Cancel races claim | Versioned transition decides admission; cancelling a running job is cooperative, not an undo of a payment |
+| Ten minutes missed | Caller chooses skip, coalesce-to-latest, or bounded catch-up; record omitted occurrences rather than silently losing them |
+| Retry is too old | Stop at the occurrence’s maximum retry age; reconcile uncertain effects before any manual replay |
+
+**Catch-up arithmetic:** at 10,000 arrivals/s, a ten-minute outage leaves
+6,000,000 occurrences. With 12,000 useful completions/s and live arrivals still
+at 10,000/s, spare capacity is 2,000/s: drain takes **3,000 seconds (50 minutes)**,
+ignoring retries and service-time variation. At equal arrival/service rates the
+backlog never drains. One-minute due-to-start accuracy is breached during this
+recovery; admission limits and misfire policy must say which work is deferred.
+
+Rehearse a gap, a fold, duplicate dispatch, an edit/cancel race and that backlog
+with new arrivals continuing. Count intended, executed, skipped and reconciled
+occurrences separately from worker attempts.
+
 **First diagram:** Draw scheduled → due → leased → running → succeeded/retry/dead-letter states and mark the crash window.
 
 ![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/job-scheduler-aws.svg)
