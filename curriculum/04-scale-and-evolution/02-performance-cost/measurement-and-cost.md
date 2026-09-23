@@ -91,39 +91,42 @@ Three things, and the first is the whole section.
 
 ![A latency distribution where the average sits comfortably inside the target while the tail does not, with the p99 marked far to the right and a note that one in a hundred requests is a real person](../../../assets/diagrams/average-hides-it.svg)
 
-An average latency of 180ms sounds fine. If the p99 is 4 seconds, then one
-request in a hundred takes four seconds — and on a page making twenty calls,
-roughly one page load in five contains one of them. The people having the worst
-time are invisible in the average and they are the ones who leave.
+An average latency of 180 ms can hide a long tail. Suppose a defined slow event
+occurs on 1% of calls. For **20 independent calls**, the probability of at least
+one slow call is `1 - 0.99**20 ≈ 18.2%`. If every call shares exactly the same
+slow event, perfect correlation makes that probability **1%**, not 18.2%.
+A p99 is a distribution boundary, not a claim that exactly 1% take four seconds.
+Measure page-level elapsed time and dependency correlation rather than inferring
+them from marginal percentiles.
 
 So: **percentiles, always.** p50 to know what typical feels like, p99 to know
 what bad feels like, and the gap between them to know how consistent you are.
 
-**Most systems wait rather than compute.** The profile of a normal web
-application is dominated by waiting: on the database, on a network call, on a
-lock, on the disk. This is why intuition fails — engineers reason about
-algorithms, and the answer is usually a query, a missing index, or a call that
-should have been made once and is being made ninety times.
+**Identify what the profiler sampled.** A CPU flame graph attributes sampled
+CPU activity; an allocation profile attributes allocations. Neither is
+automatically elapsed request time. Use a trace/waterfall for the critical path,
+including queue, lock and network waits. Concurrent span durations cannot simply
+be added to obtain end-to-end latency.
 
-**Cost is a performance metric with a currency.** The same flame graph that shows
-you where the time goes is showing you where the money goes, because the money
-is compute time. Which means one instrument answers both questions, and the
-second question only feels different because it arrives on an invoice instead of
-in a dashboard.
+| Change, same useful workload | Measured result | What follows |
+|---|---|---|
+| 10 ms helper becomes 5 ms in a 1,000 ms serial endpoint | Endpoint becomes 995 ms | Helper is 2× faster; endpoint improves only 0.5% |
+| CPU usage halves on an unchanged fixed-size reserved instance | Same instance-hours billed | More headroom, not an automatic 50% bill reduction |
+| Retries double while successful jobs stay constant | More requests/CPU/network per useful job | Report cost including failed attempts, not cost per attempt alone |
 
-### Continuous profiling, which changed what is possible
+**Cost needs billing data.** Attribute compute time/capacity, requests, storage,
+I/O, network and allocated idle cost to useful requests or completed jobs. Name
+the actual billed unit and what was measured versus estimated. Compare matched
+workloads, percentiles and error rates before claiming a cheaper release.
 
-Profiling used to be something you did locally, on a synthetic workload, hoping
-it resembled production. eBPF-based profilers changed that: they sample the
-whole machine from the kernel in production. Overhead depends on the profiler,
-sampling configuration, workload, and environment. Measure CPU, latency, dropped
-samples, and storage before accepting an always-on budget.
+### Continuous profiling and repeatable comparisons
 
-What that buys you is the thing that was previously impossible: **a diff flame
-graph between two versions.** Not "is this fast" but "what did this release
-change about where time goes". Some teams fail a deploy on a regression in it.
-
-*(Checked 2026-09-21; see [docs/research/senior-craft-2026.md](../../../docs/research/senior-craft-2026.md) for sources and what could not be verified.)*
+Differential flame graphs compare two profiles; they do not depend on eBPF and
+were not invented by modern production profiling. Choose a collection method
+for workload coverage, overhead, deployment constraints and symbolization.
+Record profiler/configuration and workload identity, then compare equivalent
+profiles across versions. Measure CPU, latency, dropped samples and storage
+before accepting an always-on budget.
 
 ### Attribution is the whole cost discipline
 
@@ -251,7 +254,8 @@ On **P3**, after the load test:
 
 - **percentile** — the value below which that share of requests fall. p99 is the unlucky hundredth person.
 - **tail latency** — the slow end of the distribution. Where the people who leave live.
-- **flame graph** — a profile drawn so width is time spent. The standard way to see where it went.
+- **flame graph** — a profile whose width represents its sampled quantity
+  (for example CPU samples or allocated bytes); read the profiler and units first.
 - **diff flame graph** — two profiles compared, so you see what a release changed rather than what is slow.
 - **continuous profiling** — always-on sampling in production, cheap enough to leave running.
 - **N+1** — one query to get a list, then one per item. The commonest real cause of slow pages.
