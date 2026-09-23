@@ -6,10 +6,10 @@ def two_sum(nums, target):
     _integers(nums)
     if type(target) is not int:
         raise ValueError("target must be an integer")
-    earliest = {}
+    first_index_by_value = {}
     for j, value in enumerate(nums):
-        needed = target - value
-        if needed in earliest:
-            return earliest[needed], j
-        earliest.setdefault(value, j)
+        complement = target - value
+        if complement in first_index_by_value:
+            return first_index_by_value[complement], j
+        first_index_by_value.setdefault(value, j)
     return None

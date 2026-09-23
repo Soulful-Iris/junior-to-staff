@@ -4,11 +4,12 @@ from heapq import heappop, heappush, nlargest
 
 
 def two_sum(nums, target):
-    seen = {}
-    for i, value in enumerate(nums):
-        if target - value in seen:
-            return seen[target - value], i
-        seen[value] = i
+    first_index_by_value = {}
+    for j, value in enumerate(nums):
+        complement = target - value
+        if complement in first_index_by_value:
+            return first_index_by_value[complement], j
+        first_index_by_value.setdefault(value, j)
     return None
 
 

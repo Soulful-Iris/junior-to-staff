@@ -8,17 +8,17 @@
 
 ## First, what is a map?
 
-A **map** stores a value under a key so you can look up that key later. Python calls it a **dictionary** (`dict`). Here the key is a number we saw earlier, and the stored value is its *first position* in the list. Braces create a dictionary; a colon separates a key from its value:
+A **map** stores a value under a key so you can look up that key later. Python calls it a **dictionary** (`dict`). Here the key is a number we saw earlier, and the stored value is its *first index* in the list. Name the dictionary for both sides of that relationship and the rule for repeated values: `first_index_by_value`. It works for prices, transaction amounts, or any list of numbers. Braces create a dictionary; a colon separates a key from its value:
 
 ```python
-first_position = {}             # empty dictionary
-first_position[2] = 0           # key 2 -> value 0
-print(first_position)            # {2: 0}
-print(2 in first_position)       # True: is this key present?
-print(first_position[2])         # 0: retrieve the stored position
+first_index_by_value = {}
+first_index_by_value[2] = 0
+print(first_index_by_value)       # {2: 0}
+print(2 in first_index_by_value)  # True
+print(first_index_by_value[2])    # 0
 ```
 
-This is different from a list: `prices[0]` means “the value *at position* 0”; `first_position[2]` means “the *position previously saved under value* 2.” The keys come from input values, not from list positions. A dictionary can remember one answer to a question without scanning the list again.
+This is different from a list: `prices[0]` means “the value *at index* 0”; `first_index_by_value[2]` means “the *first index saved under value* 2.” The keys come from input values, not from list indices. The name describes `value → first index`; `first_position` describes only the right-hand side, so a reader has to reconstruct the key from surrounding code. If the requirement changes to the *most recent* occurrence, the name and update rule must change together.
 
 ## Watch the question change at each position
 
@@ -43,16 +43,16 @@ The simple approach tries each pair of different positions. The map saves the ea
 
 ```python
 def two_sum(prices: list[int], target: int) -> tuple[int, int] | None:
-    earliest: dict[int, int] = {}
+    first_index_by_value: dict[int, int] = {}
     for j, value in enumerate(prices):  # j is the current position
-        needed = target - value
-        if needed in earliest:           # ask about earlier positions first
-            return earliest[needed], j
-        earliest.setdefault(value, j)   # keep the first position for this value
+        complement = target - value
+        if complement in first_index_by_value:
+            return first_index_by_value[complement], j
+        first_index_by_value.setdefault(value, j)
     return None                          # examined every position; no pair
 ```
 
-`setdefault(value, j)` adds the key only if absent. Without that guard, overwriting an earlier index can break the contract “smallest earlier position.” The complete [two sum problem](../problems/01-two-sum/README.md) adds validation and more difficult tie cases.
+`j` is the right-hand index in the requested pair; that short name is useful inside this small loop. `complement` names the value needed to finish the sum. `setdefault(value, j)` adds the key only if absent. Without that guard, overwriting an earlier index can break the contract “smallest earlier index.” This name and update rule together express the invariant: **before each lookup, the dictionary maps each previously seen value to its earliest index**. The complete [two sum problem](../problems/01-two-sum/README.md) adds validation and more difficult tie cases.
 
 ## Try inputs that could break your answer
 

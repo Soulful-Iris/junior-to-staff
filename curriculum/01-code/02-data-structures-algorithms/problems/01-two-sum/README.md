@@ -18,13 +18,13 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 
 ## The tool before the challenge
 
-A Python map is a `dict`: a value used as a key points to the earliest index where it appeared. For `[3, 3]`, the second 3 can find the first 3; a one-item `[3]` cannot reuse itself.
+A Python map is a `dict`: a value used as a key points to the earliest index where it appeared. For `[3, 3]`, the second 3 can find the first 3; a one-item `[3]` cannot reuse itself. Name the state for the mapping and the tie rule: `first_index_by_value`.
 ```python
-earliest = {3: 0}          # value -> first index
-print(3 in earliest)       # True
-print(earliest[3])         # 0
+first_index_by_value = {3: 0}
+print(3 in first_index_by_value)  # True
+print(first_index_by_value[3])    # 0
 ```
-Trace the dictionary *before* processing each position. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
+Trace the dictionary *before* processing each position. The name describes `value → first index` regardless of whether the input is prices or transaction amounts. If the contract asks for **all** pairs, a single index per value no longer holds enough state; the name and stored type must change. The [maps primer](../../lessons/01-maps.md) teaches the full search and complexity; the contract below adds tie order and invalid inputs.
 
 <!-- interview-rehearsal:start -->
 
