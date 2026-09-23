@@ -4,6 +4,7 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as ET
+import check_catalog
 
 def local_state_update(anim, root, parents):
     """Allow a small logical commit, never discrete geometry or scene replacement.
@@ -52,7 +53,12 @@ for path in files:
 # edge cases before the worked answer. This guards against a future problem being
 # added with only an implementation and hidden tests.
 problem_bank=json.loads((ROOT/'indexes/problem-bank.json').read_text())
-if len(problem_bank)!=42:errors.append('problem bank must contain 42 entries')
+try:
+    catalog = check_catalog.collect(ROOT)
+    errors.extend(check_catalog.check(ROOT, catalog))
+except (OSError, ValueError, KeyError) as exc:
+    errors.append(f'Learning catalog: {exc}')
+    catalog = {'projects': []}
 for item in problem_bank:
     path=ROOT/item['path'];content=path.read_text()
     start='<!-- interview-rehearsal:start -->';end='<!-- interview-rehearsal:end -->'
@@ -66,12 +72,23 @@ for item in problem_bank:
 
 project_files=sorted([path for path in (ROOT/'curriculum').rglob('*.md') if '/projects/' in path.as_posix()]
                      + list((ROOT/'projects/reading-list/stages').rglob('README.md')))
-if len(project_files)!=45:errors.append(f'expected 45 project briefs, found {len(project_files)}')
+registered_projects={item['path']:item['kind'] for item in catalog['projects']}
+if {str(p.relative_to(ROOT)) for p in project_files} != set(registered_projects):
+    errors.append('Project inventory differs from current learning catalog')
 for path in project_files:
     content=path.read_text();start='<!-- project-expectation:start -->';end='<!-- project-expectation:end -->'
-    if content.count(start)!=1 or content.count(end)!=1:
-        errors.append(f'{path}: expected one project expectation block');continue
-    block=content.split(start,1)[1].split(end,1)[0]
+    if registered_projects.get(str(path.relative_to(ROOT))) == 'runnable-reference':
+        # Supplied AI references use visible handoff headings, not the older
+        # assignment template's hidden markers. Validate the same learning contract.
+        heading='## What you are expected to hand over'
+        if content.count(heading)!=1:
+            errors.append(f'{path}: missing reference handoff');continue
+        block=content.split(heading,1)[1].split('## Research',1)[0]
+        block=heading+block
+    else:
+        if content.count(start)!=1 or content.count(end)!=1:
+            errors.append(f'{path}: expected one project expectation block');continue
+        block=content.split(start,1)[1].split(end,1)[0]
     if '## What you are expected to hand over' not in block or '### How the review conversation gets harder' not in block:
         errors.append(f'{path}: incomplete project expectation headings')
     review_rows=[line for line in block.splitlines() if line.startswith('| ')][1:]
