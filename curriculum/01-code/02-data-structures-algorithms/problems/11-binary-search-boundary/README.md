@@ -21,7 +21,7 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 Lower bound means the *first* index whose value is at least the target, including the insertion position `len(nums)` when none exists:
 ```python
 nums = [1, 2, 2, 5]
-lo, hi = 0, len(nums)  # potential answer is in [lo, hi)
+lo, hi = 0, len(nums)  # uninspected elements: [lo, hi); answer boundary: [lo, hi]
 mid = (lo + hi) // 2
 print(mid, nums[mid])  # 2, 2; still search LEFT for the first 2
 ```
@@ -29,7 +29,13 @@ The answer for target 2 is index 1. [Walk the full boundary loop](../../lessons/
 
 ### A design choice worth saying aloud
 
-Use `lo` as the first index not yet ruled out and `hi` as the exclusive upper bound; this `[lo, hi)` invariant explains why `hi = mid` keeps a possible first match. Return `len(nums)` when the predicate never becomes true, rather than inventing `-1` if the contract promises an insertion index.
+`[lo, hi)` contains uninspected **elements**; inclusive `[lo, hi]` contains the possible **answer boundary**. `hi` is a known true boundary, or the sentinel `n`. Setting `hi = mid` removes mid from inspection but keeps it eligible as the answer. Return `len(nums)` when every element is smaller.
+
+| Input / target | Boundary trace `(lo, hi)` | Answer |
+|---|---|---|
+| `[]` / `2` | `(0,0)`; no elements to inspect | `0` |
+| `[1,2]` / `9` | `(0,2) → (2,2)` | `2`, the sentinel |
+| `[1,3,3,8]` / `3` | `(0,4) → (0,2) → (0,1) → (1,1)` | `1`, retained when mid became hi |
 
 <!-- interview-rehearsal:start -->
 
