@@ -37,7 +37,7 @@ Second, the single most important fact this project surfaces: **if a customer
 told you, that number is the whole finding** and the rest of the postmortem is
 detail. Being told by a user is not a small operational gap — it means your
 instruments cannot see the thing your users experience, which is
-[10 · Observability](../../02-senior/10-observability/)'s entire argument
+[10 · Observability](../04-observability/README.md)'s entire argument
 arriving as a specific failure.
 
 Third, why the two timestamps have to be separated deliberately: **a narrative
@@ -118,7 +118,7 @@ than being discovered by a two-hour investigation.
 
 For the detection improvement, the shapes worth knowing: a **composite alarm**
 so a page requires two signals to agree (see
-[09 · Reliability](../../02-senior/09-reliability/)), **CloudWatch anomaly
+[09 · Reliability](README.md)), **CloudWatch anomaly
 detection** for metrics with a daily shape where a static threshold does not
 work, and — the setting people miss — **treat missing data as breaching** on at
 least your critical alarm, because a component that stopped emitting looks
@@ -242,7 +242,7 @@ connectivity loss.
 
 The highest-value single drill remains an **RDS failover** triggered on
 purpose — `reboot-db-instance --force-failover` or `failover-db-cluster` — for
-the reasons in [13 · Data at scale](../../02-senior/13-data-at-scale/): you
+the reasons in [13 · Data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md): you
 learn your real failover time, that your pool does not reconnect the way you
 assumed, and that something caches DNS past its TTL.
 
@@ -375,7 +375,7 @@ that coincided with the break. **AWS Config**'s configuration timeline shows a
 resource's exact state before and after, which settles "was it always
 configured that way" without argument. **CloudWatch Logs Insights** over the
 window gives you the application's own account, and if you followed
-[10 · Observability](../../02-senior/10-observability/) you can pivot from a
+[10 · Observability](../04-observability/README.md) you can pivot from a
 trace id to everything one request did.
 
 **Systems Manager Incident Manager** produces a post-incident analysis with the
@@ -636,7 +636,7 @@ rather not.
 objective, and it tracks attainment and the remaining error budget, with
 burn-rate alarms. That is the lowest-effort path from "we have an SLO" to "the
 budget is a number on a dashboard everybody can see". If you built the SLI by
-hand in [09 · Reliability](../../02-senior/09-reliability/), the budget is
+hand in [09 · Reliability](README.md), the budget is
 metric math over your good and total counters, and the same dashboard applies.
 
 Put the budget remaining on the dashboard people already look at — not a
