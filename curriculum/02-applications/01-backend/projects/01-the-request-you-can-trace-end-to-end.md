@@ -15,23 +15,20 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Client sends `X-Request-ID` containing newlines and a token-bearing URL. | Mint or validate at the trusted edge; sanitize fields and omit token values. |
 | Scope | Logs explain observed events; absence and cross-host clock skew require explicit handling. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Send concurrent requests A and B. A's title fetch times out; B succeeds. For each response, return an ID that finds only that request's auth, DB, and fetch events. **Show:** one JSON log line such as `{"requestId":"A","event":"title.timeout","durationMs":500}`, an error response carrying A, and the output of `trace-request A`; no secret URL appears.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** P1 emits one structured JSON event for each step of every request — an id minted at the entry point, carried through auth, the database and the title fetch, echoed in the response headers and in every error body. Plus a script that takes an id and prints that request's story.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

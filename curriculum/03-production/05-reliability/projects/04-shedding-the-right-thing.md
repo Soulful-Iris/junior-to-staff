@@ -15,23 +15,20 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 | Boundary / failure | 120 critical requests/s with capacity 100/s. | At least 20 critical requests/s must be shed or queued within a stated finite deadline; refusing them is not automatically a classification bug. |
 | Scope | Equal-cost teaching requests; real admission also considers concurrency and work cost. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Present two traffic classes to a 100-request/s service: 80 critical and 50 bulk per second. **Show:** 80 critical admitted, at most 20 bulk admitted, at least 30 bulk explicitly rejected with retry guidance. Increase critical traffic to 120/s and document what happens when even the high-priority class cannot fit; no design creates extra capacity.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Classify your requests into three priorities, then shed the lowest first when the system is short of capacity. Load it until shedding starts, and verify from the outside that the high-priority class kept working.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -15,23 +15,20 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | The AI review gives a style verdict and silently approves a missing owner check. | Its contract is violated; human behavioral review remains required. |
 | Scope | Five subsequent PRs form a small local experiment, not a universal productivity study. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Label 20 actual review comments as deterministic or judgment calls. A formatter/linter should replace the 12 formatting/import comments; a human must still own the naming/behavior decisions. **Show:** before/after review queues and a diff that quietly removes the owner check: the AI's pleasant style feedback must never count as approval.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A corpus of real review comments — project 2 supplies plenty — sorted into what a machine could have said and what needed a person. Then the machine layer: a formatter that rewrites, a linter and import order that enforce, an AI first pass constrained by contract. Then the count, re-run on your next five PRs.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -11,9 +11,23 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Photo suggestion 19990 minor units USD; human correction 1999 USD. | Persist both; confirmed monthly total increases by 1999 USD, with provenance linking the correction. |
+| Small example | Photo suggestion 19,990 USD cents ($199.90); human correction 1,999 USD cents ($19.99). | Persist both; confirmed monthly total increases by 1,999 cents ($19.99), with provenance linking the correction. |
 | Boundary / failure | An interrupted upload has no complete image, or the image is not a receipt. | Keep an explicit incomplete/failed record or clean it up; do not invent an amount or count an unconfirmed total. |
 | Scope | Currency stored with exact decimal/minor-unit representation; no implicit exchange-rate conversion. | Explain any additional assumption before implementing it. |
+
+## See the first reviewable result
+
+**First slice:** Display an uploaded photo as `processing`, then show the model's suggested amount `19990` USD cents ($199.90) alongside the user's confirmed `1999` USD cents ($19.99). **Show:** both values and their sources in the record, plus a monthly total derived only from *confirmed* amounts. Interrupt another upload and prove it cannot silently contribute a guessed number.
+
+| Record/action | Displayed state | Monthly USD total, starting at $0.00 |
+|---|---|---|
+| Upload receipt A; extraction suggests $199.90 | `needs review` with suggestion and source image | $0.00 |
+| User confirms $19.99 for A | Confirmed $19.99 beside retained suggestion $199.90 | $19.99 |
+| Completion for A is delivered twice | One receipt A, one confirmed amount | $19.99 |
+| Upload B stops halfway | Incomplete/failed or cleaned up explicitly | $19.99 |
+| Confirm a JPY 500 receipt | JPY amount and currency visible separately | $19.99 USD; JPY 500 in its own total |
+
+Use integer minor units with an explicit currency and scale; do not label `1999` as 1,999 dollars or add yen to dollars. Keep the image private, show who corrected which value, and test the retry at the finalization boundary.
 
 <!-- project-expectation:start -->
 
@@ -23,17 +37,10 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/receipt-tracker.svg)
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

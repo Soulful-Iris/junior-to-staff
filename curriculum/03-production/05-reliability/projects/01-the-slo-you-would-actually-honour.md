@@ -15,23 +15,20 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 | Boundary / failure | Zero eligible requests in a reporting interval. | Ratio is undefined; display no eligible traffic and use a separate missing-telemetry signal. |
 | Scope | Request-weighted availability; time-weighted 43.2 minutes at 99.9% is a different SLI. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Publish good/eligible counters for bookmark saves and a 30-day **request-weighted** 99.9% objective. With 1,000,000 eligible requests and 10,000 failures, **show:** 99% success, a 1,000-failure budget, and 10× budget consumption—even if all failures happened in one minute. Display “no eligible traffic” rather than 100% when the denominator is zero.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Pick the single thing users care about most in your system — the list loading, the item saving — and define an SLO for it: a metric, a target, and a window. Then write the error-budget policy: what happens at 50% of the budget spent and at 75% spent (25% left).
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

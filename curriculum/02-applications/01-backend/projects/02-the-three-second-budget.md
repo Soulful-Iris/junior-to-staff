@@ -15,23 +15,20 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | 429 says Retry-After 5 seconds with only 1 second left. | Return a pending/failure outcome under contract; do not wait beyond the original deadline. |
 | Scope | Teaching durations, not production latency promises; two total attempts means one retry. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Mint a three-second deadline at entry. Spend 300 ms on auth/database and reserve 100 ms; two 1,200 ms fetch attempts plus 200 ms backoff fit the 2,600 ms left. **Show:** a fake-clock trace with each attempt start/end and a 429 carrying `Retry-After: 5` when only one second remains; there must be no third attempt or over-deadline sleep.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A time budget for P1's add-a-URL request: a deadline minted at the door and spent down the chain — the diagram above — every outbound timeout derived from what remains, retries living only in the fetch client, and an idempotency key so a retried POST cannot create two rows.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

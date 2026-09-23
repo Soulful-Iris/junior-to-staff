@@ -15,23 +15,20 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | An entry says “do not mock the database” on a parser with no database. | Reject or narrow applicability; literal reuse is not successful transfer. |
 | Scope | A small local comparison; no causal productivity claim from one run. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Extract five reusable constraints from three real transcripts. For each, write when it applies and the check that could prove a future AI answer wrong. Apply all five to a *held-out paginated importer*; an instruction about UI-only behavior must be discarded. **Show:** a before/after prompt and the holdout run with keep/parameterize/delete decisions, not a collection of slogans.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Mine three or four of your own transcripts for the asks you keep retyping. Compress them into five to ten named entries — a constraint, when it applies, what to check after — then run the library on a task from a different area and count what needed editing.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

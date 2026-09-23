@@ -15,23 +15,20 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 | Boundary / failure | Read assertion fails after create succeeds. | Finally-style cleanup deletes the known item; failure still names the read step. |
 | Scope | Dedicated synthetic account and bounded cleanup; no claim one region represents all users. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Give a synthetic user a private test namespace. Each minute: sign in, create item 7, read it, delete it, then verify absence. **Show:** one successful per-step report and one run where read fails; the cleanup still runs, the skipped dependent steps are not green, and the alert links to the failed step without exposing credentials.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A small check that exercises the real system from outside — sign in, add a link, read it back, delete it — on a schedule, against production, alerting when it fails.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

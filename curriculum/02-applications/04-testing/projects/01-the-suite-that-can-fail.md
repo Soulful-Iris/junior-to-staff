@@ -15,23 +15,20 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 | Boundary / failure | The first mutation remains applied while the second runs. | Stop because later results are contaminated; restore or discard the isolated worktree. |
 | Scope | Twenty selected mutations are a sample, not a completeness or mastery measure. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** In isolated copies, remove an ownership filter and change `<` to `<=`. Both are behavioral mutants: the tests should turn red with a named fixture. A comment change and variable rename are excluded as equivalent edits. **Show:** a four-row mutant report, commands and failing inputs, then verify the original worktree is restored before the next mutation.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A script that takes your P1 repository, makes one small semantic change (flip a comparison, drop a line, invert a boolean, off-by-one a slice), runs the suite, records whether it went red, and reverts. Twenty mutations, one report.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

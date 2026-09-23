@@ -15,23 +15,20 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | An implementation expires timestamps strictly less than the boundary. | The 60-second probe fails; the fixture must distinguish `<` from `<=`. |
 | Scope | One key, monotonic clock, no distributed replicas in the baseline. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Build a deterministic fake-clock harness for a five-attempt, 60-second limit. After accepts at t=0–4, show an attempt at t=59 denied and t=60 accepted: the t=0 event has left the window `(now−60,now]`. **Show:** the event log with accepted/denied flags and a test that fails if expiration uses the wrong inequality. Explain what you asked AI to implement and which oracle you wrote yourself.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Ask for something genuinely past your ability to produce — a sliding-window rate limiter for P1's sign-in is the classic; a URL canonicaliser works too. Then build the apparatus that would catch it being wrong: properties, a dumb reference implementation, adversarial inputs, a one-page trust argument.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

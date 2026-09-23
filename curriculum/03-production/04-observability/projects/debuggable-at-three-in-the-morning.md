@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Only one user ID is affected but metrics aggregate all traffic. | Use bounded cohort metrics plus trace/log queries by ID; do not create one unbounded metric series per user. |
 | Scope | Request-weighted SLO with explicit missing-data and no-traffic behavior. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Seed a failure at 03:00:00, first confirming metric at 03:00:30, alert delivered at 03:01:10. **Show:** a trace and redacted logs that identify one bad request, plus detection time 70 s separated into collection and delivery. Recreate a one-user-only failure to show how a broad aggregate can look healthy while scoped traces find the affected user.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Telemetry good enough that an unfamiliar person can answer "what happened to this request?" without adding a log line and redeploying — plus an SLO, an alert that fires once and usefully, and a measured detection time.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

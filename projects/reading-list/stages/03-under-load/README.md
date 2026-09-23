@@ -13,23 +13,20 @@ Prerequisites: [P2](../02-it-survives/README.md). This page is a build brief; it
 | Boundary / failure | 200 concurrent readers on ten instances miss one key; database budget is 100 reads/s. | Limit admitted origin work explicitly; do not infer one fleet-wide load from local coalescing or TTL jitter. |
 | Scope | Refresh generations distinguish later refreshes from duplicate delivery of the same job. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Submit operation K twice with the same payload. Then let worker A claim epoch 1, B reclaim epoch 2 and store `New`, and A attempt to store `Old`. **Show:** one current result, old-epoch write rejected, queue depth and accepted/rejected rates. Hit ten instances with 200 readers under a 100-read/s database budget; a local singleflight is not a fleet-wide admission policy.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Stage 3 · the question is what happens when it is busy, and when a dependency dies? Same reading list. Now make it behave when it is under pressure and when the things it depends on stop working.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

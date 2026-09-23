@@ -15,23 +15,20 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Old field is replaced by objects before clients migrate. | The saved old-client fixture fails; do not infer compatibility from provider unit tests. |
 | Scope | An additive example; new enum values and strict consumers still need compatibility tests. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Replay a saved old-client fixture expecting `{"tags":["work"]}`. Add `"tagObjects":[{"id":7,"name":"work"}]` without replacing `tags`. **Show:** the old fixture still green and a new-client check for objects. Deliberately replace the old field once and capture the old client's failure; a provider-only unit test is insufficient.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Yesterday's client, recorded and turned into a compatibility test. One real change made additively — the new shape beside the old. The old shape marked with Deprecation and Sunset headers and a real date, and telemetry plus a consumer inventory that state what old usage can and cannot be observed.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

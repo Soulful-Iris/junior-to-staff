@@ -15,23 +15,20 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Worker crashes after remote fetch but before any durable result record. | A later owner may fetch again; guarantee one current stored result, not one remote fetch. |
 | Scope | One job identity and payload hash; immutable generation per claim; no external exactly-once guarantee. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Claim a pending fetch job as generation 1. Let its lease expire, let worker B claim generation 2 and store title `New`, then let old worker A try to store `Old`. **Show:** one conditional update succeeds and A's affects zero rows. Kill a worker after fetch and prove a retry may fetch again without replacing the newer stored result.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A jobs table in the database P1 already has — pending, claimed with an expiry, done, failed with a reason — and a worker loop that claims atomically and runs the guarded fetch inside the budget. The add-URL endpoint returns at once with the title pending. At-least-once delivery, idempotent handling.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

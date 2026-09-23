@@ -15,23 +15,20 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 | Boundary / failure | Retry arrivals 60/s while completion remains 50/s after the original spike ends. | Backlog still grows 10/s; removing the original trigger does not restore stability. |
 | Scope | Discard only expired/rebuildable work; durable business operations need reconciliation. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Start a 600-job backlog, reduce new useful arrivals to 20/s and restore safe completion to 50/s. **Show:** an ideal drain slope of 30/s and roughly 20 seconds, then measure actual drain. Add 60/s retry arrivals instead: backlog grows 10/s after the original spike ends. The graph must make the sustained feedback loop visible.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Induce a metastable failure: overload the system, remove the overload, and watch it stay broken. Then find the mechanism and fix it.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

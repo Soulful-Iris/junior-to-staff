@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Rollback credentials depend on the same failing configuration service. | The recovery plan is blocked; add independently available emergency access and rehearse it. |
 | Scope | Isolated environment, bounded workload and explicit rollback; do not label the scripted cause an unfamiliar assessment. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Rehearse a failure injection with a clock and an observer. Inject at 10:00:00, first bad job 10:00:05, alert 10:01:00, rollback 10:02:00, backlog clear 10:03:30. **Show:** detection after impact 55 s, mitigation after alert 60 s, and full recovery after impact 205 s; record user impact separately. Make rollback unavailable through the same failing config service once and fix the recovery path.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Pick a failure you have never tried. Break your own system with it, deliberately, in daylight. Run it as an incident: note the timeline, mitigate before you diagnose, then write the postmortem and complete one action item.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

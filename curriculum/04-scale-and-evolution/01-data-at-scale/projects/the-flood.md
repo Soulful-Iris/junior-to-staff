@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | The same operation ID arrives twice concurrently with different content. | Reject/quarantine the conflict; do not return the first result as if the payload matched. |
 | Scope | Queue budget is enforced at admission; SQS visibility is not an exclusive execution lock. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** With 100 jobs/s arriving for 10 s, 20/s worker capacity, and 300 queued-job slots, **show:** at most 200 completed, 300 still admitted, and at least 500 explicit rejections in the idealized model. Include the actual queue and latency graph. Send one operation ID twice with different payloads and demonstrate conflict rejection rather than silently reusing a result.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Move the slow work off the request onto a bounded queue, make the work idempotent, rate-limit the entrances, then flood it on purpose and record what broke first.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

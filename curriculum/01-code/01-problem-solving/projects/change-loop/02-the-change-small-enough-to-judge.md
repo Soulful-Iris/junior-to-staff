@@ -15,23 +15,20 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | The UI stage lands before the response includes tags. | A contract check rejects that stage; a smaller diff is not automatically a safe diff. |
 | Scope | One feature; compare identical behavior and preserve reviewer blinding. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Take one tagging feature and implement the same finished behavior as one large change and as five green layers: rename, nullable schema, validation, API, UI. **Show:** a successful check at every layer and a final-tree diff proving both versions agree. Force the UI ahead of the API once; capture the contract failure before fixing the order.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** One real P1 feature — tagging is the right size: a rename, a migration, behaviour, UI — built twice from one plan: as a single PR, and as a stack of five layers, each green and runnable alone. Two bugs planted blind in both at the same spots. Review both forms, timed; open the sealed answers last.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

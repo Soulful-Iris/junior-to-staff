@@ -15,23 +15,20 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | A failed ownership job is advisory rather than required. | The exercise fails even though the job is red: merging remains possible. |
 | Scope | Test repository and inert secret fixtures; never plant a real credential. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Name four required jobs—build/test, format/lint, secret scan, owner isolation. Make four disposable branches, each with one intentional violation. **Show:** the matching red job and blocked merge for each branch, then restore the original branch. A red *advisory* ownership job does not meet this project.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Four checks on P1 as separate named jobs — build-and-test, format-and-lint, secret scan, and the invariant that nobody can touch someone else's items — made required by branch protection. Plus the red catalogue: one deliberately bad PR per check, refused by that check, kept closed as evidence.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

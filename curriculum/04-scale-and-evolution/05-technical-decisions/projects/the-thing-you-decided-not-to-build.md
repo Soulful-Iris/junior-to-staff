@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Estimate excludes on-call support or assumes unverified service pricing. | Label the uncertainty and run a bounded spike/source check before treating cost as decisive. |
 | Scope | Constructed numbers; independently verify real prices, capabilities and user demand for a real decision. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Compare a custom exporter (6 engineer-weeks plus a day of monthly support) with a three-day script for two exports a month. **Show:** a one-page decision with the same required behavior for both options, uncertainties, an explicit trigger to revisit the decision, and one bounded spike that tests the most fragile cost assumption. “Do nothing” without evidence is not the artifact.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Take a feature or a project you genuinely want to build. Investigate it properly. Then write the decision not to — with the alternatives argued at their strongest, the evidence, the cost of being wrong, and the one sentence that would change your mind.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -15,23 +15,20 @@ Prerequisites: [the section](../failure-budgets.md). This page is a build brief;
 | Boundary / failure | Missing counters are interpreted as zero errors. | Report missing data explicitly; distinguish absent traffic from broken telemetry. |
 | Scope | Teaching thresholds; paging, tickets and incident closure are separate policies. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Feed a multi-window burn rule four short/long states: `F/F, T/F, T/T, F/T`. **Show:** alert `F, F, T, F` for an AND rule and the notification/deduplication timeline. Stop the counters entirely and prove missing telemetry is a distinct signal, not a quiet healthy interval.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Replace a static threshold alert with a multi-window, multi-burn-rate alert on the SLO from project 1, then prove it both ways: fire it with a fast burn, and confirm it stays quiet through a trickle that does not threaten the budget.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

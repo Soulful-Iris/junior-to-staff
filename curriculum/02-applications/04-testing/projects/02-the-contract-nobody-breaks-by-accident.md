@@ -15,23 +15,20 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 | Boundary / failure | Provider changes milliseconds to seconds but retains the numeric type. | A semantic fixture catches the unit change; schema type validation alone does not. |
 | Scope | REST API Gateway basic request validation; do not assume the same feature in HTTP APIs. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Record a provider response `{"title":"Guide","durationMs":12}`. Change `durationMs` to string `"12"` and watch the provider contract fail. Then change the meaning from milliseconds to seconds while keeping a number: **show** a semantic fixture that catches what a schema alone cannot. Run both caller and provider checks in CI.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Split P1's link-fetching into a second service with an HTTP interface. Then write the contract: a machine-readable description of what the caller sends and what the callee promises, and a test on each side that checks itself against that same file.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

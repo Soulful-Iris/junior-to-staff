@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | v2 deletes a required column before v1 is retired. | Block rollout; code rollback cannot restore the dropped data. |
 | Scope | Scratch environments for destructive rebuild drills; observed rollback time applies only to the rehearsed failure. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Deploy artifact v2 with its new UI flag off. Enable it for 1%, inspect cohort errors/latency, then 10%; disable the flag and verify new entry stops while v1/v2 can both read current data. **Show:** pipeline run, cohort dashboard, feature flag history and one practiced rollback. Deliberately propose dropping a v1-required column early; the migration gate must refuse it.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A pipeline where merging means deploying, the infrastructure is described in the repository, releases are separate from deploys, and rolling back is one action you have actually taken.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

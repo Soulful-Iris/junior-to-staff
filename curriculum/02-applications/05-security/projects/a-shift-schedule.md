@@ -15,6 +15,19 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Warm GET token T returns 200; revoke T; issue identical GET again. | After revocation acknowledgment, the new GET returns 403/404; no shared cached body bypasses authorization. |
 | Scope | No recall of already downloaded data; authoritative revocation checked on each new protected request. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Give manager and employee views of the same schedule. Two concurrent writes assign person 7 to 09:00–12:00 and 11:00–14:00 UTC; exactly one saves, the other receives a conflict. **Show:** a direct API swap request from a non-owner returning your declared 403/404 policy, and a read after token revocation that cannot return a warm cached private schedule.
+
+| Action | Expected screen or response | Invariant to inspect |
+|---|---|---|
+| Concurrently save person 7 at `[09:00,12:00)` and `[11:00,14:00)` | One success, one conflict | Database contains one of the overlapping shifts, never both. |
+| Save `[12:00,14:00)` after `[09:00,12:00)` | Success | Half-open intervals allow touching endpoints. |
+| Staff member edits a manager-only assignment through a direct API call | `403` or documented `404` | Server checks role and ownership even if the button is hidden. |
+| GET protected schedule with token T; revoke T; repeat the identical GET after acknowledgment | First `200`, subsequent `403`/`404` | No shared cache serves the old private response. |
+
+Sketch separate boxes for the browser, protected route, authorization store, and assignment database. Mark the exact atomic write that prevents overlap and the authorization check that *every* protected GET must reach; static asset caching has a different rule.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
@@ -23,17 +36,10 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/shift-schedule.svg)
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

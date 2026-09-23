@@ -13,23 +13,20 @@ Prerequisites: [P3](../03-under-load/README.md). This page is a build brief; it 
 | Boundary / failure | Human labels 99 pass/1 fail; judge always predicts pass. | 99% agreement with 0% failure recall is inadequate evidence of failure detection. |
 | Scope | Use real collected examples for implementation; these inputs are constructed teaching fixtures. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Suggest one tag from the closed set `{databases,frontend,reliability}` for a page about SQL indexes; show `databases` as an *unconfirmed suggestion*. Empty content yields no suggestion; a malformed or unavailable model still lets a user tag manually. **Show:** evaluator confusion counts, including a judge with 99% agreement and zero detection of the one true failure.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Stage 4 · the question is can you add a model to it and prove it is any good? Same reading list. Add one small feature that uses a model, and then spend most of the project proving whether it works.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

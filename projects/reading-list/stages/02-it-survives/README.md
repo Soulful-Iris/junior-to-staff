@@ -13,23 +13,20 @@ Prerequisites: [P1](../01-it-works/README.md). This page is a build brief; it do
 | Boundary / failure | Application process is live but its required database is unreachable. | Readiness/user-journey evidence shows unavailable; liveness can remain true without triggering pointless restart loops. |
 | Scope | Destructive drills only in scratch infrastructure; RPO and RTO are measured assumptions, not guarantees from one exercise. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Back up items 1–100 at 12:00, acknowledge item 101 at 12:03, and fail the service at 12:05. Restore and **show:** items 1–100 present, item 101 missing, and an honest loss interval. Keep liveness separate from readiness when the database is unreachable, and have someone else execute the runbook from a clean environment.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Junior → senior · fed by sections 10, 11, 12 · the question is can someone else run it, and can you fix it at 3am? Take the reading list you built in P1. Do not add a single feature to it.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

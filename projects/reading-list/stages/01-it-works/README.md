@@ -13,6 +13,20 @@ Prerequisites: [the junior chapters](../../../../curriculum/01-code/01-problem-s
 | Boundary / failure | Bob directly sends DELETE item 7, or a URL points to loopback. | Owner check refuses deletion; guarded fetch refuses the internal destination without losing the item. |
 | Scope | One group, persisted data, explicit duplicate policy and accessible forms; no ranking or notifications. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Sign in as Alice and add URL U as item 7. Sign in as Bob in the same group: both see the item, but only Alice sees her personal read mark after she checks it. **Show:** both screens, saved URL after title-fetch failure, and direct owner-forbidden DELETE as Bob. Record the response/status and unchanged row, not just a disabled button.
+
+| Reviewer action | Expected visible behavior | Persisted fact |
+|---|---|---|
+| Alice saves `https://example.com/article` | Item 7 appears in group G | One item owned by Alice, scoped to G. |
+| The title lookup times out | URL remains with `title failed` or `pending` status | Item 7 remains stored; title is optional enrichment. |
+| Alice marks item 7 read; Bob signs in | Alice sees read; Bob sees unread | Only `(Alice, 7)` changes. |
+| Bob submits `DELETE /items/7` | Documented `403`/`404`; list still contains item 7 | Server refuses the mutation. |
+| Browser refreshes | List and personal state return | Database, rather than browser memory, owns both facts. |
+
+Start with three boxes labeled **items**, **group membership**, and **read state**. Put `group_id` and `owner_id` on the item, and `(user_id, item_id)` on read state. Then draw the browser and API: the browser displays these facts, while the API checks membership and ownership before writing them. The preview below shows the intended screens; your runnable slice supplies the proof.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
@@ -21,17 +35,10 @@ Prerequisites: [the junior chapters](../../../../curriculum/01-code/01-problem-s
 
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/shared-reading-list.svg)
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

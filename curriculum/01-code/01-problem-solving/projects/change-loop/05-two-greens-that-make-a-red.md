@@ -15,23 +15,20 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | CI reruns only the unchanged PR head after main moves. | The stale green result is not accepted as proof of the combined tree. |
 | Scope | A controlled semantic conflict with no textual conflict; a test must exercise the new caller. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Branch A changes `fetchTitle(url, ms)` to `fetchTitle(url, {timeoutMs})`; branch B adds a caller using the old signature in another file. Run A and B separately, then their temporary merge. **Show:** green A, green B, red combined contract test, and a required merge-queue check that rejects B until updated.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** PR A changes a function's contract. PR B, branched before A landed, adds a new call site written against the old contract, in a different file. No textual conflict; both green on their own base; together they break main. Then a merge queue — real or hand-rolled — catches the second one before main ever sees it.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

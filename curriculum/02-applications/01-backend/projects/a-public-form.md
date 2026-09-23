@@ -15,6 +15,19 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Client-side validation is bypassed; K is reused with a different payload. | Reject malformed input and conflicting key reuse at the server; no new row. |
 | Scope | CSV import behavior varies by spreadsheet; use typed XLSX or explicit text-import instructions when exact text preservation is required. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Render the form and submit `name="=1+1"`, `phone="00123"`, and a comment containing a newline with operation key K. **Show:** accessible field-level errors for malformed input, one accepted record despite an exact retry, and the owner's export opened in the named spreadsheet/import mode with text preserved. Reuse K with a different payload and capture a server-side conflict with no new row.
+
+| Action the reviewer takes | Visible result | Server or export proof |
+|---|---|---|
+| Submit `name="=1+1"`, `phone="00123"`, `comment="line 1\nline 2"`, key `K` | Success and the submitted values display as text | One row; the phone is still the string `00123` when reopened using the documented import mode. |
+| Repeat the identical request with `K` | Same accepted result, no duplicate card | Exactly one stored submission. |
+| Submit a different body with `K` | Conflict that tells the user what happened | No second row; the first row is unchanged. |
+| Send a 40,000-character field directly to the API | Accessible validation message | Bounded server-side rejection, with no persisted row. |
+
+**Export review:** State the target reader and import mode. Quoting CSV fields alone does not promise that a spreadsheet will treat `=1+1` or a zero-prefixed phone as text. If the importer cannot enforce text typing, supply a typed XLSX export or explicit text-import instructions and verify both fields after opening the file.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
@@ -23,17 +36,10 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/public-form.svg)
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Old write succeeds but the new-store call fails before responding. | Acknowledged source mutation is durably captured for retry; a sampled mismatch alone is not repair. |
 | Scope | A compatible read migration first; new-only writes require a separate rollback/authority decision. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Read item 7 at v1 for backfill, update it live to v2, then delete it with tombstone v3. Deliver the old v1 backfill last. **Show:** old source, change log and target projection; target stays deleted at v3. Break the target write after the source acknowledges a change and demonstrate a *durable replay path*, not merely a mismatch alert.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Replace something load-bearing in your operating application — how items are stored, how authentication works, the job runner — with the full apparatus around it: a design doc, the hardest case first, a mechanical block on new usage, a remaining-work counter, and the deletion.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

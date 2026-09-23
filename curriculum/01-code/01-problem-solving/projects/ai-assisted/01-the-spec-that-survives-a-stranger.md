@@ -15,23 +15,20 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | User B sends a tag update to A’s item 7. | 404 with no row changed; matching happy paths cannot establish ownership safety. |
 | Scope | Closed normalization rule for this exercise; choose maximum length explicitly. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Write one page specifying tag normalization, duplicate behavior, ownership, and the error response. Give two fresh implementers only that page, not your earlier chat history. For item 7, the inputs `" AI "`, `"ai"`, `""` should yield one stored `ai`, then a 400 without state change. **Show:** both implementations' test output and the exact point their interpretations differed. A stranger's ability to reproduce the behavior is the product.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** One specification for one small, real feature — tagging from P1 is the right size. Hand the identical document to two fresh sessions with no other context, let each build it, and compare what comes back. The spec is the deliverable; the two builds are its test.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | The template is correct but an existing service drifts to indefinite retention. | A separate drift check finds it; a creation template does not enforce future state. |
 | Scope | Toy retention values for the exercise, not legal or organization-wide retention advice. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Generate a new service with 14-day log retention by default. Run a fixture that omits retention (reject) and one choosing an approved 30-day policy (pass with documented reason). **Show:** a first-time user's path through the template, the failing check, and a separate drift check that catches an existing service changed to indefinite retention.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Find the thing you have explained more than twice — to yourself, in notes, or to a model — and make it structurally unavailable to get wrong. A default, a template, a generator, a failing check. Then hand it to another person and watch without helping.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

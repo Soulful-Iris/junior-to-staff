@@ -15,23 +15,20 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | A rewrite accidentally restores timeout 300. | The tip comparison fails even if all rewritten commits look tidy. |
 | Scope | Private practice branches; no rewriting a branch other people use. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Use a disposable branch with three changes: timeout 300→800, a helper rename, and a timeout test. Rewrite their order/story while keeping the final code identical. **Show:** the original and rewritten commit graph, a zero diff between tips, and the commit that explains the timeout choice. A tidy history that changes behavior is a failure.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Take a real week of your P1 history — the honest one with wip in it. On a copy, rewrite it into the sequence you would want at 3am: same final code, different story. Then the experiment: a reader with no context gets one line and one question — why is this here — against each version, timed.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

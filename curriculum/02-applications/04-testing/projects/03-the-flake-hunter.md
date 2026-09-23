@@ -15,23 +15,20 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 | Boundary / failure | A worker finishes only after a randomly timed sleep. | Replace sleep-based correctness with a controllable completion barrier or fake clock. |
 | Scope | A hundred runs detect observed flakiness; zero observed failures does not prove determinism. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Run the suite repeatedly with a recorded seed and test order. Make `creates item` then `expects empty store` fail; reverse them and pass. **Show:** the shortest reproducing two-test sequence and the reset that removes shared state. Replace a sleep-based worker assertion with a controllable barrier or fake clock; one green rerun is not proof the flake is gone.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A runner that executes your suite one hundred times, records pass or fail per test per run, and reports any test that was not unanimous.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

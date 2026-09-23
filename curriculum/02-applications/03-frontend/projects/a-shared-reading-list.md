@@ -15,6 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | Bob sends a direct DELETE for item 7 while hiding the UI button. | Server refuses with the chosen 403/404 policy and the item remains. |
 | Scope | One group initially; tags and visible fetch failure; no anonymous editing. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** In group G, Alice adds item 7 and marks it read. Open the two-member view: both see the link, only Alice sees her own read mark. **Show:** the screen for each account plus direct API calls demonstrating that Bob cannot edit/delete Alice's URL even if he crafts the request without the UI. A failed title fetch should leave the URL and a clear pending/failure state visible.
+
+| Action | Alice's view | Bob's view / API result |
+|---|---|---|
+| Alice saves item 7 in group G | Item 7 appears with its URL | Item 7 appears in the same group. |
+| Alice marks item 7 read | Read | Unread; Bob's state was not overwritten. |
+| Bob marks item 7 read | Still read | Read; two separate person–item records exist. |
+| Bob sends `DELETE /items/7` directly | Item 7 remains | `403` or a documented `404`; disabling a button alone fails this check. |
+| Title provider times out on a new URL | URL persists with pending/failed title | URL persists with the same visible status. |
+
+Model an item once per group, membership once per person and group, and read state once per person and item. Ask the learner to sketch these three boxes and their keys before writing the UI; the screenshot above is a *target view*, not a runnable implementation.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
@@ -23,17 +37,10 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 
 ![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/shared-reading-list.svg)
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

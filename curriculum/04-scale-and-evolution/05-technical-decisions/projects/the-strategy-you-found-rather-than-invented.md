@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | The memo says “always use one database” without addressing replay or isolation. | Reject the universal; the exceptional workload is a concrete counterexample. |
 | Scope | An engineering strategy artifact, not a new service or invented industry consensus. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Lay out five earlier decisions: three require transactions, one replayable events, one isolated reporting. Draft a default based on *those* records and list the two justified exceptions. **Show:** citations to the original decisions, one cost the default imposes, and a counterexample that defeats an overbroad “always one database” rule. Test the memo on the next decision.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Read back the real decisions you made across Acts 1 and 2. Find the one you kept making from scratch. Write it once, with its reasoning and its cost. Then cite it in the next decision and see whether the argument got shorter.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

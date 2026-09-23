@@ -15,23 +15,20 @@ Prerequisites: [the section](../request-lifecycle.md). This page is a build brie
 | Boundary / failure | Hostname resolves publicly during checking but privately during connection. | Connect only to the vetted address while preserving the hostname for Host and TLS verification. |
 | Scope | HTTP/HTTPS, at most three redirects, one-megabyte response, inherited total deadline. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Try a public HTTPS URL that redirects to `http://127.0.0.1:8080/admin`. **Show:** the first allowed hop and an explicit rejection before the loopback listener sees a connection. Then make DNS change between validation and connection; a capture of the actual connected IP must prove it was the vetted public address while Host/TLS still use the original hostname.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** One guarded HTTP client that everything in P1 fetches through: scheme allowlist, resolve-then-connect to the exact address that was vetted, refusals for private, loopback, link-local and metadata addresses, every redirect re-vetted, plus project 2's deadline and a size cap. Refusals are coded 4xxs, and the item still saves with…
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

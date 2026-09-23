@@ -13,23 +13,20 @@ Prerequisites: [P4](../04-it-reasons/README.md). This page is a build brief; it 
 | Boundary / failure | An old-store write succeeds while an independent target write fails. | Durable source change capture enables replay/repair; observed divergence is not itself safety. |
 | Scope | Choose authority and compatible readers/writers at each phase; retirement can have benefits beyond earlier cohort gains. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Backfill item 7 at v4, edit it live to v5, delete it with tombstone v6, then deliver the v4 event last. **Show:** target still deleted at v6 and the comparison/replay script proving it. Break a target write while the old store succeeds; the source change must be durable for later repair before you retire the old read path.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** Stage 5 · the question is can you replace a load-bearing piece without stopping the world? The last project is not a feature. It is a migration of the system you have spent four projects building, done the way you would have to do it if other people depended on it.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

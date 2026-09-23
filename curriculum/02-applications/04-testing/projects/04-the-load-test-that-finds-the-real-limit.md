@@ -15,23 +15,20 @@ Prerequisites: [the section](../testing-strategy.md). This page is a build brief
 | Boundary / failure | A closed-loop generator waits for each response before sending again. | Report reduced offered load; its stable throughput does not prove stability under fixed external arrivals. |
 | Scope | Toy capacity, controlled environment, bounded duration and explicit stop conditions. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Generate fixed open-loop arrivals of 120/s against 100/s service capacity for 10 s. **Show:** admitted throughput, around 200 additional queued requests without shedding, p95/p99 latency and user-visible rejection when capacity is bounded. Repeat with a closed-loop client and label its *lower offered load*, so the second green chart cannot falsely prove the service handles 120/s.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A load generator that ramps traffic against P1 until something fails, and a record of what failed, at what throughput, and what a user saw.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

@@ -15,23 +15,20 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | A caller is registered dynamically and absent from simple text search. | Mark search limits and inspect runtime registration; do not claim complete call-graph coverage. |
 | Scope | Ten recorded diffs; collector supplies evidence, never an approval verdict. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** Hand the harness a diff that changes `parseLimit`. Its report should name both callers—API list and export—show the existing `test_limit_zero` for the first, and say `NONE` for the second. **Show:** the actual diff, generated report, and a manually checked missing dynamically registered caller. The tool's honest uncertainty is part of the deliverable.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A written procedure plus a small script that collects evidence and answers three questions of any diff: what behaviour changed, what could have changed accidentally, which existing test would catch the accident. Run it on ten real diffs from your history and tally how often the third answer is "none".
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 

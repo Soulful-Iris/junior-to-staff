@@ -15,23 +15,20 @@ Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisit
 | Boundary / failure | HTTP 200 contains a parked-domain page, or 429 asks for backoff. | Record uncertain/content-changed or throttled state; HTTP success alone is not proof the original content survives. |
 | Scope | Controlled URLs for load/failure drills; respectful per-host concurrency and deadlines. | Explain any additional assumption before implementing it. |
 
+## See the first reviewable result
+
+**First slice:** For URL U feed the checker status history `200 → 404 → 404 → 200`. **Show:** four timestamped observations and exactly two user-facing transitions: broken and recovered. Feed a 200 parked-domain response and a 429 too; label those uncertain/throttled, never “content is healthy” solely because the HTTP status is 200.
+
 <!-- project-expectation:start -->
 
 ## What you are expected to hand over
 
 **The finished artifact:** A list of URLs, a weekly check of each, a record of what changed, and a message when something breaks.
 
-Treat that sentence as a review contract, not an inspiration. A reviewable
-submission contains all of the following:
-
-- the narrow working slice or decision artifact described above, reproducible
-  from a clean checkout with assumptions stated;
-- captured proof of the normal flow **and** the boundary/failure row above;
-- tests, probes, or metrics that can go red when the important guarantee breaks;
-- a short decision record naming ownership, excluded scope, and the first
-  operational limit; and
-- a changed contract, diagram, and new evidence for each follow-up—not only a
-  paragraph claiming the original design still works.
+Bring a runnable slice or decision artifact, its normal output, and a captured
+failure from the table above. Include one check that turns red when the guarantee
+breaks, the state owner, and the first operational limit. For each follow-up,
+change the diagram **and** the evidence before claiming the design still works.
 
 ### How the review conversation gets harder
 
