@@ -1,6 +1,10 @@
 # Projects by engineering subject
 
-The existing 45 briefs are preserved: 40 standalone projects and five stages of one continuing reading-list project. Choose a brief after its chapter; its baseline and deeper follow-ups stay together. These are build assignments unless runnable code is explicitly supplied.
+The current catalog contains **49 project entries**: **40 standalone build briefs**,
+**five stages of one continuing reading-list project**, and **four runnable AI
+references**. Choose a brief after its chapter; its baseline and deeper follow-ups
+stay together. A build brief is an assignment, not a claim that its application
+is already implemented. The historical 45-brief count excludes the four later AI references.
 
 [Continue one system through five stages](../projects/reading-list/README.md)
 
@@ -71,6 +75,10 @@ The existing 45 briefs are preserved: 40 standalone projects and five stages of 
 
 ## AI systems
 
+The first four projects include runnable references in `examples/ai-systems`;
+the fifth is a separate build assignment. Local fixtures do not certify real-model
+quality or live AWS deployment.
+
 - [Evidence desk: a document assistant with citations and revocation](../curriculum/04-scale-and-evolution/03-ai-systems/projects/01-evidence-desk.md)
 - [Approval desk: a support agent that proposes before it acts](../curriculum/04-scale-and-evolution/03-ai-systems/projects/02-approval-desk.md)
 - [Invoice review: extract, validate, retry, and reconcile](../curriculum/04-scale-and-evolution/03-ai-systems/projects/03-invoice-review.md)
@@ -86,3 +94,17 @@ The existing 45 briefs are preserved: 40 standalone projects and five stages of 
 - [4. The paved road](../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-paved-road.md)
 - [2. The strategy you found rather than invented](../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-strategy-you-found-rather-than-invented.md)
 - [5. The thing you decided not to build](../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-thing-you-decided-not-to-build.md)
+
+## Continuing reading-list project: five build stages
+
+These are assignments that evolve one application, not five supplied completed
+applications. The bookmark editor is a bounded reference slice, not the whole
+P1–P5 implementation.
+
+| Stage | Responsibility |
+|---|---|
+| [P1 · it works](../projects/reading-list/stages/01-it-works/README.md) | Persisted ownership and one end-to-end user action |
+| [P2 · it survives](../projects/reading-list/stages/02-it-survives/README.md) | Delivery, observability and recovery |
+| [P3 · it holds under load](../projects/reading-list/stages/03-under-load/README.md) | Measured load, overload and duplicate handling |
+| [P4 · it reasons, provably](../projects/reading-list/stages/04-it-reasons/README.md) | An evaluated AI feature with a safe manual path |
+| [P5 · it changes safely](../projects/reading-list/stages/05-it-changes/README.md) | Compatibility, migration, rollback and retirement |
