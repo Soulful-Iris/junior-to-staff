@@ -80,10 +80,17 @@ inward:
 
 ![One click becomes 27 calls at the database: three total attempts at each of three layers yield at most twenty-seven leaf attempts](../../../assets/diagrams/retry-amplification.svg)
 
-The preserved image's “retried three times” wording means **three total attempts** in its 27-leaf drawing. Three retries after an original attempt means four total attempts and `4³ = 64` leaves. Count actual SDK semantics, not a configuration label alone.
+The drawing has **three total attempts per layer**, including the original.
+Three *retries* after the original would mean four total attempts and `4³ = 64`
+leaves. Count actual SDK semantics, not a configuration label alone.
 
-Nobody writes 27 into a config. Three teams each write 3. The first rule is
-structural: **retry at one layer only**, and know which.
+Nobody writes 27 into a config. Three teams each write 3. Prefer **one deliberate
+retry owner**. When another layer is necessary, derive the whole attempt tree: two
+application attempts × three SDK attempts permit six dependency attempts, not two.
+The remaining end-to-end deadline may stop it earlier. Name per-operation attempt
+limits, per-process concurrency/rate limits and any fleet-wide budget separately.
+A shared provider idempotency key prevents duplicate effects only under that
+provider’s scope and retention contract; it does not eliminate request load.
 
 Cap even that layer. A circuit breaker can stop calls while a dependency is unhealthy; test its closed, open and probing transitions. A retry token bucket limits retry work. Their scopes differ: a per-SDK-client bucket does not enforce a fleet-wide dependency budget. [AWS retry documentation](https://docs.aws.amazon.com/sdkref/latest/guide/feature-retry-behavior.html) describes SDK behavior; publication age unknown, accessed 2026-09-22. Inspect your pinned SDK and service-specific errors.
 
@@ -121,7 +128,8 @@ Source provenance and retracted original claims are recorded in the [claim ledge
 - Every outbound call has an explicit timeout, and a sentence says why that value.
 - An SLO someone outside engineering agreed to, and a one-page policy with named actions and authority.
 - Alerts are burn rates over paired windows; the last page matched real user harm.
-- Retries at exactly one layer, budgeted and jittered; every other layer fails fast upward.
+- A named retry owner and a measured end-to-end attempt budget, including SDK
+  and proxy behavior; extra layers need an explicit combined budget.
 - Every retried side effect carries an idempotency key, and a test submits a duplicate.
 - A written shed order: which classes drop first, at what signal, what the caller sees.
 
@@ -214,8 +222,8 @@ cleanly" that never says what queued retries and cold caches do in minute six.
    2am.
 2. **Count the amplification.** Slow the database, send exactly one request at
    the top, and count arrivals at the bottom in the query log. The number must
-   match what your single retry layer allows; twenty-seven means hidden layers
-   are retrying.
+   match the derived tree and remaining deadline, including SDK attempts.
+   A larger count reveals an unaccounted layer or an incorrect budget.
 3. **The duplicate test.** The same side-effecting request twice with one
    idempotency key: exactly one effect. With two keys: exactly two. The second
    half matters: a dedupe that swallows everything is broken in the other
@@ -237,8 +245,8 @@ On **P3**, the reading list meets load. From this section:
   drill log showing each fired once.
 - A timeout inventory: every outbound call, its value, chosen or inherited — no
   "default" without the number.
-- Retries at exactly one layer, token-bucket capped, jittered; other layers
-  explicitly zero. An idempotency key on adding a URL.
+- Prefer one retry owner; explicitly bound any additional layer. Record the
+  total attempt/deadline budget, limiter scope and idempotency key on adding a URL.
 - Two classes — user actions CRITICAL, title fetching BULK — one threshold
   shedding BULK first, and a load test showing the availability curves
   separating.
