@@ -1,6 +1,6 @@
 # 17 · Writing that decides — five projects
 
-> Staff tier · each one an afternoon · read [the section](README.md) first
+> Staff tier · each one an afternoon · read [the section](../../../curriculum/04-scale-and-evolution/05-technical-decisions/design-documents.md) first
 
 Five projects that produce documents with a job. The test for every one of them
 is the same and it is not "is this well written" — it is whether somebody who
@@ -504,7 +504,7 @@ elapsed" side by side is the cheapest possible honesty mechanism, because the
 two lines diverging is visible to everybody at once and cannot be narrated away
 in a status update.
 
-And a note that connects this to [19 · Migrations](../19-migrations/): the most
+And a note that connects this to [19 · Migrations](../../../curriculum/04-scale-and-evolution/04-migrations/README.md): the most
 important kill criterion in a migration project is usually about the
 *dual-running period*, because that is where the cost lives and where the
 abandonment happens. Write that one first.
