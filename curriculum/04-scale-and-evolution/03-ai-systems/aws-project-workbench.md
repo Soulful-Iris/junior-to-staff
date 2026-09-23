@@ -2,7 +2,7 @@
 
 Four finished reference implementations follow this page. Run a complete session locally, inspect its saved state and failures, then use the same request contract on AWS. You build a document assistant, an approval-based support agent, an extraction pipeline, and an evaluation/release registry. Each has its own project page, examples, diagrams, and review conversation.
 
-**What is complete:** Python application code, persistent local storage, a real Bedrock adapter, AWS infrastructure, request fixtures, session runners, and executable boundary tests. **Validation boundary:** local behavior and infrastructure checks are tested here; an AWS deployment requires your account and has not been run by the guide authors. The deterministic fixture is a test double, not a trained language model or evidence of AI accuracy.
+**Supplied:** runnable Python references, persistent local storage, a Bedrock adapter, an AWS deployment template, fixtures, session runners and boundary tests. **Validation boundary:** local tests, mocked adapters, template validation and a live AWS run are different checks; success in one does not certify another. No live AWS deployment or real-model quality result is claimed here. The deterministic fixture is a test double, not a trained language model.
 
 ## Start with one visible result
 
@@ -117,11 +117,11 @@ aws lambda invoke --function-name "$AI_FUNCTION" \
 cat /tmp/invoice-result.json
 ```
 
-Immediately querying may return `NOT_FOUND`; query again after the worker has processed the message. The worker accepts only `invoice.extract`, reports failed message IDs, and lets SQS retry transient failures. The queue visibility timeout is 1,080 seconds against a 180-second Lambda timeout. Three failed receives route a message to the DLQ. A malformed invoice that was successfully processed becomes `REVIEW_REQUIRED` and does not loop through the queue.
+Immediately querying may return `NOT_FOUND`; query again after the worker has processed the message. The worker accepts only `invoice.extract` and reports failed message IDs. Its structured logs record a hashed message reference, failure category and retry decision. Transient failures retry; malformed jobs and ID conflicts also redrive to the DLQ for operator correction, not silent acknowledgment. The queue visibility timeout is 1,080 seconds against a 180-second Lambda timeout. Three failed receives route a message to the DLQ. A malformed invoice that was successfully processed becomes `REVIEW_REQUIRED` and does not loop through the queue.
 
 ## Observe, recover, and remove
 
-- `sam logs --name Operator --stack-name ai-project-workbench --tail` shows handler errors and Bedrock usage metadata. Use `Worker` for extraction. Application logging omits source text; AWS tooling and retained artifacts still need your data retention policy.
+- `sam logs --name Operator --stack-name ai-project-workbench --tail` shows handler errors and Bedrock usage metadata. Use `Worker` for extraction categories such as `provider_unavailable`, `id_conflict` and `invalid_input`; terminal `REVIEW_REQUIRED` is not an infrastructure retry. Worker logs omit raw source, exception text and model output. AWS tooling and retained artifacts still need your data retention policy.
 - The DLQ alarm enters ALARM when visible failed messages exist. Attach an `AlarmActions` destination for notifications; the supplied alarm has no email subscription.
 - For a `Conflict`, reload the authoritative record and make a new decision. Repeating a stale overwrite is not recovery.
 - Monitor request failures, model-call duration, usage tokens, queue age, review rate, and rejected approvals. The supplied template creates logs and one DLQ alarm; richer dashboards are a follow-up exercise.
