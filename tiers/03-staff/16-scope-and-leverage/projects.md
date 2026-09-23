@@ -1,6 +1,6 @@
 # 16 · Scope and leverage — five projects
 
-> Staff tier · each one an afternoon · read [the section](README.md) first
+> Staff tier · each one an afternoon · read [the section](../../../curriculum/04-scale-and-evolution/05-technical-decisions/scope-and-leverage.md) first
 
 These five are not like the others. There is almost no code in them, and the
 deliverable is usually a page, a conversation, or a decision you can point at
@@ -124,7 +124,7 @@ limit you discover the week you need it is an incident.
 
 Add **Compute Optimizer** and **Trusted Advisor** for the right-sizing and
 waste picture, and **CloudWatch** trends for the capacity picture from
-[08 · System design](../../02-senior/08-system-design/)'s project 4. Between them you can
+[08 · System design](../../../curriculum/03-production/01-system-design/README.md)'s project 4. Between them you can
 usually attach a number to all three of your problems in an afternoon, which is
 the difference between a document people act on and one they nod at.
 
@@ -246,7 +246,7 @@ only person who knows.
 
 For the what-it-costs-to-fix half, be specific about the AWS-shaped costs that
 get forgotten — a migration's dual-running period where you pay for both
-(see [19 · Migrations](../19-migrations/)), a quota increase with a lead time,
+(see [19 · Migrations](../../../curriculum/04-scale-and-evolution/04-migrations/README.md)), a quota increase with a lead time,
 a reserved commitment you would be breaking. Those are the items that turn an
 estimate from optimistic to credible, and including one you are not required to
 include is how a document earns trust.
