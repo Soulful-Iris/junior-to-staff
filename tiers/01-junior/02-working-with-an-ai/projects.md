@@ -1,6 +1,6 @@
 # 02 · Working with an AI that writes the code — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [the section](../../../curriculum/01-code/01-problem-solving/working-with-ai.md) first
 
 Five projects, rising. No new features in any of them: each builds an
 instrument, and every instrument points at you — a specification whose precision
