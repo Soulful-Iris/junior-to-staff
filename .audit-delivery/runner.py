@@ -1,8 +1,8 @@
-"""Deliver reviewed, tree-hash-checked patches; never force-push or deploy AWS.
+"""Apply reviewed patches, test exact trees, then fast-forward main.
 
-This runner exists only on the temporary delivery branch, not in the curriculum.
-Only that branch can trigger it. Every batch must match a locally tested tree.
+Only the temporary delivery branch uses this helper. Never force-push.
 """
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,7 +19,7 @@ clean_env = {k: v for k, v in os.environ.items() if k != 'GH_TOKEN'}
 
 def run(args, *, env=clean_env, log=None):
     p = subprocess.run(args, text=True, stdout=subprocess.PIPE,
-                       stderr=subprocess.STDOUT, env=env, timeout=180)
+                       stderr=subprocess.STDOUT, env=env, timeout=600)
     if log:
         log.write_text(p.stdout)
     print(p.stdout, end='', flush=True)
@@ -29,9 +29,10 @@ def run(args, *, env=clean_env, log=None):
 
 
 def checked_path(name):
+    if not isinstance(name, str) or not name or Path(name).is_absolute() or '..' in Path(name).parts:
+        raise ValueError('Unsafe delivery path')
     p = root / name
-    if (not isinstance(name, str) or Path(name).is_absolute()
-            or '..' in Path(name).parts or Path(name).parts[0] in {'.git', '.github', '.audit-delivery'}
+    if (Path(name).parts[0] in {'.git', '.github', '.audit-delivery'}
             or p.is_symlink() or not p.resolve().is_relative_to(root)):
         raise ValueError('Unsafe or protected delivery path')
     return p
@@ -43,6 +44,8 @@ if run(['git', 'rev-parse', 'origin/main']) != payload['base']:
 run(['git', 'checkout', '--detach', payload['base']])
 run(['git', 'config', 'user.name', 'github-actions[bot]'])
 run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'])
+for number, command in enumerate(payload.get('prepare', []), 1):
+    run(command, log=out / f'prepare-{number:02d}.log')
 askpass = out / 'askpass.sh'
 askpass.write_text('#!/bin/sh\ncase "$1" in *Username*) printf "%s" x-access-token;; *Password*) printf "%s" "$GH_TOKEN";; esac\n')
 askpass.chmod(0o700)
@@ -59,11 +62,18 @@ for number, batch in enumerate(payload['batches'], 1):
         else:
             text = path.read_text()
             for replacement in edit['replacements']:
-                old, new = replacement['old'], replacement['new']
-                expected = replacement.get('count', 1)
-                if not old or text.count(old) != expected:
-                    raise ValueError(f'Edit precondition mismatch: {edit["path"]}')
-                text = text.replace(old, new)
+                if 'offset' in replacement:
+                    start, length = replacement['offset'], replacement['length']
+                    old = text[start:start + length]
+                    if start < 0 or length < 1 or hashlib.sha256(old.encode()).hexdigest() != replacement['sha256']:
+                        raise ValueError(f'Edit range mismatch: {edit["path"]}')
+                    text = text[:start] + replacement['new'] + text[start + length:]
+                else:
+                    old, new = replacement['old'], replacement['new']
+                    expected = replacement.get('count', 1)
+                    if not old or text.count(old) != expected:
+                        raise ValueError(f'Edit precondition mismatch: {edit["path"]}')
+                    text = text.replace(old, new)
         path.write_text(text)
         changed.append(edit['path'])
     run(['git', 'add', '--', *changed])
