@@ -45,6 +45,23 @@ try {
     assert.equal(await page.locator('figure.code-file[data-source$="test_solution.py"]').count(),1);
     await page.screenshot({path:join(shots,'problem-desktop.png'),fullPage:true});
   });
+  await check('Contextual prerequisites support keyboard and touch round trips',async()=>{
+    const lesson='/curriculum/02-applications/01-backend/request-lifecycle.html';
+    for (const touch of [false,true]) {
+      const ctx=await browser.newContext({viewport:{width:touch?390:1440,height:844},hasTouch:touch,isMobile:touch});
+      const tab=await ctx.newPage();await tab.goto(address+lesson);
+      const link=tab.locator('article a.context-link[href]').filter({visible:true}).first();
+      await link.scrollIntoViewIfNeeded();
+      const target=new URL(await link.getAttribute('href'),tab.url()).href;
+      const before=tab.url();
+      if(touch) await link.tap(); else {await link.focus();await tab.keyboard.press('Enter');}
+      await tab.waitForURL(target);
+      await tab.goBack();await tab.waitForURL(before);
+      assert.ok(await tab.locator('article.lesson-body').isVisible());
+      assert.ok(await tab.locator('.sticky-next').isVisible());
+      await ctx.close();
+    }
+  });
   await check('Company studio preserves five direct profile links and the sequential path',async()=>{
     await go('/companies/');
     assert.equal(await page.locator('.studio-card.studio-link').count(),5);

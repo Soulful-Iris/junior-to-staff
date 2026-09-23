@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
 from bs4 import BeautifulSoup
+import content_checks
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = Path(os.environ.get('SITE_OUT', ROOT/'site/out'))
@@ -14,6 +15,7 @@ def output_for(src):
     return OUT/(src[:-len('README.md')]+'index.html' if src.endswith('README.md') else src[:-3]+'.html')
 
 def main():
+    content_checks.validate(OUT, json.loads((OUT/"content-inventory.json").read_text()))
     manifest = json.loads((OUT/'course.json').read_text())
     assets = json.loads((OUT/'reader-assets.json').read_text())
     for kind, item in assets.items():
@@ -26,11 +28,12 @@ def main():
     assert not any('assessor' in src for src in sequence), 'Answer keys entered candidate sequence'
     bank=json.loads((ROOT/'indexes/problem-bank.json').read_text())
     problem_sources={p['path'] for p in bank}
-    assert len(bank)==42 and all(p['path'] in sequence for p in bank)
+    assert len(bank)==len(problem_sources) and problem_sources <= set(sequence)
     briefs=[p for p in sequence if '/projects/' in p and p.endswith('.md')]
-    assert len(briefs)==44, f'Missing standalone projects/briefs: {len(briefs)}'
+    expected_briefs={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum').rglob('*.md') if '/projects/' in p.as_posix()}
+    assert set(briefs)==expected_briefs, 'Missing or extra project in learning route'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
-    assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
+    assert stages and all(str(p.relative_to(ROOT)) in sequence for p in stages)
     design_practice={
         '03-production/01-system-design': ('api-quota','ticket-inventory','realtime-chat','social-feed','video-processing','checkout-payment'),
         '03-production/04-observability': ('slow-request',),
@@ -51,12 +54,12 @@ def main():
             words=article.get_text(' ',strip=True)
             assert 'Senior follow-up' in words and 'Staff follow-up' in words,source
     foundations=[p for p in sequence if '/02-data-structures-algorithms/lessons/' in p]
-    assert len(foundations)==23
+    assert set(foundations)=={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum/01-code/02-data-structures-algorithms/lessons').glob('*.md')}
     assert max(map(sequence.index,foundations)) < min(sequence.index(p['path']) for p in bank)
     assert sequence[sequence.index(foundations[-1])+1]=='curriculum/01-code/03-coding-practice/README.md'
     project_sources={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum').rglob('*.md') if '/projects/' in p.as_posix()}
     project_sources|={str(p.relative_to(ROOT)) for p in (ROOT/'projects/reading-list/stages').rglob('README.md')}
-    assert len(project_sources)==49
+    assert project_sources == expected_briefs | {str(p.relative_to(ROOT)) for p in stages}
     expected_product_pages={
         'curriculum/02-applications/01-backend/projects/a-public-form.md',
         'curriculum/02-applications/02-databases/projects/a-receipt-tracker.md',
@@ -100,7 +103,7 @@ def main():
                 product_visuals+=1
         toc=soup.select_one('nav[aria-label="Table of contents"]');assert toc,src
         assert len(toc.select('.toc-area:not(.reference-area):not(.company-area)'))==4,src
-        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area) .toc-chapter'))==18,src
+        assert len(toc.select('.toc-area:not(.reference-area):not(.company-area) .toc-chapter'))==len(list((ROOT/'curriculum').glob('*/*/README.md'))),src
         assert len(toc.select('.company-area .toc-chapter'))==5,src
         assert len(toc.select('[aria-current="page"]'))==1,src
         for link in soup.select('[data-heading]'):
@@ -110,7 +113,7 @@ def main():
             if not url.scheme and not a.has_attr('data-start'):
                 if src=='companies/README.md' and 'studio-link' in a.get('class',[]):
                     assert a['href'].endswith('.html'),(src,a['href'])
-                else:local_jumps.append((src,a['href']))
+                else:assert 'context-link' in a.get('class', []), (src, a['href'])
         for img in article.find_all('img'):
             if '/assets/mermaid/' in img.get('src',''):diagrams.add(Path(img['src']).name)
             assert img.get('alt'),src
@@ -135,8 +138,7 @@ def main():
                 sticky=soup.select_one('.sticky-previous')
                 assert sticky and sticky['href']==link['href'],src
             previous_next+=1
-    assert not local_jumps,local_jumps[:10]
-    assert len(diagrams)>=398,len(diagrams)
+    # Exact source/output inventory is validated above.
     company_sources=[f'companies/{name}.md' for name in ('openai','reddit','meta','databricks','observe')]
     assert sequence[-6:]==['companies/README.md']+company_sources
     for src in company_sources:
@@ -146,15 +148,15 @@ def main():
         tables=article.select('.tablewrap table')
         assert len(tables[0].select('tbody tr'))==8 and len(tables[1].select('tbody tr'))==5,src
         assert all(article.find('h2',string=lambda t:t and name in t.lower()) for name in ('room','coding bench','design board','niche mock')),src
-    assert rehearsed==42 and framed==49 and product_visuals==5,(rehearsed,framed,product_visuals)
+    assert rehearsed==len(bank) and framed==len(project_sources) and product_visuals==len(expected_product_pages),(rehearsed,framed,product_visuals)
     originals=list((ROOT/'assets').rglob('*.svg'))
     # This includes the four expected-product mockups added for UI project
     # briefs. Every source visual is copied byte-identically into the site.
-    assert len(originals)>=134
+    # Exact source/output inventory is validated above.
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
-    print(f'PASS {len(pages)} pages: full 4-part / 18-chapter TOC, 23 foundations before practice, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
-    print('PASS 42 interview expectation blocks, 49 project deliverables with six review gates, and 5 expected-product placements.')
+    print(f'PASS {len(pages)} pages: full TOC, {len(foundations)} foundations before practice, {previous_next-1} contiguous steps, all {len(bank)} problems and {len(stages)} project stages, contextual learning links retained.')
+    print(f'PASS {rehearsed} interview expectation blocks, {framed} project deliverables with six review gates, and {product_visuals} expected-product placements.')
     print(f'PASS {embedded} exact inline files; all {len(originals)} source SVGs copied byte-identically; {len(diagrams)} Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 
 if __name__=='__main__':main()

@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote
 from bs4 import BeautifulSoup
 import course
+import content_checks
 
 E = html.escape
 CODE_SUFFIXES = {'.py', '.ts', '.js', '.mjs', '.cjs', '.json', '.yaml', '.yml', '.sql', '.csv', '.txt', '.diff', '.sh'}
@@ -125,6 +126,9 @@ def compose(b, page, have, by_dest):
     if page['kind'] == 'subject': text = b.strip_chapter_menus(text)
     raw, _ = b.render_body(text, have, depth)
     soup = BeautifulSoup(raw, 'html.parser')
+    page['expected_mermaid'] = [Path(i['src']).name for i in soup.select('img[src]') if '/assets/mermaid/' in i['src']]
+    page['source_images'] = sorted({local_target(b, page, i['src']) for i in soup.select('img[src]') if local_target(b, page, i['src'])})
+    page['expected_code'] = sorted({local_target(b, page, a['href']) for a in soup.select('a[href]') if Path(urlsplit(a['href']).path).suffix in CODE_SUFFIXES and local_target(b, page, a['href'])})
     # Chapter/part overview lists are generated from the real teaching order.
     # Sources remain available in the reference shelf, not as link menus.
     for paragraph in list(soup.find_all('p')):
@@ -134,7 +138,7 @@ def compose(b, page, have, by_dest):
         for a in links: remainder = remainder.replace(a.get_text(' ', strip=True), '')
         if not re.sub(r'[\s·|.,:—–-]', '', remainder) and all(local_target(b, page, a.get('href', '')) is not None for a in links):
             # Code/fixtures are instructional; leave them for inline expansion.
-            if page['src'] != 'companies/README.md' and not any(Path(urlsplit(a.get('href', '')).path).suffix in CODE_SUFFIXES for a in links):
+            if page['src'] != 'companies/README.md' and all(a.get_text(' ', strip=True).lower() in NAV_LABELS for a in links):
                 paragraph.decompose()
     embedded = set()
     code_tail = {}
@@ -142,13 +146,14 @@ def compose(b, page, have, by_dest):
         href = a.get('href', '')
         target = local_target(b, page, href)
         if href.startswith('#'):
-            # In-page movement belongs in the nested contents too.
-            a.unwrap(); continue
+            a['class'] = ['context-link']; continue
         if target is None:
             a['target'] = '_blank'; a['rel'] = 'noopener noreferrer'; a['class'] = ['source-link']; continue
         disk = b.OUT / target
         suffix = disk.suffix
         label = a.get_text(' ', strip=True)
+        if suffix in CODE_SUFFIXES and not disk.is_file():
+            raise ValueError(f"Missing linked code: {page['src']} -> {href}")
         if suffix in CODE_SUFFIXES and disk.is_file():
             if target in embedded:
                 a.replace_with(soup.new_string(label + ' (shown in this lesson)')); continue
@@ -179,16 +184,15 @@ def compose(b, page, have, by_dest):
             else: a.unwrap()
         elif page['src'] == 'companies/README.md' and target in by_dest and target.startswith('companies/'):
             a['class'] = list(set(a.get('class', [])) | {'studio-link'})
-        elif target in by_dest or target.endswith('/index.html') or suffix in ('.html', ''):
-            target_page = by_dest.get(target) or by_dest.get(target.rstrip('/') + '/index.html')
-            span = soup.new_tag('span', attrs={'class': 'concept-reference'})
-            span.string = label
-            if target_page and target_page.get('chapter') and target_page.get('chapter') != page.get('chapter'):
-                span['title'] = f"Covered in chapter {target_page['chapter']}: {target_page.get('subject_title', '')}"
-            a.replace_with(span)
         else:
-            # Keep file downloads inside the left resources branch; reading never navigates away.
-            a.unwrap()
+            target_page = by_dest.get(target) or by_dest.get(target.rstrip('/') + '/index.html')
+            if not target_page and disk.is_dir():
+                a['href'] = 'https://github.com/Soulful-Iris/junior-to-staff/tree/main/' + target
+                a['class'] = ['source-link']
+            elif target_page or disk.is_file():
+                a['class'] = ['context-link']
+            else:
+                raise ValueError(f"Missing published reference: {page['src']} -> {href}")
     for p in list(soup.find_all('p')):
         if not p.get_text(strip=True) and not p.find(['img', 'code']): p.decompose()
         elif re.fullmatch(r'[\s·|.,]+', p.get_text()): p.decompose()
@@ -351,7 +355,8 @@ def build(b):
     base=os.environ.get('SITE_BASE','/')
     if not base.startswith('/') or not base.endswith('/'): raise ValueError('SITE_BASE must be an absolute path ending in /')
     b.CHAPTER_BLURBS.update(b.chapter_blurbs())
-    pages=b.collect(); sequence=course.organize(pages)
+    pages=b.collect()
+    source_refs = content_checks.source_references(b.ROOT, pages); sequence=course.organize(pages)
     blocks=b.mermaid_blocks(pages); have=b.render_mermaid(blocks)
     if set(blocks)!=have: raise RuntimeError('Missing diagrams: refusing an incomplete site build')
     if b.OUT.exists(): shutil.rmtree(b.OUT)
@@ -407,6 +412,7 @@ def build(b):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
             if folder == 'examples/ai-systems' and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
             rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)
+    resources = sorted(p.relative_to(b.OUT).as_posix() for p in b.OUT.rglob('*.html'))
     by_dest={b.dest_for(p['src']):p for p in pages}
     bodies={p['src']:compose(b,p,have,by_dest) for p in pages}
     # Preserve old URLs while all reading movement uses the one sequence.
@@ -426,5 +432,16 @@ def build(b):
     records=[{k:p.get(k) for k in ('src','title','url','kind','chapter','sub','section','position','headings','embedded')} for p in pages]
     (b.OUT/'course.json').write_text(json.dumps({'sequence':[p['src'] for p in sequence],'pages':records},separators=(',',':')))
     (b.OUT/'search.json').write_text(json.dumps([{'title':p['title'],'url':href(base,p),'chapter':p.get('subject_title','Reference'),'text':b.prose_of(p['text'])} for p in pages],separators=(',',':')))
+    inventory = {'schema': 1, 'renderer': b.renderer_inputs(), 'pages': {}, 'assets': {}, 'resource_html': resources}
+    for p in pages:
+        inventory['pages'][p['src']] = {
+            'output': b.dest_for(p['src']), 'source_sha256': hashlib.sha256(p['text'].encode()).hexdigest(),
+            'presentation': 'generated-overview' if p['src'] == 'README.md' or p['kind'] in ('group', 'subject') else 'authored-lesson',
+            'mermaid': p['expected_mermaid'], 'source_images': p['source_images'],
+            'code_inclusions': p['expected_code'], 'references': source_refs[p['src']]}
+    for file in (b.OUT/'assets').rglob('*'):
+        if file.is_file(): inventory['assets'][file.relative_to(b.OUT).as_posix()] = hashlib.sha256(file.read_bytes()).hexdigest()
+    (b.OUT/'content-inventory.json').write_text(json.dumps(inventory, indent=2) + '\n')
+    content_checks.validate(b.OUT, inventory)
     print(f'Built {len(pages)} pages, {len(sequence)-1} guided steps, {len(have)} diagrams; full TOC and inline code.')
     return 0

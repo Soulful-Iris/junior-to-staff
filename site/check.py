@@ -19,6 +19,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from bs4 import BeautifulSoup
 from pathlib import Path
 from urllib.parse import unquote, urldefrag
 
@@ -33,6 +34,10 @@ def main() -> int:
         return 2
 
     pages = sorted(OUT.rglob("*.html"))
+    if not pages or not (OUT/'index.html').is_file():
+        print('Empty or incomplete output: missing homepage/content pages', file=sys.stderr)
+        return 2
+    anchors = {p.resolve(): {t['id'] for t in BeautifulSoup(p.read_text(), 'html.parser').select('[id]')} for p in pages}
     dead: list[tuple[str, str]] = []
     linked: set[Path] = set()
     checked = 0
@@ -51,16 +56,16 @@ def main() -> int:
             empty.append(str(page.relative_to(OUT)))
 
         for raw in HREF.findall(html):
-            url, _ = urldefrag(raw)
-            if not url or url.startswith(("http://", "https://", "mailto:", "data:", "#")):
+            url, fragment = urldefrag(raw)
+            if url.startswith(("http://", "https://", "mailto:", "data:", "#")):
                 continue
             checked += 1
             rel = unquote(url)
-            target = (OUT / rel.lstrip("/")) if rel.startswith("/") else (page.parent / rel)
+            target = page if not rel else ((OUT / rel.lstrip("/")) if rel.startswith("/") else (page.parent / rel))
             target = Path(target).resolve()
             if target.is_dir():
                 target = target / "index.html"
-            if not target.exists():
+            if not target.exists() or (fragment and target.suffix == ".html" and unquote(fragment) not in anchors.get(target, set())):
                 dead.append((str(page.relative_to(OUT)), raw))
             else:
                 try:
