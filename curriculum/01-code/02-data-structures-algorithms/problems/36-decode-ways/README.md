@@ -51,7 +51,8 @@ leave any existing state unchanged unless the contract says otherwise.
 | Valid zero | `"10"` / `"20"` | `1` / `1` | Zero participates only in those pairs. |
 | Invalid zero | `"30"` / `"100"` | `0` / `0` | A preceding digit does not always rescue zero. |
 | Empty public input | `""` | `0` | Public semantics differ from the DP empty suffix base. |
-| Invalid/large | nondigit raises; long valid digits return exact integer | no truncation or modulus | Separate validation from arbitrary-size counting. |
+| Invalid input | `"1x"` | `ValueError` | Malformed text differs from an impossible digit sequence. |
+| Large exact count | `"1111111111"` (ten ones) | `89` | Count every partition exactly; no modulus or truncation. |
 
 For each row, show which branch or state change produces that result.
 

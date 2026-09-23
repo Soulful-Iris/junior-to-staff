@@ -25,8 +25,9 @@ structure's meaning; combining these jobs carelessly hides syntax errors.
 
 An expression evaluator has two jobs: turn characters into tokens, then interpret tokens according to precedence and parentheses. Do not call Python `eval` on a user-supplied policy:
 ```python
-expression = "age >= 18"
-tokens = ["age", ">=", "18"]  # illustrative token values
+expression = 'role == "admin" AND active == TRUE'
+tokens = ["role", "==", "admin", "AND", "active", "==", True]
+# Illustrative decoded token values; the real lexer also records positions.
 ```
 Ask whether `AND` binds more tightly than `OR`, how missing fields behave, and which operators are permitted. A parser should reject a trailing unexpected token rather than silently accept part of the input.
 
@@ -51,8 +52,9 @@ leave any existing state unchanged unless the contract says otherwise.
 | Parentheses | `(a==TRUE OR b==TRUE) AND c==TRUE` | `False` | Grouping changes authority. |
 | Missing | `missing != "admin"` | `False` | Absence cannot accidentally grant access. |
 | Malformed right branch | `a==TRUE OR ???` | `ValueError` | Short-circuit evaluation must not skip parsing. |
-| Quoted content | string literal containing spaces/escaped quote/OR text | one decoded literal token | Splitting on whitespace or keywords is wrong. |
-| Resource/type boundary | too many tokens/depth or mismatched scalar type | `ValueError` for limits; comparison false for type mismatch | Syntax admission and evaluation semantics differ. |
+| Quoted content | `name == "Ada \"OR\" Lovelace"`, record `{"name": 'Ada "OR" Lovelace'}` | `True` | Escaped quotes and `OR` inside the string are not operators. |
+| Type boundary | `tier != 2`, record `{"tier": "2"}` | `False` | Mismatched scalar types make both comparisons false. |
+| Token limit | `'a==TRUE OR ' * 2049 + 'a==TRUE'`, record `{"a": True}` | `ValueError` | Exceeds the 4,096-token admission limit before evaluation. |
 
 For each row, show which branch or state change produces that result.
 
