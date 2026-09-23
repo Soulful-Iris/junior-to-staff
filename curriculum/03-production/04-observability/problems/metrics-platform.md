@@ -1,5 +1,7 @@
 # Metrics platform: query the right time window
 
+*Design brief · supplied diagrams and contracts, not a deployed metrics platform.*
+
 > **Interviewer:** “Hundreds of thousands of hosts emit CPU, memory, throughput, and service metrics. Engineers build dashboards and alerts. One customer labels every request with a unique user ID.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 300,000 hosts, 10-second sampling and one-year retention for downsampled aggregates. Clarify service guarantees and a first version before filling the board with services.
@@ -25,9 +27,40 @@ A metric identity is name plus label set; each distinct set creates another time
 |---|---|---|
 | **Amazon Kinesis Data Streams** / metric event stream | Buffer high-rate metric batches and fan out consumers. | MSK where existing Kafka ecosystem and client guarantees dominate. |
 | **Amazon Managed Service for Apache Flink** / stream aggregation | Window, downsample and compute event-time rollups. | Lambda for simpler low-state aggregation. |
-| **Amazon Timestream** / time-series store | Serve timestamp/measure queries with retention tiers. | Amazon S3 + Athena for long-term low-cost analytics. |
+| **Amazon Managed Service for Prometheus** / metrics store and PromQL query | Receive Prometheus remote-write samples and retain/query the configured window. | Amazon Timestream for InfluxDB for an InfluxDB-oriented workload; it is not the same API. Archive long-term rollups separately when retention requires it. |
 | **Amazon Managed Grafana** / dashboard UI | Explore metrics and dashboard operational data. | Self-managed Grafana when plugins or tenancy controls require it. |
-| **Amazon CloudWatch Alarms** / alert evaluation | Evaluate monitored signals and route alarm state. | Prometheus Alertmanager for Prometheus-native rule ownership. |
+| **Managed Prometheus ruler + alert manager** / evaluation, then routing | The ruler evaluates PromQL; alert manager groups, deduplicates, silences and routes firing alerts to a configured SNS receiver. | Self-managed Prometheus-compatible rule evaluator plus Alertmanager. CloudWatch Alarms evaluate CloudWatch metrics, not an arbitrary external store directly. |
+
+**Baseline data path:** agents validate/cardinality-limit samples, then remote-write
+to Managed Prometheus. A Kinesis/Flink path is optional for raw metric events or
+custom rollups; its consumer must explicitly convert output to a supported sink
+format. Grafana queries the store; it is not the rule evaluator. Preserve
+one-year aggregates in an explicitly configured store/archive, not an assumed
+default retention setting.
+
+```mermaid
+flowchart LR
+  Agent["Bounded labels and authenticated ingest"] --> Store["Metrics store / query"]
+  Store --> Dashboard["Grafana dashboard"]
+  Store --> Rules["Ruler: evaluate PromQL and missing data"]
+  Rules --> Routing["Alertmanager: group, silence, route"]
+  Routing --> SNS["Configured SNS receiver"]
+  SNS --> Oncall["On-call destination"]
+```
+
+**Trace the alarm:** threshold crosses → evaluator enters pending/firing → router
+groups and sends → receiver records delivery → evaluator resolves → configured
+resolved notification. Test silence and missing telemetry separately. Notification
+deduplication is not a guarantee of exactly-once delivery to a person.
+
+**Availability note, checked 2026-09-23:** AWS closed **Amazon Timestream for
+LiveAnalytics** to new customers on June 20, 2025; existing eligible payer
+accounts remain supported. It is not this new-account design’s baseline.
+[AWS availability notice](https://docs.aws.amazon.com/timestream/latest/developerguide/AmazonTimestreamForLiveAnalytics-availability-change.html).
+Managed Prometheus’s [ruler](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-Ruler.html)
+and [alert manager](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-alert-manager.html)
+have different responsibilities. Check the chosen region, quotas and account
+permissions before provisioning; no account/region was deployed for this brief.
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
 
