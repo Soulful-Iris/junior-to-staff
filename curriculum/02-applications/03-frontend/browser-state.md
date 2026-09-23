@@ -129,10 +129,17 @@ needs exactly one home, chosen by what the fact must survive.
 
 ![Where state lives, as a decision ladder: must another device or person see it, the server; should refresh or a shared link reproduce it, the URL; do far-apart parts of the page need it at once, a shared store; otherwise component memory. One fact in two homes drifts.](../../../assets/diagrams/where-state-lives.svg)
 
-The classic self-inflicted bug is the same fact in two homes: server truth
-copied into page memory "for convenience" and synchronised by hope. Treat
-everything outside the server as a cache you can throw away, and P1's
-"refreshing loses nothing" criterion follows on its own.
+Choose authority **per fact**, not per machine:
+
+| State | Example | Lifetime |
+|---|---|---|
+| Confirmed remote state | Saved title A, version 2 | Durable server record |
+| Reconstructible cache | Previously fetched title A | May refetch or evict |
+| Uncommitted local intent | New draft B typed after saving A | Preserve until saved or deliberately discarded |
+
+A save acknowledgment confirms A, not B. Losing B is data loss, not cache
+invalidation. Define reload/navigation persistence explicitly; memory-only drafts
+do not survive refresh. See the [editor trace](labs/bookmark-editor/README.md).
 
 **3. The boundary.** Between the page and the server, data arrives late,
 broken, or not at all. So every server-backed view has four states —
@@ -329,8 +336,8 @@ On **P1**, add:
 - **hydration** — attaching interactivity in the browser to HTML that was built
   on the server.
 - **state** — any fact the interface must remember.
-- **source of truth** — the one home where a fact is authoritative; every other
-  copy is a cache.
+- **source of truth** — authority for a particular fact: the server owns the
+  confirmed record; a local draft owns the user's not-yet-committed intent.
 - **optimistic update** — showing a result before the server confirms, with a
   plan to roll back.
 - **pending state** — the screen acknowledging work in flight; its absence is

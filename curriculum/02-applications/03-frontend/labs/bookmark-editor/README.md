@@ -23,6 +23,13 @@ Prerequisites: [search generations](../search-race/README.md),
 | Ownership | Alice cannot read or change Bob's `secret`; return 404 for unavailable objects |
 | Scope | Edit/search/paginate existing bookmarks; no create/delete, enrichment, multi-device offline sync, or production authentication |
 
+**Draft lifetime:** save responses, stale refetches, failures and conflict
+acknowledgment preserve the current draft. This reference keeps drafts only in
+memory: closing the editor, selecting another row or reloading discards unsaved
+text. Those are explicit scope limits, not a promise of reload/offline durability.
+A production editor must add a discard warning or durable draft storage before
+promising that navigation loses nothing.
+
 ## Run locally
 
 Python 3.10+ and Node 24+ are enough for the application. No npm dependency is required
