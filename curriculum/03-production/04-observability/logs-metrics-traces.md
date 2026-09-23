@@ -112,8 +112,9 @@ request was slow.
 
 **Logs** are events with detail — but only the detail someone thought to write,
 and without a shared id a log line is a diary entry: true, timestamped, about
-somebody, connectable to nothing. A log becomes telemetry when it is structured
-(keys and values, not prose) and carries the id of the request that caused it.
+somebody, difficult to correlate. Use structured fields and the active trace/span
+IDs when there is a request context. Lifecycle events such as startup have no
+request: record service, instance, version and event, not an invented trace ID.
 
 **Traces** follow one request across services as a tree of timed spans — the
 answer to "where did the time go" for a single request. They lie by absence:
@@ -184,8 +185,8 @@ visible" — the user's unit of work, not your process.
 
 ## What good looks like
 
-- Every request gets an id at the edge, and that id is on every log line, span
-  and error report it causes, all the way to the worker behind the queue.
+- Every operation has a queryable causal path: trace parent/child relations or
+  links, stable message/operation IDs, and structured logs with active context.
 - From an alert to the traces to one request's logs in a few clicks; no ssh in
   the incident story.
 - Application code imports only the OpenTelemetry API; the vendor is named in
@@ -220,12 +221,13 @@ Rules:
   SDK outside one exporter config file.
 - Propagate trace context across every boundary: inbound HTTP,
   outbound HTTP, the database, the queue in both directions.
-- Every log line is structured and carries the trace id.
+- Logs are structured; include active trace/span IDs when present, otherwise
+  service/instance/event fields. Preserve message IDs and causal span links.
 - List every metric you created with its labels, and for each
   label the number of possible values. Flag anything unbounded.
 
 Then show me one request's story end to end: its trace, its spans,
-and the log lines sharing its trace id.
+and the logs reached through its trace IDs, links and operation/message IDs.
 ```
 
 *Why it is asked that way:* the API-only rule keeps instrumentation portable,
@@ -280,10 +282,11 @@ the routing layer.
    every backend exposes it. Add one label to one metric, predict the new
    count, check. Unable to predict means you do not control the bill; off by
    10x means the label was not bounded.
-3. **Follow one real request across the boundary.** Confirm its trace reaches
-   the worker on the far side of the queue with the same trace id — then walk
-   from one of its error logs back to the trace and the user. Any break in that
-   chain means the correlation id is decorative.
+3. **Follow causality across the queue.** Test a single message, a batch from
+   two different producer traces, and a delayed consumer. Use a parent where
+   appropriate and span links for multi-parent/asynchronous work. Navigate
+   from the consumer log to each originating operation without merging
+   unrelated requests into one trace. A lifecycle log needs no request trace.
 4. **Check a dashboard rate against the unsampled truth.** Compare the
    dashboard's error rate with the raw pre-sampling error count for the same
    hour. Divergence means metrics are computed after the sampler, and every
@@ -299,7 +302,8 @@ On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
 
 - OpenTelemetry tracing on inbound requests, database calls, the outbound URL
   fetch, and the deferred title-fetch path in both directions.
-- All logs structured, each carrying the trace id.
+- Structured logs with active trace/span context or lifecycle identity;
+  message IDs and span links preserve asynchronous causality.
 - Metrics for rate, errors and duration by route and status class, plus queue
   depth and the age of the oldest pending fetch.
 - A written sampling policy. At your volume it may honestly be "keep
@@ -326,11 +330,14 @@ On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
 - **time series** — one stored stream per combination of metric name and label values.
 - **cardinality** — how many distinct values a label has. The multiplier.
 - **structured log** — an event as keys and values, not prose, so it can be queried.
-- **correlation id** — the id, usually the trace id, connecting everything one request caused.
+- **correlation id** — a stable identifier used to connect related events; an
+  operation may span several linked traces.
 - **span** — one timed operation; a trace is the tree of spans for one request.
-- **context propagation** — carrying the trace id across every boundary, queues included.
+- **context propagation** — carrying causal context across boundaries;
+  parent/child relations and span links represent different relationships.
 - **head sampling** — keep-or-drop decided at trace start. Cheap, blind to outcome.
-- **tail sampling** — decided once the trace is complete, at a stateful collector; errors always kept.
+- **tail sampling** — a stateful decision after a buffering window. A keep-error
+  policy still depends on spans arriving within that window and capacity limits.
 - **wide event** — one rich event per request; metrics and traces derived at query time.
 
 ---
