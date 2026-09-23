@@ -15,7 +15,23 @@ Assume 500 ordinary exports/minute, 20-second average processing time, and a 60-
 
 ## Keep job truth separate from message delivery
 
-Create a durable job record keyed by customer and request identity; record ACCEPTED, RUNNING, SUCCEEDED or FAILED with attempt/lease information. Queue messages ask workers to make progress; status comes from the job store. Write outputs under a stable job-derived key and verify the expected checksum/version before marking success. A delivery may be repeated even while an earlier worker is running. Fence stale workers with a generation/version check at the authoritative status write. If a side effect cannot be idempotent, reconcile it explicitly.
+Create a durable job record keyed by customer and request identity; record ACCEPTED, RUNNING, SUCCEEDED or FAILED with attempt/lease information. Queue messages ask workers to make progress; status comes from the job store. Write each attempt to an **immutable** object key such as `job/attempt-id/checksum`; never overwrite a shared `job/result.csv`. A delivery may repeat while an earlier worker is running. Publish `{object_key, checksum, size}` together with SUCCEEDED in a conditional job-store update requiring the current ownership generation. Readers follow only that committed pointer, not a guessed object name or listing. Reject stale pointer updates even when their object upload succeeded. If a side effect cannot be idempotent, reconcile it explicitly.
+
+### Pause the old worker at the dangerous boundary
+
+| Step | Authoritative result | Object state |
+|---|---|---|
+| A claims generation 4, then pauses | RUNNING, generation 4 | No published output |
+| Lease expires; B claims generation 5 | RUNNING, generation 5 | B writes immutable object B |
+| B publishes under generation 5 | SUCCEEDED → B, checksum B | B is reachable |
+| A resumes and uploads object A | Still SUCCEEDED → B | A is an orphan; it cannot overwrite B |
+| A tries generation-4 publication | Conditional update fails | Readers still obtain B’s bytes |
+
+Crash after uploading but before publishing leaves a complete orphan, not a
+partial result. A retry first reads current job truth; a duplicate completed
+message is acknowledged without another effect. Garbage collection excludes
+committed pointers and active attempts, and waits beyond the retry/lease window.
+Recheck current read permission before issuing an output download.
 
 ![Queue grows when 500 arrivals per minute exceed 150 completions per minute](../../../../assets/design-practice/durable-jobs-deep.svg)
 
@@ -27,7 +43,7 @@ The bars show a trend, not a measured forecast. At the stated steady rates the b
 
 ![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/durable-jobs-aws.svg)
 
-**Why these boxes, and what changes the choice:** SQS buffers accepted jobs but redelivers on a lost acknowledgement. DynamoDB stores stable job IDs and conditional status; S3 outputs use stable keys and existence checks. ECS can replace Lambda for jobs that exceed its duration or memory envelope.
+**Why these boxes, and what changes the choice:** SQS buffers accepted jobs but redelivers on a lost acknowledgement. DynamoDB stores stable job IDs and conditional status; S3 holds private immutable attempt objects; the job-store generation check publishes the winning pointer. Existence alone does not prove ownership or the right bytes. ECS can replace Lambda for jobs that exceed its duration or memory envelope.
 
 Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
 
