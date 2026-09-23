@@ -2,6 +2,11 @@
 
 Keep one project context as its requirements change. These are the original P1–P5 build briefs, now grouped under one home. Each stage preserves its complete instructions, prompts, AWS choices, diagrams and checks. They are implementation stages, not separate junior/senior/staff versions.
 
+These are **build assignments**. The supplied bookmark-editor and other labs
+exercise specific mechanisms; they do not constitute a complete implementation
+of all five stages. P4's historical “provably” wording means checking a declared
+application contract, not proving a language model always tells the truth.
+
 | Stage | Existing brief | Added responsibility |
 |---|---|---|
 | 1 | [P1 · it works](stages/01-it-works/README.md) | A persisted, authorized full-stack feature |
