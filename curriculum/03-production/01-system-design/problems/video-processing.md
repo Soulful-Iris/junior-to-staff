@@ -1,5 +1,7 @@
 # Video processing: accept once, publish when ready
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Creators upload 4 GB videos. Processing produces three renditions and a thumbnail. The mobile connection drops mid-upload; a transcode task times out after writing one rendition. Design the upload and watch experience without making the API hold a 4 GB request open.”
 
 Assume 50,000 uploads/day, peak 300 concurrent uploads, and a 99% target of publish-ready within ten minutes for videos under 2 GB. The target is a hypothetical exercise requirement; clarify whether larger files have a different SLA.

@@ -1,5 +1,7 @@
 # API quota: which request spends the last token?
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Partners call our public API. Each organization may make 100 requests per minute, and a paid organization also has a daily quota. Two gateways receive requests for the same organization simultaneously. Define exactly which requests are admitted and what the client sees at the limit.”
 
 This is a constructed prompt. Assume 8,000 organizations, 20,000 peak requests/s overall, and an occasional 2,000 requests/s from one organization. Start with per-organization policy; do not guess an individual IP is an organization.

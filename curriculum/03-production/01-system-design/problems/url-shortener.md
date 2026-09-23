@@ -1,5 +1,7 @@
 # URL shortener: who owns the code?
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Turn long links into short links that redirect quickly. Users can choose a custom alias, set an expiry, and inspect click counts. What happens if two people request the same alias?”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 30 million new links/day, 3 billion redirects/day, and redirect p99 below 100 ms. Start with redirect correctness; make analytics asynchronous. Clarify service guarantees and a first version before filling the board with services.

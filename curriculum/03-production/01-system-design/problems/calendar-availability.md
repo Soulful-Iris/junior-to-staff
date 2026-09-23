@@ -1,5 +1,7 @@
 # Calendar: reserve time without hiding conflicts
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “People create events, invite guests, and look up free/busy time across calendars. Two organizers may book the same room at once. Time zones and daylight saving changes matter.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 100 million calendars, 3 million active users, and free/busy reads much more frequent than event writes. Clarify service guarantees and a first version before filling the board with services.

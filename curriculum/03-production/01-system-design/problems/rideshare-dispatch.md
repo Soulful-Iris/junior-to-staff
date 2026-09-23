@@ -1,5 +1,7 @@
 # Ride sharing: one driver, one accepted ride
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “A rider asks for a car. Drivers move every few seconds, one driver can accept only one trip, and the rider wants a live ETA. Design matching and state transitions.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 5 million active drivers, location p95 younger than 5 seconds, and bursts around commute and event traffic. Clarify service guarantees and a first version before filling the board with services.

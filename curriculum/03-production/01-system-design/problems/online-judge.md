@@ -1,5 +1,7 @@
 # Online judge: untrusted code gets a small box
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Users submit code to a timed contest. Compile and run it against hidden tests, report results, and update a live leaderboard. Submissions are untrusted.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 100,000 contest participants, 10,000 submissions/minute at peak and strict CPU, memory, and wall-time caps. Clarify service guarantees and a first version before filling the board with services.

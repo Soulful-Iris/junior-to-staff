@@ -1,5 +1,7 @@
 # Realtime chat: reconnect without losing the conversation
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Design a team chat. Ana sends ‘Ready?’ on her phone, loses reception before the acknowledgement, and retries from her laptop. Ben was offline. When both reconnect, which messages appear, in what order, and how do you avoid an accidental duplicate?”
 
 Assume 2 million daily active users, 30,000 peak messages/s, groups of 2–500 members, and one-year history. These are exercise inputs. Distinguish server-accepted messages from messages displayed or read on a device.

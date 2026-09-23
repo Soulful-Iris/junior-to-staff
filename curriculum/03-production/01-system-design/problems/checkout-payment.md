@@ -1,5 +1,7 @@
 # Checkout: paid twice, ordered once?
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “A customer clicks Pay. The payment provider charges their card; your server times out before saving the result. The customer retries. Design checkout so you can explain which order exists, which charge exists, and how an operator repairs disagreements.”
 
 Assume 200 checkout requests/s peak, 10% provider timeouts during an incident, and an inventory reservation that expires after ten minutes. These are exercise conditions. Clarify whether the contract promises no duplicate charge, no duplicate order, or both; each needs its own authority.

@@ -1,5 +1,7 @@
 # News aggregator: freshness without a write storm
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Collect articles from publishers, remove duplicates, and make a personalized feed from topics and followed sources. A major story arrives from hundreds of sources at once.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 50,000 publisher feeds, 20 million daily readers, and new stories visible within 60 seconds. Clarify service guarantees and a first version before filling the board with services.

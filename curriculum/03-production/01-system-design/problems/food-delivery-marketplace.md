@@ -1,5 +1,7 @@
 # Food delivery: quote the right nearby options
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Customers search nearby restaurants, place an order, and track delivery. Restaurants change hours and menus; couriers move; inventory can sell out between browse and checkout. Design the customer path.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 200,000 restaurants, 2 million concurrent shoppers during dinner, and availability freshness within 30 seconds. Clarify service guarantees and a first version before filling the board with services.

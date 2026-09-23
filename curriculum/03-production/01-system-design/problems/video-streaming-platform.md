@@ -1,5 +1,7 @@
 # Video streaming: keep playback smooth at the edge
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Creators upload large videos. Viewers start playback quickly and continue across different bandwidths and devices. Design ingest, processing, storage, and delivery.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 5 million daily uploads, 100 million viewers, 4K source files up to 20 GB, and playback start p95 under 2 seconds. Clarify service guarantees and a first version before filling the board with services.

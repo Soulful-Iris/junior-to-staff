@@ -1,5 +1,7 @@
 # Webhook delivery: a timeout is not a rejection
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Merchants subscribe to order events over HTTPS. A merchant's endpoint takes 20 seconds and sometimes commits the event before returning a timeout. How will you deliver without slowing checkout or claiming exactly-once delivery?”
 
 **Your contract.** Assume 50,000 subscriptions, 8,000 events/s at peak, 48-hour delivery attempts, endpoint-specific secrets, and a visible replay tool. Ask whether per-subscription ordering matters: it changes partitioning and throughput. This is a constructed practice problem.

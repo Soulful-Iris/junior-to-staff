@@ -1,5 +1,7 @@
 # Ticket inventory: one seat, two buyers
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “A theater sells assigned seats. Two buyers see A12 as available and both click Reserve. One pays; the other loses connection after the server accepts a hold. Prevent overselling, expire abandoned holds, and make the final result understandable to both buyers.”
 
 Constructed practice brief. Assume 30,000 seats across a venue, an on-sale spike of 60,000 requests/s for 20 seconds, a five-minute hold, and a payment provider outside your database transaction. The spike is workload, not a promise that the database can write 60,000 seat updates/s.

@@ -1,6 +1,8 @@
-# System design · worked examples and changing constraints
+# System design · worked examples and design briefs
 
 These are original practice prompts chosen to exercise the concepts. They are not a ranked list of current company questions. Recent reported question families and their limits are in [research](../docs/research/interview-evidence.md).
+
+The five longer worked examples below explain a baseline; they are not five deployed applications. For the full set of shorter architecture briefs, start at the [system-design chapter](../curriculum/03-production/01-system-design/README.md) and follow the [curriculum](../curriculum/README.md) into reliability, data and AI. Runnable artifacts identify their source directory and test command explicitly.
 
 ## A 45-minute practice structure
 

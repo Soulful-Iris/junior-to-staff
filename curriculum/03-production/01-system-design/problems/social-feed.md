@@ -1,5 +1,7 @@
 # Social feed: a popular author changes the shape
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Build a home feed. Most authors have hundreds of followers; one has eight million. People expect their own new post immediately and friends' posts within ten seconds. Show what happens when the popular author posts four times in a minute.”
 
 Assume 20 million daily readers, 15,000 ordinary writes/s, 120,000 peak read requests/s, and a home page of 30 items. These are capacity assumptions, not observed company numbers. First clarify follow privacy, delete behavior, ranking versus recency, and the ten-second measurement point.

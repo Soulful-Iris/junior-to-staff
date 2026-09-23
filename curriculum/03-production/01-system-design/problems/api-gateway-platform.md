@@ -1,5 +1,7 @@
 # API gateway: route safely across many teams
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Build a shared gateway for dozens of product teams. It validates identity, routes API versions, enforces quotas, and protects downstream services. One team deploys a bad route rule.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 25,000 requests/s, 150 services and gateway p99 overhead under 15 ms. Clarify service guarantees and a first version before filling the board with services.

@@ -2,6 +2,8 @@
 
 Turn requirements and workload estimates into an explainable architecture.
 
+**Artifact types:** the short architecture pages below are **design briefs**, not completed applications. They supply a contract, diagrams and questions to work through. A **worked design** explains a particular solution; an **executable reference** links to source and a test command; a **deployment lab** supplies setup and cleanup steps. None of these labels alone means a live cloud deployment was verified.
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Before this chapter
@@ -36,7 +38,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 20 | [API gateway: route safely across many teams](problems/api-gateway-platform.md) |
 | 21 | [Online judge: untrusted code gets a small box](problems/online-judge.md) |
 
-Each of these 15 pages links to a current community interview-question catalog entry. The catalog tags candidate reports with companies, but usually omits interview dates. Treat these as widely listed prompt types, not verified reports from the past year or a current company rubric. See the [source review and recency limits](../../../docs/research/interview-design-problem-set-2026.md).
+The 15 catalog-sourced prompts distributed across this and later chapters link to community interview-question entries. The catalog tags candidate reports with companies, but usually omits interview dates. Treat these as widely listed prompt types, not verified reports from the past year or a current company rubric. See the [source review and recency limits](../../../docs/research/interview-design-problem-set-2026.md).
 
 Work through each problem from its opening brief. First draw the failing design and identify which component decides the disputed state. Use the paired architecture and event-timeline diagrams to test the design; explain the senior and staff changes before checking a service name. The later chapters return to these boundaries under observability, outages, large data, AI serving, and regional recovery.
 

@@ -1,5 +1,7 @@
 # Collaborative editor: two people edit the same sentence
 
+*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+
 > **Interviewer:** “Build a shared document editor. Ana and Ben can edit the same document while one is offline. They should see changes within a second when connected. What does the server accept, and what happens when edits collide?”
 
 **Your contract.** Start with plain text, 50 concurrent editors per document, 10,000 active documents, and a durable history. Presence may disappear temporarily; acknowledged edits may not. Agree on whether an offline edit must merge automatically or can require a visible conflict resolution. This is a constructed exercise, not a claimed company question.
