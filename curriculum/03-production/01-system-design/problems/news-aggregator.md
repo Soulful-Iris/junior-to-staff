@@ -4,7 +4,7 @@
 
 > **Interviewer:** “Collect articles from publishers, remove duplicates, and make a personalized feed from topics and followed sources. A major story arrives from hundreds of sources at once.”
 
-This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 50,000 publisher feeds, 20 million daily readers, and new stories visible within 60 seconds. Clarify service guarantees and a first version before filling the board with services.
+This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 50,000 publisher feeds, 20 million daily readers, and new stories visible within a 60-second target for responsive, successfully polled sources. Publisher outages cannot meet that target; surface stale-source status. Clarify service guarantees and a first version before filling the board with services.
 
 | Situation | Input / condition | Expected result |
 |---|---|---|
@@ -18,6 +18,21 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 ## Think from the contract to the boxes
 
 Treat collection, canonicalization, ranking and feed reads as separate stages. Keep source article IDs and a canonical cluster ID; dedupe is probabilistic candidate grouping followed by explainable rules. Precompute ordinary feeds where it helps, but do not copy every breaking story to every user synchronously. Recheck follows and muted topics when composing the page.
+
+### Publication and freshness budget
+
+| Arrow | Identity and accepted state | Failure policy |
+|---|---|---|
+| Scheduler → fetcher | `(publisher_id, poll_slot)`; a scheduled tick means work is due, not fetched. | Per-domain concurrency cap and 5 s HTTP deadline; record stale status when publisher limits prevent freshness. |
+| Fetcher → article authority | `(publisher_id, source_article_id, source_version)` plus content hash; commit article revision and outbox together. | Replay revision without duplicating it; credentials are scoped to that publisher/domain. |
+| Outbox → indexer | `(article_id, revision, cluster_version)`; index is a projection. | Reject older versions, retry failed writes; outbox survives a crash before send. |
+| Index/cache → feed composer | Candidate IDs, then current follow/mute and content policy checks. | Never treat a personalized cached response as current permission. |
+
+A worked **60 s target** is 20 s maximum poll delay + 5 s fetch + 10 s queue + 15 s normalize/index + 10 s index/cache visibility. Polling 50,000 feeds every 20 s needs **2,500 fetch starts/s** before retries; provider limits can make this target infeasible, requiring push feeds or an explicitly relaxed promise.
+
+Keep publisher articles immutable by revision. Cluster merges store aliases from old cluster IDs to the chosen cluster; splits increment cluster version and emit membership corrections. Preserve source attribution; rebuild projected feeds from those corrections rather than changing article identity.
+
+**Check:** commit revision 8, crash before indexing, replay twice, then deliver revision 7. One current revision 8 is visible. Pause invalidation, unfollow a source, and confirm feed composition removes it on the next authorized read. Record detection-to-visibility latency, not merely worker execution time.
 
 **First diagram:** Trace publisher fetch → canonical story → topic index → feed composition; mark which copy is source and which is projection.
 
