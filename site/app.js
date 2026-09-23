@@ -3,10 +3,24 @@
   const state = JSON.parse(document.getElementById('page-state').textContent);
   const base = window.SITE_BASE || '/';
   const key = 'engineering-guide:progress:v1';
-  function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+  function read(key, fallback, valid) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return fallback;
+      const value = JSON.parse(raw);
+      return valid(value) ? value : fallback;
+    } catch { return fallback; }
+  }
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  function progressValue(value) {
+    return object(value) && Array.isArray(value.completed) && value.completed.length <= 10000
+      && value.completed.every(src => typeof src === 'string' && src.length <= 1000)
+      && (value.last === null || (object(value.last) && typeof value.last.url === 'string'
+        && value.last.url.length <= 2000 && typeof value.last.title === 'string' && value.last.title.length <= 1000));
+  }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Reading works without storage. */ } }
-  const progress = read(key, {completed: [], last: null});
-  if (!Array.isArray(progress.completed)) progress.completed = [];
+  const saved = read(key, {completed: [], last: null}, progressValue);
+  const progress = {completed: [...new Set(saved.completed)], last: saved.last};
   if (state.position !== null && state.position > 0) {
     progress.last = {url: state.url, title: state.title}; write(key, progress);
   }
@@ -96,14 +110,15 @@
   function updateScroll(){const max=document.documentElement.scrollHeight-innerHeight;progressBar.style.width=(max>0?Math.min(100,scrollY/max*100):0)+'%';}
   addEventListener('scroll',updateScroll,{passive:true});addEventListener('resize',updateScroll);updateScroll();
   const media=matchMedia('(prefers-reduced-motion: reduce)');
-  let still=read('engineering-guide:still',media.matches);
+  const boolean = value => typeof value === 'boolean';
+  let still=read('engineering-guide:still',media.matches,boolean);
   const motionButton=document.getElementById('motion-toggle');
   function applyMotion(){
     document.querySelectorAll('img[data-motion]').forEach(img=>{img.src=still?img.dataset.still:img.dataset.motion;});
     motionButton.textContent=still?'Static visuals':'Motion on';motionButton.setAttribute('aria-pressed',String(still));
   }
   motionButton.addEventListener('click',()=>{still=!still;write('engineering-guide:still',still);applyMotion();});
-  media.addEventListener('change',()=>{still=media.matches;applyMotion();});applyMotion();
+  media.addEventListener('change',()=>{still=read('engineering-guide:still',media.matches,boolean);applyMotion();});applyMotion();
   document.querySelectorAll('.mer,.figwrap,.featured-diagram').forEach(figure=>{
     const img=figure.querySelector('img');if(!img)return;
     const toolbar=document.createElement('div');toolbar.className='visual-toolbar';const hint=document.createElement('span');hint.className='diagram-scroll-hint';hint.textContent='Wide diagram? Swipe to explore.';toolbar.append(hint);
