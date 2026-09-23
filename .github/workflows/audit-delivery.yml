@@ -24,7 +24,14 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/audit-delivery"
           cp .audit-delivery/runner.py "$RUNNER_TEMP/audit-delivery/runner.py"
-          cp .audit-delivery/batch.json "$RUNNER_TEMP/audit-delivery/batch.json"
+          python3 - <<'PY'
+          import base64, json, os, zlib
+          from pathlib import Path
+          data = json.loads(Path('.audit-delivery/batch.json').read_text())
+          if 'zlib_base64' in data:
+              data = json.loads(zlib.decompress(base64.b64decode(data['zlib_base64'], validate=True)))
+          Path(os.environ['RUNNER_TEMP'], 'audit-delivery', 'batch.json').write_text(json.dumps(data))
+          PY
       - name: Apply exact reviewed edits, test, then fast-forward main per chapter
         env:
           GH_TOKEN: ${{ github.token }}
