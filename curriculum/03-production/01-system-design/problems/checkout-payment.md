@@ -23,6 +23,14 @@ Your order database owns order state; the payment provider owns charge state; an
 
 Show PENDING → PAYMENT_UNKNOWN/PAID → CONFIRMED or REFUND_REQUIRED. Persist the external charge reference on confirmation. To send receipts, commit an outbox event in the same database transaction as the order state and publish it asynchronously; consumers still deduplicate delivery. The reconciliation job compares provider charge IDs and local order IDs, pays attention to refunds and provider webhooks arriving out of order, and reports exceptions to a human owner.
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/checkout-payment-aws.svg)
+
+**Why these boxes, and what changes the choice:** An Aurora transaction records intent and local state; DynamoDB transactional writes are an alternative for key-oriented orders. SQS retries can duplicate work: the provider idempotency key and status lookup are still required. An ECS worker suits high-volume, long-running reconciliation.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** Provider idempotency lasts only 24 hours; a DLQ is replayed in three days. Derive why replaying a charge blindly is unsafe, then use provider status lookup, a durable attempt record, and manual escalation for unknowns. Make the maximum auto-retry window explicit.
 
 **Staff follow-up:** Regional failover starts a second worker while the first may still run. Fence ownership or use the same durable order ID/provider key; decide how to audit and repair split decisions. Explain what “exactly once” refers to and what proof you can actually gather.

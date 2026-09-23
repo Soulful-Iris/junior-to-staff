@@ -23,6 +23,14 @@ Only three of the hundred partials are drawn. The 1,000 events/s per shard is an
 
 ![Late arrival corrects a provisional count after the first top-ten read](../../../../assets/design-practice/trending-counts-trace.svg)
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/trending-counts-aws.svg)
+
+**Why these boxes, and what changes the choice:** Kinesis partitions input; a hot topic must be salted or otherwise distributed, because a hot partition key stays hot. Lambda aggregates windows or Managed Service for Apache Flink handles complex event-time work; DynamoDB serves a versioned result and S3 enables replay.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** One input partition goes idle while the rest advance. Explain the global watermark bottleneck and an idle-partition policy. Show what correction a user sees when #10 becomes #11 after a late event.
 
 **Staff follow-up:** A bot floods a topic. Decide which boundary verifies identity and abuse policy; quantify the effect of revoking events already included in materialized windows. Separate a fast approximate public display from an auditable billing count if the product needs both.

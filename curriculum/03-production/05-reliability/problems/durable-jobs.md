@@ -23,6 +23,14 @@ The bars show a trend, not a measured forecast. At the stated steady rates the b
 
 ![Completed output followed by lost acknowledgement and duplicate delivery](../../../../assets/design-practice/durable-jobs-trace.svg)
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/durable-jobs-aws.svg)
+
+**Why these boxes, and what changes the choice:** SQS buffers accepted jobs but redelivers on a lost acknowledgement. DynamoDB stores stable job IDs and conditional status; S3 outputs use stable keys and existence checks. ECS can replace Lambda for jobs that exceed its duration or memory envelope.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** At 500/min and 20 seconds per job, Little's-law concurrency estimate is roughly 167 occupied worker slots for zero queue growth at steady load. If the system can run only 50 tasks, derive the queue growth and make the wait visible. Apply per-tenant fairness and a bounded retention/expiry policy.
 
 **Staff follow-up:** A customer requests data deletion while an export waits or runs. Decide which step authorizes the read, how to revoke or cancel the output, and what audit record survives deletion without retaining private data. Show the repair path after an entire Region disappears.

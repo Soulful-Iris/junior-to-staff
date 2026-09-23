@@ -23,6 +23,14 @@ The allocation adds to 250 ms. If the feature call needs 170 instead of its allo
 
 ![The feature lookup exhausts the remaining budget and triggers a safe fallback](../../../../assets/design-practice/personalized-ranking-trace.svg)
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/personalized-ranking-aws.svg)
+
+**Why these boxes, and what changes the choice:** SageMaker endpoints serve a managed ranker; ECS inference fits a lighter model with existing deployment tooling. DynamoDB serves versioned online features. ECS enforces final eligibility and fallback; CloudWatch observes latency and denial outcomes, not model quality by itself.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** A rollout raises average CTR 3% while a small language cohort experiences a 20% complaint rise. Define evaluation slices, minimum sample size, rollback signals, and an owner for the trade-off. Explain why the offline metric cannot substitute for an online guardrail.
 
 **Staff follow-up:** A privacy deletion crosses online features, training sets, caches, exposure logs, and models. Set retention and retraining policy, ownership, an audit trail, and a response contract while deletion propagates. Separate serving reliability from experimentation governance.

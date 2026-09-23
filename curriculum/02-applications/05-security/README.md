@@ -15,6 +15,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | Step | Existing lesson or exercise |
 |---|---|
 | 1 | [Security](trust-and-authorization.md) |
+| 2 | [Tenant isolation: an ID in the URL is not authority](problems/tenant-isolation.md) |
+| 3 | [Audit trail: who changed this permission?](problems/audit-trail.md) |
 
 ## Go deeper on the same problem
 

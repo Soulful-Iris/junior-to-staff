@@ -19,6 +19,14 @@ At the ingress, record a trace ID and deadline. Propagate both through API, data
 
 ![The same user request accrues wait, work, and retries until the deadline](../../../../assets/design-practice/slow-request-trace.svg)
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/slow-request-aws.svg)
+
+**Why these boxes, and what changes the choice:** CloudWatch holds fleet-level denominators and tail latency by route; X-Ray or an OpenTelemetry-compatible tracing stack identifies spans and queue wait. ALB timing is a separate boundary. A trace sample cannot substitute for complete request metrics.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** Sampling drops the failing request. Which RED metrics (rate, errors, duration) and structured logs can still show the blast radius? Alert on an error-budget burn or bounded tail-latency objective with low-traffic safeguards; include the deploy marker.
 
 **Staff follow-up:** Three teams own different spans. Define trace context/version compatibility and the on-call handoff. Show how you would tell a local pool exhaustion from a downstream outage before rolling back or scaling the wrong component.

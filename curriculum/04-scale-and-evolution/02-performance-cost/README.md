@@ -16,6 +16,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 |---|---|
 | 1 | [Performance and cost](measurement-and-cost.md) |
 | 2 | [A correct deployment can still cause an outage](cases/deployment-headroom.md) |
+| 3 | [Overload: protect the requests that can finish](problems/overload-shedding.md) |
 
 ## Go deeper on the same problem
 

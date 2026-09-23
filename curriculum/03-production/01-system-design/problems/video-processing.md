@@ -23,6 +23,14 @@ CREATED → UPLOADING → RECEIVED → PROCESSING → READY, with FAILED and DEL
 
 The small API path creates a session and reports status. Bytes travel directly to object storage; a worker creates renditions and publishes a manifest. Playback requests pass authorization and fetch content via CDN. Specify which objects get cleaned when an upload expires, a job fails, or a creator deletes the video. A video CDN reduces origin load; it does not itself authorize revoked users after a signed URL was issued.
 
+## Put the AWS names on the boxes
+
+![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/video-processing-aws.svg)
+
+**Why these boxes, and what changes the choice:** Direct S3 upload keeps bytes away from API workers. MediaConvert handles managed media jobs; ECS with FFmpeg fits custom codecs and scheduling. DynamoDB moves status to READY only when outputs exist, SQS can redeliver, and CloudFront distributes authorized renditions.
+
+Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 **Senior follow-up:** Publishing has a ten-minute target but the processing queue waits twelve minutes. Estimate arrivals × average work and worker demand. Prioritize small jobs fairly without starving large jobs; expose P50/P99 ingest-to-ready and DLQ age, not just successful worker duration.
 
 **Staff follow-up:** A viral launch floods playback while an owner requests removal. State revocation delay and signed URL expiry; describe a stricter authorized delivery path when immediate revocation is mandatory. Budget transcoding and egress cost under peak demand.

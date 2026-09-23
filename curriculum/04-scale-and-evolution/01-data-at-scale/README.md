@@ -26,6 +26,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 10 | [File synchronization](problems/file-synchronization.md) |
 | 11 | [Document search: results must follow permissions](problems/document-search.md) |
 | 12 | [Trending counts: the spike that breaks one partition](problems/trending-counts.md) |
+| 13 | [Event ingestion: change a schema without losing yesterday](problems/event-ingestion.md) |
 
 ## Go deeper on the same problem
 

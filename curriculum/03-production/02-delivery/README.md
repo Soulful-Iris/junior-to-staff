@@ -16,6 +16,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 |---|---|
 | 1 | [Delivery](delivery-pipeline.md) |
 | 2 | [Configuration is executable behavior](cases/configuration-rollout.md) |
+| 3 | [Feature rollout: the switch that failed after 100%](problems/feature-rollout.md) |
 
 ## Go deeper on the same problem
 

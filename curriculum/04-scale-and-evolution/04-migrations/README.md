@@ -20,6 +20,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 4 | [Move a hot tenant, then lose a region](labs/recovery-migration/regions.md) |
 | 5 | [Multi-tenant migration](problems/multi-tenant-migration.md) |
 | 6 | [Regional failover: which acknowledged write survives?](problems/regional-failover.md) |
+| 7 | [Data erasure: one request, nine copies](problems/erasure-workflow.md) |
 
 ## Go deeper on the same problem
 

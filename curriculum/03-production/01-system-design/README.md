@@ -25,6 +25,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 9 | [Video processing: accept once, publish when ready](problems/video-processing.md) |
 | 10 | [Checkout: paid twice, ordered once?](problems/checkout-payment.md) |
 | 11 | [Notification platform](problems/notification-platform.md) |
+| 12 | [Collaborative editor: two people edit the same sentence](problems/collaborative-editor.md) |
+| 13 | [Webhook delivery: a timeout is not a rejection](problems/webhook-delivery.md) |
 
 Work through each problem from its opening brief. First draw the failing design and identify which component decides the disputed state. Use the paired architecture and event-timeline diagrams to test the design; explain the senior and staff changes before checking a service name. The later chapters return to these boundaries under observability, outages, large data, AI serving, and regional recovery.
 
