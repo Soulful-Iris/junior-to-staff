@@ -112,7 +112,15 @@ destinations. [TypeScript](web/app.ts) owns view state and request generations.
 [Schema](schema.sql) defines the durable authority: primary bookmark ID, owner, positive
 version, bounded title, and owner/mutation-key uniqueness. A conditional SQL update
 and idempotency response commit in one transaction, so the same successful request
-can return its original response without incrementing twice.
+can return its original response without incrementing twice. Every response,
+including conflicts and replays, is sent **after** the transaction closes.
+
+Titles accept 1–200 Unicode code points, including accented text and emoji;
+whitespace-only titles, C0/C1 controls (including NUL/newline), and lone surrogates
+return structured 400 before SQL. This is not a byte or grapheme count. Unsupported
+input changes neither bookmarks nor replay rows. Other database faults are not
+all mislabeled as retryable lock contention. The schema is for fresh lab databases;
+existing files need an explicit migration to adopt its additional NUL constraint.
 
 ## Follow-up 1 · B exists when A conflicts
 

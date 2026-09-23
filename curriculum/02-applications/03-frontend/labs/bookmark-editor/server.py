@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import re
 import sqlite3
+import unicodedata
 from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).parent
@@ -136,29 +137,42 @@ def handler(path):
                 title, expected = body["title"], body["expectedVersion"]
                 if not isinstance(title, str) or not title.strip() or len(title) > 200 or type(expected) is not int or not 1 <= expected < 2**53 - 1:
                     raise ValueError()
-            except (ValueError, TypeError, json.JSONDecodeError):
-                return self.reply(400, {"error": "title, integer expectedVersion and mutation key required"})
+                title.encode("utf-8")  # reject lone surrogates before SQLite binding
+                if any(unicodedata.category(ch) == "Cc" for ch in title):
+                    raise ValueError("single-line title cannot contain control characters")
+            except (ValueError, TypeError, UnicodeError, json.JSONDecodeError):
+                return self.reply(400, {"error": "valid single-line Unicode title, integer expectedVersion and mutation key required"})
             fingerprint = hashlib.sha256(json.dumps([ident, title, expected]).encode()).hexdigest()
             try:
                 with connect(path) as db:
                     db.execute("BEGIN IMMEDIATE")
                     row = db.execute("SELECT * FROM bookmarks WHERE id=? AND owner_id=?", (ident, owner)).fetchone()
                     if row is None:
-                        return self.reply(404, {"error": "not found"})
-                    old = db.execute("SELECT * FROM mutations WHERE owner_id=? AND mutation_id=?", (owner, key)).fetchone()
-                    if old:
-                        if old["fingerprint"] != fingerprint:
-                            return self.reply(409, {"error": "mutation key reused with different payload", "current": record(row)})
-                        return self.reply(200, json.loads(old["response"]))
-                    changed = db.execute("UPDATE bookmarks SET title=?,version=version+1 WHERE id=? AND owner_id=? AND version=?",
-                                         (title, ident, owner, expected)).rowcount
-                    if not changed:
-                        return self.reply(409, {"error": "version conflict", "current": record(row)})
-                    result = record(db.execute("SELECT * FROM bookmarks WHERE id=? AND owner_id=?", (ident, owner)).fetchone())
-                    db.execute("INSERT INTO mutations VALUES(?,?,?,?)", (owner, key, fingerprint, json.dumps(result)))
-                return self.reply(200, result)  # commit precedes acknowledgement
-            except sqlite3.OperationalError:
-                return self.reply(503, {"error": "store busy; retry the same mutation key"})
+                        status, result = 404, {"error": "not found"}
+                    else:
+                        old = db.execute("SELECT * FROM mutations WHERE owner_id=? AND mutation_id=?", (owner, key)).fetchone()
+                        if old and old["fingerprint"] != fingerprint:
+                            status, result = 409, {"error": "mutation key reused with different payload", "current": record(row)}
+                        elif old:
+                            status, result = 200, json.loads(old["response"])
+                        else:
+                            changed = db.execute("UPDATE bookmarks SET title=?,version=version+1 WHERE id=? AND owner_id=? AND version=?",
+                                                 (title, ident, owner, expected)).rowcount
+                            if not changed:
+                                status, result = 409, {"error": "version conflict", "current": record(row)}
+                            else:
+                                status = 200
+                                result = record(db.execute("SELECT * FROM bookmarks WHERE id=? AND owner_id=?", (ident, owner)).fetchone())
+                                db.execute("INSERT INTO mutations VALUES(?,?,?,?)", (owner, key, fingerprint, json.dumps(result)))
+                # Every outcome is chosen under the transaction; none writes to a
+                # potentially slow socket until the transaction and connection end.
+                return self.reply(status, result)
+            except sqlite3.OperationalError as exc:
+                code = getattr(exc, "sqlite_errorcode", None)
+                busy = code is not None and (code & 0xff) in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED)
+                if busy or (code is None and str(exc) in ("database is locked", "database table is locked")):
+                    return self.reply(503, {"error": "store busy; retry the same mutation key"})
+                return self.reply(500, {"error": "store operation failed"})
     return Handler
 
 

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
-from threading import Thread
+from threading import Event, Thread
 import unittest
 import urllib.error
 import urllib.request
@@ -88,6 +88,56 @@ class APITests(unittest.TestCase):
         for query in ["limit=0", "limit=51", "cursor=bad", "cursor=W10="]:
             self.assertEqual(self.request("/api/bookmarks?" + query)[0], 400)
         self.assertEqual(self.request("/api/bookmarks?q=notpresent")[1]["items"], [])
+
+    def test_unicode_validation_and_durable_idempotence(self):
+        for title in ("\0abc", "a\0bc", "\ud800", "line\nbreak", "\u0085"):
+            code, body = self.request("/api/bookmarks/b", {"title": title, "expectedVersion": 1})
+            self.assertEqual(code, 400)
+            self.assertIn("error", body)
+        with connect(self.db) as db:
+            self.assertEqual(tuple(db.execute("SELECT title,version FROM bookmarks WHERE id='b'").fetchone()), ("Beta", 1))
+            self.assertEqual(db.execute("SELECT count(*) FROM mutations").fetchone()[0], 0)
+        body = {"title": "Café 👩‍💻", "expectedVersion": 1}
+        first = self.request("/api/bookmarks/b", body)
+        self.assertEqual((first[0], first[1]["title"], first[1]["version"]), (200, body["title"], 2))
+        self.assertEqual(self.request("/api/bookmarks/b", body), first)
+
+    def test_slow_conflict_response_releases_write_transaction(self):
+        self.request("/api/bookmarks/b", {"title": "first", "expectedVersion": 1}, key="first")
+        entered, release, writer_done = Event(), Event(), Event()
+        handler = self.server.RequestHandlerClass
+        original = handler.reply
+        results, errors = [], []
+        def gated_reply(request, status, body):
+            if status == 409:
+                entered.set()
+                if not release.wait(3):
+                    raise TimeoutError("conflict response gate")
+            return original(request, status, body)
+        handler.reply = gated_reply
+        def request_in_thread(body, key, done=None):
+            try:
+                results.append((key, self.request("/api/bookmarks/b", body, key=key)[0]))
+            except Exception as exc:
+                errors.append(exc)
+            finally:
+                if done:
+                    done.set()
+        conflict = Thread(target=request_in_thread, args=({"title": "stale", "expectedVersion": 1}, "stale"))
+        writer = Thread(target=request_in_thread, args=({"title": "next", "expectedVersion": 2}, "next", writer_done))
+        conflict.start()
+        try:
+            self.assertTrue(entered.wait(2))
+            writer.start()
+            self.assertTrue(writer_done.wait(2), "slow response retained a write transaction")
+        finally:
+            release.set()
+            conflict.join(3)
+            if writer.ident is not None:
+                writer.join(3)
+            handler.reply = original
+        self.assertEqual(errors, [])
+        self.assertEqual(sorted(results), [("next", 200), ("stale", 409)])
 
 
 if __name__ == "__main__":

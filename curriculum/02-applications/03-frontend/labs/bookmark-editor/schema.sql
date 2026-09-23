@@ -2,7 +2,7 @@ PRAGMA foreign_keys=ON;
 CREATE TABLE IF NOT EXISTS bookmarks (
   id TEXT PRIMARY KEY,
   owner_id TEXT NOT NULL,
-  title TEXT NOT NULL CHECK(length(title) BETWEEN 1 AND 200),
+  title TEXT NOT NULL CHECK(length(title) BETWEEN 1 AND 200 AND instr(title,char(0))=0),
   url TEXT NOT NULL,
   created_at INTEGER NOT NULL,
   version INTEGER NOT NULL DEFAULT 1 CHECK(version > 0)
