@@ -16,14 +16,49 @@ This is a short prerequisite lesson. Attempt the complete [daily temperatures pr
 
 **The idea:** Store unresolved indices in non-increasing temperature order. A new warmer value resolves colder indices at the top.
 
+## First, what is a stack?
+
+A **stack** keeps the most recently added item on top. Python lists can push with `append` and pop with `pop`. Here the stack holds **day positions**, not temperatures: we must eventually return how many days each earlier position waited. The temperatures at those positions are non-increasing from the bottom to the top of the stack.
+
+```python
+temperatures = [73, 74, 71, 75]
+waiting = []                  # indices still waiting for a warmer day
+answer = [0] * len(temperatures)
+for day, temperature in enumerate(temperatures):
+    while waiting and temperatures[waiting[-1]] < temperature:
+        earlier = waiting.pop()
+        answer[earlier] = day - earlier
+    waiting.append(day)
+print(answer)  # [1, 2, 1, 0]
+```
+
+At 74, day 0 is resolved. At 75, both 71 (day 2) and 74 (day 1) are popped. Equal temperatures stay on the stack because the requirement is **strictly warmer**, not at least as warm. The animation's moving indices represent unresolved days waiting for an answer.
+
+| Day / temperature | Stack after day (indices) | Answer so far |
+| --- | --- | --- |
+| 0 / 73 | `[0]` | `[0, 0, 0, 0]` |
+| 1 / 74 | `[1]` | `[1, 0, 0, 0]` |
+| 2 / 71 | `[1, 2]` | `[1, 0, 0, 0]` |
+| 3 / 75 | `[3]` | `[1, 2, 1, 0]` |
+
 ## Your 45-minute session
 
 1. **5 min:** draw one example and a simple solution.
 2. **25 min:** implement `daily_temperatures` without the reference.
-3. **10 min:** test Equal temperatures; decreasing input; a final value that pops the entire stack.
+3. **10 min:** check the input/output cases below, including strict equality.
 4. **5 min:** explain the cost and answer the changed requirement.
 
 **Cost:** Scan forward for each day: O(n²). Monotonic stack: O(n) time and O(n) space.
+
+| Temperatures | Expected waits | Why |
+| --- | --- | --- |
+| `[73, 74, 71, 75]` | `[1, 2, 1, 0]` | Day 3 resolves days 1 and 2. |
+| `[70, 70]` | `[0, 0]` | Equal is not warmer. |
+| `[75, 74, 73]` | `[0, 0, 0]` | No later warmer day. |
+| `[70, 60, 80]` | `[2, 1, 0]` | One arrival resolves two waiting days. |
+| `[]` | `[]` | No days. |
+
+The `while` loop looks nested, but each of `n` indices enters the stack once and leaves it at most once, so total push/pop work is O(n). At worst a decreasing list leaves all `n` indices waiting: O(n) extra space. Trying every later day for every start is O(n²).
 
 **Pass before moving on:** Prove linear total work by counting pushes and pops, even with the nested loop.
 

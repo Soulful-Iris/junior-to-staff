@@ -23,6 +23,30 @@ Trie example: `a → p → p* → l → e*`. Stars mark complete words; `ap` has
 
 **The idea:** Backtracking tracks the current path, then undoes it. A trie shares prefixes but marks complete words explicitly.
 
+## First, what is a choice you must undo?
+
+Searching a grid for a word means choosing a cell for each next letter. Under the **no reuse** rule, a cell used in the *current path* cannot be used again until that candidate path ends. A `set` of `(row, column)` pairs records used cells. Undo the choice when returning so a different starting cell gets a fair chance.
+
+```python
+used = set()
+cell = (0, 0)
+used.add(cell)                  # choose the A cell for this path
+# Explore a neighboring B cell here; only this path sees A as used.
+used.remove(cell)               # undo before trying another path
+```
+
+For the one-row board `[["A", "B"]]`, `"AB"` succeeds by moving right. `"ABA"` fails: the only A is already used by that path. Marking cells globally without undoing them would make a later independent start incorrectly fail. If you modify the board itself instead of using a set, restore the original letter even when a branch fails.
+
+A **trie** solves a different problem: sharing prefixes across many stored words. Each edge is a character; a separate terminal flag says “a complete word ends here.” The path `a → p` exists for both `"app"` and `"apple"`, but `"ap"` is not a word until its node is marked terminal.
+
+```python
+root = {"children": {}, "end": False}
+root["children"]["a"] = {"children": {}, "end": False}
+# A path can exist even when end is False.
+```
+
+**Read both animations:** in the backtracking visual, watch the mark get removed on exit; in the trie visual, watch several words reuse the same prefix edges while only marked nodes are returned as words. Do not confuse “path currently used” with “dictionary word stored.”
+
 ![Choose, explore, undo, try the next branch](../../../../assets/learning/backtracking.svg)
 
 [Static view](../../../../assets/learning/backtracking-still.svg)
@@ -35,10 +59,21 @@ Trie example: `a → p → p* → l → e*`. Stars mark complete words; `ap` has
 
 1. **5 min:** draw one example and a simple solution.
 2. **25 min:** implement `word_exists, Trie` without the reference.
-3. **10 min:** test Cell reuse; unsuccessful branch followed by success; unchanged board; prefix that is not a full word.
+3. **10 min:** check the exact search and trie examples below.
 4. **5 min:** explain the cost and answer the changed requirement.
 
 **Cost:** Word search: O(rows × cols × 4^L) conservative time, O(L) working space. Trie lookup: O(L).
+
+| Operation / input | Expected | Why |
+| --- | --- | --- |
+| Grid `[["A", "B"]]`, word `"AB"` | `True` | The cells are adjacent. |
+| Same grid, word `"ABA"` | `False` | The one A cell cannot be reused. |
+| Grid `[["A", "B"], ["B", "A"]]`, word `"BA"` | `True` | A failed start must not poison a later one. |
+| Search an existing grid | Grid unchanged afterward | Every branch restores its choice. |
+| Trie stores `"app"`, `"apple"`; search `"ap"` | Prefix exists, exact word absent | A path alone is not terminal. |
+| Trie stores `"app"`, `"apple"`; search `"app"` | Exact word present | The `app` node is terminal and still has children. |
+
+For `r×c` grid cells and word length `L`, a conservative search bound is O(r×c×4^L) branches; path storage is O(L), excluding the input board. A trie lookup follows `L` character edges in O(L) time. Storage for all inserted trie words depends on their total character count, not just the query length.
 
 **Pass before moving on:** Draw the state restored after a failed branch, and distinguish an end marker from a child edge.
 
