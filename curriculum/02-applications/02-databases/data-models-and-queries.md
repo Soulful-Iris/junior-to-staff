@@ -79,9 +79,18 @@ index matching its owner filter and time ordering.
 
 **5. An index is a purchase, and the planner holds the receipt.**
 
+| Index family | Useful access pattern | Does not imply |
+|---|---|---|
+| B-tree | Equality, ranges, matching key order | Every query avoids a sort |
+| Hash | Equality | Range or ordered traversal |
+| GIN | Membership/full-text terms | Arbitrary `ORDER BY` without sorting |
+| GiST | Operator-class-dependent search, such as spatial predicates | One universal ordering |
+| BRIN | Summaries of physically correlated row ranges | Exact row matches without rechecks |
+
 ![One read uses a single sorted index to reach its row in a few page reads; one insert must also write the table and every index on it](../../../assets/diagrams/index-cost.svg)
 
-An index is a sorted copy of chosen columns with pointers back to the rows.
+For the **B-tree index in this example**, think of ordered keys pointing to
+row locations—not a universal definition of every index.
 Reads matching its shape can get faster; inserts maintain the table and its
 applicable indexes, and the copies take disk. An update creates a new row
 version, but PostgreSQL's heap-only tuple (HOT) optimization can avoid new
@@ -120,8 +129,8 @@ until an audit finds it: store integer minor units or a decimal type.
 - Columns are NOT NULL by default; every exception has a written meaning.
 - Each fact lives in one place; every deliberate copy names what keeps it true.
 - Timestamps are UTC instants; money is integer minor units or a decimal type.
-- Each index exists because a measured plan asked for it, and every migration
-  ran forwards and backwards on a copy first.
+- Each index has a measured purpose. Each migration states its compatibility,
+  rollback window, and restore or forward-fix plan; reversibility is not assumed.
 
 Done badly, you see:
 
@@ -212,9 +221,11 @@ the assumption.
    only make sense together, `kill -9` in the gap, restart, count. If half the
    change is visible, those writes were never in one transaction — and now you
    have seen the check go red.
-4. **Run every migration forwards and backwards on a copy.** Row counts and a
-   spot-check query must survive the round trip. A down step that cannot
-   restore what the up step removed means the up step was destructive.
+4. **Test the promised recovery path on a copy.** Compare keys, values and
+   invariants, not just counts. Dropping a populated column then adding it back
+   can preserve row counts while losing every value. A down migration restores
+   schema only unless data recovery is separately demonstrated. For an
+   irreversible step, rehearse restore or forward repair and state the window.
 5. **Attempt the illegal writes from `psql`, not the app.** An item with no
    owner; a duplicate of something you believe unique; NULL into a mandatory
    column. The refusal must come from the database — the migration script, the
@@ -235,8 +246,9 @@ On **P1**, add:
 - The `EXPLAIN ANALYZE` output of the group-list query at that size, saved with
   two sentences: what the planner chose, and why that is fine — or the index
   you added.
-- One additive migration *after* seeding — a `fetched_at` column with a
-  backfill — run forwards and backwards on a copy first.
+- One additive migration after seeding: a `fetched_at` column with a defined
+  backfill and tested old/new-reader compatibility. Unknown historical fetch
+  times stay unknown; do not invent them. Test values after the recovery path.
 
 **Acceptance criteria you can check yourself:**
 
