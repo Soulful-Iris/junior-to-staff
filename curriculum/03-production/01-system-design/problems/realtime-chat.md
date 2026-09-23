@@ -17,9 +17,24 @@ Assume 2 million daily active users, 30,000 peak messages/s, groups of 2–500 m
 
 ## Separate storage from delivery
 
-The message write becomes authoritative when the server persists it and assigns a room sequence or another documented order. WebSockets carry low-latency delivery, presence, and acknowledgements; connections are not the message database. Store `(room_id, sequence, message_id, sender_id, body, created_at)` and an idempotency key scoped to sender and room. If a device misses sequence 19, fetch the gap before advancing its cursor. Delivery may be at least once; the UI deduplicates by message ID. “Read” means the client confirms display according to an explicit policy, not merely that a push reached a gateway.
+The message write becomes authoritative when the server persists it and assigns a room sequence or another documented order. WebSockets carry low-latency delivery, presence, and acknowledgements; connections are not the message database. Store `(room_id, sequence, message_id, sender_id, body, created_at)` and an idempotency key scoped to sender and room. A client must retain the same send-operation ID across retries; a laptop cannot deduplicate a phone's uncertain send unless that pending ID was synchronized. Two independently composed identical texts remain two messages. If a device misses sequence 19, fetch the gap before advancing its cursor. Delivery may be at least once; the UI deduplicates by message ID. “Read” means the client confirms display according to an explicit policy, not merely that a push reached a gateway.
 
 ![Duplicate send, durable commit, missing acknowledgement, and replay](../../../../assets/design-practice/realtime-chat-trace.svg)
+
+### One accepted message
+
+`send(room_id, operation_id, body)` derives sender identity from authentication. A fenced room owner chooses `next_sequence`; one DynamoDB transaction checks its ownership epoch and current counter, advances the counter, and stores the message, `(sender, room, operation_id) → result + request_hash`, and an outbox row. A duplicate key reads the existing result; different content under that key conflicts. If the epoch or sequence check fails, reload or hand off—do not publish the uncommitted message.
+
+| Arrow | Acknowledgement means | Recovery |
+|---|---|---|
+| Sender → room authority | Transaction committed message + sequence + replay + outbox. | Same operation ID recovers an uncertain acknowledgement. |
+| Outbox → fanout queue | Fanout work is queued, not displayed. | Retry relay; consumers deduplicate `(message_id, recipient)`. |
+| Fanout → authorized connection | Delivery attempt only; recheck membership before private bytes leave. | Missing/duplicate broadcast is repaired by authorized history replay. |
+| Device → cursor store | Client has received a contiguous range. | Never advance over a missing sequence; retention expiry requires explicit resync. |
+
+**Failure trace:** commit sequence 18 → owner crashes before broadcasting → outbox relays twice → recipient reconnects at cursor 17. History returns message 18 once in the UI; a stale owner fails its epoch condition.
+
+**Capacity example:** 30,000 messages/s × 50 online recipients = **1.5 million delivery attempts/s**, excluding retries. If accepted-to-queued takes 50 ms, queueing 100 ms and live delivery 150 ms, the target is 300 ms for online devices, not for offline readers. Bound queue age and per-room fanout; retained history, not infinite live buffering, handles slow clients.
 
 ## Make the boxes accountable
 
