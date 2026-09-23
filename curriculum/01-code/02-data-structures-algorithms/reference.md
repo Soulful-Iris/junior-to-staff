@@ -12,6 +12,22 @@ Use [Python reference implementations](algorithms.py) and [TypeScript implementa
 
 Read [why each pattern works](pattern-notes.md) for the invariants, pitfalls, and language-specific costs.
 
+## Shared variants are not the 42 standalone bundles
+
+The [standalone registry](../../../indexes/problem-bank.json) identifies each
+bundle's own brief, implementation and isolated tests. This page describes the
+separate shared helpers; passing their tests does not validate the bundles.
+
+| Shared helper | Standalone contract |
+|---|---|
+| `longest_unique` returns a length | Problem 04 returns a window/slice |
+| `LRU` uses `None` for a miss | The manual LRU bundle raises `KeyError` |
+| `lower_bound` assumes sorted input | Problem 11 validates ordering first: O(n) overall |
+
+Read each bundle's input, empty and invalid-case contract. Python accepting extra
+values does not itself prove an algorithm wrong; promised rejection behavior
+must still be implemented and tested.
+
 ## Python problem set
 
 Hash operations below are expected average O(1). Space includes copied input and working structures, excluding only the caller's original input. `n` is input length; `u` unique items; `V/E` graph vertices/edges; `A` target amount; `m` coin count; `L` word length.
