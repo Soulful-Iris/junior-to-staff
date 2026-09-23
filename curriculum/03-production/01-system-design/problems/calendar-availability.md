@@ -17,7 +17,37 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 ## Think from the contract to the boxes
 
-Store instants in UTC plus the original time-zone identifier and recurrence rule. Use interval overlap semantics `[start,end)` so adjacent meetings do not conflict. A precomputed free/busy view accelerates reads, but booking must check authoritative intervals at commit. Make invitations versioned events; a delayed response cannot resurrect a canceled meeting.
+Store each occurrence as UTC instants, but retain the recurring series' **local wall-time anchor**, IANA zone, recurrence rule, version and exceptions. Expand future occurrences in that zone, not by repeatedly adding 24 hours in UTC. This exercise skips nonexistent spring-forward times and chooses the earlier offset for ambiguous fall-back times; expose that policy to the organizer. Use interval overlap semantics `[start,end)` so adjacent meetings do not conflict. A precomputed free/busy view accelerates reads, but booking must check authoritative intervals at commit. Make invitations versioned events; a delayed response cannot resurrect a canceled meeting.
+
+### One room, one conflict authority
+
+`POST /rooms/{room}/bookings` includes an idempotency key, start and end; identity and room permission are server-checked. The PostgreSQL authority commits booking, replay result and outbox together. For a disposable PostgreSQL database, the core constraint is:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE TABLE room_booking (
+  booking_id text PRIMARY KEY, room_id text NOT NULL,
+  starts_at timestamptz NOT NULL, ends_at timestamptz NOT NULL,
+  cancelled boolean NOT NULL DEFAULT false,
+  CHECK (starts_at < ends_at),
+  EXCLUDE USING gist (room_id WITH =,
+    tstzrange(starts_at, ends_at, '[)') WITH &&)
+    WHERE (NOT cancelled)
+);
+```
+
+Concurrent overlaps conflict at this constraint; a preceding availability SELECT is only a hint. Cancel/update uses a version condition in the same authority. Event changes and outbox rows commit together; the relay sends to EventBridge/SQS and consumers deduplicate `(event_id, version)`. EventBridge routes events—it cannot make a separate database write and publish atomic.
+
+| Trace to test | Expected result |
+|---|---|
+| Insert 09:00–10:00 and 09:30–10:30 concurrently | Only one active booking commits. |
+| Insert 09:00–10:00 and 10:00–11:00 | Both commit: half-open intervals are adjacent. |
+| Cancellation races with a new booking | Outcome follows commit order; no overlapping active pair. |
+| Replica still shows an old free slot | Final write rechecks the primary constraint; strict free/busy reads use the primary. |
+| Crash after database commit, before event send | Outbox relay resumes; no missing accepted event, duplicates tolerated. |
+| A 09:00 recurring meeting crosses DST | It remains 09:00 local under the declared expansion policy. |
+
+This is a schema and test schedule to execute, not evidence that PostgreSQL or AWS was deployed.
 
 **First diagram:** Draw event authority, free/busy projection, notification delivery, and a conflict check using the exact interval boundary.
 
@@ -26,9 +56,9 @@ Store instants in UTC plus the original time-zone identifier and recurrence rule
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon API Gateway** / calendar API entry | Authenticate calendar reads and writes. | ALB + ECS for long-lived sync clients. |
-| **Amazon Aurora PostgreSQL** / event + room store | Range constraints/transactions prevent conflicting reservations. | DynamoDB with carefully partitioned per-calendar transactions. |
-| **Amazon ElastiCache** / free/busy cache | Speed repeated availability reads. | Aurora read replicas when freshness can remain transactional. |
-| **Amazon EventBridge** / change event router | Publish event changes to notification and sync consumers. | Transactional outbox + SQS for tighter publish recovery. |
+| **Amazon Aurora PostgreSQL** / event + room store | Range constraints/transactions prevent conflicting reservations. | DynamoDB with one fenced per-room decision owner, or a fixed-slot model that transactionally claims every slot; arbitrary overlap is not a conditional item check. |
+| **Amazon ElastiCache** / free/busy cache | Speed repeated availability reads. | Read replicas for explicitly stale views; primary or a verified watermark for strict reads. |
+| **Amazon EventBridge** / change event router | Route changes delivered by the database outbox relay. | Outbox relay → SQS when a queue is enough; routing and atomic publication are different jobs. |
 | **Amazon SQS** / notification queue | Retry mail/push without blocking calendar writes. | EventBridge Scheduler for delayed reminders. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
