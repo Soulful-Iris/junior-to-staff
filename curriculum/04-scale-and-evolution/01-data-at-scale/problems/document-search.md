@@ -15,11 +15,20 @@ Assume 30 million documents, 15,000 updates/minute, and 3,000 search requests/s.
 
 ## Give each copy a job
 
-The source store owns document content and version; an index owns searchable tokens and perhaps embeddings; an authorization source owns current read rights. Updates flow through a durable change stream and idempotent versioned indexing. A keyword index retrieves exact terms; semantic/vector retrieval helps with paraphrases but changes ranking and cost. Merge candidates and rank them after checking authorization for **each result before exposing title or snippet**. Index-time ACL filtering alone can leave a revocation gap. Keep document and ACL versions in cache keys or revalidate at read time according to the one-minute contract.
+The source store owns document content and version; an index owns searchable tokens and perhaps embeddings; an authorization source owns current read rights. Updates flow through a durable change stream and idempotent versioned indexing. A keyword index retrieves exact terms; semantic/vector retrieval helps with paraphrases but changes ranking and cost. Merge candidates and rank them after checking authorization for **each result before exposing title or snippet**. Index-time ACL filtering alone can leave a revocation gap. Cache keys may include document/ACL versions, but those versions must come from
+trusted current permission state. A stale index or caller-supplied version cannot
+select a formerly authorized cache entry. Revalidate membership and object read
+permission before returning any cached title, snippet or content.
 
 ![Twenty search hits pass through the current access decision before snippets are shown](../../../../assets/design-practice/document-search-deep.svg)
 
-The search index can be two minutes behind and still meet its freshness target. The authorization check has the stricter one-minute revocation rule. If ACL lookup fails, the design must choose an explicit unavailable/partial response without leaking snippets.
+The search index can be two minutes behind and still meet its freshness target. The authorization check has the stricter one-minute revocation rule. This baseline uses a current authoritative permission check on every response;
+if it cannot complete, return unavailable and no private titles/snippets. An
+alternative permission cache must keep its entire staleness budget below one
+minute, including propagation and clock uncertainty—not just set a 60-second TTL.
+Route direct downloads and exports through the same check, or explicitly bound
+existing bearer URLs by their enforced expiry. Pause indexing, warm every route,
+revoke at 12:00 and verify the 12:01 promise independently of search freshness.
 
 ![Document edit and permission revocation race with index refresh](../../../../assets/design-practice/document-search-trace.svg)
 
