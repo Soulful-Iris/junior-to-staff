@@ -2,12 +2,12 @@
 
 > **Interviewer:** “A new checkout path works in staging. Release it to 5% of customers, then 50%, then everyone. A billing bug appears only after a full day. How do you make activation, observation, and rollback safe?”
 
-**Your contract.** Use a stable customer assignment (not a fresh coin toss per request), a reversible old path, and a meaningful error signal. A percentage rollout alone cannot catch a bug that appears after a daily job runs. This is a constructed exercise.
+**Your contract.** Use a stable customer assignment (not a fresh coin toss per request), a compatible control path during the rollback window, and a meaningful error signal. A percentage rollout alone cannot catch a bug that appears after a daily job runs. This is a constructed exercise.
 
 | Situation | Expected behavior |
 |---|---|
-| One customer makes 20 requests at 5% | All requests take the same assigned path for this version |
-| Failure starts at 50% | Stop expansion and revert flag; confirm affected requests drain |
+| One customer makes 20 requests at 5% | All requests take the same assigned path for this assignment salt |
+| Failure starts at 50% | Stop new exposure after propagation; drain/cancel admitted work by contract and repair committed effects |
 | Batch job runs 24 hours after 100% | Bake time or delayed gate catches the regression; recovery plan addresses writes already made |
 | Control path schema was removed | Toggle cannot restore behavior; migration sequencing must have kept both paths compatible |
 
@@ -15,7 +15,35 @@
 
 ## Decide what the flag actually protects
 
-Hash `(stable account ID, experiment/flag version)` to keep assignment stable; specify what happens when customer membership changes. Separate deploying compatible code from activating the behavior. Store a validated configuration version, observe per-cohort error and conversion rates, and rollback on a **guardrail** signal. A flag reversal is not a data rollback: if the new path writes incompatible records, use expand–migrate–contract and a compensating workflow. Account for an alarm with no data before relying on it as a guardrail.
+Hash `(stable account ID, assignment salt)` into a fixed bucket. **Keep the salt unchanged across 5% → 50% → 100%**; the configuration revision changes the threshold, not the assignment. A new salt means an intentional new experiment. Use the trusted account identity rather than a browser-selected ID; define how account merges move membership. Separate deploying compatible code from activating the behavior. Store a validated configuration version, observe per-cohort error and conversion rates, and rollback on a **guardrail** signal. A flag reversal is not a data rollback: if the new path writes incompatible records, use expand–migrate–contract and a compensating workflow. Account for an alarm with no data before relying on it as a guardrail.
+
+### A cohort you can reproduce
+
+This is a routing bucket, not an authorization or randomness primitive. The
+same account and salt map to the same integer on every runtime.
+
+```python
+import hashlib
+import json
+
+def bucket(account_id: str, assignment_salt: str) -> int:
+    payload = json.dumps([account_id, assignment_salt],
+                         ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return int.from_bytes(hashlib.sha256(payload).digest()[:8], "big") % 10000
+
+accounts = [f"account-{i}" for i in range(1000)]
+assigned = {a: bucket(a, "checkout-A") for a in accounts}
+cohort_5 = {a for a, value in assigned.items() if value < 500}
+cohort_50 = {a for a, value in assigned.items() if value < 5000}
+assert cohort_5 and cohort_5 <= cohort_50
+assert all(bucket(a, "checkout-A") == assigned[a] for a in accounts)
+assert all(0 <= value < 10000 for value in assigned.values())
+assert any(bucket(a, "checkout-B") != assigned[a] for a in accounts)
+```
+
+A 5% threshold is approximate over a finite population, not a promise of exactly
+50 of these 1,000 accounts. Rolling back to 0% changes admission, not bucket
+identity or already committed billing effects.
 
 ![Named AWS boxes pair a gradual config rollout with independent telemetry](../../../../assets/design-next/feature-rollout-aws.svg)
 
