@@ -398,12 +398,12 @@ experiment, `kill -9` between two writes that belong together.
 
 **The thought process**
 
-Build the bug before the fix, because a fix for a failure you have never seen
-is a belief. Read the count, sleep a hundred milliseconds, write it back: the
-sleep widens the window until two workers reliably read the same value and one
-update vanishes. Only when it fails every round do you have an instrument — a
-race you can only sometimes reproduce proves nothing later, when it merely
-seems fixed.
+Use a barrier-controlled schedule for the naive read/compute/write version:
+let both connections read 3, release both writers, and observe the final 4
+instead of 5. A sleep may expose the race, but it does not establish ordering.
+Test against the database and isolation level named by the exercise. A correct
+post-hoc contract test remains useful; the deliberately broken version is an
+additional sensitivity check.
 
 Now the decision the folk cure skips: understanding why "wrap it in a
 transaction" does not fix this. Under READ COMMITTED — the default — two
@@ -430,25 +430,26 @@ Without a transaction the two tables disagree, and no error anywhere says so.
 **1. The bug, made reliable.**
 
 ```
-Add a read_count column on items, updated read-modify-write in the app
-with a 100ms sleep between the read and the write. Then write a harness:
-two workers mark the same item read concurrently, 100 rounds, report
-expected versus actual count. I want this to FAIL reliably first.
+Use two database connections. In the naive version, gate both readers after
+reading the same count, then release the writes. Assert the lost increment.
+For the fixed version, start both operations together and assert both increments
+commit. Do not wait for a second read while the first transaction holds the row lock.
 ```
 
-If it passes, the window is too narrow — widen the sleep. A bug you cannot
-reproduce on demand is one you cannot prove fixed.
+Record the actual schedule. A test that never creates the intended overlap is
+not evidence for this race; inspect the gates rather than increasing a sleep.
 
 **2. The fix, twice, named.**
 
 ```
-Fix it without touching the harness, twice: once as a single atomic
+Keep the expected final count unchanged; adapt scheduling gates to avoid
+deadlocking a correctly locked implementation. Fix it twice: once as a single atomic
 UPDATE, once with SELECT ... FOR UPDATE. Name the anomaly, explain why
 READ COMMITTED permits it, and say when each fix is the right one.
 ```
 
-Both versions must go a hundred for a hundred. "Without touching the harness"
-is the constraint that stops the test being adjusted until it passes.
+Both versions must preserve both increments. Review changed assertions separately
+from necessary changes to test orchestration; never weaken the expected result.
 
 **3. The other promise.**
 
