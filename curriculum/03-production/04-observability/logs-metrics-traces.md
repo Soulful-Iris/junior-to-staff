@@ -135,16 +135,21 @@ with a real request rather than relying on a project's maturity label.
 ### The cardinality trap
 
 A metric is not one thing in storage. It is one **time series per combination
-of label values**, and every new label multiplies every series that already
-exists.
+of label values** actually observed. Multiplying each label’s possible values
+gives a potential Cartesian-product bound, not necessarily the active count.
+For example, 4 methods × 20 routes × 5 status classes is at most 400 combinations;
+if only 63 combinations occur in the active window, observe 63, not 400.
 
-![One metric multiplying into time series as labels are added: four methods make 4 series, twenty routes make 80, five status classes make 400, and a customer id with ten thousand values makes 4,000,000 — a bar running off the chart](../../../assets/diagrams/cardinality-explosion.svg)
+![Potential series combinations: 4 methods × 20 routes × 5 status classes × 10,000 customers = 4,000,000. Actual active combinations must be measured](../../../assets/diagrams/cardinality-explosion.svg)
 
 Storage — and most vendor bills — scale with active series, not traffic, which
 is how one deploy adding one label doubles a bill overnight. Metric labels are
 for **bounded** dimensions you group by: method, route, status class. Anything
-unbounded — user id, request id, raw URL — belongs on spans and logs: events
-you sample and query, not series you multiply.
+unbounded — user ID, request ID, raw URL — must not become an unbounded metric
+dimension. Where diagnosis justifies it, use permitted pseudonymous identifiers
+on spans/logs with explicit indexing, access, sampling and retention controls.
+Never record secrets; strip sensitive URL parameters. Diagnostic attributes have
+a storage/query cost too, but do not automatically create one metric series per ID.
 
 The counter-argument, wide events ("observability 2.0"): one wide structured
 event per request, dozens of fields, in a columnar store; metrics and traces
@@ -240,8 +245,8 @@ one request, so make the work demonstrate it.
 link to the producer's trace id. That hop is the one automatic instrumentation
 misses most: the context must ride inside the message.
 
-*Push back on:* any metric labelled `user_id`, `request_id` or raw URL — those
-belong on spans; errors logged without an id; a hand-rolled "portability
+*Push back on:* unbounded metric labels; diagnostic fields without privacy and
+retention controls; request errors without correlation; a hand-rolled "portability
 wrapper" around a vendor SDK — the vendor SDK with extra steps.
 
 **Request 2 — a tail-sampling design that must show its topology**

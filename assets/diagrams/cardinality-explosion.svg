@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 456" width="760" height="456" role="img" aria-label="One metric multiplying into time series as labels are added: with no labels, one series. A method label with four values makes 4. A route label with twenty values makes 80. A status class label with five values makes 400. A customer id label with ten thousand values makes 4,000,000 — drawn as a bar that runs off the edge, because at the same dot density it would cover about 565 pages this size.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 456" width="760" height="456" role="img" aria-label="Potential label-combination bound, not measured active series. Four methods times twenty routes times five statuses times ten thousand customers is four million combinations.">
   <rect width="760" height="456" rx="10" fill="#faf9f7"/>
 
   <defs>

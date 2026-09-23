@@ -15,7 +15,7 @@ Constructed exercise. Assume 8,000 requests/minute, 4% of requests wait for a da
 
 ## Partition elapsed time
 
-At the ingress, record a trace ID and deadline. Propagate both through API, database calls, and provider requests. Tag spans with operation and status, not raw secrets or unbounded user IDs. Compare end-to-end latency histograms by endpoint and tenant class to selected exemplar traces. Distinguish pool wait, network, server time, retries, and time spent waiting in a queue. An average of 40 ms from a provider does not explain your 9-second P99 or exonerate your retry policy.
+At the ingress, record a trace ID and deadline. Propagate both through API, database calls, and provider requests. Use bounded metric labels such as route and status class. Spans may include a permitted pseudonymous tenant/user ID when diagnosis requires it; define indexing, sampling, retention and access controls. Never record secrets or raw sensitive URLs. Compare end-to-end latency histograms by endpoint and tenant class to selected exemplar traces. Distinguish pool wait, network, server time, retries, and time spent waiting in a queue. An average of 40 ms from a provider does not explain your 9-second P99 or exonerate your retry policy.
 
 ![The same user request accrues wait, work, and retries until the deadline](../../../../assets/design-practice/slow-request-trace.svg)
 
