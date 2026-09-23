@@ -1,5 +1,24 @@
 # Maintain the visuals
 
+## Python reference gate
+
+`python scripts/check_curriculum.py --report /tmp/python-results.json` runs every
+suite registered in `indexes/python-suites.json`, including AI examples and these
+tool tests. Each directory runs in a fresh process. The manifest records runtime,
+working directory, timeout and required/skip policy (shared defaults are explicit).
+Add a new test directory to the manifest; an absent or unregistered suite fails.
+
+Reports distinguish executed tests, skips with reasons, failures, errors,
+expected failures and unexpected successes. Required zero-test or all-skipped
+suites fail; partial optional adapter skips stay visible. SDK adapter mocks are
+not live AWS evidence. Browser, TypeScript, real PostgreSQL and visual/cloud
+checks remain separate. `--coding-only` selects the problem registry subset.
+
+The report's `source_commit` identifies checked-out history; before-commit runs
+must also retain the delivery tree receipt. Final clean-checkout evidence should
+be rerun at the published commit rather than attributed to an earlier revision.
+
+
 ```bash
 python scripts/render_visuals.py
 python scripts/check_learning.py

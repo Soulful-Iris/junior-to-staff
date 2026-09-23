@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "discovery_roots": [
+    "curriculum",
+    "examples",
+    "scripts/tests"
+  ],
+  "defaults": {
+    "runtime": "python",
+    "kind": "directory",
+    "cwd": ".",
+    "timeout_seconds": 90,
+    "required": true,
+    "skip_policy": "allow_partial"
+  },
+  "suites": [
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/01-two-sum"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/02-valid-anagram"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/03-group-anagrams"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/04-longest-unique-window"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/05-minimum-covering-window"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/06-subarray-sum-count"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/07-product-except-self"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/08-longest-consecutive"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/09-merge-intervals"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/10-meeting-room-capacity"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/11-binary-search-boundary"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/12-rotated-array-search"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/13-shipping-capacity"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/19-lowest-common-ancestor"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/20-tree-diameter"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/21-dependency-order"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/22-word-ladder"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/23-disjoint-set-connectivity"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/24-grid-shortest-path"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/25-weighted-shortest-path"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/26-top-k-stream"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/27-merge-k-streams"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/30-trie-autocomplete"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/31-combination-search"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/32-word-search"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/33-coin-change"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/34-longest-increasing-subsequence"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/35-edit-distance"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/36-decode-ways"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/37-daily-temperatures"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/38-largest-histogram-rectangle"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/39-policy-expression-evaluator"
+    },
+    {
+      "path": "curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median"
+    },
+    {
+      "path": "curriculum/02-applications/01-backend/labs/api-contract"
+    },
+    {
+      "path": "curriculum/02-applications/01-backend/labs/bounded-executor"
+    },
+    {
+      "path": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue"
+    },
+    {
+      "path": "curriculum/02-applications/02-databases/labs/postgresql"
+    },
+    {
+      "path": "curriculum/02-applications/03-frontend/labs/bookmark-editor/tests"
+    },
+    {
+      "path": "curriculum/02-applications/04-testing/labs/importer"
+    },
+    {
+      "path": "curriculum/02-applications/04-testing/labs/importer/review"
+    },
+    {
+      "path": "curriculum/03-production/03-infrastructure/aws/labs/job-pipeline"
+    },
+    {
+      "path": "curriculum/03-production/05-reliability/labs/reliability"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/01-data-at-scale/labs/cache-consistency"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/28-manual-lru-cache"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/29-expiring-key-value-store"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations"
+    },
+    {
+      "path": "curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration"
+    },
+    {
+      "path": "examples/ai-systems"
+    },
+    {
+      "path": "scripts/tests"
+    },
+    {
+      "path": "practice/assessor/heldback_importer.py",
+      "kind": "file"
+    }
+  ]
+}
