@@ -40,9 +40,12 @@ jobs:
               selected = []
               for item in data['selection']:
                   batch = source['batches'][item['index']]
-                  batch['tree'] = item['tree']
+                  batch['tree'] = item.get('tree', batch.get('tree'))
+                  batch['tests'] = item.get('tests', batch.get('tests', []))
                   selected.append(batch)
-              data = {'base': data['base'], 'batches': selected}
+              data = {'base': data['base'], 'batches': selected,
+                      'allow_unrelated': data.get('allow_unrelated', False),
+                      'prepare': data.get('prepare', [])}
           Path(os.environ['RUNNER_TEMP'], 'audit-delivery', 'batch.json').write_text(json.dumps(data))
           PY
       - name: Apply exact reviewed edits, test, then fast-forward main per chapter
