@@ -58,181 +58,64 @@ flowchart TD
 Lead depth is the rule, migration sequence, ownership, and feedback mechanism.
 The number of teams adopting a tool is insufficient if their delivery worsens.
 
-## The one-liner
+## Diagnosis → choices → coordinated action
 
-Strategy is not a plan and it is not a wish. It is the small set of decisions
-you have made in advance so that a hundred later decisions do not each have to
-be argued from scratch. One useful input is recurring decisions. New product direction, risk or other
-future constraints can also justify strategy before a historical pattern exists.
+A technical strategy connects a diagnosed constraint to a small set of guiding
+choices and coherent actions. Insight can come from repeated decisions,
+anticipated scale, a product direction, a contractual deadline or a new threat.
+The origin does not substitute for evidence.
 
-## The failure it prevents
+![One bottom-up practice exercise: synthesize decisions into policies, then examine their longer-term consequences. Counts are illustrative.](../../../assets/diagrams/strategy-ladder.svg)
 
-An organisation without a technical strategy does not notice it is missing one.
-What it notices is that everything takes longer than it should.
+Reading several old design documents is **one useful synthesis exercise**, not a
+prerequisite. Five unrelated documents do not automatically make a strategy, and
+a future constraint can justify action before any such documents exist.
 
-Every new service picks its own datastore, so there are five. Every team solves
-authentication slightly differently, so there are five of those too. Somebody
-proposes a shared platform; it is half-built and abandoned because nobody
-decided it was the way. Each individual decision was locally defensible and made
-by a competent person, and the sum is an organisation that cannot move because
-every move requires re-litigating three things.
+## Worked example: a second operating region
 
-The other failure is the opposite and looks more impressive: a strategy document
-written top-down, full of ambition, that nobody uses. It describes a future
-nobody can act on from where they are standing. It gets referenced in
-presentations and never in a code review, which is the only place it would have
-mattered.
+The product will need a second region. Assume, for this exercise, that existing
+writers and recovery procedures are tied to one region.
 
-## The mental model
+| Strategy element | Concrete choice |
+|---|---|
+| Diagnosis | A regional outage currently leaves no exercised write-recovery path |
+| Guiding policy | Establish one fenced write authority; replicas alone are not a failover protocol |
+| Actions | Identify writers, define recovery objectives, rehearse authority transfer, measure data loss and restore time |
+| Non-investment | Do not add active-active writes before their conflict contract is justified |
+| Ownership | Named service owners and a coordinator for cross-service recovery |
+| Revisit | Failed rehearsal, changed availability requirement or a scheduled review |
 
-This exercise uses a bottom-up synthesis method. It is useful, not mandatory.
+This may be justified by a future requirement even with no historical debate.
+Conversely, “standardize on database X” is not enough without explaining the
+constraint, adoption work, exceptions and expected result.
 
-![Strategy is synthesised upward from real decisions: five design docs make a strategy, five strategies extrapolated make a vision](../../../assets/diagrams/strategy-ladder.svg)
+## Make the default useful, not absolute
 
-**Compare a few design docs.** Five is an exercise size, not a prerequisite. Real ones, about real decisions, each made
-because something actually had to be built. Then read them together and look for
-the decision you keep making — the same trade-off appearing in three of them,
-argued each time from nothing.
+A shared platform has operating and migration costs. State which workloads fit,
+what support it provides and how a team can request a measured exception. An
+exception needs an owner; the default needs a maintainer. Adoption counts alone
+do not prove improved delivery or reliability.
 
-**Turn the recurring constraint into a guiding choice and coherent actions.** Write it down once, with its
-rationale, so the next three documents can cite it instead of reopening it. A
-strategy is a decision made once and reused, and its value is precisely the
-arguments it prevents.
+Compare before and after using matched workloads and explicit outcomes. A policy
+can reduce one risk while increasing another. Record opportunity cost and
+uncertainty rather than manufacturing a loser just to demonstrate “trade-offs.”
 
-**Explore the future consequences of those choices.** A vision needs explicit
-assumptions; extrapolating several strategies is one way to develop it.
+## Practice and acceptance
 
-And the test, which is the line most worth remembering: **a great vision is
-usually so obvious that it bores.** If yours is exciting, it is probably a
-proposal with no consensus behind it yet.
+Start with either a recurring decision from P1–P4 **or** a justified future
+constraint. Write a short diagnosis, policy, actions, exclusions, owners and
+review trigger. Ask someone to apply it to a new design and to one legitimate
+exception. Ambiguous answers identify missing scope, not a need for more slogans.
 
-*(Method from Larson's published writing on engineering strategy, read
-2026-09-21.)*
+A sound review may approve the strategy unchanged. A plain vision can be
+ambitious or unsurprising; excitement and boredom are not correctness tests.
 
-### What makes a strategy real
+**Words to keep:** *diagnosis* identifies the constraint; *policy* guides choices;
+*actions* make it operational; *vision* describes a desired future; *review
+trigger* states when to reconsider. A roadmap schedules work; it does not by
+itself explain why that work addresses the constraint.
 
-- It is **opinionated**. It picks. A document that says "consider the
-  trade-offs" has delegated the decision straight back.
-- The **rationale is visible**, so someone can tell whether it still applies.
-  Strategies expire, and the only way anybody notices is if the reasoning is on
-  the page next to the ruling.
-- It is **cited**. If nobody references it in a design doc or a review, it is not
-  operating, whatever it says.
-
-### The thing that makes strategy pay more than it used to
-
-DORA's 2025 research found that AI acts as an **amplifier** of existing
-organisational quality: the returns come from platform quality and workflow
-clarity rather than from the tools. Which means the classic, unglamorous staff
-work — making the paved road good, making the decisions clear — is now the thing
-that decides whether the rest of it helps or hurts.
-
-
-
-## What good looks like
-
-- You can name the three decisions your organisation has already made, and so can everyone else.
-- A design doc can say "per the datastore strategy" and stop arguing.
-- The rationale is written next to the ruling, so it can be revisited rather than resented.
-- There is a stated cost. Every real strategy makes something worse on purpose.
-- It explains the diagnosis, evidence, guiding choices, coherent actions, trade-offs, owner and review trigger, whatever its source.
-
-Done badly:
-
-- A strategy that forbids without saying why, which gets routed around within a quarter.
-- A vision statement that is a list of adjectives.
-- Written by one person in isolation and announced, so its first contact with reality is resistance.
-- No expiry, no review, so it outlives its reasoning and becomes folklore.
-- So broad it cannot be violated, which means it cannot be followed either.
-
-## Ask Claude for this
-
-**Request 1 — find the recurring decision**
-
-```
-Here are five design documents from the last year.
-
-Find the decisions that appear in more than one of them, argued from
-scratch each time. For each, tell me whether the documents reached the
-same conclusion or different ones.
-
-Where they disagreed, that disagreement is what I most want to see.
-```
-
-*Why it is asked that way:* this is a reading task at a scale that is genuinely
-tedious for a person and easy for a model, and the output is the raw material of
-a strategy. The disagreements matter most, because a decision being made
-differently in different places is the exact cost a strategy removes.
-
-*What you should get back:* two or three recurring trade-offs, with the places
-they were resolved inconsistently. If you get a summary of each document
-separately, the synthesis did not happen; ask again for what is *common*.
-
-**Request 2 — make it cost something**
-
-```
-Here is my draft strategy. Tell me what it makes WORSE, and for whom.
-
-If your answer is that it makes nothing worse, then it is not a strategy,
-it is a preference. Say that instead.
-```
-
-*Why:* a strategy that only has upsides has not chosen anything. Forcing the
-cost into the open both improves the document and tells you whether you have
-actually decided.
-
-**Request 3 — the boring test**
-
-```
-Rewrite this vision as plainly as possible. Remove every word that is
-there to make it sound ambitious.
-
-Then tell me whether what remains is obvious. If it is, say so — that is
-the result I want, not a problem to fix.
-```
-
-*Why:* the instruction in the last line is doing the work, because a model will
-otherwise try to make your vision sound better, which is the opposite of the
-test.
-
-## How you would know it is wrong
-
-1. **Search your design docs for citations of it.** Zero citations after a quarter means it is not operating.
-2. **Ask three engineers to state the strategy from memory.** If you get three different answers, it is not written clearly enough to be followed.
-3. **Find the decision it should have prevented.** If somebody re-argued it anyway, ask whether they knew, disagreed, or could not find it. Those are three different fixes.
-4. **Check whether the rationale is still true.** The constraint that produced the strategy may have gone. Nobody will notice unless the reasoning is on the page.
-5. **Try to violate it in a pull request.** If nothing and nobody objects, it is advisory, and advisory strategy is a description of what people already felt like doing.
-6. **Read it a year later.** Did the thing that actually happened appear anywhere in it? This is the only calibration you will ever get, and it is worth collecting.
-
-## Your slice of the project
-
-For **P5**, after the design doc from [Writing that decides](design-documents.md):
-
-- Read your own document alongside the decisions you made in P1 through P4. Find one decision you have now made **three times** — how errors surface, how state is stored, where validation lives, what gets retried.
-- Write it once, in half a page, with the rationale and what it costs.
-- Then cite it in the P5 design doc, and notice whether citing it actually shortened the argument.
-
-**Acceptance criteria:** the half page names a decision, gives a reason, states a
-cost, and is specific enough that somebody could violate it and know they had.
-
-## Words you now own
-
-- **strategy** — a decision made once, with its reasoning, so it is not re-argued each time.
-- **vision** — the extrapolation of your strategies two or three years out. Boring is the target.
-- **rationale** — why the decision was made. Without it a strategy cannot be revisited, only obeyed or ignored.
-- **paved road** — the supported way of doing a thing, made easy enough that leaving it is a choice.
-- **amplifier** — DORA's framing of AI: it multiplies whatever your organisation already is.
-- **synthesis** — reading several real decisions together and finding the one underneath them.
-- **expiry** — the moment a strategy's reasoning stops being true. Rarely noticed, usually late.
-
----
-
-**Not covered here:** organisational politics, which is real and is not a
-document problem. And roadmaps, which are plans rather than strategy — a
-roadmap tells you what is being built and when, a strategy tells you which
-arguments you are no longer having.
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
+[Writing that decides](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
 
 ## Draw it from memory · Make strategy a constraint on real decisions
 
@@ -249,4 +132,4 @@ flowchart TD
   Review --> Diagnosis
 ```
 
-**Redraw challenge:** Name the attractive project this strategy says no to. If there is none, sharpen the policy.
+**Redraw challenge:** Name a supported case and a case outside this policy’s scope. Explain which constraint separates them.
