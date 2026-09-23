@@ -93,7 +93,8 @@ advance what would make it fail, you have not written a test, you have written a
 script that runs.
 
 **2. Tests trade speed for realism.** The closer a test is to the real system,
-the more truth it tells you and the slower and flakier it is.
+the more real boundaries it can exercise, usually with more setup and runtime.
+Flakiness is not an unavoidable feature: control clocks, data and ordering.
 
 ![Tests trade speed for truth: unit tests are fast and are a model of the system; end-to-end tests are slow and are the system itself](../../../assets/diagrams/test-tradeoff.svg)
 
@@ -104,7 +105,8 @@ everything above it is a model of the system rather than the system.
 
 **3. The thing you are really testing is the change, not the code.** Before a
 test is worth keeping, ask: what edit would make this go red? If the honest
-answer is "almost none", delete it.
+answer is unclear, inspect its assertion and supported input domain before
+keeping or deleting it. A narrow boundary test may catch just one important bug.
 
 
 
@@ -120,8 +122,8 @@ answer is "almost none", delete it.
 Done badly, you see:
 
 - A suite that is green and a product that is broken.
-- Tests that assert what the code currently does, written after the fact, so they
-  can only ever fail when someone changes the code *on purpose*.
+- Tests that merely copy implementation assumptions rather than the contract.
+  Writing a test after implementation is fine when its expected result is independent.
 - A mocked database, so the test passes and the real query has a typo in it.
 - One enormous test that sets up half the app and asserts twelve things, so when
   it fails you learn nothing.
@@ -155,9 +157,16 @@ one is visibly worthless on the page.
 them one to one. If you get five tests that all check the happy path with
 different numbers, the list was skipped.
 
-*Push back on:* any test that asserts the implementation ("calls `save()` once")
-rather than the outcome ("the row is in the table afterwards"). Those break every
-time you refactor and catch nothing.
+Prefer observable behavior, but match the assertion to the contract:
+
+| Test | Defect it can expose | Boundary it does not cover |
+|---|---|---|
+| Provider called once for one accepted charge | Accidental duplicate invocation | Real provider settlement |
+| Row exists after a real SQL transaction | Query typo or wrong persistence | External side effects |
+| `x + 0` becomes `x` for integer inputs | Equivalent mutant: survival is expected | No changed behavior to detect |
+
+A mock call-count assertion is useful when invocation count is itself the promise.
+It is brittle when it only encodes an incidental implementation detail.
 
 **Request 2 — proving the suite can actually fail**
 
@@ -170,12 +179,12 @@ If any of the three still passes with the bug in place, tell me that
 plainly and explain why.
 ```
 
-*Why:* this is the only way to find out whether the tests bite. It is cheap, it
-takes one command, and almost nobody does it.
+*Why:* a known, non-equivalent defect is a useful negative control. Inject it in
+a disposable copy and confirm the intended assertion—not an unrelated crash—fails.
 
-*What you should get back:* three red runs. If something stays green, you have
-just found a test that has never been able to fail, and that is a better finding
-than three passing tests.
+*What you should get back:* results and an explanation of any survivor. Was the
+mutation applied and executed? Did it change supported behavior, or is it
+equivalent? Only then decide whether an assertion or input case is missing.
 
 **Request 3 — the test for the bug you just hit**
 
@@ -186,16 +195,17 @@ First write the test that reproduces it and watch it fail. Show me the
 failure output. Only then fix the code.
 ```
 
-*Why:* a fix without a failing test first is a guess that happened to work. You
-have no evidence the fix addresses the bug rather than moving it.
+*Why:* a red reproduction followed by a green repair is strong regression
+evidence. Test chronology alone is not the criterion: the expected result must
+come from the contract, and the test must exercise the relevant boundary.
 
 ## How you would know it is wrong
 
 The checks for this topic, each one capable of going red:
 
 1. **Break it on purpose.** Change a `>` to a `>=`, delete a line, invert a
-   boolean. The suite must fail. If it does not, the coverage over that line is
-   decorative.
+   boolean in a disposable copy. A behavior-changing mutation in the tested
+   domain should fail; investigate equivalent and unexecuted mutants separately.
 2. **Read the summary line properly.** `21 passed, 10 errors` is not green. A
    skipped test and a passing test look the same at a glance and mean opposite
    things. Count them.
@@ -237,7 +247,7 @@ On **P1**, add:
 - **integration test** — checks your code against a real dependency, usually a database.
 - **end-to-end test** — drives the whole system the way a user would.
 - **fixture** — prepared data or state a test starts from.
-- **mock / stub** — a fake stand-in for a real dependency. Convenient, and a common way to test nothing.
+- **mock / stub** — a controlled dependency substitute; useful for caller behavior, not proof of the real dependency's semantics.
 - **flaky test** — passes and fails without the code changing. Treat as broken; a suite people do not trust is a suite nobody reads.
 - **coverage** — the share of lines the tests execute. Says what ran, never whether it was checked.
 - **mutation testing** — deliberately introducing bugs to see whether the suite notices. The honest version of coverage.
