@@ -137,7 +137,7 @@ retried. Everything else in this project is about what that does to you.
 - [ ] Link fetching happens on a queue, not in the request. The user's action returns immediately.
 - [ ] The queue has a **bound**. You know what happens when it is full, because you chose it.
 - [ ] Matching duplicate submissions for one retained operation identity produce one stored item/result under the chosen URL policy. Remote fetches may repeat after crashes; count and document them. Conflicting payload reuse is rejected.
-- [ ] Every outbound call has a timeout you picked, a retry policy at exactly one layer, and jitter.
+- [ ] Every outbound call has a chosen timeout, an end-to-end attempt/deadline budget, and jitter. Prefer one retry owner; explicitly compose any other retrying layer.
 - [ ] When the external site is slow, your system stays responsive. It degrades rather than stopping.
 - [ ] There is a cache, it has stampede protection, and you demonstrated the protection working.
 - [ ] You measured throughput and latency under load, and you have the numbers written down.
@@ -148,7 +148,7 @@ retried. Everything else in this project is about what that does to you.
 
 1. **What is the unit of work on the queue?** Define owner/item, operation ID, payload hash and refresh generation. Neither “fetch URL” nor “refresh item” is automatically idempotent; explain the protected stored effect and separate external execution.
 2. **What happens when the queue is full?** Reject, shed, or block? Each is defensible; blocking is how a queue becomes a memory leak with a scheduler.
-3. **What is your retry policy, and at which layer only?** Write the number of attempts and where jitter goes. Retrying at two layers multiplies, and three layers of three attempts is twenty-seven requests from one click.
+3. **Who owns retries, and what bounds all layers together?** Prefer one owner. Three nested layers of three attempts can make 27 downstream attempts, so count initial calls as well as retries. A valid multi-layer design must share or allocate the total budget and deadline; jitter changes timing, not that bound.
 4. **What does the user see while the fetch is pending?** This is a product decision and it is yours, not the queue's.
 5. **What is stale-but-acceptable?** A cached title from an hour ago is fine. A cached authorisation decision from an hour ago is a security bug. Say where the line is.
 6. **What do you shed first when you cannot serve everything?** Rank your request types before you need to.
