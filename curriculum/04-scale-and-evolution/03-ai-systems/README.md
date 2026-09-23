@@ -1,6 +1,6 @@
 # AI systems
 
-Evaluate an AI feature, protect permissions, and enforce quality and task budgets.
+Design, implement, evaluate, and operate AI features with explicit permission, state, quality and task-budget boundaries.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
 
@@ -29,7 +29,14 @@ Related prerequisites for deeper follow-ups: [Security](../../02-applications/05
 
 ## Apply the concept
 
-Each link opens one existing project brief with its own context, diagrams, AI prompts, AWS choices and follow-ups.
+Build in this order. The four new projects include working reference code, local sessions, AWS deployment instructions, expected results, six visuals each, failure tests, and engineer FAQs. They share the workbench introduced above.
+
+1. [Evidence desk: a document assistant with citations and revocation](projects/01-evidence-desk.md)
+2. [Approval desk: a support agent that proposes before it acts](projects/02-approval-desk.md)
+3. [Invoice review: extract, validate, retry, and reconcile](projects/03-invoice-review.md)
+4. [Release evidence: evaluate a candidate, promote it, and roll back](projects/04-release-evidence.md)
+
+Then use the open-ended brief to design your own feature:
 
 - [An AI feature you can defend](projects/an-ai-feature-you-can-defend.md)
 

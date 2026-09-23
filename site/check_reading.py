@@ -28,7 +28,7 @@ def main():
     problem_sources={p['path'] for p in bank}
     assert len(bank)==42 and all(p['path'] in sequence for p in bank)
     briefs=[p for p in sequence if '/projects/' in p and p.endswith('.md')]
-    assert len(briefs)==40, f'Missing standalone briefs: {len(briefs)}'
+    assert len(briefs)==44, f'Missing standalone projects/briefs: {len(briefs)}'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
     assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
     design_practice={
@@ -56,7 +56,7 @@ def main():
     assert sequence[sequence.index(foundations[-1])+1]=='curriculum/01-code/03-coding-practice/README.md'
     project_sources={str(p.relative_to(ROOT)) for p in (ROOT/'curriculum').rglob('*.md') if '/projects/' in p.as_posix()}
     project_sources|={str(p.relative_to(ROOT)) for p in (ROOT/'projects/reading-list/stages').rglob('README.md')}
-    assert len(project_sources)==45
+    assert len(project_sources)==49
     expected_product_pages={
         'curriculum/02-applications/01-backend/projects/a-public-form.md',
         'curriculum/02-applications/02-databases/projects/a-receipt-tracker.md',
@@ -76,6 +76,8 @@ def main():
         assert js and js['src'].endswith(assets['js']['file']), src
         assert js['integrity'] == assets['js']['integrity'], src
         article=soup.select_one('article.lesson-body');assert article,src
+        if src == 'curriculum/04-scale-and-evolution/03-ai-systems/aws-project-workbench.md':
+            assert len(article.select('figure.code-file')) == 7, 'AI workbench source must be readable inline'
         if src in problem_sources:
             heading=next((h for h in article.find_all('h2') if h.get_text(strip=True)=='What the interviewer expects'),None)
             assert heading,src
@@ -144,7 +146,7 @@ def main():
         tables=article.select('.tablewrap table')
         assert len(tables[0].select('tbody tr'))==8 and len(tables[1].select('tbody tr'))==5,src
         assert all(article.find('h2',string=lambda t:t and name in t.lower()) for name in ('room','coding bench','design board','niche mock')),src
-    assert rehearsed==42 and framed==45 and product_visuals==5,(rehearsed,framed,product_visuals)
+    assert rehearsed==42 and framed==49 and product_visuals==5,(rehearsed,framed,product_visuals)
     originals=list((ROOT/'assets').rglob('*.svg'))
     # This includes the four expected-product mockups added for UI project
     # briefs. Every source visual is copied byte-identically into the site.
@@ -152,7 +154,7 @@ def main():
     for svg in originals:
         assert hashlib.sha256(svg.read_bytes()).digest()==hashlib.sha256((OUT/svg.relative_to(ROOT)).read_bytes()).digest(),svg
     print(f'PASS {len(pages)} pages: full 4-part / 18-chapter TOC, 23 foundations before practice, {previous_next-1} contiguous steps, all 42 problems and 5 project stages, no in-body lesson jumps.')
-    print('PASS 42 interview expectation blocks, 45 project deliverables with six review gates, and 5 expected-product placements.')
+    print('PASS 42 interview expectation blocks, 49 project deliverables with six review gates, and 5 expected-product placements.')
     print(f'PASS {embedded} exact inline files; all {len(originals)} source SVGs copied byte-identically; {len(diagrams)} Mermaid diagrams displayed; heading anchors resolve; assessor keys excluded from sequence.')
 
 if __name__=='__main__':main()

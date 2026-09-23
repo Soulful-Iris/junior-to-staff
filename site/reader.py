@@ -292,7 +292,7 @@ def overview(b, sequence, base):
 <h1>Build the judgment.<br><em>Then write the code.</em></h1>
 <p class="hero-lede">Understand the problem. Make the trade-offs. Build something that holds up.<br class="desktop-only"> One guided journey from your first correct solution to systems you can defend.</p>
 <div class="hero-actions"><a class="primary-button" data-start href="{href(base,sequence[1])}">Start learning <span aria-hidden="true">↗</span></a><span>One sequence. Deeper questions at every step.</span></div>
-<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>45</strong><span>project briefs</span></div></div></header>
+<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>49</strong><span>projects &amp; briefs</span></div></div></header>
 <section class="home-mechanism"><div class="section-label">01 / THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
 <section class="journey-section"><div class="section-label">02 / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">0{i}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for i,(name,desc,detail) in enumerate([
 ('Write correct code','Clarify a problem. Work with AI deliberately. Choose a data structure and defend its invariant.','Problem solving · Algorithms'),
@@ -402,9 +402,10 @@ def build(b):
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)
-    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies'):
+    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies','examples/ai-systems'):
         for f in (b.ROOT/folder).rglob('*'):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
+            if folder == 'examples/ai-systems' and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
             rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)
     by_dest={b.dest_for(p['src']):p for p in pages}
     bodies={p['src']:compose(b,p,have,by_dest) for p in pages}

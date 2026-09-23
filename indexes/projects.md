@@ -71,6 +71,10 @@ The existing 45 briefs are preserved: 40 standalone projects and five stages of 
 
 ## AI systems
 
+- [Evidence desk: a document assistant with citations and revocation](../curriculum/04-scale-and-evolution/03-ai-systems/projects/01-evidence-desk.md)
+- [Approval desk: a support agent that proposes before it acts](../curriculum/04-scale-and-evolution/03-ai-systems/projects/02-approval-desk.md)
+- [Invoice review: extract, validate, retry, and reconcile](../curriculum/04-scale-and-evolution/03-ai-systems/projects/03-invoice-review.md)
+- [Release evidence: evaluate a candidate, promote it, and roll back](../curriculum/04-scale-and-evolution/03-ai-systems/projects/04-release-evidence.md)
 - [5. An AI feature you can defend](../curriculum/04-scale-and-evolution/03-ai-systems/projects/an-ai-feature-you-can-defend.md)
 
 ## Migrations and recovery

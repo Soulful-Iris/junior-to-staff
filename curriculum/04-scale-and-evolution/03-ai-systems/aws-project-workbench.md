@@ -16,6 +16,8 @@ python3.12 examples/ai-systems/demo.py evaluation
 python3.12 -m unittest discover -s examples/ai-systems -p 'test_*.py' -v
 ```
 
+The core tests use Python's standard library. To also run the mocked AWS persistence and Converse adapter checks, install `examples/ai-systems/requirements-test.txt` and repeat the test command. Mocked service tests verify the adapters; they do not replace a live AWS smoke run.
+
 Each demo creates isolated temporary storage and prints the actual requests followed by actual responses. Repeat without cleanup. Use `--output /tmp/assistant-session.json` to preserve the transcript. The fixed clock in these demos makes approval timestamps reproducible; the application uses the real clock normally.
 
 | Session | What completion looks like | Persisted authority |
