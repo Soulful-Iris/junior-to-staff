@@ -18,7 +18,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                       ".css": "text/css", ".js": "text/javascript"}
 
     def translate_path(self, path):
-        current = Path(super().translate_path(path))
+        current = Path(super().translate_path(path)).resolve()
         if current.is_file() or current.is_dir():
             return str(current)
         relative = unquote(urlsplit(path).path).lstrip('/')
