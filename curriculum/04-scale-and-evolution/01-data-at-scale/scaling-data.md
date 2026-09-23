@@ -74,27 +74,33 @@ cache without stampede protection is exactly that machine.
 
 ## The mental model
 
-**What load hits first.** Four things, and raw volume is none of them.
+**What load hits first depends on the workload.** Measure arrival/service rates,
+bytes, CPU, I/O, lock wait, saturation and skew. Four useful questions for this
+read-heavy example are:
 *Connections*: a database connection is scarce and stateful — PostgreSQL's
 default ceiling is typically 100 (checked 2026-09-21) — and every feature
 competes for the same pool. The first purchase is rarely hardware: a pooler
 (PgBouncer, say) and a pool-full decision. *Query shape*:
 [the application foundations](../../02-applications/02-databases/data-models-and-queries.md) taught that a scan
 grows with the table; concurrency is worse: two hundred copies of one slow
-query fight for the same pages, locks and pool slots. *Read pressure*: most
-products read far more than they write, so reads saturate first. *Failover*: at
+query fight for the same pages, locks and pool slots. *Read pressure*: this
+example reads more than it writes; that is a workload assumption, not a law. *Failover*: at
 scale the database is the dependency that dies; the seconds where nobody is
 primary are designed, not caught.
 
-**The ladder, and what each rung bills.**
+**A read-heavy scaling example, and what each option costs.**
 
 ![The escalation ladder — index, cache, replicas, shard last — each rung labelled with what it buys and the new failure class it bills.](../../../assets/diagrams/scaling-order.svg)
 
-Climb on a measured number; every rung above is dearer and harder to reverse.
+Choose from a measured constraint, not a mandatory order. An append-heavy
+ingestion service can saturate disk bandwidth while reads and connections are
+quiet: smaller records, batching or more write capacity may help, while a read
+cache will not. A queue buffers a temporary mismatch; it does not increase
+steady-state service capacity.
 
 1. **Index** — buys fast reads on one query shape; the bill — every write pays —
-   was priced in the junior data section. Exhaust it first; it adds no moving
-   part.
+   was priced in the junior data section. Try it when the query plan identifies
+   avoidable read work; another index can make a write-bound workload worse.
 2. **Cache** — buys read headroom from a copy, and bills two failure classes.
    *Invalidation*: the copy can disagree with the truth, and enumerating every
    write that must refresh it is now your job. *The stampede*: when a hot key
@@ -195,20 +201,21 @@ cache misses — and for each, the command and what a bad number looks
 like.
 
 Then, given [pool stats, EXPLAIN ANALYZE, error rates]: name the
-bottleneck, the cheapest rung that addresses it — index, cache,
-replica, shard — and why each rung below is not enough.
+bottleneck and the simplest change that addresses it. Compare query/index,
+batching, admission, capacity, cache, replication or partitioning as relevant.
+Explain why plausible alternatives do not address this measured constraint.
 ```
 
 *Why it is asked that way:* "do not propose a fix yet" does the work — a
 model's reflex is a cache or a bigger instance before knowing what is full.
-Arguing why the lower rungs are not enough enforces the escalation order.
+Comparing the measured constraint with each mechanism prevents a technology checklist.
 
 *What you should get back:* that sign-in failing beside one slow page points at
-a shared resource — almost always connections. If the first suggestion is "add
-Redis" with no plan read, measuring was skipped.
+a shared resource: connections, CPU, locks or I/O are hypotheses to test.
+An unconditional "add Redis" without resource evidence skips that diagnosis.
 
-*Push back on:* replicas, shards or a queue anywhere in the first answer.
-Nothing measured has justified rung two yet.
+*Push back on:* any technology proposed without showing that it addresses the
+measured constraint, including a connection pooler or index.
 
 **Request 2 — a cache that fails the way you chose**
 
@@ -240,9 +247,9 @@ boundary, failure model, or enforcement point.
 **Request 3 — a consumer that survives what queues actually do**
 
 ```
-Move the link-fetch onto the queue. Write the consumer, assuming every
-message can arrive twice and out of order, because at-least-once means
-it eventually will.
+Move the link-fetch onto the queue. Messages may be redelivered; this
+chosen queue may also reorder them. Delivery-count guarantees do not by
+themselves define ordering. Name and test both contracts.
 
 Design the idempotency: what is the message key, where is it stored,
 and which database constraint turns a second delivery into a no-op?
@@ -257,10 +264,10 @@ Kill the consumer after the write but before the acknowledgement and
 assert the message is redelivered.
 ```
 
-*Why:* "because at-least-once means it eventually will" turns duplicates from
-an edge case into a premise, and models build differently from premises.
-Demanding the dedup live in a database constraint closes the version that
-survives review most often.
+*Why:* permitted duplicates are a required failure case, not a prediction that
+every message duplicates. Commit the deduplication record and local effect
+atomically. A transactional outbox prevents lost publication but its relay can
+still duplicate; external effects need provider idempotency or reconciliation.
 
 *What you should get back:* a consumer whose second delivery dies on a unique
 constraint, an explicit bound, and both tests. "Exactly-once" as a

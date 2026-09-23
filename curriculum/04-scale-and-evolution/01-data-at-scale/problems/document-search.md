@@ -28,7 +28,9 @@ alternative permission cache must keep its entire staleness budget below one
 minute, including propagation and clock uncertainty—not just set a 60-second TTL.
 Route direct downloads and exports through the same check, or explicitly bound
 existing bearer URLs by their enforced expiry. Pause indexing, warm every route,
-revoke at 12:00 and verify the 12:01 promise independently of search freshness.
+revoke at 12:00 with index updates **and invalidation delivery paused**, and verify
+the 12:01 promise independently of search freshness. This prevents new disclosure;
+it cannot recall a snippet or download already delivered to a client.
 
 ![Document edit and permission revocation race with index refresh](../../../../assets/design-practice/document-search-trace.svg)
 
