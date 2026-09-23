@@ -36,8 +36,8 @@ flowchart TD
    may hide incompatible requirements rather than remove repetition.
 2. Define a small shared contract and a versioning rule; retain domain-specific
    behavior with its owner.
-3. Pilot with the hardest representative consumer. Measure repair hours and
-   change lead time, including adoption effort.
+3. Test hard consumer requirements early in a replay or controlled pilot. Choose
+   live exposure with bounded impact; measure repair hours and adoption effort.
 4. Assign ownership, support boundaries, and a stop condition. A shared service
    without an owner can become a new bottleneck.
 
@@ -57,198 +57,61 @@ Senior evidence is a sound implementation and measured local result. Lead/staff
 evidence adds an agreed cross-team decision, adoption, and sustained outcomes.
 A solo exercise practices the reasoning; it cannot manufacture that history.
 
-## The one-liner
+## Match scope to the problem
 
-Staff is not senior with more years on it. It is a different job, and the change
-is in **scope**: from one team over a quarter to several teams over years, and
-from being the person who solves the problem to being the person who decides
-which problem gets solved. The uncomfortable part is that the skill that got you
-here — writing excellent code fast — stops being the thing you are measured on.
+Company ladders and staff titles differ. This guide uses senior, lead and staff
+follow-ups to practice increasing ambiguity, coordination and ownership; they
+are **not universal promotion criteria**. Deep specialist work, sustained technical
+leadership and cross-team coordination can all matter. Coding quality does not
+cease to matter when a title changes.
 
-## The failure it prevents
+![Illustrative staff archetypes: tech lead, architect, solver and right hand. These are possible role shapes, not fixed company-size requirements.](../../../assets/diagrams/staff-archetypes.svg)
 
-The common way this goes wrong is not failure. It is a very good senior engineer
-doing very good senior work for three more years and quietly wondering why
-nothing changes.
+Treat the pictured archetypes as prompts for understanding a role, not a ranking
+or a requirement to become all four. Verify the actual mandate, authority and
+success measures of a role instead of inferring them from company size.
 
-They ship more than anyone. They are the person you want on a hard bug. They are
-also picking up whatever lands in front of them, and every one of those choices
-is locally correct, and the sum is a career that plateaus with excellent
-reviews. Meanwhile somebody with less raw ability wrote the document that
-decided what the team would spend the next year on.
+## Count the benefit and the work it creates
 
-That is not a story about politics. It is a story about **leverage**: the
-difference between doing the work and changing what work gets done.
+In the constructed three-team example above, compatibility repair consumes
+three team-days per week. A shared contract costs six team-days to introduce.
+If it removes two repair days per week and adds half a day of weekly support,
+the net saving is **1.5 team-days/week**; the initial effort breaks even after
+**four weeks**, before any additional migration or coordination cost.
 
-## The mental model
+This is a prediction to test, not a guaranteed platform return. The third team
+may have a legitimate different requirement. Preserve an owned exception when
+forcing convergence would cost more than it saves.
 
-Every published engineering ladder draws the same line in slightly different
-words. Dropbox's framework describes its staff level as delivering multi-year,
-multi-team product or platform goals, and expects org-optimal decisions over
-locally optimal ones. Etsy's talks about directing solutions to significantly
-complex, *unscoped* problems. CircleCI splits its levels explicitly: the first
-three are about becoming a highly effective individual contributor, the next
-three about using those skills to create leverage across larger groups.
+| Evidence | What it supports | What it does not prove |
+|---|---|---|
+| Fewer repair hours under comparable work | A useful local outcome | Universal staff readiness |
+| Another team adopts and independently operates the contract | Adoption and reduced dependence | That every team should use it |
+| A solo reference implementation passes tests | Reference correctness under those cases | Real cross-team leadership history |
 
-The detail worth pausing on, because it is counterintuitive and it is stated in
-the framework rather than inferred: **Dropbox's code-fluency expectations stop
-rising at the senior level.** Growth past senior is direction, talent and
-culture. You are not expected to code better. You are expected to code as a
-means.
+## Mentorship and sponsorship are different contributions
 
-*(Read from the published ladders on 2026-09-21. Every company words this
-differently; the shape is remarkably consistent.)*
+Mentorship develops another person's capability through teaching, feedback or
+practice. Sponsorship advocates for their access to an opportunity. Neither is
+automatically cheap, effective or superior. Evaluate actual outcomes, time,
+access and attribution. Successful mentoring need not produce a promotion story.
 
-### What the job actually contains
+Coordination and maintenance are work too. Record who did them and who benefits;
+do not claim a teammate's independent result as your own output.
 
-The StaffEng project surveyed around thirty staff engineers and their work
-sorted into five buckets:
+## Practice on P5
 
-1. **Setting technical direction** — deciding what gets built and on what.
-2. **Mentorship, and separately sponsorship.** These are not the same and the
-   second one costs you something. Mentorship is advice. Sponsorship is spending
-   your own credibility to put someone in a room, on a project, or in a promotion
-   packet. Most guides say "mentor more". The ladders reward the other one.
-3. **Being in the room** — getting into the conversations where decisions are
-   made, and being useful once there rather than merely present.
-4. **Exploring ambiguity** — the problems normal process cannot digest because
-   nobody can say what they are yet.
-5. **Glue work** — the coordination, unblocking and quiet repair that makes a
-   group function.
+Name a structural problem, verify examples, and compare a local fix with a
+broader intervention. Include adoption, support and transition costs. Choose the
+smallest scope that addresses the cause and identify what would reverse that
+choice. A small well-targeted change can be more useful than a platform.
 
-### The four archetypes
+**Acceptance:** another reader can explain the problem, proposed boundary,
+trade-off, owner and measure of success. They may approve unchanged. An exercise
+can test that reasoning but cannot manufacture employment history or predict a
+hiring outcome.
 
-Staff is at least four different jobs, and which one exists depends on the
-company rather than on you.
-
-![The four staff archetypes positioned by organisation size and by whether their scope is one team cluster or the whole organisation](../../../assets/diagrams/staff-archetypes.svg)
-
-- **Tech Lead** — guides one team or a small cluster. The commonest by far.
-- **Architect** — owns a domain such as APIs or infrastructure. Requires intimate business and user context; the version that sits above the business is the failure mode, not the ideal.
-- **Solver** — pointed at one critical problem after another. Common where planning centres on individuals. Carries a transience risk: you are never anywhere long enough to be missed.
-- **Right Hand** — extends a senior leader's attention and borrows their authority. Only exists at real scale.
-
-Choosing the wrong archetype for your organisation is a named failure mode. An
-architect role at a forty-person company is a title with no work under it.
-
-
-
-## What good looks like
-
-- You can name the three problems your organisation will regret not solving, and say which one you are on.
-- Your work has a written form other people can act on without you in the room.
-- Somebody else got a better job because you spent credibility on them.
-- You say no to work that is beneath your leverage, and you say it in a way that leaves the work getting done by somebody for whom it is growth.
-- You are in the meeting where the decision happens, and you speak about the thing rather than about the technology.
-
-Done badly — and StaffEng names these, which is why they are worth quoting:
-
-- **Snacking.** Picking easy, satisfying, low-impact work because it feels productive. This is the trap for exactly the people who are good at the work.
-- **Preening.** Visible, low-impact work. The demo that impresses and changes nothing.
-- **Chasing ghosts.** Imposing the solution from your last company onto a problem that is not the same problem.
-- **Glue work without the title.** Tanya Reilly's finding, and it is uncomfortable: the person who coordinates, mentors and prevents outages is frequently told they lack technical contribution. The work is necessary, it is undervalued, and women do measurably more of it. Do it visibly and credited as leading, or do less of it.
-
-## Ask Claude for this
-
-The model cannot do your politics. It is very good at the two things that block
-most people: making a vague idea specific, and arguing against you honestly.
-
-**Request 1 — turn a feeling into a scoped problem**
-
-```
-I think <the thing you believe is wrong> is the biggest technical problem
-facing us. Interrogate that.
-
-Ask me the five questions you would need answered to know whether it is
-real, whether it is the biggest, and whether it is solvable in a year.
-Do not offer solutions yet.
-```
-
-*Why:* staff work starts as an instinct, and an instinct handed to an executive
-gets dismissed. Making yourself answer five specific questions is the cheapest
-version of the work you would otherwise do badly in public.
-
-*What you should get back:* questions about evidence, cost, who else is
-affected, and what happens if nothing is done. If it starts proposing an
-architecture, tell it to stop and answer again.
-
-**Request 2 — steelman the thing you rejected**
-
-```
-Here is the design I am proposing and the alternative I rejected.
-
-Make the strongest possible case for the alternative. Assume the person
-arguing for it is smarter than me and knows something I do not. What
-would they know?
-```
-
-*Why:* the "alternatives considered" section of a design doc is where its
-credibility lives, and a weak steelman is visible from space. If you cannot
-argue the other side better than its advocates, you have not finished deciding.
-
-*Push back on:* a polite, balanced comparison. You asked for an argument, not a
-table.
-
-**Request 3 — find who disagrees before they find you**
-
-```
-Here is my proposal. List the teams or roles whose work it makes harder,
-what they lose, and the objection each would raise in review.
-
-Rank them by how likely that objection is to stop this.
-```
-
-*Why:* the disagreement surfaced in review is a cheap early warning that the
-project itself will slip. Finding it a week before the review, and going to
-those people first, is most of what "being in the room" actually means.
-
-## How you would know it is wrong
-
-Staff work has long feedback loops, which is precisely why it needs deliberate
-checks rather than a feeling of productivity.
-
-1. **Count what you did last quarter and ask what would have happened without you.** If the honest answer is "somebody else would have done it a bit slower", that is senior work, done well.
-2. **Look for your name on something you did not attend.** A document being used in a meeting you are not in is leverage. Being needed in every meeting is the opposite.
-3. **Ask whether you can point at a person whose situation you changed.** Sponsorship leaves a trace: a promotion, a project, a role.
-4. **Check the snacking ratio.** Of the last ten things you worked on, how many were chosen because they were satisfying? There is no correct number, but if it is ten, you know.
-5. **Test the archetype against the org, not your preference.** If you are trying to be an architect in a company that has no such role, the absence of progress is structural rather than personal.
-6. **Have somebody who will tell you no.** Long feedback loops plus a deferential team is how people spend two years on the wrong thing while everyone is polite about it.
-
-## Your slice of the project
-
-For **P5**, before any code:
-
-- Write down the three problems your system will have in a year, and rank them. Not the bugs. The structural ones.
-- Pick one, and write the one-page version of why it matters, what it costs to fix, and what happens if nobody does.
-- Identify who would object, and what they lose.
-
-**Acceptance criteria:** somebody who did not build this system can read your
-one page and tell you back what the problem is and why it is worth a quarter. If
-they cannot, the page is not finished — and it is the page that is wrong, not
-the reader.
-
-## Words you now own
-
-- **leverage** — the ratio between what changes and how much of you it took.
-- **scope** — how far your decisions reach, in teams and in time.
-- **sponsorship** — spending your credibility on someone else's opportunity. Distinct from, and costlier than, mentorship.
-- **archetype** — the shape a staff role takes in a given organisation: tech lead, architect, solver, right hand.
-- **snacking** — easy, satisfying, low-impact work.
-- **preening** — visible, low-impact work.
-- **chasing ghosts** — importing your last company's solution to a problem that is not the same.
-- **glue work** — the coordination and repair that makes a group function; necessary, chronically uncredited.
-- **org-optimal** — the choice that is best for the organisation even when it is worse for your team. The staff tiebreak.
-- **unscoped problem** — one where nobody can yet say what the work is. Defining it *is* the work.
-
----
-
-**Not covered here:** the artefacts themselves — design docs, RFCs, strategy —
-are [Writing that decides](design-documents.md) and [Technical strategy](technical-strategy.md). Promotion
-mechanics are real and are deliberately not the organising idea of this chapter; if
-you do the work in this section, the packet writes itself, and if you optimise
-for the packet you will end up preening.
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
+[Writing that decides](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
 
 ## Draw it from memory · Show who owns the shared constraint
 
