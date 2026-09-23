@@ -31,6 +31,23 @@ def main():
     assert len(briefs)==40, f'Missing standalone briefs: {len(briefs)}'
     stages=list((ROOT/'projects/reading-list/stages').glob('*/README.md'))
     assert len(stages)==5 and all(str(p.relative_to(ROOT)) in sequence for p in stages)
+    design_practice={
+        '03-production/01-system-design': ('api-quota','ticket-inventory','realtime-chat','social-feed','video-processing','checkout-payment'),
+        '03-production/04-observability': ('slow-request',),
+        '03-production/05-reliability': ('durable-jobs',),
+        '04-scale-and-evolution/01-data-at-scale': ('document-search','trending-counts'),
+        '04-scale-and-evolution/03-ai-systems': ('personalized-ranking',),
+        '04-scale-and-evolution/04-migrations': ('regional-failover',),
+    }
+    for chapter, names in design_practice.items():
+        introduction=f'curriculum/{chapter}/README.md'
+        for name in names:
+            source=f'curriculum/{chapter}/problems/{name}.md'
+            assert source in sequence and sequence.index(introduction)<sequence.index(source), source
+            article=BeautifulSoup(output_for(source).read_text(),'html.parser').select_one('article.lesson-body')
+            assert len(article.select('img[src*="/assets/design-practice/"]')) >= 2, source
+            words=article.get_text(' ',strip=True)
+            assert 'Senior follow-up' in words and 'Staff follow-up' in words,source
     foundations=[p for p in sequence if '/02-data-structures-algorithms/lessons/' in p]
     assert len(foundations)==23
     assert max(map(sequence.index,foundations)) < min(sequence.index(p['path']) for p in bank)

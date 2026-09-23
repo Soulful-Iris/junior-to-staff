@@ -17,6 +17,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 1 | [AI systems](evaluation-and-budgets.md) |
 | 2 | [May we ship a tagger that passes every regression?](labs/evaluations/README.md) |
 | 3 | [Support assistant](problems/support-assistant.md) |
+| 4 | [Personalized ranking: low latency and evidence of quality](problems/personalized-ranking.md) |
 
 ## Go deeper on the same problem
 

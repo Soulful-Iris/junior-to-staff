@@ -19,6 +19,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 3 | [Retries spend the capacity needed for recovery](cases/retry-amplification.md) |
 | 4 | [Risk and incidents](risk-and-incidents.md) |
 | 5 | [Incident desk: the page cleared, the queue did not](labs/reliability/incident.md) |
+| 6 | [Durable jobs: the queue drained, the work did not](problems/durable-jobs.md) |
 
 ## Go deeper on the same problem
 

@@ -24,6 +24,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 8 | [Completed work can have a stale status view](cases/status-projections.md) |
 | 9 | [A healthy average can hide an overloaded partition](cases/hot-partitions.md) |
 | 10 | [File synchronization](problems/file-synchronization.md) |
+| 11 | [Document search: results must follow permissions](problems/document-search.md) |
+| 12 | [Trending counts: the spike that breaks one partition](problems/trending-counts.md) |
 
 ## Go deeper on the same problem
 

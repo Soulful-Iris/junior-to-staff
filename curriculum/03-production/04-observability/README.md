@@ -15,6 +15,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | Step | Existing lesson or exercise |
 |---|---|
 | 1 | [Observability](logs-metrics-traces.md) |
+| 2 | [Slow request: the healthy average hid a timeout](problems/slow-request.md) |
 
 ## Go deeper on the same problem
 
