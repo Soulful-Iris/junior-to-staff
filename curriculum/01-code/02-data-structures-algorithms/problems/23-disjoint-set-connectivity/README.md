@@ -28,6 +28,10 @@ print(parent["A"] == parent["B"])  # True
 ```
 A full `find` follows parent links and compresses paths; the snippet only illustrates storage. Adding B–C later must connect A and C transitively, not merely the last pair.
 
+### A design choice worth saying aloud
+
+`parent` is the representation, not the connectivity answer: `find(vertex)` follows parents to the representative and compresses the path. A separate `size_by_root` is meaningful only for current representatives and helps bound tree depth. If link removals are added, this structure does not undo unions; surface that limitation early.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

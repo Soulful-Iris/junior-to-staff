@@ -28,6 +28,10 @@ tail = tail.next
 ```
 Given `1 → 4` and `2 → 3`, the output is `1 → 2 → 3 → 4`. Keep the unchosen input suffix reachable; decide how equal values are ordered and whether old nodes may be reused.
 
+### A design choice worth saying aloud
+
+The dummy node owns only the output **assembly point**; decide whether you splice the original nodes or allocate copies. Splicing is O(1) extra space but mutates input links, so callers must permit it. On equal keys, taking from the left first preserves a predictable cross-list tie policy.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

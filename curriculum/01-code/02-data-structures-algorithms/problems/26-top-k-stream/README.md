@@ -30,6 +30,10 @@ print(heap[0])  # 4, the cutoff for a new arrival
 ```
 For k=3, incoming 2 is discarded and incoming 9 replaces 4, giving `[9,7,7]` when sorted for presentation. Duplicate observations count separately.
 
+### A design choice worth saying aloud
+
+The min-heap stores only the `k` largest observations seen so far; its root is the current cutoff, not the maximum of the full stream. A `top_k` heap can discard a new value only after comparing it with that cutoff. Decide whether equal observations count separately before replacing at equality; this contract keeps duplicates.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

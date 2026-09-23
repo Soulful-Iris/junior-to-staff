@@ -26,6 +26,10 @@ print(2 - 1 not in values)  # False: already inside one
 ```
 For `[3,2,1,8,2]`, the longest run has length 3, despite unsorted input and duplicate 2. Define whether duplicates count as separate run positions.
 
+### A design choice worth saying aloud
+
+The `values` set gives membership without storing duplicates or ordering. Starting a run only when `value - 1` is absent prevents walking the same run from every member. A sort-based baseline is simpler but costs O(n log n); say which guarantee the set trades space for.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

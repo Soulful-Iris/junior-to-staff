@@ -27,6 +27,10 @@ print(left)  # 2, not 1
 ```
 For `"abba"` the longest answer is `"ab"` or `"ba"`, length 2. [Trace all four steps](../../lessons/02-windows.md) before coding.
 
+### A design choice worth saying aloud
+
+`last_seen` deliberately **overwrites** an index whenever a character recurs; the latest position is the one needed to move the window. `left` may move right but never left. Trace `abba`: at the final `a`, its old index is outside the active window, so shrinking backward would manufacture an invalid answer.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

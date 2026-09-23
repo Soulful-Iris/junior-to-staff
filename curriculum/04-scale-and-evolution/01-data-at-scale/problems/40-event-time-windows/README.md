@@ -31,6 +31,10 @@ print((60 // window_size) * window_size)  # 60
 ```
 A watermark is a stated belief about how late events can arrive; it does not change an event's timestamp. Work through duplicate IDs and a late arrival after finalization.
 
+### A design choice worth saying aloud
+
+Key aggregates by `(entity, window_start)`, not by arrival minute; otherwise late events land in the wrong window. Keep a processed-event ID set only for the retention period needed by the delivery contract. Once a watermark closes a window, define whether later events are dropped, side-output, or corrections before choosing storage.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

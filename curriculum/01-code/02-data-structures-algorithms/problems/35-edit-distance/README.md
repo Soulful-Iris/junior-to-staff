@@ -30,6 +30,10 @@ substitution_cost = 0 if same else 1
 ```
 `"cat" → "cut"` needs one substitution. Empty source to `"cut"` needs three insertions; those empty-prefix cells are base cases, not special patches at the end.
 
+### A design choice worth saying aloud
+
+Let `distance[i][j]` mean the cost for two **prefixes**, rather than an unexplained cell number. Initialize the empty-prefix row and column from insertion/deletion costs; every other cell refers to smaller prefixes. If memory is optimized to two rows, preserve which row means `i - 1` before overwriting it.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

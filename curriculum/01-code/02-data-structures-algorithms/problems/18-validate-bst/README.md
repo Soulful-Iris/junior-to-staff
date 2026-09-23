@@ -25,6 +25,10 @@ def allowed(value, lower, upper):
 ```
 A right child 6 under root 5 looks locally fine, but if it lies inside left subtree rooted at 3 it violates the root's upper bound of 5.
 
+### A design choice worth saying aloud
+
+`lower` and `upper` are exclusive bounds, so duplicate values fail the BST contract. A local child comparison is insufficient: a node 6 deep in the left subtree of root 5 must fail even if its immediate parent is 3. If duplicates become legal, state which side admits equality and adjust both checks.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

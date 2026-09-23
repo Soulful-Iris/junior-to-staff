@@ -25,6 +25,10 @@ print(meetings[0][1] <= meetings[1][0])  # True: reuse is legal
 ```
 State the endpoint policy before sorting arrivals and departures. The *maximum simultaneous occupancy* sets the required room count.
 
+### A design choice worth saying aloud
+
+At equal timestamps, `end` frees a room before `start` occupies it. At time 10, release a `[9,10)` room **before** admitting `[10,11)`; reversing the tie order inflates capacity. State whether the output is the peak simultaneous occupancy or an actual assignment of room IDs; the latter needs more state.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

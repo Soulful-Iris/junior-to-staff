@@ -26,6 +26,10 @@ level_size = len(queue)  # children appended later belong to next level
 ```
 For root 1 with children 2 and 3, return `[[1], [2,3]]`. An empty tree returns `[]`, not a list containing an empty level.
 
+### A design choice worth saying aloud
+
+The queue contains nodes still to be visited, not completed values. Capture `level_size` before appending children: without that boundary, the first pass swallows the next level. If the input graph can share a node or contain a cycle, define whether traversal is a tree-only contract or add identity-based visited tracking.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

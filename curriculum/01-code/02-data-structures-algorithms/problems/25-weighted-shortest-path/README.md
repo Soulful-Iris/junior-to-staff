@@ -30,6 +30,10 @@ print(heappop(heap))  # (0, 'A'); then C before B
 ```
 If A→B costs 10, A→C costs 1 and C→B costs 1, the best cost to B is 2. Skip stale entries when a cheaper route has already been recorded.
 
+### A design choice worth saying aloud
+
+`best_cost` holds the cheapest known route; heap entries are **candidates**, not committed answers. On pop, skip a candidate whose cost differs from the best recorded cost, since a better path may have arrived later. This proof uses nonnegative edges; with negative costs, the greedy finalization argument fails.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

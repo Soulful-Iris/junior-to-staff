@@ -28,6 +28,10 @@ nodes = {"a": node_a, "b": node_b}
 ```
 For capacity 2: put a, put b, get a, put c must evict b. State which pointers change for moving a node and for deleting the old tail.
 
+### A design choice worth saying aloud
+
+The dictionary maps **cache key → list node**; the linked list orders recency, with a read moving its node to the front. Neither structure can replace the other without changing the cost. Decide who owns the node mutation and whether concurrent callers need a lock before claiming O(1) operations.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

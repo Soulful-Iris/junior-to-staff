@@ -25,6 +25,10 @@ low, high = max(weights), sum(weights)  # 4 and 9
 ```
 For two days, capacity 5 works as `[3,2] | [4]`; capacity 4 does not. Prove the feasibility test is monotone before binary searching.
 
+### A design choice worth saying aloud
+
+Extract a predicate named `can_ship_with_capacity(capacity)` whose only job is to count days while preserving package order. Test its boundary at 4 (false) and 5 (true) for `[3,2,4]` over two days before binary search. If the predicate cannot be shown monotone, binary search has no justification.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

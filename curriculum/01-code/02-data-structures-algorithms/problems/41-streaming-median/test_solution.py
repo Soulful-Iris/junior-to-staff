@@ -16,9 +16,9 @@ class Tests(unittest.TestCase):
             n = len(ordered)
             expected = Fraction(ordered[n // 2]) if n % 2 else Fraction(ordered[n//2-1] + ordered[n//2], 2)
             self.assertEqual(stream.median(), expected)
-            self.assertIn(len(stream.low) - len(stream.high), (0, 1))
-            if stream.high:
-                self.assertLessEqual(max(-x for x in stream.low), min(stream.high))
+            self.assertIn(len(stream.lower_half) - len(stream.upper_half), (0, 1))
+            if stream.upper_half:
+                self.assertLessEqual(max(-x for x in stream.lower_half), min(stream.upper_half))
 
     def test_huge_integers_without_float_overflow(self):
         stream = StreamingMedian()
@@ -32,7 +32,7 @@ class Tests(unittest.TestCase):
             stream.median()
         with self.assertRaises(ValueError):
             stream.add(float('nan'))
-        self.assertEqual(stream.low, [])
+        self.assertEqual(stream.lower_half, [])
 
 
 if __name__ == '__main__':

@@ -27,6 +27,10 @@ print([a*b for a,b in zip(left_product,right_product)])  # [12, 8, 6]
 ```
 At index 1, neither side includes its own 3. Predict the result with one zero and with two zeros before reading the solution.
 
+### A design choice worth saying aloud
+
+Choose whether the output array may temporarily hold left products; reusing it cuts extra storage without changing the contract. The running `prefix_product` and `suffix_product` stay strictly before and after the current index: neither may multiply `nums[i]` before writing the result at `i`. Zeros then work without a special division branch.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

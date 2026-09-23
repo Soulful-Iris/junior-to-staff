@@ -31,6 +31,10 @@ tokens = ["role", "==", "admin", "AND", "active", "==", True]
 ```
 Ask whether `AND` binds more tightly than `OR`, how missing fields behave, and which operators are permitted. A parser should reject a trailing unexpected token rather than silently accept part of the input.
 
+### A design choice worth saying aloud
+
+Give lexing, parsing, and evaluation separate responsibilities. A token includes its location for useful errors; the parser must consume the **entire** input before the evaluator can short-circuit safely. Restrict field lookup to the supplied mapping—Python `eval` or attribute traversal would grant behavior the policy language never promised.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

@@ -7,17 +7,17 @@ class TopK:
         if not isinstance(k, int) or k < 0:
             raise ValueError("k must be a nonnegative integer")
         self.k = k
-        self._heap = []
+        self._top_k = []
 
     def add(self, value):
         if not isinstance(value, int):
             raise ValueError("integer observations required")
         if self.k == 0:
             return
-        if len(self._heap) < self.k:
-            heapq.heappush(self._heap, value)
-        elif value > self._heap[0]:
-            heapq.heapreplace(self._heap, value)
+        if len(self._top_k) < self.k:
+            heapq.heappush(self._top_k, value)
+        elif value > self._top_k[0]:
+            heapq.heapreplace(self._top_k, value)
 
     def largest(self):
-        return sorted(self._heap, reverse=True)
+        return sorted(self._top_k, reverse=True)

@@ -14,7 +14,7 @@ def tree_level_order(root):
     if not isinstance(root, Node):
         raise ValueError("root must be Node or None")
     queue = deque([root])
-    seen = {root}
+    visited_nodes = {root}
     result = []
     while queue:
         level = []
@@ -24,9 +24,9 @@ def tree_level_order(root):
             for child in (node.left, node.right):
                 if child is None:
                     continue
-                if not isinstance(child, Node) or child in seen:
+                if not isinstance(child, Node) or child in visited_nodes:
                     raise ValueError("expected a tree without malformed or repeated nodes")
-                seen.add(child)
+                visited_nodes.add(child)
                 queue.append(child)
         result.append(level)
     return result

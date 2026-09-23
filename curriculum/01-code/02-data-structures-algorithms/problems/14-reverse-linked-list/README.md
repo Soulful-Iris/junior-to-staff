@@ -26,6 +26,10 @@ previous, current = current, next_node
 ```
 For `1 → 2 → 3 → None`, the new head must yield `3 → 2 → 1 → None`. Draw the three pointers and test the empty and one-node lists.
 
+### A design choice worth saying aloud
+
+`next_node` is a **temporary ownership handle**: save it before assigning `current.next = previous`, or the rest of the input becomes unreachable. After each iteration, `previous` heads the reversed prefix and `current` heads the untouched suffix. Check both the returned head and that the old head now points to `None`.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

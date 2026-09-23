@@ -28,6 +28,10 @@ visited = {"cat"}  # mark on enqueue so a word is not queued twice
 ```
 If the dictionary contains `cat, cot, cog, dog`, then `cat → cot → cog → dog` uses three changes. Say whether the count includes words or edges.
 
+### A design choice worth saying aloud
+
+The queue holds `(word, number_of_changes)` and `visited` marks words **on enqueue**, preventing two parents from scheduling the same state. This is correct because all transformations cost one change; weighted edits would require a different frontier. Define whether length means words or changes before reporting 3 for `cat → cot → cog → dog`.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

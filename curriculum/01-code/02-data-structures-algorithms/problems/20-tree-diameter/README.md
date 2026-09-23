@@ -25,6 +25,10 @@ through_here = left_height + right_height
 ```
 State the unit: this problem measures diameter in **edges**, so a single-node tree has diameter 0. Draw why the longest path need not pass through the root.
 
+### A design choice worth saying aloud
+
+Separate the two quantities: `height_from_node` is one downward branch that a parent can extend, while `best_diameter` may join **two** branches at this node. Specify whether heights count nodes or edges before adding them; for the stated edge contract, a single-node tree returns 0.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

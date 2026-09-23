@@ -29,6 +29,10 @@ print(now >= expires_at)  # True: expired at the boundary
 ```
 If an old expiry event runs after a new value replaces the key, it must not delete the replacement. Track a generation or compare the stored expiry before deleting.
 
+### A design choice worth saying aloud
+
+Store `expires_at` from a specified clock and compare it on **every read**; cleanup runs can lag. An expiry task should carry a generation/version so an old task cannot delete a new value under the same key. State whether the clock is monotonic process time or persisted wall time before promising survival across restarts.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

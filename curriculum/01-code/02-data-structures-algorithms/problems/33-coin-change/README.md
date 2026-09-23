@@ -30,6 +30,10 @@ best[3] = min(best[3], best[0] + 1)  # one coin makes 3
 ```
 The full contract returns a **witness** as well as count, so save which coin produced each improving state; reconstruct from amount 6.
 
+### A design choice worth saying aloud
+
+`minimum_coins` tracks the count required for each smaller amount. A count alone cannot produce the promised list of coins; retain the selected previous coin or predecessor amount whenever a state improves. State a tie rule for equally short witnesses, since otherwise two correct implementations may return different sequences.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

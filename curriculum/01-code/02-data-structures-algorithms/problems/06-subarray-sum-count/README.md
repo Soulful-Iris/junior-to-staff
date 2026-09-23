@@ -20,12 +20,16 @@ Constructed practice problem; no company attribution. Prerequisites: [two sum](.
 
 A prefix sum is the total of everything seen up to this point. Two prefix totals differ by the sum of the contiguous items *between* them:
 ```python
-counts = {0: 1}  # empty prefix, before any item
+prefix_counts = {0: 1}  # empty prefix, before any item
 prefix = 0
 prefix += 1
-print(counts.get(prefix - 1, 0))  # 1 starting position
+print(prefix_counts.get(prefix - 1, 0))  # 1 starting position
 ```
 For `[1,-1,1]`, target 1, the answer is 3 ranges, not 2. [See the three exact ranges](../../lessons/03-prefix.md).
+
+### A design choice worth saying aloud
+
+`prefix_counts` tracks how often each prefix total has appeared. `{0: 1}` counts the empty prefix so a range beginning at index 0 is not lost. Query `prefix - target` **before** incrementing the current prefix, or a zero target could accidentally count an empty range.
 
 <!-- interview-rehearsal:start -->
 

@@ -29,6 +29,10 @@ queue = deque([(start, 0)])  # coordinate, distance in moves
 ```
 On `[[0,0],[1,0]]`, start (0,0), goal (1,1), the shortest route takes 2 moves through (0,1); diagonal shortcuts do not count.
 
+### A design choice worth saying aloud
+
+Store coordinates `(row, col)` in the queue and a separate `visited_cells` set; store distance with a queued coordinate or process one BFS level at a time. Mark on enqueue. Check bounds, walls, and whether start/goal are passable before exploring, or a blocked start can accidentally yield a valid path.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

@@ -31,6 +31,10 @@ stack.append((start, 1))    # height 1 can reach back to index 0
 ```
 The best rectangle here has area 3 (height 1 across all three bars), not area 4. Flush remaining bars after the final input, often with a sentinel height 0.
 
+### A design choice worth saying aloud
+
+Each stack entry means `(earliest_start, height)` for a bar that has not met a shorter right boundary. When a shorter bar arrives, carry the popped start backward before pushing the new height. A final zero-height sentinel closes all remaining rectangles; without it, increasing inputs leave candidates uncounted.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

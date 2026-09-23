@@ -21,12 +21,16 @@ means **a must finish before b can start**. An incoming-edge count is called ind
 
 ## The tool before the challenge
 
-Dependencies form directed arrows `prerequisite → task`. `indegree[task]` counts unfinished prerequisites; a task joins the ready queue exactly when that count reaches zero:
+Dependencies form directed arrows `prerequisite → task`. `remaining_prerequisites[task]` counts unfinished prerequisites; a task joins the ready queue exactly when that count reaches zero:
 ```python
 from collections import deque
-ready = deque(t for t in tasks if indegree[t] == 0)
+ready = deque(t for t in tasks if remaining_prerequisites[t] == 0)
 ```
 For `A→C` and `B→C`, C waits for *both*. Dedupe repeated edges before incrementing indegree; unfinished nodes after the queue empties indicate a cycle.
+
+### A design choice worth saying aloud
+
+`remaining_prerequisites` declines as prerequisites finish, while the queue contains exactly tasks at zero. Deduplicate edges before counting so two copies of `A → C` do not require A to finish twice. A nonempty remainder after the queue drains is cycle evidence, not a partial success.
 
 <!-- interview-rehearsal:start -->
 

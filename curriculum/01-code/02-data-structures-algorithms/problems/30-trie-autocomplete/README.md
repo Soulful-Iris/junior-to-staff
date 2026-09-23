@@ -28,6 +28,10 @@ print(node["end"])  # False: this node is a prefix only
 ```
 Inserted `car, card, cat`; query prefix `car` with limit 5 gives `["car","card"]` in lexical order. Describe when sorted traversal stops.
 
+### A design choice worth saying aloud
+
+A node's children map describes paths; its `is_terminal` flag answers whether that path is a complete inserted word. Do not infer completion from the presence of a prefix node. If words need deletion or frequency ranking later, define where those counts live and how stale terminal markers are removed.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

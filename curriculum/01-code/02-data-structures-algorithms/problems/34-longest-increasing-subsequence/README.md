@@ -30,6 +30,10 @@ tails[i] = 3
 ```
 `tails` is a compact summary, not necessarily a subsequence of the original input. Keep predecessor links if the output needs an actual witness.
 
+### A design choice worth saying aloud
+
+`smallest_tail_by_length` is a search summary, **not** the subsequence to return: replacements can combine elements that never formed one path. Keep predecessor links and original indices if the output needs a witness. Strict increasing uses `bisect_left`; a nondecreasing contract changes the comparison and duplicate case.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

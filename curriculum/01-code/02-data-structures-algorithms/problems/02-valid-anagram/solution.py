@@ -3,11 +3,11 @@ def valid_anagram(first, second):
         raise ValueError("arguments must be strings")
     if len(first) != len(second):
         return False
-    counts = {}
+    remaining = {}
     for char in first:
-        counts[char] = counts.get(char, 0) + 1
+        remaining[char] = remaining.get(char, 0) + 1
     for char in second:
-        if counts.get(char, 0) == 0:
+        if remaining.get(char, 0) == 0:
             return False
-        counts[char] -= 1
+        remaining[char] -= 1
     return True

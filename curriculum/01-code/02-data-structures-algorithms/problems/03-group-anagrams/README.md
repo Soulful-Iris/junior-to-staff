@@ -27,6 +27,10 @@ print(groups[key])  # ['eat', 'tea']
 ```
 State the output order contract before building groups. Two equal keys must share one group, but distinct original words keep their input order.
 
+### A design choice worth saying aloud
+
+`groups` uses an immutable tuple of sorted characters to collect the original words that share a signature. Append rather than sort the words in each group: sorting their contents would discard the promised input order. The signature is an internal key, never a substitute for the word shown to the user.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

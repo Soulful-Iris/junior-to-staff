@@ -30,6 +30,10 @@ heappush(heap, (1, 1))  # equal value from stream 1
 ```
 After popping a head, advance only that stream and push its next item. Streams `[1,3]` and `[1,2]` merge to `[1,1,2,3]`, duplicates included.
 
+### A design choice worth saying aloud
+
+Heap entries carry `(value, stream_id)` so equal values have a deterministic tie and Python never tries to compare iterator objects. Only one head per stream is active, so another position field adds no information. Advance **only** the stream whose head was popped; if streams are generators, define who closes them after early termination.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

@@ -31,6 +31,10 @@ path.pop()      # restore [2,2] for the next choice
 ```
 With candidates `[2,3,6,7,2]` and target 7, expect `[[2,2,3],[7]]`. Positive sizes ensure remaining capacity decreases.
 
+### A design choice worth saying aloud
+
+Treat `path` as mutable workspace owned by the current recursion branch. Append, recurse, and pop; append a **copy** to results at a solution, or every result can later change with the same list. Deduplicate candidate values up front and keep a nondecreasing start index so permutations do not masquerade as new combinations.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

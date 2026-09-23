@@ -29,6 +29,10 @@ if fast is not None and fast.next is not None:
 ```
 For `A → B → C → B` the entry is the *B object*; for `A → B → None` there is no entry. Trace when the fast pointer stops before dereferencing.
 
+### A design choice worth saying aloud
+
+Use object identity (`is`) for the meeting and entry checks: two different nodes can have equal `value` fields. Check `fast` and `fast.next` before a two-link advance. Ask whether inputs can contain malformed `next` fields; that is a validation decision, separate from cycle detection and its O(1) extra-space claim.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

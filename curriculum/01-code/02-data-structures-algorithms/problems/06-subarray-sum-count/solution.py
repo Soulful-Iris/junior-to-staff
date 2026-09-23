@@ -6,10 +6,10 @@ def subarray_sum_count(nums, target):
     _integers(nums)
     if type(target) is not int:
         raise ValueError("target must be an integer")
-    counts = {0: 1}
+    prefix_counts = {0: 1}
     prefix = total = 0
     for value in nums:
         prefix += value
-        total += counts.get(prefix - target, 0)
-        counts[prefix] = counts.get(prefix, 0) + 1
+        total += prefix_counts.get(prefix - target, 0)
+        prefix_counts[prefix] = prefix_counts.get(prefix, 0) + 1
     return total

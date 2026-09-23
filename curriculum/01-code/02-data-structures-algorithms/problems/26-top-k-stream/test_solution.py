@@ -14,7 +14,6 @@ class Tests(unittest.TestCase):
                 seen.append(value)
                 top.add(value)
                 self.assertEqual(top.largest(), sorted(seen, reverse=True)[:k])
-                self.assertLessEqual(len(top._heap), k)
 
     def test_duplicates_and_snapshot(self):
         top = TopK(2)

@@ -30,6 +30,10 @@ print(1 - earlier)        # wait 1 day
 ```
 `[73,74,71,75]` gives `[1,2,1,0]`; equal temperatures are *not* strictly warmer. [Trace the whole stack](../../lessons/07-stack.md).
 
+### A design choice worth saying aloud
+
+`waiting_days` stores indices still waiting for a strictly warmer day, not temperatures. Pop only while the current temperature is greater, then calculate `today - earlier_day`. If equals were popped, `[73,73]` would incorrectly claim a warmer day.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

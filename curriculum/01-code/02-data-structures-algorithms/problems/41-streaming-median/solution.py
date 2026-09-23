@@ -5,23 +5,23 @@ import heapq
 
 class StreamingMedian:
     def __init__(self):
-        self.low, self.high = [], []
+        self.lower_half, self.upper_half = [], []
 
     def add(self, value):
         if not isinstance(value, int):
             raise ValueError("integer observations required")
-        if not self.low or value <= -self.low[0]:
-            heapq.heappush(self.low, -value)
+        if not self.lower_half or value <= -self.lower_half[0]:
+            heapq.heappush(self.lower_half, -value)
         else:
-            heapq.heappush(self.high, value)
-        if len(self.low) > len(self.high) + 1:
-            heapq.heappush(self.high, -heapq.heappop(self.low))
-        elif len(self.high) > len(self.low):
-            heapq.heappush(self.low, -heapq.heappop(self.high))
+            heapq.heappush(self.upper_half, value)
+        if len(self.lower_half) > len(self.upper_half) + 1:
+            heapq.heappush(self.upper_half, -heapq.heappop(self.lower_half))
+        elif len(self.upper_half) > len(self.lower_half):
+            heapq.heappush(self.lower_half, -heapq.heappop(self.upper_half))
 
     def median(self):
-        if not self.low:
+        if not self.lower_half:
             raise ValueError("median of empty stream")
-        if len(self.low) > len(self.high):
-            return Fraction(-self.low[0])
-        return Fraction(-self.low[0] + self.high[0], 2)
+        if len(self.lower_half) > len(self.upper_half):
+            return Fraction(-self.lower_half[0])
+        return Fraction(-self.lower_half[0] + self.upper_half[0], 2)

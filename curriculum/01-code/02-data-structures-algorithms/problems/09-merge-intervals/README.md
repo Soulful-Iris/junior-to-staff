@@ -25,6 +25,10 @@ print(sorted(intervals))  # [[1, 3], [3, 4]]
 ```
 Compare the next start with the current end; extending with `max` matters for a fully nested interval. Calendar meetings may instead be half-open.
 
+### A design choice worth saying aloud
+
+Make a sorted **copy** of the intervals if the caller retains ownership of its input; sorting the received list in place would be an observable side effect. The active merged interval stores the covered end, so use `max(current_end, next_end)` for nesting. Write down the closed-endpoint rule before deciding whether touching ranges merge.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

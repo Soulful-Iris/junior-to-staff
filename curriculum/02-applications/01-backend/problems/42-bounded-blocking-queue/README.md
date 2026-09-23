@@ -35,6 +35,10 @@ with condition:
 ```
 For capacity 1 containing A, a put(B) blocks until A is removed *or* shutdown rejects it. Use a loop, a single deadline across wakes, and explicit drain/cancel behavior.
 
+### A design choice worth saying aloud
+
+Separate `closed` from `items`: shutdown may reject new puts while still permitting consumers to drain queued work. Recheck capacity and closure in a `while` after every wake; a signal is not a reservation. Use one monotonic deadline for timed operations, or repeated wakes could extend the advertised timeout.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

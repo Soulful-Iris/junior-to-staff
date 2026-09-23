@@ -27,6 +27,10 @@ print(mid, nums[mid])  # 2, 2; still search LEFT for the first 2
 ```
 The answer for target 2 is index 1. [Walk the full boundary loop](../../lessons/04-order.md) and explain why `hi = mid` keeps mid eligible.
 
+### A design choice worth saying aloud
+
+Use `lo` as the first index not yet ruled out and `hi` as the exclusive upper bound; this `[lo, hi)` invariant explains why `hi = mid` keeps a possible first match. Return `len(nums)` when the predicate never becomes true, rather than inventing `-1` if the contract promises an insertion index.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

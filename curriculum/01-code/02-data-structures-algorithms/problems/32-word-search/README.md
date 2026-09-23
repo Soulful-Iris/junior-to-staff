@@ -30,6 +30,10 @@ used.remove((0, 0))   # undo when returning
 ```
 On the one-row board `[["A","B"]]`, `"AB"` is present but `"ABA"` is impossible without reusing the only A. State whether diagonal movement is allowed.
 
+### A design choice worth saying aloud
+
+`used_in_path` belongs to the current search branch, not to the entire board. A failed route must release its cells before another route starts. If you mark by mutating the board, restore cells even on early returns; a separate set avoids altering caller-owned input.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

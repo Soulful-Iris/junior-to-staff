@@ -24,12 +24,17 @@ exposes the largest lower-half value; Python's min-heap can represent it by nega
 The median splits sorted values into two halves. Two heaps can maintain that split incrementally: a max-heap for the lower half (Python uses negated numbers) and a min-heap for the upper:
 ```python
 from heapq import heappush
+from fractions import Fraction
 lower, upper = [], []
 heappush(lower, -3)  # lower-half maximum is -lower[0] = 3
 heappush(upper, 7)   # upper-half minimum is upper[0] = 7
-print((-lower[0] + upper[0]) / 2)  # 5.0
+print(Fraction(-lower[0] + upper[0], 2))  # Fraction(5, 1)
 ```
 After each add, rebalance sizes and enforce every lower value ≤ every upper value. Ask how the contract represents half-integer medians.
+
+### A design choice worth saying aloud
+
+`lower_half` and `upper_half` own opposite sides of the median; Python negates lower values to emulate a max-heap. Keep the size difference at most one and every lower value ≤ every upper value. Return `Fraction` for exact half-integers, including inputs too large for lossless float conversion.
 
 <!-- interview-rehearsal:start -->
 

@@ -14,21 +14,21 @@ def two_sum(nums, target):
 
 def longest_unique(text):
     left = best = 0
-    last = {}
+    last_seen = {}
     for right, char in enumerate(text):
-        left = max(left, last.get(char, -1) + 1)
+        left = max(left, last_seen.get(char, -1) + 1)
         best = max(best, right - left + 1)
-        last[char] = right
+        last_seen[char] = right
     return best
 
 
 def subarray_sum(nums, target):
-    counts = {0: 1}
+    prefix_counts = {0: 1}
     prefix = result = 0
     for value in nums:
         prefix += value
-        result += counts.get(prefix - target, 0)
-        counts[prefix] = counts.get(prefix, 0) + 1
+        result += prefix_counts.get(prefix - target, 0)
+        prefix_counts[prefix] = prefix_counts.get(prefix, 0) + 1
     return result
 
 

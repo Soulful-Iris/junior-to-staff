@@ -26,6 +26,10 @@ print(need["A"])       # 2
 ```
 With text `"AAAB"` and requirement `"AAB"`, the shortest cover is `"AAB"` at the end. Expanding earns characters; shrinking is safe only while every required count remains satisfied.
 
+### A design choice worth saying aloud
+
+Keep the requested counts separate from the mutable `remaining_by_character`. The latter answers how many more of each character the current window owes; a negative count means surplus, not failure. A single `missing` total can tell you when to shrink, while the count map tells you **which** removal would break coverage.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

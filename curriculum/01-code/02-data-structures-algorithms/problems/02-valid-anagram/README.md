@@ -26,6 +26,10 @@ print(Counter("aab") == Counter("abb"))  # False
 ```
 The dictionary key is a Unicode code point; its value is the number of occurrences. Ask whether case and normalization should change *before* counting.
 
+### A design choice worth saying aloud
+
+`remaining` starts with the first string's character counts, then each character in the second consumes one copy; a missing copy fails immediately. Keep the original strings untouched. If case folding or Unicode normalization becomes a requirement, apply the same explicit rule to **both** inputs before counting; changing one side silently changes the contract.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

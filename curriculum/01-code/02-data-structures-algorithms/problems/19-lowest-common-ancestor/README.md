@@ -25,6 +25,10 @@ found_q = node is q
 ```
 In a tree `A → {B,C}`, the lowest common ancestor of B and C is A. For B and an outside node X, the correct result is absent under this contract, not B.
 
+### A design choice worth saying aloud
+
+A returned candidate alone cannot prove both requested nodes exist. Carry `found_p` and `found_q` (or a two-bit presence mask) with each subtree result and return an ancestor only when both are true. Compare nodes by identity; a second object with the same value must not satisfy the request.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

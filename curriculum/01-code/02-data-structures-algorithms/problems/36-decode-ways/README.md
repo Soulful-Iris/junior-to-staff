@@ -29,6 +29,10 @@ print(10 <= int(digits[-2:]) <= 26)  # True: 26 is a letter
 ```
 `"226"` has three decodings: `2|2|6`, `22|6`, `2|26`. `"06"` has none; do not interpret a leading zero as 6.
 
+### A design choice worth saying aloud
+
+`ways[i]` counts decodings after consuming `i` digits. The internal base `ways[0] = 1` is one way to extend an empty prefix; the public contract returns 0 for empty input. Distinguish those semantics rather than patching the recurrence.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects

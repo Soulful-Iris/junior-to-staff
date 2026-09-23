@@ -26,6 +26,10 @@ print(nums[lo] <= nums[mid])  # True: left half is sorted
 ```
 For target 2, the answer is position 4. Clarify duplicate values: if ties prevent identifying a sorted half, the log-time guarantee may vanish.
 
+### A design choice worth saying aloud
+
+Keep `lo`, `mid`, and `hi` as indices, never as values; compare `nums[lo]` and `nums[mid]` to prove which half is ordered before discarding it. Duplicate endpoints can make that proof inconclusive. If duplicates become allowed, show the ambiguous `[1,1,1,0,1]` case and qualify the worst-case bound.
+
 <!-- interview-rehearsal:start -->
 
 ## What the interviewer expects
