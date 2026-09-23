@@ -127,6 +127,7 @@ class Projects(unittest.TestCase):
         self.assertEqual(self.invoice("TOTAL USD 12.50; TOTAL USD 14.00")["status"], "REVIEW_REQUIRED")
 
     def test_subtotal_cannot_replace_total(self):
+        self.model.generate = lambda *a: {"currency": "USD", "total_cents": 1250, "evidence": "TOTAL USD 12.50"}
         self.assertEqual(self.invoice("SUBTOTAL USD 12.50; TOTAL USD 14.00")["status"], "REVIEW_REQUIRED")
 
     def test_missing_currency_requires_review(self):

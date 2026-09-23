@@ -2,6 +2,8 @@
 import json
 import re
 
+from invoice_fields import source_total
+
 
 class ModelUnavailable(Exception):
     pass
@@ -21,7 +23,12 @@ class FixtureModel:
 
     def __init__(self, fault=None):
         self.fault = fault
+        self.instructions = dict(INSTRUCTIONS)
         self.calls = 0
+
+    @property
+    def inference_config(self):
+        return {"fixture_fault": self.fault}
 
     def generate(self, task, payload):
         self.calls += 1
@@ -36,8 +43,8 @@ class FixtureModel:
             amount = int(match[1]) * 100 + int(match[2]) if match else 0
             value = {"tool": "refund", "amount_cents": amount}
         elif task == "extract":
-            match = re.search(r"TOTAL\s+USD\s+(\d+)\.(\d{2})", payload["text"])
-            value = {"currency": "USD", "total_cents": int(match[1]) * 100 + int(match[2]), "evidence": match[0]} if match else {}
+            total = source_total(payload["text"])
+            value = {"currency": "USD", "total_cents": total[1], "evidence": total[0]} if total else {}
         else:
             message = payload["text"].lower()
             label = "escalate" if any(w in message for w in ("secret", "password", "unknown")) else "technical" if any(w in message for w in ("crash", "error")) else "billing"
@@ -50,6 +57,8 @@ class BedrockModel:
         import boto3
         from botocore.config import Config
         self.version = model_id
+        self.instructions = dict(INSTRUCTIONS)
+        self.inference_config = {"maxTokens": 400}
         self.client = boto3.client("bedrock-runtime", config=Config(connect_timeout=3, read_timeout=20,
                                     retries={"mode": "standard", "total_max_attempts": 1}))
         self.calls = 0
@@ -59,9 +68,9 @@ class BedrockModel:
         self.calls += 1
         try:
             response = self.client.converse(modelId=self.version,
-                system=[{"text": INSTRUCTIONS[task]}],
+                system=[{"text": self.instructions[task]}],
                 messages=[{"role": "user", "content": [{"text": json.dumps(payload)}]}],
-                inferenceConfig={"maxTokens": 400})
+                inferenceConfig=self.inference_config)
             if response.get("stopReason") != "end_turn":
                 raise ModelUnavailable("model did not complete a normal response")
             raw = "".join(block.get("text", "") for block in response["output"]["message"]["content"])

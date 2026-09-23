@@ -6,6 +6,8 @@ from pathlib import Path
 import re
 import time
 
+from candidate import manifest as candidate_manifest
+from invoice_fields import source_total
 from models import BedrockModel, FixtureModel, ModelUnavailable
 from storage import AwsStore, Conflict, LocalStore, fingerprint
 
@@ -49,7 +51,8 @@ class Workbench:
                   "agent.propose": self.agent_propose, "agent.approve": self.agent_approve,
                   "invoice.extract": self.invoice_extract, "invoice.get": self.invoice_get,
                   "evaluation.run": self.evaluation_run, "release.promote": self.release_promote,
-                  "release.rollback": self.release_rollback, "release.get": self.release_get}
+                  "release.rollback": self.release_rollback, "release.get": self.release_get,
+                  "classifier.predict": self.classifier_predict}
         if action not in routes:
             raise Invalid("unknown action")
         return routes[action](event)
@@ -178,13 +181,9 @@ class Workbench:
         output = self.model.generate("extract", {"text": source})
         valid = isinstance(output, dict) and output.get("currency") == "USD"
         valid = valid and type(output.get("total_cents")) is int and 0 < output["total_cents"] <= 100000
-        evidence = output.get("evidence", "") if isinstance(output, dict) else ""
-        match = re.fullmatch(r"TOTAL\s+USD\s+(\d+)\.(\d{2})", evidence) if isinstance(evidence, str) else None
-        valid = valid and bool(match) and evidence in source
-        valid = valid and output["total_cents"] == int(match[1]) * 100 + int(match[2])
-        # Ambiguous totals must be reviewed rather than selecting one arbitrarily.
-        totals = re.findall(r"(?<!\w)TOTAL\s+USD\s+(\d+)\.(\d{2})", source)
-        valid = valid and len(totals) == 1 and output["total_cents"] == int(totals[0][0]) * 100 + int(totals[0][1])
+        total = source_total(source)
+        valid = valid and total is not None
+        valid = valid and output.get("evidence") == total[0] and output["total_cents"] == total[1]
         result = {"id": record_id, "source_hash": source_hash, "status": "ACCEPTED" if valid else "REVIEW_REQUIRED",
                   "data": output if valid else None, "model": self.model.version, "schema": "invoice-v1"}
         result["artifact"] = self.store.write_object(result)
@@ -211,6 +210,7 @@ class Workbench:
         key = self.key("evaluation#" + run_id)
         if self.store.get(key)[1] is not None:
             raise Conflict("evaluation ID is immutable; choose another ID")
+        identity = candidate_manifest(self.model)
         results = []
         started = self.clock()
         for case in cases:
@@ -221,11 +221,14 @@ class Workbench:
                 actual = None
             results.append({"id": case["id"], "expected": case["expected"], "actual": actual,
                             "pass": actual == case["expected"], "severe": case["severe"]})
+        if candidate_manifest(self.model) != identity:
+            raise Conflict("candidate changed during evaluation; rerun")
         passed = sum(r["pass"] for r in results)
         severe_misses = sum(r["severe"] and not r["pass"] for r in results)
         coverage = {c["expected"] for c in cases} == {"billing", "technical", "escalate"} and any(c["severe"] for c in cases)
         eligible = len(cases) >= 6 and passed == len(cases) and severe_misses == 0 and coverage
-        report = {"id": run_id, "candidate": self.model.version, "dataset_hash": fingerprint(cases),
+        report = {"id": run_id, "candidate": self.model.version, "candidate_manifest": identity,
+                  "candidate_id": fingerprint(identity), "dataset_hash": fingerprint(cases),
                   "policy": "demo-gate-v1", "total": len(cases), "passed": passed, "severe_misses": severe_misses,
                   "coverage": coverage, "eligible": eligible, "elapsed_ms": int((self.clock()-started)*1000), "results": results}
         report["artifact"] = self.store.write_object(report)
@@ -243,6 +246,8 @@ class Workbench:
         revision, state = self.store.get(self.key("release"))
         if type(event.get("expected_revision")) is not int or event["expected_revision"] != revision:
             raise Conflict("release changed; inspect it again")
+        if state and state["active"] == report["id"]:
+            return {"revision": revision, **state}  # Preserve the previous distinct release.
         state = {"active": report["id"], "previous": state["active"] if state else None}
         new_revision = self.store.put(self.key("release"), state, revision)
         return {"revision": new_revision, **state}
@@ -257,6 +262,23 @@ class Workbench:
         new_revision = self.store.put(self.key("release"), state, revision)
         return {"revision": new_revision, **state}
 
+    def classifier_predict(self, event):
+        message = text(event.get("text"), 500)
+        revision, release = self.store.get(self.key("release"))
+        report = release and self.store.get(self.key("evaluation#" + release["active"]))[1]
+        identity = candidate_manifest(self.model)
+        if (not report or not report.get("eligible")
+                or report.get("candidate_manifest") != identity
+                or report.get("candidate_id") != fingerprint(identity)):
+            raise Invalid("active release does not authorize this candidate; evaluate or load matching code")
+        output = self.model.generate("classify", {"text": message})
+        if (candidate_manifest(self.model) != identity
+                or self.store.get(self.key("release"))[0] != revision):
+            raise Conflict("release or candidate changed during inference; retry")
+        if not isinstance(output, dict) or output.get("label") not in ("billing", "technical", "escalate"):
+            raise Invalid("invalid classification")
+        return {"label": output["label"], "release": report["id"], "candidate_id": report["candidate_id"]}
+
 
 def configured():
     tenant, subject = os.getenv("AI_TENANT", "team-a"), os.getenv("AI_SUBJECT", "alice")
@@ -269,12 +291,23 @@ def handle(event, workbench, surface="operator"):
     if surface == "worker":
         failures = []
         for record in event.get("Records", []):
+            payload = None
             try:
                 payload = json.loads(record["body"])
-                if payload.get("action") != "invoice.extract":
+                if not isinstance(payload, dict) or payload.get("action") != "invoice.extract":
                     raise Invalid("worker only accepts invoice extraction")
-                workbench.run(payload)
-            except Exception:
+                result = workbench.run(payload)
+                print(json.dumps({"event": "invoice_worker", "message_ref": fingerprint(record["messageId"])[:16],
+                                  "category": result["status"], "retry": False}))
+            except Exception as exc:
+                category = ("invalid_input" if isinstance(exc, (Invalid, ValueError, KeyError, TypeError)) else
+                            "id_conflict" if isinstance(exc, Conflict) else
+                            "provider_unavailable" if isinstance(exc, ModelUnavailable) else "processing_failure")
+                # No exception text, source, prompt, or model output enters logs.
+                # Invalid jobs also fail the batch: SQS redrive sends them to DLQ,
+                # instead of silently acknowledging a request with no durable result.
+                print(json.dumps({"event": "invoice_worker", "message_ref": fingerprint(record["messageId"])[:16],
+                                  "category": category, "retry": True, "disposition": "redrive"}))
                 failures.append({"itemIdentifier": record["messageId"]})
         return {"batchItemFailures": failures}
     return workbench.run(event)
