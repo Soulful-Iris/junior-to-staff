@@ -25,7 +25,8 @@ def main() -> int:
     broken = []
     checked = 0
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d != ".git"]
+        dirnames[:] = [d for d in dirnames if d not in {".git", "node_modules", ".venv", "__pycache__", ".mermaid-cache", ".releases"}
+                       and not (dirpath == os.path.join(ROOT, "site") and (d == "out" or d.startswith("out.")))]
         for name in filenames:
             if not name.endswith(".md"):
                 continue
