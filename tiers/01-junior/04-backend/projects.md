@@ -1,6 +1,6 @@
 # 04 · Backend — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [the section](../../../curriculum/02-applications/01-backend/README.md) first
 
 Five projects, rising. Each one isolates a different thing the backend owes
 the world: an account of what it did, an answer on time, a refusal it can
