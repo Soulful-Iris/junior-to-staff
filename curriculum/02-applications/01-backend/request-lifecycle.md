@@ -105,9 +105,11 @@ framework; the stops do not.
 Three ideas survive framework churn.
 
 **Every hop is a place it can stop, and each stop needs an owner.** HTTP is
-the contract for saying so: 4xx means the sender got it wrong, 5xx means you
-did. GET must never change anything. PUT and DELETE are idempotent — twice
-leaves the world as once — while POST is not guaranteed to be (RFC 9110;
+the contract for saying so: 4xx reports client/request-side failure; 5xx reports
+server-side failure. A safe GET does not request a state-changing operation;
+incidental logging is allowed. PUT and DELETE are idempotent in their intended
+effect, not necessarily their response or logs. POST has no default idempotency
+guarantee and can also represent a complex query (RFC 9110;
 checked 2026-09-21), which matters because networks deliver things twice and
 users double-click. Failures come in three kinds: expected (a 4xx with a clear
 message), unexpected (a 5xx, logged loudly with stack trace and request id),
@@ -119,8 +121,11 @@ category of its own (checked 2026-09-21).
 duplicated, killed mid-request; truth lives in the database. Requests
 interleave, so "read a value, change it, write it back" is a bug waiting for
 company: both read 4, both write 5, one update vanishes without an error. A
-transaction is the database's promise that a group of changes happens entirely
-or not at all, never seen half-done. Identity comes from the environment:
+transaction commits a group atomically, but its isolation and write predicates
+must also protect the invariant. `BEGIN` alone does not stop both callers from
+reading 4 and assigning 5. Use `UPDATE count = count + 1`, a version-guarded
+update, a row lock around read/decide/write, or serializable isolation with
+whole-transaction retry. Identity comes from the environment:
 harmless defaults in committed config files; secrets handed to the process at
 start, as environment variables set by whatever launches it, or read from a
 secret store. Never the repo — a repo is designed to be copied
@@ -140,22 +145,22 @@ you never decided what your fetcher was allowed to reach.
 
 ## What good looks like
 
-- Status codes tell the truth: every failure is a 4xx or 5xx. A 200 with an
-  error inside is a lie that frontends, caches, and monitoring all believe.
+- Status codes describe the HTTP operation: a rejected charge needs the documented
+  failure status; a successful GET may return a job whose domain state is failed.
 - Errors have one shape everywhere: machine-readable code, human message, a
   request id that also appears in the logs.
 - Every outbound call has a timeout visible in the code, chosen on purpose.
-- GET changes nothing; repeating a PUT or DELETE changes nothing more; a
-  duplicate POST does something you decided in advance.
+- GET requests no destructive effect; repeated PUT/DELETE preserve the intended
+  idempotent effect; duplicate POST behavior is defined explicitly.
 - Input is validated at the edge; handler logic starts after the shape is
   proven.
 - Config comes from the environment; the repo holds an example file with
   variable names and none of the values.
-- Read-modify-write paths sit inside transactions or single atomic statements.
+- Read-modify-write paths name their enforcing predicate, row lock, or isolation level—not only a transaction wrapper.
 
 Done badly, you see:
 
-- `200 {"success": false}`.
+- A rejected `POST /charges` reported as a successful charge; this is different from `GET /jobs/42` returning `200 {"state":"failed"}`.
 - A catch block that logs nothing and returns something.
 - The database password in a committed config file, "to rotate later."
 - A fetcher that will happily request `http://169.254.169.254/`, where cloud
@@ -180,14 +185,15 @@ about if the endpoint returned 200 with an error message inside the body.
 
 *Why it is asked that way:* the failure column is what juniors and models both
 skip, so it is demanded before a happy path exists to crowd it out. The second
-paragraph turns "never 200 on failure" from a rule into a visible cost.
+paragraph distinguishes a failed HTTP operation from a successful representation of failed background work.
 
 *What you should get back:* a boring table — nouns in the paths, methods as
 verbs, mostly 200, 201, 400, 401, 403, 404, 409. Boring is the win:
 everything already understands it.
 
-*Push back on:* any failure returned as 200; POST used for reads; inventive
-shapes that trade a decade of shared convention for nothing.
+*Push back on:* failed operations disguised as success, destructive GET requests,
+or undocumented retry semantics. A logged GET is still safe; a documented POST
+query is valid when its semantics and caching trade-offs justify it.
 
 **Request 2 — hostile-input review of the fetcher**
 
@@ -225,20 +231,34 @@ it back. For the most important one, write a test that runs two of those
 operations concurrently and demonstrates the lost update — I want to see
 it fail before any fix exists.
 
-Then fix it with a transaction or a single atomic statement, and show the
-same test passing.
+Then choose the enforcing mechanism: an atomic relative update, a guarded update
+with an affected-row check, a row lock held through the write, or serializable
+isolation with bounded whole-transaction retry. State the isolation level and
+show the same controlled schedule preserving the invariant.
 ```
 
 *Why:* the same discipline as [Testing](../04-testing/testing-strategy.md) — evidence the
-bug exists before you trust the fix. A concurrency fix without a red test
-first is a guess that happened to compile.
+bug exists before you trust the fix. A failing reproduction strengthens the
+evidence; a separately justified invariant and real concurrent test also matter.
 
 *What you should get back:* one red run showing the lost update, then the same
 test green after the fix, in that order.
 
-*Push back on:* a test that fakes concurrency with sleeps and sequential
-calls; any fix that adds an in-process lock, which dies the moment you run a
-second process — the first thing that happens after P1.
+*Push back on:* sleep-only ordering or a process-local lock presented as a
+multi-process guarantee. Use two independent database sessions; the
+[PostgreSQL lab](../02-databases/labs/postgresql/README.md) includes the naive
+transactional schedule, guarded stock decrement and serializable retry.
+
+| Two callers start at 4 | Final value / decision |
+|---|---|
+| Both `BEGIN`; both read 4; both assign 5 | 5: atomic transactions still lost an update |
+| Both `UPDATE counters SET value = value + 1` | 6: each update uses the protected current value |
+| Both guard `WHERE version = 7` | One row changes; the loser handles a conflict |
+
+For stock: `UPDATE inventory SET available=available-1 WHERE id=:id AND available>0 RETURNING available`.
+Insert the reservation in that same transaction **only if a row returned**.
+The conditional decrement prevents negative stock; the transaction couples it
+to the reservation. SQL execution evidence belongs to the database lab, not this table.
 
 ## How you would know it is wrong
 
@@ -280,10 +300,10 @@ On **P1**, this section is the add-a-URL flow done properly:
   reason next to it), a size cap, a scheme allowlist, and a private-address
   block. A failed fetch still saves the item, failure visible on it.
 - One structured error shape — code, message, request id — used by every
-  handler, and no 200-with-a-failure-inside anywhere.
+  handler; distinguish failed requests from successfully retrieved domain states.
 - Your one genuinely concurrent write (two people marking the same item read,
-  say) protected by a transaction or atomic update, with Request 3's
-  red-then-green test as evidence.
+  say) protected by a named atomic predicate, lock or isolation/retry protocol,
+  with Request 3's controlled two-session test as evidence.
 - Secrets via the environment: an example env file in the repo, the real one
   ignored.
 
