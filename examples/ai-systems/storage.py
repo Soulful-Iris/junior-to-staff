@@ -1,6 +1,8 @@
 """Persistence adapters: identical optimistic concurrency contract, local and AWS."""
 import hashlib
 import json
+import os
+import tempfile
 from pathlib import Path
 import sqlite3
 
@@ -15,6 +17,15 @@ def encode(value):
 
 def fingerprint(value):
     return hashlib.sha256(encode(value).encode()).hexdigest()
+
+
+def sync_directory(path):
+    """POSIX durability boundary; fail explicitly on unsupported filesystems."""
+    fd = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 class LocalStore:
@@ -44,9 +55,32 @@ class LocalStore:
         return revision + 1
 
     def write_object(self, value):
-        key = fingerprint(value) + ".json"
-        (self.directory / key).write_text(encode(value))
-        return key
+        data = encode(value).encode("utf-8")
+        key = hashlib.sha256(data).hexdigest() + ".json"
+        destination = self.directory / key
+        if destination.exists():
+            if destination.read_bytes() != data:
+                raise ValueError("content-addressed object is corrupt")
+            sync_directory(self.directory)
+            return key  # Never reopen an already published object for writing.
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=self.directory, prefix=".object-", delete=False) as stream:
+                temporary = Path(stream.name)
+                stream.write(data)
+                stream.flush()
+                os.fsync(stream.fileno())
+            # Same-filesystem, no-clobber publication: readers see all bytes or none.
+            try:
+                os.link(temporary, destination)
+            except FileExistsError:
+                if destination.read_bytes() != data:
+                    raise ValueError("content-addressed object is corrupt")
+            sync_directory(self.directory)
+            return key
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
 
     def read_object(self, key):
         if Path(key).name != key:
