@@ -18,7 +18,8 @@ Read [the infra candidate brief](../../../../../practice/candidate/infra.md) bef
 | Task interface | Callable receives a context with `check()`, cancellation event and optional absolute monotonic deadline |
 | Accepted task | Exactly one terminal outcome: succeeded, failed, cancelled or expired |
 | Shutdown | Stop admission; either drain queued work or cancel it; let running work finish cooperatively |
-| Deadline | Admission and execution share one absolute task deadline; a wait timeout alone does not stop a task |
+| Deadline | One finite absolute monotonic deadline covers admission through terminal publication; a wait timeout alone does not stop a task |
+| Cancellation | `cancel(task) == True` wins over an unpublished outcome; `False` means the task was already terminal |
 | Nested work | A worker submitting into this same pool fails immediately; worker joining this pool is also rejected |
 | Excluded | Forced thread termination, FIFO fairness among blocked producers, process-crash durability and fleet-wide limits |
 
@@ -83,8 +84,12 @@ waits while the queue is empty and the executor is open; closed plus empty termi
 Can its slot be handed to another task immediately? **Expected answer:** no. Signal
 cancellation, retain active accounting, wait for actual return, then record a terminal
 outcome. A shutdown timeout reports that work still owns resources. It must not
-pretend to release a socket or thread. `Context.check()` after return discards a
-cancelled/expired result but cannot undo an external effect already performed.
+pretend to release a socket or thread. Cancellation and terminal publication use
+the same lock. A successful `cancel()` before publication makes the eventual
+outcome cancelled, including the gap after the callable's final check. A success
+is also checked for deadline expiry under that lock. Neither can undo an external
+effect already performed. Deadlines and wait timeouts reject NaN/infinity/bool;
+wait timeouts must be nonnegative. Individual OS waits are capped and rechecked.
 
 ```mermaid
 stateDiagram-v2
@@ -93,7 +98,7 @@ stateDiagram-v2
   Queued --> Cancelled: queued cancellation
   Running --> CancelRequested: caller cancels
   CancelRequested --> Cancelled: callable returns or checks
-  Running --> Succeeded: returns before deadline
+  Running --> Succeeded: publish under lock before deadline
   Running --> Failed: raises
   Running --> Expired: deadline observed
 ```
@@ -117,3 +122,16 @@ instances can run 80 tasks and queue 160. Lead follow-up: allocate dependency an
 tenant budgets, choose overload responses, and state whether waiting producers can
 starve. This implementation promises bounds and eventual progress under its assumptions,
 not strict fairness or a fleet-wide concurrency cap.
+
+| Saturated one-process snapshot | Count |
+|---|---:|
+| Active | 4 |
+| Accepted in queue | 8 |
+| Blocked producer outside accepted work | 1 |
+| Accepted total before release | 12 |
+
+`snapshot()` exposes `waiting_producers` separately. A service must also bound
+incoming callers, apply a total caller deadline and return an overload response.
+For 20 replicas, budget the actual 80 active + 160 queued tasks against downstream
+capacity; local bounds do not allocate a fleet quota. FIFO dequeue order does not
+promise completion order or fairness among blocked callers.

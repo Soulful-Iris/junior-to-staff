@@ -1,6 +1,7 @@
 """A fixed worker pool with bounded admission; stdlib only, Python 3.10+."""
 from collections import deque
-from threading import Condition, Event, Thread, local
+from threading import Condition, Event, Thread, TIMEOUT_MAX, local
+import math
 import time
 
 
@@ -18,6 +19,18 @@ class Cancelled(RuntimeError):
 
 class DeadlineExceeded(TimeoutError):
     pass
+
+
+def _time_value(value, name, *, nonnegative=False):
+    if value is None:
+        return None
+    try:
+        valid = type(value) in (int, float) and math.isfinite(value)
+    except OverflowError:
+        valid = False
+    if not valid or (nonnegative and value < 0):
+        raise ValueError(f"{name} must be finite" + (" and nonnegative" if nonnegative else ""))
+    return value
 
 
 class Context:
@@ -38,8 +51,13 @@ class Task:
         self.state, self.value, self.error, self.terminal_count = "queued", None, None, 0
 
     def result(self, timeout=None):
-        if not self.done.wait(timeout):
-            raise TimeoutError("waiting did not cancel the task")
+        timeout = _time_value(timeout, "timeout", nonnegative=True)
+        end = None if timeout is None else time.monotonic() + timeout
+        while not self.done.is_set():
+            remaining = None if end is None else end - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                raise TimeoutError("waiting did not cancel the task")
+            self.done.wait(None if remaining is None else min(remaining, TIMEOUT_MAX))
         if self.error is not None:
             raise self.error
         return self.value
@@ -47,7 +65,7 @@ class Task:
 
 class Executor:
     def __init__(self, workers=4, capacity=8, clock=time.monotonic):
-        if workers <= 0 or capacity <= 0:
+        if type(workers) is not int or type(capacity) is not int or workers <= 0 or capacity <= 0:
             raise ValueError("positive workers and queue capacity required")
         self.capacity, self.clock = capacity, clock
         self.cv, self.queue, self.worker_local = Condition(), deque(), local()
@@ -64,6 +82,7 @@ class Executor:
             self.cv.notify_all()
 
     def submit(self, fn, *, deadline=None):
+        deadline = _time_value(deadline, "deadline")
         if getattr(self.worker_local, "inside", False):
             raise NestedSubmission("workers cannot submit into their own pool")
         with self.cv:
@@ -75,7 +94,7 @@ class Executor:
                 self.waiting_producers += 1
                 self.cv.notify_all()
                 try:
-                    self.cv.wait(remaining)
+                    self.cv.wait(None if remaining is None else min(remaining, TIMEOUT_MAX))
                 finally:
                     self.waiting_producers -= 1
             if self.closed:
@@ -92,6 +111,11 @@ class Executor:
     def _finish(self, task, state, value=None, error=None):
         # Caller owns cv. Only internal state and Event are changed under this lock.
         assert not task.done.is_set()
+        # cancel() and this publication share cv: an accepted cancellation wins.
+        if task.context.cancelled.is_set():
+            state, value, error = "cancelled", None, Cancelled("cancelled before publication")
+        elif state == "succeeded" and task.context.deadline is not None and self.clock() >= task.context.deadline:
+            state, value, error = "expired", None, DeadlineExceeded("deadline before publication")
         task.state, task.value, task.error = state, value, error
         task.terminal_count += 1
         self.completed += 1
@@ -141,6 +165,7 @@ class Executor:
                     self.cv.notify_all()
 
     def shutdown(self, *, cancel_queued=False, wait=True, timeout=None):
+        timeout = _time_value(timeout, "timeout", nonnegative=True)
         if wait and getattr(self.worker_local, "inside", False):
             raise NestedSubmission("worker cannot join its own executor")
         with self.cv:
@@ -153,11 +178,16 @@ class Executor:
         if wait:
             end = None if timeout is None else time.monotonic() + timeout
             for thread in self.threads:
-                thread.join(None if end is None else max(0, end - time.monotonic()))
+                while thread.is_alive():
+                    remaining = None if end is None else end - time.monotonic()
+                    if remaining is not None and remaining <= 0:
+                        break
+                    thread.join(None if remaining is None else min(remaining, TIMEOUT_MAX))
             if any(thread.is_alive() for thread in self.threads):
                 raise TimeoutError("running work still owns resources")
 
     def snapshot(self):
         with self.cv:
             return dict(active=self.active, queued=len(self.queue), accepted=self.accepted,
-                        completed=self.completed, peak_active=self.peak_active, peak_queued=self.peak_queued)
+                        completed=self.completed, peak_active=self.peak_active, peak_queued=self.peak_queued,
+                        waiting_producers=self.waiting_producers)
