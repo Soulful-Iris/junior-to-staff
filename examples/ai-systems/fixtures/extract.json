@@ -1,0 +1,5 @@
+{
+  "action": "invoice.extract",
+  "id": "invoice-17",
+  "text": "ACME invoice 17. TOTAL USD 12.50"
+}

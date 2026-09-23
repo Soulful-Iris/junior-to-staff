@@ -19,6 +19,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 3 | [Support assistant](problems/support-assistant.md) |
 | 4 | [Personalized ranking: low latency and evidence of quality](problems/personalized-ranking.md) |
 | 5 | [Knowledge assistant: the citation that lost access](problems/knowledge-assistant.md) |
+| 6 | [Build and deploy the AI project workbench](aws-project-workbench.md) |
 
 ## Go deeper on the same problem
 

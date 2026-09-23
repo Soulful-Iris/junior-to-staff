@@ -1,0 +1,8 @@
+{
+  "action": "document.put",
+  "id": "refund-policy",
+  "text": "Refunds are available within 30 days.",
+  "readers": [
+    "alice"
+  ]
+}

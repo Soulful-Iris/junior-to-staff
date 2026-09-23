@@ -1,0 +1,409 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "Four bounded AI learning projects: operator invocation, persistent state, async extraction.",
+  "Parameters": {
+    "Tenant": {
+      "Type": "String",
+      "Default": "team-a",
+      "AllowedPattern": "[a-zA-Z0-9_-]{1,64}"
+    },
+    "Subject": {
+      "Type": "String",
+      "Default": "alice",
+      "AllowedPattern": "[a-zA-Z0-9_-]{1,64}"
+    },
+    "ModelMode": {
+      "Type": "String",
+      "Default": "fixture",
+      "AllowedValues": [
+        "fixture",
+        "bedrock"
+      ]
+    },
+    "ModelId": {
+      "Type": "String",
+      "Default": "fixture"
+    },
+    "ModelResourceArn": {
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "UseBedrock": {
+      "Fn::Equals": [
+        {
+          "Ref": "ModelMode"
+        },
+        "bedrock"
+      ]
+    }
+  },
+  "Globals": {
+    "Function": {
+      "Runtime": "python3.12",
+      "Handler": "app.handler",
+      "CodeUri": ".",
+      "Timeout": 180,
+      "MemorySize": 512,
+      "Environment": {
+        "Variables": {
+          "AI_TENANT": {
+            "Ref": "Tenant"
+          },
+          "AI_SUBJECT": {
+            "Ref": "Subject"
+          },
+          "AI_MODEL_MODE": {
+            "Ref": "ModelMode"
+          },
+          "BEDROCK_MODEL_ID": {
+            "Ref": "ModelId"
+          },
+          "STATE_TABLE": {
+            "Ref": "State"
+          },
+          "ARTIFACT_BUCKET": {
+            "Ref": "Artifacts"
+          }
+        }
+      }
+    }
+  },
+  "Resources": {
+    "State": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "pk",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "pk",
+            "KeyType": "HASH"
+          }
+        ],
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        }
+      }
+    },
+    "Artifacts": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+          "BlockPublicPolicy": true,
+          "RestrictPublicBuckets": true
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      }
+    },
+    "ArtifactPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "Artifacts"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Artifacts",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${Artifacts.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "DeadLetters": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "SqsManagedSseEnabled": true
+      }
+    },
+    "Jobs": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "VisibilityTimeout": 1080,
+        "SqsManagedSseEnabled": true,
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DeadLetters",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 3
+        }
+      }
+    },
+    "Operator": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Policies": [
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem"
+                ],
+                "Resource": {
+                  "Fn::GetAtt": [
+                    "State",
+                    "Arn"
+                  ]
+                },
+                "Condition": {
+                  "ForAllValues:StringLike": {
+                    "dynamodb:LeadingKeys": [
+                      {
+                        "Fn::Sub": "${Tenant}#*"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:GetObject",
+                  "s3:PutObject"
+                ],
+                "Resource": {
+                  "Fn::Sub": "${Artifacts.Arn}/${Tenant}/*"
+                }
+              },
+              {
+                "Fn::If": [
+                  "UseBedrock",
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "bedrock:InvokeModel"
+                    ],
+                    "Resource": {
+                      "Ref": "ModelResourceArn"
+                    }
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "ReservedConcurrentExecutions": 2,
+        "Environment": {
+          "Variables": {
+            "AI_SURFACE": "operator"
+          }
+        }
+      }
+    },
+    "Worker": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Policies": [
+          {
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:GetItem",
+                  "dynamodb:PutItem"
+                ],
+                "Resource": {
+                  "Fn::GetAtt": [
+                    "State",
+                    "Arn"
+                  ]
+                },
+                "Condition": {
+                  "ForAllValues:StringLike": {
+                    "dynamodb:LeadingKeys": [
+                      {
+                        "Fn::Sub": "${Tenant}#*"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:GetObject",
+                  "s3:PutObject"
+                ],
+                "Resource": {
+                  "Fn::Sub": "${Artifacts.Arn}/${Tenant}/*"
+                }
+              },
+              {
+                "Fn::If": [
+                  "UseBedrock",
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "bedrock:InvokeModel"
+                    ],
+                    "Resource": {
+                      "Ref": "ModelResourceArn"
+                    }
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "ReservedConcurrentExecutions": 2,
+        "Environment": {
+          "Variables": {
+            "AI_SURFACE": "worker"
+          }
+        },
+        "Events": {
+          "InvoiceJobs": {
+            "Type": "SQS",
+            "Properties": {
+              "Queue": {
+                "Fn::GetAtt": [
+                  "Jobs",
+                  "Arn"
+                ]
+              },
+              "BatchSize": 1,
+              "FunctionResponseTypes": [
+                "ReportBatchItemFailures"
+              ],
+              "ScalingConfig": {
+                "MaximumConcurrency": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "OperatorLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${Operator}"
+        },
+        "RetentionInDays": 14
+      }
+    },
+    "WorkerLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${Worker}"
+        },
+        "RetentionInDays": 14
+      }
+    },
+    "FailedJobAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Extraction messages require operator review in the DLQ. Attach an AlarmActions destination for notifications.",
+        "Namespace": "AWS/SQS",
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "DeadLetters",
+                "QueueName"
+              ]
+            }
+          }
+        ],
+        "Statistic": "Maximum",
+        "Period": 60,
+        "EvaluationPeriods": 1,
+        "Threshold": 1,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching"
+      }
+    }
+  },
+  "Outputs": {
+    "OperatorFunction": {
+      "Value": {
+        "Ref": "Operator"
+      }
+    },
+    "WorkerFunction": {
+      "Value": {
+        "Ref": "Worker"
+      }
+    },
+    "JobsQueueUrl": {
+      "Value": {
+        "Ref": "Jobs"
+      }
+    },
+    "DeadLetterQueueUrl": {
+      "Value": {
+        "Ref": "DeadLetters"
+      }
+    },
+    "ArtifactBucket": {
+      "Value": {
+        "Ref": "Artifacts"
+      }
+    },
+    "StateTable": {
+      "Value": {
+        "Ref": "State"
+      }
+    }
+  }
+}
