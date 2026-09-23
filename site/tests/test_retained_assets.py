@@ -15,6 +15,19 @@ spec.loader.exec_module(server)
 
 
 class RetainedAssetsTests(unittest.TestCase):
+    def test_request_path_is_pinned_before_a_concurrent_switch(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for name in ('old', 'new'):
+                (root/name).mkdir(); (root/name/'index.html').write_text(name)
+            live = root/'out'; live.symlink_to('old', target_is_directory=True)
+            handler = server.Handler.__new__(server.Handler)
+            handler.directory = str(live)
+            selected = Path(handler.translate_path('/index.html'))
+            pointer = root/'next'; pointer.symlink_to('new', target_is_directory=True)
+            pointer.replace(live)
+            self.assertEqual(selected.read_text(), 'old')
+
     def test_cold_delayed_request_after_pointer_switch(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); releases = root/'.releases'; releases.mkdir()
