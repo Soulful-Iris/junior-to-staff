@@ -3,7 +3,9 @@ node_modules/
 __pycache__/
 .venv/
 *.pyc
-site/out/
+site/out
 site/tools/node_modules/
 site/.mermaid-cache/
 site/out.*/
+site/.releases/
+site/.publish.lock
