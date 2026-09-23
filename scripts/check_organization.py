@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Verify the content-preserving move against the recorded source commit.
+"""Check historical membership; use --historical for the old equality experiment.
 
-Requires the source commit's git objects (fetch full history in shallow clones).
-Navigation and link prose may change. Visuals, Mermaid blocks, algorithm/lab
-implementations, fixtures, and all original source destinations must survive.
+The --historical mode requires source git objects and the original reorganization checkout.
+The default permits additions and reports changed hashes instead of claiming that
+an old green result certifies later corrections. Current test gates remain separate.
 """
 from collections import Counter
 from hashlib import sha256
@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args])
 
-def main():
+def historical_main():
     manifest = json.loads((ROOT / 'docs/reorganization-map.json').read_text())
     source = manifest['source_commit']
     files = manifest['files']
@@ -72,6 +72,43 @@ def main():
           f'105 unchanged SVGs; 387 unchanged Mermaid blocks; '
           f'{unchanged_code} other unchanged non-Markdown artifacts.')
     print('Scope: prose/link edits and four path-dependent helpers require review; this is not a new technical-content audit.')
+
+def check_current(root, manifest):
+    """Preservation of membership, not a claim of byte-identical content."""
+    destinations = [item['destination'] for item in manifest['files']]
+    counts = Counter(destinations)
+    if any(counts[item['destination']] > 1 and item.get('kind') != 'navigation' for item in manifest['files']):
+        raise ValueError('Only navigation pages may have a recorded merged destination')
+    changed = []
+    for item in manifest['files']:
+        path = root/item['destination']
+        if not path.resolve().is_relative_to(root.resolve()) or not path.is_file():
+            raise ValueError(f"Missing historical artifact: {item['destination']}")
+        digest = sha256(path.read_bytes()).hexdigest()
+        if digest != item['source_sha256']:
+            changed.append({'path': item['destination'], 'source_sha256': item['source_sha256'],
+                            'current_sha256': digest})
+    return {'baseline': manifest['source_commit'], 'preserved_destinations': len(set(destinations)), 'mapped_sources': len(destinations),
+            'changed_since_baseline': changed,
+            'scope': 'Membership only. Changed artifacts require current tests/review; additions are allowed.'}
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--historical', action='store_true', help='Reproduce the original reorganization-only equality check')
+    parser.add_argument('--report', type=Path)
+    args = parser.parse_args()
+    if args.historical:
+        return historical_main()
+    result = check_current(ROOT, json.loads((ROOT/'docs/reorganization-map.json').read_text()))
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(result, indent=2)+'\n')
+    print(f"PASS membership: {result['preserved_destinations']} historical destinations present; "
+          f"{len(result['changed_since_baseline'])} have changed bytes.")
+    print(result['scope'])
+
 
 if __name__ == '__main__':
     main()

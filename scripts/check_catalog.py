@@ -1,5 +1,8 @@
 """Check current learning catalogs against source paths, not historical totals."""
 from pathlib import Path
+import argparse
+import hashlib
+import subprocess
 import json
 import re
 import sys
@@ -73,11 +76,21 @@ def check(root, data):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--report', type=Path)
+    args = parser.parse_args()
     try:
         data = collect(ROOT)
         errors = check(ROOT, data)
         if errors:
             print('\n'.join(errors)); return 1
+        if args.report:
+            paths = data['chapters'] + data['coding'] + data['designs'] + [p['path'] for p in data['projects']]
+            report = {'counts': {k: len(v) for k, v in data.items()}, 'inventory': data,
+                      'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                      'sha256': {p: hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in paths}}
+            args.report.parent.mkdir(parents=True, exist_ok=True)
+            args.report.write_text(json.dumps(report, indent=2)+'\n')
         print('; '.join(f'{len(v)} {k}' for k, v in data.items()) + '; exact catalogs agree')
         return 0
     except (OSError, ValueError, KeyError) as exc:

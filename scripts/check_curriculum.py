@@ -82,6 +82,10 @@ def main(argv=None):
               "suites": [], "manifest_error": None}
     source = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True)
     report["source_commit"] = source.stdout.strip() if source.returncode == 0 else None
+    status = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, text=True)
+    report["worktree_dirty"] = bool(status.stdout.strip()) if status.returncode == 0 else None
+    tree = subprocess.run(["git", "rev-parse", "HEAD^{tree}"], cwd=root, capture_output=True, text=True)
+    report["committed_tree"] = tree.stdout.strip() if tree.returncode == 0 else None
     report["scope"] = "coding-only" if args.coding_only else "all-registered-python"
     try:
         suites = load_manifest(root, args.manifest or root / "indexes/python-suites.json")
