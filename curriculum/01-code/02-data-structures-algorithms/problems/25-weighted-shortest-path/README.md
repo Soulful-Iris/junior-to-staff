@@ -15,8 +15,8 @@ cost; **relaxing** an edge means replacing a known cost when that edge improves 
 | Input | Mapping of every vertex to `(neighbor,weight)` pairs; source and target |
 | Output | `(minimum_cost, endpoint-inclusive_path)`; any tied shortest path |
 | Boundaries | Unreachable returns `(math.inf, [])`; source=target returns `(0,[source])` |
-| Failure | Missing vertices or negative/nonfinite weights raise `ValueError` |
-| Scope | Directed, static graph; numeric cost arithmetic; no negative edges |
+| Failure | Missing vertices, bool or negative/nonfinite weights raise `ValueError`; an evaluated sum outside float range raises `OverflowError` |
+| Scope | Directed, static graph; nonnegative `int`/`float` weights; integer-only sums stay exact |
 
 ## The tool before the challenge
 
@@ -64,8 +64,18 @@ For each case, show which branch or state change produces that result.
 
 For `A→B:8`, `A→C:1`, and `C→B:2`, return `(3,[A,C,B])`, even though B was
 discovered directly first. A disconnected target returns infinity and no path.
-Clarify whether edge weights represent exact integers or floating measurements;
-floating-point precision can affect near ties. Inputs are not mutated.
+Integer-only routes retain arbitrary precision. Float or mixed routes use Python
+float arithmetic: near ties may round, and **any evaluated relaxation** whose
+sum is unrepresentable raises `OverflowError`, even if another route exists.
+Infinity is reserved for unreachable results, not reachable costs. Inputs are
+not mutated. Use exact integer units when the domain requires exact costs.
+
+| Numeric trace | Result |
+|---|---|
+| `1e308 + 1e308` along a reachable route | `OverflowError`, not “unreachable” |
+| `10**400 + 0.5` | `OverflowError` on the mixed addition |
+| `10**400 + 10**400` using integers only | Exact `2 * 10**400` |
+| Finite graph with disconnected target | `(math.inf, [])` |
 
 ```mermaid
 flowchart TD

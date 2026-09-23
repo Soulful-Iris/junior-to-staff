@@ -5,12 +5,16 @@ from itertools import count
 
 
 def weighted_shortest_path(graph, source, target):
-    """graph maps every vertex to (neighbor, finite nonnegative weight) edges."""
+    """Return a cheapest path; raise OverflowError on an unrepresentable sum.
+
+    Integer-only routes retain arbitrary precision. Float routes use Python
+    float precision; every evaluated relaxation must have a finite result.
+    """
     if source not in graph or target not in graph:
         raise ValueError("missing endpoint")
     for edges in graph.values():
         for neighbor, weight in edges:
-            if neighbor not in graph or not isinstance(weight, (int, float)):
+            if neighbor not in graph or type(weight) not in (int, float):
                 raise ValueError("invalid edge")
             if (isinstance(weight, float) and not math.isfinite(weight)) or weight < 0:
                 raise ValueError("finite nonnegative weights required")
@@ -29,7 +33,12 @@ def weighted_shortest_path(graph, source, target):
                 path.append(parent[path[-1]])
             return cost, path[::-1]
         for neighbor, weight in graph[vertex]:
-            new_cost = cost + weight
+            try:
+                new_cost = cost + weight
+            except OverflowError as exc:
+                raise OverflowError("path cost is not representable") from exc
+            if isinstance(new_cost, float) and not math.isfinite(new_cost):
+                raise OverflowError("path cost is not representable")
             if new_cost < distance.get(neighbor, math.inf):
                 distance[neighbor] = new_cost
                 parent[neighbor] = vertex
