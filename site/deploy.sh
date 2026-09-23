@@ -30,17 +30,16 @@ VENV="$STATE/reader-venv"
 if [ ! -x "$VENV/bin/python" ]; then
   "$PY" -m venv "$VENV" || fail "VENV"
 fi
-REQ_HASH=$(sha256sum site/requirements.txt | cut -d' ' -f1)
+REQ_HASH=$(sha256sum site/requirements.lock | cut -d' ' -f1)
 if [ "$(cat "$STATE/requirements-hash" 2>/dev/null || true)" != "$REQ_HASH" ]; then
-  "$VENV/bin/python" -m pip install -r site/requirements.txt || fail "PYTHON DEPENDENCIES"
+  "$VENV/bin/python" -m pip install --require-hashes -r site/requirements.lock || fail "PYTHON DEPENDENCIES"
   printf '%s\n' "$REQ_HASH" > "$STATE/requirements-hash"
 fi
 PY="$VENV/bin/python"
-# A reviewed transitive lock is still required to close audit SITE-05.
-# Keep the existing install policy here until that artifact is supplied.
-NODE_HASH=$(sha256sum site/tools/package.json | cut -d' ' -f1)
+# Include the complete dependency graph, not just top-level versions.
+NODE_HASH=$(sha256sum site/tools/package-lock.json | cut -d' ' -f1)
 if [ ! -d site/tools/node_modules ] || [ "$(cat "$STATE/node-hash" 2>/dev/null || true)" != "$NODE_HASH" ]; then
-  npm install --prefix site/tools --ignore-scripts --package-lock=false --no-audit --no-fund || fail "NODE DEPENDENCIES"
+  npm ci --prefix site/tools --ignore-scripts --no-audit --no-fund || fail "NODE DEPENDENCIES"
   printf '%s\n' "$NODE_HASH" > "$STATE/node-hash"
 fi
 SITE_OUT="$STAGE" "$PY" site/build.py || fail "BUILD"

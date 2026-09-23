@@ -4,12 +4,12 @@ The site presents the existing curriculum as a guided book. Its homepage explain
 
 ## Build and check
 
-Python 3.12+, Node, and Chromium are required for a fresh build. Install the declared tooling in a virtual environment and the local Node tooling directory:
+Python 3.12+, Node 22.16.0, and Chromium are required for a fresh build. Install the declared tooling in a virtual environment and the local Node tooling directory:
 
 ```bash
 python3.12 -m venv /tmp/engineering-guide-venv
-/tmp/engineering-guide-venv/bin/python -m pip install -r site/requirements.txt
-npm install --prefix site/tools
+/tmp/engineering-guide-venv/bin/python -m pip install --require-hashes -r site/requirements.lock
+npm ci --prefix site/tools --ignore-scripts --no-audit --no-fund
 # Use an existing Chromium executable, or install one with Playwright:
 cd site/tools
 npx playwright install chromium
