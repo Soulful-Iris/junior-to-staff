@@ -99,13 +99,24 @@ Three rules, and everything else is detail.
 
 **1. Build once, promote the artefact.** You build a thing — a container image,
 a bundle, a binary — exactly once, and that identical thing moves through your
-environments. If you rebuild for production, production is running something no
-one tested.
+environments. Record its digest. A production rebuild creates a new artifact
+that needs its own verification; it does not inherit the earlier test result.
 
 **2. Configuration comes from the environment, not the artefact.** The same
 image points at a test database or the real one depending on what it is told at
-start-up. The moment you have `if environment == "production"` inside your code,
-you have two programs in one file and you are testing the wrong one.
+start-up. Validate a typed configuration schema and test the important behavior
+combinations. Prefer named capabilities (`require_tls`, `payments_enabled`) to
+unexplained environment-name branches; legitimate production-only controls still
+need tests using synthetic credentials and endpoints. An environment condition
+is not automatically wrong, and injected config is not automatically tested.
+
+| Same artifact digest | Configuration under test | Evidence |
+|---|---|---|
+| D1 | Payments disabled | No provider effect; explicit disabled response |
+| D1 | Payments enabled, fake provider | Idempotent success, timeout and reconciliation |
+| D1 | TLS required | Reject plaintext; valid TLS succeeds |
+
+These tests exercise behavior without granting a test environment production access.
 
 **3. Secrets are not configuration.** Config can live in a file in the repo.
 Secrets cannot, ever, not even briefly, not even in a private repo. They are
@@ -181,20 +192,22 @@ row to fix now rather than at 3am.
 **Request 3 — the dependency review nobody does**
 
 ```
-List every direct dependency with: last release date, number of
-maintainers, and whether it runs a lifecycle script on install.
+For each direct dependency, name its required behavior, release/provenance
+controls, transitive dependencies, install scripts and maintenance status.
 
-Flag any that I could replace with under thirty lines of my own code.
+Compare keeping it with a local implementation of the same contract.
+Include boundary tests and a maintenance owner; retaining it is a valid outcome.
 ```
 
 *Why:* a lifecycle script runs arbitrary code on your machine at install time
 with your credentials in the environment. Knowing which of your dependencies do
 that turns an abstract supply-chain worry into a short, specific list. The last
-question is the useful one: a lot of small dependencies are a rounding error of
-code and a permanent piece of attack surface.
+question compares the actual contract, not line count. A tiny wrapper may rely
+on years of compatibility and adversarial-input work.
 
-*Push back on:* the reflex to add a library for something trivial. Ask what it
-buys beyond thirty lines.
+*Push back on:* replacing cryptography, authentication or a parser because a
+happy-path imitation fits in thirty lines. Small local code is useful when its
+full contract is genuinely small, tested and maintained; either choice has costs.
 
 ## How you would know it is wrong
 
