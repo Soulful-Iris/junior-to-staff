@@ -15,7 +15,37 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 ## Think from the contract to the boxes
 
-Persist a submission record, then enqueue compilation and execution. Run each language in a sandbox with no network, read-only base image, ephemeral filesystem, seccomp/container or microVM boundary, and hard CPU/memory/time limits. Workers are replaceable; results are versioned and idempotent. Treat compilation output and runtime output as hostile text before displaying it.
+Persist the submission and its outbox record together; a relay enqueues its ID.
+The trusted broker obtains artifacts and starts a **separate untrusted execution
+domain**. Compilation is untrusted too. Results use the submission/version key,
+and output is bounded and treated as hostile text before display.
+
+```mermaid
+flowchart LR
+  Q[Queue] --> Broker[Trusted broker: scoped artifact credentials]
+  Broker -->|source and one test input via bounded pipe| Box[Untrusted compiler or program]
+  Box -->|bounded output only| Check[Trusted checker]
+  Tests[Hidden expected results] --> Check
+  Box -. no credentials or artifact-store access .-> Deny[Denied boundary]
+```
+
+The program must see the input it computes on; it must not mount the whole hidden
+test corpus, expected outputs, another submission, a Docker socket or cloud
+credentials. The trusted checker decides what limited feedback can leave.
+
+| Boundary | Required enforcement / negative test |
+|---|---|
+| Identity and network | No execution-role credentials; deny egress including metadata/credential endpoints; probe only a fake endpoint in a disposable test |
+| Files and processes | Read-only runtime, isolated size-bounded scratch space, non-root identity, dropped capabilities, bounded process count; test cross-submission reads and controlled process exhaustion |
+| CPU, memory, wall time | Enforced outside the submitted process; terminate the whole execution domain, not only its parent PID |
+| Output and cleanup | Cap stdout/stderr bytes and disk writes; truncate safely, reap descendants and discard the domain before reuse |
+
+**Implementation gate:** this is a design brief, not a supplied or cloud-verified
+sandbox. Choose a runtime whose documented controls satisfy this table and run
+loop/process/output/disk/credential-isolation fixtures in a disposable environment.
+Do not assume every seccomp, capability, process or network control is configurable
+on every managed container runtime. No malicious-program execution or live-cloud
+isolation result is claimed here.
 
 **First diagram:** Draw public API, durable submission state, queue, isolated compile/run pool, result checker, and leaderboard projection.
 
@@ -26,7 +56,7 @@ Persist a submission record, then enqueue compilation and execution. Run each la
 | **Amazon API Gateway** / submission entry | Authenticate, bound payload size and rate. | ALB + ECS for custom upload/stream behavior. |
 | **Amazon S3** / source + test artifacts | Keep versioned packages away from worker images. | EFS for shared read-only test corpora with careful isolation. |
 | **Amazon SQS** / execution queue | Buffer work and separate compile from run tiers. | Step Functions for explicit multi-language orchestration. |
-| **Amazon ECS on AWS Fargate** / isolated task compute | Run ephemeral bounded tasks with per-task roles. | EC2 microVM or dedicated sandbox fleet for stronger isolation and lower cost at scale. |
+| **Amazon ECS on AWS Fargate** / trusted orchestration | Can host the broker; its artifact role must never reach submitted code. A task role alone is not a hostile-code sandbox. | Separately controlled VM/microVM sandbox fleet after validating the required isolation controls. |
 | **Amazon DynamoDB** / submission/result state | Store state transitions and idempotent result IDs. | Aurora for relational contest/rank queries. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
