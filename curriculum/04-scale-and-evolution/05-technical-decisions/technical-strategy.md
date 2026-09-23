@@ -62,8 +62,8 @@ The number of teams adopting a tool is insufficient if their delivery worsens.
 
 Strategy is not a plan and it is not a wish. It is the small set of decisions
 you have made in advance so that a hundred later decisions do not each have to
-be argued from scratch. The counterintuitive part is that you do not write it by
-thinking about the future. You write it by noticing what you keep arguing about.
+be argued from scratch. One useful input is recurring decisions. New product direction, risk or other
+future constraints can also justify strategy before a historical pattern exists.
 
 ## The failure it prevents
 
@@ -85,24 +85,22 @@ mattered.
 
 ## The mental model
 
-The method that works is bottom-up, and Will Larson's version of it is the one
-worth copying.
+This exercise uses a bottom-up synthesis method. It is useful, not mandatory.
 
 ![Strategy is synthesised upward from real decisions: five design docs make a strategy, five strategies extrapolated make a vision](../../../assets/diagrams/strategy-ladder.svg)
 
-**Write five design docs first.** Real ones, about real decisions, each made
+**Compare a few design docs.** Five is an exercise size, not a prerequisite. Real ones, about real decisions, each made
 because something actually had to be built. Then read them together and look for
 the decision you keep making — the same trade-off appearing in three of them,
 argued each time from nothing.
 
-**That recurring decision is your strategy.** Write it down once, with its
+**Turn the recurring constraint into a guiding choice and coherent actions.** Write it down once, with its
 rationale, so the next three documents can cite it instead of reopening it. A
 strategy is a decision made once and reused, and its value is precisely the
 arguments it prevents.
 
-**Then five strategies, extrapolated two or three years, become a vision.** Not
-an aspiration — an extrapolation. What does this place look like if these
-decisions hold?
+**Explore the future consequences of those choices.** A vision needs explicit
+assumptions; extrapolating several strategies is one way to develop it.
 
 And the test, which is the line most worth remembering: **a great vision is
 usually so obvious that it bores.** If yours is exciting, it is probably a
@@ -137,7 +135,7 @@ that decides whether the rest of it helps or hurts.
 - A design doc can say "per the datastore strategy" and stop arguing.
 - The rationale is written next to the ruling, so it can be revisited rather than resented.
 - There is a stated cost. Every real strategy makes something worse on purpose.
-- It came from documents that already existed, not from a planning offsite.
+- It explains the diagnosis, evidence, guiding choices, coherent actions, trade-offs, owner and review trigger, whatever its source.
 
 Done badly:
 

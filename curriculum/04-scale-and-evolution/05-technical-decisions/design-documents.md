@@ -120,11 +120,11 @@ objection in month four costs the project.
 ## What good looks like
 
 - A reader who was not in any of the conversations can say back what is being decided and why.
-- There are non-goals, and they are specific enough to be disappointing to somebody.
+- Non-goals define specific excluded work; stakeholders can agree with them.
 - The rejected alternatives are argued at their strongest, with a named reason each lost.
 - The approvers are named people, and they know they are approvers.
 - It is short enough to be read in one sitting by someone who did not want to read it.
-- Somebody changed their mind because of it. That is the only real success condition.
+- The accountable decision, reasons and review outcome are recorded. Approval without changes is valid.
 
 Done badly:
 
@@ -195,7 +195,7 @@ the document that was yours.
 ## How you would know it is wrong
 
 1. **Give it to someone outside the project and ask them to state the decision back.** If they cannot, the document is wrong, not the reader.
-2. **Check there is a non-goal that disappoints somebody.** A non-goals list everyone is happy with is not a scope, it is a formality.
+2. **Test a non-goal against a concrete request.** Can a reviewer tell whether the request is excluded and why? Agreement does not invalidate the boundary.
 3. **Show the alternatives section to somebody who prefers one of the rejected options.** If they say "that is not why I would have argued for it", you have a strawman.
 4. **Count the named approvers.** If the answer is zero, nothing is being decided, whatever the document says.
 5. **Look for the decision in passive voice.** "It was decided" means nobody decided. Find the sentence with a person in it.
@@ -217,7 +217,7 @@ Keep it under four pages.
 **Acceptance criteria:**
 
 - Somebody who has not seen your system reads it and tells you back what is being decided, what is out of scope, and what you rejected.
-- You can point at a sentence you changed because of a review comment. If nothing changed, either it was perfect or nobody really read it, and it is not the first one.
+- Reviewers can explain the assumptions and alternatives they checked, with approval, changes or dissent recorded. No cosmetic edit is required.
 
 ## Words you now own
 
@@ -232,8 +232,7 @@ Keep it under four pages.
 
 ---
 
-**Not covered here:** strategy and vision, which are what you get when you have
-written five of these and notice the same controversial decision recurring —
+**Not covered here:** strategy and vision. Recurring decisions are one useful input —
 that is [Technical strategy](technical-strategy.md). Postmortems are writing that decides too,
 but they belong with **20 · Risk and incidents** because they are written under
 different pressure.
