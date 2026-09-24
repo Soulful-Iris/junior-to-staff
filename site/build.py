@@ -304,7 +304,7 @@ def collect() -> list[dict]:
         add(f.relative_to(ROOT), kind="practice", group=None, subject=None,
             area="assessor")
 
-    for d in ("indexes", "practice", "projects", "docs", "scripts", "companies"):
+    for d in ("indexes", "practice", "projects", "docs", "scripts", "companies", "examples/link-watcher"):
         base = ROOT / d
         if not base.is_dir():
             continue

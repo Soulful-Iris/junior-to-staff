@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="725" viewBox="0 0 1100 725" role="img" aria-labelledby="title desc"><title id="title">Notification delivery and watcher health</title><desc id="desc">Two separate concerns: tell owners about changed links, and detect a watcher that has stopped</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#586979"/></marker></defs><style>text{font-family:Arial,sans-serif;fill:#182e3e}.title{font-size:27px;font-weight:700}.sub{font-size:17px;fill:#526575}.service{font-size:22px;font-weight:700}.role{font-size:18px;fill:#405565}.detail{font-size:16px;fill:#526575}.edge{font-size:16px;font-weight:600}.note{font-size:18px}</style><rect width="1100" height="725" fill="#f8fafc" rx="18"/><text x="36" y="45" class="title">Notification delivery and watcher health</text><text x="36" y="76" class="sub">Two separate concerns: tell owners about changed links, and detect a watcher that has stopped</text>
+<path d="M336 180 L398 180" stroke="#586979" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+<rect x="338.5" y="148" width="57.0" height="24" rx="5" fill="#f8fafc"/><text x="367" y="165" text-anchor="middle" class="edge">claim</text>
+<path d="M702 180 L760 180" stroke="#586979" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+<rect x="706.6" y="148" width="48.8" height="24" rx="5" fill="#f8fafc"/><text x="731" y="165" text-anchor="middle" class="edge">send</text>
+<path d="M550 244 L550 300 L186 300 L186 244" stroke="#586979" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+<rect x="229.60000000000002" y="306" width="376.79999999999995" height="24" rx="5" fill="#f8fafc"/><text x="418" y="323" text-anchor="middle" class="edge">persist provider response or unknown outcome</text>
+<path d="M336 453 L398 453" stroke="#586979" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+<rect x="334.4" y="421" width="65.19999999999999" height="24" rx="5" fill="#f8fafc"/><text x="367" y="438" text-anchor="middle" class="edge">invoke</text>
+<path d="M702 453 L760 453" stroke="#586979" stroke-width="2.4" fill="none" marker-end="url(#arrow)"/>
+<rect x="694.3" y="421" width="73.39999999999999" height="24" rx="5" fill="#f8fafc"/><text x="731" y="438" text-anchor="middle" class="edge">publish</text>
+<rect x="36" y="120" width="300" height="124" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><rect x="36" y="120" width="6" height="124" rx="3" fill="#327cba"/>
+<text x="56" y="152" class="service">Amazon DynamoDB</text><text x="56" y="180" class="role">(notification outbox)</text>
+<text x="56" y="207" class="detail">Stable transition ID</text>
+<text x="56" y="229" class="detail">Pending / sending / sent / unknown</text>
+<rect x="398" y="120" width="304" height="124" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><rect x="398" y="120" width="6" height="124" rx="3" fill="#c27720"/>
+<text x="418" y="152" class="service">AWS Lambda</text><text x="418" y="180" class="role">(notification worker)</text>
+<text x="418" y="207" class="detail">Claim a pending intent</text>
+<text x="418" y="229" class="detail">Record attempt before sending</text>
+<rect x="760" y="120" width="304" height="124" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><rect x="760" y="120" width="6" height="124" rx="3" fill="#c27720"/>
+<text x="780" y="152" class="service">Amazon SES</text><text x="780" y="180" class="role">(email delivery provider)</text>
+<text x="780" y="207" class="detail">Send link + old/new state</text>
+<text x="780" y="229" class="detail">Acceptance ≠ mailbox delivery</text>
+<rect x="36" y="392" width="300" height="125" rx="10" fill="white" stroke="#985ca9" stroke-width="2"/><rect x="36" y="392" width="6" height="125" rx="3" fill="#985ca9"/>
+<text x="56" y="424" class="service">EventBridge Scheduler</text><text x="56" y="452" class="role">(independent health schedule)</text>
+<text x="56" y="479" class="detail">Invoke every 5 minutes</text>
+<text x="56" y="501" class="detail">Separate from the weekly run</text>
+<rect x="398" y="392" width="304" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><rect x="398" y="392" width="6" height="125" rx="3" fill="#c27720"/>
+<text x="418" y="424" class="service">AWS Lambda</text><text x="418" y="452" class="role">(run-health checker)</text>
+<text x="418" y="479" class="detail">Expected run started? finished?</text>
+<text x="418" y="501" class="detail">Publish breach and heartbeat</text>
+<rect x="760" y="392" width="304" height="125" rx="10" fill="white" stroke="#ac4852" stroke-width="2"/><rect x="760" y="392" width="6" height="125" rx="3" fill="#ac4852"/>
+<text x="780" y="424" class="service">Amazon CloudWatch</text><text x="780" y="452" class="role">(metrics and alarms)</text>
+<text x="780" y="479" class="detail">Late run OR missing heartbeat</text>
+<text x="780" y="501" class="detail">Alarm through SNS</text>
+<text x="36" y="573" class="note">Outbox: a durable list of messages to send, committed with the state change that caused them.</text>
+<text x="36" y="611" class="note">A lost SES response is an unknown outcome. Reconcile events or accept a documented duplicate risk.</text>
+<text x="36" y="649" class="note">Health: a run is late after 30 minutes. Alarm within the next 5-minute health check.</text>
+<text x="36" y="687" class="note">The health heartbeat alarm also detects failure of the health checker itself.</text>
+</svg>

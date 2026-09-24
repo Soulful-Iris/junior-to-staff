@@ -1,233 +1,384 @@
-# 4. A link-rot watcher
+# Build a link-rot watcher
 
 [Curriculum](../../../README.md) · [Backend and APIs](../README.md) · [Project index](../../../../indexes/projects.md)
 
-## The reviewer's brief
+## What you are building
 
-> A weekly link checker emails the same broken URL every week and silently stops when its scheduler fails. Make the alert useful and expose the watcher’s own failure. What observation really proves a link is dead?
+> Build a service that checks a team's saved documentation links every Monday,
+> records what it observed, and emails the owner when a link becomes unavailable
+> or recovers. Repeated failures must not create a new alert every week. If the
+> watcher itself stops running, the operations team must know.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../../../01-code/01-problem-solving/change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Scenario:** You maintain an internal engineering handbook. Twelve teams own
+500 external links each: API documentation, vendor setup guides, and reference
+articles. Engineers currently discover broken links while following a runbook.
+A weekly script exists, but it sends the same broken-link list repeatedly and
+nobody notices when it stops. Your replacement needs durable history, useful
+notifications, and a visible record of each scheduled run.
 
-| Case | Exact input or workload | Expected outcome |
+**The first deliverable** is a local command-line application with a SQLite
+database. The supplied reference implements response classification, history,
+state changes, and pending notifications. You then add scheduled work,
+notification delivery, and run monitoring. **The second deliverable** is the AWS
+version shown below. The infrastructure foundation supplies queues, storage and
+one alarm; wiring the application into those services is part of the project.
+
+Start with Python 3.12+, basic HTTP status codes, and SQL transactions. No AWS
+account is needed for the local checkpoints. Use the
+[reference files](../../../../examples/link-watcher/README.md) beside this guide.
+
+## Requirements and sizing
+
+These are **invented workload inputs for this exercise**, not measured traffic
+from a real company. Keep them in your design so the service choices have a reason.
+
+| Requirement | Concrete target | Engineering consequence |
 |---|---|---|
-| Small example | Check history for URL U: 200, 404, 404, 200. | Record four observations; emit one broken transition and one recovery, not two identical broken alerts. |
-| Boundary / failure | HTTP 200 contains a parked-domain page, or 429 asks for backoff. | Record uncertain/content-changed or throttled state; HTTP success alone is not proof the original content survives. |
-| Scope | Controlled URLs for load/failure drills; respectful per-host concurrency and deadlines. | Explain any additional assumption before implementing it. |
+| Inventory | 6,000 URLs across 1,000 hosts; at most 100 URLs on one host | Model both total work and a busy host. |
+| Schedule | Monday 09:00 UTC; finish the normal run by 09:30 | Store expected, started and completed times. |
+| HTTP workload | Assume 2 seconds mean request duration; enforce a 10-second total deadline in the cloud worker | At concurrency 20, ideal drain time is `6,000 × 2 / 20 = 600 seconds`, or 10 minutes. Retries and host limits use the remaining margin. |
+| Host protection | One active request per host; wait at least 1 second after completion before starting another | For 100 URLs averaging 2 seconds, one host takes about `100 × (2 + 1) = 300 seconds`. Global concurrency alone cannot enforce this. |
+| Response limit | Read at most 64 KiB; follow at most 3 redirects in the cloud adapter | Bound memory, network work and redirect loops. Larger pages receive an incomplete-content observation. |
+| Notification timing | Queue the change with its observation; normally submit email within 5 minutes | Email failure must not erase the observation. |
+| Retention | 90 days of observations; preserve current state | About `6,000 × 13 = 78,000` weekly observations; at 1 KiB each, about 76 MiB of payload before indexes and overhead. |
+| Detection limit | Weekly sampling | A link can fail for almost a week before discovery. A 30-minute run target is not a 30-minute breakage-detection guarantee. |
 
-## See the first reviewable result
+A run in which every request takes the full 10 seconds needs at least 50 minutes
+at concurrency 20, even before retries. Report it as late; do not promise the
+normal completion target under that failure load. If 30 minutes becomes a hard
+requirement, revisit inventory distribution, deadlines and capacity together.
 
-**First slice:** For URL U feed the checker status history `200 → 404 → 404 → 200`. **Show:** four timestamped observations and exactly two user-facing transitions: broken and recovered. Feed a 200 parked-domain response and a 429 too; label those uncertain/throttled, never “content is healthy” solely because the HTTP status is 200.
+## Decide what the observation means
 
-<!-- project-expectation:start -->
+The service can report what it saw. It cannot prove that a web page is permanently
+dead or that a successful response still contains the intended documentation.
 
-## What you are expected to hand over
+| Observed result | Stored outcome | Update the last known state? | Notify? |
+|---|---|---|---|
+| 2xx and expected content marker present | `reachable` | Yes | Recovery only if previously broken |
+| 404 or 410 | `broken` | Yes | Once on entering broken, including the first observation |
+| 429 | `throttled` | No | No broken-link email; schedule later using bounded Retry-After |
+| Timeout, DNS/TLS error, 5xx, 401 or 403 | `uncertain` | No | Record for review; repeated uncertainty belongs in an operational report |
+| 2xx but expected marker missing | `content_changed` | No | Review the content; do not call it recovered |
 
-**The finished artifact:** A list of URLs, a weekly check of each, a record of what changed, and a message when something breaks.
+For this baseline, a single 404 changes the state. Requiring two consecutive 404s
+is a valid product change, but with weekly checks it delays confirmation by a
+week. Implement that only after deciding whether the delay is acceptable.
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
+```mermaid
+stateDiagram-v2
+    [*] --> Unknown
+    Unknown --> Reachable: first matching 2xx; no email
+    Unknown --> Broken: first 404 or 410; broken email
+    Reachable --> Broken: 404 or 410; broken email
+    Broken --> Reachable: matching 2xx; recovery email
+    Broken --> Broken: repeated 404; no new email
+```
 
-### How the review conversation gets harder
+Throttled, uncertain and content-changed observations preserve the last known
+state. Thus `200 → 429 → 200` must not manufacture a recovery notification.
 
-| Review gate | The interviewer changes | Expected response |
+## Checkpoint 1 — run the durable core
+
+From the repository root:
+
+```bash
+python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-demo.sqlite3 demo
+```
+
+This feeds `200 → 404 → 404 → 200` to the same URL and prints the stored records.
+Look for **four observations, two transitions, and two pending outbox entries**.
+The final link state is `reachable`. Run the same command again: the counts must
+stay the same. Close the process and inspect the database with a new process:
+
+```bash
+python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-demo.sqlite3 inspect
+```
+
+An **outbox** is a durable list of messages waiting to be sent. These entries are
+notification intentions, not evidence that an email reached someone's inbox.
+
+Read `classify()` and `record()` in
+[watcher.py](../../../../examples/link-watcher/watcher.py). The key transaction is:
+
+```text
+BEGIN
+  reject conflicting reuse of a job ID
+  append observation once
+  if this observation is newer than the last applied sequence:
+    advance the last-applied sequence
+    if the meaningful state changed:
+      update current state and version
+      insert transition and pending notification together
+COMMIT
+```
+
+The database transaction makes these writes succeed together. A crash must not
+leave the current state changed with its notification missing. `BEGIN IMMEDIATE`
+serializes writers in this SQLite reference; the DynamoDB version instead uses
+conditional writes inside a transaction.
+
+| Local table | Identity and important fields | Why it exists |
 |---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Many URLs share one host | Ten workers each apply a local one-request limit. Can the host receive ten simultaneous requests? Predict which boundary must change before opening the design. | Yes. Coordinate per-host admission across the active workers or partition host ownership with explicit leases; local concurrency is not a fleet guarantee. Honor bounded Retry-After and revalidate redirects. |
-| Lead · Email succeeded but acknowledgment vanished | The notification worker retries after losing its provider response. Can you promise one email? State what evidence would make you reject your first design. | Only with provider-supported deduplication or equivalent protocol. Persist notification state and key; otherwise expose the possible duplicate and reconcile unknown outcomes instead of equating one stored transition with one delivery. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
+| `links` | `id`, `url`, `state`, `version`, `last_sequence` | Current summary; prevents an old result from overwriting a newer one. |
+| `observations` | Unique `job_id`; unique `(link_id, sequence)`; timestamp, status, outcome, content hash | Durable evidence of each logical check. |
+| `transitions` | `link_id:state_version`, previous/new states | Stable identity for each meaningful change. |
+| `outbox` | Unique transition ID, delivery status, attempts | Separates committing a change from contacting an email provider. |
 
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
+A hash only detects different bytes. Timestamps, ads and navigation can change a
+hash without changing the documentation. The local fixture uses an explicit
+`guide-v1` content marker so you can see the difference between HTTP reachability
+and content validation. Content extraction for arbitrary sites is a later feature.
 
-<!-- project-expectation:end -->
+## Checkpoint 2 — check a real HTTP response
 
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
+In terminal A, start the controlled website:
 
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- S["Weekly schedule"] --> W["HTTP checker"]
- W -->|404 each week| N["Repeated identical email"]
- W --> H["No durable transition history"]
+```bash
+cd examples/link-watcher
+python3 fixture_server.py
 ```
 
-An alert is a change in observed state, not a dump of every observation. Content hashes can reveal change but cannot alone decide its meaning.
+In terminal B, from the repository root:
 
-<details>
-<summary>Reveal the approach and decisions</summary>
-
-Persist append-only observations, compare against the last meaningful state, and allocate stable transition IDs. The invariant is one stored transition per observed state change, with notification retries scoped separately. A missing run must be monitored independently.
-
-</details>
-
-## Follow-up 1 · Many URLs share one host
-
-**Changed requirement:** Ten workers each apply a local one-request limit. Can the host receive ten simultaneous requests? Predict which boundary must change before opening the design.
-
-<details>
-<summary>Expected reasoning and changed diagram</summary>
-
-Yes. Coordinate per-host admission across the active workers or partition host ownership with explicit leases; local concurrency is not a fleet guarantee. Honor bounded Retry-After and revalidate redirects.
-
-```mermaid
-flowchart TD
- Q["URL jobs partitioned by host"] --> H["Shared per-host admission"]
- H --> W["Bounded fetch workers"]
- W --> P["Remote host"]
+```bash
+python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-http.sqlite3 check \
+  --id handbook --url http://127.0.0.1:8765/guide --sequence 1
 ```
 
-</details>
+The default response is `200` with `guide-v1` in its body. You should see one
+reachable observation and no notification. Make that same URL fail:
 
-## Follow-up 2 · Email succeeded but acknowledgment vanished
-
-**Changed requirement:** The notification worker retries after losing its provider response. Can you promise one email? State what evidence would make you reject your first design.
-
-<details>
-<summary>Expected reasoning and changed diagram</summary>
-
-Only with provider-supported deduplication or equivalent protocol. Persist notification state and key; otherwise expose the possible duplicate and reconcile unknown outcomes instead of equating one stored transition with one delivery.
-
-```mermaid
-flowchart TD
- T["Stored transition ID"] --> O["Notification outbox"]
- O --> P["Email provider"]
- P -->|response lost| U["Unknown delivery outcome"]
- U --> R["Lookup or documented duplicate policy"]
+```bash
+python3 -c 'from pathlib import Path; Path("examples/link-watcher/state.json").write_text("{\"status\": 404}")'
+python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-http.sqlite3 check \
+  --id handbook --url http://127.0.0.1:8765/guide --sequence 2
 ```
 
-</details>
+You should now see a broken transition and one pending notification. Repeat the
+check with sequence 3: the observation count grows, the notification count does
+not. Write `{"status": 200}` to `state.json` and check sequence 4: a recovery adds
+the second notification. Use a fresh database filename if you want to repeat
+this exercise from the beginning.
 
-## Evidence to bring to review
+Try `{"status": 429}`, `{"status": 200, "body": "Domain for sale"}`, or
+`{"delay_seconds": 3}` next. Inspect the outcomes and confirm they preserve the
+last known state. The fixture is a real local HTTP server; no external website is
+needed to reproduce these cases.
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+**Work to add:** a registration command that accepts `link_id`, `url`, owner team,
+notification address and optional expected marker. Validate the fields, keep
+recipients in trusted configuration, and list links by owner. Keep registration
+separate from checking: a user submitting a URL should not make your API fetch it
+inside the incoming request.
 
-**Senior expectation:** Test repeated status, scheduler silence, host concurrency and delivery ambiguity. **Additional lead scope:** Define notification semantics, recipient ownership and history retention. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+The supplied HTTP adapter only accepts this fixture address, disables redirects
+and proxies, and bounds response bytes. Its two-second socket timeout handles the
+slow fixture; a cloud adapter also needs a total deadline against trickled bytes.
+Do not remove the fixture restriction and assume the adapter is ready to fetch
+untrusted internet URLs. The public-fetch boundary is specified below.
 
-## Build and prompt sequence
+## Checkpoint 3 — move scheduled work onto AWS
 
-*Give it URLs, and it tells you when one dies.*
+![AWS architecture: schedule, dispatcher, durable queue, HTTP checker, state store and failed jobs](../../../../assets/projects/link-watcher/aws-checks.svg)
 
-**Build**
+Follow one URL through the drawing:
 
-A list of URLs, a weekly check of each, a record of what changed, and a message
-when something breaks.
+1. **EventBridge Scheduler** invokes the dispatcher with a scheduled time. Derive
+   `run_id` from that intended time so a duplicate trigger identifies the same run.
+2. **Dispatcher Lambda** records the run and creates one stable job per link.
+   Reuse the job ID if enqueueing is retried. Record expected job count and dispatch
+   completion; a partially enqueued run must be resumed or reported incomplete.
+3. **SQS** stores jobs until workers can process them. Queue redelivery is normal;
+   the application's operation identity prevents a second state change.
+4. **Checker Lambda** checks whether the job is already committed, acquires host
+   admission, performs bounded HTTP work and commits the result.
+5. **DynamoDB** stores the observation and any transition/outbox item atomically.
+   Only then does the worker succeed so Lambda can acknowledge the queue message.
+   A failure after commit is safe to replay because the next worker finds the job.
 
-```mermaid
-graph LR
-  S[schedule] --> W[worker]
-  W -.->|"one at a time, politely"| N[the internet]
-  W --> D[(history)]
-  D --> C{changed?}
-  C -->|"yes"| M[tell somebody]
+Use this message contract. `sequence` is allocated monotonically for each link
+when the run is created; receiving a message does not allocate a new sequence.
+
+```json
+{
+  "job_id": "2026-09-28T09:00:00Z:handbook",
+  "run_id": "2026-09-28T09:00:00Z",
+  "link_id": "handbook",
+  "sequence": 42,
+  "config_version": 3
+}
 ```
 
-**The thought process**
+Read the registered URL and recipient from trusted configuration, rather than
+allowing a queue message to select an arbitrary destination or recipient.
+If configuration changed, define whether the old job is cancelled or uses its
+stored version; do not silently check a different URL under the same job ID.
 
-The first decision is **what counts as dead**. A 404 is easy. A 200 returning a
-parked-domain page is the hard case, and the honest answer involves comparing to
-what the page looked like last time. Which means this project is really about
-*history*, not about checking — you are building a record of states, and the
-alert is a diff.
+**Files to implement next:** `dispatcher.py` for run creation/enqueueing,
+`aws_store.py` for DynamoDB transactions, `checker.py` for SQS handling and safe
+HTTP fetching, and `notify.py` for outbox delivery. Keep `classify()` as a small
+function that both the local and cloud paths use.
 
-Then **being a good citizen**. You are making automated requests to other
-people's servers. One at a time per host, a real user agent that says who you
-are, honour a 429, and back off. The engineering and the manners are the same
-work here.
+### Map the local data to DynamoDB
 
-Third: **the alert is the product.** Nobody wants a weekly email listing 200
-working links. They want to hear when something broke, once, with enough context
-to act. A watcher that emails every run gets filtered within a fortnight and then
-it is not a watcher.
+Use the foundation table's `pk` and `sk` keys:
 
-**How to organise the prompts**
+| Record | Partition key | Sort key | Access pattern |
+|---|---|---|---|
+| Link state | `LINK#handbook` | `STATE` | Read current state and configuration |
+| Observation | `LINK#handbook` | `OBS#0000000042` | Query a link's ordered history |
+| Transition | `LINK#handbook` | `CHANGE#0000000003` | Retrieve a specific state change |
+| Pending notification | `OUTBOX#2026-09-28` | Transition ID | Query that day's pending delivery work |
+| Host admission | `HOST#docs.example.com` | `LEASE` | Conditional claim with owner token and `next_allowed_at` |
+| Run summary | `RUN#2026-09-28T09:00:00Z` | `META` | Expected/dispatched/completed counts and deadline |
+| Run job result | `RUN#2026-09-28T09:00:00Z` | `JOB#handbook` | Unique completion marker; enables reconciliation |
 
-```
-I am building a link-rot watcher. Before code: what states can a URL be
-in beyond up and down? For each, say how I would distinguish it from the
-others using only what an HTTP response gives me.
+For an actionable result, condition the state update on the version you read and
+commit it with the observation, transition, outbox item and unique run-job result.
+Increment run completion only with the first job result. On a conditional conflict,
+reread before deciding whether this is a replay, an older result or new work.
+An old sequence stays in history but does not reverse current state. That policy
+tracks the newest sample; it does not reconstruct every transition missed between
+samples or during out-of-order processing.
 
-Be honest about the ones I cannot reliably distinguish.
-```
+Query outbox date partitions for the full retry window, including prior days;
+otherwise yesterday's failures disappear from the worker's view. At this small
+scale, a paginated scan of the link registry once weekly is acceptable. Larger
+inventories need an explicit due-time index and partition plan.
 
-The last line is the important one, and the answer shapes the whole design.
+### Configure the infrastructure deliberately
 
-```
-Implement the checker for ONE url: fetch with a timeout I chose, record
-status, final URL after redirects, response size, and a hash of the
-main content. Store it as a new row, never an update.
-```
+The supplied [CloudFormation foundation](../../../../examples/link-watcher/infra-foundation.json)
+creates the table, work queue, dead-letter queue and dead-letter alarm. A
+**dead-letter queue** holds jobs that exhausted their delivery attempts so they
+can be inspected and replayed. It does not repair them.
 
-Append-only is the design decision. It is what makes the diff possible later.
+| Setting | Initial value | Reason |
+|---|---|---|
+| Check worker timeout | 30 seconds | Includes a 10-second total HTTP deadline and time to commit the result. |
+| SQS visibility timeout | 180 seconds | Six times the Lambda timeout; a zero batching window keeps the calculation simple. |
+| Batch size / batching window | 1 / 0 seconds | One slow website does not delay unrelated jobs in the same invocation. |
+| Worker concurrency | Event source maximum 20; reserved concurrency at least 20 | Caps total active checks; host admission is an additional constraint. |
+| Redrive | After 5 receives; work retention 4 days; dead-letter retention 14 days | Failed work stays visible long enough to investigate. |
+| History cleanup | `expires_at` TTL on observation items only | TTL removes old data eventually; never use deletion timing to decide lease expiry. |
+| Logs | Structured fields; 14-day retention for the exercise | Include run/job/link IDs, duration, outcome and retry reason; omit response bodies and URL secrets. |
 
-```
-Now the diff: given two consecutive checks of the same URL, decide
-whether something meaningful changed. Distinguish a real change from
-noise — a tracking parameter, a timestamp on the page, an ad.
-```
+Create separate IAM roles. The dispatcher needs access to its run/registry table
+and `sqs:SendMessage` on the work queue. The checker needs queue consumption and
+access to the state table. The notifier needs outbox access and permission to send
+from the configured SES identity. Each function needs its own log permissions;
+none needs an administrator policy. Add event-source mapping and scheduler invoke
+permissions only for their intended targets.
 
-```
-Rate limiting: one request per host at a time, honour 429 with backoff,
-and a user agent that identifies the tool. Show me the code path that
-runs when a host returns 429.
-```
+**Host admission:** store a conditional lease with an owner token. Use a 60-second
+lease while the worker has a 30-second hard lifetime, and release it only if the
+owner token still matches. Store a one-second cooldown after release. Compare
+`lease_until` explicitly; DynamoDB TTL is asynchronous cleanup. If the lease is
+held, delay/requeue the job rather than spending the invocation sleeping. Account
+for bounded clock skew and never let an HTTP operation continue past its worker
+lifetime; otherwise an expired lease can allow overlapping requests.
 
-**On AWS**
+**429 behavior:** parse Retry-After as seconds or an HTTP date; clamp it to
+1–900 seconds for this exercise. Without a usable value, use capped exponential
+backoff with jitter. Persist the host's next allowed time. Commit the throttled sample once. Schedule a follow-up check with a new job ID
+and per-link sequence, plus `retry_of` pointing to the original job; count it in a
+separate retry run so the original run's completion arithmetic stays stable. Cap
+that retry window. A normal throttle should not be retried immediately until it
+reaches the DLQ.
 
-This is the best fit for serverless among these application projects, and worth doing that way to feel
-the difference. **EventBridge Scheduler** fires weekly, a **Lambda** fans the
-URLs out onto **SQS**, and a second Lambda consumes the queue with a
-concurrency limit set deliberately low. Add the shared per-host admission
-mechanism from the follow-up: a global worker limit alone does not prove
-one active request per host across replicas. SQS supplies durable delivery and configurable redrive/DLQ mechanisms;
-you still configure them, bound work, and pay for the relevant usage.
+**Public-fetch boundary:** permit only HTTP/HTTPS with approved ports, reject
+credentials and private/reserved addresses, check every DNS answer and redirect,
+and connect to the validated address while preserving TLS hostname verification.
+A preflight DNS check followed by an unrestricted hostname fetch leaves a DNS
+rebinding gap. Apply egress restrictions as a second boundary. Do not send cookies
+or credentials, execute JavaScript, or store full page bodies. Start cloud work
+against domains you control, then expand the allowed inventory.
 
-Why SQS and not EventBridge for the fan-out: EventBridge routes *events* to
-*targets* and does not hold a backlog you can drain at your own pace, which is
-exactly what you want when the work is polite by design. Why not Step Functions:
-it is the right answer when the workflow has branches and human steps, and here
-the workflow is "do this for each one".
+Use the foundation's [deploy and cleanup commands](../../../../examples/link-watcher/README.md).
+After wiring your handlers, enqueue a controlled job, inspect its DynamoDB records
+and queue removal, then deliberately fail a job and inspect the DLQ alarm.
+The supplied local core and infrastructure foundation are not a completed cloud deployment.
 
-**DynamoDB** suits the history well — partition by URL, sort by timestamp, and
-"the last two checks for this URL" becomes one cheap query. Set a TTL so history
-does not grow for ever. Delivery by **SES** if you want email you control, or a
-webhook if you want it in a chat.
+## Checkpoint 4 — deliver useful notifications and detect silence
 
-**What productionising it means**
+![AWS notification and monitoring design: outbox, notification Lambda, SES and an independent health schedule](../../../../assets/projects/link-watcher/aws-notifications.svg)
 
-It runs whether or not you remember, and **its own failure is visible** — a
-watcher that silently stops looks exactly like a watcher reporting nothing wrong,
-which is the most repeated failure mode there is. Alarm on the absence of a run.
-Politeness is enforced in code rather than intended. Alerts are deduplicated so
-one dead link is one message, not one a week for ever.
+Build an email containing the link, owner, old/new state, observed status, check
+time and transition ID. Claim the outbox item conditionally, record an attempt,
+then call SES. Persist the returned provider message ID and mark it `sent` to mean
+**accepted by the provider**. Use delivery/bounce events for mailbox outcomes.
 
-**The learning**
+If SES accepts the email but the response is lost, your worker cannot know whether
+sending again will create a duplicate. SES SendEmail has no application idempotency
+token in its documented request contract. Preserve `unknown` status; reconcile
+provider events tagged with your transition ID, or use a documented retry policy
+that accepts possible duplicates. One transition in your database does not imply
+exactly one email in a mailbox.
 
-Anything that watches needs something watching it, and the alert design is the
-product. Both of those generalise to every monitoring system you will ever touch,
-including the ones in the operating concepts.
+An independent five-minute health schedule must ask:
 
-**How you would know it is wrong**
+- Was the expected weekly run created and fully dispatched?
+- Did all expected jobs reach a recorded terminal result by 09:30?
+- Are retries, unknown deliveries or dead-letter jobs accumulating?
 
-- Point it at a URL you control and break it on purpose. Time how long until you are told.
-- Stop the schedule. Something must notice within a run or two.
-- Point it at a page with a live timestamp. It must not report a change every week.
-- Make a host return 429 and confirm it backs off rather than retrying immediately.
+Publish `RunLate` and a health-check heartbeat to CloudWatch. Alarm on a late run
+and on a missing heartbeat so failure of the health checker is visible too.
+A completed run with 6,000 timeout observations is operationally complete but has
+poor coverage: report the outcome distribution, not just a green completion flag.
+Route these operational alarms to the team's configured SNS destination, separately
+from link-owner emails.
 
-**Stage it**
+## Why this architecture, and when to simplify it
 
-1. One URL, checked by hand, history appended.
-2. The diff, with the noise cases.
-3. The schedule and the queue, with politeness enforced.
-4. Alerts, deduplicated, plus an alarm on the run not happening.
+**Why start with SQLite?** You can inspect a transaction and restart the process
+without learning five AWS APIs first. It proves local persistence behavior, not
+fleet coordination or cloud delivery.
 
----
+**Why SQS?** A durable backlog lets you process checks at a controlled rate and
+recover after a worker crash. A dispatcher directly invoking thousands of workers
+makes backpressure and redrive harder to inspect.
 
-[Back to the ordered project index](../../../../indexes/projects.md)
+**Why DynamoDB?** The main reads are one link's state/history and conditional job
+or lease claims. Those fit keyed access. PostgreSQL is also a sound choice,
+especially if your application already uses it; preserve the same transaction
+boundary rather than adding another database for its own sake.
+
+**Why Lambda?** The workload is short and weekly. Persistent ECS workers become
+more attractive when checks run continuously or require a carefully managed
+outbound proxy. Do not add a load balancer to a system with no incoming user API.
+
+**What drives cost?** Request count, worker duration, logs and retries. The normal
+assumption is 12,000 worker-seconds per run; at 256 MiB that is about 3,000 GB-seconds,
+before overhead. Price the actual region and usage when deploying. A continuously
+running NAT gateway or container can dominate a small weekly workload; the diagram
+does not imply either is required.
+
+## What to show when it works
+
+Bring a short recorded run, not a long design essay:
+
+1. The same URL returns `200 → 404 → 404 → 200`: four observations and two pending notifications.
+2. Replaying a committed job or restarting the process adds no duplicate transition.
+3. A timeout, 429 and missing content marker produce different recorded outcomes.
+4. In your AWS implementation, replay a job after its result commit and show it is acknowledged without another transition.
+5. Send several same-host jobs and show their HTTP intervals do not overlap; a different host can still make progress.
+6. Pause weekly dispatch and show the independent monitor reports the missed run. Restore it and explain how incomplete work resumes.
+
+**First extension:** require two failing observations before alerting; show the
+new state machine and the resulting detection delay. **Second extension:** scale
+to 600,000 URLs, including 50,000 on one host. Calculate that host's minimum check
+time before increasing total concurrency. **Third extension:** accept user-submitted
+URLs and explain how your URL, DNS, redirect and egress controls prevent requests
+to internal services.
+
+## Service references
+
+- [Lambda with SQS: visibility, batching and concurrency](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html)
+- [SQS/Lambda failure and replay behavior](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html)
+- [DynamoDB transaction semantics](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html)
+- [DynamoDB TTL is asynchronous](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html)
+- [SES SendEmail request and response contract](https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html)
+
+The scenario, workload and architecture are original practice material. The links
+above document the AWS mechanisms; they do not certify this design's deployment.
