@@ -56,3 +56,13 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [2. A receipt tracker](../../curriculum/02-applications/02-databases/projects/a-receipt-tracker.md) | [a_receipt_tracker.py](a_receipt_tracker.py) |
 | [1. A shared reading list](../../curriculum/02-applications/03-frontend/projects/a-shared-reading-list.md) | [a_shared_reading_list.py](a_shared_reading_list.py) |
 | [3. A shift schedule](../../curriculum/02-applications/05-security/projects/a-shift-schedule.md) | [a_shift_schedule.py](a_shift_schedule.py) |
+| [1. The suite that can fail](../../curriculum/02-applications/04-testing/projects/01-the-suite-that-can-fail.md) | [01_the_suite_that_can_fail.py](01_the_suite_that_can_fail.py) |
+| [2. The contract nobody breaks by accident](../../curriculum/02-applications/04-testing/projects/02-the-contract-nobody-breaks-by-accident.md) | [02_the_contract_nobody_breaks_by_accident.py](02_the_contract_nobody_breaks_by_accident.py) |
+| [3. The flake hunter](../../curriculum/02-applications/04-testing/projects/03-the-flake-hunter.md) | [03_the_flake_hunter.py](03_the_flake_hunter.py) |
+| [4. The load test that finds the real limit](../../curriculum/02-applications/04-testing/projects/04-the-load-test-that-finds-the-real-limit.md) | [04_the_load_test_that_finds_the_real_limit.py](04_the_load_test_that_finds_the_real_limit.py) |
+| [5. The test that runs in production, forever](../../curriculum/02-applications/04-testing/projects/05-the-test-that-runs-in-production-forever.md) | [05_the_test_that_runs_in_production_forever.py](05_the_test_that_runs_in_production_forever.py) |
+| [2. Twenty deploys a day](../../curriculum/03-production/02-delivery/projects/twenty-deploys-a-day.md) | [twenty_deploys_a_day.py](twenty_deploys_a_day.py) |
+| [3. Debuggable at three in the morning](../../curriculum/03-production/04-observability/projects/debuggable-at-three-in-the-morning.md) | [debuggable_at_three_in_the_morning.py](debuggable_at_three_in_the_morning.py) |
+| [1. The SLO you would actually honour](../../curriculum/03-production/05-reliability/projects/01-the-slo-you-would-actually-honour.md) | [01_the_slo_you_would_actually_honour.py](01_the_slo_you_would_actually_honour.py) |
+| [2. The alert that fires when it matters and not before](../../curriculum/03-production/05-reliability/projects/02-the-alert-that-fires-when-it-matters-and-not-before.md) | [02_the_alert_that_fires_when_it_matters_and_not_before.py](02_the_alert_that_fires_when_it_matters_and_not_before.py) |
+| [3. The retry storm you build on purpose](../../curriculum/03-production/05-reliability/projects/03-the-retry-storm-you-build-on-purpose.md) | [03_the_retry_storm_you_build_on_purpose.py](03_the_retry_storm_you_build_on_purpose.py) |

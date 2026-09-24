@@ -1,72 +1,85 @@
 # 2. The alert that fires when it matters and not before
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Build alert logic for the save SLO. A page should require both short and long windows to burn too fast, but the incident owner wants the incident to remain open until both recover and someone acknowledges it. These are two different state rules.
 
-> Your SLO alert pages only when short and long windows both burn too fast. The short window recovers while the long window remains bad. An operator expects the page to stay active. Which rule did you implement?
+**Working contract:** The current composite alarm is short_breach AND long_breach. The incident record is a separate latch with its own closure rule. Missing data has an explicit outcome and never silently becomes healthy.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../failure-budgets.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | States `(short,long)`: `(false,false)`, `(true,false)`, `(true,true)`, `(false,true)`. | Ordinary AND gives false, false, true, false; either false operand clears the composite. |
-| Boundary / failure | Missing counters are interpreted as zero errors. | Report missing data explicitly; distinguish absent traffic from broken telemetry. |
-| Scope | Teaching thresholds; paging, tickets and incident closure are separate policies. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 99.9% objective; 0.9% observed failure rate | Burn rate is 0.009 / 0.001 = 9× sustainable consumption. |
+| States F/F, T/F, T/T, F/T | AND alarm outputs F, F, T, F; either false operand clears the composite. |
+| Short five-minute and long one-hour teaching windows | Choose thresholds from response goals and traffic; these are exercise settings, not universal paging defaults. |
 
-**First slice:** Feed a multi-window burn rule four short/long states: `F/F, T/F, T/T, F/T`. **Show:** alert `F, F, T, F` for an AND rule and the notification/deduplication timeline. Stop the counters entirely and prove missing telemetry is a distinct signal, not a quiet healthy interval.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Replace a static threshold alert with a multi-window, multi-burn-rate alert on the SLO from project 1, then prove it both ways: fire it with a fast burn, and confirm it stays quiet through a trickle that does not threaten the budget.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Operations wants a hold | Keep the incident open until both windows recover and an owner acknowledges. How do you implement that? Predict which boundary must change before opening the design. | Add an explicit incident state distinct from the composite. Enter on AND breach; leave only on both-normal plus acknowledgment. Test both recovery orders and acknowledge-before-recovery. |
-| Lead · Slow burn still matters | A sustained 0.9% error rate never reaches the fast-page threshold. May it be ignored? State what evidence would make you reject your first design. | At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity sustained condition with its own windows and owner; a nonpaging incident may still consume the entire budget. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- S["Short-window alarm"] --> A["AND composite"]
- L["Long-window alarm"] --> A
- A --> P["Page state"]
+```bash
+python3 examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py
 ```
 
-An AND condition controls current alarm state, not an incident latch. Both operands need to be true to fire; both do not need to become false to clear.
+[Open the starting code](../../../../examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| burn_window | good,total,coverage,error_fraction | Request-weighted consumption estimate. |
+| composite_alarm | short_breach,long_breach,state | Current Boolean condition. |
+| incident | opened_at,acknowledged,recovery_evidence,state | Human-owned lifecycle independent of alarm clearing. |
+
+## AWS implementation
+
+![2. The alert that fires when it matters and not before: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-the-alert-that-fires-when-it-matters-and-not-before.svg)
+
+The composite expresses current metric truth; the incident store expresses the team’s response lifecycle. Separating them prevents confusing an alarm recovery with completed incident work.
+
+## Build it in this order
+
+### 1. Calculate burn from counts
+
+Divide observed error fraction by the allowed error fraction, using summed counts and explicit coverage. Separate no traffic from no telemetry. Keep window lengths and thresholds versioned so responders can explain why a page fired.
+
+### 2. Implement the Boolean alarm
+
+Feed the four state pairs into the rule and inspect exact transitions. Debounce or evaluation periods, if used, are additional documented behavior. Do not describe an AND rule as requiring both inputs to recover before it clears.
+
+### 3. Implement incident ownership separately
+
+Open an incident on qualifying breach, deduplicate repeated notifications and record acknowledgement. Close only under the product’s chosen condition, here both windows normal plus acknowledgement. Keep this state in an incident record rather than hidden in alert wording.
+
+### 4. Cover sustained consumption and silence
+
+A 9× slow burn may deserve owned work even if it misses the fast-page threshold. Add a lower-severity policy and separate missing-telemetry signal. Demonstrate the notification timeline manually; do not install recurring checks in this repository.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Alarm configuration | State missing-data behavior explicitly and retain threshold/window version. |
+| Incident state | Idempotent transition identity; acknowledgement does not erase active breach evidence. |
+| Notifications | Deduplicate and route to a named owner; configuring actual recipients is outside this local lesson run. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The alarm clears at F/T while the incident remains open until acknowledged full recovery. |
+| Stop counters | Missing telemetry is distinct from no errors. |
+| Hold a sustained 0.9% failure rate | The lower-severity policy records 9× burn rather than ignoring it. |
+
+## The next design decision
+
+An acknowledgement arrives before metrics recover. Keep it recorded, but do not close until the separately defined recovery condition becomes true.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Calculate burn from the request error ratio divided by allowed error fraction. Choose windows for response speed and noise rejection, then state recovery logic. The invariant is that every alarm transition follows the documented Boolean or state-machine rule.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Operations wants a hold
 
@@ -76,14 +89,6 @@ Calculate burn from the request error ratio divided by allowed error fraction. C
 <summary>Expected reasoning and changed diagram</summary>
 
 Add an explicit incident state distinct from the composite. Enter on AND breach; leave only on both-normal plus acknowledgment. Test both recovery orders and acknowledge-before-recovery.
-
-```mermaid
-stateDiagram-v2
- [*] --> Clear
- Clear --> Open: both windows breach
- Open --> Open: one window recovers
- Open --> Clear: both normal and acknowledged
-```
 
 </details>
 
@@ -96,21 +101,7 @@ stateDiagram-v2
 
 At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity sustained condition with its own windows and owner; a nonpaging incident may still consume the entire budget.
 
-```mermaid
-flowchart TD
- C["Good and total counters"] --> F["Fast-burn windows"]
- C --> S["Sustained-burn windows"]
- F --> P["Page"]
- S --> T["Owned ticket"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Trace every truth-table case, both recovery orders and no-data behavior. **Additional lead scope:** Own incident lifecycle independently of individual alarm states. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -118,109 +109,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-![Two alert windows watching the same error budget: a fast burn crossing both and firing, and a slow trickle crossing the long window only and staying quiet until it matters](../../../../assets/diagrams/burn-rate.svg)
-
-*You end up with an alert that caught a fast burn and stayed quiet through a slow one.*
-
-**Reading the retained illustration:** its window picture is illustrative; use
-the explicit truth table and separate incident latch above for clearing. A slow
-burn may warrant a ticket even when it does not meet the fast-page threshold.
-
-**Build**
-
-Replace a static threshold alert with a multi-window, multi-burn-rate alert on
-the SLO from project 1, then prove it both ways: fire it with a fast burn, and
-confirm it stays quiet through a trickle that does not threaten the budget.
-
-**The thought process**
-
-Start from what is wrong with thresholds. "Alert if error rate is above 1%"
-fires on a thirty-second blip that costs you nothing, and stays quiet through a
-0.9% error rate that eats your whole month's budget in a week. It is measuring
-the wrong quantity: you care about **how fast the budget is being spent**, not
-the instantaneous rate.
-
-That gives you burn rate — spending at 14.4x the sustainable rate exhausts a
-thirty-day budget in about two days. And then the second decision, which is the
-clever part of the standard approach: **two windows.** A short one so you notice
-quickly, a long one so a blip in the short window does not page anybody. Both
-must be burning for it to fire. An ordinary AND composite clears when either
-window is no longer in ALARM. If the incident must remain open until both
-recover, implement the separate latch/acknowledgment policy shown above.
-
-Third: **what severity, and who gets woken.** A fast burn is a page. A slow burn
-is a ticket. Conflating them is how alerts become noise, and an alert people
-have learned to ignore is worse than no alert because it occupies the space where
-a real one would have been noticed.
-
-**How to organise the prompts**
-
-```
-Here is my SLO: <target> over <window>. Explain burn rate for this
-specific budget, with the arithmetic: at what multiple is the whole
-budget gone in two days, and in one hour?
-
-Then propose a two-window alert and tell me what each window is FOR.
-```
-
-Making it show the arithmetic for your own numbers is what turns a borrowed
-recipe into something you can defend.
-
-```
-Implement it. Then simulate two scenarios against the implementation:
-a sharp 30-minute outage, and a steady 0.9% error rate lasting a week.
-
-For each, tell me whether it fires, when, and at what severity.
-```
-
-```
-Now show me the case where this alert is WRONG — a real failure it would
-miss, or a harmless event it would page for. I want the blind spot, not
-reassurance.
-```
-
-**On AWS**
-
-A **CloudWatch alarm** on a **metric math** expression over the good/total
-counters, with two alarms — a short-window and a long-window — combined in a
-**composite alarm** so the page only fires when both are in ALARM. That
-composite alarm is the specific feature that makes this pattern easy on AWS and
-is worth knowing by name; without it you end up with two noisy alarms and a
-human doing the AND.
-
-Route it through **SNS** to wherever you actually look. And the setting people
-miss: **choose missing-data behavior explicitly**. A ratio with no eligible traffic
-is undefined, not automatically a service failure. Monitor heartbeat/export
-freshness separately; use breaching for a signal whose expected emission has
-actually stopped. Test both absence of traffic and absence of telemetry.
-
-Why not a third-party alerting service: you may well want one eventually for
-on-call rotation and escalation, and that is what they are for. The argument for
-staying in CloudWatch while learning is that the alarm sits next to the metric it
-watches, so there is one fewer system to keep in sync.
-
-**What productionising it means**
-
-The alert has fired on a real or simulated fast burn, and you have watched it
-stay quiet through a slow one. Severities are split: page for fast, ticket for
-slow. Missing data alarms. And the runbook link is in the alert body, because an
-alert that says only "SLO burn rate high" at 3am is a puzzle rather than a page.
-
-**The learning**
-
-Alerting is a design problem, not a threshold. The question is never "what value
-is bad" but "what pattern is worth a human being awake", and burn rate is the
-first formulation of that which actually survives contact with a noisy system.
-
-**How you would know it is wrong**
-
-- Fire it deliberately with a sharp burst. Time how long until the alert arrives.
-- Run a slow trickle that does not threaten the budget. It must stay quiet.
-- Stop emitting the metric entirely. It must alarm on missing data.
-- Read the alert body as somebody woken by it. Does it say what is burning, how fast, and where to look?
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

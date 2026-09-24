@@ -1,72 +1,85 @@
 # 3. The flake hunter
 
-[Curriculum](../../../README.md) · [Testing, debugging, and code review](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Diagnose an intermittent failure in a shared-store exercise. A case that expects an empty store passes alone but fails after another case creates an item. Rerunning until green hides the dependency rather than explaining it.
 
-> A test fails six times in one hundred CI runs. Re-running usually makes the PR green. Determine whether the cause is shared fixture state, time, or execution order. What evidence distinguishes those hypotheses?
+**Working contract:** Produce a minimal deterministic reproduction and a causal explanation. Distinguish shared state, timing, external dependency and resource collision. A retry is evidence of variability, not proof of repair.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../testing-strategy.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Run order `[creates item, expects empty store]` fails; reverse order passes with the same seed. | The minimal two-test ordering reproduces failure; per-test store reset removes that dependency. |
-| Boundary / failure | A worker finishes only after a randomly timed sleep. | Replace sleep-based correctness with a controllable completion barrier or fake clock. |
-| Scope | A hundred runs detect observed flakiness; zero observed failures does not prove determinism. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Two orderings: create→expect-empty and expect-empty→create | The same inputs produce different outcomes only when state leaks between cases. |
+| Twenty parallel runs share one filename assumption | A resource collision can remain invisible in every sequential ordering. |
+| One fixed seed and recorded order | Reproduction must retain both; a seed alone may not capture external scheduling. |
 
-**First slice:** Run the suite repeatedly with a recorded seed and test order. Make `creates item` then `expects empty store` fail; reverse them and pass. **Show:** the shortest reproducing two-test sequence and the reset that removes shared state. Replace a sleep-based worker assertion with a controllable barrier or fake clock; one green rerun is not proof the flake is gone.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** A runner that executes your suite one hundred times, records pass or fail per test per run, and reports any test that was not unanimous.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Parallel execution fails | Sequential shuffled runs pass, but concurrent runs fail. What experiment comes next? Predict which boundary must change before opening the design. | Use a barrier to overlap two operations on a shared resource. Give files/ports unique test identities or synchronize intentional sharing; preserve the forced overlap as a regression. |
-| Lead · The fix will take a week | The flaky test blocks every merge while a repair is underway. How do you quarantine it honestly? State what evidence would make you reject your first design. | Remove it from the blocking gate only with an owner, expiry and visible nonblocking execution. Its passing reruns must not be treated as repair evidence; track the protected behavior’s temporary coverage gap. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- A["Test A leaves item"] --> S["Shared store"]
- S --> B["Test B expects empty"]
- B --> F["Order-dependent failure"]
+```bash
+python3 examples/architecture-starts/03_the_flake_hunter.py
 ```
 
-The nominal test input is not the whole input: fixture state, scheduler, clock and external resources also matter.
+[Open the starting code](../../../../examples/architecture-starts/03_the_flake_hunter.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| reproduction | seed,order,environment,shared_resource | Minimal facts needed to reproduce. |
+| fixture_lifecycle | allocate,reset,cleanup | Explicit ownership of state, files, ports and clocks. |
+| incident_note | symptom,cause,repair,evidence | Explains why the variability disappeared. |
+
+## AWS implementation
+
+![3. The flake hunter: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-the-flake-hunter.svg)
+
+Cloud isolation can help reproduce resource collisions, but the first diagnosis is local and deterministic. Infrastructure cannot compensate for a fixture that silently shares mutable state.
+
+## Build it in this order
+
+### 1. Reduce the failure
+
+Preserve the failing order and remove unrelated cases until the two-operation dependency remains. Record the initial store, process reuse and cleanup behavior. Avoid adding sleeps; they change timing without establishing ownership.
+
+### 2. Give state a clear lifecycle
+
+Allocate a fresh store per independent case, unique temporary paths and explicit cleanup. If sharing is intentional, synchronize it and name the shared contract. Reset fake clocks and randomness as deliberately as database rows.
+
+### 3. Force a suspected race
+
+When only parallel execution fails, use a barrier to overlap the relevant operations and capture the shared filename/port/key. Replace accidental shared resources with unique identities or proper synchronization; a hundred lucky reruns are weaker than one controlled explanation.
+
+### 4. Record the bounded repair
+
+Compare the minimal reproduction before and after isolation. Keep an owner and expiry for any temporary quarantine and state the evidence gap. Do not turn a flaky rerun loop into a requirement for publishing this website.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Isolation | Unique run identity in files, schema names and object prefixes; never point the exercise at shared production data. |
+| Timing | Injectable clock and explicit barriers for controlled schedules; avoid arbitrary sleep-based repairs. |
+| Cleanup | Run even after failure and record cleanup errors separately from the original symptom. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Shared state makes one order fail; fresh stores make both independent. |
+| Reuse one file in parallel | The forced overlap exposes the collision. |
+| Remove arbitrary sleeps | The repaired ownership still explains the result. |
+
+## The next design decision
+
+The failure depends on a third-party API. Replace it with a controlled response timeline for diagnosis, then document which live integration behavior remains outside that local reproduction.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Record seed, order and environment, minimize the failing schedule, then vary one hypothesized source. The invariant is isolated fixtures or an explicitly controlled shared-state contract. Do not hide a real race with automatic retries.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Parallel execution fails
 
@@ -76,14 +89,6 @@ Record seed, order and environment, minimize the failing schedule, then vary one
 <summary>Expected reasoning and changed diagram</summary>
 
 Use a barrier to overlap two operations on a shared resource. Give files/ports unique test identities or synchronize intentional sharing; preserve the forced overlap as a regression.
-
-```mermaid
-flowchart TD
- A["Concurrent test A"] --> B["Barrier"]
- C["Concurrent test B"] --> B
- B --> R["Shared resource race"]
- R --> F["Deterministic assertion"]
-```
 
 </details>
 
@@ -96,105 +101,6 @@ flowchart TD
 
 Remove it from the blocking gate only with an owner, expiry and visible nonblocking execution. Its passing reruns must not be treated as repair evidence; track the protected behavior’s temporary coverage gap.
 
-```mermaid
-flowchart TD
- T["Known flaky test"] --> Q["Owned time-bounded quarantine"]
- Q --> N["Nonblocking evidence runs"]
- F["Deterministic repair"] --> G["Restore required gate"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Reproduce a minimal schedule and remove its mechanism. **Additional lead scope:** Budget quarantine and preserve visibility of temporarily unprotected behavior. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-![A grid of one hundred test runs. Most are solid green, a handful flicker between pass and fail, and the caption explains that a flaky test is a bug in the test rather than bad luck](../../../../assets/diagrams/flake-grid.svg)
-
-*You end up with a list of your tests that are not deterministic, and the
-evidence to prove it.*
-
-**Build**
-
-A runner that executes your suite one hundred times, records pass or fail per
-test per run, and reports any test that was not unanimous.
-
-**The thought process**
-
-The decision that changes everything is how you treat a flake. The common
-instinct is to re-run it and move on. The correct position is that **a test that
-passes and fails on identical input is a bug — in the test, in the code, or in
-your assumptions about time and ordering — and "re-run it" is deciding not to
-find out which.**
-
-Then a practical decision: one hundred sequential runs takes too long, and
-parallel runs change the conditions you are measuring. Both are legitimate, and
-which you pick depends on whether you are hunting order-dependence (run
-sequentially, shuffled) or resource contention (run in parallel).
-
-**How to organise the prompts**
-
-```
-Run the suite 100 times. After each run, record per-test pass/fail with a
-run number and a seed. Shuffle test order each run and record the seed.
-
-Report only tests that were not unanimous, with the count and the seeds
-they failed on.
-```
-
-```
-For the top flake, tell me the three most likely mechanisms: shared
-state between tests, a real clock, or an ordering assumption.
-
-Then write the smallest experiment that distinguishes them.
-```
-
-The second half is the important one. A model will happily fix a flake by adding
-a sleep, which converts a fast intermittent failure into a slow one.
-
-```
-Fix it without adding a sleep or a retry. If you believe a sleep is the
-only option, explain what we are actually waiting for and why we cannot
-wait for that thing directly.
-```
-
-**On AWS**
-
-One hundred suite runs is embarrassingly parallel, so this is where
-**AWS Fargate** earns its place: a task definition, one hundred tasks, no
-servers to manage, and you pay for the seconds used. **AWS Batch** is the
-alternative and is the better answer once you want queueing, retries and
-priorities across many such jobs — it is a scheduler, where Fargate on its own
-is just compute.
-
-Lambda is tempting and usually wrong here: a fifteen-minute maximum and a
-read-only filesystem outside `/tmp` make it a poor fit for a full test suite.
-That comparison — *why not Lambda* — is worth being able to make quickly.
-
-**What productionising it means**
-
-Weekly, on a schedule, with the results kept over time. Flakiness is a trend,
-not an event. Quarantine is a real mechanism and needs a rule: a flake gets
-tagged, excluded from blocking merges, and given an owner and a date — and the
-quarantine list has a maximum size, because an unbounded one is just a disabled
-suite with paperwork.
-
-**The learning**
-
-Flakiness is not bad luck, it is unexamined non-determinism, and there is
-always a mechanism. Once you have found three of them — shared state, a real
-clock, an ordering assumption — you will recognise the fourth in minutes.
-
-**How you would know it is wrong**
-
-- Write a test that fails exactly one time in ten by construction. The hunter must find it and report roughly that rate.
-- Run the hunter twice and compare the lists. Wildly different lists mean you are measuring your machine, not your tests.
-- Check the seeds are recorded and a failure actually reproduces from its seed. A flake report you cannot replay is a rumour.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

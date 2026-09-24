@@ -1,71 +1,85 @@
 # 1. The suite that can fail
 
-[Curriculum](../../../README.md) · [Testing, debugging, and code review](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Review the evidence protecting a multi-user bookmark service. A green suite exists, but nobody knows whether it notices a missing owner filter or an off-by-one expiry check. Produce a short sensitivity report using the existing exercise code; this project does not add a publishing gate to this guide.
 
-> Your bookmark suite reports 95% line coverage, but nobody knows whether removing an owner filter would be caught. Build a reversible mutation experiment. Which changed behaviors deserve a failing test?
+**Working contract:** Distinguish meaningful behavior changes from equivalent edits. Report which selected defects are detected, which survive and which time out. A percentage over a small selected set is evidence about that set, not proof of all correctness.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../testing-strategy.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Four isolated mutants: remove owner filter, turn `<` into `<=`, change a comment, and rename a local variable. | Evaluate two semantic mutants; exclude the two behavior-equivalent edits; list surviving semantic mutants with reproduction inputs. |
-| Boundary / failure | The first mutation remains applied while the second runs. | Stop because later results are contaminated; restore or discard the isolated worktree. |
-| Scope | Twenty selected mutations are a sample, not a completeness or mastery measure. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Four proposed edits | Missing owner filter and < changed to <= are semantic candidates; a comment change and a safe local rename are excluded. |
+| Two relevant semantic candidates | One detected and one surviving means 50% of this selected set, not 25% of all four textual edits. |
+| Ten-second execution deadline assumption | A hang is recorded separately from an assertion failure and a normal pass. |
 
-**First slice:** In isolated copies, remove an ownership filter and change `<` to `<=`. Both are behavioral mutants: the tests should turn red with a named fixture. A comment change and variable rename are excluded as equivalent edits. **Show:** a four-row mutant report, commands and failing inputs, then verify the original worktree is restored before the next mutation.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** A script that takes your P1 repository, makes one small semantic change (flip a comparison, drop a line, invert a boolean, off-by-one a slice), runs the suite, records whether it went red, and reverts. Twenty mutations, one report.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A mutant hangs | One mutant creates an infinite loop. Does that count as a successful detection? Predict which boundary must change before opening the design. | Record timeout separately and impose a runner deadline. If termination is part of the contract it is a detected harm, but it is not a passing assertion; retain the smallest hanging input. |
-| Lead · All relevant mutants are caught | The suite kills all twenty selected semantic mutants. Must you invent a current regression? State what evidence would make you reject your first design. | No. Preserve the passing regressions and report the sampled scope. Add new challenge cases based on risks, not a quota of failures; a seeded defect demonstrates sensitivity even after its repair. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- C["Source lines executed"] --> G["95 percent coverage"]
- M["Owner filter removed"] --> T["Same suite stays green"]
+```bash
+python3 examples/architecture-starts/01_the_suite_that_can_fail.py
 ```
 
-Execution coverage says a line ran; it does not say the assertion distinguishes correct behavior from a harmful alternative.
+[Open the starting code](../../../../examples/architecture-starts/01_the_suite_that_can_fail.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| mutation_record | edit_id,changed_behavior,scope | Why the edit is relevant to the contract. |
+| observation | edit_id,input,outcome,elapsed | Reproducible evidence from an isolated run. |
+| review_report | detected,survived,timed_out,excluded | Honest denominator and remaining uncertainty. |
+
+## AWS implementation
+
+![1. The suite that can fail: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-the-suite-that-can-fail.svg)
+
+The cloud version is a bounded experiment runner with durable evidence. S3 or ECS does not decide whether a mutation is meaningful; that judgment comes from the stated behavior contract.
+
+## Build it in this order
+
+### 1. Choose the protected behavior
+
+Open an existing ownership/expiry implementation and write its exact examples: Ben must not see Ana’s record; a record is expired at now >= expires_at. Keep the original program and environment fixed while changing one behavior at a time.
+
+### 2. Classify candidate edits
+
+Remove the owner predicate and change the expiry comparison independently. Exclude comments and equivalent renames from the semantic denominator. Inspect whether the edit is reachable and actually changes the contract before calling it a surviving defect.
+
+### 3. Capture isolated outcomes
+
+Run each selected version in a disposable directory with a fixed input and deadline. Record normal failure, timeout, execution error and survival separately. Keep the smallest input that exposes a missed behavior; do not manufacture a failure when the current evidence already catches the defect.
+
+### 4. Write the engineering conclusion
+
+Name the uncovered boundary and the evidence needed to protect it. Report sampled scope and limitations. Keep this as a learning exercise and review artifact; no CI requirement or automatic website-publishing check is introduced.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Local first | Use separate temporary directories and fixed inputs; cloud execution is optional for larger experiment batches. |
+| Runner | No production credentials; CPU/memory/wall limits and cleanup after every run. |
+| Artifacts | Store commit identity and selected edits with outcomes; exclude secrets and unrelated user data. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The report uses two semantic candidates and names the surviving expiry boundary. |
+| Use a comment-only edit | It is excluded rather than counted as a missed defect. |
+| Make an edit loop forever | The outcome is timeout with its input retained, not an invented pass. |
+
+## The next design decision
+
+All twenty selected defects are detected. Report that result and the sampled risks honestly; expand coverage only for a concrete uncovered behavior, not to meet a quota of failures.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Classify relevant semantic mutants, run each against the same clean base, and distinguish killed, survived, invalid, and timed-out mutants. The invariant is isolation of each experiment. Read survivors to eliminate equivalent behavior before calling them gaps.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A mutant hangs
 
@@ -75,13 +89,6 @@ Classify relevant semantic mutants, run each against the same clean base, and di
 <summary>Expected reasoning and changed diagram</summary>
 
 Record timeout separately and impose a runner deadline. If termination is part of the contract it is a detected harm, but it is not a passing assertion; retain the smallest hanging input.
-
-```mermaid
-flowchart TD
- M["Loop mutant"] --> R["Isolated suite run"]
- D["Runner deadline"] -->|terminate| R
- R --> O["Timeout evidence and cleanup"]
-```
 
 </details>
 
@@ -94,106 +101,6 @@ flowchart TD
 
 No. Preserve the passing regressions and report the sampled scope. Add new challenge cases based on risks, not a quota of failures; a seeded defect demonstrates sensitivity even after its repair.
 
-```mermaid
-flowchart TD
- R["Correct implementation"] --> P["Required regressions pass"]
- M["Seeded relevant defects"] --> F["Same regressions fail"]
- P --> E["Scoped evidence"]
- F --> E
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Demonstrate mutant isolation and explain one survivor. **Additional lead scope:** Manage runtime budgets and avoid using mutation scores as a universal ranking. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*You end up with a number: what share of deliberately planted bugs your existing
-test suite catches.*
-
-**Build**
-
-A script that takes your P1 repository, makes one small semantic change (flip a
-comparison, drop a line, invert a boolean, off-by-one a slice), runs the suite,
-records whether it went red, and reverts. Twenty mutations, one report.
-
-**The thought process**
-
-The decision that has to come first is **which mutations count**. Change a log
-message and no test should fail — that is not a gap. Change a rounding rule and
-something must. So before writing any code you are writing a list of *semantic*
-edits, and that list is a statement about what your software is for.
-
-Second decision: what does a score mean? 100% caught on twenty hand-picked
-mutations establishes sensitivity to that sample; it proves neither broad
-coverage nor that the sample was necessarily too easy. The
-honest output is the *list of survivors*, not the percentage.
-
-**How to organise the prompts**
-
-```
-Read this repository. List 20 small SEMANTIC changes I could make to the
-source that SHOULD make a test fail. Exclude anything cosmetic: logs,
-comments, formatting, variable names.
-
-For each, say which behaviour it breaks. Do not write code yet.
-```
-
-That list is the project. Argue with it before it becomes a script.
-
-```
-Now write a runner that, for each mutation: applies it, runs the suite,
-records pass/fail, reverts, and confirms the tree is clean again before
-the next one.
-
-If the tree is not clean after a revert, stop the whole run and tell me.
-```
-
-The last sentence is the one that matters. A mutation runner that leaves
-edits behind will poison every later result, and the failure looks like a
-suddenly worse score.
-
-```
-Report only the SURVIVORS: mutations where the suite stayed green.
-For each, name the test that should have caught it.
-```
-
-**On AWS**
-
-Run it in **GitHub Actions** first when the repository already uses it. Move to **AWS CodeBuild** only when you need something
-Actions cannot give you: a machine with more memory than the hosted runner, or
-a build that must sit inside your VPC to reach a private database. Estimate the chosen CodeBuild machine and duration: twenty mutations mean
-roughly twenty suite executions plus setup, not a known fixed price.
-
-What you do **not** want is EC2. A permanently-running instance to do
-occasional work is the most common early AWS mistake, and it costs money while
-you sleep.
-
-**What productionising it means**
-
-Nightly, not on every push — twenty suite runs is too slow for a pull request.
-Store the survivor list somewhere durable (an S3 object keyed by commit is
-enough) so the trend is visible, and alert only when the list *grows*. A
-mutation score that silently drifts down is the exact thing you built this to
-notice.
-
-**The learning**
-
-Coverage tells you which lines ran. This tells you which lines are *defended*.
-After one run you will never read a coverage percentage the same way, because
-you will have seen a fully-covered function survive four mutations untouched.
-
-**How you would know it is wrong**
-
-- Plant a mutation you are certain is caught. If the runner reports it as a survivor, the runner is broken, not the suite.
-- Check the tree is clean after the run: `git status` must be empty.
-- Run it twice and compare. Different results on identical input means something is not being reverted.
-- Read three survivors by hand and confirm they are real gaps rather than mutations that changed nothing.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

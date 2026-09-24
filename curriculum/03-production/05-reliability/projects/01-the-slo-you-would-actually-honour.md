@@ -1,72 +1,85 @@
 # 1. The SLO you would actually honour
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Define a bookmark-save reliability objective with product and operations. Product asks for 99.9% successful eligible saves over thirty days. One failed minute contains a large traffic spike, so counting bad minutes gives a different answer from counting failed user requests.
 
-> Product asks for 99.9% successful bookmark saves over thirty days. Traffic spikes during one failed minute. Decide whether the service met its objective and what work should pause. What exactly counts as an eligible request?
+**Working contract:** Write the eligibility rule, success definition, measurement point and reporting window. The request-based SLO uses summed good and total requests, including declared timeout/server-failure outcomes. Missing telemetry and zero traffic are explicit states.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../failure-budgets.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | 1,000,000 eligible requests, 10,000 failures concentrated in one minute; objective 99.9%. | Observed success 99%; budget 1,000 failures; 10× budget consumed. One minute does not imply the request SLO passed. |
-| Boundary / failure | Zero eligible requests in a reporting interval. | Ratio is undefined; display no eligible traffic and use a separate missing-telemetry signal. |
-| Scope | Request-weighted availability; time-weighted 43.2 minutes at 99.9% is a different SLI. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 1,000,000 eligible requests; 10,000 failures | 99% observed success, not 99.9%. |
+| 99.9% objective | Error budget is 1,000 failures; 10,000 failures consume ten times that budget. |
+| Quiet interval 1/10 failures; busy interval 0/990 | Overall failure rate is 1/1,000 = 0.1%, not the mean of interval percentages. |
 
-**First slice:** Publish good/eligible counters for bookmark saves and a 30-day **request-weighted** 99.9% objective. With 1,000,000 eligible requests and 10,000 failures, **show:** 99% success, a 1,000-failure budget, and 10× budget consumption—even if all failures happened in one minute. Display “no eligible traffic” rather than 100% when the denominator is zero.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Pick the single thing users care about most in your system — the list loading, the item saving — and define an SLO for it: a metric, a target, and a window. Then write the error-budget policy: what happens at 50% of the budget spent and at 75% spent (25% left).
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Traffic is uneven | A quiet interval has 1/10 failures and a busy interval has 0/990. Is mean interval success 95%? Predict which boundary must change before opening the design. | No: total success is 999/1000=99.9%. Sum counts before dividing; averaging percentages gives the quiet interval unjustified weight. |
-| Lead · Product wants a time SLO | The requirement becomes “the service is usable in 99.9% of one-minute windows.” What changes? State what evidence would make you reject your first design. | Define a good window and its probing/traffic rule, then count eligible windows. Thirty days contain 43,200 minutes, yielding 43.2 bad-window minutes at 0.1%; state discrete rounding and no-traffic treatment. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- R["Variable request traffic"] --> M["One failed minute"]
- M --> X["Incorrect 43-minute comparison"]
- R --> C["Good and total counts"]
+```bash
+python3 examples/architecture-starts/01_the_slo_you_would_actually_honour.py
 ```
 
-Converting a request ratio directly to wall-clock minutes assumes traffic weighting that has not been established.
+[Open the starting code](../../../../examples/architecture-starts/01_the_slo_you_would_actually_honour.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| sli_event | operation,eligible,good,measurement_time | One agreed outcome per logical request. |
+| slo_window | start,end,good,total,missing_coverage | Aggregated evidence and coverage. |
+| budget_policy | objective,owner,response_actions | What the team changes when reliability degrades. |
+
+## AWS implementation
+
+![1. The SLO you would actually honour: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-the-slo-you-would-actually-honour.svg)
+
+The database commit helps define durable success, while the request outcome determines what the user experienced. A CloudWatch ratio is only meaningful after those semantics are agreed.
+
+## Build it in this order
+
+### 1. Choose the user operation
+
+Define save success as a durable accepted bookmark within the agreed latency bound. State how invalid input, authentication failure, duplicate retries and dependency timeouts count. Do not remove failures from the denominator merely because they are inconvenient.
+
+### 2. Instrument at the outcome boundary
+
+Emit good and eligible counts where the request’s visible result is known. Reconcile client timeouts and server completion according to the chosen user-facing definition. Record telemetry coverage; a missing counter interval is not automatically zero errors.
+
+### 3. Calculate the rolling window
+
+Sum counts across instances and intervals before dividing. Handle counter resets and late data explicitly. Show budget remaining and consumption rate with the raw denominator so small samples are not mistaken for strong evidence.
+
+### 4. Agree on an actionable response
+
+Name owners for reliability work, risky feature exposure and dependency remediation when the budget is exhausted. Keep the SLO as an operating decision for the application; this curriculum update does not add a publishing gate.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Metrics | Complete eligible counters with bounded labels and reset-aware aggregation. |
+| Definition | Version changes to eligibility/latency rules; do not silently rewrite historical meaning. |
+| Reporting | Explicit no-traffic and missing-data states; retain the counts behind percentages. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | One million requests and 10,000 failures show 99% success and 10× budget use. |
+| Use unequal traffic intervals | Sum counts before calculating the ratio. |
+| Observe zero traffic | Display no eligible traffic rather than 100% success. |
+
+## The next design decision
+
+Product instead wants 99.9% of one-minute windows to be usable. Define usable per window and the low-traffic rule; that is a different SLO with a different denominator.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Define eligible/good counts, measurement boundary and exclusions before selecting the target. Compute budget as total×(1−target), then agree operational consequences. The invariant is a numerator and denominator with matching population, window and units.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Traffic is uneven
 
@@ -76,13 +89,6 @@ Define eligible/good counts, measurement boundary and exclusions before selectin
 <summary>Expected reasoning and changed diagram</summary>
 
 No: total success is 999/1000=99.9%. Sum counts before dividing; averaging percentages gives the quiet interval unjustified weight.
-
-```mermaid
-flowchart TD
- A["Quiet: 9 good of 10"] --> S["Sum good and total"]
- B["Busy: 990 good of 990"] --> S
- S --> R["999 / 1000 = 99.9 percent"]
-```
 
 </details>
 
@@ -95,20 +101,7 @@ flowchart TD
 
 Define a good window and its probing/traffic rule, then count eligible windows. Thirty days contain 43,200 minutes, yielding 43.2 bad-window minutes at 0.1%; state discrete rounding and no-traffic treatment.
 
-```mermaid
-flowchart TD
- O["Per-minute observations"] --> W["Explicit good-window rule"]
- W --> C["Good and eligible window counts"]
- C --> B["Time-weighted budget"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Compute variable-traffic and empty-window cases correctly. **Additional lead scope:** Agree a budget policy with owners who can actually pause releases. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -116,112 +109,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*You end up with one number, a written policy, and an honest answer about whether you would keep to it.*
-
-**Build**
-
-Pick the single thing users care about most in your system — the list loading,
-the item saving — and define an SLO for it: a metric, a target, and a window.
-Then write the error-budget policy: what happens at 50% of the budget spent and at 75% spent (25% left).
-
-**The thought process**
-
-The first decision is **what to measure**, and the instinct is wrong. Engineers
-reach for uptime of the process, which is a fact about your infrastructure.
-Users experience whether their request succeeded quickly. So the metric is
-almost always a ratio of good requests to total, measured at the edge, where
-"good" is a definition you have to write down — and writing it down is most of
-the work.
-
-Second: **the target is a budget with units.** For this request-based SLI,
-99.9% permits 0.1% of eligible requests to fail: 1,000 failures out of a million.
-Ten thousand failures in one busy minute consume ten such budgets. The familiar
-43.2 minutes over thirty days belongs to a time-weighted objective with a defined
-good-window rule; it is not a valid conversion of arbitrary request traffic.
-Choose a target based on user need, measured feasibility and agreed consequences.
-
-Third, and this is where most SLOs quietly die: **the policy has to bind
-somebody.** "When the budget is spent we will focus on reliability" is a
-sentence. "When the budget is spent, feature work stops until it recovers" is a
-policy — and the honest question is whether you, personally, would do that on a
-week when something else is due. If the answer is no, pick a target you would
-honour rather than one that sounds serious.
-
-**How to organise the prompts**
-
-```
-Here is my system. Propose three candidate SLIs for the thing users care
-about most, each as a precise ratio: what counts as good, what counts as
-total, and where it is measured.
-
-For each, tell me what it would MISS — a real user-visible failure that
-this indicator would score as fine.
-```
-
-That last question is the one that matters. Every indicator has a blind spot,
-and knowing it beforehand is the difference between a number you trust and one
-you defend.
-
-```
-For the SLI I picked, implement it: a metric emitted at the edge, with
-good and total counted separately so I can see both.
-
-Do not compute the ratio in the application — emit the counts and let
-the query do the arithmetic.
-```
-
-Why that constraint: a precomputed ratio cannot be re-sliced later. Counts can.
-
-```
-Write the error-budget policy as rules with thresholds and
-consequences. Then tell me, for each consequence, what would have to be
-true organisationally for it to actually happen.
-```
-
-**On AWS**
-
-Emit the counts as **CloudWatch** metrics from the edge — if you are behind an
-**Application Load Balancer** you already have `RequestCount` and
-`HTTPCode_Target_5XX_Count`, which provide a useful partial view. Include
-load-balancer failures, eligibility, latency and semantic outcomes as required;
-target 5xx alone does not cover every failed user request. That is the "why this service" answer:
-it exists already and it is measured outside your process, so it keeps working
-when your process does not.
-
-**CloudWatch metric math** computes the ratio at query time from the two counts,
-which is exactly the split above. For anything richer — per-endpoint, per-user-
-class — use a **metric filter** on structured logs, or emit your own metrics with
-**EMF** (embedded metric format), which lets you write one structured log line
-and have CloudWatch extract metrics from it. EMF is the underrated one here: one
-write, both signals, no separate metrics client.
-
-Watch the cost shape: custom metrics bill per metric per month, so an SLI split
-by a high-cardinality dimension is a bill rather than an insight. Start with two
-counters.
-
-**What productionising it means**
-
-The SLI is measured where the user is, not inside the process. The target is a
-number you would honour and have written down. The policy names consequences
-somebody has agreed to. And the budget is visible somewhere you look weekly, not
-somewhere you look during an incident.
-
-**The learning**
-
-An SLO is not a reliability target, it is a *permission to fail a specific
-amount* — and that inversion is what makes it useful. Without a budget, every
-failure is a crisis and reliability work never ends; with one, you know whether
-you have room.
-
-**How you would know it is wrong**
-
-- Break the thing on purpose and check the SLI moved. An indicator that does not notice your deliberate failure is measuring something else.
-- Find a real user-visible failure your SLI scores as fine. There is always one — name it.
-- Compute the request budget from eligible total and allowed error fraction. Test unequal traffic intervals and zero eligible requests; do not average interval ratios or substitute outage minutes.
-- Ask whether the agreed owner can enforce the budget policy. Revise an unrealistic policy transparently; do not silently loosen the target after a breach.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

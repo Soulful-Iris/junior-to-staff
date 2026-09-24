@@ -1,72 +1,85 @@
 # 3. The retry storm you build on purpose
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Investigate a save operation that explodes into dozens of dependency calls during an outage. The browser, API handler and SDK each retry independently. Reduce amplification while retaining a safe response to transient failures.
 
-> A single save button produces dozens of dependency requests during an outage. Client, API and SDK each retry independently. Reduce amplification without losing safe recovery. How many total attempts does each configuration permit?
+**Working contract:** One layer owns the retry budget for a logical operation. Count total attempts explicitly, preserve the original deadline and operation identity, and retry writes only under a verified idempotency/reconciliation contract.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../failure-budgets.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Three layers each allow three total attempts. | Worst case is 27 dependency attempts; with three retries plus initial at each layer it is 64. |
-| Boundary / failure | Provider returns a retryable 429 with Retry-After beyond the caller deadline. | No new attempt starts; record exhaustion and surface the agreed outcome. |
-| Scope | Toy worst case assumes every allowed attempt executes; actual deadlines may truncate it. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Three layers × three total attempts each | Worst-case 3³ = 27 dependency attempts for one user action. |
+| Three retries plus initial attempt at each layer | Four total attempts/layer gives 4³ = 64, not 27. |
+| 1,000 clients with identical backoff | Even a bounded attempt count can create synchronized recovery bursts; spread timing with jitter. |
 
-**First slice:** Configure client, API and dependency client with three **total** attempts each. Trigger retryable failures under a hard deadline. **Show:** one user action generating up to 27 dependency attempts, then move retries to one owner and measure the reduction. A provider `Retry-After` beyond the remaining budget must stop new attempts.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Stack three layers that each allow three TOTAL attempts (one initial plus two retries) — client, API, data client — then measure from the outside how many requests one user action actually generates. Then fix it: retry at one layer only, with jitter and a token bucket, and measure again.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Every client starts together | A dependency recovers and 1,000 clients have identical backoff. Does the request count alone reveal the risk? Predict which boundary must change before opening the design. | Plot attempt timestamps as well as counts. Full jitter spreads retries, while an admission limit bounds total downstream concurrency; jitter does not create extra capacity or serialize one key. |
-| Lead · The first write succeeded | The provider performed a write before the response disappeared. What determines retry safety? State what evidence would make you reject your first design. | For local effects, atomically persist operation identity, payload and result with the effect. For a remote effect, use its idempotency/status protocol or reconcile an unknown outcome. Compare duplicate conflicting payloads before replay. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- C["Client: 3 attempts"] --> A["API: 3 per call"]
- A --> D["SDK: 3 per call"]
- D --> T["Dependency: up to 27 calls"]
+```bash
+python3 examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py
 ```
 
-Retry budgets multiply across boundaries. An application counter cannot see retries hidden inside an SDK unless instrumented at the actual send boundary.
+[Open the starting code](../../../../examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| retry_policy | owner_layer,max_total_attempts,deadline | One bounded operation budget. |
+| attempt_record | operation_id,attempt,reason,scheduled_delay | Explains amplification and exhaustion. |
+| effect_identity | operation_id,payload_hash,provider_key | Deduplicates safe external writes or supports reconciliation. |
+
+## AWS implementation
+
+![3. The retry storm you build on purpose: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-the-retry-storm-you-build-on-purpose.svg)
+
+The API and SDK are separate retry layers even when they run in one process. Explicit ownership makes the worst-case dependency load calculable.
+
+## Build it in this order
+
+### 1. Measure actual amplification
+
+Attach one logical operation ID across browser, API and SDK. Count attempts at each layer and compare to user actions. Inspect SDK defaults rather than assuming the retry loop visible in application code is the only one.
+
+### 2. Assign one retry owner
+
+Disable or constrain nested retries so the total budget is explicit. Use a maximum total-attempt count, shared deadline and bounded exponential backoff with jitter. Stop when Retry-After exceeds remaining time; do not start work that cannot contribute to the response.
+
+### 3. Preserve write identity
+
+Reuse one provider idempotency key for an exact write intent and reject changed payload under that key. A timeout after a successful provider commit is unknown, not definitely failed. Reconcile before switching providers or creating another operation.
+
+### 4. Observe recovery under load
+
+Use a finite local fault window and compare request count, attempt timing, useful throughput and queue age. A circuit breaker can reduce doomed calls, but half-open probes must also be bounded so recovery does not release every waiting client at once.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| SDK settings | Set retry mode/count deliberately and document whether configuration means retries or total attempts. |
+| Timeouts | Share the original deadline and cap queue/backoff time; cancel abandoned work where supported. |
+| Provider state | Persist operation identity before the call and retain it for the required retry horizon. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The two configurations produce 27 and 64 attempts; a two-second Retry-After cannot fit 500 ms remaining. |
+| Lose a successful write response | The retry uses the same intent identity and resolves the original effect. |
+| Recover 1,000 clients together | Jitter and bounded probes spread attempts within the configured budget. |
+
+## The next design decision
+
+The provider’s idempotency retention expires before your retry horizon. Shorten the automatic retry window or add a provider lookup/reconciliation path; do not assume an old key remains deduplicated forever.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Inventory configured attempts, choose a single retry owner, classify retryability by service semantics, and bound both elapsed time and retry tokens. Idempotency must protect the real stored effect with payload identity; a standalone marker cannot make an external operation exactly once.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Every client starts together
 
@@ -76,14 +89,6 @@ Inventory configured attempts, choose a single retry owner, classify retryabilit
 <summary>Expected reasoning and changed diagram</summary>
 
 Plot attempt timestamps as well as counts. Full jitter spreads retries, while an admission limit bounds total downstream concurrency; jitter does not create extra capacity or serialize one key.
-
-```mermaid
-flowchart TD
- C["1000 clients"] --> J["Jittered backoff"]
- J --> A["Bounded retry admission"]
- A --> D["Recovering dependency"]
- A --> F["Budget exhausted response"]
-```
 
 </details>
 
@@ -96,20 +101,7 @@ flowchart TD
 
 For local effects, atomically persist operation identity, payload and result with the effect. For a remote effect, use its idempotency/status protocol or reconcile an unknown outcome. Compare duplicate conflicting payloads before replay.
 
-```mermaid
-flowchart TD
- R["Retry with operation identity"] --> P["Payload identity check"]
- P -->|matching| E["Atomic local result or provider protocol"]
- P -->|conflicting| Q["Reject and investigate"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Count dependency arrivals and demonstrate safe duplicate semantics. **Additional lead scope:** Coordinate SDK settings, global load budgets and provider reconciliation. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -117,120 +109,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*You end up with a number: how many requests one user action produces when everything retries.*
-
-**Build**
-
-Stack three layers that each allow three TOTAL attempts (one initial plus two
-retries) — client, API, data client — then
-measure from the outside how many requests one user action actually generates.
-Then fix it: retry at one layer only, with jitter and a token bucket, and measure
-again.
-
-**The thought process**
-
-The first thing to understand is that **retries multiply, not add.** Three
-layers at three attempts is twenty-seven requests from one click, and every
-layer's author made a locally reasonable decision. Nobody chose twenty-seven.
-
-Then the counterintuitive bit: **the retry makes the outage worse.** When a
-dependency is struggling, the thing that pushes it from slow to dead is the
-retry traffic from everyone politely trying again. This is why the discipline is
-retry at *one* layer — usually the one closest to the failure, which knows
-whether the operation is safe to repeat.
-
-Third: **retries are only safe if the operation is idempotent**, which means
-this project has a precondition. A retried POST that creates something creates it
-twice, and the fix is an idempotency key rather than a cleverer retry policy.
-
-Fourth, and this is where the AWS position is genuinely instructive: a **token
-bucket** is preferable to a circuit breaker for limiting retries. A breaker is
-modal — it is either open or closed, which makes it hard to test and slow to
-recover — where a bucket degrades smoothly and self-heals as capacity returns.
-
-**How to organise the prompts**
-
-```
-Here are the three layers of my call chain. Tell me, for each, what its
-current retry behaviour is — including any retries I did not write,
-which the HTTP client or SDK does by default.
-
-Then compute the worst-case number of requests one user action produces.
-```
-
-The "retries I did not write" clause is the important one. Most SDKs retry by
-default and most people do not know their own numbers.
-
-```
-Build the storm deliberately: make the bottom dependency fail, and count
-the requests it actually receives from the OUTSIDE. I want the measured
-number, not the computed one.
-```
-
-Measured from outside, because that is the only place amplification is visible.
-
-```
-Now fix it: retries at one layer only, full jitter on the backoff, and a
-token bucket limiting the retry budget. Measure again from the outside.
-
-Tell me both numbers.
-```
-
-```
-Add idempotency keys so a retry of a write is safe. Then write a test
-that sends the same keyed request twice CONCURRENTLY and asserts the
-effect happened once.
-```
-
-**On AWS**
-
-The AWS SDKs have retried with a token bucket for years, and the setting to know
-is the **retry mode** — `standard` and `adaptive` (adaptive adds client-side rate
-limiting) against the older `legacy` behaviour. Reading your own SDK's configured
-retry mode is the two-minute version of this project's first prompt.
-
-For the operations themselves: **idempotency tokens** are a first-class concept
-in several AWS APIs (EC2's `RunInstances` being the canonical example) and are
-worth looking at as a design to copy rather than invent. **API Gateway** can be
-configured to pass a client-supplied idempotency key through, and **DynamoDB**
-conditional writes can protect a single stored result. Store payload identity
-and the result/effect atomically; if separate records are involved, use an
-appropriate transaction. A conditional marker before an external effect does
-not make that effect exactly once.
-
-Count actual HTTP attempts at the dependency’s request boundary or transport
-send hook, correlating them with one operation ID. **VPC Flow Logs** describe
-network flows, not one record per HTTP request; connection reuse and encryption
-make them unsuitable as an exact request-attempt counter.
-
-Technical semantics checked 2026-09-22: [AWS SDK retry behavior](https://docs.aws.amazon.com/sdkref/latest/guide/feature-retry-behavior.html).
-Pin the SDK version, retry mode and explicit total attempts; the current guide
-distinguishes 2026 opt-in behavior from older behavior. Include retryable 429
-and nonretryable validation errors, and respect the original deadline.
-
-**What productionising it means**
-
-Retries exist at exactly one layer and you can say which. Every backoff has
-jitter, not just the retry — synchronised clients are a self-inflicted thundering
-herd. The retry budget is bounded. Writes carry idempotency keys. And the
-amplification factor is a number you measured rather than reasoned about.
-
-**The learning**
-
-Every layer retrying is a system that turns a small failure into a large one, and
-the arithmetic is multiplicative and invisible from any single layer. This is
-also the clearest example in the guide of a property that only exists in the
-whole system — no component is wrong.
-
-**How you would know it is wrong**
-
-- Count requests at the dependency during a failure, from the dependency's side. Compare to your computed worst case.
-- Check for retries you did not write: read the SDK and HTTP client defaults.
-- Send the same keyed write twice, concurrently. The effect must happen once.
-- Remove the jitter and watch the request timing cluster. That clustering is the herd.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

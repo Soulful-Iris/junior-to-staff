@@ -298,5 +298,65 @@
     "starter": "examples/architecture-starts/a_shift_schedule.py",
     "diagram": "assets/architecture-guides/a-shift-schedule.svg",
     "batch": "application-projects"
+  },
+  {
+    "path": "curriculum/02-applications/04-testing/projects/01-the-suite-that-can-fail.md",
+    "starter": "examples/architecture-starts/01_the_suite_that_can_fail.py",
+    "diagram": "assets/architecture-guides/01-the-suite-that-can-fail.svg",
+    "batch": "testing-project-guidance"
+  },
+  {
+    "path": "curriculum/02-applications/04-testing/projects/02-the-contract-nobody-breaks-by-accident.md",
+    "starter": "examples/architecture-starts/02_the_contract_nobody_breaks_by_accident.py",
+    "diagram": "assets/architecture-guides/02-the-contract-nobody-breaks-by-accident.svg",
+    "batch": "testing-project-guidance"
+  },
+  {
+    "path": "curriculum/02-applications/04-testing/projects/03-the-flake-hunter.md",
+    "starter": "examples/architecture-starts/03_the_flake_hunter.py",
+    "diagram": "assets/architecture-guides/03-the-flake-hunter.svg",
+    "batch": "testing-project-guidance"
+  },
+  {
+    "path": "curriculum/02-applications/04-testing/projects/04-the-load-test-that-finds-the-real-limit.md",
+    "starter": "examples/architecture-starts/04_the_load_test_that_finds_the_real_limit.py",
+    "diagram": "assets/architecture-guides/04-the-load-test-that-finds-the-real-limit.svg",
+    "batch": "testing-project-guidance"
+  },
+  {
+    "path": "curriculum/02-applications/04-testing/projects/05-the-test-that-runs-in-production-forever.md",
+    "starter": "examples/architecture-starts/05_the_test_that_runs_in_production_forever.py",
+    "diagram": "assets/architecture-guides/05-the-test-that-runs-in-production-forever.svg",
+    "batch": "testing-project-guidance"
+  },
+  {
+    "path": "curriculum/03-production/02-delivery/projects/twenty-deploys-a-day.md",
+    "starter": "examples/architecture-starts/twenty_deploys_a_day.py",
+    "diagram": "assets/architecture-guides/twenty-deploys-a-day.svg",
+    "batch": "delivery-observability-slo-retry"
+  },
+  {
+    "path": "curriculum/03-production/04-observability/projects/debuggable-at-three-in-the-morning.md",
+    "starter": "examples/architecture-starts/debuggable_at_three_in_the_morning.py",
+    "diagram": "assets/architecture-guides/debuggable-at-three-in-the-morning.svg",
+    "batch": "delivery-observability-slo-retry"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/01-the-slo-you-would-actually-honour.md",
+    "starter": "examples/architecture-starts/01_the_slo_you_would_actually_honour.py",
+    "diagram": "assets/architecture-guides/01-the-slo-you-would-actually-honour.svg",
+    "batch": "delivery-observability-slo-retry"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/02-the-alert-that-fires-when-it-matters-and-not-before.md",
+    "starter": "examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py",
+    "diagram": "assets/architecture-guides/02-the-alert-that-fires-when-it-matters-and-not-before.svg",
+    "batch": "delivery-observability-slo-retry"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/03-the-retry-storm-you-build-on-purpose.md",
+    "starter": "examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py",
+    "diagram": "assets/architecture-guides/03-the-retry-storm-you-build-on-purpose.svg",
+    "batch": "delivery-observability-slo-retry"
   }
 ]

@@ -1,71 +1,85 @@
 # 5. The test that runs in production, forever
 
-[Curriculum](../../../README.md) · [Testing, debugging, and code review](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Design a synthetic user journey for a reading-list service: sign in as a dedicated probe account, create a marker link, read it and remove it. The exercise begins with a single manual run; no recurring monitor is installed in this repository.
 
-> The health endpoint is green while users cannot save bookmarks. Build a scheduled sign-in/create/read/delete probe that detects the failure without leaving test data forever. What should happen after create fails?
+**Working contract:** A run succeeds only when every required step succeeds. Dependent steps skipped after failure are reported as skipped. Cleanup is attempted independently, and missing runs are distinct from successful runs.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../testing-strategy.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | One run each minute: create item 7, read its content, delete it, verify absent. | Success only if required steps pass; dependent steps skipped after failure are reported as skipped, not successful. |
-| Boundary / failure | Read assertion fails after create succeeds. | Finally-style cleanup deletes the known item; failure still names the read step. |
-| Scope | Dedicated synthetic account and bounded cleanup; no claim one region represents all users. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| One-minute interval in the proposed deployed design | 1,440 runs/day and at least 4,320 create/read/delete operations before authentication and absence checks. |
+| Three missing intervals | A separate heartbeat policy detects a stopped runner; no result is not a healthy result. |
+| Dedicated synthetic namespace | Probe data must not appear in real users’ lists, analytics or billing. |
 
-**First slice:** Give a synthetic user a private test namespace. Each minute: sign in, create item 7, read it, delete it, then verify absence. **Show:** one successful per-step report and one run where read fails; the cleanup still runs, the skipped dependent steps are not green, and the alert links to the failed step without exposing credentials.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** A small check that exercises the real system from outside — sign in, add a link, read it back, delete it — on a schedule, against production, alerting when it fails.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The scheduler stops | No probe result arrives for three intervals. Is that equivalent to success? Predict which boundary must change before opening the design. | No. Monitor heartbeat freshness separately from journey outcome; distinguish no eligible data from missing instrumentation. Alert on the absent run with the monitor’s owner and last successful timestamp. |
-| Lead · A regional path fails | The probe in the application VPC passes, but public DNS fails for a region. What changes? State what evidence would make you reject your first design. | Probe the actual public entry path from a second location and keep region-specific outcomes. Do not automatically collapse a single-location failure into global outage; correlate it with other evidence. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- M["Health endpoint probe"] --> P["Process is alive"]
- U["Real save journey"] --> D["Database permission failure"]
+```bash
+python3 examples/architecture-starts/05_the_test_that_runs_in_production_forever.py
 ```
 
-Liveness skips authentication, persistence and delivery boundaries that matter to the actual user journey.
+[Open the starting code](../../../../examples/architecture-starts/05_the_test_that_runs_in_production_forever.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| journey_run | run_id,started_at,location,step_outcomes | One complete execution with explicit skipped states. |
+| synthetic_resource | run_id,owner,created_at | Cleanup identity and expiry fallback. |
+| heartbeat | runner,last_started,last_completed | Scheduler health independent of application outcome. |
+
+## AWS implementation
+
+![5. The test that runs in production, forever: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-test-that-runs-in-production-forever.svg)
+
+The journey measures the user path; heartbeat evidence measures whether the journey ran. The proposed scheduler is part of the lesson architecture, not a change to this website’s publishing behavior.
+
+## Build it in this order
+
+### 1. Build one manual journey
+
+Use a dedicated account and run identity. Follow the real public DNS/TLS/application path, create a unique marker and verify its content after reading. Run it on demand first and inspect every step’s visible result.
+
+### 2. Make cleanup independent
+
+Keep the created resource ID as soon as it is known. Attempt deletion in a finally-style cleanup path even after a read failure, and record cleanup failure separately. Add expiry-based cleanup for abandoned synthetic data without letting it hide a failing journey.
+
+### 3. Model missing and skipped outcomes
+
+A create failure means read is skipped, not passed. Emit the run result and heartbeat separately. If a future scheduler is configured, monitor freshness from an independent path so a dead runner does not report its own absence as success.
+
+### 4. Define regional interpretation
+
+A probe inside the application VPC does not exercise public DNS and routing. Use a second location when that distinction matters, and retain location-specific evidence. A single-location failure is a useful signal, not automatic proof of a global outage.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Execution | A manually invoked runner is enough for this exercise; scheduling is an explicit later infrastructure choice. |
+| Identity | Probe account has only synthetic-data permissions; credentials never enter logs. |
+| Cleanup | Finite runtime and orphan-retention policy; cap synthetic data volume even if deletion repeatedly fails. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Failed create plus skipped read is not success; an absent runner becomes stale. |
+| Fail the read after creation | Cleanup still attempts deletion and records its own outcome. |
+| Stop the optional runner | The freshness signal detects absence independently of application errors. |
+
+## The next design decision
+
+A probe passes while real users fail because its account has special permissions. Compare its identity, data size and routing with the user population and remove privileges that bypass the behavior being measured.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Use an isolated account, record each step outcome and correlate created IDs. Run cleanup independently where its prerequisites exist. The invariant is no false success after a required step failed and no unbounded orphaned synthetic data.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · The scheduler stops
 
@@ -75,14 +89,6 @@ Use an isolated account, record each step outcome and correlate created IDs. Run
 <summary>Expected reasoning and changed diagram</summary>
 
 No. Monitor heartbeat freshness separately from journey outcome; distinguish no eligible data from missing instrumentation. Alert on the absent run with the monitor’s owner and last successful timestamp.
-
-```mermaid
-flowchart TD
- S["Scheduler"] --> J["Journey runner"]
- J --> R["Result metric"]
- J --> H["Heartbeat timestamp"]
- H --> M["Independent missing-run alarm"]
-```
 
 </details>
 
@@ -95,115 +101,6 @@ flowchart TD
 
 Probe the actual public entry path from a second location and keep region-specific outcomes. Do not automatically collapse a single-location failure into global outage; correlate it with other evidence.
 
-```mermaid
-flowchart TD
- A["External probe region A"] --> D["Public DNS and TLS"]
- B["External probe region B"] --> D
- D --> L["Load balancer"]
- L --> J["User journey"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Inject a mid-journey failure, verify cleanup, and stop the scheduler. **Additional lead scope:** Own regional coverage and missing-monitor escalation. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*You end up finding out about breakage before a person tells you.*
-
-**Build**
-
-A small check that exercises the real system from outside — sign in, add a link,
-read it back, delete it — on a schedule, against production, alerting when it
-fails.
-
-**The thought process**
-
-The first decision is **what it does with data.** A synthetic test that writes
-to production writes real rows. You either accept that and clean up after
-yourself, or you carve out a dedicated account whose data is ignored everywhere
-else. Both are real choices; not choosing means a test user slowly polluting
-every metric you own.
-
-Second: what it checks. The temptation is a health endpoint, which tells you the
-process is alive — a much weaker claim than "a person could use this". The
-valuable check is the *journey*, because that is what exercises the parts that
-depend on each other.
-
-Third, and this is the one that separates a useful check from noise: **what is
-worth waking someone for.** One failed run of a five-step journey is often a
-network blip. Two consecutive is a signal. Deciding that ratio in advance, while
-calm, is the whole difference between an alert people trust and one they mute.
-
-**How to organise the prompts**
-
-```
-Write a check that performs this journey against a real deployment:
-sign in, create an item, read it back, assert the content, delete it,
-and assert it is gone.
-
-Every step must fail loudly with which step failed and what it saw.
-Do not report an unexecuted dependent step as passed. Mark it skipped with
-the failed prerequisite, and always attempt applicable cleanup in a finally
-path using the identifiers actually created.
-```
-
-```
-Now make it clean up after itself even when it fails partway. Show me
-what happens if the assertion fails between create and delete.
-```
-
-Half-cleaned synthetic data is the commonest way this kind of check becomes a
-nuisance nobody removes.
-
-```
-Make it alert only after two consecutive failures, and make the alert
-say which step failed and for how long it has been failing.
-```
-
-**On AWS**
-
-This is the one place where a managed service is clearly the right answer:
-**CloudWatch Synthetics** canaries exist for exactly this — a scheduled script
-in a managed Lambda, with screenshots, a results dashboard and CloudWatch
-alarms wired in. You write the journey and stop maintaining a runner.
-
-The build-it-yourself version is a **Lambda** on an **EventBridge** schedule
-publishing a custom **CloudWatch** metric with an alarm on it, and it is worth
-understanding because it is three small pieces you will reuse for everything
-else. Compare canary-run charges with function, scheduling, logging and storage
-charges at the selected frequency. The managed dashboard and screenshots
-reduce your maintenance work; a custom runner trades that convenience for
-implementation and operating responsibility.
-
-And run it from **outside** your VPC. A check that runs inside the network it is
-checking cannot see the failures that matter most — DNS, certificates, the load
-balancer, the internet.
-
-**What productionising it means**
-
-It already is production; that is the point. What makes it durable is that its
-own failure is visible — a canary that stops running looks exactly like a canary
-that is passing, which is the single most repeated failure mode in my own
-record. Alarm on missing data, not only on failures.
-
-**The learning**
-
-The gap between "it broke" and "we knew" is the number that decides how bad an
-incident is, and it is the only one you can shrink before anything goes wrong.
-This project is how you find out what yours currently is.
-
-**How you would know it is wrong**
-
-- Break the journey on purpose (revoke the test user's permission) and time how long until the alert arrives. That number is your detection time.
-- Stop the canary entirely. Something must notice. If nothing does, silence means nothing and the check is decorative.
-- Check what it leaves behind after a mid-journey failure. Then check again a week later.
-- Confirm the alert names the failing step. "Canary failed" at 3am is a puzzle, not a page.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>
