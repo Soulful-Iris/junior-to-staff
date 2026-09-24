@@ -1,73 +1,85 @@
 # 4. The API that does not break its callers
 
-[Curriculum](../../../README.md) · [Backend and APIs](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Evolve a reading-list API whose mobile clients expect tags as strings. The new web UI needs tag IDs and display colors. Some mobile clients will not update for ninety days, so replacing tags with objects in place would break supported callers.
 
-> Your API returns `tags: ["work"]`; new clients need tag IDs. Old mobile clients will remain deployed for ninety days. Change the API without silently changing their behavior. Which client populations can you actually observe?
+**Working contract:** Keep tags as string[] for the supported old contract and add a separately named tagObjects field or explicit API version. Reject incompatible input clearly. Both representations derive from one canonical stored model.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../request-lifecycle.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Old response `tags:["work"]`; new data adds `tagObjects:[{id:7,name:"work"}]`. | Old reader still receives strings; new reader receives objects derived from the same authoritative tag data. |
-| Boundary / failure | Old field is replaced by objects before clients migrate. | The saved old-client fixture fails; do not infer compatibility from provider unit tests. |
-| Scope | An additive example; new enum values and strict consumers still need compatibility tests. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 90-day old-client support window | Keep compatibility until observed usage and policy allow retirement, not merely until the new UI ships. |
+| 10,000 active clients; 15% old-version assumption | 1,500 clients would be affected by an in-place type change. |
+| Two response shapes, one stored tag identity | Avoid independently mutable parallel fields that drift. |
 
-**First slice:** Replay a saved old-client fixture expecting `{"tags":["work"]}`. Add `"tagObjects":[{"id":7,"name":"work"}]` without replacing `tags`. **Show:** the old fixture still green and a new-client check for objects. Deliberately replace the old field once and capture the old client's failure; a provider-only unit test is insufficient.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Yesterday's client, recorded and turned into a compatibility test. One real change made additively — the new shape beside the old. The old shape marked with Deprecation and Sunset headers and a real date, and telemetry plus a consumer inventory that state what old usage can and cannot be observed.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Usage cannot be seen | Both clients call the same URL, and the server cannot tell which JSON field they read. How do you measure retirement? Predict which boundary must change before opening the design. | Use explicit version/capability telemetry where feasible, client inventories and owner acknowledgments. Endpoint traffic alone cannot reveal field access; the removal decision must name uninstrumented and offline clients. |
-| Lead · A team misses the sunset | One consumer cannot migrate before the announced date. Must the compatibility test turn green on removal anyway? State what evidence would make you reject your first design. | No. A date is a policy input, not evidence of safety. Choose extended support, a versioned endpoint, or explicit accepted breakage with an owner; revise the go/no-go gate accordingly. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- O["Old response: tags are strings"] --> P["Unchanged old-client parser"]
- N["Changed response: tags are objects"] --> P
- P -->|string fixture| S["Passes"]
- P -->|object fixture| F["Parsing failure"]
+```bash
+python3 examples/architecture-starts/04_the_api_that_does_not_break_its_callers.py
 ```
 
-A source-compatible provider change can still break a deployed consumer. The baseline changes an existing field’s type rather than adding a new promise.
+[Open the starting code](../../../../examples/architecture-starts/04_the_api_that_does_not_break_its_callers.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| canonical_tags | tag_id,label,color,version | Single source of tag meaning. |
+| legacy_adapter | canonical tags → string[] | Preserves field type and legacy ordering. |
+| current_adapter | canonical tags → tagObjects[] | Explicit richer representation without reusing the old field type. |
+
+## AWS implementation
+
+![4. The API that does not break its callers: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/04-the-api-that-does-not-break-its-callers.svg)
+
+Compatibility belongs at the application boundary. A managed gateway can route versions, but it cannot infer the meaning of tags or repair a changed JSON type for old callers.
+
+## Build it in this order
+
+### 1. Capture actual caller behavior
+
+Write down request/response examples used by supported clients, including nulls, empty lists, unknown fields and error shapes. Do not assume every client ignores additional fields; use an explicit version if strict decoders require it.
+
+### 2. Add a canonical model and adapters
+
+Store tag IDs and metadata once. Build response serializers for the old and new contracts. Keep legacy tags as strings; do not overload the same field with mixed types. Decide how old clients create or rename tags without stable IDs.
+
+### 3. Run both client paths
+
+Use a small old-client script that joins tag strings and a new-client script that reads IDs. Send both through the same application state. Check a real error response too; compatible success bodies do not protect callers from changed error semantics.
+
+### 4. Retire deliberately
+
+Measure requests by explicit client/API version, publish the support window and keep an owner for the adapter. Remove it only after the agreed condition; database migration and API retirement are separate steps.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Routing | Keep version selection explicit and observable; do not infer a contract from incidental user-agent text. |
+| Data | One canonical tag representation; adapters cannot independently overwrite competing copies. |
+| Retirement | Record supported versions and usage evidence; deployment remains independent of this curriculum exercise. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The old string-joining client and new ID-reading client both work. |
+| Send an old tag-create request | The canonical model is updated through a defined adapter. |
+| Remove tagObjects from a legacy response | The old client remains unaffected; tags still has the same type. |
+
+## The next design decision
+
+Change units from milliseconds to seconds. Use a new field name or version and explicit conversion; keeping a JSON number type does not preserve its semantic contract.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Inventory observed promises and create the old-client test first. Derive both representations from one source instead of independent unsynchronized writes. The invariant is unchanged old behavior until the agreed retirement gate, with usage evidence and a documented blind spot.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Usage cannot be seen
 
@@ -77,14 +89,6 @@ Inventory observed promises and create the old-client test first. Derive both re
 <summary>Expected reasoning and changed diagram</summary>
 
 Use explicit version/capability telemetry where feasible, client inventories and owner acknowledgments. Endpoint traffic alone cannot reveal field access; the removal decision must name uninstrumented and offline clients.
-
-```mermaid
-flowchart TD
- C["Versioned client capability"] --> A["API telemetry"]
- I["Client inventory"] --> G["Retirement gate"]
- A --> G
- O["Offline-client blind spots"] --> G
-```
 
 </details>
 
@@ -97,132 +101,6 @@ flowchart TD
 
 No. A date is a policy input, not evidence of safety. Choose extended support, a versioned endpoint, or explicit accepted breakage with an owner; revise the go/no-go gate accordingly.
 
-```mermaid
-flowchart TD
- M["Unmigrated consumer"] --> D["Owner decision"]
- D --> E["Extend compatibility"]
- D --> V["Isolate supported v1"]
- D --> B["Explicitly accepted breakage"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Run old/new client fixtures and describe telemetry limits. **Additional lead scope:** Negotiate retirement and compatibility ownership across teams. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*You end up able to change P1's API underneath a frontend you are not allowed
-to touch — with a dated, tested path to removing what you replaced.*
-
-**Build**
-
-Yesterday's client, recorded and turned into a compatibility test. One real
-change made additively — the new shape beside the old. The old shape marked
-with `Deprecation` and `Sunset` headers and a real date, and telemetry plus a consumer inventory that
-state what old usage can and cannot be observed.
-
-**The thought process**
-
-Decide what breaking means before touching anything. Not "the schema changed"
-— "a promise changed": a field removed or renamed, a type tightened, a meaning
-shifted, required become optional. Then the honest third column, ambiguous:
-field order, an enum value nobody has seen. Callers depend on everything
-observable, promised or not, and the ambiguous column is where incidents are
-born.
-
-The additive rule and its price: you may add; you may not remove or repurpose.
-So wrong turns accumulate forever unless retirement is a process — announce,
-measure, remove — and only the measuring makes the date honest. Version only
-when additive fails, when the shape itself was the mistake, and version in the
-path: `/v2/` shows up in logs, curls and screenshots. Header versioning is
-tidier and invisible, and invisible is the wrong property while you are
-learning to debug.
-
-There are standard words for retirement: `Deprecation` (RFC 9745, published
-March 2025) announces it, `Sunset` (RFC 8594) names the date after which it
-may stop answering, and the sunset must not be earlier than the deprecation
-(checked 2026-09-22). Machine-readable retirement reaches callers a changelog
-never will.
-
-**How to organise the prompts**
-
-**1. The promises, then the classification.**
-
-```
-Read the API and its callers. Write down every promise a caller could
-currently rely on: fields, types, optionality, meanings, status codes,
-orderings. Then sort possible changes into three lists — safe to make
-silently, breaking, and ambiguous — with one line of why per entry.
-```
-
-Argue with the ambiguous list before moving on. It is the whole lesson wearing
-a table.
-
-**2. The additive change, guarded by yesterday.**
-
-```
-Tags need to become structured objects instead of bare strings. Do it
-additively: new field beside the old, both written on every change, old
-callers unaffected. Derive both representations from one authoritative tag
-model or update them in one transaction; do not add unsynchronized dual writes. Before changing anything, record today's real
-responses and turn them into a test that yesterday's client still
-passes.
-```
-
-The recorded-yesterday test must be green before and after. That pair of runs
-is the deliverable.
-
-**3. The retirement, dated and enforced.**
-
-```
-Mark the old field's endpoints with Deprecation and Sunset headers,
-sunset ninety days out. Use explicit client version/capability signals and a consumer inventory
-to estimate old usage; ordinary response logs cannot reveal which JSON field
-a client reads. Make removal depend on the agreed date AND the compatibility
-review, naming offline and uninstrumented clients. A date alone does not
-make a breaking removal safe.
-```
-
-Check with `curl -i` that both headers arrive with a real date, and that the
-usage query returns a number rather than a shrug.
-
-**On AWS**
-
-This is where **API Gateway** earns its keep over an **ALB**: stages and
-base-path mappings make `/v1` and `/v2` separately deployed, separately
-measured things, per-stage **CloudWatch** metrics answer "is anyone still on
-v1" without instrumenting a line, and canary settings shift a percentage of a
-stage to new code first. An ALB can route paths to target groups, but the
-bookkeeping — per-version metrics, the gradual shift, the mapping — is yours
-to build. Pin `/v1` to a **Lambda** alias so the retired surface is served by
-code that no longer changes. Estimate gateway, function, logging and retained version costs for the
-actual account; retire obsolete versions deliberately.
-
-**What productionising it means**
-
-The sunset date gets an owner and a calendar entry, because a date nobody owns
-is a wish. Removal day is a deploy with a decided behaviour — a 410 and a
-pointer at the new shape, chosen in advance. The second deprecation should be
-cheaper than the first; that is what writing the policy down buys. The date
-opens the conversation; the caller count closes it, at zero.
-
-**The learning**
-
-An API is a promise with an audience. You can widen it silently; narrowing it
-needs consent and a calendar. Compatibility is not refusing to change — it is
-changing in a fixed order: add, migrate, measure, and only then remove.
-
-**How you would know it is wrong**
-
-- Replaying yesterday's recorded traffic fails against today's API.
-- Deleting the old field on a branch leaves the compatibility test green — a guard that cannot fail.
-- `curl -i` shows a Sunset earlier than the Deprecation, or no date at all.
-- A brand-new optional field trips an alarm — a guard that blocks safe changes teaches people to route around it.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

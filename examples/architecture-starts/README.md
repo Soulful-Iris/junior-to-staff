@@ -47,3 +47,12 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [Knowledge assistant: the citation that lost access](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/knowledge-assistant.md) | [knowledge_assistant.py](knowledge_assistant.py) |
 | [Support assistant](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md) | [support_assistant.py](support_assistant.py) |
 | [Personalized ranking: low latency and evidence of quality](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/personalized-ranking.md) | [personalized_ranking.py](personalized_ranking.py) |
+| [1. The request you can trace end to end](../../curriculum/02-applications/01-backend/projects/01-the-request-you-can-trace-end-to-end.md) | [01_the_request_you_can_trace_end_to_end.py](01_the_request_you_can_trace_end_to_end.py) |
+| [2. The three-second budget](../../curriculum/02-applications/01-backend/projects/02-the-three-second-budget.md) | [02_the_three_second_budget.py](02_the_three_second_budget.py) |
+| [3. The fetch that cannot be aimed inward](../../curriculum/02-applications/01-backend/projects/03-the-fetch-that-cannot-be-aimed-inward.md) | [03_the_fetch_that_cannot_be_aimed_inward.py](03_the_fetch_that_cannot_be_aimed_inward.py) |
+| [4. The API that does not break its callers](../../curriculum/02-applications/01-backend/projects/04-the-api-that-does-not-break-its-callers.md) | [04_the_api_that_does_not_break_its_callers.py](04_the_api_that_does_not_break_its_callers.py) |
+| [5. The job that survives a restart](../../curriculum/02-applications/01-backend/projects/05-the-job-that-survives-a-restart.md) | [05_the_job_that_survives_a_restart.py](05_the_job_that_survives_a_restart.py) |
+| [5. A public form](../../curriculum/02-applications/01-backend/projects/a-public-form.md) | [a_public_form.py](a_public_form.py) |
+| [2. A receipt tracker](../../curriculum/02-applications/02-databases/projects/a-receipt-tracker.md) | [a_receipt_tracker.py](a_receipt_tracker.py) |
+| [1. A shared reading list](../../curriculum/02-applications/03-frontend/projects/a-shared-reading-list.md) | [a_shared_reading_list.py](a_shared_reading_list.py) |
+| [3. A shift schedule](../../curriculum/02-applications/05-security/projects/a-shift-schedule.md) | [a_shift_schedule.py](a_shift_schedule.py) |

@@ -1,72 +1,85 @@
 # 5. The job that survives a restart
 
-[Curriculum](../../../README.md) · [Backend and APIs](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Move title fetching out of a bookmark request into a durable background job. The worker can die after fetching a title, two workers can overlap after a lease expires, and an old worker must not replace a newer result when it resumes.
 
-> Title fetching moves into a worker so bookmark creation can return immediately. Worker A pauses after fetching an old title; its lease expires, B completes a new title, and A resumes. Keep A from overwriting B. What does lease expiry actually stop?
+**Working contract:** Creating a bookmark commits a stable title job and dispatch intent. Jobs expose accepted, running, succeeded and failed states. A result is published only by the current ownership epoch; queue acknowledgement follows the durable outcome.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../request-lifecycle.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | A claims generation 1 and fetches `Old`; B reclaims generation 2 after expiry and commits `New`; A then commits. | B’s conditional commit succeeds; A’s generation-1 commit affects zero rows; stored title remains `New`. |
-| Boundary / failure | Worker crashes after remote fetch but before any durable result record. | A later owner may fetch again; guarantee one current stored result, not one remote fetch. |
-| Scope | One job identity and payload hash; immutable generation per claim; no external exactly-once guarantee. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 saves/minute; two-second mean fetch | About 3.3 occupied worker slots at steady state; start with a small bounded pool. |
+| Thirty-second lease | Renew only while the same epoch owns the job; a paused worker can lose ownership before it notices. |
+| Five delivery attempts | Exhaustion becomes a visible failed/repair state, not an endlessly hidden queue retry. |
 
-**First slice:** Claim a pending fetch job as generation 1. Let its lease expire, let worker B claim generation 2 and store title `New`, then let old worker A try to store `Old`. **Show:** one conditional update succeeds and A's affects zero rows. Kill a worker after fetch and prove a retry may fetch again without replacing the newer stored result.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** A jobs table in the database P1 already has — pending, claimed with an expiry, done, failed with a reason — and a worker loop that claims atomically and runs the guarded fetch inside the budget. The add-URL endpoint returns at once with the title pending. At-least-once delivery, idempotent handling.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A expires during work | A resumes after expiry but before B claims. May it still commit? Predict which boundary must change before opening the design. | Under this exercise’s strict policy, no: the commit checks both generation and lease validity using authoritative time. A must reacquire a new generation. This closes the gap where “owner matches” alone accepts an expired owner. |
-| Lead · The provider charges per operation | Replace the read with a billable enrichment API that succeeds but loses its response. Can you safely repeat? State what evidence would make you reject your first design. | Use a provider-supported idempotency key or status lookup tied to the same operation identity. Otherwise record outcome unknown and reconcile before retrying a non-idempotent effect. Local fencing protects your store, not an external provider. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- J["Job lease expires"] --> B["B claims and writes New"]
- A["A paused with Old"] -->|unguarded late write| D["Item title"]
- B --> D
+```bash
+python3 examples/architecture-starts/05_the_job_that_survives_a_restart.py
 ```
 
-A lease coordinates admission but cannot stop a suspended process. Writing a fetched title twice is not automatically convergent because the remote page can change.
+[Open the starting code](../../../../examples/architecture-starts/05_the_job_that_survives_a_restart.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| jobs | bookmark_id,request_id,state,epoch,lease_until | Logical identity and ownership. |
+| attempts | job_id,epoch,started,outcome | Separate retries under one job. |
+| bookmark_title | bookmark_id,title,title_version | Updated conditionally by the winning job/source version. |
+
+## AWS implementation
+
+![5. The job that survives a restart: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-job-that-survives-a-restart.svg)
+
+The queue wakes workers; the job record owns lifecycle and publication. Keeping those roles separate makes duplicate delivery and restarts understandable.
+
+## Build it in this order
+
+### 1. Create a durable job transaction
+
+In store.py, save the bookmark and job/outbox record together. Return a stable status URL after commit. A duplicate create request reuses the job identity; it does not schedule another logical fetch.
+
+### 2. Implement worker ownership
+
+In worker.py, claim due work using a conditional epoch increment and lease timestamp. Store attempt evidence. A queue’s visibility period only limits delivery overlap; the job-store condition decides who may publish.
+
+### 3. Publish and acknowledge in order
+
+Recheck bookmark source version and worker epoch before writing the title and succeeded state. Acknowledge after commit. On redelivery, a completed job is recognized and acknowledged without another visible result. Handle deleted bookmarks as cancellation rather than recreating them.
+
+### 4. Add an operator repair path
+
+Show oldest accepted job, attempt count, last error and next retry. After bounded attempts, move to failed/DLQ and allow an authorized replay retaining logical identity. A replay is evidence, not deletion of the previous failure history.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| SQS | Visibility greater than ordinary work duration, bounded redrive and a documented repair action. |
+| DynamoDB | Conditional claims and result writes; TTL cleanup never substitutes for lease/expiry checks. |
+| Worker | Outbound URL policy, total deadline and reserved concurrency protecting source/database capacity. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Epoch 2 wins; epoch 1 cannot replace the title. |
+| Restart after result commit but before acknowledgement | Redelivery observes succeeded and finishes without another result. |
+| Delete the bookmark while work waits | The worker records cancellation and does not recreate it. |
+
+## The next design decision
+
+Let users edit the URL while an old fetch runs. Add a source URL version to the job and reject results for an earlier source even if the worker still owns its lease.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Atomically save item and job, claim with an incrementing generation, and condition the result transaction on current owner/generation and valid lease. Couple item/result and terminal job state in that transaction. Retry transient failures with a cap; reject conflicting payload identity and retain visible failures.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A expires during work
 
@@ -76,13 +89,6 @@ Atomically save item and job, claim with an incrementing generation, and conditi
 <summary>Expected reasoning and changed diagram</summary>
 
 Under this exercise’s strict policy, no: the commit checks both generation and lease validity using authoritative time. A must reacquire a new generation. This closes the gap where “owner matches” alone accepts an expired owner.
-
-```mermaid
-flowchart TD
- A["A result with generation 1"] --> C["Check current generation and lease"]
- C -->|expired| R["Reject commit"]
- C -->|valid owner| T["Atomic item and job completion"]
-```
 
 </details>
 
@@ -95,21 +101,7 @@ flowchart TD
 
 Use a provider-supported idempotency key or status lookup tied to the same operation identity. Otherwise record outcome unknown and reconcile before retrying a non-idempotent effect. Local fencing protects your store, not an external provider.
 
-```mermaid
-flowchart TD
- W["Worker operation key"] --> P["Provider applies effect"]
- P -->|response lost| U["Outcome unknown"]
- U -->|lookup or same key| R["Provider reconciliation"]
- R --> C["Conditional local completion"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Replay pause, crash, duplicate and conflicting-payload schedules. **Additional lead scope:** Define reconciliation ownership, replay retention and recovery objectives. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -117,134 +109,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*You end up with the title fetch off the request path, and a worker you can
-kill mid-job without losing the work or doing it twice where it shows.*
-
-**Build**
-
-A jobs table in the database P1 already has — pending, claimed with an expiry,
-done, failed with a reason — and a worker loop that claims atomically and runs
-the guarded fetch inside the budget. The add-URL endpoint returns at once with
-the title pending. At-least-once delivery, idempotent handling.
-
-**The thought process**
-
-Start with what the user gets now. The request has to end on time — project 2
-— so the honest answer is the saved item with its title pending. P1's decision
-list called this the honest version of a queue; note the response gains a
-status field, an additive change under project 4's rules.
-
-Then the guarantee arithmetic. The worker claims, fetches, and records. A
-crash after the fetch but before recording can require another fetch. A lease
-permits another worker to reclaim work; it does not stop a suspended old worker.
-A remote page can change, so repeating a title write is not necessarily harmless.
-
-Protect the actual write: each claim increments a generation. The transaction
-that updates the item and terminal job result must require the current generation,
-owner, expected item refresh version, and an unexpired lease under the chosen
-clock policy. A stale owner changes zero rows. Retain the job identity and payload
-hash for the deduplication horizon. This gives a scoped current stored-result
-guarantee, not one execution, one fetch, or exactly-once external effects.
-
-The claim itself is the section's lost update wearing overalls: two workers,
-one job, and read-then-write hands it to both. It must be one atomic statement
-— update where still pending, returning the row — never a select followed by
-an update. And failure is a state, not an exception: attempts counted, capped,
-ending in failed with the reason stored where a person can see it. A fetch
-that can never succeed must end somewhere visible, not loop forever, and not
-vanish.
-
-**How to organise the prompts**
-
-**1. The design, and the crash map.**
-
-```
-Move the title fetch out of the request. Design first, no code: the jobs
-table with its states, the exact atomic statement by which one of two
-competing workers claims a job, how a claim expires if its worker dies,
-and a list of every moment where a crash loses work or repeats it.
-```
-
-If the crash list does not include "after the fetch, before recording it," the
-design has not understood the problem. No code yet.
-
-**2. The worker, counted honestly.**
-
-```
-Implement it: the endpoint saves the item and the job and returns the
-title as pending. The worker claims with the atomic statement, claims
-expire after 60 seconds; each claim increments a fencing generation.
-Commit the item and job result atomically only while the owner, generation,
-refresh version and lease are current. Three failed attempts end visibly.
-First run two workers against ten jobs without crashes and record ten
-initial claims. Then permit reclaims in the crash drills and prove that
-stale completions cannot overwrite newer results.
-```
-
-From the tables, not the logs' general mood — a count of claims is a number
-that can be wrong.
-
-**3. The two deaths.**
-
-```
-Two demonstrations. One: kill -9 the worker mid-fetch, restart it, and
-show the job re-claimed after the expiry and finished. Two: crash
-between the fetch finishing and the outcome being recorded, and show the
-fetch running twice while the item still ends correct. Save both stories
-with their job ids.
-```
-
-The second demonstration proves that execution can repeat. Add the pause
-schedule from the opening: A fetches Old, B reclaims and stores New, A resumes.
-Only the conditional result boundary makes the late duplicate harmless to
-stored state. Record the rejected generation and retained New title.
-
-**On AWS**
-
-**SQS** is this project as a managed service, and everything you built has a
-name there: the claim expiry is the visibility timeout — 30 seconds by
-default, extendable to 12 hours (checked 2026-09-22) — the attempts cap is a
-dead-letter queue, and standard queues promise exactly the at-least-once you
-designed for (checked 2026-09-22). **EventBridge** is the neighbour that looks
-similar and is not: it routes events to many listeners — announcements, not a
-work list. **Kinesis** is an ordered, replayable stream for many readers, the
-wrong shape for "do this once". For the consumer, **Lambda** triggered from
-SQS wires batching, retries and the DLQ with almost no code, under a
-15-minute ceiling per invocation (checked 2026-09-22) — vast for a title
-fetch; a **Fargate** worker is for jobs that outgrow it. Keeping the table
-version instead: the claim is `SKIP LOCKED` on **RDS** Postgres, a conditional
-write on **DynamoDB** — the same idea in two spellings. Estimate queue requests, worker duration, database access and retention;
-use the existing local database first when cloud deployment adds no learning.
-
-**What productionising it means**
-
-The alarms are depth and age, not errors: a dead worker emits no errors at
-all, and its silence photographs exactly like health, so alarm when the oldest
-pending job passes an age you chose. On SIGTERM the worker stops claiming, drains within its shutdown budget, and
-releases or lets unfinished leases expire; it cannot assume shutdown always
-allows the in-flight work to finish. The attempts cap stands between one poison job and a
-worker that dies in a loop, and the failed state needs an owner — a
-dead-letter queue nobody reads is a landfill with an SLA.
-
-**The learning**
-
-Delivery, execution and committed effect are different guarantees. A crash can
-repeat a remote read while an atomic conditional result stays correct. The hard
-parts are the claim/completion state machine, its protected write boundary, and
-the recovery protocol for effects outside your database.
-
-**How you would know it is wrong**
-
-- `kill -9` mid-fetch: with the database and upstream healthy, completion occurs after lease expiry, a poll and the bounded fetch/commit time. Measure each term; expiry alone does not bound completion.
-- Two workers, ten jobs with no faults: ten initial claims. Under injected crashes, reclaims may increase this count; accepted current results remain one per operation identity.
-- A poison job: three attempts, a failed state with the reason, a worker still alive.
-- Stop the worker for an hour: the age check goes red. If nothing notices, silence means nothing.
-- Kill the database mid-claim: the worker survives and resumes when it returns.
-
----
-
-[Back to the ordered project index](../projects.md)
-
-Technical behavior checked 2026-09-22: [SQS visibility timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) and [Lambda with SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html). Visibility and at-least-once delivery do not fence the result store. Configure partial-batch failure reporting and redrive deliberately.
+</details>

@@ -1,84 +1,85 @@
 # 2. A receipt tracker
 
-[Curriculum](../../../README.md) · [Databases and transactions](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Build a receipt tracker for a small business. An employee uploads a receipt for 19.99, but extraction reads 199.90. The accountant corrects it, and a later extraction retry must not overwrite the confirmed amount.
 
-> A receipt photo says USD 19.99, but OCR suggests 199.90. Users must correct it without losing the evidence needed to measure extraction quality. What enters the monthly total before confirmation?
+**Working contract:** Keep source evidence, extracted suggestions and human-confirmed values as distinct records. Money is stored in integer minor units with currency. Reports use confirmed values or clearly label unreviewed entries.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../../../01-code/01-problem-solving/change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Photo suggestion 19,990 USD cents ($199.90); human correction 1,999 USD cents ($19.99). | Persist both; confirmed monthly total increases by 1,999 cents ($19.99), with provenance linking the correction. |
-| Boundary / failure | An interrupted upload has no complete image, or the image is not a receipt. | Keep an explicit incomplete/failed record or clean it up; do not invent an amount or count an unconfirmed total. |
-| Scope | Currency stored with exact decimal/minor-unit representation; no implicit exchange-rate conversion. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 1,000 receipts/month; 2 MB average image | About 2 GB/month of source objects before versions and backups. |
+| OCR suggests 199.90; human confirms 19.99 | Suggested 19,990 minor units must not replace confirmed 1,999 minor units. |
+| Two reviewers may edit simultaneously | Require expected revision and preserve an audit trail of corrections. |
 
-**First slice:** Display an uploaded photo as `processing`, then show the model's suggested amount `19990` USD cents ($199.90) alongside the user's confirmed `1999` USD cents ($19.99). **Show:** both values and their sources in the record, plus a monthly total derived only from *confirmed* amounts. Interrupt another upload and prove it cannot silently contribute a guessed number.
+## Start with one working boundary
 
-| Record/action | Displayed state | Monthly USD total, starting at $0.00 |
-|---|---|---|
-| Upload receipt A; extraction suggests $199.90 | `needs review` with suggestion and source image | $0.00 |
-| User confirms $19.99 for A | Confirmed $19.99 beside retained suggestion $199.90 | $19.99 |
-| Completion for A is delivered twice | One receipt A, one confirmed amount | $19.99 |
-| Upload B stops halfway | Incomplete/failed or cleaned up explicitly | $19.99 |
-| Confirm a JPY 500 receipt | JPY amount and currency visible separately | $19.99 USD; JPY 500 in its own total |
+Run from the repository root with Python 3.12+:
 
-Use integer minor units with an explicit currency and scale; do not label `1999` as 1,999 dollars or add yen to dollars. Keep the image private, show who corrected which value, and test the retry at the finalization boundary.
-
-<!-- project-expectation:start -->
-
-## What you are expected to hand over
-
-**The finished artifact:** A receipt workspace where uploads reach durable storage directly, processing state is visible, repeated delivery is harmless, and summaries can be reconciled to source receipts.
-
-![Expected end product preview for this project: the main workflow, visible state, and reviewable outcomes](../../../../assets/product/receipt-tracker.svg)
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The upload is retried | The phone loses the completion response and submits the same upload ID twice. What is counted? Predict which boundary must change before opening the design. | Use an owner-scoped upload identity, verify object metadata and finalize idempotently. A repeated completion must not create another receipt or queue an unbounded duplicate extraction. |
-| Lead · Several currencies | The month contains USD 19.99 and JPY 500. What does the summary show? State what evidence would make you reject your first design. | Group totals by currency unless conversion is explicitly requested. Conversion needs rate source, rate date, rounding and audit trail; adding 1999 and 500 would combine different units. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- P["Receipt photo"] --> M["Extraction suggestion: 199.90"]
- M --> T["Monthly total treated as fact"]
- T --> E["Incorrect money summary"]
+```bash
+python3 examples/architecture-starts/a_receipt_tracker.py
 ```
 
-A plausible extraction is not an authoritative financial record. The correction path and provenance are part of the data contract.
+[Open the starting code](../../../../examples/architecture-starts/a_receipt_tracker.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| receipts | receipt_id,owner,source_key,source_hash | Immutable original evidence. |
+| extraction_attempts | receipt_id,attempt,model,fields | Versioned machine suggestions and provenance. |
+| confirmed_fields | receipt_id,revision,amount_minor,currency,actor | Human-approved reporting authority. |
+
+## AWS implementation
+
+![2. A receipt tracker: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/a-receipt-tracker.svg)
+
+Textract supplies candidate data; the review transaction establishes the confirmed financial record. Keeping those authorities separate makes correction durable across retries.
+
+## Build it in this order
+
+### 1. Store one receipt with evidence
+
+Save the private original image and checksum, then create a receipt record with owner and upload time. Keep object identity immutable so an accountant can inspect exactly what supported a correction.
+
+### 2. Add extraction as a suggestion
+
+Record each extractor/model version, raw suggested fields and confidence/evidence location. Validate currency and decimal conversion explicitly. Low confidence, inconsistent totals or missing fields route to review rather than becoming silently accepted financial data.
+
+### 3. Implement conditional human review
+
+Display image, suggestion and editable confirmed fields side by side. Save against expected revision and record actor plus previous/new values. An extraction retry appends a new suggestion; it has no authority to overwrite confirmed fields.
+
+### 4. Build useful reports and recovery
+
+Filter reports by owner/date/currency and distinguish reviewed from pending amounts. Export integer-money-derived decimal strings without binary floating-point rounding. Restore a database backup together with referenced object versions and show that every confirmed record still has source evidence.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Evidence bucket | Private access, versioning and owner-authorized download; avoid receipt content in logs. |
+| Database | Currency plus integer minor units, optimistic revision updates and immutable correction history. |
+| Extraction | Bounded document size/pages, stable source identity and explicit review state after provider failure. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Reporting stays at 1,999 minor units after another 19,990-unit suggestion. |
+| Two reviewers save the same revision | One succeeds; the other sees a conflict with their draft preserved. |
+| Restore the data | Confirmed values remain linked to the original receipt evidence. |
+
+## The next design decision
+
+Add currencies with different minor-unit conventions and tax-line reconciliation. Make the currency exponent part of the conversion policy instead of multiplying every amount by 100.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Upload privately, verify finalization, store raw output with access/retention controls, and represent suggestion versus confirmation separately. The invariant is that totals use the selected authoritative amount and explicit currency. Define currency scale; not every currency has two minor digits.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · The upload is retried
 
@@ -88,14 +89,6 @@ Upload privately, verify finalization, store raw output with access/retention co
 <summary>Expected reasoning and changed diagram</summary>
 
 Use an owner-scoped upload identity, verify object metadata and finalize idempotently. A repeated completion must not create another receipt or queue an unbounded duplicate extraction.
-
-```mermaid
-flowchart TD
- P["Phone upload identity"] --> S["Private object store"]
- P --> F["Owner-scoped finalize"]
- S -->|metadata verification| F
- F --> D["One receipt and extraction job"]
-```
 
 </details>
 
@@ -108,142 +101,6 @@ flowchart TD
 
 Group totals by currency unless conversion is explicitly requested. Conversion needs rate source, rate date, rounding and audit trail; adding 1999 and 500 would combine different units.
 
-```mermaid
-flowchart TD
- R["Confirmed receipts"] --> C["Group by currency"]
- C --> U["USD 1999 minor units"]
- C --> J["JPY 500 units"]
- U --> V["Optional converted report"]
- J --> V
- X["Explicit dated rate policy"] --> V
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Prove upload retry safety and corrected exact-money totals. **Additional lead scope:** Own retention, correction audit and conversion policy. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*Photograph a receipt, get the total and the category, see the month.*
-
-**Build**
-
-Upload a photo, extract merchant, date and total, let the person correct it,
-categorise it, and show a monthly summary.
-
-```mermaid
-graph LR
-  B[phone] -->|"photo"| A[api]
-  A --> S[(object store)]
-  A --> D[(store)]
-  A -.->|"extract text"| X[vision service]
-  D --> R[monthly view]
-```
-
-**The thought process**
-
-The decision that shapes everything: **extraction is a suggestion, not a
-result.** Any system that treats a model's reading of a crumpled receipt as
-fact will be wrong a few per cent of the time, silently, about money. So the
-data model needs both the extracted value and the corrected one, and the
-interface needs a correction step that is faster than typing it fresh.
-
-Then **money**, which has its own rules and punishes ignorance. Never floats.
-Integer minor units with the currency stored beside them. A receipt in another
-currency is not the same number, and "convert at today's rate" is a decision
-with an audit trail attached.
-
-Third: a photograph is large, and the upload happens over a phone connection
-that will drop. Do you accept the upload and process later, or make them wait?
-The answer determines whether you need a queue in the initial build or can defer it to the operating follow-up.
-
-**How to organise the prompts**
-
-```
-I am building a receipt tracker. The extraction step is a model and will
-sometimes be wrong about money.
-
-Design the data model so that an extracted value and a human-corrected
-value are both first-class, and so that I can later measure how often
-extraction was right. Do not write code yet.
-```
-
-The second clause is the valuable one: it makes the schema support an
-evaluation you have not built yet.
-
-```
-Implement the upload path only: photo in, stored, a record created,
-nothing extracted yet. Include the case where the upload dies halfway.
-```
-
-```
-Now extraction. Store the raw model output verbatim alongside the parsed
-fields. If parsing fails, the record must still exist with the failure
-attached and be correctable by hand.
-```
-
-```
-Money handling: integer minor units, currency stored explicitly, and a
-test that a total of 19.99 survives a round trip through the database
-and back to the screen unchanged.
-```
-
-**On AWS**
-
-**S3** for the images, with a lifecycle rule, and **presigned PUT URLs** so the
-phone uploads straight to S3 and your API never handles the bytes — that single
-decision removes your biggest scaling problem before you have it.
-
-For extraction, **Amazon Textract** is the purpose-built answer for receipts
-specifically (it has an expense-analysis mode that returns merchant, date and
-total as fields rather than as text). **Bedrock** with a vision-capable model is
-the flexible alternative and is better when you want structure Textract does not
-know about. **Rekognition** is the wrong tool here — it detects objects and
-faces, not document structure. Being able to make that three-way distinction is
-the point of the exercise.
-
-**DynamoDB** suits this better than a relational store if each receipt is a
-self-contained document you fetch by user and month; **RDS** is better the moment
-you want to ask cross-cutting questions ("how much on transport last year").
-Decide from the queries, not from fashion.
-
-**What productionising it means**
-
-Uploads are owner-scoped and verified at finalization. A presigned PUT URL
-is not by itself a general content-length-range policy; use an appropriate
-upload policy/enforcement boundary and verify actual object size/type before
-accepting the receipt. Clean up abandoned objects. The image store has a lifecycle policy so
-it does not grow forever. Extraction failures are visible and correctable rather
-than silently dropped. There is a number for extraction accuracy, measured on
-receipts you corrected. And the cost per receipt is known, because a vision call
-per upload is a real per-unit cost.
-
-**The learning**
-
-The interesting engineering in any AI feature is the correction path and the
-measurement, not the model call. Build the place where a human disagrees with
-the machine and you have built the only thing that can tell you whether the
-feature works.
-
-**How you would know it is wrong**
-
-- Upload a receipt you have already read. Compare field by field.
-- Upload something that is not a receipt. It must fail visibly, not invent a total.
-- Enter 19.99 and check the stored value is 1999 and it renders back as 19.99.
-- Kill the upload mid-flight. There should be no half-record pointing at no image.
-- Correct ten extractions, then compute the accuracy. That is your baseline.
-
-**Stage it**
-
-1. Upload and store, with the failure case.
-2. Extraction, raw output kept, failures correctable.
-3. Money done properly, with the round-trip test.
-4. The monthly view, and the accuracy number.
-
----
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

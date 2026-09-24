@@ -244,5 +244,59 @@
     "starter": "examples/architecture-starts/personalized_ranking.py",
     "diagram": "assets/architecture-guides/personalized-ranking.svg",
     "batch": "ai-design-boundaries"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/01-the-request-you-can-trace-end-to-end.md",
+    "starter": "examples/architecture-starts/01_the_request_you_can_trace_end_to_end.py",
+    "diagram": "assets/architecture-guides/01-the-request-you-can-trace-end-to-end.svg",
+    "batch": "backend-boundaries"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/02-the-three-second-budget.md",
+    "starter": "examples/architecture-starts/02_the_three_second_budget.py",
+    "diagram": "assets/architecture-guides/02-the-three-second-budget.svg",
+    "batch": "backend-boundaries"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/03-the-fetch-that-cannot-be-aimed-inward.md",
+    "starter": "examples/architecture-starts/03_the_fetch_that_cannot_be_aimed_inward.py",
+    "diagram": "assets/architecture-guides/03-the-fetch-that-cannot-be-aimed-inward.svg",
+    "batch": "backend-boundaries"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/04-the-api-that-does-not-break-its-callers.md",
+    "starter": "examples/architecture-starts/04_the_api_that_does_not_break_its_callers.py",
+    "diagram": "assets/architecture-guides/04-the-api-that-does-not-break-its-callers.svg",
+    "batch": "backend-boundaries"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/05-the-job-that-survives-a-restart.md",
+    "starter": "examples/architecture-starts/05_the_job_that_survives_a_restart.py",
+    "diagram": "assets/architecture-guides/05-the-job-that-survives-a-restart.svg",
+    "batch": "application-projects"
+  },
+  {
+    "path": "curriculum/02-applications/01-backend/projects/a-public-form.md",
+    "starter": "examples/architecture-starts/a_public_form.py",
+    "diagram": "assets/architecture-guides/a-public-form.svg",
+    "batch": "application-projects"
+  },
+  {
+    "path": "curriculum/02-applications/02-databases/projects/a-receipt-tracker.md",
+    "starter": "examples/architecture-starts/a_receipt_tracker.py",
+    "diagram": "assets/architecture-guides/a-receipt-tracker.svg",
+    "batch": "application-projects"
+  },
+  {
+    "path": "curriculum/02-applications/03-frontend/projects/a-shared-reading-list.md",
+    "starter": "examples/architecture-starts/a_shared_reading_list.py",
+    "diagram": "assets/architecture-guides/a-shared-reading-list.svg",
+    "batch": "application-projects"
+  },
+  {
+    "path": "curriculum/02-applications/05-security/projects/a-shift-schedule.md",
+    "starter": "examples/architecture-starts/a_shift_schedule.py",
+    "diagram": "assets/architecture-guides/a-shift-schedule.svg",
+    "batch": "application-projects"
   }
 ]
