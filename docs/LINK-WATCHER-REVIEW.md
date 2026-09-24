@@ -1,6 +1,6 @@
 # Link-watcher reference project: feedback and review scope
 
-Status: **reference revision for Bruno's review; broader rollout is on hold**.
+Status: **approved by Bruno; apply this standard across design and architecture projects**.
 
 On 24 September 2026, Bruno asked to improve only the link-rot watcher first.
 Revise this example with his feedback until he is satisfied, then apply the accepted
@@ -23,6 +23,8 @@ this checklist as his approval.
 | Learn by implementing | Separate supplied behavior from work to build; give ordered checkpoints with exact expected outputs. |
 
 ## Review log
+
+- Approval: Bruno confirmed the site is fixed, approved the link-watcher changes, and requested the same approach across all design/architecture projects. Push to main; add no internal or interval tests and no deployment gates.
 
 - Initial request: improve engineering quality across all design and architecture problems.
 - Scope correction: **only this linked project until Bruno approves it**.

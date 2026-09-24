@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="550" viewBox="0 0 1080 550" role="img" aria-labelledby="t d"><title id="t">Bookmark service</title><desc id="d">AWS implementation with service roles and labelled data flow.</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526776"/></marker></defs><rect width="1080" height="550" rx="16" fill="#f8fafc"/><style>text{font-family:Arial,sans-serif;fill:#193444}.name{font-size:23px;font-weight:bold}.role{font-size:19px}.detail{font-size:17px;fill:#526575}.edge{font-size:16px;font-weight:bold}</style>
+<text x="36" y="44" class="name" style="font-size:23px">Bookmark service</text><text x="36" y="77" class="detail">AWS service • general architectural role • responsibility in this project</text>
+<path d="M446 183 L626 183" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="498.6" y="150" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="536.0" y="166" class="edge" text-anchor="middle">request</text>
+<path d="M241 243 L241 318" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="182.6" y="258.5" width="116.80000000000001" height="23" fill="#f8fafc"/><text x="241" y="274.5" class="edge" text-anchor="middle">verify token</text>
+<path d="M831 243 L831 318" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="768.4" y="258.5" width="125.2" height="23" fill="#f8fafc"/><text x="831" y="274.5" class="edge" text-anchor="middle">read / commit</text>
+<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role">(authenticated HTTP entry)</text>
+<text x="54" y="207" class="detail">Create, list and conditional edit routes</text>
+<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">AWS Lambda</text><text x="644" y="180" class="role">(bookmark application)</text>
+<text x="644" y="207" class="detail">Verified owner; request ID; version check</text>
+<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon Cognito</text><text x="54" y="380" class="role">(identity provider)</text>
+<text x="54" y="407" class="detail">Validated identity, not object ownership</text>
+<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon DynamoDB</text><text x="644" y="380" class="role">(private bookmark store)</text>
+<text x="644" y="407" class="detail">Owner partition; atomic version updates</text>
+<text x="36" y="522" class="detail">Proposed cloud implementation; the local starting code demonstrates the named mechanism only.</text></svg>

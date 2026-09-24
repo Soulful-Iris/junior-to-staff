@@ -1,6 +1,86 @@
 # URL shortener: who owns the code?
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build a campaign-link service for a marketing platform. A creator reserves /launch for a product announcement; another creator requests the same alias at the same instant. Readers need fast redirects, while the abuse team needs expired and blocked links to stop resolving.
+
+**Working contract:** POST /links accepts target, optional alias and expiry; return 201 or 409. GET /{code} returns 302 with Cache-Control: no-store, or 410 after expiry. The management API requires ownership.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 30 million links/day | 30,000,000 / 86,400 ≈ 347 creates/s average; provision for the actual burst, not just this mean. |
+| 3 billion redirects/day | About 34,722 redirects/s average; model the existing 80,000/s hot-campaign case separately. |
+| 100 ms redirect p99; 30-day default expiry | Keep analytics off the critical path and enforce expiration on each lookup, including cache hits. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/url_shortener.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/url_shortener.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| links | code → owner,target,expires_at,version | Durable uniqueness authority. |
+| request_results | (owner,request_id) → payload hash and code | Keeps random-code allocation stable after a lost response. |
+| redirect.py / analytics.py | resolve(code, now); record_click(event_id) | Separate resolving the mapping from counting an event. |
+
+## AWS implementation
+
+![URL shortener: who owns the code?: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/url-shortener.svg)
+
+An ECS resolver behind an ALB makes its in-memory connections and cache behavior explicit at sustained traffic. API Gateway/Lambda is a reasonable smaller baseline. The database owns names; a cache only accelerates reads of already-owned mappings.
+
+## Build it in this order
+
+### 1. Implement alias ownership
+
+Use a unique database key or DynamoDB conditional put. Do not check then insert as two separate unprotected operations. For generated codes, retry a random-code collision with a fresh candidate; persist the allocated code with the create operation’s identity.
+
+### 2. Write the redirect path
+
+Read target, expiry and version. Check the timestamp before constructing the response. Return `302` and `Cache-Control: no-store`; ordinary CDN/browser redirect caching can outlive your expiry decision. Reject unsupported target schemes and restrict management changes to the owner.
+
+### 3. Handle a hot campaign
+
+Cache mapping data inside the resolver and coalesce concurrent misses per code. Maintain a blocklist whose maximum accepted age is five seconds for this exercise; if that authority is unavailable or too old, fail closed for redirects. Demonstrate expiry with a deliberately stale cached mapping.
+
+### 4. Count clicks asynchronously
+
+Emit events with a stable event ID and timestamp. Define whether failed event publication can undercount analytics; redirect availability and complete click accounting are different promises. Aggregate duplicates by event ID inside a bounded replay window and report delayed counts explicitly.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| DynamoDB mapping table | Use the short code as the unique key; conditional create; backup enabled. TTL is cleanup, not the expiry check. |
+| ECS resolver + ALB | Start with two tasks in separate AZs and a bounded connection pool. Size from measured requests per task; do not infer 80k/s from the diagram. |
+| ElastiCache | Use cached target/expiry/version with bounded memory; apply expiration and abuse policy on every response. |
+| Kinesis and monitoring | Stream click records separately; observe mapping-cache misses, redirect p99, blocklist age and analytics lag. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The first launch reservation wins; the second conflicts. A cached mapping returns 410 at time 100. |
+| Pause blocklist refresh | Redirects stop once policy age exceeds five seconds. |
+| Slow the click consumer | Redirect latency remains bounded while the visible analytics lag grows. |
+
+## The next design decision
+
+At multi-region scale, choose one owner for alias allocation or a globally consistent authority. Do not let two independent regional caches reserve the same alias. Quantify added write latency and what a region does during loss of the allocation authority.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Turn long links into short links that redirect quickly. Users can choose a custom alias, set an expiry, and inspect click counts. What happens if two people request the same alias?”
 
@@ -60,3 +140,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists user-submitted URL-shortener reports across companies including PayPal, Microsoft, and JPMorgan Chase; individual report dates are not shown. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/url-shortener-design/cm5svnaco01dqxszbok7e1lk1).
+
+</details>

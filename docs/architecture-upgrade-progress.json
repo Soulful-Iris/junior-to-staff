@@ -1,0 +1,26 @@
+[
+  {
+    "path": "curriculum/03-production/01-system-design/problems/bookmark-service.md",
+    "starter": "examples/architecture-starts/bookmark_service.py",
+    "diagram": "assets/architecture-guides/bookmark-service.svg",
+    "batch": "transactional-designs-1"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/url-shortener.md",
+    "starter": "examples/architecture-starts/url_shortener.py",
+    "diagram": "assets/architecture-guides/url-shortener.svg",
+    "batch": "transactional-designs-1"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/api-quota.md",
+    "starter": "examples/architecture-starts/api_quota.py",
+    "diagram": "assets/architecture-guides/api-quota.svg",
+    "batch": "transactional-designs-1"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/checkout-payment.md",
+    "starter": "examples/architecture-starts/checkout_payment.py",
+    "diagram": "assets/architecture-guides/checkout-payment.svg",
+    "batch": "transactional-designs-1"
+  }
+]

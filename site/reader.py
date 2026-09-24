@@ -407,10 +407,10 @@ def build(b):
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)
-    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies','examples/ai-systems','examples/link-watcher'):
+    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies','examples/ai-systems','examples/link-watcher','examples/architecture-starts'):
         for f in (b.ROOT/folder).rglob('*'):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
-            if folder in {'examples/ai-systems', 'examples/link-watcher'} and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
+            if folder in {'examples/ai-systems', 'examples/link-watcher', 'examples/architecture-starts'} and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
             rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)
     resources = sorted(p.relative_to(b.OUT).as_posix() for p in b.OUT.rglob('*.html'))
     by_dest={b.dest_for(p['src']):p for p in pages}
