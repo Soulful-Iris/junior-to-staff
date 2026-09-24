@@ -64,5 +64,47 @@
     "starter": "examples/architecture-starts/regional_failover.py",
     "diagram": "assets/architecture-guides/regional-failover.svg",
     "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/calendar-availability.md",
+    "starter": "examples/architecture-starts/calendar_availability.py",
+    "diagram": "assets/architecture-guides/calendar-availability.svg",
+    "batch": "reservations-dispatch"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/ticket-inventory.md",
+    "starter": "examples/architecture-starts/ticket_inventory.py",
+    "diagram": "assets/architecture-guides/ticket-inventory.svg",
+    "batch": "reservations-dispatch"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/rideshare-dispatch.md",
+    "starter": "examples/architecture-starts/rideshare_dispatch.py",
+    "diagram": "assets/architecture-guides/rideshare-dispatch.svg",
+    "batch": "reservations-dispatch"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/realtime-chat.md",
+    "starter": "examples/architecture-starts/realtime_chat.py",
+    "diagram": "assets/architecture-guides/realtime-chat.svg",
+    "batch": "collaboration-notifications"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/collaborative-editor.md",
+    "starter": "examples/architecture-starts/collaborative_editor.py",
+    "diagram": "assets/architecture-guides/collaborative-editor.svg",
+    "batch": "collaboration-notifications"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/notification-platform.md",
+    "starter": "examples/architecture-starts/notification_platform.py",
+    "diagram": "assets/architecture-guides/notification-platform.svg",
+    "batch": "collaboration-notifications"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/webhook-delivery.md",
+    "starter": "examples/architecture-starts/webhook_delivery.py",
+    "diagram": "assets/architecture-guides/webhook-delivery.svg",
+    "batch": "collaboration-notifications"
   }
 ]

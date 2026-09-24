@@ -17,3 +17,10 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [Data erasure: one request, nine copies](../../curriculum/04-scale-and-evolution/04-migrations/problems/erasure-workflow.md) | [erasure_workflow.py](erasure_workflow.py) |
 | [Multi-tenant migration](../../curriculum/04-scale-and-evolution/04-migrations/problems/multi-tenant-migration.md) | [multi_tenant_migration.py](multi_tenant_migration.py) |
 | [Regional failover: which acknowledged write survives?](../../curriculum/04-scale-and-evolution/04-migrations/problems/regional-failover.md) | [regional_failover.py](regional_failover.py) |
+| [Calendar: reserve time without hiding conflicts](../../curriculum/03-production/01-system-design/problems/calendar-availability.md) | [calendar_availability.py](calendar_availability.py) |
+| [Ticket inventory: one seat, two buyers](../../curriculum/03-production/01-system-design/problems/ticket-inventory.md) | [ticket_inventory.py](ticket_inventory.py) |
+| [Ride sharing: one driver, one accepted ride](../../curriculum/03-production/01-system-design/problems/rideshare-dispatch.md) | [rideshare_dispatch.py](rideshare_dispatch.py) |
+| [Realtime chat: reconnect without losing the conversation](../../curriculum/03-production/01-system-design/problems/realtime-chat.md) | [realtime_chat.py](realtime_chat.py) |
+| [Collaborative editor: two people edit the same sentence](../../curriculum/03-production/01-system-design/problems/collaborative-editor.md) | [collaborative_editor.py](collaborative_editor.py) |
+| [Notification platform](../../curriculum/03-production/01-system-design/problems/notification-platform.md) | [notification_platform.py](notification_platform.py) |
+| [Webhook delivery: a timeout is not a rejection](../../curriculum/03-production/01-system-design/problems/webhook-delivery.md) | [webhook_delivery.py](webhook_delivery.py) |

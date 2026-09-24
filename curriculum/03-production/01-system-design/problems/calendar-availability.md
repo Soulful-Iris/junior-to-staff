@@ -1,6 +1,85 @@
 # Calendar: reserve time without hiding conflicts
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build room booking for a company with offices in London and New York. Two organizers select the last available room for overlapping meetings. A weekly 09:00 meeting must stay at 09:00 local time when daylight-saving time changes.
+
+**Working contract:** POST /rooms/{id}/bookings accepts an interval and request ID; conflicting room occupancy returns 409. GET /availability is advisory. The booking transaction decides whether the interval is still available.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 million calendars; 3 million active/day | 3% daily activity; partitioning every request by calendar avoids global scans. |
+| 100 bookings/s exercise peak; 60-day availability view | Expand bounded recurrence horizons; do not materialize an infinite series. |
+| Intervals are [start,end) | A 10:00–11:00 booking and an 11:00–12:00 booking do not overlap. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/calendar_availability.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/calendar_availability.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| bookings | room_id,booking_id,start_utc,end_utc | Committed occupancy; enforce no overlap at the database. |
+| series | series_id,local_time,IANA_zone,rule,revision | Recurrence intent plus exception dates. |
+| booking_operations | organizer,request_id,payload_hash | Exact retries reuse one booking. |
+
+## AWS implementation
+
+![Calendar: reserve time without hiding conflicts: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/calendar-availability.svg)
+
+A relational occupancy constraint fits interval exclusion directly. DynamoDB conditional puts alone do not prevent arbitrary overlapping intervals without an additional serialized room-calendar design.
+
+## Build it in this order
+
+### 1. Implement one room first
+
+Store UTC instants and require end after start. In PostgreSQL, use a GiST exclusion constraint combining room equality with overlapping tstzrange values; enable btree_gist where required. A SELECT availability followed by an unconstrained INSERT can double-book under concurrency.
+
+### 2. Add recurrence without losing local intent
+
+Keep the IANA timezone, local recurrence rule and occurrence exceptions. For this exercise skip nonexistent local times and choose the earlier instant for ambiguous times; display that policy. Recompute future materialized occurrences after rule edits under a series revision.
+
+### 3. Separate browsing from committing
+
+Cache availability briefly with an as-of timestamp. On submit, recheck through the authoritative constraint. Preserve the organizer’s proposed time when returning a conflict, and offer a fresh availability read.
+
+### 4. Handle series edits and cancellation
+
+Change only the explicitly chosen occurrence or future series segment. Use stable occurrence IDs and transactionally update occupancy; notify attendees asynchronously from an outbox. A failed email must not roll back an already reserved room.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Aurora PostgreSQL | Use a supported engine and range/exclusion constraint; cap pooled connections and keep reservation transactions short. |
+| Application configuration | Store timezone identifiers, not fixed UTC offsets. Pin and deliberately update timezone data used for expansion. |
+| Notification queue | Bound retries, record delivery state and keep room occupancy independent of provider health. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The overlap at 10:30 conflicts; the back-to-back 11:00 booking succeeds. |
+| Submit two overlapping reservations concurrently | One commits and the other returns a conflict from the authoritative write. |
+| Cross a daylight-saving transition | The recurring event follows the published local-time policy. |
+
+## The next design decision
+
+Add a meeting requiring three rooms atomically. Compare a database transaction spanning all room constraints with independent reservations and compensation. Explain what the organizer sees if only two rooms can be acquired.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “People create events, invite guests, and look up free/busy time across calendars. Two organizers may book the same room at once. Time zones and daylight saving changes matter.”
 
@@ -78,3 +157,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists calendar/free-busy reports at Microsoft, Oracle and LinkedIn; individual interview dates are not provided. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/calendar-free-busy/cm8c1h59t005n8pgzdq4ynqjo).
+
+</details>

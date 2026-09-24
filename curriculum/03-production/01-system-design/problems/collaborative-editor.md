@@ -1,6 +1,85 @@
 # Collaborative editor: two people edit the same sentence
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build a shared incident document for up to 50 responders. Two browsers edit revision 12 at once, one laptop works offline, and a server restarts after acknowledging an operation. Start with a correct versioned editor before adding automatic merging.
+
+**Working contract:** An acknowledged edit is durable and assigned a document revision. The first milestone accepts an edit only against its stated base revision; stale edits remain as local drafts with an explicit conflict. Presence and cursors are best-effort.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 10,000 active documents; 50 possible editors/document | Up to 500,000 connected editors; actual active edit rate must be measured separately. |
+| Two edits/s from 10% of connected editors | 100,000 operations/s in this constructed active scenario, not a benchmark claim. |
+| Snapshots every 1,000 accepted operations | Recovery replays a bounded tail; retain enough history for supported offline clients. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/collaborative_editor.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/collaborative_editor.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| documents | document_id,revision,snapshot_pointer | Current durable state and snapshot boundary. |
+| operations | document_id,operation_id,base_revision,new_revision | Idempotent accepted changes in order. |
+| presence | document_id,session_id,last_seen | Expiring cursor information; never durable edit truth. |
+
+## AWS implementation
+
+![Collaborative editor: two people edit the same sentence: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/collaborative-editor.svg)
+
+The operation log is durable; presence is disposable. ECS exposes the stateful session and ordering problem clearly. A managed synchronization product can replace parts of this design, but its conflict and offline semantics must still match the product.
+
+## Build it in this order
+
+### 1. Build a versioned save protocol
+
+Implement GET document and POST operation with base revision and operation identity. Commit accepted operation and new revision together. Keep the losing draft visible and support a manual merge against the latest revision. This is a useful working baseline, not a claim of conflict-free editing.
+
+### 2. Add live operation delivery
+
+Broadcast only committed operations. Clients track the last applied revision and fetch missing ranges on reconnect. Apply duplicate operation IDs once. Store snapshots with a proven last included revision so replay neither skips nor doubles an edit.
+
+### 3. Choose an actual merge algorithm
+
+For automatic concurrent editing, choose a maintained OT or CRDT implementation and document its operation identities, causal metadata and persistence format. Do not invent string-offset merging after the fact; deletion and insertion offsets change under concurrent edits.
+
+### 4. Bound offline and presence state
+
+Specify the supported offline duration and history/metadata retention required by the chosen algorithm. Expire presence independently. A user removed from the document cannot upload old offline edits without a current authorization check.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Document ownership | Route a document to one logical ordering authority; persist ownership/fencing if session owners can change. |
+| Operation storage | Unique document/operation identity; bounded replay pages; snapshot publication after durable upload. |
+| Connection limits | Cap sessions per document and reconnect replay rate; reject oversized operations before broadcasting. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Ana reaches revision 13; Ben keeps an explicit conflicting draft; Ana’s retry returns revision 13. |
+| Restart after acknowledgement | The accepted edit reappears from the log. |
+| Drop a live event | The client discovers the revision gap and replays durable operations. |
+
+## The next design decision
+
+Allow two offline users to delete and insert at the same position. Show the chosen algorithm’s actual operation data and convergence rule. A diagram labeled merge is not enough to define the result.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Build a shared document editor. Ana and Ben can edit the same document while one is offline. They should see changes within a second when connected. What does the server accept, and what happens when edits collide?”
 
@@ -39,3 +118,5 @@ The ECS owner is an optimization, **not** the only protection: a restarted owner
 **Practice artifact:** Draw the authority and three client states (current, stale, reconnecting). Walk the four rows above with version numbers. Spend 35 minutes designing and 10 minutes attacking an acknowledged but not broadcast edit.
 
 **Source boundary:** This problem and capacities are original. Current [DynamoDB condition expressions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html) describe the AWS primitive; they do not provide automatic merge semantics.
+
+</details>

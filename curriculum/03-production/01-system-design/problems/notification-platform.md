@@ -1,5 +1,86 @@
 # Notification platform
 
+## What you are building
+
+> Build customer notifications for order status, security alerts and a monthly digest. Marketing schedules a million-recipient campaign just before a password-reset burst. Recipients can unsubscribe while jobs wait, and a provider may accept an email before its response is lost.
+
+**Working contract:** Create a notification intent with a stable event identity and channel policy. Track queued, suppressed, attempted, provider_accepted and confirmed-delivery evidence separately. Transactional security messages and marketing preferences have distinct rules.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| One million recipients in ten minutes | About 1,667 recipient jobs/s before channel fan-out and retries. |
+| Provider limit: 2,000 submissions/s exercise assumption | Reserve capacity for urgent traffic; a 20% retry rate can consume the apparent headroom. |
+| Campaign payload 1 KiB/recipient | About 1 GB of raw work data; store template references rather than repeating large HTML bodies. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/notification_platform.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/notification_platform.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| intents | source_event_id,recipient,channel | Stable logical notification identity. |
+| preferences | recipient,category,revision | Current suppression and channel rules. |
+| attempts | intent_id,attempt_id,provider_key,outcome | Provider evidence and ambiguous outcomes. |
+
+## AWS implementation
+
+![Notification platform: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/notification-platform.svg)
+
+A durable intent ledger distinguishes one desired notification from many delivery attempts. Separate queues make priority enforceable; a priority label inside one unbounded FIFO workload does not guarantee urgent progress.
+
+## Build it in this order
+
+### 1. Persist intent at the source boundary
+
+Accept an idempotent event and expand recipients in checkpointed pages. Persist each recipient/channel identity before dispatch. A source transaction should write an outbox event rather than calling the provider and then hoping its business record commits.
+
+### 2. Recheck preferences at send time
+
+The worker loads current preferences and consent category before submission. Render a versioned template using bounded payload data. Store the reason for suppression; unsubscribing after provider acceptance cannot retract an already submitted message.
+
+### 3. Budget channel capacity
+
+Use separate urgent and bulk queues with explicit concurrency/rate budgets. Respect provider throttling and Retry-After with bounded jitter. Track oldest age by priority; total queue length can conceal a stuck urgent message behind healthy bulk throughput.
+
+### 4. Handle ambiguous sends honestly
+
+Reuse provider idempotency only where that provider actually supports it for the required duration. Otherwise a timeout requires reconciliation or an explicit duplicate-versus-loss policy. Provider acceptance is not proof that the user received or read the message.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| SQS queues | Separate urgent/bulk DLQs and concurrency; retain original recipient identity when replaying. |
+| SES account | Verify sending identities and current quotas in the exercise account; do not infer capacity from an architecture diagram. |
+| Secrets and payloads | Restrict provider credentials; avoid personal message content in logs and queue dead-letter exports. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Duplicate source event yields one intent; unsubscribe before send suppresses it. |
+| Throttle the bulk provider path | Security traffic retains its reserved capacity. |
+| Lose a provider response | The attempt is unknown, with a documented reconciliation or duplicate-risk policy. |
+
+## The next design decision
+
+Add SMS fallback. Define whether an unknown email attempt justifies sending a second channel, and let the product choose the user-visible duplication tradeoff.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 [Curriculum](../../../README.md) · [System design](../README.md)
 
 All prompts here are constructed practice, without company attribution.
@@ -82,3 +163,5 @@ capacity.
 
 
 [Design route](../../../../indexes/system-designs.md) · [Practice rubric](../../../../practice/README.md)
+
+</details>
