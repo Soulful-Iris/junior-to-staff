@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Show queued, processing, failed and ready with a reason and last progress time. 
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Allow students to keep watching during reprocessing. Keep the previous manifest 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Creators upload 4 GB videos. Processing produces three renditions and a thumbnail. The mobile connection drops mid-upload; a transcode task times out after writing one rendition. Design the upload and watch experience without making the API hold a 4 GB request open.”
+
 
 Assume 50,000 uploads/day, peak 300 concurrent uploads, and a 99% target of publish-ready within ten minutes for videos under 2 GB. The target is a hypothetical exercise requirement; clarify whether larger files have a different SLA.
 
@@ -92,13 +94,9 @@ Assume 50,000 uploads/day, peak 300 concurrent uploads, and a 99% target of publ
 | Transcoder writes one rendition, then crashes | Retry resumes or safely replaces output; no premature READY |
 | Creator revokes a published video | New playback requests denied; address old signed URLs' expiry |
 
-![Proxying media through the API blocks workers; direct upload and durable processing isolate it](../../../../assets/design-practice/video-processing-boundary.svg)
-
 ## Design the state machine first
 
 CREATED → UPLOADING → RECEIVED → PROCESSING → READY, with FAILED and DELETED branches. A signed upload permission is scoped to one object key and expires; it is not a proof that the final object exists or passes validation. Verify completion, size, content type, owner, and malware policy before enqueueing work. Commit READY only after all required outputs and metadata are durable. Treat object events as triggers to reconcile state, not as unique commands.
-
-![Partial upload, duplicate work, and completion gate](../../../../assets/design-practice/video-processing-trace.svg)
 
 ## Draw the byte path and the control path
 
@@ -106,11 +104,9 @@ The small API path creates a session and reports status. Bytes travel directly t
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/video-processing-aws.svg)
-
 **Why these boxes, and what changes the choice:** Direct S3 upload keeps bytes away from API workers. MediaConvert handles managed media jobs; ECS with FFmpeg fits custom codecs and scheduling. DynamoDB moves status to READY only when outputs exist, SQS can redeliver, and CloudFront distributes authorized renditions.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** Publishing has a ten-minute target but the processing queue waits twelve minutes. Estimate arrivals × average work and worker demand. Prioritize small jobs fairly without starving large jobs; expose P50/P99 ingest-to-ready and DLQ age, not just successful worker duration.
 

@@ -1,72 +1,87 @@
 # 4. The paved road
 
-[Curriculum](../../../README.md) · [Technical decisions and engineering effectiveness](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Build a service template for three teams that keep forgetting log retention. New services should get fourteen days by default, while an approved thirty-day case remains easy to express. Existing deployed services can drift after creation, so the template alone cannot establish current compliance with the team policy.
 
-> Three services accidentally omit log retention when created from scratch. Engineers know the policy but forget it. Build a default or check and watch another engineer create a service. What evidence would show your tool removed work rather than adding a ritual?
+**Working contract:** The generated infrastructure includes an explicit supported retention value and a discoverable override. The default reduces setup work. A separate on-demand inventory compares deployed values with intended policy; no recurring check or deployment gate is added to this repository.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../scope-and-leverage.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | New service template sets 14-day retention; a fixture omits retention; another explicitly selects an approved 30-day policy. | Missing retention is rejected; approved values pass; the first-time user can discover the policy and override process. |
-| Boundary / failure | The template is correct but an existing service drifts to indefinite retention. | A separate drift check finds it; a creation template does not enforce future state. |
-| Scope | Toy retention values for the exercise, not legal or organization-wide retention advice. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Three services omit retention | Solve the repeated configuration task once and observe whether a new user can complete it unaided. |
+| Default fourteen days; approved alternative thirty days | Keep policy choices explicit rather than enforcing one value for every workload. |
+| Existing service with indefinite retention | Creation-time defaults cannot detect later console changes. |
 
-**First slice:** Generate a new service with 14-day log retention by default. Run a fixture that omits retention (reject) and one choosing an approved 30-day policy (pass with documented reason). **Show:** a first-time user's path through the template, the failing check, and a separate drift check that catches an existing service changed to indefinite retention.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Find the thing you have explained more than twice — to yourself, in notes, or to a model — and make it structurally unavailable to get wrong. A default, a template, a generator, a failing check. Then hand it to another person and watch without helping.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · An existing service drifts | A manual console edit removes retention after deployment. What notices? Predict which boundary must change before opening the design. | Compare actual resources against the declared policy on a schedule or relevant event. Report ownership and remediation; do not claim a repository template makes all future console changes impossible. |
-| Lead · A legitimate exception exists | A security archive needs a different retention policy. Does your check block useful work? State what evidence would make you reject your first design. | Support a reviewed, expiring exception with reason and owner. Validate the exception itself; count repeated exceptions to discover whether the default is wrong. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- D["Policy document"] --> M["Engineer must remember"]
- M --> S["New service"]
- S --> E["Retention omitted again"]
+```bash
+python3 examples/architecture-starts/the_paved_road.py
 ```
 
-A remembered rule has an unreliable execution point. Default, enforcement and drift detection address different moments in a service’s life.
+[Open the starting code](../../../../examples/architecture-starts/the_paved_road.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| service_spec | name,retention_days,owner | Small supported input contract with defaults. |
+| rendered_template | AWS::Logs::LogGroup properties | Concrete configuration the user can inspect. |
+| policy_exception | resource,reason,owner,expiry | Discoverable bounded alternative, not a hidden bypass. |
+
+## AWS implementation
+
+![4. The paved road: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-paved-road.svg)
+
+CloudFormation supplies repeatable creation; current CloudWatch configuration is the deployed truth. An on-demand comparison reveals drift that a correct template cannot prevent by itself.
+
+## Build it in this order
+
+### 1. Generate the concrete resource
+
+Turn the starting function into a small template command that accepts service name, owner and optional retention. Output inspectable CloudFormation or your team’s existing IaC format. Keep defaults near the input documentation and show the exact generated resource.
+
+### 2. Observe a first-time user
+
+Ask another engineer to create a service from the instructions, noting unclear steps and manual edits. Measure completion time and missing information. Improve the interface where they stumble instead of adding a ritual acknowledgment that the policy exists.
+
+### 3. Support legitimate variation
+
+Accept the documented thirty-day setting and explain when a separately reviewed exception is needed. Record reason, owner and review date for an unusual archive. Do not force a security archive into the same retention policy as ordinary diagnostic logs.
+
+### 4. Inspect deployed state on demand
+
+Use describe-log-groups or the corresponding IaC drift view to compare actual RetentionInDays with intended values. An absent value means indefinite retention, not the fourteen-day default. Report the discrepancy with resource ownership and a concrete repair command; scheduling that inventory is a separate decision.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Template | Explicit RetentionInDays and ownership tags; no silent indefinite-retention fallback. |
+| Inventory | Read-only resource inspection by default; a repair targets a named resource and desired value. |
+| Exceptions | Preserve reason/owner/review date and distinguish diagnostic logs from retained evidence archives. |
+
+For this decision project, provision resources only if a bounded implementation spike needs them; the diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The default template contains fourteen days; thirty days is accepted; missing deployed retention is flagged for review. |
+| Create a service from the instructions | The engineer can find the default and override without reading generator internals. |
+| Remove retention after creation | The next explicit inventory shows the discrepancy. |
+
+## The next design decision
+
+The template grows fifty optional switches. Revisit the common service path and split genuinely different products instead of exposing every implementation detail as another mandatory choice.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Pick a recurring harm, choose the strongest proportionate intervention, prove a negative fixture, then watch unaided first use. The invariant is a detectable violation at the appropriate boundary with a clear exception path. Record actual adoption and work removed.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · An existing service drifts
 
@@ -76,14 +91,6 @@ Pick a recurring harm, choose the strongest proportionate intervention, prove a 
 <summary>Expected reasoning and changed diagram</summary>
 
 Compare actual resources against the declared policy on a schedule or relevant event. Report ownership and remediation; do not claim a repository template makes all future console changes impossible.
-
-```mermaid
-flowchart TD
- T["Approved template"] --> R["Deployed resource"]
- C["Manual change"] --> R
- R --> D["Drift policy check"]
- D --> O["Owner remediation"]
-```
 
 </details>
 
@@ -96,113 +103,6 @@ flowchart TD
 
 Support a reviewed, expiring exception with reason and owner. Validate the exception itself; count repeated exceptions to discover whether the default is wrong.
 
-```mermaid
-flowchart TD
- S["Service policy"] --> G["Policy gate"]
- E["Owned dated exception"] --> G
- G --> P["Allowed declared configuration"]
- G --> F["Unexplained violation refused"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Show negative/positive fixtures and an unaided first-use observation. **Additional lead scope:** Own adoption, migration of existing services and the work the platform replaces. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*You end up with a mistake that nobody on your project can make silently again.*
-
-**Build**
-
-Find the thing you have explained more than twice — to yourself, in notes, or to
-a model — and make it structurally unavailable to get wrong. A default, a
-template, a generator, a failing check. Then hand it to another person and watch
-without helping.
-
-**The thought process**
-
-The first decision is **what to pick**, and the signal is repetition. Anything
-you have explained three times is either genuinely subtle or badly designed, and
-the second is far more common.
-
-Then the ranking that matters, from weakest to strongest: documentation, a
-warning, a review checklist, a failing check, a default that is correct, and the
-footgun deleted. **Prefer the strongest option you can afford**, because every
-weaker one depends on somebody remembering at the exact moment they are busy.
-
-Third, and this is the part that makes it a staff project rather than a tooling
-one: **you have to watch somebody else use it.** Your own tool always feels
-obvious to you. The information is entirely in the other person's confusion, and
-you only get it by shutting up.
-
-**How to organise the prompts**
-
-```
-Here is a mistake that keeps happening on this project: <describe it>.
-
-Give me three ways to make it structurally impossible or loudly
-obvious, ranked by how little anybody has to remember. Do not suggest
-documentation or a guideline.
-```
-
-```
-Implement the strongest one. Then show me it failing on a deliberately
-wrong case, and passing on a correct one.
-```
-
-```
-Now the first-run experience. Write down every step a person who has
-never seen this has to take. Then tell me which of those steps I would
-be tempted to leave undocumented because it is obvious to me.
-```
-
-**On AWS**
-
-The AWS-shaped version of a paved road is worth knowing because it is what
-platform teams actually build.
-
-**Service Catalog** or a **CloudFormation**/**CDK** template that provisions the
-approved shape — right tags, right logging, right permissions boundary — so the
-easy path is the compliant one. **Config rules** to detect drift from it, and
-**SCPs** or a permissions boundary to make the wrong thing impossible rather than
-discouraged. That escalation — easy, then detected, then impossible — is exactly
-the ranking above, in infrastructure.
-
-At one-person scale the same idea is a repository template with the CI, the
-`.env.example`, the health endpoint and the link checker already in it. Small,
-and it means the boring correct things exist before you are tired.
-
-**What productionising it means**
-
-The wrong thing fails rather than warns. Somebody other than you used it, and you
-asked what was annoying. And you wrote down what you stopped doing to make room —
-if the answer is nothing, you added work rather than creating leverage.
-
-**The learning**
-
-A rule that depends on memory is a rule that fails on the busy day. Moving it
-into a default or a failing check is the difference between being careful and
-being unable to get it wrong — and the second one keeps working when you are not
-there.
-
-**How you would know it is wrong**
-
-- Do the wrong thing on purpose. It must fail, not warn.
-- Watch a person use it for the first time without helping. Every question is a documentation bug.
-- Check adoption honestly. A paved road nobody walks solves a problem you had rather than theirs.
-- Ask what you stopped doing.
-
-**Stage it**
-
-1. The repetition audit: what have you explained three times?
-2. The three options, ranked, and the strongest one implemented.
-3. It failing on a wrong case and passing on a right one.
-4. Somebody else's first run, watched in silence, and what you changed after.
-
----
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

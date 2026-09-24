@@ -1,72 +1,87 @@
 # 2. The strategy you found rather than invented
 
-[Curriculum](../../../README.md) · [Technical decisions and engineering effectiveness](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Write a data-platform decision policy from five concrete team decisions. Billing, inventory and permissions require transactions; event processing requires replay; analytics needs an independent reporting workload. The goal is to shorten the next decision without pretending one datastore fits all five.
 
-> Three teams repeatedly debate whether to add another datastore. Two chose PostgreSQL and one chose a queue-backed projection. Write a half-page policy that shortens the next decision without ignoring the exception. Which shared constraint explains the choices?
+**Working contract:** The memo cites the constructed decision records, states the shared constraint, proposes a default and names evidence-based exceptions. It includes operating ownership and a review trigger when relevant capabilities or requirements change.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../scope-and-leverage.md). The output is a decision memo, not a runnable service.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Five recorded decisions: three require transactions, one needs replayable events, one needs independent reporting. | Cite each decision; propose a default with explicit exceptions and account for its actual costs. |
-| Boundary / failure | The memo says “always use one database” without addressing replay or isolation. | Reject the universal; the exceptional workload is a concrete counterexample. |
-| Scope | An engineering strategy artifact, not a new service or invented industry consensus. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Five decisions: three transactional, one replay, one reporting | The majority supports a transactional default, not a universal ban on other storage. |
+| Three teams maintaining separate stacks assumption | Include on-call, backup, expertise and migration effort in the comparison. |
+| Six-month capability review trigger | A product or service change can invalidate the old deciding constraint; review is an explicit decision, not an installed recurring task. |
 
-**First slice:** Lay out five earlier decisions: three require transactions, one replayable events, one isolated reporting. Draft a default based on *those* records and list the two justified exceptions. Show the supporting decisions, adoption/support costs and a counterexample that defeats an overbroad “always one database” rule. Test the memo on the next decision.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** A policy with a diagnosed constraint, supporting decisions, applicability, exceptions, owner and review trigger. In this exercise, synthesize earlier decisions from P1–P4; do not present that method as the only legitimate source of strategy.
-
-Bring one case that fits and one that does not, explaining the difference.
-For each follow-up, recheck the diagram and evidence rather than requiring an
-edit when the existing policy already covers the new case.
-
-### How the review conversation gets harder
-
-| Review gate | Changed requirement | Expected response |
-|---|---|---|
-| Baseline | Apply the memo to the five decisions. | Explain the common requirement and each legitimate exception. |
-| Failure | An overbroad default blocks replayable events. | Show the mismatch and repair the applicability boundary. |
-| Senior | Another team needs independently replayable events. | Use an owned exception review; repeated exceptions are feedback on the policy. |
-| Lead | A relevant capability changes six months later. | Recheck the dated observation and retain or revise the policy according to evidence. |
-| Evidence | A reviewer asks for support. | Distinguish source facts, constructed workloads and assumptions. |
-| Handoff | The author is absent. | Another engineer can apply the rule, find its owner and know when to reopen it. |
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the constraint and trace the example.
-In interview practice, sketch independently; during AI-assisted practice, verify
-the cited evidence rather than accepting a confident summary of it.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- A["Team A repeats debate"] --> X["Unlinked decision"]
- B["Team B repeats debate"] --> Y["Unlinked decision"]
- C["Team C chooses exception"] --> Z["Apparent contradiction"]
+```bash
+python3 examples/architecture-starts/the_strategy_you_found_rather_than_invented.py
 ```
 
-Repetition may reveal a useful default, but different constraints can legitimately
-produce different choices. Evidence must explain both commonality and exceptions.
+[Open the starting code](../../../../examples/architecture-starts/the_strategy_you_found_rather_than_invented.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| decision_record | id,workload,invariant,choice,cost,owner | Evidence for why a team chose its design. |
+| policy_memo | default,exceptions,consequences,revisit_trigger | Half-page usable guidance for the next team. |
+| exception_case | unmet_requirement,measured_gap,alternative | A concrete counterexample to the default. |
+
+## AWS implementation
+
+![2. The strategy you found rather than invented: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-strategy-you-found-rather-than-invented.svg)
+
+The diagram shows one concrete composition that preserves the three different workload needs. It is evidence for the policy discussion, not a claim that every team should deploy the whole stack.
+
+## Build it in this order
+
+### 1. Write the five source decisions
+
+Record D1 billing atomicity, D2 inventory ownership, D3 permission/audit transaction, D4 independently replayable events and D5 reporting isolation. Include rejected options and their actual constraint, not merely which technology the team preferred.
+
+### 2. Extract the common default
+
+Propose PostgreSQL for transactional application records when its measured capacity and access patterns fit. Explain existing expertise, backup/restore and operating cost. A count of three choices is a clue; the transaction requirement is the reason.
+
+### 3. State explicit exceptions
+
+For D4, retain an event log/archive with replay identity and retention. For D5, isolate expensive analytical scans through a projection or warehouse. Name ownership, lag and reconciliation costs introduced by each exception.
+
+### 4. Make the next decision easier
+
+Give teams a short decision path: required guarantee, existing default fit, measured gap, smallest exception and owner. Revisit when a named workload or service capability changes. Avoid universal slogans that erase the concrete replay and reporting counterexamples.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Decision scope | This is an evaluated option, not an instruction to provision every box. |
+| Ownership | Name backup/restore, schema evolution and incident owners for each chosen service. |
+| Revisit evidence | Verify current service capabilities from official documentation when they become a deciding factor; preserve the original assumption and date. |
+
+For this decision project, provision resources only if a bounded implementation spike needs them; the diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The five records remain visible and the exceptions survive the summary. |
+| Propose always one database | D4 and D5 provide specific counterexamples to examine. |
+| Change a relevant managed-service capability | Reopen the deciding constraint rather than defending an obsolete technology rule. |
+
+## The next design decision
+
+A team requests a new datastore for developer preference alone. Ask for the unmet guarantee or measured operating improvement, then compare it against the additional ownership burden without treating novelty as either sufficient or forbidden.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Extract recurring constraints with citations, state the default and trade-off,
-then test it on the strongest counterexample. The rule must retain its
-applicability conditions and revision trigger. A shorter discussion is useful
-only if the resulting decision remains sound.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A new workload breaks the default
 
@@ -79,14 +94,6 @@ than current row state. Should enforcement block the design?
 Route it through a documented exception review that names the mismatched
 constraint and maintenance owner. Do not make a default impossible to challenge;
 measure exception recurrence as feedback on the policy.
-
-```mermaid
-flowchart TD
- N["New workload"] --> A["Applicability check"]
- A -->|fits| D["Documented default"]
- A -->|does not fit| E["Owned exception decision"]
- E --> R["Policy review evidence"]
-```
 
 </details>
 
@@ -103,55 +110,6 @@ source, update the constraint and rerun the decision comparison. A recent access
 date does not make an old study recent evidence. A rule can also remain valid
 when the changed capability does not affect its rationale.
 
-```mermaid
-flowchart TD
- S["Dated source claim"] --> C["Current constraint check"]
- C --> R["Revise rationale or retain rule"]
- I["Stable invariant"] --> R
- R --> D["Versioned strategy"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Bring the scoped policy, citations to its inputs and decisions for the baseline
-and both follow-ups. **Senior expectation:** defend the default and exceptions.
-**Additional lead scope:** assign owners and review triggers without erasing local
-context. This is practice evidence, not a claim of interview readiness or real
-multi-team delivery experience.
-
-## Build and prompt sequence
-
-This assignment practices **bottom-up synthesis**, one strategy method rather
-than the only source of technical direction. Use the five example decisions as
-fixtures, or real decisions with clear provenance. A justified future requirement
-can also motivate a policy before a pattern of past documents exists.
-
-1. Extract each decision's constraint, evidence and owner.
-2. Separate repeated needs from legitimate differences. Inconsistent choices
-   are not necessarily mistakes when the workloads differ.
-3. Write a short policy with scope, rationale, adoption/support cost, exceptions
-   and a review trigger. Do not invent a harmed stakeholder to prove a trade-off.
-4. Apply it to a new decision and a valid exception. Record whether it improved
-   clarity and correctness, not only whether discussion became shorter.
-
-```text
-Given these decisions, cite the constraints that justify a shared default.
-Identify legitimate exceptions and missing evidence.
-State the smallest coherent policy, its owner and a reason to revisit it.
-A clean proposal may be approved unchanged.
-```
-
-**AWS connection:** a policy may choose Parameter Store for a specific runtime
-configuration need, but a blanket ban on files is not automatically sound. Name
-the threat or operational requirement and test the chosen controls. A grep or a
-Config finding observes only its declared scope; it does not prove every runtime
-followed the policy or that a future write was prevented.
-
-Keep the decision discoverable and reviewed with the affected system. A
-repository or a wiki can work when ownership and update triggers are explicit;
-neither location guarantees freshness. The final artifact is a decision memo,
-not a new service or a claim about universal company practice.
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

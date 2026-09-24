@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Store status, final URL, content hash and retry time before completing the lease
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Change normalization rules after 500 million URLs are stored. Plan identity migr
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Starting from seed URLs, discover pages and index their content. Avoid fetching the same URL repeatedly, respect publisher crawl rules, and keep making progress when a worker dies.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 1 billion discovered URLs, 50,000 fetches/s and at least once crawl execution. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,15 +94,11 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Worker crash | Page fetched but frontier ACK lost | Idempotent page version and crawl lease tolerate retry. |
 | Robots change | Host disallows a path | Stop future fetches and expire queued work under the new policy. |
 
-![The failure path and repaired design for Web crawler](../../../../assets/design-interview/web-crawler-before.svg)
-
 ## Think from the contract to the boxes
 
 The frontier is a durable work scheduler keyed by normalized URL and host. Deduplication controls repeated work, but politeness is per origin and needs independent rate state. Workers fetch with bounded time/body size, extract links, and write content/version before advancing the frontier. A global queue that dispatches arbitrarily can violate a host’s crawl-delay even if its total rate is low.
 
 **First diagram:** Trace one URL from discovery to normalized frontier, host gate, fetch, content store, and extracted links.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/web-crawler-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -111,8 +109,6 @@ The frontier is a durable work scheduler keyed by normalized URL and host. Dedup
 | **Amazon OpenSearch Service** / content search index | Serve indexed page queries. | S3/Athena for batch research queries. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Web crawler](../../../../assets/design-interview/web-crawler-deep.svg)
 
 ## Pressure-test the design
 

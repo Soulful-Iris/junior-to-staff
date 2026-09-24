@@ -1,72 +1,87 @@
 # 3. The incident you caused on purpose
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Run one controlled incident exercise in a disposable staging service. A valid JSON configuration routes every title job to an unavailable host. Record when users are affected, when the responder detects it, when rollback happens and when useful work actually recovers.
 
-> A staging configuration is valid JSON but routes every title job to an unavailable host. Run a controlled incident exercise, preserve the timeline, and complete one repair. What observable stop condition protects the drill?
+**Working contract:** The drill has a named owner, bounded scope, observable stop condition and independently available rollback path. It produces a factual timeline and one completed repair. No recurring fault injection or production action is installed.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../../../04-scale-and-evolution/05-technical-decisions/scope-and-leverage.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Inject at 10:00:00; first bad job 10:00:05; alert 10:01:00; rollback 10:02:00; backlog clears 10:03:30. | Detection after first impact is 55 s; mitigation after alert is 60 s; recovery after first impact is 205 s. |
-| Boundary / failure | Rollback credentials depend on the same failing configuration service. | The recovery plan is blocked; add independently available emergency access and rehearse it. |
-| Scope | Isolated environment, bounded workload and explicit rollback; do not label the scripted cause an unfamiliar assessment. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Inject 10:00:00; first impact 10:00:05; alert 10:01:00 | Detection after first impact is 55 seconds. |
+| Rollback 10:02:00; backlog clear 10:03:30 | Mitigation after alert is 60 seconds; recovery after first impact is 205 seconds. |
+| Maximum five-minute exercise window assumption | Stop earlier if the scoped impact or emergency-access condition is violated. |
 
-**First slice:** Rehearse a failure injection with a clock and an observer. Inject at 10:00:00, first bad job 10:00:05, alert 10:01:00, rollback 10:02:00, backlog clear 10:03:30. **Show:** detection after impact 55 s, mitigation after alert 60 s, and full recovery after impact 205 s; record user impact separately. Make rollback unavailable through the same failing config service once and fix the recovery path.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Pick a failure you have never tried. Break your own system with it, deliberately, in daylight. Run it as an incident: note the timeline, mitigate before you diagnose, then write the postmortem and complete one action item.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The normal control plane fails | You cannot reach the deployment dashboard. How do you stop the drill? Predict which boundary must change before opening the design. | Use pre-authorized independent recovery access and a time-bounded failure injection. Test its credentials and dependencies beforehand; a stop button inside the failed system is not an independent stop mechanism. |
-| Lead · The fix changes only the alert | The page arrives sooner, but users still wait the same time for backlog drain. What improved? State what evidence would make you reject your first design. | Detection improved, recovery did not. Report both. Choose a separate repair such as bounded retries or gradual admission, then measure net drain rather than claiming an earlier page solved capacity. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- C["Valid but wrong configuration"] --> W["Jobs sent to unavailable host"]
- W --> Q["Backlog grows"]
- Q --> A["Late human discovery"]
+```bash
+python3 examples/architecture-starts/the_incident_you_caused_on_purpose.py
 ```
 
-Schema validity does not imply operational safety. Build a factual timeline before selecting a cause, and distinguish restored admission from fully recovered backlog.
+[Open the starting code](../../../../examples/architecture-starts/the_incident_you_caused_on_purpose.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| drill_plan | environment,owner,fault,stop_condition,rollback | Concrete bounded action and independent exit. |
+| timeline_event | monotonic_elapsed,wall_time,evidence_ref | Observed milestones, not reconstructed guesses. |
+| repair_record | cause,change,owner,observed_result | One implemented improvement with evidence. |
+
+## AWS implementation
+
+![3. The incident you caused on purpose: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-incident-you-caused-on-purpose.svg)
+
+The exercise separates injection, detection, mitigation and recovery. A control plane that shares the failure can block rollback, so the recovery path needs its own availability assumptions.
+
+## Build it in this order
+
+### 1. Prepare a bounded staging drill
+
+Name the exact configuration field, affected worker pool and synthetic workload. Save the previous configuration and verify emergency access before injecting anything. Define the stop condition in observable terms such as oldest-job age or an unexpected environment identifier.
+
+### 2. Inject one fault and record evidence
+
+Change only the selected staging route to an unavailable fixture host. Record the applied configuration version, first failed job, alert delivery and responder action. Do not add simultaneous failures that make cause and effect impossible to separate.
+
+### 3. Mitigate and follow the backlog
+
+Restore the prior valid configuration through the independent path. Confirm the version actually applied, then watch useful completions and oldest age until recovery. A successful rollback command is not proof that waiting users have recovered.
+
+### 4. Complete one repair
+
+Fix the discovered weakness: semantic configuration validation, independent rollback credentials, bounded retries or clearer evidence. Re-run only the relevant bounded scenario to see whether the repair changes the measured outcome. Keep the factual timeline and remaining limits.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Environment | Explicit staging resource IDs and synthetic data; finite drill duration and named stop owner. |
+| Recovery | Credentials and rollback instructions available independently of the failing application/configuration path. |
+| Evidence | Record applied version and actual useful recovery; retain a redacted timeline with timestamps. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Detection is 55 s, mitigation after alert 60 s and full recovery 205 s. |
+| Make the normal dashboard unavailable | The independent stop/restore path remains usable. |
+| Improve only alert delivery | Report faster detection, while backlog recovery may remain unchanged. |
+
+## The next design decision
+
+The drill exposes a repair that cannot be completed immediately. Name the temporary operating limit and owner, and preserve the evidence rather than declaring the exercise successful solely because the service eventually recovered.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Choose blast radius and stop conditions, preserve raw metrics/logs, mitigate using reversible controls, then compare causal hypotheses. The invariant is bounded impact and an independently observable recovery path. Finish one action with a seeded regression before calling the exercise complete.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · The normal control plane fails
 
@@ -76,13 +91,6 @@ Choose blast radius and stop conditions, preserve raw metrics/logs, mitigate usi
 <summary>Expected reasoning and changed diagram</summary>
 
 Use pre-authorized independent recovery access and a time-bounded failure injection. Test its credentials and dependencies beforehand; a stop button inside the failed system is not an independent stop mechanism.
-
-```mermaid
-flowchart TD
- F["Failure injection"] --> S["Staging service"]
- M["Independent stop monitor"] -->|stop condition| F
- R["Independent recovery identity"] -->|restore configuration| S
-```
 
 </details>
 
@@ -95,21 +103,7 @@ flowchart TD
 
 Detection improved, recovery did not. Report both. Choose a separate repair such as bounded retries or gradual admission, then measure net drain rather than claiming an earlier page solved capacity.
 
-```mermaid
-flowchart TD
- A["Earlier alert"] --> M["Mitigation action"]
- M --> L["Admission and retry limits"]
- L --> D["Positive backlog drain"]
- D --> R["Measured recovery"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Build the timeline from evidence and close one verified action. **Additional lead scope:** Own incident command, recovery access and cross-team action completion. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -117,113 +111,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*You end up with a measured detection time and one change that actually happened.*
-
-**Build**
-
-Pick a failure you have never tried. Break your own system with it, deliberately,
-in daylight. Run it as an incident: note the timeline, mitigate before you
-diagnose, then write the postmortem and complete one action item.
-
-**The thought process**
-
-The first decision is **which failure**, and the useful criterion is the one you
-are least sure about. Not the database going away — you have probably thought
-about that. The certificate expiring, the disk filling, a dependency returning
-slow-but-successful responses, a clock skewing, a config change that is valid
-and wrong.
-
-Then the discipline that is genuinely hard and is the whole practice:
-**mitigate before you diagnose.** Your instinct will be to find out why. Roll
-back, fail over, shed load first, and satisfy the curiosity afterwards with the
-system up. Doing this once, in a drill, is how you will manage it at 3am.
-
-Third: **the timeline before the theory.** Write what happened and when, with
-"it broke" and "I knew" as separate entries, before you write a single sentence
-about cause. A cause offered early becomes the frame everything else is read
-through.
-
-**How to organise the prompts**
-
-```
-Here is my system. List failure modes I have probably NOT considered —
-not the obvious ones. For each, tell me how I could induce it safely in
-my own environment.
-```
-
-```
-Here are the logs and metrics from the window. Build a timeline: what
-happened and when. Mark separately the moment the system broke and the
-moment I first knew.
-
-Do not propose a cause yet.
-```
-
-```
-Given the timeline: list the contributing factors, plural. For each, say
-what would have had to be different.
-
-Do not name a single root cause, and do not list anything a PERSON
-should have done differently.
-```
-
-Banning both single causes and human error is what turns a story into a system
-description.
-
-```
-For this failure, what check would have caught it before I did? Be
-specific: what it measures, what threshold, what it would have said.
-Then tell me what that check costs — in noise as well as money.
-```
-
-**On AWS**
-
-Two things worth knowing exist for this. **AWS Fault Injection Service** is the
-managed way to induce real failures — stop instances, add latency, throttle an
-API — with a stop condition tied to a **CloudWatch** alarm so the experiment
-ends itself if it goes further than you meant. That stop condition is the feature
-that makes it safe enough to run against something you care about.
-
-The homemade versions are fine and teach more: a security-group rule that blocks
-your dependency, a `stress` process on the instance, a deliberately expired
-certificate in a staging environment, an IAM permission revoked for ten minutes.
-
-And use this project to check the thing everyone's monitoring gets wrong: set a
-CloudWatch alarm to **treat missing data as alarming** for at least one critical
-metric. Then stop the component entirely. If nothing fires, silence means
-nothing in your system, which is the most common quiet failure there is.
-
-**What productionising it means**
-
-The drill is on a schedule rather than a one-off, because the value is in the
-trend. The detection time is written down and compared to last time. And the
-action item is *done* — with a commit or a config change to point at — because
-the honest measure of an incident practice is the percentage of action items
-completed, not the quality of the writing.
-
-**The learning**
-
-You cannot shorten the gap between "it broke" and "we knew" during an incident.
-You can only shorten it beforehand, and a drill is the only way to find out what
-it currently is without waiting for a real one.
-
-**How you would know it is wrong**
-
-- Time the gap. If you cannot produce both timestamps, it is unmeasured, which usually means large.
-- Read your postmortem for the word "should". Every one marks where the investigation stopped early.
-- Check the action item is done. Not planned.
-- Stop a component and see whether anything notices the silence.
-- Do a second drill a month later and compare the detection time.
-
-**Stage it**
-
-1. The failure list, and the one you picked, with how to induce it safely.
-2. The drill, with a timeline written as it happens.
-3. The postmortem: contributing factors, no people, one action item with a date.
-4. The action item done, and the next drill scheduled.
-
----
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Return event and attempt history to authorized customers. A 2xx means the endpoi
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Allow customers to rotate a secret while attempts wait. Decide whether you sign 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Merchants subscribe to order events over HTTPS. A merchant's endpoint takes 20 seconds and sometimes commits the event before returning a timeout. How will you deliver without slowing checkout or claiming exactly-once delivery?”
+
 
 **Your contract.** Assume 50,000 subscriptions, 8,000 events/s at peak, 48-hour delivery attempts, endpoint-specific secrets, and a visible replay tool. Ask whether per-subscription ordering matters: it changes partitioning and throughput. This is a constructed practice problem.
 
@@ -92,13 +94,9 @@ Allow customers to rotate a secret while attempts wait. Decide whether you sign 
 | Receiver returns 429 with retry hint | Back off for this destination, preserve other destinations' progress |
 | Permanent 400 due to obsolete schema | Stop repeated hot retries; surface a failure and replay path after repair |
 
-![Inline HTTP fanout blocks checkout; durable event and isolated delivery do not](../../../../assets/design-next/webhook-delivery-before.svg)
-
 ## Reason about two boundaries
 
 In the order transaction, write an outbox row with a stable event ID; a dispatcher publishes it asynchronously. Each subscription gets a **delivery attempt record** keyed by event ID and endpoint. Sign the raw payload with a rotating secret, enforce an outbound URL policy against private-network targets, and use a short timeout. Retries with jitter are bounded by age and attempts. A 2xx confirms transport reception only; the merchant owns idempotent processing. A replay uses the same event ID for the same logical event, with a new delivery-attempt ID.
-
-![AWS delivery architecture with explicit outbox, queue, retry, and failure lane](../../../../assets/design-next/webhook-delivery-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -109,8 +107,6 @@ In the order transaction, write an outbox row with a stable event ID; a dispatch
 | SQS dead-letter queue | Retain exhausted deliveries for triage and replay | Explicit failure table if richer query and operator tooling are required |
 
 EventBridge routing plus a queue does **not** make the order write atomic with publication. The outbox and reconciler close that gap. If using EventBridge API destinations directly, verify its execution timeout and bounded retry behavior against the 20-second receiver; use an asynchronous receipt contract where necessary.
-
-![A committed callback with a missing reply illustrates why an attempt is not an event](../../../../assets/design-next/webhook-delivery-detail.svg)
 
 **Senior follow-up:** One customer floods 429s. Budget per-endpoint concurrency and inspect oldest queued age, retry count, terminal failures, and delivery-to-commit delay; ensure their backlog does not consume the whole worker pool.
 

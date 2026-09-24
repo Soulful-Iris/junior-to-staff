@@ -1,71 +1,87 @@
 # P2 · it survives
 
-## The reviewer's brief
+## What you are building
 
-> Your reading list works on your laptop. Tomorrow another engineer is on call, the database may be lost, and a new deploy may crash. Make the operating path reproducible and show what a restored system actually contains.
+> Extend the same reading-list application so accepted saves survive process restarts and recovery is honest about data loss. A backup taken at 12:00 contains link 100; link 101 is acknowledged at 12:03; the primary fails at 12:05.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [P1](../01-it-works/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Working contract:** Durable acknowledgement, backup and restore are separate guarantees. Restore into an isolated location, inspect recovered data and state the observed recovery point/time. Do not claim zero loss when link 101 was never present in the restored backup.
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Backup at 12:00 includes items 1–100; acknowledged item 101 is written at 12:03; failure at 12:05. | Restore contains items 1–100; report missing item 101 and the recovery interval instead of claiming zero loss. |
-| Boundary / failure | Application process is live but its required database is unreachable. | Readiness/user-journey evidence shows unavailable; liveness can remain true without triggering pointless restart loops. |
-| Scope | Destructive drills only in scratch infrastructure; RPO and RTO are measured assumptions, not guarantees from one exercise. | Explain any additional assumption before implementing it. |
+## Workload and the decisions it changes
 
-## See the first reviewable result
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-**First slice:** Back up items 1–100 at 12:00, acknowledge item 101 at 12:03, and fail the service at 12:05. Restore and **show:** items 1–100 present, item 101 missing, and an honest loss interval. Keep liveness separate from readiness when the database is unreachable, and have someone else execute the runbook from a clean environment.
+| Input or objective | Calculation / consequence |
+|---|---|
+| Backup 12:00; acknowledgement 12:03; failure 12:05 | Snapshot-only recovery may lose link 101; the latest backup is five minutes old. |
+| 200 links at 1 KiB metadata assumption | Data volume is small enough to inspect directly; correctness of restore is the exercise. |
+| Thirty-minute recovery target assumption | Measure start-to-usable time, including credentials, schema and object references. |
 
-<!-- project-expectation:start -->
+## Start with one working boundary
 
-## What you are expected to hand over
+Run from the repository root with Python 3.12+:
 
-**The finished artifact:** Junior → senior · fed by sections 10, 11, 12 · the question is can someone else run it, and can you fix it at 3am? Take the reading list you built in P1. Do not add a single feature to it.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A deploy crashes | A candidate version exits immediately. What keeps the previous version available? Predict which boundary must change before opening the design. | Build once, route only to ready instances, preserve the previous artifact and compatible config, and prove rollback by observing served version. Data compatibility remains a separate gate. |
-| Lead · The primary and its credentials are lost | Can an unfamiliar engineer recover without depending on the failed primary? State what evidence would make you reject your first design. | Use independently accessible backup, documented scoped recovery identity and a fresh target. Verify row contents and application behavior before routing traffic; retain evidence of missing acknowledged writes. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- A["Author laptop and remembered commands"] --> D["Deployment"]
- D --> R["Running app"]
- R --> B["Untested backup"]
- B --> Q["Unknown recovery outcome"]
+```bash
+python3 examples/architecture-starts/reading_list_it_survives.py
 ```
 
-A stored backup and a deploy script do not prove restore correctness or that an unfamiliar operator has sufficient access.
+[Open the starting code](../../../../examples/architecture-starts/reading_list_it_survives.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| durable_store | committed link/request identity | What success promises across process restart. |
+| backup_manifest | created_at,source_position,schema,objects | Exactly which data the backup contains. |
+| restore_record | target,started,ready,recovered_position,missing_ids | Evidence of recovery and acknowledged loss. |
+
+## AWS implementation
+
+![P2 · it survives: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/reading-list-it-survives.svg)
+
+A backup service coordinates retained recovery points, but the application’s loss and recovery claims come from inspecting a restored target. A successful backup job alone does not establish those claims.
+
+## Build it in this order
+
+### 1. Persist the application state
+
+Move from disposable memory to a durable local file/database with an explicit commit boundary. Store request identities with creates so a lost response can be retried. Restart the process and show that acknowledged links and personal read state remain.
+
+### 2. Create a restorable backup
+
+Record schema version, database position/time and referenced object versions. Protect backup credentials and retention separately from the application’s ordinary write role. A copied database file is only a valid backup if the database’s supported snapshot procedure makes it consistent.
+
+### 3. Restore away from the source
+
+Use a new database/path and the documented startup command. Inspect link 100 and the acknowledged link 101 scenario. Record missing acknowledged operations rather than inferring completeness because the application starts successfully.
+
+### 4. Close the recovery gap deliberately
+
+Choose more frequent snapshots, log-based point-in-time recovery or another durability design based on the required loss bound. Rehearse the actual restore path and include access, schema migration and private object references in the measured recovery time.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Database recovery | Configure the selected service’s backup/PITR behavior and retain required logs; verify the actual recoverable window. |
+| Restore target | Separate resource identity and credentials; never overwrite the only source while learning recovery. |
+| Evidence | Record restored commit/time, schema and missing acknowledged IDs; encrypt/restrict backups containing private data. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The restored snapshot contains 100 and lacks acknowledged 101. |
+| Restart only the app process | Durable committed state remains available. |
+| Restore into a fresh environment | Record the actual ready time and recovered data boundary. |
+
+## The next design decision
+
+Continue to stage 3 with the recovery procedure intact. Add asynchronous work without weakening what an accepted job or a published result means.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Inventory artifact/config/secrets/data boundaries, define recovery objectives, and rehearse from a clean environment. The invariant is reproducible serving state with explicitly measured data loss. Separate liveness, readiness and user-journey checks according to what automation should do.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A deploy crashes
 
@@ -75,14 +91,6 @@ Inventory artifact/config/secrets/data boundaries, define recovery objectives, a
 <summary>Expected reasoning and changed diagram</summary>
 
 Build once, route only to ready instances, preserve the previous artifact and compatible config, and prove rollback by observing served version. Data compatibility remains a separate gate.
-
-```mermaid
-flowchart TD
- A["Immutable candidate artifact"] --> C["Candidate runtime"]
- C --> H["Readiness gate"]
- H -->|fails| O["Keep previous serving version"]
- H -->|passes| L["Load-balancer admission"]
-```
 
 </details>
 
@@ -95,136 +103,6 @@ flowchart TD
 
 Use independently accessible backup, documented scoped recovery identity and a fresh target. Verify row contents and application behavior before routing traffic; retain evidence of missing acknowledged writes.
 
-```mermaid
-flowchart TD
- I["Recovery identity"] --> B["Independent backup access"]
- B --> D["Fresh restore target"]
- D --> V["Data and journey verification"]
- V --> R["Controlled traffic restoration"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Have another engineer deploy and restore from the recorded procedure. **Additional lead scope:** Own recovery access, compatibility and measurable RPO/RTO. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-> Junior → senior · fed by sections 10, 11, 12 · the question is **can someone else run it, and can you fix it at 3am?**
-
-Take the reading list you built in P1. Do not add a single feature to it.
-
-The whole of P2 is making the same system survivable: deployable by somebody who
-is not you, observable when it misbehaves, recoverable when it breaks, and
-defensible when somebody pokes at it. Nothing a user can see changes. That is
-the point, and it is why this project is the one people skip.
-
-## What done means
-
-- [ ] A deploy happens automatically when you merge, and you did not run any command by hand.
-- [ ] The infrastructure is described in files in the repo. You destroyed it and recreated it from those files at least once, and it came back.
-- [ ] You can answer "what happened to request X?" from telemetry, without adding a log line and redeploying.
-- [ ] There is a dashboard or a query that tells you whether the thing is healthy right now, and it is the one you would actually look at first.
-- [ ] You get told when it breaks. You have tested that by breaking it.
-- [ ] A backup exists, and **you have restored from it into a scratch environment**. Not "we have backups."
-- [ ] Rolling back to the previous version takes one action and you have done it.
-- [ ] No long-lived cloud credential sits in CI. It uses short-lived identity.
-- [ ] Every dependency is locked, installs are strict, and something checks them.
-- [ ] A person who has never seen the repo can deploy it from the README alone. Ideally, a person actually did.
-
-## The decisions you are being asked to make
-
-Three sentences each, written down before you build.
-
-1. **What is each health check for?** Liveness checks whether restarting the process may help; readiness decides admission; a synthetic checks user-visible dependencies. A database outage should fail the relevant readiness/journey check without forcing every live process into a restart loop.
-2. **What do you alert on?** The temptation is "errors". The better question is: what would a user notice, and what would you want to be woken for? Everything else is a dashboard, not a page.
-3. **What is your rollback unit?** The artefact, the config, the database schema? They roll back at different speeds, and a migration usually does not roll back at all.
-4. **What is the blast radius of your CI?** It has credentials and it runs code from pull requests. Those two facts together are the whole supply-chain question in miniature.
-5. **What is your recovery point?** If the database is lost right now, how much data have you lost — an hour, a day, all of it? Say the number before you find out.
-
-## Working with Claude on it
-
-**1. Make the pipeline explicit before generating any of it.**
-
-```
-Write the deployment pipeline for this project as stages, with what each
-stage can access. For each stage, tell me what an attacker who controlled
-a pull request could do with that access.
-```
-
-Why: CI is the highest-privilege thing most small projects own and the least
-examined. Asking the second question reliably surfaces a step that is more
-powerful than it needs to be.
-
-**2. Make the alert prove itself.**
-
-```
-Add alerting for <the failure you care about>. Then break the system in
-that exact way and show me the alert firing. Then fix it and show me the
-alert clearing.
-
-If the alert does not fire, tell me why rather than adjusting the
-threshold until it does.
-```
-
-Why: the last sentence is the whole instruction. Tuning a threshold until an
-alert fires on your test is how you get an alert that fires on nothing else.
-
-**3. The restore, not the backup.**
-
-```
-Set up backups. Then write the restore procedure as a numbered list, run
-it into a scratch database, and tell me how long it took and what was
-missing.
-```
-
-Why: everyone has backups. Far fewer have restores. The time and the gap are
-the two numbers that matter and neither is knowable without doing it.
-
-## How you would know it is wrong
-
-1. **Destroy your infrastructure and rebuild it from the repo.** Do it in a scratch environment. Whatever you had to do by hand is what is missing from the code.
-2. **Kill the database and observe each health signal.** Readiness or the affected journey must show unavailable. Liveness may remain healthy when restarting cannot fix the dependency.
-3. **Break the system on purpose and time yourself** from the moment it broke to the moment you knew. That number is your detection time, and it is probably much worse than you assumed.
-4. **Restore from backup into a scratch environment** and diff it against production. Note the gap in minutes.
-5. **Revoke the credential CI uses** and confirm the deploy fails. Then rotate it properly and confirm it works. Now you know both halves.
-6. **Ask somebody else to deploy it** using only what is written down. Watch without helping. Every question they ask is a documentation bug.
-
-## Break it on purpose
-
-| do this | what should happen | what it teaches |
-|---|---|---|
-| deploy a version that crashes on start | it is caught before it takes traffic, or it is rolled back quickly | a deploy that cannot detect its own failure is not a deploy, it is a hope |
-| fill the disk | a clear failure and an alert, not silent corruption | the boring resource limits are the ones that get you |
-| delete a row somebody cares about | you restore it from backup and know how long it took | this is the drill that matters most and is rehearsed least |
-| let a certificate expire (or simulate it) | you find out whether anything watches expiry dates | nobody is watching expiry dates |
-
-## What P3 will do to this
-
-P3 puts the same system under load: queues, caching, idempotency, rate limits,
-and deliberate failure of the things it depends on.
-
-Everything you leave manual in P2 becomes something you have to do by hand while
-the system is misbehaving. That is the actual argument for this project, and it
-is the one nobody believes until the first time it happens.
-
-## Architecture rehearsal · Operational controls around the same application
-
-```mermaid
-flowchart TD
-  Artifact["Versioned build"] --> Runtime["Application runtime"]
-  Config["Environment configuration"] --> Runtime
-  Secrets["Scoped secret store"] --> Runtime
-  Runtime --> DB[("Database")]
-  DB --> Backup[("Backup and restore target")]
-  Runtime --> Signals["Logs, metrics, traces"]
-  Signals --> Alert["Actionable alert"]
-  Alert --> Runbook["Owner + runbook"]
-  Runbook -->|"mitigate"| Runtime
-  Backup --> Drill["Restore drill"]
-```
-
-**Draw the failure:** Erase the author of this project from the team. Can another engineer deploy and recover it?
+</details>

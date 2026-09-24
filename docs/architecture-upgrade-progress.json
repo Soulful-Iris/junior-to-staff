@@ -358,5 +358,119 @@
     "starter": "examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py",
     "diagram": "assets/architecture-guides/03-the-retry-storm-you-build-on-purpose.svg",
     "batch": "delivery-observability-slo-retry"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/04-shedding-the-right-thing.md",
+    "starter": "examples/architecture-starts/04_shedding_the_right_thing.py",
+    "diagram": "assets/architecture-guides/04-shedding-the-right-thing.svg",
+    "batch": "recovery-degradation-ingestion-projects"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/05-the-failure-that-will-not-recover.md",
+    "starter": "examples/architecture-starts/05_the_failure_that_will_not_recover.py",
+    "diagram": "assets/architecture-guides/05-the-failure-that-will-not-recover.svg",
+    "batch": "recovery-degradation-ingestion-projects"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/degrade-do-not-stop.md",
+    "starter": "examples/architecture-starts/degrade_do_not_stop.py",
+    "diagram": "assets/architecture-guides/degrade-do-not-stop.svg",
+    "batch": "recovery-degradation-ingestion-projects"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/projects/the-incident-you-caused-on-purpose.md",
+    "starter": "examples/architecture-starts/the_incident_you_caused_on_purpose.py",
+    "diagram": "assets/architecture-guides/the-incident-you-caused-on-purpose.svg",
+    "batch": "recovery-degradation-ingestion-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/projects/the-flood.md",
+    "starter": "examples/architecture-starts/the_flood.py",
+    "diagram": "assets/architecture-guides/the-flood.svg",
+    "batch": "recovery-degradation-ingestion-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/projects/01-evidence-desk.md",
+    "starter": null,
+    "diagram": "assets/architecture-guides/01-evidence-desk.svg",
+    "batch": "ai-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/projects/02-approval-desk.md",
+    "starter": null,
+    "diagram": "assets/architecture-guides/02-approval-desk.svg",
+    "batch": "ai-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/projects/03-invoice-review.md",
+    "starter": null,
+    "diagram": "assets/architecture-guides/03-invoice-review.svg",
+    "batch": "ai-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/projects/04-release-evidence.md",
+    "starter": null,
+    "diagram": "assets/architecture-guides/04-release-evidence.svg",
+    "batch": "ai-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/projects/an-ai-feature-you-can-defend.md",
+    "starter": "examples/architecture-starts/an_ai_feature_you_can_defend.py",
+    "diagram": "assets/architecture-guides/an-ai-feature-you-can-defend.svg",
+    "batch": "ai-projects"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/04-migrations/projects/the-migration-you-actually-finish.md",
+    "starter": "examples/architecture-starts/the_migration_you_actually_finish.py",
+    "diagram": "assets/architecture-guides/the-migration-you-actually-finish.svg",
+    "batch": "migration-technical-decisions"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-paved-road.md",
+    "starter": "examples/architecture-starts/the_paved_road.py",
+    "diagram": "assets/architecture-guides/the-paved-road.svg",
+    "batch": "migration-technical-decisions"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-strategy-you-found-rather-than-invented.md",
+    "starter": "examples/architecture-starts/the_strategy_you_found_rather_than_invented.py",
+    "diagram": "assets/architecture-guides/the-strategy-you-found-rather-than-invented.svg",
+    "batch": "migration-technical-decisions"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-thing-you-decided-not-to-build.md",
+    "starter": "examples/architecture-starts/the_thing_you_decided_not_to_build.py",
+    "diagram": "assets/architecture-guides/the-thing-you-decided-not-to-build.svg",
+    "batch": "migration-technical-decisions"
+  },
+  {
+    "path": "projects/reading-list/stages/01-it-works/README.md",
+    "starter": "examples/architecture-starts/reading_list_it_works.py",
+    "diagram": "assets/architecture-guides/reading-list-it-works.svg",
+    "batch": "reading-list-stages"
+  },
+  {
+    "path": "projects/reading-list/stages/02-it-survives/README.md",
+    "starter": "examples/architecture-starts/reading_list_it_survives.py",
+    "diagram": "assets/architecture-guides/reading-list-it-survives.svg",
+    "batch": "reading-list-stages"
+  },
+  {
+    "path": "projects/reading-list/stages/03-under-load/README.md",
+    "starter": "examples/architecture-starts/reading_list_under_load.py",
+    "diagram": "assets/architecture-guides/reading-list-under-load.svg",
+    "batch": "reading-list-stages"
+  },
+  {
+    "path": "projects/reading-list/stages/04-it-reasons/README.md",
+    "starter": "examples/architecture-starts/reading_list_it_reasons.py",
+    "diagram": "assets/architecture-guides/reading-list-it-reasons.svg",
+    "batch": "reading-list-stages"
+  },
+  {
+    "path": "projects/reading-list/stages/05-it-changes/README.md",
+    "starter": "examples/architecture-starts/reading_list_it_changes.py",
+    "diagram": "assets/architecture-guides/reading-list-it-changes.svg",
+    "batch": "reading-list-stages"
   }
 ]

@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="750" viewBox="0 0 1080 750" role="img" aria-labelledby="t d"><title id="t">2. The contract nobody breaks by accident</title><desc id="d">AWS implementation with service roles and labelled data flow.</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526776"/></marker></defs><rect width="1080" height="750" rx="16" fill="#f8fafc"/><style>text{font-family:Arial,sans-serif;fill:#193444}.name{font-size:23px;font-weight:bold}.role{font-size:19px}.detail{font-size:17px;fill:#526575}.edge{font-size:16px;font-weight:bold}</style>
 <text x="36" y="44" class="name" style="font-size:23px">2. The contract nobody breaks by accident</text><text x="36" y="77" class="detail">AWS service • general architectural role • responsibility in this project</text>
 <path d="M446 183 L626 183" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="498.6" y="150" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="536.0" y="166" class="edge" text-anchor="middle">request</text>
-<path d="M626 213 L556 213 L556 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="498.4" y="267.0" width="83.2" height="23" fill="#f8fafc"/><text x="540" y="283.0" class="edge" text-anchor="middle">response</text>
+<g transform="translate(536.0 166) rotate(0)"><rect x="-37.400000000000006" y="-16" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">request</text></g>
+<path d="M626 213 L482 213 L482 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<g transform="translate(540 283.0) rotate(0)"><rect x="-41.6" y="-16" width="83.2" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">response</text></g>
 <path d="M831 318 L831 243" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="751.6" y="258.5" width="158.8" height="23" fill="#f8fafc"/><text x="831" y="274.5" class="edge" text-anchor="middle">provider contract</text>
+<g transform="translate(831 274.5) rotate(0)"><rect x="-79.4" y="-16" width="158.8" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">provider contract</text></g>
 <path d="M626 383 L446 383" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="456.6" y="350" width="158.8" height="23" fill="#f8fafc"/><text x="536.0" y="366" class="edge" text-anchor="middle">consumer contract</text>
+<g transform="translate(536.0 366) rotate(0)"><rect x="-79.4" y="-16" width="158.8" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">consumer contract</text></g>
 <path d="M241 443 L241 518" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="174.2" y="458.5" width="133.60000000000002" height="23" fill="#f8fafc"/><text x="241" y="474.5" class="edge" text-anchor="middle">decode outcome</text>
-<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role">(HTTP request boundary)</text>
-<text x="54" y="207" class="detail">Explicit content-type and parameter policy</text>
-<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">AWS Lambda</text><text x="644" y="180" class="role">(provider application)</text>
-<text x="644" y="207" class="detail">Domain and response validation</text>
-<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon ECS</text><text x="54" y="380" class="role">(consumer application)</text>
-<text x="54" y="407" class="detail">Runtime decoder and supported behavior</text>
-<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon S3</text><text x="644" y="380" class="role">(versioned contract examples)</text>
-<text x="644" y="407" class="detail">Schemas; units; error fixtures</text>
-<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">Amazon CloudWatch</text><text x="54" y="580" class="role">(boundary diagnostics)</text>
-<text x="54" y="607" class="detail">Invalid shape and client-version evidence</text>
+<g transform="translate(241 474.5) rotate(0)"><rect x="-66.80000000000001" y="-16" width="133.60000000000002" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">decode outcome</text></g>
+<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role" style="font-size:19px">(HTTP request boundary)</text>
+<text x="54" y="207" class="detail" style="font-size:17px">Explicit content-type and parameter policy</text>
+<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">AWS Lambda</text><text x="644" y="180" class="role" style="font-size:19px">(provider application)</text>
+<text x="644" y="207" class="detail" style="font-size:17px">Domain and response validation</text>
+<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon ECS</text><text x="54" y="380" class="role" style="font-size:19px">(consumer application)</text>
+<text x="54" y="407" class="detail" style="font-size:17px">Runtime decoder and supported behavior</text>
+<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon S3</text><text x="644" y="380" class="role" style="font-size:19px">(versioned contract examples)</text>
+<text x="644" y="407" class="detail" style="font-size:17px">Schemas; units; error fixtures</text>
+<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">Amazon CloudWatch</text><text x="54" y="580" class="role" style="font-size:19px">(boundary diagnostics)</text>
+<text x="54" y="607" class="detail" style="font-size:17px">Invalid shape and client-version evidence</text>
 <text x="36" y="722" class="detail">Proposed cloud implementation; the local starting code demonstrates the named mechanism only.</text></svg>

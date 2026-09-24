@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Preserve the evidence needed for invalid-traffic filtering, attribution correcti
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ An advertiser disputes yesterday’s invoice after fraud filtering changes. Defi
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Advertisers want minute-level click and impression counts. Events arrive more than once and sometimes minutes late; dashboards need recent counts while analysts query years of history.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 5 billion events/day, 30-second dashboard freshness and two years of historical queries. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,15 +94,11 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | High-cardinality | Millions of campaigns × regions × devices | Bound dimensions and partition for both writes and analytics scans. |
 | Dashboard read | Query campaign for last 60 minutes | Return freshness/watermark with aggregated buckets. |
 
-![The failure path and repaired design for Ad click aggregator](../../../../assets/design-interview/ad-click-aggregator-before.svg)
-
 ## Think from the contract to the boxes
 
 Ingest immutable event IDs, event-time and dimensions, then aggregate in event-time windows. Watermarks decide when a window is provisionally complete; late arrivals update a correction path. Keep an append-only raw archive for replay. Pre-aggregation serves dashboards cheaply, while an OLAP store handles historical multi-dimensional slices. Do not force one database to serve both paths.
 
 **First diagram:** Draw click → stream → event-time windows → hot aggregate and raw archive; show a late event correcting one bucket.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/ad-click-aggregator-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -111,8 +109,6 @@ Ingest immutable event IDs, event-time and dimensions, then aggregate in event-t
 | **Amazon DynamoDB** / recent aggregate view | Serve hot recent buckets by campaign/time key. | Timestream for primarily time-series reads with lower dimensions. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Ad click aggregator](../../../../assets/design-interview/ad-click-aggregator-deep.svg)
 
 ## Pressure-test the design
 

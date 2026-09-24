@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ The application may append archive objects but cannot overwrite evidence or shor
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Design recovery when the database is restored to yesterday but the archive conta
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A customer reports that access to a sensitive report changed yesterday. Show who made the change, what the old and new permissions were, and whether anyone tampered with the evidence.”
+
 
 **Your contract.** The app processes 2,000 permission changes/s at peak and supports 7-year retained records for this exercise. Define which fields are sensitive and which employee roles may read them. These numbers are invented; retention and legal requirements are product decisions.
 
@@ -93,13 +95,9 @@ Design recovery when the database is restored to yesterday but the archive conta
 | Operator changes an audit row | Detection and an immutable retained source outside the operator's write privileges |
 | User asks to delete personal data | Apply the governing retention rule; document any lawful exception and restrict access |
 
-![Best-effort logging loses evidence; a committed audit intent preserves it](../../../../assets/design-next/audit-trail-before.svg)
-
 ## Separate evidence from visibility
 
 Commit the permission transition and an audit intent in the **same transaction**. The event records who acted, verified tenant, target, before/after references, request ID, decision time, and policy version. Never let clients supply “actor” as an authoritative field. A dispatcher can export immutable records asynchronously; a searchable index is a *projection*, so losing it must not lose the retained original. Version the envelope so future readers can interpret old records. Avoid logging raw secrets; limit reader privileges and produce a separate audit for audit access.
-
-![AWS architecture distinguishes transactional evidence, retained archive, and query projection](../../../../assets/design-next/audit-trail-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -109,8 +107,6 @@ Commit the permission transition and an audit intent in the **same transaction**
 | Athena | Query partitioned retained events for investigation | OpenSearch projection for interactive search, never as the sole evidence source |
 
 S3 Object Lock protects retained **object versions** under configured retention/legal hold; it does not prove a missing event was ever emitted. Reconcile the outbox and archived sequence ranges and alert on gaps.
-
-![Sequence and verification gap make missing records visible before an incident](../../../../assets/design-next/audit-trail-detail.svg)
 
 **Senior follow-up:** A projected audit search is 20 minutes behind during an incident. Show the operator how to query the retained source and display a truthful freshness indicator.
 

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Check current membership before history reads and attachment downloads, and defi
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add cross-region conversations. State which region orders a conversation and wha
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Design a team chat. Ana sends ‘Ready?’ on her phone, loses reception before the acknowledgement, and retries from her laptop. Ben was offline. When both reconnect, which messages appear, in what order, and how do you avoid an accidental duplicate?”
+
 
 Assume 2 million daily active users, 30,000 peak messages/s, groups of 2–500 members, and one-year history. These are exercise inputs. Distinguish server-accepted messages from messages displayed or read on a device.
 
@@ -92,13 +94,9 @@ Assume 2 million daily active users, 30,000 peak messages/s, groups of 2–500 m
 | Two devices send concurrently into one room | Explain the chosen per-room ordering rule; no unearned global order |
 | Device is offline for two days | History query and pagination work even when live connection state expired |
 
-![Ephemeral WebSocket delivery loses history; a durable log anchors reconnect](../../../../assets/design-practice/realtime-chat-boundary.svg)
-
 ## Separate storage from delivery
 
 The message write becomes authoritative when the server persists it and assigns a room sequence or another documented order. WebSockets carry low-latency delivery, presence, and acknowledgements; connections are not the message database. Store `(room_id, sequence, message_id, sender_id, body, created_at)` and an idempotency key scoped to sender and room. A client must retain the same send-operation ID across retries; a laptop cannot deduplicate a phone's uncertain send unless that pending ID was synchronized. Two independently composed identical texts remain two messages. If a device misses sequence 19, fetch the gap before advancing its cursor. Delivery may be at least once; the UI deduplicates by message ID. “Read” means the client confirms display according to an explicit policy, not merely that a push reached a gateway.
-
-![Duplicate send, durable commit, missing acknowledgement, and replay](../../../../assets/design-practice/realtime-chat-trace.svg)
 
 ### One accepted message
 
@@ -121,11 +119,9 @@ Draw authentication/room membership check → message authority → history stor
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/realtime-chat-aws.svg)
-
 **Why these boxes, and what changes the choice:** WebSocket connections deliver low-latency updates, while a DynamoDB log owns acknowledged history. ECS owners may assign room sequence numbers; a database conditional write must still fence old owners. SQS fans out work but can redeliver, so reconnect uses log cursors instead.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** A fanout worker dies after delivering to half a room. The cursor-based recovery path replays without duplicating visible messages. Show what a restarted worker reads, when it checkpoints, and what happens if a user is removed halfway through a backlog.
 

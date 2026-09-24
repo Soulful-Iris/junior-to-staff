@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Use hot retention for operational queries and S3-backed archived rollups for the
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Allow ad hoc labels for one debugging session. Design an expiring, separately bu
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Hundreds of thousands of hosts emit CPU, memory, throughput, and service metrics. Engineers build dashboards and alerts. One customer labels every request with a unique user ID.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 300,000 hosts, 10-second sampling and one-year retention for downsampled aggregates. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,15 +94,11 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Late sample | Host reconnects after 5 minutes | Backfill within a defined correction window. |
 | No data | Critical service stops reporting | Alert on missing telemetry separately from threshold breach. |
 
-![The failure path and repaired design for Metrics platform](../../../../assets/design-interview/metrics-platform-before.svg)
-
 ## Think from the contract to the boxes
 
 A metric identity is name plus label set; each distinct set creates another time series. Validate schema and cardinality at ingest, aggregate high-volume counters near the source, and separate high-resolution recent data from older rollups. Alert evaluation needs durable rules, missing-data semantics, and a notification path independent of the metrics query dashboard.
 
 **First diagram:** Estimate series count from hosts × metrics × label combinations. Draw ingest, rollup, query and alert paths separately.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/metrics-platform-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -117,16 +115,6 @@ format. Grafana queries the store; it is not the rule evaluator. Preserve
 one-year aggregates in an explicitly configured store/archive, not an assumed
 default retention setting.
 
-```mermaid
-flowchart LR
-  Agent["Bounded labels and authenticated ingest"] --> Store["Metrics store / query"]
-  Store --> Dashboard["Grafana dashboard"]
-  Store --> Rules["Ruler: evaluate PromQL and missing data"]
-  Rules --> Routing["Alertmanager: group, silence, route"]
-  Routing --> SNS["Configured SNS receiver"]
-  SNS --> Oncall["On-call destination"]
-```
-
 **Trace the alarm:** threshold crosses → evaluator enters pending/firing → router
 groups and sends → receiver records delivery → evaluator resolves → configured
 resolved notification. Test silence and missing telemetry separately. Notification
@@ -142,8 +130,6 @@ have different responsibilities. Check the chosen region, quotas and account
 permissions before provisioning; no account/region was deployed for this brief.
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Metrics platform](../../../../assets/design-interview/metrics-platform-deep.svg)
 
 ## Pressure-test the design
 

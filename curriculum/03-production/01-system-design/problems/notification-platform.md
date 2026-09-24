@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Reuse provider idempotency only where that provider actually supports it for the
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -100,15 +102,6 @@ runnable starting point: [atomic-result worker](../../03-infrastructure/aws/labs
 then [external-provider extension](../../../04-scale-and-evolution/04-migrations/labs/recovery-migration/README.md). Deliver
 accepted intent, bounded fan-out, and truthful per-recipient state in that order.
 
-```mermaid
-flowchart TD
-  Campaign["Campaign API"] --> Loop["Synchronous million-recipient loop"]
-  Loop -->|"unbounded calls"| Provider["Provider: 200/s"]
-  Provider --> Timeout["Timeout; effect may have happened"]
-  Timeout --> Retry["Retry without retained identity"]
-  Retry --> Provider
-```
-
 Decide the deadline and provider capacity before worker count. Separate accepted,
 processed, provider-accepted, and delivered states; choose which the product can
 actually observe. Draw every crash around the provider call before promising an
@@ -121,17 +114,6 @@ effect count.
 
 API: POST campaign returns campaign id and accepted state; GET campaign returns accepted/processed/failed counts. Model campaign intent, per-recipient job id, channel, payload version, attempt state, and provider receipt. A campaign accepted is not a campaign delivered.
 
-```mermaid
-flowchart TD
- A[Campaign API] --> O[Intent and outbox]
- O --> R[Relay]
- R --> Q[Recipient queue]
- Q --> W[Bounded workers]
- W --> P[Provider]
- W --> S[Delivery state]
- W --> D[Dead-letter queue]
-```
-
 **AWS mapping:** a transactional database plus outbox, SQS standard for independent recipient jobs, Lambda or ECS workers, DynamoDB for status keyed by job, CloudWatch for completion age and failure rate. SNS/EventBridge can route events; they do not replace your per-recipient delivery-state model. Choose FIFO only for a demonstrated ordering requirement and design message groups deliberately.
 
 **Deep dive:** if a provider accepts 200 requests/s, more workers cannot make 1,667/s delivery possible. Negotiate deadline, batch with provider support, or distribute channels/providers. Queueing only delays the failure. A timeout after provider success is uncertain; retry with the provider's idempotency key or reconcile receipts.
@@ -141,17 +123,6 @@ flowchart TD
 </details>
 
 ## Follow-up: one tenant monopolizes the queue
-
-```mermaid
-flowchart TD
-  Intent["Tenant-tagged recipient jobs"] --> Fair["Admission and tenant scheduling"]
-  Fair --> A["Tenant A quota"]
-  Fair --> B["Tenant B quota"]
-  A --> Shared["Shared provider rate budget: 200/s"]
-  B --> Shared
-  Shared --> Provider["Provider with retained operation receipt"]
-  Shared --> Deferred["Deferred or expired by product deadline"]
-```
 
 **Senior:** supply the lost-response test, oldest-job age, and bounded retry/expiry
 policy. **Lead follow-up:** fail over to a second provider; does the first

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Trace committed manifests and active uploads before deleting unreferenced chunks
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -100,14 +102,6 @@ versions. This is a build brief: deliver server-owned upload sessions, verified
 conditional finalization, then change-feed recovery. The upload script demonstrates
 only bytes; it does not claim to implement this entire sync application.
 
-```mermaid
-flowchart TD
-  Browser["Browser uploads large file"] --> API["API holds request and proxies bytes"]
-  API --> Object["Object store"]
-  API --> DB["Metadata overwritten without expected version"]
-  Other["Second device finalizes old v3"] --> DB
-```
-
 First separate byte transport from metadata authority. Next put ownership and
 expected version in the upload session, validate the object at finalization,
 then make the change record durable with the metadata transition.
@@ -119,19 +113,6 @@ then make the change record durable with the metadata transition.
 
 API issues an upload session containing object key, expected version, and short-lived upload capability. Browser uploads bytes directly to object storage. Finalization checks the object and conditionally updates metadata. Store file id, owner, parent id, object version/key, checksum, size, and metadata version. Upload completion and application visibility are separate transitions.
 
-```mermaid
-flowchart TD
- B[Browser] --> M[Metadata API]
- M --> D[Metadata database]
- M --> U[Upload capability]
- U --> B
- B --> S[Object storage]
- B --> F[Finalize upload]
- F --> D
- D --> E[Change feed]
- E --> C[Other devices]
-```
-
 **AWS mapping:** S3 for bytes, API Gateway/Lambda for metadata, DynamoDB or RDS for ownership and versions, SQS for asynchronous processing, CloudFront for authorized downloads where justified. S3 events can be duplicated or arrive out of order; treat them as triggers to validate state, not unquestionable proof of the newest version.
 
 **Before/after:** proxying large uploads through the API holds application capacity and adds a bandwidth hop. Direct upload reduces that pressure but introduces abandoned sessions, multipart cleanup, and capability security. Version conflicts need an explicit user-visible resolution policy.
@@ -141,16 +122,6 @@ flowchart TD
 </details>
 
 ## Follow-up: the device's history is gone
-
-```mermaid
-flowchart TD
-  Device["Device: checkpoint 10"] --> Feed["Server retains changes after 50"]
-  Feed -->|"history expired"| Reset["Request consistent snapshot + position 80"]
-  Reset --> State["Replace local confirmed state"]
-  State --> Replay["Apply changes after 80"]
-  Draft["Unsynced local edits"] --> Conflict["Rebase or user-visible conflict"]
-  Replay --> Conflict
-```
 
 Use the [expired-history replay fixture](../../04-migrations/labs/recovery-migration/migration.md)
 to prove the server refuses incomplete catch-up. **Senior:** preserve unsynced

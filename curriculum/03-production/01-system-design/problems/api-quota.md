@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Run two client processes against one real shared authority. Observe accepted, re
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Replace fixed windows with a rolling 60-second policy. Estimate the state needed
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Partners call our public API. Each organization may make 100 requests per minute, and a paid organization also has a daily quota. Two gateways receive requests for the same organization simultaneously. Define exactly which requests are admitted and what the client sees at the limit.”
+
 
 This is a constructed prompt. Assume 8,000 organizations, 20,000 peak requests/s overall, and an occasional 2,000 requests/s from one organization. Start with per-organization policy; do not guess an individual IP is an organization.
 
@@ -93,19 +95,13 @@ This is a constructed prompt. Assume 8,000 organizations, 20,000 peak requests/s
 | Client failure | An admitted request fails downstream | State whether admission spends quota; do not quietly refund it |
 | Burst | Paid client sends 100 requests in one second | Define whether burst is legal before selecting token bucket or sliding window |
 
-![Two gateways independently spending the same last token, then a shared admission decision](../../../../assets/design-practice/api-quota-boundary.svg)
-
 ## Think aloud before naming a service
 
 The decision must have one authority per `(organization, policy, period)` at the moment of admission. A local dictionary on each gateway answers a different question: *how many requests did this gateway see?* A token bucket smooths bursts; a fixed window resets sharply at its boundary; a sliding window gives a closer rolling limit but needs more state or an approximation. Ask whether “100 per minute” means a fixed calendar minute or any moving 60 seconds. Estimate key cardinality and the hottest single key before talking about sharding.
 
 The simplest correct version writes a conditional counter for each organization and period. Serialize competing admissions through one owner or use an atomic conditional update. Daily and minute counters form **two constraints**: if checking the first spends it and the second rejects, you need an atomic joint decision, a reservation/compensation policy, or a carefully documented approximation. A fast cache can reduce reads, but an eventually synchronized cache cannot promise an exact hard quota by itself.
 
-![Two requests converge on one atomic quota decision](../../../../assets/design-practice/api-quota-deep.svg)
-
 Read the fork: A and B arrive independently. One successful conditional decrement changes the state; the other must observe a failed condition. Redraw this with two independent local counters and locate the extra admitted request.
-
-![A pair of competing requests and the one atomic admission point](../../../../assets/design-practice/api-quota-trace.svg)
 
 ## Draw, test, change
 
@@ -113,11 +109,9 @@ Draw client → gateway → shared admission authority → API and label the key
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/api-quota-aws.svg)
-
 **Why these boxes, and what changes the choice:** DynamoDB conditional updates arbitrate a single shared quota key; a transaction or reservation handles minute and daily quotas together. An ElastiCache cache is useful for approximate reads, but a stale cache cannot enforce an exact limit. ECS can replace Lambda when connection reuse or steady traffic justifies a service.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** The shared quota store goes down while the API still works. Choose fail-open or fail-closed separately for an expensive paid endpoint and a cheap read endpoint, then cap worst-case overspend. Measure decisions, rejected legitimate traffic, latency, and policy version.
 

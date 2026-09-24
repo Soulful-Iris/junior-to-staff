@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Turn the flag off and confirm the old path processes records written during expo
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Let product change the hash salt mid-rollout. Explain cohort churn and experimen
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A new checkout path works in staging. Release it to 5% of customers, then 50%, then everyone. A billing bug appears only after a full day. How do you make activation, observation, and rollback safe?”
+
 
 **Your contract.** Use a stable customer assignment (not a fresh coin toss per request), a compatible control path during the rollback window, and a meaningful error signal. A percentage rollout alone cannot catch a bug that appears after a daily job runs. This is a constructed exercise.
 
@@ -91,8 +93,6 @@ Let product change the hash salt mid-rollout. Explain cohort churn and experimen
 | Failure starts at 50% | Stop new exposure after propagation; drain/cancel admitted work by contract and repair committed effects |
 | Batch job runs 24 hours after 100% | Bake time or delayed gate catches the regression; recovery plan addresses writes already made |
 | Control path schema was removed | Toggle cannot restore behavior; migration sequencing must have kept both paths compatible |
-
-![Manual all-at-once activation cannot observe a safe cohort](../../../../assets/design-next/feature-rollout-before.svg)
 
 ## Decide what the flag actually protects
 
@@ -126,8 +126,6 @@ A 5% threshold is approximate over a finite population, not a promise of exactly
 50 of these 1,000 accounts. Rolling back to 0% changes admission, not bucket
 identity or already committed billing effects.
 
-![Named AWS boxes pair a gradual config rollout with independent telemetry](../../../../assets/design-next/feature-rollout-aws.svg)
-
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
 | AWS AppConfig (configuration rollout) | Validate, ramp, bake and revert flag versions | Homegrown flag service if targeting rules and audit needs exceed its features, with ownership cost |
@@ -136,8 +134,6 @@ identity or already committed billing effects.
 | Amazon RDS for PostgreSQL (relational database) | Keep both data representations compatible during migration | Amazon DynamoDB for a key-oriented model with conditional writes |
 
 AWS AppConfig can roll back on configured CloudWatch alarms during deployment and bake time; it cannot reverse side effects already persisted by customers. Check alarm permissions and a measurable signal before turning on automatic rollback.
-
-![Two timelines distinguish configuration rollback from irreversible data writes](../../../../assets/design-next/feature-rollout-detail.svg)
 
 **Senior follow-up:** The 5% cohort sees an error increase but revenue improves. Define primary and guardrail measures, minimum sample size, and a decision rule rather than “watch the dashboard.”
 

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Reduce concurrency when the dependency degrades and ramp it back gradually after
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Product labels every route critical. Use dependency consumption and user consequ
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “An API receives 40,000 requests/s after a partner retry storm. At 20,000/s its database already saturates. Paid writes, free reads, and internal health checks share one worker pool. What happens in the next minute?”
+
 
 **Your contract.** Keep paid writes available where capacity permits; shed work early with a stable policy; reserve enough capacity for health and recovery. Define an admission signal that does not wait for every caller to time out. Constructed scenario and workload.
 
@@ -92,13 +94,9 @@ Product labels every route critical. Use dependency consumption and user consequ
 | Database slows to half capacity | Reduce admission, expose 429/503 with bounded retry guidance |
 | Every client retries after 1 second | Jitter/backoff and budgets prevent retry traffic from multiplying overload |
 
-![A shared pool lets low-value retries crowd out work that could finish](../../../../assets/design-next/overload-shedding-before.svg)
-
 ## Calculate the queue before choosing an autoscaler
 
 At 40k/s arriving and 20k/s service capacity, backlog grows by **20k requests per second** if admission does nothing. A 100k-request buffer fills in five seconds; a bigger queue raises latency rather than increasing throughput. Reserve per-class concurrency and cap queue waiting against each deadline. Shed low-priority work at the gateway, set a retry budget with randomized backoff, and measure accepted work, dropped work, p99, and recovery time. Autoscaling cannot instantly repair a constrained database or hot key.
-
-![AWS architecture with edge controls, separate budgets, and a measurable bottleneck](../../../../assets/design-next/overload-shedding-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -109,8 +107,6 @@ At 40k/s arriving and 20k/s service capacity, backlog grows by **20k requests pe
 | Amazon CloudWatch (telemetry) | Observe queue age, p99 by class, and rejected work | Existing tracing/metrics system with same per-class evidence |
 
 A cache is only a substitute for database reads that may legally be stale. API Gateway throttling alone does not encode the business priorities; the service still needs admission budgets. State what you shed and what you never drop.
-
-![Queue area and deadlines show why larger buffers can worsen outcomes](../../../../assets/design-next/overload-shedding-detail.svg)
 
 **Senior follow-up:** Health checks succeed while users time out. Build an overload signal from useful work and queue delay; show a 60-second incident trace.
 

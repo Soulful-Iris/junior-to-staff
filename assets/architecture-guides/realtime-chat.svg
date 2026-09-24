@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="750" viewBox="0 0 1080 750" role="img" aria-labelledby="t d"><title id="t">Realtime chat: reconnect without losing the conversation</title><desc id="d">AWS implementation with service roles and labelled data flow.</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526776"/></marker></defs><rect width="1080" height="750" rx="16" fill="#f8fafc"/><style>text{font-family:Arial,sans-serif;fill:#193444}.name{font-size:23px;font-weight:bold}.role{font-size:19px}.detail{font-size:17px;fill:#526575}.edge{font-size:16px;font-weight:bold}</style>
 <text x="36" y="44" class="name" style="font-size:23px">Realtime chat: reconnect without losing the conversation</text><text x="36" y="77" class="detail">AWS service • general architectural role • responsibility in this project</text>
 <path d="M446 183 L626 183" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="511.20000000000005" y="150" width="49.6" height="23" fill="#f8fafc"/><text x="536.0" y="166" class="edge" text-anchor="middle">send</text>
-<path d="M626 213 L556 213 L556 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="506.79999999999995" y="267.0" width="66.4" height="23" fill="#f8fafc"/><text x="540" y="283.0" class="edge" text-anchor="middle">commit</text>
+<g transform="translate(536.0 166) rotate(0)"><rect x="-24.8" y="-16" width="49.6" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">send</text></g>
+<path d="M626 213 L482 213 L482 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<g transform="translate(540 283.0) rotate(0)"><rect x="-33.2" y="-16" width="66.4" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">commit</text></g>
 <path d="M831 243 L831 318" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="768.4" y="258.5" width="125.2" height="23" fill="#f8fafc"/><text x="831" y="274.5" class="edge" text-anchor="middle">outbox events</text>
-<path d="M626 413 L556 413 L556 553 L446 553" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="502.6" y="467.0" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="540" y="483.0" class="edge" text-anchor="middle">fan out</text>
-<path d="M831 243 L831 518" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
-<rect x="776.8" y="358.5" width="108.4" height="23" fill="#f8fafc"/><text x="831" y="374.5" class="edge" text-anchor="middle">attachments</text>
-<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role">(WebSocket connections)</text>
-<text x="54" y="207" class="detail">Ephemeral device routes</text>
-<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">Amazon ECS</text><text x="644" y="180" class="role">(conversation application)</text>
-<text x="644" y="207" class="detail">Membership; durable send; replay</text>
-<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon DynamoDB</text><text x="54" y="380" class="role">(message and cursor store)</text>
-<text x="54" y="407" class="detail">Conversation keys; retry identity</text>
-<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon Kinesis</text><text x="644" y="380" class="role">(committed delivery events)</text>
-<text x="644" y="407" class="detail">Fan-out after durable message commit</text>
-<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">Amazon ECS</text><text x="54" y="580" class="role">(push delivery workers)</text>
-<text x="54" y="607" class="detail">Device delivery; reconnect recovery</text>
-<rect x="626" y="518" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="550" class="name" style="font-size:23px">Amazon S3</text><text x="644" y="580" class="role">(private attachments)</text>
-<text x="644" y="607" class="detail">Authorized upload and download</text>
+<g transform="translate(831 274.5) rotate(0)"><rect x="-62.6" y="-16" width="125.2" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">outbox events</text></g>
+<path d="M626 413 L510 413 L510 553 L446 553" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<g transform="translate(540 483.0) rotate(0)"><rect x="-37.400000000000006" y="-16" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">fan out</text></g>
+<path d="M1036 183 L1054 183 L1054 583 L1036 583" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<g transform="translate(1069 383.0) rotate(90)"><rect x="-54.2" y="-16" width="108.4" height="23" fill="#f8fafc"/><text x="0" y="0" class="edge" text-anchor="middle">attachments</text></g>
+<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role" style="font-size:19px">(WebSocket connections)</text>
+<text x="54" y="207" class="detail" style="font-size:17px">Ephemeral device routes</text>
+<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">Amazon ECS</text><text x="644" y="180" class="role" style="font-size:19px">(conversation application)</text>
+<text x="644" y="207" class="detail" style="font-size:17px">Membership; durable send; replay</text>
+<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon DynamoDB</text><text x="54" y="380" class="role" style="font-size:19px">(message and cursor store)</text>
+<text x="54" y="407" class="detail" style="font-size:17px">Conversation keys; retry identity</text>
+<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon Kinesis</text><text x="644" y="380" class="role" style="font-size:19px">(committed delivery events)</text>
+<text x="644" y="407" class="detail" style="font-size:17px">Fan-out after durable message commit</text>
+<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">Amazon ECS</text><text x="54" y="580" class="role" style="font-size:19px">(push delivery workers)</text>
+<text x="54" y="607" class="detail" style="font-size:17px">Device delivery; reconnect recovery</text>
+<rect x="626" y="518" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="550" class="name" style="font-size:23px">Amazon S3</text><text x="644" y="580" class="role" style="font-size:19px">(private attachments)</text>
+<text x="644" y="607" class="detail" style="font-size:17px">Authorized upload and download</text>
 <text x="36" y="722" class="detail">Proposed cloud implementation; the local starting code demonstrates the named mechanism only.</text></svg>

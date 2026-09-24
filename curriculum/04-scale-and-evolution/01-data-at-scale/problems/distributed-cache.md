@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Choose bounded stale serving for eligible fields, rejection for unsafe fields an
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add negative caching for missing products. Define how a newly created product in
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Build a low-latency distributed cache across many nodes. Clients read and write keys while nodes are added, removed, or become slow. Tell me what happens to hot keys and stale values.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 20 million keys, 2 million reads/s, 200 cache nodes and an average value of 2 KB. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,15 +94,11 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Cache miss storm | A shard restarts | Bound origin concurrency and jitter refill; do not stampede the database. |
 | Stale value | Source record changes | State invalidation/version/TTL behavior and maximum stale interval. |
 
-![The failure path and repaired design for Distributed cache](../../../../assets/design-interview/distributed-cache-before.svg)
-
 ## Think from the contract to the boxes
 
 State whether the cache is disposable or authoritative; this problem assumes disposable. Consistent hashing limits remapping, but replication and hot-key behavior still need a policy. Use request coalescing and per-key/origin budgets for misses. Invalidation carries a source version so delayed older fills cannot replace newer values. A cache outage must degrade to a bounded origin path, not unbounded reads.
 
 **First diagram:** Draw key placement, replica choice, source-of-truth version, miss coalescing, and what a node-removal event remaps.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/distributed-cache-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -111,8 +109,6 @@ State whether the cache is disposable or authoritative; this problem assumes dis
 | **Amazon ECS** / cache client service | Own coalescing, version checks and bounded fallback. | Lambda for intermittent, low-throughput clients. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Distributed cache](../../../../assets/design-interview/distributed-cache-deep.svg)
 
 ## Pressure-test the design
 

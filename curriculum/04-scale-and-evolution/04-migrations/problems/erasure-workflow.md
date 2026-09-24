@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Expose pending steps, age and named escalation owner. Reconcile storage inventor
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ A vendor says deletion is complete but cannot provide object-level evidence. Dec
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A customer requests deletion of a profile. It exists in the main database, search, object storage, an event archive, backups, derived features, and cached answers. Design a workflow that reports truthfully when deletion has happened.”
+
 
 **Your contract.** Invent a 30-day completion target for this exercise; actual legal deadlines depend on jurisdiction and counsel. Retention and legal holds can override ordinary deletion. Do not assert that one database DELETE removes backups or immutable archives.
 
@@ -93,13 +95,9 @@ A vendor says deletion is complete but cannot provide object-level evidence. Dec
 | S3 version is under legal hold | Surface an exception with owner, scope, and reason; never report “fully erased” |
 | A backup is restored after erasure | Deletion tombstone/ledger prevents re-exposure and triggers re-erasure |
 
-![Deleting the primary row leaves derived and backup copies reachable](../../../../assets/design-next/erasure-workflow-before.svg)
-
 ## Treat erasure as a stateful distributed workflow
 
 Record an authenticated request ID, subject scope and policy decision. Immediately deny reads via a retained tombstone while asynchronous workers enumerate stores and delete or render inaccessible each copy. Every subsystem reports an evidence record for an exact version/range; a coordinator marks complete only after required acknowledgements, or records a formal exception. Reconcile stale projections and backup restores against the ledger. Don't leak the user's identity in a broadly readable job dashboard. A legal-hold path needs explicit review, not a silent retry loop.
-
-![AWS workflow coordinates deletion, exceptions, and restored-copy reconciliation](../../../../assets/design-next/erasure-workflow-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -110,8 +108,6 @@ Record an authenticated request ID, subject scope and policy decision. Immediate
 | Amazon CloudWatch (audit telemetry) | Alert on overdue jobs, missing acknowledgements, restored copies | Existing observability with immutable investigation evidence elsewhere |
 
 A DynamoDB TTL is eventual expiry, **not** a deadline or erasure proof. S3 Object Lock can prevent removal of retained object versions; the state machine must record this honestly. Enumerate data lineage before claiming coverage.
-
-![Nine-copy inventory shows what a partial deletion looks like](../../../../assets/design-next/erasure-workflow-detail.svg)
 
 **Senior follow-up:** A search index is down for two days. Keep the subject suppressed from live reads; show how the worker resumes and verifies the index after recovery.
 

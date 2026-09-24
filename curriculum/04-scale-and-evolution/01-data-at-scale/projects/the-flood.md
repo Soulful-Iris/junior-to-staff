@@ -1,72 +1,87 @@
 # 4. The flood
 
-[Curriculum](../../../README.md) · [Data at scale](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Build bounded ingestion for a small event-processing application. A ten-second burst sends 100 events/s, workers complete only 20/s, and the in-memory waiting budget is 300 events. Producers need an explicit answer about accepted versus rejected work.
 
-> An import burst is ten times larger than normal. Your API accepts everything and the worker quietly falls a day behind. Bound admission and make every accepted operation’s outcome recoverable. What is the unit of deduplication?
+**Working contract:** Accepted means durably owned work under a finite backlog policy. Keep event identity across retries, expose queue age, and reject excess before pretending it was accepted. A restart cannot lose previously acknowledged work.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../../../03-production/01-system-design/design-method.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Capacity 20 jobs/s, arrivals 100/s for 10 s, queue budget 300 jobs. | At most 200 complete during the interval and 300 remain admitted; reject at least 500 of 1,000 arrivals under this idealized model. |
-| Boundary / failure | The same operation ID arrives twice concurrently with different content. | Reject/quarantine the conflict; do not return the first result as if the payload matched. |
-| Scope | Queue budget is enforced at admission; SQS visibility is not an exclusive execution lock. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 arrivals/s × ten seconds | 1,000 offered events. |
+| 20 completions/s × ten seconds | At most 200 completed during the burst. |
+| 300 waiting slots | With that bounded queue, the exercise ends with 200 completed, 300 queued and 500 rejected. |
 
-**First slice:** With 100 jobs/s arriving for 10 s, 20/s worker capacity, and 300 queued-job slots, **show:** at most 200 completed, 300 still admitted, and at least 500 explicit rejections in the idealized model. Include the actual queue and latency graph. Send one operation ID twice with different payloads and demonstrate conflict rejection rather than silently reusing a result.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Move the slow work off the request onto a bounded queue, make the work idempotent, rate-limit the entrances, then flood it on purpose and record what broke first.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A worker pauses past visibility | A second worker completes before the first resumes. What stops the stale completion? Predict which boundary must change before opening the design. | Condition writes on the current fencing generation and job state. The old process may still execute; only the destination boundary can reject its stale mutation. |
-| Lead · The backlog must drain | After the burst, arrivals return to 5/s with completion 20/s. How long to drain 300 jobs? State what evidence would make you reject your first design. | Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs; stop scale-out at the database budget instead of scaling blindly on depth. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- A["Bursting API"] --> Q["Unbounded accepted backlog"]
- Q --> W["Fixed worker capacity"]
- W --> D["Shared database"]
+```bash
+python3 examples/architecture-starts/the_flood.py
 ```
 
-A durable queue preserves work but does not create capacity or make unbounded waiting useful. A long visibility timeout cannot prevent every duplicate delivery.
+[Open the starting code](../../../../examples/architecture-starts/the_flood.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| ingestion_record | producer,event_id,payload_hash,state | Durable acceptance and retry identity. |
+| work_queue | event_id,enqueued_at,attempt | Delivery and measurable waiting. |
+| checkpoint | partition,last_applied | Replay-safe output progress. |
+
+## AWS implementation
+
+![4. The flood: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-flood.svg)
+
+SQS can retain work, but the application must decide how much waiting it promises. The acceptance ledger makes overload and restart behavior observable to producers.
+
+## Build it in this order
+
+### 1. Make acceptance explicit
+
+Validate an event envelope and stable producer/event ID. Commit accepted work before returning success. If capacity is exhausted, return a clear rejection with bounded retry guidance; an in-memory append is not durable acceptance.
+
+### 2. Bound the actual queue
+
+Track admitted unfinished work and enforce its limit atomically or through a defined admission authority. Keep oldest age and deadline/retention policy alongside depth. A larger queue buys waiting time, not processing capacity.
+
+### 3. Consume with replay-safe effects
+
+Store output identity/version before advancing progress or acknowledging delivery. Duplicate events cannot apply the effect twice. Poison events go to a visible quarantine/repair state rather than blocking unrelated work indefinitely.
+
+### 4. Recover and reconcile counts
+
+Stop arrivals, measure drain and reconcile offered = completed + queued + rejected under the exercise’s accounting model. Then restart a worker mid-batch and show that accepted identities remain traceable. Preserve late/failed outcomes rather than deleting them to improve throughput figures.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Admission | Enforce unfinished-work budget independently of SQS storage capacity. |
+| Workers | Fixed initial concurrency tied to the measured 20/s dependency capacity; bounded retries. |
+| Retention | Durable accepted-work horizon and a named repair path for expired or quarantined events. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The four totals are 1,000 offered, 200 completed, 300 queued and 500 rejected. |
+| Restart a worker after output commit | Replay recognizes the existing effect. |
+| Stop arrivals | The remaining 300 jobs drain at the measured useful rate. |
+
+## The next design decision
+
+An event costs ten times the average. Move from count-only admission toward estimated work units while retaining a hard memory/byte bound for the queue.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Choose operation identity, atomic stored effect/result, queue/age limits and finite worker concurrency. The invariant is a durable terminal or visible pending state for admitted work, with bounded downstream demand. Guard completion with versions if jobs may be reclaimed.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A worker pauses past visibility
 
@@ -76,14 +91,6 @@ Choose operation identity, atomic stored effect/result, queue/age limits and fin
 <summary>Expected reasoning and changed diagram</summary>
 
 Condition writes on the current fencing generation and job state. The old process may still execute; only the destination boundary can reject its stale mutation.
-
-```mermaid
-flowchart TD
- A["Old worker epoch 1"] --> C["Conditional result boundary"]
- B["Current worker epoch 2"] --> C
- C -->|epoch 2 accepted| D["Stored current result"]
- C -->|epoch 1 rejected| R["Stale completion metric"]
-```
 
 </details>
 
@@ -96,21 +103,7 @@ flowchart TD
 
 Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs; stop scale-out at the database budget instead of scaling blindly on depth.
 
-```mermaid
-flowchart TD
- Q["Backlog 300"] --> W["Completion 20 per second"]
- A["New arrivals 5 per second"] --> Q
- W --> D["Net drain 15 per second"]
- D --> M["Age and recovery-time evidence"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Prove queue bounds, conflict handling and stale-result rejection. **Additional lead scope:** Own business obligations, replay windows and cross-tenant fairness. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -118,110 +111,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*A burst of work ten times bigger than normal arrives, and the system bends.*
-
-**Build**
-
-Move the slow work off the request onto a bounded queue, make the work idempotent,
-rate-limit the entrances, then flood it on purpose and record what broke first.
-
-**The thought process**
-
-The first decision: **what is the unit of work, and is it safe to do twice?**
-Because it will be done twice. At-least-once delivery is what you get in
-practice, so the handler has to be idempotent, and idempotency is a property of
-the *data model* (a unique key, a state machine) far more than of the code.
-
-Second: **every queue needs a bound.** An unbounded queue is not resilience, it
-is a memory leak with a scheduler, and the failure it produces is the worst kind
-— nothing appears wrong for hours, then everything is wrong at once and the
-backlog takes a day to drain.
-
-Third, the one people find counterintuitive: **rejecting work is a feature.**
-A system that accepts everything and then collapses serves nobody. A system that
-sheds the excess quickly, with an honest response, keeps working for the people
-it did accept.
-
-**How to organise the prompts**
-
-```
-I am moving this work onto a queue. List what can now go wrong that
-could not go wrong before — including the silent ones: work lost, work
-done twice, and a backlog growing with nobody noticing.
-
-Do not write code yet.
-```
-
-```
-Make the handler idempotent, and prove it: a test that delivers the same
-message twice CONCURRENTLY and asserts one atomic stored result for a
-matching operation identity. For external effects, require the destination
-idempotency protocol or an explicit unknown-outcome reconciliation path. Show me that test failing against the current handler first.
-```
-
-```
-Bound the queue. Tell me what happens at the bound — reject, shed, or
-block — and implement the one I choose. Then show me the bound being
-hit.
-```
-
-```
-Write a load generator that ramps until something fails, reports what
-failed first and at what rate, and tells me from the DATA which
-resource ran out rather than guessing from the architecture.
-```
-
-**On AWS**
-
-**SQS** is the default and the right default: it is durable, it has retries and
-a dead-letter queue, and it costs almost nothing at small volume. Why not
-**EventBridge** — it routes events to targets and does not hold a backlog you
-drain at your own pace, which is the property you actually want here. Why not
-**Kinesis** — it serves ordered retained streams with independent readers;
-choose capacity mode and price it for the actual workload rather than assuming
-all modes use the same idle-shard billing shape.
-
-Set two things deliberately: the **visibility timeout** longer than your
-worst-case processing time (too short and the same message is handed to a second
-worker while the first is still working, which is where duplicate side effects
-come from), and a **dead-letter queue** with a redrive policy, so a message that
-can never succeed stops being retried for ever.
-
-Workers on **Fargate** with a service autoscaling on queue depth, or **Lambda**
-with an SQS trigger and a **reserved concurrency** limit — that limit is the one
-knob that stops a flood of messages becoming a flood of database connections.
-That single sentence is why concurrency limits exist.
-
-**What productionising it means**
-
-The queue depth is a metric with an alarm, because an invisible backlog is the
-whole failure mode. The dead-letter queue has something watching it. The handler
-is idempotent and there is a concurrency test proving it. And you know the
-breaking point, because you found it on purpose rather than in production.
-
-**The learning**
-
-A queue does not make work reliable, it makes work *deferred* — and it converts a
-loud synchronous failure into a quiet asynchronous one. Everything you build
-around it is there to make the quiet failure loud again.
-
-**How you would know it is wrong**
-
-- Deliver matching duplicates concurrently: one atomic stored result. Conflicting payloads must be rejected, stale owners fenced, and external effect uncertainty handled explicitly.
-- Stop the worker and keep submitting. Does anything tell you the backlog is growing?
-- Fill the queue past its bound. Confirm the behaviour is the one you chose.
-- Count actual outbound requests during a retry storm, from the outside.
-- Check the dead-letter queue has a consumer or an alarm. An unwatched DLQ is a folder of lost work.
-
-**Stage it**
-
-1. Work moved off the request, nothing bounded yet.
-2. Idempotency, with the concurrent-duplicate test.
-3. Bounds, rate limits and the chosen rejection behaviour.
-4. A deliberate flood, with the breaking point and the first thing that broke written down.
-
----
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

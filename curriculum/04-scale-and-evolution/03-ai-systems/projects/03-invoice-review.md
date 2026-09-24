@@ -1,12 +1,93 @@
 # Invoice review: extract, validate, retry, and reconcile
 
+## What you are building
+
+> Build invoice intake for a finance operations team. An uploaded invoice is extracted into structured fields, but totals can be inconsistent and a corrected source document may arrive under the same business invoice number. Route uncertain content to review without confusing it with a transient provider outage.
+
+**Working contract:** Preserve source identity/version, extractor version and validated candidate fields. Review-required is a content outcome; retryable failure is a transport/processing outcome. A corrected source gets a new version and cannot silently reuse an old accepted result.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 1,000 invoices/day; 2 MB mean source assumption | About 2 GB/day of originals before versions and retention. |
+| 5% content review rate | Fifty human reviews/day; measure that queue separately from infrastructure retries. |
+| Three bounded processing attempts | Exhaustion becomes visible repair work; repeated extraction cannot make invalid arithmetic valid. |
+
+## Start with one working boundary
+
+Run the existing complete local reference workflow from the repository root:
+
+```bash
+python3 examples/ai-systems/demo.py extraction
+```
+
+The reference uses local fixtures to make the workflow inspectable. The implementation walkthrough and source notes are retained below. Add real model/provider adapters only after the local state transitions and evidence are clear.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| source_document | invoice_id,source_version,hash,object_key | Immutable evidence and corrected-source identity. |
+| extraction_run | source_version,extractor_version,attempt | Candidate fields and processing outcome. |
+| review_decision | revision,actor,confirmed_fields,reason | Human-approved data with provenance. |
+
+## AWS implementation
+
+![Invoice review: extract, validate, retry, and reconcile: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-invoice-review.svg)
+
+The extractor proposes fields; deterministic validation and human review decide whether those fields are usable. Separate source versions prevent a retry from hiding a corrected invoice.
+
+## Build it in this order
+
+### 1. Inspect the complete local workflow
+
+Run the extraction demo and follow submission, extraction, validation, retry and review states. Use the retained code walkthrough to identify the source fingerprint and idempotency boundary before adding an OCR/model service.
+
+### 2. Validate domain meaning
+
+Check required fields, currency, dates and line-total arithmetic using explicit decimal/minor-unit rules. Keep raw suggestions and evidence locations. A schema-valid object can still contain the wrong total or vendor identity.
+
+### 3. Separate retry from review
+
+Retry transient timeouts under a bounded budget. Route ambiguous content, missing evidence and inconsistent totals to human review. Preserve the previous confirmed decision when a machine retry produces another suggestion.
+
+### 4. Handle corrected source versions
+
+A new source hash/version creates a new processing intent. Link it to the business invoice and prior review history, then require an explicit decision about superseding confirmed data. Reconciliation records explain which source version reached downstream accounting.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Source storage | Private versioned originals, bounded file/page sizes and controlled retention. |
+| Processing | Stable source-version key across retries; explicit DLQ/repair state for exhausted infrastructure failures. |
+| Review | Conditional revisions and actor evidence; downstream publication uses confirmed version identity. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the existing extraction demo | Inspect distinct review, retry and reconciliation outcomes. |
+| Return valid JSON with inconsistent totals | The document goes to review rather than automatic acceptance. |
+| Upload corrected source bytes | A new source version is processed and linked to prior evidence. |
+
+## The next design decision
+
+One invoice is split across several files. Define the complete source bundle identity and completion rule before extracting; a partial bundle must not be published as a final invoice.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 ## The reviewer's brief
 
 > “Operations receives invoices as text from an existing document parser. Extract the USD total and the evidence supporting it. Some invoices are ambiguous, some model calls fail, and our queue delivers the same message twice. Build a result the operator can inspect without silently accepting the wrong amount.”
 
 **End product:** a working text-to-structured-data pipeline with model inference, independent field validation, source evidence, durable outcomes, duplicate detection, and an asynchronous AWS queue worker. It accepts text, not PDF images. Parsing and OCR are clearly identified extensions; the delivered pipeline starts with extracted text and ends with a saved, queryable result.
-
-![Expected console result with 1250 cents and a separate unreadable-invoice review outcome](../../../../assets/ai-projects/extraction-result.svg)
 
 ## Establish the contract
 
@@ -36,11 +117,7 @@ confidence is not an acceptance criterion.
 
 **Review** means the pipeline ran and could not establish a safe data result. Repeating the same ambiguous input with the same model is not a recovery plan. **Retry** means a dependency failed before a useful terminal result was established. **A dead-letter queue** contains messages that repeatedly failed processing; it is not the same collection as invoices requiring business review.
 
-![Before accepting arbitrary model JSON and retrying everything; after evidence validation and selective retries](../../../../assets/ai-projects/extraction-before.svg)
-
 ## Draw the AWS architecture
-
-![SQS jobs, Lambda worker, Bedrock extraction, DynamoDB results, S3 artifacts, and SQS DLQ](../../../../assets/ai-projects/extraction-aws.svg)
 
 | AWS service / general role | Implemented responsibility | Alternative and deciding factor |
 |---|---|---|
@@ -61,8 +138,6 @@ confidence is not an acceptance criterion.
 5. **Publish complete bytes before the pointer.** On AWS, write the content-derived S3 object, then conditionally publish its pointer and status in DynamoDB. Locally, sync a same-filesystem temporary file, publish it without replacing an existing object, sync the directory, then commit the SQLite pointer. Existing bytes are verified, never reopened for truncation. Filesystem durability support is a local prerequisite.
 6. **Acknowledge terminal outcomes.** Both `ACCEPTED` and `REVIEW_REQUIRED` are successfully processed messages. Model/network failures propagate to the worker's partial-batch failure response.
 7. **Read by record ID.** Operators query the result endpoint; they do not infer completion from the producer's successful `SendMessage` call.
-
-![Animated extraction flow from stable record identity through source validation and publication](../../../../assets/ai-projects/extraction-flow.svg)
 
 The core retry decision is independent of model wording:
 
@@ -97,13 +172,9 @@ The session extracts invoice 17, repeats it, quarantines invoice 18's unreadable
 
 For AWS, first use `cloud_smoke.py extraction --function "$AI_FUNCTION"` to exercise the synchronous handler. Then follow the workbench's SQS submission instructions to exercise the actual asynchronous worker. An immediate lookup may return `NOT_FOUND`; successful queue submission means accepted work, not completed extraction.
 
-![Queued-to-acknowledged lifecycle with different retry and review outcomes](../../../../assets/ai-projects/extraction-state.svg)
-
 ## Follow-up: a replay contains corrected source data
 
 The business corrects invoice 17 after its first result was accepted. Reusing its ID with different text must conflict. Otherwise a duplicate-delivery mechanism becomes an accidental edit API.
-
-![Same ID and same hash reuse the result; same ID with changed hash conflicts](../../../../assets/ai-projects/extraction-mechanism.svg)
 
 **Senior follow-up:** introduce explicit document version and extraction version in the operation identity. A corrected document creates a new result and preserves the prior artifact. Add a review action that records who accepted a correction, which source version it uses, and why.
 
@@ -145,3 +216,5 @@ Bring a saved accepted result, a review result, a duplicate-delivery trace, a pa
 ## Research behind the design
 
 Reviewed September 23, 2026. AWS documents [Lambda/SQS retries and partial-batch responses](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html), [Bedrock structured outputs](https://docs.aws.amazon.com/bedrock/latest/userguide/structured-output.html), [batch input identities](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-data.html), and [per-record batch outputs and errors](https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-results.html). Managed batch inference is an extension; the AWS reference is configured for SQS plus Converse calls; no live deployment is implied by the local tests. Its narrow invoice validator is original teaching code.
+
+</details>

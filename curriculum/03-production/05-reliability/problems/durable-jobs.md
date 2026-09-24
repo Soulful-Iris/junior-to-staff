@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Reject new work with Retry-After once admitted backlog exceeds the product’s w
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Add data erasure while an export is running. Define how the worker discovers can
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Users request a CSV export. The API returns ‘accepted’ and puts a job on a queue. A worker writes the file, then dies before acknowledging the message. A second worker receives it. Later one customer sends 40,000 exports in a minute. Make completion, retries, and overload observable.”
+
 
 Assume 500 ordinary exports/minute, 20-second average processing time, and a 60-second API request timeout. The job should survive a worker crash; accepted means durably recorded, not completed.
 
@@ -92,8 +94,6 @@ Assume 500 ordinary exports/minute, 20-second average processing time, and a 60-
 | Worker writes file, then crashes | Later worker checks committed output; does not send two invoices/files |
 | Worker is stuck forever | Visibility expires; bounded retries and DLQ plus an operator repair path |
 | 40,000 requests in 60 seconds | Admit within capacity or return an explicit overload outcome; backlog is measurable |
-
-![A queue acknowledgement does not atomically commit the output](../../../../assets/design-practice/durable-jobs-boundary.svg)
 
 ## Keep job truth separate from message delivery
 
@@ -115,19 +115,13 @@ message is acknowledged without another effect. Garbage collection excludes
 committed pointers and active attempts, and waits beyond the retry/lease window.
 Recheck current read permission before issuing an output download.
 
-![Queue grows when 500 arrivals per minute exceed 150 completions per minute](../../../../assets/design-practice/durable-jobs-deep.svg)
-
 The bars show a trend, not a measured forecast. At the stated steady rates the backlog grows by **350 jobs each minute**; after ten minutes that is 3,500 waiting jobs before cancellations, retries, or changes in service time. An overload policy must address admitted work before the oldest age runs away.
-
-![Completed output followed by lost acknowledgement and duplicate delivery](../../../../assets/design-practice/durable-jobs-trace.svg)
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/durable-jobs-aws.svg)
-
 **Why these boxes, and what changes the choice:** SQS buffers accepted jobs but redelivers on a lost acknowledgement. DynamoDB stores stable job IDs and conditional status; S3 holds private immutable attempt objects; the job-store generation check publishes the winning pointer. Existence alone does not prove ownership or the right bytes. ECS can replace Lambda for jobs that exceed its duration or memory envelope.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** At 500/min and 20 seconds per job, Little's-law concurrency estimate is roughly 167 occupied worker slots for zero queue growth at steady load. If the system can run only 50 tasks, derive the queue growth and make the wait visible. Apply per-tenant fairness and a bounded retention/expiry policy.
 

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Run corrected transformations into separate output tables/prefixes, compare coun
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Change an event field from cents to decimal currency. Introduce an explicit sche
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Ten thousand devices send readings. New firmware adds a temperature unit, while old devices keep sending the old shape for months. A dashboard needs recent totals, but analysts need a replayable source. Design the ingestion path.”
+
 
 **Your contract.** Assume 100,000 events/s during bursts, seven-day stream retention for the exercise, and an immutable long-term raw store. Say whether clients have clocks you trust; the answer changes event-time semantics. This is an original practice prompt.
 
@@ -92,13 +94,9 @@ Change an event field from cents to decimal currency. Introduce an explicit sche
 | Device retries event `e4` | Dedupe by device/event ID within declared window; replay remains safe |
 | Event arrives 9 minutes late | Raw event retained; dashboard revision follows chosen watermark and correction policy |
 
-![One unversioned parser silently mixes units and poisons aggregates](../../../../assets/design-next/event-ingestion-before.svg)
-
 ## Preserve the record before its projections
 
 Assign producer ID, event ID, schema version, and both event and receipt times. Validate envelopes at ingress; quarantine undecodable records instead of losing them. Store immutable raw events for replay, then run separately versioned normalization and aggregation consumers. Partition by a key that distributes load without losing the ordering you actually need (typically per device). A stream preserves order within a shard, not a global order. Changing a schema means a decoder strategy and backward/forward compatibility tests, not just adding a column.
-
-![AWS named stages separate stream, raw record, quarantine, and materialized view](../../../../assets/design-next/event-ingestion-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -109,8 +107,6 @@ Assign producer ID, event ID, schema version, and both event and receipt times. 
 | Amazon SQS (quarantine queue) | Hold parse failures for investigation and repair | S3 error prefix for bulk triage when individual queue actions aren't useful |
 
 On-demand Kinesis scaling does not automatically isolate a single hot partition key; choose device partitions and estimate the hottest device and aggregate separately. Reprocessing the archive must use idempotent output versioning to avoid doubles.
-
-![Schema version branches recombine into a canonical reading with quarantine](../../../../assets/design-next/event-ingestion-detail.svg)
 
 **Senior follow-up:** An old firmware bug sends wrong units for a week. Recompute one week's dashboard without hiding production freshness; distinguish corrected totals and previously displayed totals.
 

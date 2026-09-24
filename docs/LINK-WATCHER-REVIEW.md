@@ -2,10 +2,7 @@
 
 Status: **approved by Bruno; apply this standard across design and architecture projects**.
 
-On 24 September 2026, Bruno asked to improve only the link-rot watcher first.
-Revise this example with his feedback until he is satisfied, then apply the accepted
-standard to the other project and design pages. Do not treat a passing build or
-this checklist as his approval.
+Bruno first asked to improve only the link-rot watcher and review it before a wider rollout. He subsequently approved that page and explicitly requested the same approach across all design and architecture projects. The rollout follows that approval; publication remains automatic from main.
 
 | Feedback | Requirement for this example |
 |---|---|
@@ -24,6 +21,9 @@ this checklist as his approval.
 
 ## Review log
 
+- Rollout completed: 41 design briefs, 33 other engineering project pages and five reading-list stages. Each has a concrete scenario/contract, workload assumptions, code starting point, AWS service/role diagram, ordered implementation guidance, infrastructure settings and observable outcomes. The approved link-watcher remains unchanged.
+- Delivery: 75 small local starting programs, the four existing AI reference workflows, 79 authored AWS diagrams and a shared deployable AWS foundation. Direct execution and site rendering were inspected; no internal test suite, interval task or deployment gate was added. The exact page inventory is in `architecture-upgrade-progress.json`.
+
 - Approval: Bruno confirmed the site is fixed, approved the link-watcher changes, and requested the same approach across all design/architecture projects. Push to main; add no internal or interval tests and no deployment gates.
 
 - Initial request: improve engineering quality across all design and architecture problems.
@@ -39,7 +39,7 @@ this checklist as his approval.
 3. What do the numbers imply for concurrency, completion time and storage?
 4. Where does each piece of state live, and what happens after a crash or retry?
 5. How does local code map to AWS, and what must be configured explicitly?
-6. Which checks prove each requirement, and which guarantees remain unverified?
+6. Which observed outcomes support each requirement, and which guarantees remain unverified?
 
 - Publication feedback: pushes to main must automatically appear on the website.
   Remove manual directory-migration requirements and optional verification gates

@@ -1,70 +1,87 @@
 # P4 · it reasons, provably
 
-## The reviewer's brief
+## What you are building
 
-> Users can accept or ignore suggested tags. The model passes twenty saved examples, but you must decide whether to enable it more broadly. Define the task contract and show what a failing suggestion looks like without assuming every passing test is weak.
+> Add optional tag suggestions to the same reading list. The allowed taxonomy is databases, frontend and reliability. A model suggests an unsupported tag, or source text tells it to call a tool. Users must still be able to tag links manually when generation fails.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [P3](../03-under-load/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Working contract:** Model output is a proposal, not confirmed user data. Validate a closed tag set, preserve source/model versions and require explicit user acceptance. Manual save/list/tagging remains usable without a model response.
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Closed tags `{databases,frontend,reliability}`; page describes SQL indexes; expected `databases`; empty content expects no suggestion. | Store validated suggestions separately; only user acceptance changes confirmed tags. Unavailable or malformed output leaves manual tagging usable. |
-| Boundary / failure | Human labels 99 pass/1 fail; judge always predicts pass. | 99% agreement with 0% failure recall is inadequate evidence of failure detection. |
-| Scope | Use real collected examples for implementation; these inputs are constructed teaching fixtures. | Explain any additional assumption before implementing it. |
+## Workload and the decisions it changes
 
-## See the first reviewable result
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-**First slice:** Suggest one tag from the closed set `{databases,frontend,reliability}` for a page about SQL indexes; show `databases` as an *unconfirmed suggestion*. Empty content yields no suggestion; a malformed or unavailable model still lets a user tag manually. **Show:** evaluator confusion counts, including a judge with 99% agreement and zero detection of the one true failure.
+| Input or objective | Calculation / consequence |
+|---|---|
+| Three allowed tags | Validate exact normalized enum membership; a plausible fourth tag is still outside this contract. |
+| 200 new links/day; 25% suggestion use assumption | Fifty model-assisted cases/day provides a bounded initial scope and review workload. |
+| Two-second optional suggestion budget | On timeout, show manual tagging; do not delay the already committed link. |
 
-<!-- project-expectation:start -->
+## Start with one working boundary
 
-## What you are expected to hand over
+Run from the repository root with Python 3.12+:
 
-**The finished artifact:** Stage 4 · the question is can you add a model to it and prove it is any good? Same reading list. Add one small feature that uses a model, and then spend most of the project proving whether it works.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · All regressions pass | A bug was fixed and all required cases now pass. What should the release record show? Predict which boundary must change before opening the design. | Keep those passing regressions. Demonstrate that a seeded wrong-tag or cross-user-data mutation is caught, report challenge coverage and stochastic variability separately, and do not tune on held-out labels. |
-| Lead · Budget expires mid-task | Two attempts consume the task budget before a valid suggestion arrives. What gets committed? State what evidence would make you reject your first design. | Persist a visible exhausted/no-suggestion outcome without changing confirmed tags. Reserve budget before calls, bound attempts and elapsed time, and measure time-to-usable-suggestion; first-token latency is only relevant if streaming is actually shown. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- P["Fetched page"] --> M["Model output"]
- M --> D["Confirmed tags overwritten"]
- D --> W["Plausible wrong suggestion becomes fact"]
+```bash
+python3 examples/architecture-starts/reading_list_it_reasons.py
 ```
 
-The baseline merges a suggestion and a user decision. HTTP success and schema validity are different from task usefulness.
+[Open the starting code](../../../../examples/architecture-starts/reading_list_it_reasons.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| tag_suggestion | link_id,source_version,model,prompt,proposed_tags | Unconfirmed, provenance-bearing output. |
+| confirmed_tags | link_id,user_revision,tag_ids | User-authorized application state. |
+| suggestion_outcome | accepted,rejected,invalid,unavailable | Useful product evidence beyond generation success. |
+
+## AWS implementation
+
+![P4 · it reasons, provably: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/reading-list-it-reasons.svg)
+
+The model adds a proposal path beside the existing user-owned state. Keeping separate records makes it impossible for a retry or late answer to masquerade as a user-confirmed tag.
+
+## Build it in this order
+
+### 1. Keep the manual workflow complete
+
+Add a tag picker backed by the closed taxonomy and conditional user revision. Save a link and tag it with the model disabled. This is the fallback and comparison baseline, not an unfinished error screen.
+
+### 2. Generate a versioned proposal
+
+Queue optional suggestion work with link/source identity. Pass only authorized bounded content to the model and record model/prompt versions. Treat retrieved instructions as content and expose no effectful tools for this task.
+
+### 3. Validate and present suggestions
+
+Parse the structured response, reject unknown tags and limit count/duplicates. Display the proposal distinctly from confirmed tags. A user action commits selected allowed tags against the current link revision; a late proposal cannot overwrite a manual choice.
+
+### 4. Measure whether it helps
+
+Record acceptance, correction, invalid-output rate, latency and usage assumptions. Review examples where a confident suggestion was wrong. Keep privacy and deletion behavior consistent with the earlier stages, including warmed suggestion caches.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Model access | Suggestion worker can invoke the selected model and write proposals, not perform unrelated tools. |
+| Validation | Closed enum, bounded input/output and source-version checks before showing a proposal. |
+| Fallback | Manual tagging remains available when queue, model or parsing fails. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | finance is rejected, and suggestions do not populate confirmed tags automatically. |
+| Disable model access | Manual tagging still works. |
+| Change the link while generation runs | The old source-version proposal is not applied to the new content. |
+
+## The next design decision
+
+Continue to stage 5 by migrating the tag representation while old browsers, queued jobs and model prompts still refer to the previous contract.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Separate suggestion state from confirmed state and define valid output, fallback, quality metrics and hard constraints. Partition development/regression/challenge/holdout data. The invariant is that only an authorized user or explicit product rule confirms tags; quality gates demonstrate sensitivity to seeded relevant defects.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · All regressions pass
 
@@ -74,14 +91,6 @@ Separate suggestion state from confirmed state and define valid output, fallback
 <summary>Expected reasoning and changed diagram</summary>
 
 Keep those passing regressions. Demonstrate that a seeded wrong-tag or cross-user-data mutation is caught, report challenge coverage and stochastic variability separately, and do not tune on held-out labels.
-
-```mermaid
-flowchart TD
- R["Required regression fixtures"] --> P["Correct model path passes"]
- R --> M["Seeded defect path fails"]
- H["Held-out labels"] --> G["Class-specific quality gate"]
- P --> G
-```
 
 </details>
 
@@ -94,21 +103,7 @@ flowchart TD
 
 Persist a visible exhausted/no-suggestion outcome without changing confirmed tags. Reserve budget before calls, bound attempts and elapsed time, and measure time-to-usable-suggestion; first-token latency is only relevant if streaming is actually shown.
 
-```mermaid
-flowchart TD
- A["Task budget admission"] --> M["Bounded model attempts"]
- M --> V["Validate suggestion"]
- V --> S["Suggestion state"]
- A -->|exhausted| F["Manual tagging remains available"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Show fault-sensitive passing regressions, held-out judge metrics and budget exhaustion. **Additional lead scope:** Own release gates, drift review and user correction paths. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -116,129 +111,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-> Stage 4 · the question is **can you add a model to it and prove it is any good?**
-
-Same reading list. Add one small feature that uses a model, and then spend most
-of the project proving whether it works.
-
-The feature is deliberately modest: when somebody saves a link, suggest tags for
-it from the page's content. That is it. If you find yourself building a chat
-interface, you have swapped this project for a different one, and the different
-one teaches less.
-
-**The feature is perhaps a fifth of the work. The other four fifths are the
-evaluation, and that ratio is the lesson.**
-
-## What done means
-
-- [ ] Tag suggestions appear, and a person can accept, edit or ignore them.
-- [ ] You read **thirty real outputs by hand** and grouped the failures into a taxonomy you wrote yourself.
-- [ ] At least twenty versioned cases have operational task metrics or pass/fail gates with stated thresholds; development, regression, challenge and held-out purposes are distinguished.
-- [ ] Required regressions pass and reject seeded relevant defects. Challenge-set results are documented separately; no current product failure is required.
-- [ ] If a model judges, report class balance, confusion matrix and failure precision/recall where defined on held-out human labels; include the always-pass judge counterexample.
-- [ ] Cost is recorded per suggestion, and there is a hard cap in code that you have tested by hitting it.
-- [ ] Time-to-usable-suggestion is measured from the browser; measure first-token latency separately only if the UI actually streams tokens.
-- [ ] Turning the model off leaves the product working, minus this feature.
-- [ ] You wrote down why this is a model rather than a rule, honestly.
-- [ ] There is a written trifecta analysis: what private data it sees, what untrusted content it reads, what it can send outward — and which leg you cut.
-
-## The decisions you are being asked to make
-
-1. **What exactly is the model deciding?** "Suggest tags" is a product sentence. The engineering version names the input, the allowed outputs, and what happens when it is unsure.
-2. **Is the tag set open or closed?** A closed vocabulary makes evaluation tractable and the feature slightly worse. An open one is the reverse. Pick, and say what it costs.
-3. **What does the untrusted content do to you?** The page you fetched is written by somebody else and your model is about to read it. That is the whole of prompt injection, in your own product, on purpose.
-4. **What is a failure here?** A wrong tag, a missing obvious tag, a tag that leaks something from another user's item? They are different failures with different severities and your eval must tell them apart.
-5. **What does the user see when it fails?** Silence, a guess, or an honest "could not suggest"? The third is usually right and is almost never what gets built.
-
-## Working with Claude on it
-
-**1. Error analysis before any metric.**
-
-```
-Here are 30 real outputs with their inputs.
-
-Do not score them. Read them, and group the failures into categories you
-derive from what you see. Report the count per category and two examples
-of each.
-
-Then tell me which single category, fixed, removes the most failures.
-```
-
-Why: a score is a number with nothing under it. A taxonomy derived from the data
-is the shape of your actual problem, and the counts tell you where to spend.
-
-**2. Build the eval so it can fail.**
-
-```
-Turn category <X> into an explicit task metric or release gate with a
-threshold. Keep required regressions passing. Seed relevant wrong-tag,
-malformed-output and cross-user-data defects and show the appropriate
-checks rejecting them. Restore the correct path, then evaluate untouched
-held-out cases. Report challenge failures separately.
-```
-
-Why: seeded failures test the instrument’s sensitivity. A useful regression
-can pass on the fixed system; its ability to reject a relevant defect is the
-evidence, not a requirement to ship known failures.
-
-**3. The injection test on your own feature.**
-
-```
-Write a test page whose visible content includes text trying to redirect
-the tagging model — for example instructing it to ignore its task.
-
-Run it through the real pipeline and show me what the model produced.
-Then tell me what in my architecture, not my prompt, would stop it.
-```
-
-Why: doing this to your own system, on purpose, once, is worth more than reading
-about it. The second half forbids the answer "add a line to the prompt", which
-is the answer everyone reaches for and the one that does not hold.
-
-## How you would know it is wrong
-
-1. **Replace the model with a stub that returns a fixed answer.** Relevant wrong-answer cases must fail. Format or empty-input cases may legitimately pass; report exactly which checks the stub exercises and which it cannot assess.
-2. **Evaluate the judge on held-out human labels.** Report class-specific errors and uncertainty with sample size; overall agreement alone cannot establish failure detection.
-3. **Reorder the options in any pairwise comparison** and count how many verdicts flip. That is your noise floor.
-4. **Check the cost on the worst case**, not the average — the longest page, the most tags, the retry — and confirm the cap actually stops it.
-5. **Measure time-to-usable-suggestion from the browser.** Include queueing and validation; report first-token time only for an actual streaming flow.
-6. **Feed it a page in another language, an empty page, and a page that is one image.** Three inputs, thirty seconds, and they will find more than an hour of thinking.
-7. **Turn the model off** and use the product. What you experience is your degradation path whether or not you designed it.
-
-## Break it on purpose
-
-| do this | what should happen | what it teaches |
-|---|---|---|
-| make the model return malformed output | handled as a failure, not written to the database | anything that parses model output is parsing untrusted input |
-| put instructions in the page content | the architecture limits the damage, not the prompt | prompt injection is a design problem |
-| run the same input twice | you find out how non-deterministic your feature is | it is more than you think, and your eval must cope |
-| let the cap fire mid-request | a clear, honest failure and no half-written state | a budget that corrupts data when it fires is worse than none |
-
-## What P5 will do to this
-
-P5 makes you replace something load-bearing in the system you now have, safely,
-with a written design doc and a rollout plan — and the tagging feature is a
-tempting thing to migrate, because it is the newest and the least certain.
-
-Whatever you choose, P5 is where the guide stops being about building and starts
-being about changing something other people depend on.
-
-## Architecture rehearsal · Keep suggestion quality separate from API uptime
-
-```mermaid
-flowchart TD
-  Saved["Saved page content"] --> Input["Size and content boundary"]
-  Input --> Model["Tag suggestion model"]
-  Model --> Validate["Allowed-tag and schema validation"]
-  Validate --> UI["Suggested tags"]
-  UI --> Human["Accept, edit, or reject"]
-  Human --> DB[("Confirmed tags")]
-  Cases["Fixed evaluation examples"] --> Runner["Evaluation runner"]
-  Runner --> Model
-  Model --> Score["Quality, latency, cost"]
-  Expected["Expected outcomes"] --> Score
-```
-
-**Draw the failure:** If the model returns nonsense with HTTP 200, which box detects the product failure?
+</details>

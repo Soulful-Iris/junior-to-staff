@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Change only the explicitly chosen occurrence or future series segment. Use stabl
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add a meeting requiring three rooms atomically. Compare a database transaction s
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “People create events, invite guests, and look up free/busy time across calendars. Two organizers may book the same room at once. Time zones and daylight saving changes matter.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 100 million calendars, 3 million active users, and free/busy reads much more frequent than event writes. Clarify service guarantees and a first version before filling the board with services.
 
@@ -91,8 +93,6 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | DST boundary | Recurring 09:00 local meeting crosses clock change | Preserve local wall time with explicit zone and recurrence semantics. |
 | Concurrent booking | Two users claim the last room | One transaction/constraint wins; loser sees conflict. |
 | Invite response | Guest accepts after organizer cancels | Reject stale event version or mark response to canceled event. |
-
-![The failure path and repaired design for Calendar](../../../../assets/design-interview/calendar-availability-before.svg)
 
 ## Think from the contract to the boxes
 
@@ -130,8 +130,6 @@ This is a schema and test schedule to execute, not evidence that PostgreSQL or A
 
 **First diagram:** Draw event authority, free/busy projection, notification delivery, and a conflict check using the exact interval boundary.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/calendar-availability-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon API Gateway** / calendar API entry | Authenticate calendar reads and writes. | ALB + ECS for long-lived sync clients. |
@@ -141,8 +139,6 @@ This is a schema and test schedule to execute, not evidence that PostgreSQL or A
 | **Amazon SQS** / notification queue | Retry mail/push without blocking calendar writes. | EventBridge Scheduler for delayed reminders. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Calendar](../../../../assets/design-interview/calendar-availability-deep.svg)
 
 ## Pressure-test the design
 

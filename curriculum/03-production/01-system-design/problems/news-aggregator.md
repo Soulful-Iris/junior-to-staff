@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Index published stories and serve bounded pages with cache headers. Show source 
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add multilingual story grouping. Preserve original language and attribution, and
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Collect articles from publishers, remove duplicates, and make a personalized feed from topics and followed sources. A major story arrives from hundreds of sources at once.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 50,000 publisher feeds, 20 million daily readers, and new stories visible within a 60-second target for responsive, successfully polled sources. Publisher outages cannot meet that target; surface stale-source status. Clarify service guarantees and a first version before filling the board with services.
 
@@ -91,8 +93,6 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Feed refresh | One publisher updates title | Refresh the item without creating an unrelated duplicate. |
 | Breaking news | Topic query receives 5× normal traffic | Hot-topic cache and read fanout do not block ingestion. |
 | Unfollow | Reader unfollows a source | Feed response stops showing it within the declared privacy/freshness bound. |
-
-![The failure path and repaired design for News aggregator](../../../../assets/design-interview/news-aggregator-before.svg)
 
 ## Think from the contract to the boxes
 
@@ -115,8 +115,6 @@ Keep publisher articles immutable by revision. Cluster merges store aliases from
 
 **First diagram:** Trace publisher fetch → canonical story → topic index → feed composition; mark which copy is source and which is projection.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/news-aggregator-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon EventBridge Scheduler** / poll schedule | Trigger publisher fetches at per-source cadence. | SQS delayed work when retry timing needs tighter control. |
@@ -126,8 +124,6 @@ Keep publisher articles immutable by revision. Cluster merges store aliases from
 | **Amazon ElastiCache** / feed/result cache | Protect hot stories and repeated feed reads. | CloudFront for public non-personalized pages. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for News aggregator](../../../../assets/design-interview/news-aggregator-deep.svg)
 
 ## Pressure-test the design
 

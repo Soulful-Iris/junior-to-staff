@@ -1,72 +1,87 @@
 # 5. The thing you decided not to build
 
-[Curriculum](../../../README.md) · [Technical decisions and engineering effectiveness](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Decide whether to build a custom export scheduler for a team currently producing two exports a month. The proposed platform takes six engineer-weeks plus a day each month to maintain. A three-day script may satisfy the actual need, but the decision must include comparable behavior and operating cost.
 
-> Your team wants to build a custom export scheduler. The pain may be solved by a smaller script or an existing service. Investigate first, then make a decision another engineer can disagree with specifically. What would change your mind?
+**Working contract:** Produce a concrete build/buy/simplify/defer decision with assumptions, required behaviors, ownership and a trigger for reconsideration. A decision not to build still includes a usable smaller solution and evidence that it meets today’s need.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [project index](../../../../indexes/projects.md) and [prerequisite lesson](../scope-and-leverage.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Toy estimates: custom system 6 engineer-weeks plus 1 day/month; simple script 3 days; observed demand 2 exports/month. | Compare the same required behaviors and maintenance horizon; a plausible decision is defer custom build and measure demand with the script. |
-| Boundary / failure | Estimate excludes on-call support or assumes unverified service pricing. | Label the uncertainty and run a bounded spike/source check before treating cost as decisive. |
-| Scope | Constructed numbers; independently verify real prices, capabilities and user demand for a real decision. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| Custom: six five-day engineer-weeks + one day/month | Forty-two engineer-days over a year under these assumptions. |
+| Script: three days + 0.25 day/month maintenance assumption | Six engineer-days/year; include this explicit maintenance assumption in the comparison. |
+| Two exports/month | Twenty-four annual exports; current demand does not by itself justify a general scheduling platform. |
 
-**First slice:** Compare a custom exporter (6 engineer-weeks plus a day of monthly support) with a three-day script for two exports a month. **Show:** a one-page decision with the same required behavior for both options, uncertainties, an explicit trigger to revisit the decision, and one bounded spike that tests the most fragile cost assumption. “Do nothing” without evidence is not the artifact.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Take a feature or a project you genuinely want to build. Investigate it properly. Then write the decision not to — with the alternatives argued at their strongest, the evidence, the cost of being wrong, and the one sentence that would change your mind.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Demand changes | Three teams now each need daily exports with an audit trail. Does the old no remain binding? Predict which boundary must change before opening the design. | Reopen because the specified trigger occurred. Reuse the original analysis, update workload and support costs, and evaluate whether the smaller intervention still meets the contract. |
-| Lead · A competitor launches it | A competitor advertises a similar feature, but your customers have not asked. Is that enough? State what evidence would make you reject your first design. | Treat it as new evidence to investigate, not proof of your demand. Seek user behavior and contract gaps, then bound a reversible experiment. State which downside cannot be recovered if you wait. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- I["Interesting idea"] --> B["Build proposal"]
- B --> C["Six-week commitment"]
- U["Unmeasured user demand"] -.-> B
+```bash
+python3 examples/architecture-starts/the_thing_you_decided_not_to_build.py
 ```
 
-The baseline commits before comparing alternatives or identifying the cost of either mistake. A forced no despite contrary evidence would also be poor judgment.
+[Open the starting code](../../../../examples/architecture-starts/the_thing_you_decided_not_to_build.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| requirements | export_format,access,frequency,retry,audit | The same required behavior for every option. |
+| option_estimate | build_days,maintenance_days,service_cost,uncertainty | Comparable horizon and explicit unknowns. |
+| decision | choice,owner,small_solution,revisit_trigger | Actionable result with a reversible next step. |
+
+## AWS implementation
+
+![5. The thing you decided not to build: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-thing-you-decided-not-to-build.svg)
+
+The optional AWS path is deliberately smaller than a custom scheduling platform. Scheduling can be added when demand requires it; no periodic export or monitor is created by this curriculum update.
+
+## Build it in this order
+
+### 1. Observe the actual export task
+
+Sit with the operator, record inputs, recipients, file size, access checks and recovery steps. Distinguish scheduling from transformation, delivery and auditing. Two monthly exports may need a reliable command more than a platform.
+
+### 2. Build the smallest useful spike
+
+Implement one authorized export with a stable run ID, deterministic file naming and a visible success/failure record. Include retry and cleanup behavior. Time the real operator task before and after; do not make a polished platform mockup the only evidence.
+
+### 3. Compare equal requirements
+
+Put script, managed service and custom system against the same permissions, audit, frequency and recovery needs. Include maintenance/on-call and verify current provider pricing only if it will decide the choice. Label uncertain estimates instead of converting them into false precision.
+
+### 4. Record the decision and trigger
+
+Choose the small solution if it meets current needs, name its owner and document how to run/repair it. Revisit if three teams need daily audited exports, required guarantees change or measured operator cost crosses the stated threshold. A competitor feature alone is not evidence of your customers’ demand.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Initial choice | A local/operator-invoked script may be sufficient; the AWS diagram is a small managed alternative to evaluate. |
+| Access | Restrict source reads and export downloads; record the operator and run identity. |
+| Cost | Compare one maintenance horizon and verify current prices before treating a managed-service cost as decisive. |
+
+For this decision project, provision resources only if a bounded implementation spike needs them; the diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The constructed annual estimates are 42 engineer-days versus 6. |
+| Run the small export twice with one identity | The operator gets one logical artifact/result. |
+| Change demand to daily audited exports for three teams | Revisit the old decision against the new requirements. |
+
+## The next design decision
+
+The script becomes business-critical while its author is unavailable. Treat ownership, documentation and recovery as part of the small solution; small code does not mean zero operating responsibility.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-State user need, compare buy/build/smaller intervention, and separate verified facts from estimates. The invariant is a decision traceable to assumptions with an observable reversal trigger. Preserve the strongest case for building and the cost of delaying it.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · Demand changes
 
@@ -76,14 +91,6 @@ State user need, compare buy/build/smaller intervention, and separate verified f
 <summary>Expected reasoning and changed diagram</summary>
 
 Reopen because the specified trigger occurred. Reuse the original analysis, update workload and support costs, and evaluate whether the smaller intervention still meets the contract.
-
-```mermaid
-flowchart TD
- D["Measured demand trigger"] --> R["Reopen decision"]
- O["Prior sourced assumptions"] --> R
- R --> A["Updated alternatives"]
- A --> N["New owned decision"]
-```
 
 </details>
 
@@ -96,128 +103,6 @@ flowchart TD
 
 Treat it as new evidence to investigate, not proof of your demand. Seek user behavior and contract gaps, then bound a reversible experiment. State which downside cannot be recovered if you wait.
 
-```mermaid
-flowchart TD
- C["Competitor announcement"] --> H["Demand hypothesis"]
- H --> E["Bounded customer experiment"]
- E --> K["Keep defer decision"]
- E --> B["Reconsider build"]
-```
-
 </details>
 
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Present sourced comparisons and one measurable reversal trigger. **Additional lead scope:** Own opportunity cost and explicitly accept the cost of being wrong. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
-
-## Build and prompt sequence
-
-*You end up with a written no that somebody could disagree with specifically.*
-
-**Build**
-
-Take a feature or a project you genuinely want to build. Investigate it properly.
-Then write the decision **not** to — with the alternatives argued at their
-strongest, the evidence, the cost of being wrong, and the one sentence that would
-change your mind.
-
-**The thought process**
-
-This is the project people find hardest and it is the one that most resembles the
-job. The staff skill is not building — it is **deciding what not to build**, and
-doing it in a way that stops the question being reopened every quarter by
-somebody who does not know it was asked.
-
-The decision that makes it honest is **doing the investigation first.** A no
-written from a feeling is an opinion. A no written after you have costed it,
-found the existing options, and worked out who it would serve is a decision, and
-it holds.
-
-Then the part that separates it from a shrug: **name the sentence that would
-change it.** "We are not building this" is a position. "We are not building this
-until X, and here is what X looks like" is a decision with a trigger, and it is
-the difference between a closed question and a buried one.
-
-**How to organise the prompts**
-
-```
-I am considering building <the thing>. Before any opinion: what already
-exists that does this, who pays for it, and what does it cost?
-
-Be specific about whether anything you tell me is verified or inferred.
-```
-
-```
-Make the strongest possible case FOR building it. Assume the person
-arguing is better informed than me. What would they know about the
-users or the cost that I do not?
-
-Do not balance it. Argue one side.
-```
-
-```
-Now the cost of being wrong in each direction: what does it cost me if I
-build it and nobody wants it, and what does it cost me if I do not build
-it and somebody else does?
-
-Which of those two is recoverable?
-```
-
-That asymmetry — which mistake you can come back from — is usually the whole
-decision, and it is the question nobody asks.
-
-```
-Write the decision as a document: context, the alternatives at their
-strongest, the evidence, the decision, and the single observation that
-would reverse it.
-```
-
-**On AWS**
-
-The AWS content here is genuinely small, and saying so is more useful than
-inventing some. Two real things:
-
-**Cost the thing before you reject it on cost.** The **Pricing Calculator** and
-a small spike with real numbers beat an intuition, and "it would be too
-expensive" is the most common unexamined reason for a no. Ruling something out
-on a price you never looked up is a preference wearing a number.
-
-**And check what you already have.** Ask the account, not your memory: what is
-running, what is costing money, what did you build and forget. A surprising share
-of "should we build X" questions end with finding X, half-built, from six weeks
-ago. **Cost Explorer** grouped by tag and a **Resource Groups** query are four
-minutes and they have settled this more than once.
-
-**What productionising it means**
-
-The document exists where the next person will find it, so the question is closed
-rather than merely unanswered. The trigger sentence is specific enough to notice
-if it becomes true. And the investigation is attached, so a disagreer can argue
-with your evidence rather than with your conclusion.
-
-**The learning**
-
-Saying no with a written reason is cheaper than building the wrong thing and
-more useful than saying nothing. It is also the most durable artefact in this
-act: a decision with its reasoning attached stays decided, and one without it
-gets re-argued for years.
-
-**How you would know it is wrong**
-
-- Show the "for" case to somebody who wants the thing. If they say "that is not why I would argue for it", your steelman is a strawman.
-- Check the trigger is observable. "If demand increases" is not; "if three people ask in a month" is.
-- Come back in three months. Did the thing you predicted happen? This is the only calibration you will get on your own judgment, and it is almost never collected.
-- Count how many times the question has been reopened since. That number is what the document was for.
-
-**Stage it**
-
-1. The investigation: what exists, who pays, what it costs.
-2. The strongest case for, argued honestly.
-3. The asymmetry: which mistake is recoverable.
-4. The document, with the trigger sentence, somewhere findable.
-
----
-
-[Back to the ordered project index](../../../../indexes/projects.md)
+</details>

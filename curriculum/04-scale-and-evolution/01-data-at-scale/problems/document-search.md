@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Build a new index from a consistent source boundary and capture subsequent chang
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add semantic retrieval. Keep the same authorization boundary for vector candidat
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Employees search internal documents. A newly edited policy must become searchable within two minutes. Alice loses access to a document at noon; she must not see it at 12:01 even if the index or cache is stale. Design ingestion, search, and permission revocation.”
+
 
 Assume 30 million documents, 15,000 updates/minute, and 3,000 search requests/s. Return title, snippet, and source link for the top 20. Choose whether the two-minute freshness target includes failures and define how you observe it.
 
@@ -92,16 +94,12 @@ Assume 30 million documents, 15,000 updates/minute, and 3,000 search requests/s.
 | Indexer sees same update twice | One current document version in results |
 | ACL store unavailable | Do not silently return private snippets with stale permission |
 
-![Indexing lag and cached search hits can bypass current permission](../../../../assets/design-practice/document-search-boundary.svg)
-
 ## Give each copy a job
 
 The source store owns document content and version; an index owns searchable tokens and perhaps embeddings; an authorization source owns current read rights. Updates flow through a durable change stream and idempotent versioned indexing. A keyword index retrieves exact terms; semantic/vector retrieval helps with paraphrases but changes ranking and cost. Merge candidates and rank them after checking authorization for **each result before exposing title or snippet**. Index-time ACL filtering alone can leave a revocation gap. Cache keys may include document/ACL versions, but those versions must come from
 trusted current permission state. A stale index or caller-supplied version cannot
 select a formerly authorized cache entry. Revalidate membership and object read
 permission before returning any cached title, snippet or content.
-
-![Twenty search hits pass through the current access decision before snippets are shown](../../../../assets/design-practice/document-search-deep.svg)
 
 The search index can be two minutes behind and still meet its freshness target. The authorization check has the stricter one-minute revocation rule. This baseline uses a current authoritative permission check on every response;
 if it cannot complete, return unavailable and no private titles/snippets. An
@@ -113,15 +111,11 @@ revoke at 12:00 with index updates **and invalidation delivery paused**, and ver
 the 12:01 promise independently of search freshness. This prevents new disclosure;
 it cannot recall a snippet or download already delivered to a client.
 
-![Document edit and permission revocation race with index refresh](../../../../assets/design-practice/document-search-trace.svg)
-
 ## Put the AWS names on the boxes
-
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/document-search-aws.svg)
 
 **Why these boxes, and what changes the choice:** OpenSearch finds candidates, not permission; DynamoDB or Aurora holds current ACL under the chosen data model. ECS checks it before titles or snippets. Bedrock Knowledge Bases can manage retrieval, but the independent live permission check remains.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** A backfill is 90% complete and new changes continue arriving. Define snapshot watermark, catch-up stream, version comparisons, cutover gates, and rollback. Measure ingestion age separately from query latency.
 

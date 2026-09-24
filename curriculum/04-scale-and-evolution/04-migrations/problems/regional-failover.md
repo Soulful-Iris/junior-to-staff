@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ After the old region returns, keep it fenced. Compare acknowledged operation ide
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Product rejects both any data loss and the latency cost of synchronous regional 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A primary Region accepts a booking and returns 200. It goes dark before the asynchronous replica sees the write. Health checks route the customer to a second Region, where the booking is missing. What can the product honestly promise, and what do operators do next?”
+
 
 Assume 3,000 writes/s, a 15-minute recovery-time target, and an *initial* proposal of zero lost acknowledged bookings. These are exercise constraints; derive whether the architecture actually supports both targets and where cost or latency changes.
 
@@ -93,25 +95,17 @@ Assume 3,000 writes/s, a 15-minute recovery-time target, and an *initial* propos
 | A comes back with unreplicated data | Do not blindly make A writer again; reconcile and fence old owners |
 | Planned cutover while users remain active | Demonstrate read and write behavior during transition |
 
-![A locally acknowledged write is missing after asynchronous regional failover](../../../../assets/design-practice/regional-failover-boundary.svg)
-
 ## Make RPO and RTO concrete
 
 RPO bounds lost accepted data; RTO bounds service restoration. If an acknowledgment happens before the second durable copy commits, zero acknowledged-write loss is false under total regional loss. Options include cross-Region synchronous or strongly consistent commit at higher latency/availability cost, explicitly accepting nonzero RPO, or changing what 200 means. Draw the exact acknowledgement point and name the owner of writes in each Region. DNS or health checks change routing, not data durability.
 
-![Region A acknowledges version nine before Region B receives it](../../../../assets/design-practice/regional-failover-deep.svg)
-
 Follow the two outgoing paths from A: the customer gets 200, while replication toward B remains incomplete. If A fails there, B has v8. Place a new acknowledgment boundary after the necessary durable copies if zero lost acknowledged writes is the required outcome.
-
-![Version nine is acknowledged, disappears during failover, then returns with the old Region](../../../../assets/design-practice/regional-failover-trace.svg)
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/regional-failover-aws.svg)
-
 **Why these boxes, and what changes the choice:** Route 53 changes where clients connect but cannot replicate missing acknowledged writes. DynamoDB Global Tables have mode-dependent consistency; Aurora Global Database is another choice with its own replication and failover guarantees. A writer epoch must be enforced at write time, and CloudWatch health alone cannot fence an old writer.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** A is partitioned rather than destroyed; both Regions can reach some clients. Fence the old writer before promoting B and define behavior when fencing cannot be confirmed. Use an epoch or lease with write-time enforcement; observing a lease in a monitoring dashboard does not prevent a stale process writing.
 

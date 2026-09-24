@@ -66,3 +66,35 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [1. The SLO you would actually honour](../../curriculum/03-production/05-reliability/projects/01-the-slo-you-would-actually-honour.md) | [01_the_slo_you_would_actually_honour.py](01_the_slo_you_would_actually_honour.py) |
 | [2. The alert that fires when it matters and not before](../../curriculum/03-production/05-reliability/projects/02-the-alert-that-fires-when-it-matters-and-not-before.md) | [02_the_alert_that_fires_when_it_matters_and_not_before.py](02_the_alert_that_fires_when_it_matters_and_not_before.py) |
 | [3. The retry storm you build on purpose](../../curriculum/03-production/05-reliability/projects/03-the-retry-storm-you-build-on-purpose.md) | [03_the_retry_storm_you_build_on_purpose.py](03_the_retry_storm_you_build_on_purpose.py) |
+| [4. Shedding the right thing](../../curriculum/03-production/05-reliability/projects/04-shedding-the-right-thing.md) | [04_shedding_the_right_thing.py](04_shedding_the_right_thing.py) |
+| [5. The failure that will not recover](../../curriculum/03-production/05-reliability/projects/05-the-failure-that-will-not-recover.md) | [05_the_failure_that_will_not_recover.py](05_the_failure_that_will_not_recover.py) |
+| [1. Degrade, do not stop](../../curriculum/03-production/05-reliability/projects/degrade-do-not-stop.md) | [degrade_do_not_stop.py](degrade_do_not_stop.py) |
+| [3. The incident you caused on purpose](../../curriculum/03-production/05-reliability/projects/the-incident-you-caused-on-purpose.md) | [the_incident_you_caused_on_purpose.py](the_incident_you_caused_on_purpose.py) |
+| [4. The flood](../../curriculum/04-scale-and-evolution/01-data-at-scale/projects/the-flood.md) | [the_flood.py](the_flood.py) |
+| [5. An AI feature you can defend](../../curriculum/04-scale-and-evolution/03-ai-systems/projects/an-ai-feature-you-can-defend.md) | [an_ai_feature_you_can_defend.py](an_ai_feature_you_can_defend.py) |
+| [1. The migration you actually finish](../../curriculum/04-scale-and-evolution/04-migrations/projects/the-migration-you-actually-finish.md) | [the_migration_you_actually_finish.py](the_migration_you_actually_finish.py) |
+| [4. The paved road](../../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-paved-road.md) | [the_paved_road.py](the_paved_road.py) |
+| [2. The strategy you found rather than invented](../../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-strategy-you-found-rather-than-invented.md) | [the_strategy_you_found_rather_than_invented.py](the_strategy_you_found_rather_than_invented.py) |
+| [5. The thing you decided not to build](../../curriculum/04-scale-and-evolution/05-technical-decisions/projects/the-thing-you-decided-not-to-build.md) | [the_thing_you_decided_not_to_build.py](the_thing_you_decided_not_to_build.py) |
+| [P1 · it works](../../projects/reading-list/stages/01-it-works/README.md) | [reading_list_it_works.py](reading_list_it_works.py) |
+| [P2 · it survives](../../projects/reading-list/stages/02-it-survives/README.md) | [reading_list_it_survives.py](reading_list_it_survives.py) |
+| [P3 · it holds under load](../../projects/reading-list/stages/03-under-load/README.md) | [reading_list_under_load.py](reading_list_under_load.py) |
+| [P4 · it reasons, provably](../../projects/reading-list/stages/04-it-reasons/README.md) | [reading_list_it_reasons.py](reading_list_it_reasons.py) |
+| [P5 · it changes safely](../../projects/reading-list/stages/05-it-changes/README.md) | [reading_list_it_changes.py](reading_list_it_changes.py) |
+
+## AWS foundation
+
+Use the [provisioning and wiring guide](infra/README.md) for a deployable state-table, queue and private-object foundation, concrete IAM responsibilities, inspection commands and cleanup. It states exactly which application adapters remain to build.
+
+## Existing complete AI workflows
+
+The four AI project pages retain their existing local reference implementation:
+
+```bash
+python3 examples/ai-systems/demo.py assistant
+python3 examples/ai-systems/demo.py agent
+python3 examples/ai-systems/demo.py extraction
+python3 examples/ai-systems/demo.py evaluation
+```
+
+These commands use local fixtures and temporary storage. They do not invoke paid model APIs or deploy cloud resources.

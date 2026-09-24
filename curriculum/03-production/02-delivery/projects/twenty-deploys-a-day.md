@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Expand schema before using new fields, retain old readers/writers during the sup
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -77,30 +79,3 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 ## The next design decision
 
 An external effect completed before rollback. Define the reconciliation or compensation operation separately; switching code cannot reverse a sent email or completed payment.
-
-<details>
-<summary>Further constraints from the original project</summary>
-
-## Follow-up 1 · A PR changes CI
-
-**Changed requirement:** An untrusted pull request edits the deploy script. May it receive the production role? Predict which boundary must change before opening the design.
-
-<details>
-<summary>Expected reasoning and changed diagram</summary>
-
-No. Run untrusted checks without privileged credentials; deploy only the reviewed immutable artifact from a protected workflow with narrowly scoped OIDC trust.
-
-</details>
-
-## Follow-up 2 · Rollback follows new writes
-
-**Changed requirement:** The new version has accepted data the old reader cannot understand. What recovery remains? State what evidence would make you reject your first design.
-
-<details>
-<summary>Expected reasoning and changed diagram</summary>
-
-Use a prebuilt compatibility adapter/reverse projection or fix forward; otherwise pause the new write path and reconcile. The rollout gate must test a v1 read of a v2 write, not merely version labels.
-
-</details>
-
-</details>

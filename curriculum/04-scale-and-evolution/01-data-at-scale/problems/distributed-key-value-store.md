@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Route keys to versioned partition ownership. Move snapshots plus log tails, then
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add multi-region replicas. Quantify the write-latency cost of cross-region quoru
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Design a durable distributed `put/get/delete` store. Reads should see a caller’s successful write. Nodes fail, values range from small settings to multi-gigabyte objects, and the system must scale horizontally.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 2 million operations/s, 99.99% monthly availability and keys partitioned across 300 storage nodes. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,15 +94,11 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Large object | Value is 2 GB | Store bytes separately; keep metadata and chunk manifest in KV path. |
 | Tombstone expires | Old replica returns deleted value | Retention/repair protocol prevents resurrection. |
 
-![The failure path and repaired design for Key-value store](../../../../assets/design-interview/distributed-key-value-store-before.svg)
-
 ## Think from the contract to the boxes
 
 Choose partitioning and replication before naming a database. A write has a version, replica quorum and durability promise. Read-your-writes can use session tokens or quorum reads. Deletes need tombstones long enough to reach every replica; compaction cannot erase the only evidence too early. Large values move through object storage with checksummed manifests. Distinguish acknowledgment latency from repair convergence.
 
 **First diagram:** Draw hash partition → replica set → quorum response, then show hinted handoff/repair and tombstone propagation.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/distributed-key-value-store-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -111,8 +109,6 @@ Choose partitioning and replication before naming a database. A write has a vers
 | **AWS Backup** / recovery copies | Create point-in-time recovery protection for supported resources. | Application export snapshots for cross-engine recovery needs. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Key-value store](../../../../assets/design-interview/distributed-key-value-store-deep.svg)
 
 ## Pressure-test the design
 

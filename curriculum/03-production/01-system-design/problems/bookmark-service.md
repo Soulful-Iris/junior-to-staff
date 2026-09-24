@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Map owner to the DynamoDB partition and bookmark ID to the sort key. Use a condi
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -101,14 +103,6 @@ start from the [full-stack exercise](../../../02-applications/03-frontend/full-s
 one owner-scoped create/list, then conditional edits, then a retained conflict
 state. Run that exercise's commands and record visible behavior.
 
-```mermaid
-flowchart TD
-  Ana["Ana creates bookmark"] --> API["API trusts submitted owner ID"]
-  Ben["Ben submits Ana owner ID"] --> API
-  API --> DB["Unscoped bookmark table"]
-  DB --> Leak["Private row returned to wrong user"]
-```
-
 Before the worked design, name the invariant and move authority out of the
 submitted payload. Then trace a commit whose HTTP response disappears; operation
 identity must survive a retry.
@@ -119,15 +113,6 @@ identity must survive a retry.
 **Prompt:** save, list, and edit private bookmarks. Start with 10,000 users, 20 bookmarks each, and 100 peak reads/s; these are exercise assumptions. Require read-your-writes and owner-only access. Exclude sharing and search initially.
 
 API: POST bookmark, GET own bookmarks with cursor, PATCH by id plus expected version. Data: id, owner, url, title, created_at, version. Enforce URL scheme rules; do not fetch arbitrary submitted URLs in the API process.
-
-```mermaid
-flowchart TD
- B[Browser] --> A[API]
- A --> I[Identity verification]
- A --> O[Ownership check]
- O --> D[Bookmark store]
- D --> X[Owner and creation index]
-```
 
 **AWS choice:** API Gateway and Lambda for a small intermittent API; DynamoDB with owner partition and ordered keys for fixed queries. RDS PostgreSQL is a reasonable alternative for relational needs. Cognito or another identity provider authenticates; ownership checks still live in your application. For TypeScript UI delivery, S3 and CloudFront can serve static assets.
 
@@ -141,14 +126,6 @@ flowchart TD
 
 Predict the warm-cache path before adding a CDN. A token-specific cache key
 alone does not recheck a revoked token.
-
-```mermaid
-flowchart TD
-  Link["Shared-link GET"] --> Auth["Delivery authorization: current policy"]
-  Auth -->|"allowed tenant + object"| Cache["Scoped object cache"]
-  Auth -->|"revoked / unavailable"| Deny["403 / 503"]
-  Cache -->|"miss"| DB["Protected bookmark store"]
-```
 
 Use the [warm/cold revocation fixture](../../../04-scale-and-evolution/01-data-at-scale/labs/cache-consistency/revocation.md)
 for immediate or explicitly bounded authorization. **Senior:** test a repeated

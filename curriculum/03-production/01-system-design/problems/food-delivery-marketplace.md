@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Use location/routing services for candidate travel estimates. When search indexi
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Add restaurant-specific promotions and substitutions. Define which changes requi
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Customers search nearby restaurants, place an order, and track delivery. Restaurants change hours and menus; couriers move; inventory can sell out between browse and checkout. Design the customer path.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 200,000 restaurants, 2 million concurrent shoppers during dinner, and availability freshness within 30 seconds. Clarify service guarantees and a first version before filling the board with services.
 
@@ -91,8 +93,6 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Menu race | Last item sells after browse | Reject or substitute before payment capture; explain the reservation rule. |
 | Courier GPS stale | Last update 90 seconds old | Show uncertainty or refresh; avoid precise false ETA. |
 | Duplicate order submit | Mobile retry after timeout | Idempotency key returns the same order, not a second charge. |
-
-![The failure path and repaired design for Food delivery](../../../../assets/design-interview/food-delivery-marketplace-before.svg)
 
 ## Think from the contract to the boxes
 
@@ -115,8 +115,6 @@ Each worker authenticates with a role limited to its queue and domain records; s
 
 **First diagram:** Draw search projection, checkout authority, restaurant acceptance, courier assignment, and customer status as separate boxes.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/food-delivery-marketplace-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon OpenSearch Service** / search index | Filter and rank current restaurant/menu candidates. | Aurora spatial queries at modest data size. |
@@ -126,8 +124,6 @@ Each worker authenticates with a role limited to its queue and domain records; s
 | **Amazon SQS** / work queue | Buffer assignment/retry work independently. | Step Functions when long-lived workflow state is the main need. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Food delivery](../../../../assets/design-interview/food-delivery-marketplace-deep.svg)
 
 ## Pressure-test the design
 

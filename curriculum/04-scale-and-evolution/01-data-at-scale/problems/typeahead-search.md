@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Cache by normalized prefix, locale and index version. Bound query time and retur
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Personalize ranking while preserving a hot-prefix cache. Separate a globally eli
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “As a user types a query, show the top five likely completions. Popular prefixes are extremely hot; ranking data changes every few minutes.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 80,000 queries/s, 150 ms end-to-end p99, and a 3-character minimum prefix. Clarify service guarantees and a first version before filling the board with services.
 
@@ -89,18 +91,14 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 |---|---|---|
 | Prefix `iph` | Millions of possible terms | Return top five from a bounded precomputed candidate set. |
 | New trending term | Ranking changes in 2 minutes | Publish a new index version without partial mixed results. |
-| One hot prefix | `a` receives 12% of queries | Cache safely and avoid recomputing full descendant scans. |
+| One hot prefix | `iph` receives 12% of queries | Cache safely and avoid recomputing full descendant scans. |
 | Unicode query | User types accented text | Normalize consistently while preserving display form. |
-
-![The failure path and repaired design for Typeahead](../../../../assets/design-interview/typeahead-search-before.svg)
 
 ## Think from the contract to the boxes
 
 Separate offline/stream ranking from online prefix lookup. Build a versioned prefix index containing top candidates by score; online reads should be bounded by prefix and small K, not scan every completion. Keep raw popularity signals distinct from personalization. Atomically swap index versions and measure suggestion latency, zero-result rate, and freshness.
 
 **First diagram:** Draw term events → rank build → immutable prefix index → cache → bounded query; mark index version on response.
-
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/typeahead-search-aws.svg)
 
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
@@ -111,8 +109,6 @@ Separate offline/stream ranking from online prefix lookup. Build a versioned pre
 | **Amazon ECS** / suggestion API | Serve bounded prefix lookups and ranking blend. | Lambda for sparse traffic with cold-start allowance. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Typeahead](../../../../assets/design-interview/typeahead-search-deep.svg)
 
 ## Pressure-test the design
 

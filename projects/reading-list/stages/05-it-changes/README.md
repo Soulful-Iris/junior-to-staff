@@ -1,71 +1,87 @@
 # P5 · it changes safely
 
-## The reviewer's brief
+## What you are building
 
-> Your reading list has old clients, queued refresh jobs and confirmed AI tags. Move bookmark storage without dropping acknowledged writes or reviving deleted items, then retire the old path. How does the hardest consumer constrain rollback?
+> Evolve the completed reading list from text tags to stable tag IDs while users keep editing and deleting links. An old backfill row arrives after a live edit and deletion. The migration must include browsers, workers, exports and AI inputs, not just the database table.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [P4](../04-it-reasons/README.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Working contract:** Versioned apply preserves the newest source state including deletion. One write authority exists at a time. Supported old contracts are adapted until retirement, and the irreversible rollback boundary is recorded before incompatible writes begin.
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Backfill reads item 7 at v4; live edit produces v5; deletion creates v6 tombstone; v4 arrives last. | Target remains deleted at v6; a delayed backfill cannot overwrite newer live state. |
-| Boundary / failure | An old-store write succeeds while an independent target write fails. | Durable source change capture enables replay/repair; observed divergence is not itself safety. |
-| Scope | Choose authority and compatible readers/writers at each phase; retirement can have benefits beyond earlier cohort gains. | Explain any additional assumption before implementing it. |
+## Workload and the decisions it changes
 
-## See the first reviewable result
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-**First slice:** Backfill item 7 at v4, edit it live to v5, delete it with tombstone v6, then deliver the v4 event last. **Show:** target still deleted at v6 and the comparison/replay script proving it. Break a target write while the old store succeeds; the source change must be durable for later repair before you retire the old read path.
+| Input or objective | Calculation / consequence |
+|---|---|
+| Backfill version 4; live edit 5; deletion 6 | Applying 4 last must leave the version-6 tombstone intact. |
+| Four active consumer families | Browser/API, title worker, export and AI-tagging paths all need compatibility decisions. |
+| 10,000 links; 100 rows/s exercise backfill | About 100 seconds ideal copy time, plus live-change catch-up and reconciliation. |
 
-<!-- project-expectation:start -->
+## Start with one working boundary
 
-## What you are expected to hand over
+Run from the repository root with Python 3.12+:
 
-**The finished artifact:** Stage 5 · the question is can you replace a load-bearing piece without stopping the world? The last project is not a feature. It is a migration of the system you have spent four projects building, done the way you would have to do it if other people depended on it.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A delete is missed | Counts match but item 7 is present in the target after deletion. What check was missing? Predict which boundary must change before opening the design. | Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon; name gaps in the source log and resnapshot if history expired. |
-| Lead · Rollback after target-only writes | New writers now create fields the old path cannot read. Can routing alone restore service? State what evidence would make you reject your first design. | No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections; distinguish route admission from data readiness. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. On the AI path, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- A["Application write"] --> O["Old store succeeds"]
- A --> N["New store fails"]
- O --> X["Acknowledged v5"]
- N --> Y["Stale v4"]
+```bash
+python3 examples/architecture-starts/reading_list_it_changes.py
 ```
 
-“Dual-writing is safe” omits the partial-failure and ordering protocol. The migration must retain an authoritative repair source for every acknowledged mutation.
+[Open the starting code](../../../../examples/architecture-starts/reading_list_it_changes.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| migration_phase | phase,checkpoint,writer_epoch | Explicit authority and restart progress. |
+| new_link_state | link_id,tag_ids,source_version,deleted | Conditional monotonic target apply. |
+| compatibility_inventory | consumer,old_shape,new_shape,owner,retirement | Actual application-wide completion criteria. |
+
+## AWS implementation
+
+![P5 · it changes safely: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/reading-list-it-changes.svg)
+
+This stage changes the same system built in the earlier stages. The migration succeeds when its consumers and operating procedures agree on the new state, not when a copy counter reaches 100%.
+
+## Build it in this order
+
+### 1. Inventory the entire working system
+
+List browser request/response fields, store methods, queued payloads, exports, prompt inputs and model-output validators. Keep one canonical tag mapping and adapt old contracts deliberately. The previous stage’s optional model does not get an exception from schema compatibility.
+
+### 2. Backfill with versions and tombstones
+
+Capture a source boundary, apply live changes without a gap and checkpoint completed ranges. Use the same conditional apply function for snapshot rows and subsequent updates/deletes. Replaying an old range must not recreate deleted links.
+
+### 3. Reconcile and switch authority
+
+Compare canonical source/target state at an aligned watermark. Fence old writes, catch up the final change prefix and move the writer epoch/routing state. Keep authorized reads and personal read markers consistent through the transition.
+
+### 4. Retire and hand over
+
+Observe actual old-consumer usage, adapt or drain old queue messages and record the removal conditions. Demonstrate the supported rollback before the incompatible-write boundary and the forward-repair procedure after it. Finish with run commands, data/infra ownership and the measured limits from all five stages.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Authority | Enforce fencing at writes; configuration changes alone do not stop stale processes. |
+| Compatibility | Keep old response/job adapters until recorded retirement conditions, then remove dead paths. |
+| Recovery | Preserve the earlier backup/restore procedure and verify how the new representation changes it. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The version-6 deletion survives late version-4 backfill. |
+| Replay an old title/tag job | It follows the adapter/source-version rule and cannot resurrect old data. |
+| Inspect every consumer after cutover | The retirement inventory has an owner and evidence for each remaining old path. |
+
+## The next design decision
+
+Choose the next change from observed user demand or operating limits. Carry forward the same discipline: concrete scenario, measurable contract, explicit state authority, runnable path and honest recovery evidence.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Write the compatibility matrix, select authority, capture live changes durably, version backfill/replay, and preserve tombstones. Gate read cohorts with semantic comparisons and test rollback against new writes. The invariant is monotonic per-item versions with no lost accepted mutation or resurrection.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · A delete is missed
 
@@ -75,14 +91,6 @@ Write the compatibility matrix, select authority, capture live changes durably, 
 <summary>Expected reasoning and changed diagram</summary>
 
 Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon; name gaps in the source log and resnapshot if history expired.
-
-```mermaid
-flowchart TD
- S["Source version and tombstone"] --> C["Semantic reconciliation"]
- T["Target value and version"] --> C
- C --> R["Version-checked repair"]
- R --> T
-```
 
 </details>
 
@@ -95,21 +103,7 @@ flowchart TD
 
 No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections; distinguish route admission from data readiness.
 
-```mermaid
-flowchart TD
- N["Target-only writes"] --> C["Compatibility or reverse projection"]
- C --> O["Old reader can serve"]
- R["Routing rollback"] --> O
- X["No compatible representation"] --> F["Pause and fix forward"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Replay live update/delete fixtures and document a real reversible boundary. **Additional lead scope:** Resolve consumer deadlines, migration cost and honest completion counters. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -117,129 +111,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-> Stage 5 · the question is **can you replace a load-bearing piece without stopping the world?**
-
-The last project is not a feature. It is a **migration** of the system you have
-spent four projects building, done the way you would have to do it if other
-people depended on it.
-
-Pick something genuinely structural. How items are stored. How authentication
-works. The job runner from P3. Not a library upgrade, not a rename — something
-where a mistake means data in two shapes and a bad afternoon.
-
-And the deliverable is not only the migration. It is the **writing around it**:
-the document that would let somebody else decide whether to let you do this.
-
-## What done means
-
-- [ ] A design doc exists, under four pages, with context, goals, **at least three non-goals**, and **two alternatives argued at their strongest** with a stated reason each lost.
-- [ ] Named approvers. Actual people, who know they are approvers, even if that is one friend.
-- [ ] Kill criteria, written before you start: what you would observe that makes you stop and revert.
-- [ ] Phase one was done on the **hardest** case, not the easiest, and you wrote down what it taught you that the plan had wrong.
-- [ ] New usage of the old path fails the build. You demonstrated it failing.
-- [ ] A remaining-work counter you can run any day, plus a written note of what it misses.
-- [ ] **The finish.** The old code is deleted, in a commit, with the counter at zero.
-- [ ] A postmortem of something that went wrong during it — and something will — written blamelessly and with one change that actually happened as a result.
-
-## The decisions you are being asked to make
-
-1. **What is the smallest migration that is still genuinely load-bearing?** Too small and it teaches nothing; too large and you will abandon it at 80% and prove the point the hard way.
-2. **Do you run both paths at once, and for how long?** Independent dual writes can partially fail or reorder. Name the authoritative writer, durable capture, versioned repair and rollback compatibility; then choose a coexistence period and cutover gate.
-3. **How do you verify the new path agrees with the old one?** Shadow reads, comparison in production, a reconciliation job? "We tested it" is not an answer at this scale.
-4. **What is irreversible?** Usually a schema change or a deletion. Find it, and make it the last thing you do rather than the first.
-5. **What would make you stop?** Decide now, while calm. Kill criteria written during an incident are not criteria, they are feelings.
-
-## Working with Claude on it
-
-**1. The steelman for your document.**
-
-```
-Here is my migration plan and the alternative I rejected.
-
-Argue for the alternative as strongly as you can. Assume its advocate
-knows something about the cost or the risk that I do not.
-
-Do not balance it. Argue one side.
-```
-
-Why: the alternatives section is where a design doc's credibility lives, and a
-weak steelman is visible immediately. You want the argument you will actually
-face, before you face it.
-
-**2. Find the hardest case.**
-
-```
-Here is what uses the thing I am replacing. Rank them by how AWKWARD they
-are to migrate, not by size — I want the one most likely to break my plan.
-
-For the top one, tell me what specifically does not fit the new model.
-```
-
-Why: migrating the easy thing first produces confidence and no information.
-
-**3. The mechanical block.**
-
-```
-Write the check that makes new usage of the old path fail the build.
-Not a warning. Show me it failing on a deliberately added usage, then
-passing when I remove it.
-```
-
-Why: without this, you are migrating faster than new usage appears, or you are
-not, and you will not find out for months.
-
-**What to keep for yourself:** the decision, the kill criteria, and the
-postmortem. Especially the postmortem — a model can format one, and the value
-was never in the formatting.
-
-## How you would know it is wrong
-
-1. **Give the design doc to someone who has not seen the system** and ask them to say back what is being decided, what is out of scope, and what you rejected. If they cannot, the document is wrong.
-2. **Show the alternatives section to somebody who prefers one you rejected.** "That is not why I would have argued for it" means you built a strawman.
-3. **Run your remaining-work counter, then grep by hand.** A difference means the counter is the broken thing, and you were about to declare victory on it.
-4. **Push a branch that adds new usage of the old path.** The build must fail.
-5. **Try deleting the old system early, in a branch**, and see what screams. Five minutes now, a decision later.
-6. **Check whether both paths are documented as current.** If a new reader could reasonably pick the old one, they will.
-7. **Read your kill criteria back after you finish.** Would you have noticed if they had been met? If not, they were not observable, and you would have carried on regardless.
-
-## Break it on purpose
-
-| do this | what should happen | what it teaches |
-|---|---|---|
-| run old and new against live updates, deletes and delayed backfill | required invariants match after repair; seeded divergence must be detected | comparison reveals differences; ordered idempotent repair resolves them |
-| abandon the migration at 80% deliberately, for a day | measure what carrying both systems costs you in that day | this is the cost people pay for years without measuring once |
-| roll back mid-migration | you find out what is actually reversible, which is less than you assumed | irreversibility is discovered, not designed, unless you look |
-| have somebody else deploy it | every question they ask is a gap in the document | the document is the artefact, not the code |
-
-## When you are finished
-
-Write the last thing in the guide: a short note to yourself about what changed
-in how you work, from P1 to here.
-
-Not what you learned — what you now **do differently**. Those are not the same,
-and the difference between them is roughly the whole subject of this repo.
-
-## Architecture rehearsal · Prove coexistence and retirement
-
-```mermaid
-flowchart TD
-  OldClient["Old client"] --> Compat["Compatibility layer"]
-  NewClient["New client"] --> Compat
-  Compat --> Source[("Authoritative representation")]
-  Source --> Migrate["Backfill + ordered change capture"]
-  Migrate --> Target[("New representation")]
-  Source --> Reconcile["Value-level reconciliation"]
-  Target --> Reconcile
-  Reconcile --> Gate["Cutover gate"]
-  Gate --> Routing["Switch read routing"]
-  Routing --> Adoption["Prove old writers retired"]
-  Adoption --> Remove["Remove compatibility path"]
-```
-
-**Draw the failure:** Define the last reversible step. This is one migration pattern; adapt capture and rollback to your store.
-
-![Move admissions, drain existing work](../../../../assets/learning/traffic-shift.svg)
-
-[Static view](../../../../assets/learning/traffic-shift-still.svg)
+</details>

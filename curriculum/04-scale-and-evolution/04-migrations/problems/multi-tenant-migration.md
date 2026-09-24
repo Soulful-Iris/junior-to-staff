@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Drain or fence old writers, apply the final change watermark, then advance the t
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -101,14 +103,6 @@ Start with the [runnable migration fixture](../labs/recovery-migration/migration
 Deliver compatibility/authority first, then snapshot plus replay, then full
 reconciliation and a rehearsed writer/reader rollback.
 
-```mermaid
-flowchart TD
-  Writer["Old client writes v2"] -->|"success"| Source["Old authority"]
-  Writer -->|"failure"| Target["New copy remains v1"]
-  Backfill["Slow backfill v1"] --> Target
-  Sample["Sample comparison detects mismatch"] --> Target
-```
-
 Name source authority and the durable change record before designing traffic
 percentages. Enforce versions and tombstones at apply, and advance checkpoints
 only after durable writes. Then separate reader routing from writer authority.
@@ -120,9 +114,6 @@ only after durable writes. Then separate reader routing from writer authority.
 
 Choose a routing registry with tenant migration state. Expand client contracts first. Capture changes with an outbox or CDC; backfill a consistent baseline and apply ordered updates. Shadow reads compare meaningful values. Move a small tenant only when reconciliation and latency pass. Keep rollback routing and change capture until a stated point of no return.
 
-![Migration: expand, move, verify, and contract](../../../../assets/diagrams/migration-phases.svg)
-
-
 **AWS mapping:** RDS source, a target selected by access pattern, DMS/CDC where the supported source/target behavior fits, S3 for checkpoints/export artifacts, CloudWatch for lag and mismatch rate. Validate CDC ordering, schema-change handling, and transaction boundaries before committing to the mechanism.
 
 **Decision memo:** source and target owners; acceptance metric; customer cohorts; capacity/cost budget; rollback trigger; data repair procedure; old-path retirement owner. **Failure drill:** change a record during backfill, crash the worker, then resume. Row-count equality alone does not prove correctness.
@@ -132,15 +123,6 @@ Choose a routing registry with tenant migration state. Expand client contracts f
 </details>
 
 ## Follow-up: region failover during migration
-
-```mermaid
-flowchart TD
-  Source["Old region: acknowledged v9"] -->|"async capture lag"| Target["New region: v8"]
-  Source --> Failure["Region unavailable"]
-  Target --> Gate["Check recovery objective + migration state"]
-  Gate --> Loss["Promote with possible v9 loss under stated RPO"]
-  Gate --> Wait["Wait or restore to preserve stronger contract"]
-```
 
 **Senior:** run partial-write, stale-backfill, delete, replay and rollback tests.
 **Lead follow-up:** negotiate the mobile/retention/capacity conflict in the

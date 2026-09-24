@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Store verdict, resource usage and safe compiler output. Do not reveal hidden cas
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Allow third-party language runtimes. Define the image admission process, patch o
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Users submit code to a timed contest. Compile and run it against hidden tests, report results, and update a live leaderboard. Submissions are untrusted.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 100,000 contest participants, 10,000 submissions/minute at peak and strict CPU, memory, and wall-time caps. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,23 +94,12 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Duplicate submit | Client retries after lost ACK | One submission ID returns one result state. |
 | Hidden tests | User requests detailed failure output | Do not expose test input, secrets, or another user’s source. |
 
-![The failure path and repaired design for Online judge](../../../../assets/design-interview/online-judge-before.svg)
-
 ## Think from the contract to the boxes
 
 Persist the submission and its outbox record together; a relay enqueues its ID.
 The trusted broker obtains artifacts and starts a **separate untrusted execution
 domain**. Compilation is untrusted too. Results use the submission/version key,
 and output is bounded and treated as hostile text before display.
-
-```mermaid
-flowchart LR
-  Q[Queue] --> Broker[Trusted broker: scoped artifact credentials]
-  Broker -->|source and one test input via bounded pipe| Box[Untrusted compiler or program]
-  Box -->|bounded output only| Check[Trusted checker]
-  Tests[Hidden expected results] --> Check
-  Box -. no credentials or artifact-store access .-> Deny[Denied boundary]
-```
 
 The program must see the input it computes on; it must not mount the whole hidden
 test corpus, expected outputs, another submission, a Docker socket or cloud
@@ -130,8 +121,6 @@ isolation result is claimed here.
 
 **First diagram:** Draw public API, durable submission state, queue, isolated compile/run pool, result checker, and leaderboard projection.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/online-judge-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon API Gateway** / submission entry | Authenticate, bound payload size and rate. | ALB + ECS for custom upload/stream behavior. |
@@ -141,8 +130,6 @@ isolation result is claimed here.
 | **Amazon DynamoDB** / submission/result state | Store state transitions and idempotent result IDs. | Aurora for relational contest/rank queries. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Online judge](../../../../assets/design-interview/online-judge-deep.svg)
 
 ## Pressure-test the design
 

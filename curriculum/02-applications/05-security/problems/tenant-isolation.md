@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Add per-tenant admitted-job counters and a fair scheduler. Show Acme over its li
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Offer dedicated storage to a regulated customer without forking the entire appli
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Our SaaS dashboard serves 4,000 organizations from shared infrastructure. An engineer accidentally queries a document using only its document ID. How do you keep one tenant from reading another tenant's data, including through search, caches, exports, and background jobs?”
+
 
 **Your contract.** Each request carries a verified tenant identity. Files and search snippets are sensitive. Some large tenants may need stronger isolation later. This is a constructed exercise.
 
@@ -93,13 +95,9 @@ Offer dedicated storage to a regulated customer without forking the entire appli
 | Worker receives A's job ID with B's object key | Refuse the mixed-tenant work before reading bytes |
 | Tenant B floods export jobs | Tenant A retains its reserved share of processing capacity |
 
-![Shared query by ID leaks data; tenant-scoped authority protects every hop](../../../../assets/design-next/tenant-isolation-before.svg)
-
 ## Name the isolation boundary
 
 Derive tenant identity from authenticated claims and membership, never a caller-supplied URL or body field alone. Carry it in a typed request context, scope all primary and secondary indexes, object keys, cache keys, logs, and queued messages. Check membership again at the **read of sensitive content**; an old search hit cannot authorize a snippet. Write a negative test that deliberately reuses a valid ID from another tenant. Separate security isolation from noisy-neighbor capacity: both need enforcement.
-
-![AWS components and the tenant policy gate at each read and async path](../../../../assets/design-next/tenant-isolation-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -114,14 +112,6 @@ A tenant prefix partitions keys; it neither authenticates a caller nor proves
 current object permission. A versioned cache key is safe only when its version
 comes from trusted permission state, not a caller or stale search result.
 
-```mermaid
-flowchart LR
-  Caller[Authenticated caller] --> Membership[Current tenant membership]
-  Membership --> ACL[Current object permission]
-  ACL -->|allowed| Cache[Tenant-scoped cache or store]
-  ACL -->|denied or unavailable| Stop[No sensitive content]
-```
-
 For this exercise, check permission on every sensitive read and fail unavailable
 when the authority cannot be consulted. A bounded authorization cache is a
 **different** contract: name its maximum age and include propagation/clock delay.
@@ -132,8 +122,6 @@ revocation from an application check that the download route bypasses.
 **Drill:** warm search, snippet, cache, export and direct-download routes; pause
 indexing, revoke access and repeat each read. Distinguish a storage-key test, an
 IAM-session isolation test and an application ACL test. None replaces the others.
-
-![A single missing tenant prefix crosses the query, cache, and worker lanes](../../../../assets/design-next/tenant-isolation-detail.svg)
 
 **Senior follow-up:** A bulk export includes a deleted document. Define the consistency point, authorization check at worker time, pagination snapshot rule, and deletion behavior.
 

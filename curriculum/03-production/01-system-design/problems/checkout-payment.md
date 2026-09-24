@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Commit paid evidence and order transition. If the inventory hold is gone, record
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Add two payment providers. Define which provider owns an attempt before failover
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A customer clicks Pay. The payment provider charges their card; your server times out before saving the result. The customer retries. Design checkout so you can explain which order exists, which charge exists, and how an operator repairs disagreements.”
+
 
 Assume 200 checkout requests/s peak, 10% provider timeouts during an incident, and an inventory reservation that expires after ten minutes. These are exercise conditions. Clarify whether the contract promises no duplicate charge, no duplicate order, or both; each needs its own authority.
 
@@ -93,13 +95,9 @@ Assume 200 checkout requests/s peak, 10% provider timeouts during an incident, a
 | Inventory hold expires while charge succeeds | Order state records repair/refund work; do not pretend payment rolled back |
 | Confirmation worker receives duplicate | One confirmation event per committed order version |
 
-![Payment and order writes cannot share a database transaction](../../../../assets/design-practice/checkout-payment-boundary.svg)
-
 ## Find each authority
 
 Your order database owns order state; the payment provider owns charge state; an inventory authority owns the hold. Save checkout intent and immutable cart fingerprint before calling the provider. Reuse one provider key per order attempt and check the provider's actual idempotency retention; your internal record must live long enough for your retry and reconciliation window. Unknown is a real state between attempted and verified success. Never treat a timeout as “not charged.”
-
-![Timeout creates an unknown charge outcome until reconciliation](../../../../assets/design-practice/checkout-payment-trace.svg)
 
 ## A durable answer under failure
 
@@ -107,11 +105,9 @@ Show PENDING → PAYMENT_UNKNOWN/PAID → CONFIRMED or REFUND_REQUIRED. Persist 
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/checkout-payment-aws.svg)
-
 **Why these boxes, and what changes the choice:** An Aurora transaction records intent and local state; DynamoDB transactional writes are an alternative for key-oriented orders. SQS retries can duplicate work: the provider idempotency key and status lookup are still required. An ECS worker suits high-volume, long-running reconciliation.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** Provider idempotency lasts only 24 hours; a DLQ is replayed in three days. Derive why replaying a charge blindly is unsafe, then use provider status lookup, a durable attempt record, and manual escalation for unknowns. Make the maximum auto-retry window explicit.
 

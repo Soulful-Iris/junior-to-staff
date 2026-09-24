@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Use supported, unsupported, conflicting-source and revoked-source questions. Com
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Allow answers using multiple document versions during an ongoing policy update. 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Build an internal assistant that answers questions from company documents. A user's access to a payroll document is revoked. The document is already indexed and its text appears in yesterday's cached answer. What can the assistant safely return today?”
+
 
 **Your contract.** Answers require verifiable citations, a 4-second response target, and no content from a document the caller cannot currently open. Retrieval quality is valuable but never grants access. This is a constructed exercise with invented numbers.
 
@@ -92,13 +94,9 @@ Allow answers using multiple document versions during an ongoing policy update. 
 | Index sync lags for 20 minutes | Show a freshness limitation or refuse to answer where current truth is required |
 | Model produces a plausible citation that does not support claim | Reject that citation/claim or mark answer uncertain; never invent evidence |
 
-![Vector relevance without a live access gate leaks revoked material](../../../../assets/design-next/knowledge-assistant-before.svg)
-
 ## Design the permission boundary first
 
 Keep a versioned document catalog with current ACL and deletion state. Retrieve **candidates** from an index, then authorize every candidate and citation against the live catalog before showing titles, snippets, or generated content. Cache by caller's authorization scope and document versions, with revocation-driven invalidation or a fresh authorization gate; do not cache a final answer across users. A generation call receives only authorized excerpts. Validate claims against citations, measure unsupported answers and denial leakage in an evaluation set, and return a cautious response when retrieval or policy service is unavailable.
-
-![AWS boxes show candidate retrieval, policy gate, model invocation, and evidence store](../../../../assets/design-next/knowledge-assistant-aws.svg)
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -109,8 +107,6 @@ Keep a versioned document catalog with current ACL and deletion state. Retrieve 
 | Amazon CloudWatch (telemetry) | Monitor retrieval freshness, denial leaks, cost and latency | Existing platform monitoring with measurable per-stage budgets |
 
 Bedrock Knowledge Bases synchronization after an update or deletion is an **index maintenance step**, not an instantaneous authorization revocation. Filter before model context; if uncertain about access, omit the passage. Distinguish document ingestion version, retrieval version, and ACL version in logs.
-
-![Eligibility gate and cited passage versions show where stale retrieval is stopped](../../../../assets/design-next/knowledge-assistant-detail.svg)
 
 **Senior follow-up:** Retrieval runs out of time with two sources missing. Return a bounded partial answer or explicitly decline; prove that fallback never relaxes permissions.
 

@@ -1,73 +1,87 @@
 # 5. The failure that will not recover
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md) · [Project index](../../../../indexes/projects.md)
+## What you are building
 
-## The reviewer's brief
+> Diagnose a service that stays slow after its original traffic spike ends. Expired requests keep retrying and occupy slots needed for new work. The incident response must stop the sustaining loop and demonstrate enough spare capacity to drain useful backlog.
 
-> A brief traffic spike ends, but the bookmark service stays slow: expired requests keep retrying and consume the slots needed for fresh work. Identify the sustaining loop and a measurable recovery action. What capacity is available to drain it?
+**Working contract:** Recovery requires arrivals below safe useful completion capacity. Separate stale disposable work from business obligations that still need reconciliation. Measure backlog age and net drain, not only whether the original fault disappeared.
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../failure-budgets.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+## Workload and the decisions it changes
 
-| Case | Exact input or workload | Expected outcome |
-|---|---|---|
-| Small example | Backlog 600 useful jobs, new arrivals 20/s, safe completion 50/s after mitigation. | Net drain 30/s, so ideal drain time is 20 seconds plus measured overhead. |
-| Boundary / failure | Retry arrivals 60/s while completion remains 50/s after the original spike ends. | Backlog still grows 10/s; removing the original trigger does not restore stability. |
-| Scope | Discard only expired/rebuildable work; durable business operations need reconciliation. | Explain any additional assumption before implementing it. |
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
-## See the first reviewable result
+| Input or objective | Calculation / consequence |
+|---|---|
+| 600 useful queued jobs; 20 new jobs/s; 50 completions/s | Net drain is 30/s; ideal drain time is 20 seconds plus measured overhead. |
+| 60 retry arrivals/s; 50 completions/s | Backlog still grows 10/s after the initial spike ends. |
+| Cold cache: 1,000 reads/s; database capacity 100/s | Unbounded cache bypass preserves the outage by overloading the database. |
 
-**First slice:** Start a 600-job backlog, reduce new useful arrivals to 20/s and restore safe completion to 50/s. **Show:** an ideal drain slope of 30/s and roughly 20 seconds, then measure actual drain. Add 60/s retry arrivals instead: backlog grows 10/s after the original spike ends. The graph must make the sustained feedback loop visible.
+## Start with one working boundary
 
-<!-- project-expectation:start -->
+Run from the repository root with Python 3.12+:
 
-## What you are expected to hand over
-
-**The finished artifact:** Induce a metastable failure: overload the system, remove the overload, and watch it stay broken. Then find the mechanism and fix it.
-
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The cache is cold | Cache loss sends 1,000 reads/s to a database that can handle 100/s. Should every miss bypass? Predict which boundary must change before opening the design. | No. Bound refresh/bypass work, coalesce within an explicit scope, and serve authorized bounded-stale data or return 429/503. TTL jitter alone cannot protect a single expired hot key. |
-| Lead · Expired work has business value | A job expired by latency policy but represents a payment request. May the worker drop it? State what evidence would make you reject your first design. | Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation; acknowledge/drop only according to the business contract. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
-
-```mermaid
-flowchart TD
- B["Growing backlog"] --> T["Expired waiting requests"]
- T --> R["Retries"]
- R --> C["Capacity consumed"]
- C --> B
+```bash
+python3 examples/architecture-starts/05_the_failure_that_will_not_recover.py
 ```
 
-The trigger and the sustaining feedback are different. More application workers can intensify overload when the fixed bottleneck is the database.
+[Open the starting code](../../../../examples/architecture-starts/05_the_failure_that_will_not_recover.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| work_inventory | job_id,deadline,business_state,repair_required | Distinguishes stale response work from unresolved effects. |
+| recovery_budget | arrivals,capacity,retry_share | Explicit net-drain calculation. |
+| incident_timeline | trigger,feedback_loop,mitigation,recovered | Evidence that the sustaining mechanism stopped. |
+
+## AWS implementation
+
+![5. The failure that will not recover: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-failure-that-will-not-recover.svg)
+
+Recovery is a capacity inequality plus correct work classification. Queue depth falling is useful evidence only if obligations are completed or explicitly resolved, rather than silently discarded.
+
+## Build it in this order
+
+### 1. Identify the sustaining loop
+
+Plot original arrivals, retries, completions and queue age separately. Find whether retry traffic, cold-cache misses, connection exhaustion or another feedback path keeps load above capacity. Removing the initiating fault is only the first observation.
+
+### 2. Stop useless amplification
+
+Bound retry ownership and admission, cancel expired read work and reserve capacity for useful jobs. A timed-out payment is not disposable: move it to reconciliation using its stable operation identity. Do not delete obligations to make the queue graph look healthy.
+
+### 3. Create and measure drain capacity
+
+Reduce arrivals or optional work until safe completions exceed admitted useful arrivals. Estimate drain time from backlog divided by net capacity, then compare actual oldest-age decay. If the estimate fails, inspect variable job cost and dependency contention.
+
+### 4. Reopen with limits
+
+Warm caches through a bounded origin budget and gradually restore traffic. Keep recovery controls available independently of the failing path. Record the trigger and feedback loop separately so the permanent repair addresses both.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Recovery controls | Independent admission/retry knobs with known safe defaults and owner. |
+| Queue handling | Preserve logical job identity and obligations; expire only work whose contract permits it. |
+| Cache warmup | Fleet-wide origin limit and bounded stale serving where allowed; no unrestricted bypass. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The healthy recovery case drains in an ideal 20 seconds; the retry loop never drains at the stated rates. |
+| Turn off only the original spike | Retry-driven backlog still grows. |
+| Restore a cold cache | Origin load remains below the database budget. |
+
+## The next design decision
+
+Job cost varies by 100×. Replace a simple job-count estimate with remaining work units and identify the oldest expensive obligation rather than predicting recovery from queue count alone.
 
 <details>
-<summary>Reveal the approach and decisions</summary>
-
-Account for arrivals, completions and obsolete work, then cap admission and stop redundant retries. Reserve a real downstream budget for recovery. The invariant is positive net drain with bounded useful age; warm compute is not automatically spare database capacity.
-
-</details>
+<summary>Further constraints from the original project</summary>
 
 ## Follow-up 1 · The cache is cold
 
@@ -77,14 +91,6 @@ Account for arrivals, completions and obsolete work, then cap admission and stop
 <summary>Expected reasoning and changed diagram</summary>
 
 No. Bound refresh/bypass work, coalesce within an explicit scope, and serve authorized bounded-stale data or return 429/503. TTL jitter alone cannot protect a single expired hot key.
-
-```mermaid
-flowchart TD
- R["1000 reads per second"] --> A["Refresh and bypass admission"]
- A -->|at most 100 per second| D["Database"]
- A --> S["Authorized stale or overload response"]
- D --> C["Repopulated cache"]
-```
 
 </details>
 
@@ -97,21 +103,7 @@ flowchart TD
 
 Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation; acknowledge/drop only according to the business contract.
 
-```mermaid
-flowchart TD
- J["Old queued work"] --> K["Classify obligation"]
- K --> U["Rebuildable refresh: discard"]
- K --> P["Durable effect: reconcile"]
- P --> O["Owned terminal outcome"]
-```
-
 </details>
-
-## Evidence to bring to review
-
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
-
-**Senior expectation:** Replay the failure, remove the trigger, and measure positive net drain after repair. **Additional lead scope:** Protect recovery capacity and define which work may be abandoned. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
 ## Supplied mechanism practice
 
@@ -119,98 +111,4 @@ Build in three stops: reproduce the small case and baseline failure; implement t
 
 These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
 
-## Build and prompt sequence
-
-*You end up having built a system that stays down after the cause is gone, and then fixed it.*
-
-**Build**
-
-Induce a metastable failure: overload the system, remove the overload, and watch
-it stay broken. Then find the mechanism and fix it.
-
-**The thought process**
-
-This is the most valuable project in the section and the least known. A
-**metastable failure** is one where the trigger has gone and the system remains
-down, because the recovery itself requires capacity the system no longer has. A
-queue full of work whose timeouts have all expired; a cache that emptied, so
-every request now hits the database, so nothing ever repopulates the cache; a
-retry backlog that saturates the very capacity needed to drain it.
-
-The decision that makes this tractable is realising it is about **a sustaining
-loop**, not about the trigger. So the question to ask of your own system is: is
-there any state where the work required to recover exceeds the capacity
-available? That question is answerable on paper, before you build the drill.
-
-Then the fixes, which are all about breaking the loop: drop work that is already
-too old to be useful, admit load gradually rather than all at once when
-recovering, and keep enough capacity in reserve that recovery is possible.
-
-**How to organise the prompts**
-
-```
-Here is my system. Is there a state where it would stay broken after the
-cause was removed? Walk through the loop: what is consuming the capacity
-that recovery needs.
-
-If you think there is not, tell me what property prevents it.
-```
-
-That second sentence is the honest version — sometimes the answer is genuinely
-no, and knowing why is as valuable as finding one.
-
-```
-Design a safe experiment that induces it in my environment, with a stop
-condition so I can end it. Do not run anything yet.
-```
-
-```
-Now the fixes. For each: drop stale work, gradual admission on recovery,
-reserved capacity. Tell me what each costs when the system is HEALTHY,
-because that is the price I pay every day for a rare event.
-```
-
-The everyday cost is the real decision. Most resilience mechanisms are a small
-permanent tax against a rare catastrophe, and you should know the tax.
-
-**On AWS**
-
-Three concrete places this bites. **SQS** message age is the metric that reveals
-it: a queue whose oldest message keeps getting older while the consumer runs flat
-out is a metastable state, and the fix is often to drop messages past a useful
-age — which you do by checking the timestamp in the handler, because SQS will not
-do it for you.
-
-**Auto Scaling** can be part of the loop rather than the cure: scaling out helps
-only if the bottleneck is your compute, and if it is the database then more
-instances make it worse. Knowing which is why you did project 4 first.
-
-Provisioned concurrency on Lambda and warm pools on an ASG can reduce
-startup delay, but do not by themselves reserve database, network or provider
-capacity for recovery. Reserve admission/concurrency budgets at the actual
-bottleneck and measure their healthy-state cost.
-
-**What productionising it means**
-
-Work has a maximum useful age and is dropped past it. Recovery admits load
-gradually rather than opening the gates. Queue age is a monitored metric with an
-alarm, because it is the early signal. And you have induced the failure once, in
-daylight, so you recognise it — which is the only reason anybody diagnoses these
-quickly.
-
-**The learning**
-
-Some failures are self-sustaining, and for those, removing the cause is not the
-fix. Once you have seen one you will stop asking "what broke" first and start
-asking "what is keeping it broken", which is a different and better question.
-
-**How you would know it is wrong**
-
-- Induce it, remove the trigger, and watch. If it recovers on its own, you did not build a metastable failure — find the real loop.
-- After the fix, induce it again. Recovery should happen without intervention, and you should be able to time it.
-- Check the everyday cost of each fix. If it is zero, you have probably not actually reserved anything.
-- Look at queue age rather than queue depth. Depth can be flat while age climbs, and age is the one that tells you.
-
----
-
-[Back to the ordered project index](../projects.md)
+</details>

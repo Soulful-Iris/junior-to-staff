@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Distinguish drafted, approved, attempted, completed and unknown provider outcome
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -101,14 +103,6 @@ This is an explicit build brief, not supplied model code. Deliver fixed authoriz
 fixtures and search baseline, then fake-model failure handling, then separately
 measured retrieval/generation quality before a real provider integration.
 
-```mermaid
-flowchart TD
-  Question["Employee question"] --> Search["Authorized keyword search"]
-  Search --> Docs["Permitted documents"]
-  Docs --> Results["Ranked snippets + links"]
-  Results --> Evaluate["Measure task completion baseline"]
-```
-
 State the user task and permission invariant first. Compare the baseline on fixed
 examples, label retrieval misses separately from bad generation, then decide
 whether added latency/cost earns a measurable benefit.
@@ -127,16 +121,6 @@ Compare keyword search with retrieval+generation on a fixed test set. Add a mode
 </details>
 
 ## Follow-up: source permissions change after caching
-
-```mermaid
-flowchart TD
-  User["Authenticated question"] --> Scope["Current permission scope"]
-  Scope --> Retrieve["Retrieve only permitted documents"]
-  Retrieve --> Version["Document + authorization version check"]
-  Version -->|"valid context"| Generate["Generate grounded answer"]
-  Version -->|"revoked or unavailable"| Fallback["Permitted search / explicit unavailable"]
-  Generate --> Check["Recheck delivery permissions + citations"]
-```
 
 **Senior:** inject irrelevant/conflicting sources, permission revocation, and
 model outage; report retrieval failures separately from generation failures.

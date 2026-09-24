@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ A new dispatcher increments ownership epoch before issuing replacement offers. O
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Let a driver cross a regional boundary while an offer is active. Choose one assi
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A rider asks for a car. Drivers move every few seconds, one driver can accept only one trip, and the rider wants a live ETA. Design matching and state transitions.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 5 million active drivers, location p95 younger than 5 seconds, and bursts around commute and event traffic. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,8 +94,6 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Late acceptance | D7 accepts after offer expires | Reject stale offer token and continue matching. |
 | Stale GPS | D8 was nearby 40 seconds ago | Exclude or down-rank by freshness; do not claim it is currently nearby. |
 
-![The failure path and repaired design for Ride sharing](../../../../assets/design-interview/rideshare-dispatch-before.svg)
-
 ## Think from the contract to the boxes
 
 Split the fast changing location index from the authoritative ride record. Geospatial cells find candidates; a road-network ETA ranks them. An offer has an expiry and token. An offer is a short-lived invitation, not a reservation. On accept, commit driver ownership, ride ownership and replay identity together. GPS updates are hints, not ownership.
@@ -101,14 +101,6 @@ Split the fast changing location index from the authoritative ride record. Geosp
 ### The decision that makes one assignment true
 
 `POST /rides/{ride_id}/accept` carries `offer_id` and `operation_id`; the authenticated driver identity comes from the server. In a single-region DynamoDB transaction, check that the offer names this driver and ride, is still open and unexpired; conditionally change `Driver(D7): AVAILABLE → RESERVED(ride_id)` and `Ride(R9): SEARCHING → ASSIGNED(D7)`; consume the offer; store `Operation(driver, operation_id, request_hash, result)` and an outbox event. Reuse of an operation ID with a different request is a conflict.
-
-```mermaid
-flowchart LR
-  A["Accept: D7, R9, operation K"] --> T["One transaction: offer + driver + ride + replay + outbox"]
-  T --> OK["Commit: D7 owns R9; R9 names D7"]
-  T --> NO["Conflict or expiry: no reservation committed"]
-  OK --> R["Relay event; duplicate delivery allowed"]
-```
 
 | Interleaving | Required outcome |
 |---|---|
@@ -123,8 +115,6 @@ Treat transaction conflicts as conflicts, not as unconditional retries of stale 
 
 **First diagram:** Draw location ingress separately from offer/accept state. Label freshness, cell coverage, offer expiry, and the conditional reservation.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/rideshare-dispatch-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon API Gateway** / rider/driver entry | Authenticate updates and ride requests. | ALB + ECS for persistent bidirectional traffic. |
@@ -134,8 +124,6 @@ Treat transaction conflicts as conflicts, not as unconditional retries of stale 
 | **Amazon Location Service** / route and ETA | Estimate route distance/time from candidates. | Self-hosted routing when map coverage, control, or price requires it. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Ride sharing](../../../../assets/design-interview/rideshare-dispatch-deep.svg)
 
 ## Pressure-test the design
 

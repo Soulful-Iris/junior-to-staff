@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -66,6 +66,8 @@ Compare engagement or task success with guardrails for eligibility, latency and 
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -81,7 +83,7 @@ Run 10,000 model variants. Estimate artifact, feature and observation cardinalit
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “A reading app ranks 200 eligible articles for each visitor. The response must finish within 250 ms at P95. Yesterday's engagement model does not know about a newly blocked author. Design a candidate, feature, rank, and experiment path that never recommends a forbidden item.”
+
 
 Assume 40,000 peak recommendation requests/s, two-second fresh interaction signals, and 10,000 simultaneous experiment variants/segments as an intentionally extreme follow-up. A plausible rank score is not evidence that the system is safe or helpful.
 
@@ -92,25 +94,17 @@ Assume 40,000 peak recommendation requests/s, two-second fresh interaction signa
 | Model scores differ offline and online | Detect feature/version skew; canary gate stops wider release |
 | Variant improves clicks but raises complaints | Do not use click-through alone as release criterion |
 
-![Mixing eligibility with ranking lets stale scores surface blocked content](../../../../assets/design-practice/personalized-ranking-boundary.svg)
-
 ## Decide what can fail independently
 
 Candidate retrieval, current eligibility/ownership, feature lookup, ranking, and final filters have separate responsibilities. Allocate an end-to-end latency budget including network, P95 feature fetch, inference, and serialization, with room for variance; 250 ms is a request deadline, not five separate 250-ms allowances. Version both model and features, propagate experiment assignment deterministically, log exposure only after an item was actually shown. Preserve a safe default path when ranking is unavailable.
 
-![An end-to-end 250 millisecond latency budget across candidate lookup, features, rank, eligibility, and network](../../../../assets/design-practice/personalized-ranking-deep.svg)
-
 The allocation adds to 250 ms. If the feature call needs 170 instead of its allotted 100 ms, the whole path overruns unless a timeout triggers fallback early. The chart's 20 ms slack is a teaching budget, not a guarantee that independent P95 stages combine into a P95 request.
-
-![The feature lookup exhausts the remaining budget and triggers a safe fallback](../../../../assets/design-practice/personalized-ranking-trace.svg)
 
 ## Put the AWS names on the boxes
 
-![AWS service boxes labeled with their general architectural roles](../../../../assets/design-practice/personalized-ranking-aws.svg)
-
 **Why these boxes, and what changes the choice:** SageMaker endpoints serve a managed ranker; ECS inference fits a lighter model with existing deployment tooling. DynamoDB serves versioned online features. ECS enforces final eligibility and fallback; CloudWatch observes latency and denial outcomes, not model quality by itself.
 
-Read the smaller label under each service first: it names the architectural job. Then ask whether that service supplies the guarantee in the problem, or simply moves work to the next box.
+
 
 **Senior follow-up:** A rollout raises average CTR 3% while a small language cohort experiences a 20% complaint rise. Define evaluation slices, minimum sample size, rollback signals, and an owner for the trade-off. Explain why the offline metric cannot substitute for an online guardrail.
 

@@ -8,7 +8,7 @@
 
 ## Workload and the decisions it changes
 
-These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -67,6 +67,8 @@ Choose catch-up-all, latest-only or expire for each job type. Display scheduled 
 
 Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
+For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
+
 ## Observe the result
 
 | Action | Expected visible result |
@@ -82,7 +84,7 @@ Allow a customer to move a recurring schedule between timezones. Specify whether
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-> **Interviewer:** “Customers schedule one-time and recurring jobs. Workers can crash after doing the work but before acknowledging it. Schedule accuracy is one minute; a retry must not silently perform a financial action twice.”
+
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 10,000 jobs/s at peak, 50 million future schedules and execution history retained for one year. Clarify service guarantees and a first version before filling the board with services.
 
@@ -92,8 +94,6 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 | Worker crash | Side effect committed, ACK lost | Redelivery uses idempotency key or reconciles result. |
 | Recurring job | Hourly schedule around DST | State whether schedule follows UTC or local wall clock. |
 | Cancel race | Cancel arrives as job is claimed | One versioned state transition decides whether execution may start. |
-
-![The failure path and repaired design for Job scheduler](../../../../assets/design-interview/job-scheduler-before.svg)
 
 ## Think from the contract to the boxes
 
@@ -128,8 +128,6 @@ occurrences separately from worker attempts.
 
 **First diagram:** Draw scheduled → due → leased → running → succeeded/retry/dead-letter states and mark the crash window.
 
-![AWS services named with their provider-neutral architectural roles](../../../../assets/design-interview/job-scheduler-aws.svg)
-
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon EventBridge Scheduler** / managed schedule trigger | Use for service-managed schedules with supported precision and scale. | Custom time-bucket index when per-tenant fairness or finer semantics are required. |
@@ -139,8 +137,6 @@ occurrences separately from worker attempts.
 | **Amazon CloudWatch** / lag + failure alarms | Track due-to-start delay, oldest due item and retry outcomes. | Existing telemetry system with the same latency denominator. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
-
-![A focused failure, capacity, or state diagram for Job scheduler](../../../../assets/design-interview/job-scheduler-deep.svg)
 
 ## Pressure-test the design
 
