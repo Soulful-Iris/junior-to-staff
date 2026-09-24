@@ -239,27 +239,32 @@ def href(base, page): return base.rstrip('/') + page['url']
 
 
 def toc(pages, sequence, current, base):
-    def link(p, label=None, css=''):
+    def link(p, label=None, css='', lesson=False):
         on = p['src'] == current['src']
-        return f'<a class="toc-link {css}{" active" if on else ""}" href="{href(base,p)}" data-page="{E(p["src"])}" {"aria-current=\"page\"" if on else ""}>{E(label or p["title"])}</a>'
+        content = E(label or p['title'])
+        if lesson:
+            content = (f'<span class="lesson-index" aria-label="Chapter {p["chapter"]}, lesson {p["sub"]}">'
+                       f'{p["chapter"]}.{p["sub"]:02}</span><span class="lesson-title">{content}</span>')
+            css += ' numbered-lesson'
+        return f'<a class="toc-link {css}{" active" if on else ""}" href="{href(base,p)}" data-page="{E(p["src"])}" {"aria-current=\"page\"" if on else ""}>{content}</a>'
     result = [f'<a class="identity" href="{base}" aria-label="The Engineering Guide home"><span class="identity-mark" aria-hidden="true">e<span>∕</span></span><span>The Engineering Guide<small>LEARN. BUILD. REASON.</small></span></a>',
               '<div class="search-box"><span aria-hidden="true">⌕</span><label class="sr-only" for="contents-search">Search the curriculum</label><input id="contents-search" type="search" placeholder="Find a concept…" autocomplete="off"><kbd>/</kbd></div><div id="search-results" hidden aria-live="polite"></div>',
               '<div class="contents-label">TABLE OF CONTENTS <button id="collapse-contents" aria-label="Collapse all chapters">−</button></div><div id="contents-tree">', link(pages[0], 'Overview', 'overview')]
     for group in [p for p in sequence if p['kind']=='group']:
-        result.append(f'<section class="toc-area"><h2><span>{group["gnum"]:02}</span>{E(group["title"])}</h2>')
+        result.append(f'<section class="toc-area part-{group["gnum"]}"><h2><span class="part-label">PART {chr(64+group["gnum"])}</span><span class="part-title">{E(group["title"])}</span></h2>')
         result.append(link(group, 'Part introduction', 'part-intro'))
         for chapter in [p for p in sequence if p['kind']=='subject' and p['group']==group['group']]:
             active = current.get('chapter') == chapter['chapter']
-            result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span class="chapter-number">{chapter["chapter"]:02}</span><span>{E(chapter["title"])}</span><span class="chevron" aria-hidden="true">›</span></summary><div class="toc-lessons">')
+            result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span class="chapter-number"><small>CH</small> {chapter["chapter"]:02}</span><span class="chapter-title">{E(chapter["title"])}</span><span class="chevron" aria-hidden="true">›</span></summary><div class="toc-lessons">')
             result.append(link(chapter, 'Chapter introduction'))
             last = None
             for step in [p for p in sequence if p.get('chapter')==chapter['chapter'] and p.get('sub')]:
                 section = step.get('section', 'Learn')
                 if section != last:
                     result.append(f'<div class="toc-section">{E(section)}</div>'); last=section
-                result.append(link(step, f'{step["sub"]:02}  {step["title"]}'))
+                result.append(link(step, lesson=True))
                 if current['src']==step['src'] and step.get('headings'):
-                    result.append('<ol class="toc-headings">')
+                    result.append('<div class="toc-page-label">ON THIS PAGE</div><ol class="toc-headings">')
                     for h in step['headings']:
                         result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
                     result.append('</ol>')
@@ -279,14 +284,14 @@ def toc(pages, sequence, current, base):
         result.extend(link(p) for p in items); result.append('</div></details>')
     result.append(f'<a class="toc-link" href="{base}gallery/">Visual reference</a>')
     studio=[p for p in sequence if p['src'].startswith('companies/')]
-    result.append('</section><section class="toc-area company-area"><h2><span>05</span> COMPANY INTERVIEW STUDIO</h2>')
+    result.append('</section><section class="toc-area company-area"><h2><span class="part-label">OPTIONAL STUDIO</span><span class="part-title">Company interview practice</span></h2>')
     result.append(link(studio[0], 'Start here · the interview room', 'part-intro'))
     for p in studio[1:]:
         active = current['src'] == p['src']
         result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span>{E(p["title"])}</span><span class="chevron">›</span></summary><div class="toc-lessons">')
         result.append(link(p, 'Open company rehearsal'))
         if active and p.get('headings'):
-            result.append('<ol class="toc-headings">')
+            result.append('<div class="toc-page-label">ON THIS PAGE</div><ol class="toc-headings">')
             for h in p['headings']:
                 result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
             result.append('</ol>')
@@ -310,14 +315,22 @@ def overview(b, sequence, base):
 <section class="learning-contract"><div class="section-label">03 / EVERY LESSON HAS A JOB</div><h2>Start with a problem.<br>Leave with a reason.</h2><ol><li><span>01</span><div><h3>Understand the situation</h3><p>A concrete brief, examples, expected behavior, and the boundary of the problem.</p></div></li><li><span>02</span><div><h3>Trace it. Build it. Check it.</h3><p>Visual explanations, a baseline, implementation details, and tests in the same reading flow.</p></div></li><li><span>03</span><div><h3>Change the requirement</h3><p>Follow-ups deepen the same problem into senior and staff-level reasoning.</p></div></li></ol><p class="quiet-note">Use Next to follow the sequence. The contents on the left are always available when you want to revisit a concept. Reference answers remain closed until you choose to inspect them.</p></section>'''
 
 
-def intro(b, page, sequence):
+def intro(b, page, sequence, base):
     if page['kind']=='group':
         children=[p for p in sequence if p['kind']=='subject' and p['group']==page['group']]
         description=b.GROUPS[page['group']][2]
     else:
         children=[p for p in sequence if p.get('chapter')==page.get('chapter') and p.get('sub')]
         description=page.get('blurb') or page['summary']
-    return f'<h1>{E(page["title"])}</h1><p class="chapter-lede">{E(description)}</p><div class="chapter-contract"><span class="section-label">THE WORK AHEAD</span><p>Move through the steps in order. Each explanation leads into its exercise; implementation, diagrams, and deeper questions stay with the problem they explain.</p></div><ol class="chapter-outline">'+''.join(f'<li><span>{i:02}</span><div><h2>{E(p["title"])}</h2><p>{E(p.get("blurb") or p.get("section") or "Learn, apply, and explain")}</p></div></li>' for i,p in enumerate(children,1))+'</ol>'
+    rows=[]
+    for child in children:
+        number = f'CH {child["chapter"]:02}' if page['kind']=='group' else f'{child["chapter"]}.{child["sub"]:02}'
+        rows.append(f'<li><span class="outline-index">{number}</span><div><h2><a href="{E(href(base,child))}">{E(child["title"])}</a></h2><p>{E(child.get("blurb") or child.get("section") or "Worked explanation and practice")}</p></div></li>')
+    return (f'<h1>{E(page["title"])}</h1><p class="chapter-lede">{E(description)}</p>'
+            '<div class="chapter-contract"><span class="section-label">CHOOSE YOUR NEXT LESSON</span>'
+            '<p>Parts group related chapters. Each lesson has a chapter.lesson address, such as 4.07. '
+            'Open a title below, or use Next to follow the reading sequence. Within a lesson, On this page lists its sections.</p></div>'
+            '<ol class="chapter-outline">'+''.join(rows)+'</ol>')
 
 
 def shell(b, page, body, pages, sequence, base):
@@ -325,8 +338,8 @@ def shell(b, page, body, pages, sequence, base):
     prev=sequence[position-1] if position is not None and position>0 else None
     nxt=sequence[position+1] if position is not None and position+1<len(sequence) else None
     is_home=page['kind']=='home'
-    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'PART {page.get("gnum", "")} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
-    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'CHAPTER {page["chapter"]:02} · STEP {page["sub"]:02} OF {page["step_count"]:02}' if page.get('sub') else f'PART {page["gnum"]:02}' if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
+    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'PART {chr(64+page["gnum"])} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
+    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else f'PART {chr(64+page["gnum"])}' if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
     nav=''
     if position is not None:
         previous=(f'<a class="previous-step" href="{href(base,prev)}"><span>← PREVIOUS</span><strong>{E(prev["title"])}</strong></a>' if prev else '<span></span>')
@@ -345,7 +358,7 @@ def shell(b, page, body, pages, sequence, base):
         sticky_nav = f'<nav class="sticky-sequence" aria-label="Sticky lesson sequence">{sticky_previous}{sticky_next}</nav>'
     top_note = '<div class="reader-meta"><span>'+meta+'</span><span>'+('READ · BUILD · REASON' if is_home else E(b.KINDS.get(page['kind'],('Lesson',''))[1] or 'GUIDED READING'))+'</span></div>'
     if is_home: body=overview(b,sequence,base)
-    elif page['kind'] in ('group','subject'): body=intro(b,page,sequence)
+    elif page['kind'] in ('group','subject'): body=intro(b,page,sequence,base)
     current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':len(sequence)},ensure_ascii=True).replace('<','\\u003c')
     mobile_location = (f'<span class="mobile-location"><span class="mobile-page-title" title="{E(page["title"])}">'
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'

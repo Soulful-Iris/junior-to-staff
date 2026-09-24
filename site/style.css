@@ -111,3 +111,32 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 /* Intro timelines are authored for a narrow page and do not need horizontal panning. */
 .lesson-body img[src*="/project-context/"]{min-width:0;width:100%;max-width:520px;height:auto}
 .figwrap:has(img[src*="/project-context/"])+.visual-toolbar .diagram-scroll-hint{display:none}
+
+/* Distinct navigation levels: part bands, chapter badges, lesson addresses, section rails. */
+.toc-area{--part-ink:#315d48;--part-tint:#e5ede6}
+.toc-area.part-1{--part-ink:#245d78;--part-tint:#e6eef3}
+.toc-area.part-2{--part-ink:#315d48;--part-tint:#e5ede6}
+.toc-area.part-3{--part-ink:#82501f;--part-tint:#f3eadc}
+.toc-area.part-4{--part-ink:#70467a;--part-tint:#efe6f1}
+.toc-area>h2,.home .toc-area>h2{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin:24px 0 8px;padding:13px 10px;border-left:3px solid var(--part-ink);background:var(--part-tint);font:650 13px/1.45 var(--sans);letter-spacing:0;color:var(--part-ink)}
+.toc-area>h2 .part-label,.home .toc-area>h2 .part-label{font:750 9px/1.5 var(--sans);letter-spacing:1.1px;color:var(--part-ink);min-width:0}
+.toc-area>h2 .part-title,.home .toc-area>h2 .part-title{font:650 13px/1.45 var(--sans);letter-spacing:0;color:var(--ink)}
+.toc-chapter>summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:9px}
+.chapter-number{display:inline-flex;align-items:center;gap:3px;padding:4px 5px;min-width:43px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--part-ink);font:700 11px/1.1 var(--sans);font-variant-numeric:tabular-nums}
+.chapter-number small{font:700 8px/1 var(--sans);letter-spacing:.3px}
+.chapter-title{font-weight:650;line-height:1.5}
+.toc-lessons>.numbered-lesson{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:baseline;gap:7px;padding-left:7px}
+.lesson-index{font:650 10px/1.7 var(--sans);font-variant-numeric:tabular-nums;color:var(--part-ink);background:var(--part-tint);border-radius:3px;text-align:center;white-space:nowrap}
+.numbered-lesson.active .lesson-index{color:inherit;background:rgba(255,255,255,.16)}
+.lesson-title{min-width:0}
+.toc-page-label{margin:15px 8px 5px 12px;color:var(--muted);font:750 8px/1.4 var(--sans);letter-spacing:1px}
+.toc-headings{list-style:none;border-left:2px solid var(--line);margin:0 3px 16px 12px;padding:0 0 0 9px}
+.toc-headings li::marker{content:""}
+.toc-headings .depth-2>a{font-weight:550}
+.toc-headings .depth-3>a{font-weight:400;padding-left:14px}
+.chapter-outline .outline-index{min-width:62px;white-space:nowrap;font:650 13px/1.7 var(--sans);font-variant-numeric:tabular-nums;color:var(--accent)}
+.chapter-outline h2 a{color:inherit;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.chapter-outline h2 a:hover{text-decoration-color:var(--accent)}
+/* Real UI examples must fit the reading column, including narrow screens. */
+.lesson-body img[src*="/ui-lessons/"]{display:block;width:100%;min-width:0;max-width:700px;height:auto;margin-inline:auto}
+.figwrap:has(img[src*="/ui-lessons/"])+.visual-toolbar .diagram-scroll-hint{display:none}
