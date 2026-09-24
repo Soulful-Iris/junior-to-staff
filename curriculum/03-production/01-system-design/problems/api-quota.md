@@ -2,19 +2,33 @@
 
 ## Application background
 
-Partner organizations call a paid API through several gateway instances. Before forwarding each request, the gateway spends one unit of that organization's allowance or returns a rejection.
+Your company sells access to an API. A partner sends requests to retrieve data, and its plan allows only a certain number of requests during each minute. Before doing the requested work, the service must decide whether that partner has any allowance left.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Several gateway processes receive requests at the same time. A gateway is the entry point that forwards accepted requests to the application. If each gateway keeps its own count, the partner can spend the same remaining allowance more than once.
+
+### A proposed rejection response
+
+For an organization that has spent this minute's allowance, the endpoint should return a result such as this. The three seconds here are an example of the remaining time until its window resets:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 3
+Content-Type: application/json
+
+{"error":"minute_quota_exhausted","remaining":0}
+```
+
+This is the interface you implement around the local quota model. It is not a captured response from a supplied server. The database decision must precede any expensive downstream work.
+
+Admission means deciding whether work may start. The count update and that decision must happen as one indivisible operation, commonly called an atomic operation.
 
 ## Your assignment
 
-**Deliver:** An admission operation backed by shared atomic quota state, plus a trace of concurrent requests competing for the final allowance.
-
-Build partner API admission for 8,000 organizations. A free organization gets 100 admissions per fixed UTC minute; paid organizations also have a daily entitlement. Two gateway instances must not both spend the last available request.
+**Deliver:** Build the decision that admits or rejects a partner request. Make two gateways share the same allowance and demonstrate what happens when both try to spend its final unit.
 
 **Required behavior:** Admission returns allowed with remaining quota, or 429 with a bounded Retry-After. A successful admission spends quota even if downstream work fails. Scope counters by verified organization, policy version and period.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/api_quota.py
 
 **Supplied file:** [`examples/architecture-starts/api_quota.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/api_quota.py). You can also [read or download the source here](../../../../examples/architecture-starts/api_quota.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 gateway-a allowed
@@ -42,7 +56,7 @@ remaining: 0
 
 ### Set up your implementation workspace
 
-Create `work/api-quota/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/api-quota/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -50,7 +64,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
-| quota_policy | organization,version,minute_limit,daily_limit | Authenticated organization selects policy; client IP does not. |
+| quota_policy | organization,version,minute_limit,daily_limit | Authenticated organization selects policy. Client IP does not. |
 | counters | (organization,policy,period) | Minute and daily admission are one atomic decision. |
 | admission.py | admit(org, request_id, now) | Defines request replay behavior and returns a reason for rejection. |
 
@@ -66,7 +80,7 @@ In PostgreSQL, lock the relevant counters in a consistent order and update both 
 
 ### 3. Specify replay and outage behavior
 
-Choose whether a retried API attempt spends again or uses an admission request ID. Keep that choice separate from business-operation idempotency. For a strict paid entitlement, fail closed if the quota authority is unavailable; expose 503 rather than pretending the limit was checked.
+Choose whether a retried API attempt spends again or uses an admission request ID. Keep that choice separate from business-operation idempotency. For a strict paid entitlement, fail closed if the quota authority is unavailable. Expose 503 rather than pretending the limit was checked.
 
 ### 4. Measure the hot organization
 
@@ -76,7 +90,7 @@ Run two client processes against one real shared authority. Observe accepted, re
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Only gateway-a spends the remaining request; gateway-b sees 429. |
+| Run the starting program | Only gateway-a spends the remaining request. Gateway-b sees 429. |
 | Exhaust the daily quota first | Minute quota is unchanged when the combined decision rejects. |
 | Disconnect admission authority | The API returns the declared unavailable result, not an unmetered success. |
 
@@ -84,13 +98,13 @@ Run two client processes against one real shared authority. Observe accepted, re
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 20,000 peak attempts/s; 2,000/s from one organization | That tenant is a hot coordination key even if most attempts are rejected. |
-| 100 admissions per fixed UTC minute | A client can legally use 100 just before and 100 just after a boundary; this is not a rolling-window promise. |
-| 8,000 organizations × 2 active counters | About 16,000 minute/day counter records before policy versions and history; cardinality and contention are different concerns. |
+| 20,000 peak attempts/s. 2,000/s from one organization | That tenant is a hot coordination key even if most attempts are rejected. |
+| 100 admissions per fixed UTC minute | A client can legally use 100 just before and 100 just after a boundary. This is not a rolling-window promise. |
+| 8,000 organizations × 2 active counters | About 16,000 minute/day counter records before policy versions and history. Cardinality and contention are different concerns. |
 
 ## Map the local implementation to AWS
 
@@ -100,25 +114,25 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Enforce API quotas across concurrent gateways: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-quota.svg)
 
-The database or atomic script arbitrates the last token. A gateway-local dictionary cannot coordinate another gateway. Use a durable conditional ledger for hard business entitlements; use an in-memory limiter when its failure/overshoot contract is acceptable.
+The database or atomic script arbitrates the last token. A gateway-local dictionary cannot coordinate another gateway. Use a durable conditional ledger for hard business entitlements. Use an in-memory limiter when its failure/overshoot contract is acceptable.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated API entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated API entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: admission application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: durable quota ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: durable quota ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: admission telemetry | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| ElastiCache admission state | One atomic script per decision; colocate minute/day keys. Define what failover can lose before using it for strict billing entitlements. |
-| DynamoDB alternative | Use conditional transactional minute/day counters when durable strict admission matters more than lowest latency; hot-key throughput must be measured. |
-| Gateway configuration | Managed gateway throttles are a coarse protection layer; do not describe them as your exact organization entitlement ledger. |
+| ElastiCache admission state | One atomic script per decision. Colocate minute/day keys. Define what failover can lose before using it for strict billing entitlements. |
+| DynamoDB alternative | Use conditional transactional minute/day counters when durable strict admission matters more than lowest latency. Hot-key throughput must be measured. |
+| Gateway configuration | Managed gateway throttles are a coarse protection layer. Do not describe them as your exact organization entitlement ledger. |
 | Metrics | Record admitted/rejected/unavailable counts and authority latency by bounded plan/route labels, not every request ID. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -134,22 +148,22 @@ Replace fixed windows with a rolling 60-second policy. Estimate the state needed
 
 
 
-This is a constructed prompt. Assume 8,000 organizations, 20,000 peak requests/s overall, and an occasional 2,000 requests/s from one organization. Start with per-organization policy; do not guess an individual IP is an organization.
+This is a constructed prompt. Assume 8,000 organizations, 20,000 peak requests/s overall, and an occasional 2,000 requests/s from one organization. Start with per-organization policy. Do not guess an individual IP is an organization.
 
 | Example | Input or condition | Expected outcome |
 |---|---|---|
-| One request left | Remaining = 1; two gateways each admit one request | **Invalid:** only one may be admitted; the other receives 429 |
+| One request left | Remaining = 1. Two gateways each admit one request | **Invalid:** only one may be admitted. The other receives 429 |
 | Ordinary limit | 101 requests in one minute for one organization | At most 100 accepted under the chosen window semantics |
-| Client failure | An admitted request fails downstream | State whether admission spends quota; do not quietly refund it |
+| Client failure | An admitted request fails downstream | State whether admission spends quota. Do not quietly refund it |
 | Burst | Paid client sends 100 requests in one second | Define whether burst is legal before selecting token bucket or sliding window |
 
 ## Think aloud before naming a service
 
-The decision must have one authority per `(organization, policy, period)` at the moment of admission. A local dictionary on each gateway answers a different question: *how many requests did this gateway see?* A token bucket smooths bursts; a fixed window resets sharply at its boundary; a sliding window gives a closer rolling limit but needs more state or an approximation. Ask whether “100 per minute” means a fixed calendar minute or any moving 60 seconds. Estimate key cardinality and the hottest single key before talking about sharding.
+The decision must have one authority per `(organization, policy, period)` at the moment of admission. A local dictionary on each gateway answers a different question: *how many requests did this gateway see?* A token bucket smooths bursts. A fixed window resets sharply at its boundary. A sliding window gives a closer rolling limit but needs more state or an approximation. Ask whether “100 per minute” means a fixed calendar minute or any moving 60 seconds. Estimate key cardinality and the hottest single key before talking about sharding.
 
 The simplest correct version writes a conditional counter for each organization and period. Serialize competing admissions through one owner or use an atomic conditional update. Daily and minute counters form **two constraints**: if checking the first spends it and the second rejects, you need an atomic joint decision, a reservation/compensation policy, or a carefully documented approximation. A fast cache can reduce reads, but an eventually synchronized cache cannot promise an exact hard quota by itself.
 
-Read the fork: A and B arrive independently. One successful conditional decrement changes the state; the other must observe a failed condition. Redraw this with two independent local counters and locate the extra admitted request.
+Read the fork: A and B arrive independently. One successful conditional decrement changes the state. The other must observe a failed condition. Redraw this with two independent local counters and locate the extra admitted request.
 
 ## Draw, test, change
 
@@ -157,7 +171,7 @@ Draw client → gateway → shared admission authority → API and label the key
 
 ## Put the AWS names on the boxes
 
-**Why these boxes, and what changes the choice:** DynamoDB conditional updates arbitrate a single shared quota key; a transaction or reservation handles minute and daily quotas together. An ElastiCache cache is useful for approximate reads, but a stale cache cannot enforce an exact limit. ECS can replace Lambda when connection reuse or steady traffic justifies a service.
+**Why these boxes, and what changes the choice:** DynamoDB conditional updates arbitrate a single shared quota key. A transaction or reservation handles minute and daily quotas together. An ElastiCache cache is useful for approximate reads, but a stale cache cannot enforce an exact limit. ECS can replace Lambda when connection reuse or steady traffic justifies a service.
 
 
 
@@ -165,10 +179,10 @@ Draw client → gateway → shared admission authority → API and label the key
 
 **Staff follow-up:** One organization floods two Regions. An eventually replicated counter cannot provide a hard global maximum. Propose a home-region admission owner, leased regional budgets with bounded overshoot, or a higher-latency coordination point. State the exact lost-capacity or overspend bound when a Region disappears.
 
-**Practice artifact:** Two diagrams, the acceptance rule, a 10-line concurrent-request trace, and a table of decisions under normal, timeout, policy-change, and regional-failure conditions. Spend 35 minutes drawing and revising; use 10 minutes to explain why the first design fails.
+**Practice artifact:** Two diagrams, the acceptance rule, a 10-line concurrent-request trace, and a table of decisions under normal, timeout, policy-change, and regional-failure conditions. Spend 35 minutes drawing and revising. Use 10 minutes to explain why the first design fails.
 
-**AWS translation:** API Gateway usage plans can help with coarse throttling; enforce product-specific, exact organization quotas at your own atomic authority. A DynamoDB conditional update can protect a single counter item; multiple quota items need an explicit transactional or reservation design. Check throttling and hot-key capacity, not just total table throughput.
+**AWS translation:** API Gateway usage plans can help with coarse throttling. Enforce product-specific, exact organization quotas at your own atomic authority. A DynamoDB conditional update can protect a single counter item. Multiple quota items need an explicit transactional or reservation design. Check throttling and hot-key capacity, not just total table throughput.
 
-**Evidence and origin:** An [anonymous January 2026 interview report](https://www.reddit.com/r/leetcode/comments/1qijuto/linkedin_interview_experience/) mentions an API quota/rate-tracker design prompt; its details are unverified. This exercise, numbers, and follow-ups are original. See [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) for a primary-source consistency constraint.
+**Evidence and origin:** An [anonymous January 2026 interview report](https://www.reddit.com/r/leetcode/comments/1qijuto/linkedin_interview_experience/) mentions an API quota/rate-tracker design prompt. Its details are unverified. This exercise, numbers, and follow-ups are original. See [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) for a primary-source consistency constraint.
 
 </details>

@@ -2,19 +2,27 @@
 
 ## Application background
 
-A subscription product calculates invoices in web requests and scheduled renewals. Deploying new code and selecting which customers use it are separate controls.
+A subscription product has a new way to calculate invoices. The team wants a small set of customers to use it first while everyone else keeps the old behavior. A feature setting decides which version each customer receives after the code is deployed.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Customers should not switch unpredictably between versions on every request. Also, an interactive purchase might run immediately while the monthly renewal job runs hours later. A healthy web request does not demonstrate that delayed work is healthy.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Customer 17 is assigned to the new calculation | Keep that assignment stable during the rollout. |
+| The daily renewal worker runs later | Observe its results separately from web purchases. |
+| The new calculation is wrong | Switch exposure back to compatible old behavior. |
+
+A cohort is the selected group of customers. Deployment installs code. Rollout decides who uses a behavior. Rollback must consider any new data the code has already written.
 
 ## Your assignment
 
-**Deliver:** A deterministic cohort function, a versioned rollout configuration and a rollback walkthrough covering both interactive and delayed work.
+**Deliver:** Build stable customer selection for a new invoice calculation. Version the selection settings and demonstrate rollback for both immediate requests and delayed renewal jobs.
 
-Roll out a new invoice-calculation path to a subscription product. The web path looks healthy at 5% exposure, but a daily renewal worker will not execute until midnight. Users must remain in a stable cohort and operators need an immediate way to restore the old compatible behavior.
+**Required behavior:** Evaluate a versioned flag against a stable subject identity. Exposure is deterministic for a given flag salt and subject. Turning the flag off restores the supported old path. It cannot undo irreversible writes already made by the new path.
 
-**Required behavior:** Evaluate a versioned flag against a stable subject identity. Exposure is deterministic for a given flag salt and subject. Turning the flag off restores the supported old path; it cannot undo irreversible writes already made by the new path.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/feature_rollout.py
 
 **Supplied file:** [`examples/architecture-starts/feature_rollout.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/feature_rollout.py). You can also [read or download the source here](../../../../examples/architecture-starts/feature_rollout.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 user-4 5% True 25% True repeat True
@@ -44,7 +52,7 @@ user-9 5% False 25% True repeat False
 
 ### Set up your implementation workspace
 
-Create `work/feature-rollout/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/feature-rollout/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -64,7 +72,7 @@ Introduce the new code behind a flag while retaining the old reader/writer contr
 
 ### 2. Assign and record stable cohorts
 
-Hash a stable subject with a fixed flag salt; increasing percentage should include the previous cohort. Record actual exposure at execution time, not only configuration assignment. Keep employee overrides and emergency-off precedence explicit.
+Hash a stable subject with a fixed flag salt. Increasing percentage should include the previous cohort. Record actual exposure at execution time, not only configuration assignment. Keep employee overrides and emergency-off precedence explicit.
 
 ### 3. Observe the relevant work cycle
 
@@ -86,13 +94,13 @@ Turn the flag off and confirm the old path processes records written during expo
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 100,000 eligible accounts; 5% initial exposure | About 5,000 accounts, with random variation; hash cohorts are not an exact-count allocation. |
+| 100,000 eligible accounts. 5% initial exposure | About 5,000 accounts, with random variation. Hash cohorts are not an exact-count allocation. |
 | Daily renewal job | A ten-minute observation window cannot reveal a defect in a path that runs once per day. |
-| One-minute configuration freshness bound | Record applied version and age; define the fallback when refresh is stale. |
+| One-minute configuration freshness bound | Record applied version and age. Define the fallback when refresh is stale. |
 
 ## Map the local implementation to AWS
 
@@ -102,14 +110,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Release invoice changes with stable cohorts and rollback: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/feature-rollout.svg)
 
-AppConfig distributes the policy; application code evaluates exposure and preserves compatible behavior. A flag cannot reverse an external charge or repair incompatible stored data.
+AppConfig distributes the policy. Application code evaluates exposure and preserves compatible behavior. A flag cannot reverse an external charge or repair incompatible stored data.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local versioned configuration | AWS AppConfig: rollout configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
-| Application or worker process | Amazon ECS: web application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Application or worker process | Amazon ECS: renewal worker | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: compatible business data | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: web application | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: renewal worker | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: compatible business data | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: exposure and outcome evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 | Python operation or worker function | AWS Lambda: rollout controller | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 
@@ -118,10 +126,10 @@ AppConfig distributes the policy; application code evaluates exposure and preser
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | Config consumer | Validate snapshots, expose applied version and keep a documented stale-config fallback. |
-| Metrics | Record bounded variant/path labels and stable release identity; protect personal cohort identifiers. |
-| Rollback | Limit controller permissions to the relevant application/environment; retain the prior valid configuration. |
+| Metrics | Record bounded variant/path labels and stable release identity. Protect personal cohort identifiers. |
+| Rollback | Limit controller permissions to the relevant application/environment. Retain the prior valid configuration. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -142,13 +150,13 @@ Let product change the hash salt mid-rollout. Explain cohort churn and experimen
 | Situation | Expected behavior |
 |---|---|
 | One customer makes 20 requests at 5% | All requests take the same assigned path for this assignment salt |
-| Failure starts at 50% | Stop new exposure after propagation; drain/cancel admitted work by contract and repair committed effects |
-| Batch job runs 24 hours after 100% | Bake time or delayed gate catches the regression; recovery plan addresses writes already made |
-| Control path schema was removed | Toggle cannot restore behavior; migration sequencing must have kept both paths compatible |
+| Failure starts at 50% | Stop new exposure after propagation. Drain/cancel admitted work by contract and repair committed effects |
+| Batch job runs 24 hours after 100% | Bake time or delayed gate catches the regression. Recovery plan addresses writes already made |
+| Control path schema was removed | Toggle cannot restore behavior. Migration sequencing must have kept both paths compatible |
 
 ## Decide what the flag actually protects
 
-Hash `(stable account ID, assignment salt)` into a fixed bucket. **Keep the salt unchanged across 5% → 50% → 100%**; the configuration revision changes the threshold, not the assignment. A new salt means an intentional new experiment. Use the trusted account identity rather than a browser-selected ID; define how account merges move membership. Separate deploying compatible code from activating the behavior. Store a validated configuration version, observe per-cohort error and conversion rates, and rollback on a **guardrail** signal. A flag reversal is not a data rollback: if the new path writes incompatible records, use expand–migrate–contract and a compensating workflow. Account for an alarm with no data before relying on it as a guardrail.
+Hash `(stable account ID, assignment salt)` into a fixed bucket. **Keep the salt unchanged across 5% → 50% → 100%**. The configuration revision changes the threshold, not the assignment. A new salt means an intentional new experiment. Use the trusted account identity rather than a browser-selected ID. Define how account merges move membership. Separate deploying compatible code from activating the behavior. Store a validated configuration version, observe per-cohort error and conversion rates, and rollback on a **guardrail** signal. A flag reversal is not a data rollback: if the new path writes incompatible records, use expand–migrate–contract and a compensating workflow. Account for an alarm with no data before relying on it as a guardrail.
 
 ### A cohort you can reproduce
 
@@ -185,7 +193,7 @@ identity or already committed billing effects.
 | Amazon ECS (application runtime) | Run both compatible code paths during exposure | AWS Lambda for stateless request processing and existing serverless deployment |
 | Amazon RDS for PostgreSQL (relational database) | Keep both data representations compatible during migration | Amazon DynamoDB for a key-oriented model with conditional writes |
 
-AWS AppConfig can roll back on configured CloudWatch alarms during deployment and bake time; it cannot reverse side effects already persisted by customers. Check alarm permissions and a measurable signal before turning on automatic rollback.
+AWS AppConfig can roll back on configured CloudWatch alarms during deployment and bake time. It cannot reverse side effects already persisted by customers. Check alarm permissions and a measurable signal before turning on automatic rollback.
 
 **Senior follow-up:** The 5% cohort sees an error increase but revenue improves. Define primary and guardrail measures, minimum sample size, and a decision rule rather than “watch the dashboard.”
 
@@ -193,6 +201,6 @@ AWS AppConfig can roll back on configured CloudWatch alarms during deployment an
 
 **Practice artifact:** Draw control plane, request path, and measurement path. Trace one customer across 5%, 50%, rollback, and next-day batch processing.
 
-**Source boundary:** Original prompt. [AWS AppConfig rollback documentation](https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html) establishes AWS behavior; a [May 2026 Meta ingestion migration](https://engineering.fb.com/2026/05/12/data-infrastructure/migrating-data-ingestion-systems-at-meta-scale/) illustrates why transition and rollback strategies matter, without implying Meta asks this question.
+**Source boundary:** Original prompt. [AWS AppConfig rollback documentation](https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html) establishes AWS behavior. A [May 2026 Meta ingestion migration](https://engineering.fb.com/2026/05/12/data-infrastructure/migrating-data-ingestion-systems-at-meta-scale/) illustrates why transition and rollback strategies matter, without implying Meta asks this question.
 
 </details>

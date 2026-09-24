@@ -2,19 +2,27 @@
 
 ## Application background
 
-Internal service teams publish routes through one common HTTP entry point. The gateway handles shared identity and routing policy while each destination still decides access to its own resources.
+Many internal teams expose HTTP APIs, and clients need a common address to reach them. An API gateway receives a request, checks shared entry rules and forwards it to the selected service. For example, `/orders/17` goes to the order service.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The gateway needs a table of routes and configuration versions. A bad update could otherwise break many services at once. Verifying a caller's identity at the gateway also does not decide which individual orders that caller may read.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| A client requests `/orders/17` | Forward it to the configured order service. |
+| A route update names an invalid destination | Refuse to activate that configuration. |
+| A caller requests another customer's order | Let the order service enforce ownership even after gateway authentication. |
+
+Authentication establishes who the caller is. Resource authorization decides whether that caller may perform this operation on this particular record.
 
 ## Your assignment
 
-**Deliver:** A validated route snapshot, atomic configuration activation and rollback, with a request trace showing gateway and service responsibilities.
-
-Build the shared API entry layer for 150 internal services. Teams need consistent authentication, coarse admission limits and routing, while each service still owns resource authorization. A malformed route configuration must not take every service offline.
+**Deliver:** Build a versioned route configuration with validation, activation and rollback. Trace one request to show what the gateway checks and what the destination service still decides.
 
 **Required behavior:** The gateway verifies identity and routes using a versioned configuration snapshot. Backends authorize requested objects. The gateway adds at most 15 ms p99 overhead under the stated load and propagates a request deadline and trace context.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/api_gateway_platform.py
 
 **Supplied file:** [`examples/architecture-starts/api_gateway_platform.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/api_gateway_platform.py). You can also [read or download the source here](../../../../examples/architecture-starts/api_gateway_platform.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 rejected; keep version 1
@@ -42,7 +50,7 @@ active version 3
 
 ### Set up your implementation workspace
 
-Create `work/api-gateway-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/api-gateway-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -66,7 +74,7 @@ Propagate an absolute remaining deadline and use bounded connections, body sizes
 
 ### 3. Ship configuration as an atomic snapshot
 
-Validate routes, auth rules and timeout bounds before activation. A custom proxy can consume AppConfig; AppConfig does not automatically reprogram API Gateway. Instances retain the last valid snapshot on parse failure and report the exact applied version.
+Validate routes, auth rules and timeout bounds before activation. A custom proxy can consume AppConfig. AppConfig does not automatically reprogram API Gateway. Instances retain the last valid snapshot on parse failure and report the exact applied version.
 
 ### 4. Roll out by limited traffic scope
 
@@ -76,7 +84,7 @@ Start with a subset of instances or routes, compare errors/latency, and restore 
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Invalid configuration leaves version 1 active; valid version 3 activates atomically. |
+| Run the starting program | Invalid configuration leaves version 1 active. Valid version 3 activates atomically. |
 | Forge a subject header | The gateway discards it and the backend receives only verified context. |
 | Slow one upstream | Its bounded pool saturates without exhausting unrelated service routes. |
 
@@ -84,13 +92,13 @@ Start with a subset of instances or routes, compare errors/latency, and restore 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | 25,000 requests/s across 150 services | Mean per service is about 167/s, but hot routes must be sized separately. |
 | 15 ms p99 added overhead | Measure gateway time independently of backend latency and client network time. |
-| Configuration rollout to 100 instances assumption | Track applied version and rejection reason; a successful upload is not proof every instance activated it. |
+| Configuration rollout to 100 instances assumption | Track applied version and rejection reason. A successful upload is not proof every instance activated it. |
 
 ## Map the local implementation to AWS
 
@@ -100,14 +108,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Build versioned API routing and admission policies: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-gateway-platform.svg)
 
-This is a custom proxy platform behind an ALB. Managed API Gateway is an alternative when its routing, authentication and quota features fit; its control plane and deployment model are different from an AppConfig-driven proxy.
+This is a custom proxy platform behind an ALB. Managed API Gateway is an alternative when its routing, authentication and quota features fit. Its control plane and deployment model are different from an AppConfig-driven proxy.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local HTTP listener | Application Load Balancer: regional entry routing | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
-| Application or worker process | Amazon ECS: custom gateway proxy | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: custom gateway proxy | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local versioned configuration | AWS AppConfig: versioned proxy configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
-| Application or worker process | Amazon ECS: backend service fleet | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: backend service fleet | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: gateway operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 | Local provider configuration placeholder | AWS Secrets Manager: upstream credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
 
@@ -115,11 +123,11 @@ This is a custom proxy platform behind an ALB. Managed API Gateway is an alterna
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Gateway fleet | At least two AZs, bounded connection pools and graceful draining; size from measured per-task capacity. |
-| Configuration consumer | Poll/cache versioned snapshots with validation and a last-known-good fallback; expose applied version. |
+| Gateway fleet | At least two AZs, bounded connection pools and graceful draining. Size from measured per-task capacity. |
+| Configuration consumer | Poll/cache versioned snapshots with validation and a last-known-good fallback. Expose applied version. |
 | Authentication | Pin trusted issuers/audiences, handle key rotation and define behavior when key refresh fails. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -139,24 +147,24 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 | Situation | Input / condition | Expected result |
 |---|---|---|
-| Unknown route | Caller requests `/v9/billing` | Fail closed with a clear 404; do not guess a backend. |
+| Unknown route | Caller requests `/v9/billing` | Fail closed with a clear 404. Do not guess a backend. |
 | Auth expires | Token expires before admission | Return 401 without forwarding. An already admitted request follows its deadline and backend policy. |
 | Bad config | New route points billing to staging | Validation blocks publish or staged rollout catches it. |
 | Dependency slow | One service stalls 8 seconds | Per-route deadline and circuit breaker protect unrelated APIs. |
 
 ## Think from the contract to the boxes
 
-The gateway should centralize policy and routing, not domain business logic. Treat config as a versioned artifact: validate route targets, auth modes, timeout budgets, and compatibility before a canary. Keep each request’s end-to-end deadline; retry only safe/idempotent operations and never beyond remaining time. Avoid becoming a global failure domain by isolating route/config caches and rollout.
+The gateway should centralize policy and routing, not domain business logic. Treat config as a versioned artifact: validate route targets, auth modes, timeout budgets, and compatibility before a canary. Keep each request’s end-to-end deadline. Retry only safe/idempotent operations and never beyond remaining time. Avoid becoming a global failure domain by isolating route/config caches and rollout.
 
-**Authorization boundary:** validate issuer, audience, signature, expiry and required scope immediately before admission. Pass a trusted, request-bound identity to the backend; each backend still checks resource ownership. In this baseline, expiry after admission does not revoke that request or undo a commit. A backend requiring a fresh check at commit must say so and reject *before* its effect. A 60-second reauthorization interval for long-lived streams is a separate policy, not a property of ordinary HTTP requests.
+**Authorization boundary:** validate issuer, audience, signature, expiry and required scope immediately before admission. Pass a trusted, request-bound identity to the backend. Each backend still checks resource ownership. In this baseline, expiry after admission does not revoke that request or undo a commit. A backend requiring a fresh check at commit must say so and reject *before* its effect. A 60-second reauthorization interval for long-lived streams is a separate policy, not a property of ordinary HTTP requests.
 
 | Expiry trace | Result |
 |---|---|
-| Admission at 12:00:01; token expired at 12:00:00 | 401; nothing sent downstream. |
-| Admission at 11:59:59; expiry 12:00:00; commit 12:00:01 | Accepted operation may complete under its original deadline. |
-| Commit succeeded, response was lost, token now expired | Authenticate again; replay the same operation key and recover the committed result. Do not turn credential refresh into a new charge. |
+| Admission at 12:00:01. Token expired at 12:00:00 | 401. Nothing sent downstream. |
+| Admission at 11:59:59. Expiry 12:00:00. Commit 12:00:01 | Accepted operation may complete under its original deadline. |
+| Commit succeeded, response was lost, token now expired | Authenticate again. Replay the same operation key and recover the committed result. Do not turn credential refresh into a new charge. |
 
-**Route-control choice:** API Gateway integrations are deployed through its configuration API/IaC. AppConfig does not directly rewrite those integrations. For a custom ALB/ECS proxy, an AppConfig client fetches a candidate route snapshot; the proxy validates destinations against an allowlist and atomically swaps an in-memory version. In-flight requests retain their selected route version. Keep the last known good snapshot on fetch/validation failure. Test a bad target and rollback without moving already-started requests.
+**Route-control choice:** API Gateway integrations are deployed through its configuration API/IaC. AppConfig does not directly rewrite those integrations. For a custom ALB/ECS proxy, an AppConfig client fetches a candidate route snapshot. The proxy validates destinations against an allowlist and atomically swaps an in-memory version. In-flight requests retain their selected route version. Keep the last known good snapshot on fetch/validation failure. Test a bad target and rollback without moving already-started requests.
 
 **First diagram:** Draw config publish separately from request flow. Label the validation gate, per-route budget, auth decision, and backend health boundary.
 
@@ -165,7 +173,7 @@ The gateway should centralize policy and routing, not domain business logic. Tre
 | **Amazon API Gateway** / managed API entry | Handle managed HTTP APIs and common auth/throttle policies. | ALB + ECS proxy for custom protocol transformations and high request control. |
 | **AWS Lambda** / policy hook | Run short custom request validation. | ECS sidecar/plugin for low-latency stable policies. |
 | **Amazon Cognito** / identity provider | Issue/verify user tokens for applicable products. | External OIDC provider when enterprise identity is already managed. |
-| **AWS AppConfig** / route policy rollout | Distribute versioned policy to an explicit custom consumer; not a direct API Gateway integration updater. | GitOps config distribution when team-owned proxy fleet is preferred. |
+| **AWS AppConfig** / route policy rollout | Distribute versioned policy to an explicit custom consumer. Not a direct API Gateway integration updater. | GitOps config distribution when team-owned proxy fleet is preferred. |
 | **Amazon CloudWatch** / route telemetry | Measure per-route latency, errors and throttles. | Existing OpenTelemetry stack with per-route labels and alarm ownership. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.

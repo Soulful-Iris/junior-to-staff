@@ -2,7 +2,11 @@
 
 ## Application background
 
-Engineers repeatedly ask an assistant to change an application. A reusable instruction should preserve a useful constraint, such as cursor correctness, without carrying unrelated details from the previous task.
+When asking an assistant to change an application, you often repeat instructions such as “preserve existing callers” or “show what happens for an empty result.” You want a small set of reusable instructions that save effort without carrying unrelated details into every task.
+
+An instruction that helped build a reading-list UI may not help with a data importer. To find out, apply the proposed library to a different task and record which entries still improve the result.
+
+A held-out task is a task you did not use while choosing the instructions. It helps reveal whether the instructions transfer rather than merely fitting the examples that produced them.
 
 ## Your assignment
 
@@ -24,7 +28,7 @@ Leave the server running while sending the documented requests in a second termi
 
 ## Complete the exercise
 
-1. Collect three real development transcripts; if you have none, first use the local reading-list API for a tag change, a conflict response and a title-timeout explanation, saving each conversation.
+1. Collect three real development transcripts. If you have none, first use the local reading-list API for a tag change, a conflict response and a title-timeout explanation, saving each conversation.
 
 2. Create `PROMPTS.md` with a name, applicable situation, instruction and observable check for each entry. Distinguish a product requirement from a preference about style.
 
@@ -34,15 +38,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Five entries from three transcripts; holdout is a paginated importer, while source tasks were UI edits. | Each entry names its constraint, applicability, checkpoint, and keep/parameterize/delete decision after the holdout. |
-| Boundary / failure | An entry says “do not mock the database” on a parser with no database. | Reject or narrow applicability; literal reuse is not successful transfer. |
-| Scope | A small local comparison; no causal productivity claim from one run. | Explain any additional assumption before implementing it. |
+| Small example | Five entries from three transcripts. Holdout is a paginated importer, while source tasks were UI edits. | Each entry names its constraint, applicability, checkpoint, and keep/parameterize/delete decision after the holdout. |
+| Boundary / failure | An entry says “do not mock the database” on a parser with no database. | Reject or narrow applicability. Literal reuse is not successful transfer. |
+| Scope | A small local comparison. No causal productivity claim from one run. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -57,7 +61,7 @@ flowchart TD
  H --> X["Hidden domain assumptions"]
 ```
 
-Repeated words can preserve irrelevant assumptions. First extract the constraint and its evidence; wording is secondary.
+Repeated words can preserve irrelevant assumptions. First extract the constraint and its evidence. Wording is secondary.
 
 <details>
 <summary>Reveal the approach and decisions</summary>
@@ -73,7 +77,7 @@ Predefine the holdout checkpoint, then parameterize only genuine variables. Comp
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Re-run the saved task probes and track model/configuration versions. Earlier observations remain historical; they do not establish present behavior.
+Re-run the saved task probes and track model/configuration versions. Earlier observations remain historical. They do not establish present behavior.
 
 ```mermaid
 flowchart TD
@@ -107,9 +111,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Name one transferred constraint and one failed transfer with evidence. **Additional lead scope:** Version and review shared constraints without turning anecdotes into policy. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Name one transferred constraint and one failed transfer with evidence. **Additional lead scope:** Version and review shared constraints without turning anecdotes into policy. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -130,7 +134,7 @@ did the work — *show me it failing first*, *do not mock the database*, *stop
 when it runs* — and the rest was upholstery. The mining question is which
 clause was load-bearing, and the evidence is what the output did differently
 because of it. Sometimes the unit is not one ask but a sequence — describe it
-back, then slice, then prove — because ordering is what protects your judgment;
+back, then slice, then prove — because ordering is what protects your judgment.
 a sequence entry names its checkpoints.
 
 Then the part that separates a library from a superstition: the transfer test.
@@ -152,7 +156,7 @@ did, citing the exact moment in the transcript where the output
 changed because of it. No moment, bottom of the list.
 ```
 
-The check is the citations; anything with no moment attached gets cut.
+The check is the citations. Anything with no moment attached gets cut.
 
 **2 — compress into entries.**
 
@@ -180,7 +184,7 @@ survivor you can name the failure it prevents.
 **On AWS**
 
 Prompts live in git — versioned, diffed and blamed like anything load-bearing.
-**Bedrock Prompt Management** is the managed neighbour; it earns a place when
+**Bedrock Prompt Management** is the managed neighbour. It earns a place when
 people who do not ship code must edit prompts, or prompts must change at
 runtime without a deploy. A personal library meets neither test. The genuinely
 useful piece is measurement: asks run through **Bedrock** with invocation
@@ -207,7 +211,7 @@ stop collecting phrasings for good.
 - Ablate: same task, with and without the constraint, fresh sessions. Equally
   good outputs mean it does nothing — or the task was too easy to tell.
 - Success defined after seeing the output. That is tinkering with a ledger.
-- Every entry survived transfer untouched. Your domains were too close; the
+- Every entry survived transfer untouched. Your domains were too close. The
   clean result is the suspicious one.
 
 ---

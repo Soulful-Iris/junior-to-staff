@@ -2,19 +2,33 @@
 
 ## Application background
 
-Ticket buyers choose seats, hold them briefly and pay before the hold expires. Browsers may show the same available seat, but only its current hold owner can confirm it.
+A concert buyer selects seat A-17 and begins entering payment details. The service temporarily holds that seat so another buyer cannot purchase it during checkout. A hold has an owner and an expiry time.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Many browsers may have seen A-17 as available a moment earlier. They can all try to reserve it, but only one should receive a valid hold. A payment that arrives after the hold expires needs a deliberate outcome.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Ana requests A-17 | Return a hold ID and expiry time. |
+| Ben requests A-17 before Ana's hold expires | Tell Ben it is unavailable. |
+| Ana's payment completes after the hold has expired | Recheck ownership and decide whether to reserve again or refund. |
+
+A hold is a temporary claim, not a completed purchase. Showing availability, acquiring a hold and confirming a paid seat are separate steps.
+
+### Sizing that affects this decision
+
+The sale receives 60,000 purchase attempts/s for 20 seconds: 1.2 million attempts for 30,000 seats. Even before considering repeated buyers, most attempts cannot reserve a seat. Admission control and clear rejection are part of the normal launch behavior, not just outage handling.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** Atomic seat holds, expiry and confirmation operations, with a competing-buyers walkthrough and an expired-payment decision.
+**Deliver:** Build temporary seat holds and paid confirmation. Demonstrate two buyers competing for one seat and decide what happens to a payment received after its hold expires.
 
-Build ticket reservations for a 30,000-seat concert. At noon, 60,000 purchase attempts/s arrive for twenty seconds. Seat A-17 is shown as available to many browsers; exactly one active hold may own it.
+**Required behavior:** POST /holds accepts event, seat IDs and request identity. A hold expires after five minutes. Checkout converts a live hold to sold under the same owner. Cached availability never authorizes the sale.
 
-**Required behavior:** POST /holds accepts event, seat IDs and request identity. A hold expires after five minutes. Checkout converts a live hold to sold under the same owner; cached availability never authorizes the sale.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/ticket_inventory.py
 
 **Supplied file:** [`examples/architecture-starts/ticket_inventory.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/ticket_inventory.py). You can also [read or download the source here](../../../../examples/architecture-starts/ticket_inventory.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Ana held
@@ -44,7 +58,7 @@ Late Ana 409 hold invalid
 
 ### Set up your implementation workspace
 
-Create `work/ticket-inventory/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/ticket-inventory/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -72,13 +86,13 @@ Put a waiting room or bounded admission token ahead of expensive writes. A token
 
 ### 4. Reconcile payment after expiry
 
-Payment timeout means unknown. Record the provider key before the call. If a late payment succeeds after the hold was lost, move to an explicit refund or reacquisition workflow; do not mark an already sold seat as available.
+Payment timeout means unknown. Record the provider key before the call. If a late payment succeeds after the hold was lost, move to an explicit refund or reacquisition workflow. Do not mark an already sold seat as available.
 
 ## Demonstrate the completed local result
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Ben cannot take Ana’s live hold; after expiry Ana cannot sell Ben’s newly held seat. |
+| Run the starting program | Ben cannot take Ana’s live hold. After expiry Ana cannot sell Ben’s newly held seat. |
 | Lose a reservation response and retry | The original hold ID returns. |
 | Pause expiry cleanup | Expired holds still fail checkout because the write checks expires_at. |
 
@@ -86,13 +100,13 @@ Payment timeout means unknown. Record the provider key before the call. If a lat
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 60,000 attempts/s × 20 seconds | 1.2 million attempts compete for 30,000 seats; most attempts cannot succeed. |
+| 60,000 attempts/s × 20 seconds | 1.2 million attempts compete for 30,000 seats. Most attempts cannot succeed. |
 | Five-minute hold lifetime | Expiration is a checked timestamp, not the time a cleanup worker happens to run. |
-| Four-seat cart limit | Decide whether all four seats are held atomically; this exercise requires all or none. |
+| Four-seat cart limit | Decide whether all four seats are held atomically. This exercise requires all or none. |
 
 ## Map the local implementation to AWS
 
@@ -106,22 +120,22 @@ The database decides seat ownership. CloudFront makes the storefront cheap to se
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local static/media delivery path | Amazon CloudFront: static storefront delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reservation entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local static/media delivery path | Amazon CloudFront: static storefront delivery | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reservation entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: hold and checkout service | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: inventory authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local pending-work collection | Amazon SQS: repair queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: inventory authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: repair queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: reconciliation worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| DynamoDB inventory | Condition every transition on current owner/status and time; TTL only removes old records eventually. |
-| Admission capacity | Start the exercise with a configured maximum active reservation rate and explicit 429/Retry-After behavior; tune from observed write capacity. |
-| Payment credentials | Secrets Manager and a sandbox provider; no card data in application logs. |
+| DynamoDB inventory | Condition every transition on current owner/status and time. TTL only removes old records eventually. |
+| Admission capacity | Start the exercise with a configured maximum active reservation rate and explicit 429/Retry-After behavior. Tune from observed write capacity. |
+| Payment credentials | Secrets Manager and a sandbox provider. No card data in application logs. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -130,7 +144,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-Let users reserve any four adjacent seats. The search result is a suggestion; the selected set still needs one atomic claim. Quantify retries near sellout and choose when to stop searching rather than spin indefinitely.
+Let users reserve any four adjacent seats. The search result is a suggestion. The selected set still needs one atomic claim. Quantify retries near sellout and choose when to stop searching rather than spin indefinitely.
 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
@@ -141,36 +155,36 @@ Constructed practice brief. Assume 30,000 seats across a venue, an on-sale spike
 
 | Event | Expected answer | Failure to prevent |
 |---|---|---|
-| A12 has no hold; Ana and Ben reserve concurrently | One valid hold ID; one explicit unavailable result | Two confirmed owners |
+| A12 has no hold. Ana and Ben reserve concurrently | One valid hold ID. One explicit unavailable result | Two confirmed owners |
 | Hold expires while payment completes | One documented authority chooses whether capture wins or is refunded | Sold seat returning to inventory |
 | Same request ID retried after lost reply | Return the original hold/result | Two charges or two holds |
 | Buyer releases A12 | The seat is available after the release commits | Stale hold silently blocking stock |
 
 ## Start with the invariant
 
-At any instant, a seat can have at most one live owner or hold. Keep authoritative `seat_id, state, hold_id, expires_at, version` together. A conditional transition from AVAILABLE (or expired under a checked lease) to HELD is the linearization point. Do not implement “read AVAILABLE, then write HELD” as two unprotected operations. Use the server's authoritative time for expiry; TTL cleanup is not the decision itself. A client countdown only shows an estimate.
+At any instant, a seat can have at most one live owner or hold. Keep authoritative `seat_id, state, hold_id, expires_at, version` together. A conditional transition from AVAILABLE (or expired under a checked lease) to HELD is the linearization point. Do not implement “read AVAILABLE, then write HELD” as two unprotected operations. Use the server's authoritative time for expiry. TTL cleanup is not the decision itself. A client countdown only shows an estimate.
 
-Queue or waiting-room admission can keep the sale alive under burst, but it does not fix seat correctness. Partition seats by event or seat ID, protect popular sections from hot partitions, and decide if selecting adjacent seats requires one atomic reservation of all requested seats. If not supported, reject the group or explicitly offer partial seats; never silently split a paid order.
+Queue or waiting-room admission can keep the sale alive under burst, but it does not fix seat correctness. Partition seats by event or seat ID, protect popular sections from hot partitions, and decide if selecting adjacent seats requires one atomic reservation of all requested seats. If not supported, reject the group or explicitly offer partial seats. Never silently split a paid order.
 
-Trace the orange path separately: expiry releases only hold `h1` if it still owns the seat. A payment arriving after expiry requires a refund or repair record; it cannot change AVAILABLE directly to SOLD based on an obsolete hold.
+Trace the orange path separately: expiry releases only hold `h1` if it still owns the seat. A payment arriving after expiry requires a refund or repair record. It cannot change AVAILABLE directly to SOLD based on an obsolete hold.
 
 ## Follow the failure instead of guessing
 
-Draw the seat write, the hold-expiry worker, the payment call, and the confirmation message as separate boundaries. Write a three-event trace where expiry and payment acknowledgement cross. The finalization step must recheck that *this hold* still owns the seat. A committed paid order needs one stable purchase ID. If payment succeeds but finalization loses the seat, record a compensating refund and a reconciliation owner; a retry must not hide that debt.
+Draw the seat write, the hold-expiry worker, the payment call, and the confirmation message as separate boundaries. Write a three-event trace where expiry and payment acknowledgement cross. The finalization step must recheck that *this hold* still owns the seat. A committed paid order needs one stable purchase ID. If payment succeeds but finalization loses the seat, record a compensating refund and a reconciliation owner. A retry must not hide that debt.
 
 ## Put the AWS names on the boxes
 
-**Why these boxes, and what changes the choice:** DynamoDB conditionally moves one seat from FREE to HELD; Aurora with a row lock is an alternative when grouped seats require relational transactions. SQS buffers arrivals but is not the seat owner. Lambda handles holds; ECS suits long-lived, predictable reservation workers.
+**Why these boxes, and what changes the choice:** DynamoDB conditionally moves one seat from FREE to HELD. Aurora with a row lock is an alternative when grouped seats require relational transactions. SQS buffers arrivals but is not the seat owner. Lambda handles holds. ECS suits long-lived, predictable reservation workers.
 
 
 
-**Senior follow-up:** The waiting room admits 2,000 buyers/s while the reservation store handles 300 writes/s. Calculate queue growth over 30 seconds; surface wait time and bound admissions. Explain cancellations, payment timeout, and how an operator reconciles provider charges against confirmed orders.
+**Senior follow-up:** The waiting room admits 2,000 buyers/s while the reservation store handles 300 writes/s. Calculate queue growth over 30 seconds. Surface wait time and bound admissions. Explain cancellations, payment timeout, and how an operator reconciles provider charges against confirmed orders.
 
 **Staff follow-up:** Tickets are sold from two Regions. Eventual cross-Region replication cannot guarantee a globally unique owner of A12. Select a home-region write owner or strong global coordination, state the availability/latency trade, and rehearse failover while one hold is in flight.
 
 **Practice artifact:** Seat state machine, before/after box diagram, race timeline, two competing transactions, and a failure table containing charge success with database failure. Re-run the timeline with a duplicated client request.
 
-**AWS translation:** A DynamoDB conditional item update or a relational row lock can arbitrate one seat; DynamoDB Transactions or database transactions are needed when reserving a group atomically. EventBridge/SQS may carry notifications after the authoritative commit; neither determines seat ownership. [DynamoDB consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) and [global-table modes](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-global-table-design.html) constrain the regional claim.
+**AWS translation:** A DynamoDB conditional item update or a relational row lock can arbitrate one seat. DynamoDB Transactions or database transactions are needed when reserving a group atomically. EventBridge/SQS may carry notifications after the authoritative commit. Neither determines seat ownership. [DynamoDB consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) and [global-table modes](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-global-table-design.html) constrain the regional claim.
 
 **Source note:** This is an original practice scenario modeling common inventory races. No company attribution or claim that these numbers come from production.
 

@@ -2,15 +2,15 @@
 
 ## Application background
 
-An engineering organization chooses storage for transactional products, event pipelines and analytics. A useful policy explains which workload properties drive a choice and when an exception is warranted.
+An engineering organization repeatedly chooses storage for different products. Billing needs correct account updates, inventory needs safe reservations, event processing needs to replay input, and analytics needs to query large histories. One database choice is unlikely to suit all those needs equally.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Instead of beginning with a preferred technology, examine several real or clearly constructed decisions and record which requirements drove each one. Turn that evidence into a short policy that helps the next team make a choice.
+
+A decision policy states which facts lead to which recommendation. Its value is helping a future decision, not making every team use the same service name.
 
 ## Your assignment
 
-**Deliver:** A short decision policy traced to five concrete cases, including a new case where the policy produces a useful recommendation.
-
-Write a data-platform decision policy from five concrete team decisions. Billing, inventory and permissions require transactions; event processing requires replay; analytics needs an independent reporting workload. The goal is to shorten the next decision without pretending one datastore fits all five.
+**Deliver:** Write a short data-platform decision policy grounded in five concrete cases. Show how it helps decide a new case, and identify when a team should request an exception.
 
 **Required behavior:** The memo cites the constructed decision records, states the shared constraint, proposes a default and names evidence-based exceptions. It includes operating ownership and a review trigger when relevant capabilities or requirements change.
 
@@ -28,11 +28,11 @@ python3 examples/architecture-starts/the_strategy_you_found_rather_than_invented
 
 **Supplied file:** [`examples/architecture-starts/the_strategy_you_found_rather_than_invented.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_strategy_you_found_rather_than_invented.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_strategy_you_found_rather_than_invented.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Constructed evidence: [('D1', 'transactions'), ('D2', 'transactions'), ('D3', 'transactions'), ('D4', 'replay'), ('D5', 'reporting')]
@@ -42,7 +42,7 @@ Default: transactional store; exceptions: independently replayable events and is
 
 ### Set up your implementation workspace
 
-Create `work/the-strategy-you-found-rather-than-invented/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/the-strategy-you-found-rather-than-invented/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -62,7 +62,7 @@ Record D1 billing atomicity, D2 inventory ownership, D3 permission/audit transac
 
 ### 2. Extract the common default
 
-Propose PostgreSQL for transactional application records when its measured capacity and access patterns fit. Explain existing expertise, backup/restore and operating cost. A count of three choices is a clue; the transaction requirement is the reason.
+Propose PostgreSQL for transactional application records when its measured capacity and access patterns fit. Explain existing expertise, backup/restore and operating cost. A count of three choices is a clue. The transaction requirement is the reason.
 
 ### 3. State explicit exceptions
 
@@ -84,13 +84,13 @@ Give teams a short decision path: required guarantee, existing default fit, meas
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Five decisions: three transactional, one replay, one reporting | The majority supports a transactional default, not a universal ban on other storage. |
 | Three teams maintaining separate stacks assumption | Include on-call, backup, expertise and migration effort in the comparison. |
-| Six-month capability review trigger | A product or service change can invalidate the old deciding constraint; review is an explicit decision, not an installed recurring task. |
+| Six-month capability review trigger | A product or service change can invalidate the old deciding constraint. Review is an explicit decision, not an installed recurring task. |
 
 ## Map the local implementation to AWS
 
@@ -104,7 +104,7 @@ The diagram shows one concrete composition that preserves the three different wo
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: transactional default | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: transactional default | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
 | Local event sequence or input stream | Amazon Kinesis: replayable event transport | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
 | Local file, object fixture or exported payload | Amazon S3: retained event/data archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 | Local investigation/report query | Amazon Athena: isolated reporting queries | Define an archive schema and catalog, query the exported data and constrain query access and cost. |
@@ -116,9 +116,9 @@ The diagram shows one concrete composition that preserves the three different wo
 |---|---|
 | Decision scope | This is an evaluated option, not an instruction to provision every box. |
 | Ownership | Name backup/restore, schema evolution and incident owners for each chosen service. |
-| Revisit evidence | Verify current service capabilities from official documentation when they become a deciding factor; preserve the original assumption and date. |
+| Revisit evidence | Verify current service capabilities from official documentation when they become a deciding factor. Preserve the original assumption and date. |
 
-For this decision project, provision resources only if a bounded implementation spike needs them; the diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+For this decision project, provision resources only if a bounded implementation spike needs them. The diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -141,7 +141,7 @@ than current row state. Should enforcement block the design?
 <summary>Expected reasoning and diagram</summary>
 
 Route it through a documented exception review that names the mismatched
-constraint and maintenance owner. Do not make a default impossible to challenge;
+constraint and maintenance owner. Do not make a default impossible to challenge.
 measure exception recurrence as feedback on the policy.
 
 </details>

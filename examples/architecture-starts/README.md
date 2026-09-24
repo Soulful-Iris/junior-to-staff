@@ -11,7 +11,7 @@ git clone https://github.com/Soulful-Iris/junior-to-staff.git
 cd junior-to-staff
 ```
 
-Then run the command in the project's page. Python 3.12+ is sufficient for these standard-library demonstrations. The printed output is a first observation; completing the assignment requires the additional implementation and failure walkthroughs named on that page.
+Then run the command in the project's page. Python 3.12+ is sufficient for these standard-library demonstrations. The printed output is a first observation. Completing the assignment requires the additional implementation and failure walkthroughs named on that page.
 
 
 | Project | Starting program |

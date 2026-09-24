@@ -2,19 +2,27 @@
 
 ## Application background
 
-A SaaS application stores each customer's records in an old schema. A replacement schema must serve the same API while tenants move individually and older clients remain supported.
+A SaaS product stores several companies' records in an old database layout. The team needs a new layout, but customers must keep using the application during the move. Some still use older mobile apps that cannot change immediately.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+You will move one company's data at a time. Copying existing records is called a backfill. While that copy runs, new edits still arrive, so the system must know which database is allowed to accept authoritative writes.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Start moving tenant Acme | Record where its copy has reached. |
+| The copy process stops and restarts | Continue from saved progress instead of starting blindly. |
+| Acme is ready to move to the new store | Compare the records, then explicitly switch which store accepts writes. |
+
+A cutover is that controlled switch. Copying data and changing write authority are different operations, and the old client contract still needs to work through both.
 
 ## Your assignment
 
-**Deliver:** A per-tenant migration ledger, resumable copy command, reconciliation report and controlled switch of the authoritative writer.
-
-Move a 10 TB multi-tenant service from its old database to a new schema without asking 12-week-old mobile clients to upgrade. A security deadline is four weeks away. Build a resumable per-tenant backfill and a controlled write-authority handoff.
+**Deliver:** Build a copy process that can resume for each company, compare the old and new records, and control when the new store becomes responsible for writes.
 
 **Required behavior:** Each tenant has a recorded migration state and one write authority. Backfill, updates and deletions carry monotonically comparable source versions. Reads never resurrect an older row after a newer deletion.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/multi_tenant_migration.py
 
 **Supplied file:** [`examples/architecture-starts/multi_tenant_migration.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/multi_tenant_migration.py). You can also [read or download the source here](../../../../examples/architecture-starts/multi_tenant_migration.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 5 applied
@@ -43,7 +51,7 @@ Target: {'acme:7': {'version': 6, 'value': None}} visible: None
 
 ### Set up your implementation workspace
 
-Create `work/multi-tenant-migration/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/multi-tenant-migration/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -59,7 +67,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Make old and new contracts coexist
 
-Write down the old client request/response shape and the target schema. Add an adapter that preserves old behavior while storing the new representation. Record the last client version requiring the adapter; do not remove fields merely because the new UI stopped using them.
+Write down the old client request/response shape and the target schema. Add an adapter that preserves old behavior while storing the new representation. Record the last client version requiring the adapter. Do not remove fields merely because the new UI stopped using them.
 
 ### 2. Backfill through the same versioned apply path
 
@@ -67,7 +75,7 @@ Take a consistent snapshot boundary and start change capture without a gap. Pers
 
 ### 3. Reconcile before changing reads
 
-Compare canonical records or range hashes at an aligned source watermark. Account for deletes and null/default conversions. Shadow reads are useful only when you distinguish replication lag from transformation errors; sample by tenant size and unusual schema values.
+Compare canonical records or range hashes at an aligned source watermark. Account for deletes and null/default conversions. Shadow reads are useful only when you distinguish replication lag from transformation errors. Sample by tenant size and unusual schema values.
 
 ### 4. Transfer write authority once
 
@@ -79,19 +87,19 @@ Drain or fence old writers, apply the final change watermark, then advance the t
 |---|---|
 | Run the starting program | Version 6 deletion remains after late version 4 backfill. |
 | Restart halfway through a range | The same range replays without duplicate logical rows. |
-| Send an old-client write after cutover | The compatibility adapter accepts the supported contract; the fenced old database rejects direct writes. |
+| Send an old-client write after cutover | The compatibility adapter accepts the supported contract. The fenced old database rejects direct writes. |
 
 **Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 10 TB at 100 MB/s effective copy | 10,000,000 MB / 100 = 100,000 s ≈ 27.8 hours ideal; retries, indexes and live changes extend this. |
-| Security deadline: four weeks | A full client replacement cannot fit a 12-week compatibility window; add an adapter or narrow the deadline scope. |
-| Live writes: 1,000/s assumption | A one-hour CDC pause adds 3.6 million changes; copy throughput alone does not prove catch-up. |
+| 10 TB at 100 MB/s effective copy | 10,000,000 MB / 100 = 100,000 s ≈ 27.8 hours ideal. Retries, indexes and live changes extend this. |
+| Security deadline: four weeks | A full client replacement cannot fit a 12-week compatibility window. Add an adapter or narrow the deadline scope. |
+| Live writes: 1,000/s assumption | A one-hour CDC pause adds 3.6 million changes. Copy throughput alone does not prove catch-up. |
 
 ## Map the local implementation to AWS
 
@@ -105,10 +113,10 @@ DMS can move rows and changes, but application compatibility, semantic transform
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: existing write authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local snapshot/change-copy input | AWS DMS: change transport | Configure source/target replication and observe copy positions; implement application cutover and reconciliation separately. |
-| Application or worker process | Amazon ECS: versioned apply workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: target authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: existing write authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local snapshot/change-copy input | AWS DMS: change transport | Configure source/target replication and observe copy positions. Implement application cutover and reconciliation separately. |
+| Application or worker process | Amazon ECS: versioned apply workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: target authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
 | Local versioned configuration | AWS AppConfig: tenant routing configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: migration operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
@@ -116,12 +124,12 @@ DMS can move rows and changes, but application compatibility, semantic transform
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| AWS DMS | Use only if the source/target pair and required CDC semantics are supported; record snapshot/CDC start boundary and task lag. |
-| Aurora source and target | Separate credentials and writer roles; preserve tombstones and source versions through transformation. |
+| AWS DMS | Use only if the source/target pair and required CDC semantics are supported. Record snapshot/CDC start boundary and task lag. |
+| Aurora source and target | Separate credentials and writer roles. Preserve tombstones and source versions through transformation. |
 | ECS migration workers | Bound copy concurrency to protect live traffic. Checkpoint ranges and expose per-tenant progress/lag. |
-| AppConfig routing | Application consumes tenant placement changes; epoch enforcement occurs at the write authority, not only in cached routing. |
+| AppConfig routing | Application consumes tenant placement changes. Epoch enforcement occurs at the write authority, not only in cached routing. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -139,13 +147,13 @@ The target accepts data the old schema cannot represent. Mark that first write a
 
 All prompts here are constructed practice, without company attribution.
 
-> **Candidate opening:** “Security needs tenant isolation in four weeks; mobile
+> **Candidate opening:** “Security needs tenant isolation in four weeks. Mobile
 clients will write the old schema for twelve weeks. Copy live data without losing
 edits or resurrecting deletes, and choose a rollback boundary the teams can use.”
 
 | Input | Expected behavior | Scope |
 |---|---|---|
-| Old v2 commits; target write fails | Durable replay repairs target | Independent dual writes are not atomic |
+| Old v2 commits. Target write fails | Durable replay repairs target | Independent dual writes are not atomic |
 | Live delete v2 followed by backfill v1 | Tombstone v2 survives | Versioned apply, explicit delete retention |
 | New-only write after cutover | Rollback waits for reverse repair | Routing alone cannot restore data compatibility |
 
@@ -163,11 +171,11 @@ only after durable writes. Then separate reader routing from writer authority.
 
 **Prompt:** move from a shared relational schema to tenant-isolated storage while teams release independently. Define why: contractual isolation, noisy neighbors, or operating limits. “New technology” alone is not a benefit. Assume 10 TB to backfill and a 100 MB/s safe copy budget: about 28 hours of ideal transfer, before verification, ongoing writes, retries, and throttling.
 
-Choose a routing registry with tenant migration state. Expand client contracts first. Capture changes with an outbox or CDC; backfill a consistent baseline and apply ordered updates. Shadow reads compare meaningful values. Move a small tenant only when reconciliation and latency pass. Keep rollback routing and change capture until a stated point of no return.
+Choose a routing registry with tenant migration state. Expand client contracts first. Capture changes with an outbox or CDC. Backfill a consistent baseline and apply ordered updates. Shadow reads compare meaningful values. Move a small tenant only when reconciliation and latency pass. Keep rollback routing and change capture until a stated point of no return.
 
 **AWS mapping:** RDS source, a target selected by access pattern, DMS/CDC where the supported source/target behavior fits, S3 for checkpoints/export artifacts, CloudWatch for lag and mismatch rate. Validate CDC ordering, schema-change handling, and transaction boundaries before committing to the mechanism.
 
-**Decision memo:** source and target owners; acceptance metric; customer cohorts; capacity/cost budget; rollback trigger; data repair procedure; old-path retirement owner. **Failure drill:** change a record during backfill, crash the worker, then resume. Row-count equality alone does not prove correctness.
+**Decision memo:** source and target owners. Acceptance metric. Customer cohorts. Capacity/cost budget. Rollback trigger. Data repair procedure. Old-path retirement owner. **Failure drill:** change a record during backfill, crash the worker, then resume. Row-count equality alone does not prove correctness.
 
 **Junior:** explain old/new compatibility. **Senior:** implement resumable copy and reconciliation. **Staff:** negotiate sequencing, avoid two years of dual operation, and identify what would make you cancel the migration.
 

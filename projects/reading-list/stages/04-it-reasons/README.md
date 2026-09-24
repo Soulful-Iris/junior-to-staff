@@ -2,19 +2,27 @@
 
 ## Application background
 
-The Stage 3 reading list lets members assign tags manually. An optional AI helper suggests tags from an allowed taxonomy; members retain control when the model fails or invents a category.
+The reading list already lets members tag bookmarks manually. You now want an optional helper that suggests tags from three allowed categories: databases, frontend and reliability. A member can accept a suggestion or keep choosing tags themselves.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The model reads article content, which may include mistakes or instructions written by someone else. It may also return an invented category. The application must treat the model's response as a proposal to validate, not an instruction it automatically obeys.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| The model suggests `databases` | Offer it as an allowed suggestion. |
+| The model suggests `wizardry` | Reject the unsupported category. |
+| The model fails or the article tells it to call a tool | Keep manual tagging usable and do not grant tool authority. |
+
+A taxonomy is the set of allowed categories. Output validation checks the proposed response against that set and the expected data shape before the interface uses it.
 
 ## Your assignment
 
-**Deliver:** Add suggestions as a separate, bounded feature with schema validation, source handling, evaluation evidence and a manual fallback.
-
-Add optional tag suggestions to the same reading list. The allowed taxonomy is databases, frontend and reliability. A model suggests an unsupported tag, or source text tells it to call a tool. Users must still be able to tag links manually when generation fails.
+**Deliver:** Add optional tag suggestions with allowed-category validation and recorded source/model versions. Require user acceptance and keep manual tagging usable when the model fails.
 
 **Required behavior:** Model output is a proposal, not confirmed user data. Validate a closed tag set, preserve source/model versions and require explicit user acceptance. Manual save/list/tagging remains usable without a model response.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/reading_list_it_reasons.py
 
 **Supplied file:** [`examples/architecture-starts/reading_list_it_reasons.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/reading_list_it_reasons.py). You can also [read or download the source here](../../../../examples/architecture-starts/reading_list_it_reasons.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Invalid suggestions: ['finance']
@@ -42,9 +50,9 @@ Explicit manual confirmation: ['databases']
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
-Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point; it does not contain the previous stages' completed UI, operations, jobs or AI feature.
+Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point. It does not contain the previous stages' completed UI, operations, jobs or AI feature.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -60,9 +68,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/04-it-reasons/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/04-it-reasons/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -86,7 +94,7 @@ Queue optional suggestion work with link/source identity. Pass only authorized b
 
 ### 3. Validate and present suggestions
 
-Parse the structured response, reject unknown tags and limit count/duplicates. Display the proposal distinctly from confirmed tags. A user action commits selected allowed tags against the current link revision; a late proposal cannot overwrite a manual choice.
+Parse the structured response, reject unknown tags and limit count/duplicates. Display the proposal distinctly from confirmed tags. A user action commits selected allowed tags against the current link revision. A late proposal cannot overwrite a manual choice.
 
 ### 4. Measure whether it helps
 
@@ -104,13 +112,13 @@ Record acceptance, correction, invalid-output rate, latency and usage assumption
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Three allowed tags | Validate exact normalized enum membership; a plausible fourth tag is still outside this contract. |
-| 200 new links/day; 25% suggestion use assumption | Fifty model-assisted cases/day provides a bounded initial scope and review workload. |
-| Two-second optional suggestion budget | On timeout, show manual tagging; do not delay the already committed link. |
+| Three allowed tags | Validate exact normalized enum membership. A plausible fourth tag is still outside this contract. |
+| 200 new links/day. 25% suggestion use assumption | Fifty model-assisted cases/day provides a bounded initial scope and review workload. |
+| Two-second optional suggestion budget | On timeout, show manual tagging. Do not delay the already committed link. |
 
 ## Map the local implementation to AWS
 
@@ -124,12 +132,12 @@ The model adds a proposal path beside the existing user-owned state. Keeping sep
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: tag workflow API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: tag workflow API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: tag application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: confirmed and proposed state | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local pending-work collection | Amazon SQS: optional suggestion queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: confirmed and proposed state | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: optional suggestion queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: suggestion worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Deterministic model response fixture | Amazon Bedrock: tag generation | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
+| Deterministic model response fixture | Amazon Bedrock: tag generation | Implement model invocation with deadlines, input boundaries and validated output. Preserve the same permission and action rules. |
 
 ### Provision resources, then connect the application
 
@@ -139,7 +147,7 @@ The model adds a proposal path beside the existing user-owned state. Keeping sep
 | Validation | Closed enum, bounded input/output and source-version checks before showing a proposal. |
 | Fallback | Manual tagging remains available when queue, model or parsing fails. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -171,7 +179,7 @@ Keep those passing regressions. Demonstrate that a seeded wrong-tag or cross-use
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Persist a visible exhausted/no-suggestion outcome without changing confirmed tags. Reserve budget before calls, bound attempts and elapsed time, and measure time-to-usable-suggestion; first-token latency is only relevant if streaming is actually shown.
+Persist a visible exhausted/no-suggestion outcome without changing confirmed tags. Reserve budget before calls, bound attempts and elapsed time, and measure time-to-usable-suggestion. First-token latency is only relevant if streaming is actually shown.
 
 </details>
 
@@ -179,6 +187,6 @@ Persist a visible exhausted/no-suggestion outcome without changing confirmed tag
 
 - [Runnable evaluation and judge fixtures](../../../../curriculum/04-scale-and-evolution/03-ai-systems/labs/evaluations/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

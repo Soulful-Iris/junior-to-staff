@@ -2,19 +2,27 @@
 
 ## Application background
 
-Employees ask questions about internal handbooks. The application retrieves permitted excerpts and uses them as evidence for an answer; missing evidence should produce an abstention.
+An employee asks, “How many days can I carry over?” in an internal handbook assistant. The application searches documents the employee may read, selects relevant passages and asks a model to draft an answer with references to those passages.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The model must not fill missing policy information with a plausible invention. Access can change while the answer is being prepared, and a document might contain text telling the assistant to ignore its rules.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Ana asks about leave and can read the leave policy | Return an answer supported by the allowed passage. |
+| The only matching source is private to another team | Say there is not enough usable evidence. |
+| A source loses permission before the answer is sent | Do not expose its text or a derived answer that depends on it. |
+
+Retrieval means finding source material for the answer. Abstention means explicitly declining to answer when the application cannot provide permitted supporting evidence.
 
 ## Your assignment
 
-**Deliver:** A retrieval-to-answer flow with current access checks, source references and an abstention path when evidence is missing or revoked.
-
-Build an internal handbook assistant for a 2,000-person company. Employees ask policy questions across documents with different access rules. A document can be revoked while a generated answer is being prepared, and a retrieved page can contain instructions trying to redirect the assistant.
+**Deliver:** Build a question-to-answer flow with permitted source retrieval, usable references and a clear refusal to answer when supporting evidence is missing or revoked.
 
 **Required behavior:** Answer only from currently authorized source material, cite exact document/version evidence, and abstain when evidence is insufficient. Retrieved text is data, not permission to call tools or alter system behavior.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/knowledge_assistant.py
 
 **Supplied file:** [`examples/architecture-starts/knowledge_assistant.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/knowledge_assistant.py). You can also [read or download the source here](../../../../examples/architecture-starts/knowledge_assistant.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Authorized evidence: [('d1', 'Expenses require a receipt.')]
@@ -41,7 +49,7 @@ Final response: withheld: access changed
 
 ### Set up your implementation workspace
 
-Create `work/knowledge-assistant/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/knowledge-assistant/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -65,7 +73,7 @@ Pass only authorized chunks and a clear answer/abstain contract. Keep source ins
 
 ### 3. Recheck before returning
 
-Track the policy revision used during retrieval and revalidate access to cited sources at finalization. If access changed, discard the affected answer and return a safe retry/abstention. Cache keys include authorization context; a warm generated-answer cache cannot bypass revocation.
+Track the policy revision used during retrieval and revalidate access to cited sources at finalization. If access changed, discard the affected answer and return a safe retry/abstention. Cache keys include authorization context. A warm generated-answer cache cannot bypass revocation.
 
 ### 4. Review concrete cases
 
@@ -75,7 +83,7 @@ Use supported, unsupported, conflicting-source and revoked-source questions. Com
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The private document is excluded; revocation during preparation withholds the answer. |
+| Run the starting program | The private document is excluded. Revocation during preparation withholds the answer. |
 | Ask a question absent from sources | The assistant abstains and offers authorized source search. |
 | Put tool instructions in a document | No tool action is authorized by the retrieved text. |
 
@@ -83,13 +91,13 @@ Use supported, unsupported, conflicting-source and revoked-source questions. Com
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Four-second response target | Example budget: 700 ms retrieval, 2,500 ms generation, 200 ms final checks, 300 ms transport and 300 ms reserve. |
 | 100,000 documents × eight chunks assumption | 800,000 chunk records before embeddings and index overhead. |
-| 20 requests/s peak | At three seconds mean active time, about 60 concurrent requests; bound model and retrieval concurrency separately. |
+| 20 requests/s peak | At three seconds mean active time, about 60 concurrent requests. Bound model and retrieval concurrency separately. |
 
 ## Map the local implementation to AWS
 
@@ -99,26 +107,26 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Build a document assistant with current permissions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/knowledge-assistant.svg)
 
-Bedrock generates language; the application decides which documents the caller may use. OpenSearch provides candidates, while current policy and source version checks enforce the evidence boundary.
+Bedrock generates language. The application decides which documents the caller may use. OpenSearch provides candidates, while current policy and source version checks enforce the evidence boundary.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated question entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated question entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: answer orchestration | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local derived search records | Amazon OpenSearch Service: chunk retrieval index | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
-| Deterministic model response fixture | Amazon Bedrock: model inference | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: document policy metadata | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local derived search records | Amazon OpenSearch Service: chunk retrieval index | Implement indexing, updates/deletions and queries. Recheck current authorization before returning sensitive results. |
+| Deterministic model response fixture | Amazon Bedrock: model inference | Implement model invocation with deadlines, input boundaries and validated output. Preserve the same permission and action rules. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: document policy metadata | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local file, object fixture or exported payload | Amazon S3: private document storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Bedrock invocation | Explicit model configuration, request deadline and least-privilege invocation role; model output never grants tool permission. |
-| Retrieval | Tenant filters plus current ACL checks; source deletions invalidate retrieval and answer-cache eligibility. |
-| Telemetry | Record aggregate latency/token use and redacted evidence identities; keep sensitive document text out of general logs. |
+| Bedrock invocation | Explicit model configuration, request deadline and least-privilege invocation role. Model output never grants tool permission. |
+| Retrieval | Tenant filters plus current ACL checks. Source deletions invalidate retrieval and answer-cache eligibility. |
+| Telemetry | Record aggregate latency/token use and redacted evidence identities. Keep sensitive document text out of general logs. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -141,11 +149,11 @@ Allow answers using multiple document versions during an ongoing policy update. 
 | Authorized user asks about current policy | Grounded answer cites retrievable current document version |
 | User loses document access after embedding | Neither snippets nor paraphrases derived from that document appear |
 | Index sync lags for 20 minutes | Show a freshness limitation or refuse to answer where current truth is required |
-| Model produces a plausible citation that does not support claim | Reject that citation/claim or mark answer uncertain; never invent evidence |
+| Model produces a plausible citation that does not support claim | Reject that citation/claim or mark answer uncertain. Never invent evidence |
 
 ## Design the permission boundary first
 
-Keep a versioned document catalog with current ACL and deletion state. Retrieve **candidates** from an index, then authorize every candidate and citation against the live catalog before showing titles, snippets, or generated content. Cache by caller's authorization scope and document versions, with revocation-driven invalidation or a fresh authorization gate; do not cache a final answer across users. A generation call receives only authorized excerpts. Validate claims against citations, measure unsupported answers and denial leakage in an evaluation set, and return a cautious response when retrieval or policy service is unavailable.
+Keep a versioned document catalog with current ACL and deletion state. Retrieve **candidates** from an index, then authorize every candidate and citation against the live catalog before showing titles, snippets, or generated content. Cache by caller's authorization scope and document versions, with revocation-driven invalidation or a fresh authorization gate. Do not cache a final answer across users. A generation call receives only authorized excerpts. Validate claims against citations, measure unsupported answers and denial leakage in an evaluation set, and return a cautious response when retrieval or policy service is unavailable.
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
@@ -155,14 +163,14 @@ Keep a versioned document catalog with current ACL and deletion state. Retrieve 
 | Amazon Bedrock (model inference) | Generate from authorized excerpts with citations | Existing model serving stack with comparable isolation, observability, and budget |
 | Amazon CloudWatch (telemetry) | Monitor retrieval freshness, denial leaks, cost and latency | Existing platform monitoring with measurable per-stage budgets |
 
-Bedrock Knowledge Bases synchronization after an update or deletion is an **index maintenance step**, not an instantaneous authorization revocation. Filter before model context; if uncertain about access, omit the passage. Distinguish document ingestion version, retrieval version, and ACL version in logs.
+Bedrock Knowledge Bases synchronization after an update or deletion is an **index maintenance step**, not an instantaneous authorization revocation. Filter before model context. If uncertain about access, omit the passage. Distinguish document ingestion version, retrieval version, and ACL version in logs.
 
-**Senior follow-up:** Retrieval runs out of time with two sources missing. Return a bounded partial answer or explicitly decline; prove that fallback never relaxes permissions.
+**Senior follow-up:** Retrieval runs out of time with two sources missing. Return a bounded partial answer or explicitly decline. Prove that fallback never relaxes permissions.
 
 **Staff follow-up:** The source corpus spans business units with different retention and legal policies. Define ownership of metadata, deletion propagation, offline quality evaluation, and incident response when a citation leaked.
 
 **Practice artifact:** Draw retrieval and authorization as separate boxes, trace one revoked paragraph through cache/index/model, and define five evaluation cases with expected citations or abstentions.
 
-**Source boundary:** Original prompt. A [June 2026 Spotify engineering article](https://engineering.atspotify.com/2026/6/encoding-your-domain-expert-the-context-layer-behind-spotifys-data-assistant) describes expert-owned data context; [Bedrock sync documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync-ingest.html) describes index refresh. Neither says this was a Spotify interview question.
+**Source boundary:** Original prompt. A [June 2026 Spotify engineering article](https://engineering.atspotify.com/2026/6/encoding-your-domain-expert-the-context-layer-behind-spotifys-data-assistant) describes expert-owned data context. [Bedrock sync documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-data-source-sync-ingest.html) describes index refresh. Neither says this was a Spotify interview question.
 
 </details>

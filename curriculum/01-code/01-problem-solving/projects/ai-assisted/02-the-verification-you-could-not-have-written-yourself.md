@@ -2,7 +2,19 @@
 
 ## Application background
 
-A sign-in endpoint limits repeated attempts by caller. An optimized limiter may look convincing while mishandling the exact time at which an old attempt expires.
+You ask an AI assistant to write a sign-in limiter that allows five attempts in any sixty-second period. The generated implementation uses an optimization you do not yet understand well. You need a way to evaluate its behavior without accepting its explanation as proof.
+
+Begin with a simpler implementation you can understand and supply time as an input. That lets you compare exact moments without waiting in real time. The interesting case is when an old attempt has just left the allowed window.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| The same caller makes attempts at seconds 0, 1, 2, 3 and 4 | Accept all five. |
+| The caller tries again at second 59 | Reject the attempt because all five still count. |
+| The caller tries at second 60 | Accept because the attempt at second 0 is outside the declared window. |
+
+A reference implementation favors clarity over speed. It serves as an independent comparison for the optimized version under a precisely stated rule.
 
 ## Your assignment
 
@@ -34,15 +46,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Accepted timestamps 0,1,2,3,4; attempts at 59 and 60 seconds; window is `(now−60, now]`. | 59 is denied; 60 is accepted because timestamp 0 expires. Denials are not added to history. |
-| Boundary / failure | An implementation expires timestamps strictly less than the boundary. | The 60-second probe fails; the fixture must distinguish `<` from `<=`. |
+| Small example | Accepted timestamps 0,1,2,3,4. Attempts at 59 and 60 seconds. Window is `(now−60, now]`. | 59 is denied. 60 is accepted because timestamp 0 expires. Denials are not added to history. |
+| Boundary / failure | An implementation expires timestamps strictly less than the boundary. | The 60-second probe fails. The fixture must distinguish `<` from `<=`. |
 | Scope | One key, monotonic clock, no distributed replicas in the baseline. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -105,9 +117,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Explain the oracle independently and catch the boundary mutant. **Additional lead scope:** Specify fleet guarantees, clock assumptions, and limiter-outage behavior. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Explain the oracle independently and catch the boundary mutant. **Additional lead scope:** Specify fleet guarantees, clock assumptions, and limiter-outage behavior. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -117,7 +129,7 @@ can say out loud.*
 **Build**
 
 Ask for something genuinely past your ability to produce — a sliding-window
-rate limiter for the Stage 1 reading list's sign-in is the classic; a URL canonicaliser works too.
+rate limiter for the Stage 1 reading list's sign-in is the classic. A URL canonicaliser works too.
 Then build the apparatus that would catch it being wrong: properties, a dumb
 reference implementation, adversarial inputs, a one-page trust argument.
 
@@ -126,11 +138,11 @@ reference implementation, adversarial inputs, a one-page trust argument.
 Pick the subject by the gap: beyond you to write, not beyond you to *specify*.
 You can state what "five attempts in any sixty-second window" means without
 being able to implement it efficiently. That gap is where a model puts you
-every working day; here you stand in it on purpose.
+every working day. Here you stand in it on purpose.
 
 Then the real question: where does truth come from, if not from reading the
-code? Three places: properties that must hold for every input; an oracle — a
-slower, dumber version you *can* write and read, which must always agree; and
+code? Three places: properties that must hold for every input. An oracle — a
+slower, dumber version you *can* write and read, which must always agree. And
 known answers, worked by hand. For the rate limiter the oracle is insultingly
 simple: keep every timestamp, count the ones inside the window. It stays dumb
 on purpose — code and tests from the same hand are not two opinions, so the
@@ -150,7 +162,7 @@ brute-force reference version optimised for being obviously correct,
 not for speed.
 ```
 
-Read the reference until you believe it; if you cannot hold it in your head,
+Read the reference until you believe it. If you cannot hold it in your head,
 ask for a dumber one.
 
 **2 — the implementation, and the harness.**
@@ -173,12 +185,12 @@ Produce five variants of the implementation, each with one subtle
 behavioural bug. Number them. Do not tell me which bug is which.
 ```
 
-The harness must flag all five before the reveal; a survivor is a map reference
+The harness must flag all five before the reveal. A survivor is a map reference
 for the exact hole in your harness. Fix, re-run.
 
 **On AWS**
 
-Honestly: none. The point is a harness that runs on your machine in seconds;
+Honestly: none. The point is a harness that runs on your machine in seconds.
 infrastructure here would be decoration. The pattern does scale — a differential
 harness over a huge input space is what you fan out across **Fargate** tasks —
 but that is a later follow-up.
@@ -187,7 +199,7 @@ but that is a later follow-up.
 
 The harness outlives the implementation, which is the payoff of black-box
 checks: regenerate the component, upgrade the model that wrote it, or swap in a
-library, and the same harness re-proves the replacement. Wire it into CI; keep
+library, and the same harness re-proves the replacement. Wire it into CI. Keep
 the trust argument next to the code, so the next person knows what is defended
 and what is assumed.
 

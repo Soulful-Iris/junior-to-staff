@@ -2,19 +2,27 @@
 
 ## Application background
 
-A reading-list service shares workers between interactive saves and bulk exports. Under overload, rejecting some work protects useful capacity, but priority cannot create more capacity.
+People use a reading-list API both to save individual bookmarks and to export many records. During a busy period, exports can occupy workers that interactive users need. The service must decide which operations to admit while keeping its waiting area finite.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+In this exercise, total capacity is 100 equal-cost requests per second. Prioritizing saves helps when exports cause the excess. It cannot make every save succeed if saves alone reach 120 per second.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Interactive saves and exports together exceed capacity | Reduce or reject export work according to policy. |
+| Interactive saves alone reach 120 per second | Reject some saves with a clear response. |
+| Traffic falls below capacity | Let useful waiting work drain instead of admitting unlimited new work. |
+
+Admission is the decision to let a request start or wait. Priority changes who receives scarce capacity, not how much capacity exists.
 
 ## Your assignment
 
-**Deliver:** A class-aware admission policy with finite queues and explicit rejection when even critical traffic exceeds the budget.
-
-Add overload admission to a reading-list API. Interactive saves matter more than bulk exports, but total capacity is only 100 equal-cost requests/s. Later, critical traffic alone reaches 120/s, so priority cannot make every request succeed.
+**Deliver:** Build capacity allocation and finite waiting limits for saves and exports. Show which requests are rejected, including when critical traffic alone exceeds capacity.
 
 **Required behavior:** Keep resource usage bounded and allocate capacity by trusted work class. Admit only work that can fit a finite deadline. Rejection is explicit and measured, including when critical demand exceeds physical capacity.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/04_shedding_the_right_thing.py
 
 **Supplied file:** [`examples/architecture-starts/04_shedding_the_right_thing.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/04_shedding_the_right_thing.py). You can also [read or download the source here](../../../../examples/architecture-starts/04_shedding_the_right_thing.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'critical_admitted': 80, 'bulk_admitted': 20, 'critical_rejected': 0, 'bulk_rejected': 30}
@@ -42,7 +50,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/04-shedding-the-right-thing/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/04-shedding-the-right-thing/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -66,7 +74,7 @@ Give interactive saves a reserved share and allow bulk work to borrow spare capa
 
 ### 3. Use weighted cost when needed
 
-Measure database/CPU work per operation and choose approximate cost units. Bound both concurrency and rate where their effects differ. Revisit weights when exports become more expensive; one request counter cannot represent every workload.
+Measure database/CPU work per operation and choose approximate cost units. Bound both concurrency and rate where their effects differ. Revisit weights when exports become more expensive. One request counter cannot represent every workload.
 
 ### 4. Recover gradually
 
@@ -76,7 +84,7 @@ Expire waiting work that missed its useful deadline and ramp bulk admission afte
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The first case rejects 30 bulk/s; the second rejects 20 critical/s. |
+| Run the starting program | The first case rejects 30 bulk/s. The second rejects 20 critical/s. |
 | Make exports 100 times more expensive | Weighted admission reduces their share appropriately. |
 | Remove overload | Bulk traffic returns gradually after critical waiting clears. |
 
@@ -84,13 +92,13 @@ Expire waiting work that missed its useful deadline and ramp bulk admission afte
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 80 critical + 50 bulk requests/s; capacity 100/s | Admit all 80 critical and at most 20 bulk; reject at least 30 bulk/s. |
-| 120 critical requests/s; capacity 100/s | At least 20 critical/s must be rejected or wait within a stated finite budget. |
-| One export costs 100 saves | Request-count fairness is misleading; budget the constrained resource cost. |
+| 80 critical + 50 bulk requests/s. Capacity 100/s | Admit all 80 critical and at most 20 bulk. Reject at least 30 bulk/s. |
+| 120 critical requests/s. Capacity 100/s | At least 20 critical/s must be rejected or wait within a stated finite budget. |
+| One export costs 100 saves | Request-count fairness is misleading. Budget the constrained resource cost. |
 
 ## Map the local implementation to AWS
 
@@ -105,21 +113,21 @@ The constrained database determines useful capacity. Separate bulk delivery allo
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local HTTP listener | Application Load Balancer: request entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
-| Application or worker process | Amazon ECS: admission application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local records and transaction boundary | Amazon RDS PostgreSQL: constrained dependency | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local pending-work collection | Amazon SQS: deferred bulk queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
-| Application or worker process | Amazon ECS: export workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: admission application | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: constrained dependency | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: deferred bulk queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: export workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: overload dashboard | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Pools | Account for API and worker connections together; keep a hard total dependency budget. |
-| Queues | Fixed depth/age bounds and explicit expiry behavior; do not hide interactive requests in an unbounded queue. |
-| Policy | Version class weights and reserve settings; inspect the resulting allocation before increasing limits. |
+| Pools | Account for API and worker connections together. Keep a hard total dependency budget. |
+| Queues | Fixed depth/age bounds and explicit expiry behavior. Do not hide interactive requests in an unbounded queue. |
+| Policy | Version class weights and reserve settings. Inspect the resulting allocation before increasing limits. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -140,7 +148,7 @@ An accepted bulk job represents a paid obligation. Distinguish admission rejecti
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Reserve a bounded critical queue only if the latency budget allows it, then shed excess. Record denied critical work explicitly; inspect absolute arrival/capacity evidence before blaming classification.
+Reserve a bounded critical queue only if the latency budget allows it, then shed excess. Record denied critical work explicitly. Inspect absolute arrival/capacity evidence before blaming classification.
 
 </details>
 
@@ -151,7 +159,7 @@ Reserve a bounded critical queue only if the latency budget allows it, then shed
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Use separate concurrency/work budgets and per-tenant fairness. The shared database budget constrains all classes; protect control and recovery operations too.
+Use separate concurrency/work budgets and per-tenant fairness. The shared database budget constrains all classes. Protect control and recovery operations too.
 
 </details>
 
@@ -159,6 +167,6 @@ Use separate concurrency/work budgets and per-tenant fairness. The shared databa
 
 - [Runnable reliability arithmetic and incident lab](../labs/reliability/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

@@ -2,19 +2,33 @@
 
 ## Application background
 
-A research index discovers public web pages and extracts links for later visits. The crawler owns a durable list of pending URLs and must limit how much work each remote host receives.
+A research team wants a searchable collection of public pages. A crawler starts with some URLs, downloads a page, extracts more links and schedules those links for later visits. Its frontier is the saved list of URLs waiting to be visited.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The crawler must share work across machines without overwhelming any one website. Some pages generate endless links, and a redirect can point somewhere the crawler should not access. A restart must not lose all pending work.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| The crawler discovers a new allowed URL | Add it to the saved frontier. |
+| Several URLs belong to the same host | Space their fetches according to that host's limits. |
+| A worker stops after downloading a page | Use the recorded job state to decide whether to retry. |
+
+A worker is a process that takes pending URLs and fetches them. Track both its job ownership and the remote host's limits rather than using only a global worker count.
+
+### Sizing that affects this decision
+
+One billion waiting URL entries at 200 bytes each is about 200 GB before indexes and history. Fetching 50,000 pages/s at 100 KiB each is about 4.77 GiB/s of incoming page data. A one-fetch-at-a-time rule for each host still applies, so the total rate requires enough different eligible hosts.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** A URL frontier, host-aware claim scheduler, bounded fetch adapter and restart-safe recording of observations and discovered links.
+**Deliver:** Build a saved URL frontier, host-aware work assignment and a bounded public-page fetcher. Keep pending work and completed observations understandable after worker restarts.
 
-Build a crawler for a public research index. It must discover a billion URLs while obeying per-host limits. Some pages contain infinite calendar links, redirects point at private addresses, and workers restart after fetching but before recording completion.
+**Required behavior:** Fetch only allowed public HTTP(S) destinations, respect the configured robots and host policy, and record a durable frontier state. Fetches may repeat. Canonical URL identity and content/version handling prevent uncontrolled duplicate work.
 
-**Required behavior:** Fetch only allowed public HTTP(S) destinations, respect the configured robots and host policy, and record a durable frontier state. Fetches may repeat; canonical URL identity and content/version handling prevent uncontrolled duplicate work.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/web_crawler.py
 
 **Supplied file:** [`examples/architecture-starts/web_crawler.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/web_crawler.py). You can also [read or download the source here](../../../../examples/architecture-starts/web_crawler.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 https://example.invalid/a new
@@ -43,7 +57,7 @@ Normalization only; network destination validation is a separate required bounda
 
 ### Set up your implementation workspace
 
-Create `work/web-crawler/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/web-crawler/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -67,7 +81,7 @@ Fetch and cache robots policy under a documented failure rule. A shared host sch
 
 ### 3. Make outbound fetches safe
 
-Resolve and validate all destination addresses, pin the validated connection target, and repeat validation for every redirect. Block private, loopback, link-local and metadata ranges. Bound redirects, body bytes, decompression ratio and total time; do not execute page scripts in the first milestone.
+Resolve and validate all destination addresses, pin the validated connection target, and repeat validation for every redirect. Block private, loopback, link-local and metadata ranges. Bound redirects, body bytes, decompression ratio and total time. Do not execute page scripts in the first milestone.
 
 ### 4. Record outcomes and recover
 
@@ -77,7 +91,7 @@ Store status, final URL, content hash and retry time before completing the lease
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Fragment variants deduplicate; a distinct query remains distinct. |
+| Run the starting program | Fragment variants deduplicate. A distinct query remains distinct. |
 | Redirect a public URL to a private IP | The fetch is rejected before the private connection. |
 | Restart after content upload | A repeated fetch cannot publish under a stale attempt lease. |
 
@@ -85,13 +99,13 @@ Store status, final URL, content hash and retry time before completing the lease
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | One billion discovered URLs | At 200 bytes/frontier entry, about 200 GB raw before indexes and history. |
-| 50,000 fetches/s target | At 100 KiB/response, about 4.8 GiB/s inbound; network and storage dominate alongside politeness. |
-| One concurrent fetch/host initial policy | Large aggregate throughput requires many eligible hosts; it cannot override an individual host limit. |
+| 50,000 fetches/s target | At 100 KiB/response, about 4.8 GiB/s inbound. Network and storage dominate alongside politeness. |
+| One concurrent fetch/host initial policy | Large aggregate throughput requires many eligible hosts. It cannot override an individual host limit. |
 
 ## Map the local implementation to AWS
 
@@ -101,14 +115,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Build a durable crawler with per-host limits: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/web-crawler.svg)
 
-The frontier owns work identity; the host scheduler owns permission to fetch now. A distributed queue alone supplies neither robots policy nor fleet-wide per-host fairness.
+The frontier owns work identity. The host scheduler owns permission to fetch now. A distributed queue alone supplies neither robots policy nor fleet-wide per-host fairness.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: URL frontier authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Application or worker process | Amazon ECS: host-aware schedulers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local pending-work collection | Amazon SQS: eligible fetch queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
-| Application or worker process | Amazon ECS: outbound fetch workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: URL frontier authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Application or worker process | Amazon ECS: host-aware schedulers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: eligible fetch queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: outbound fetch workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local file, object fixture or exported payload | Amazon S3: fetched content archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: crawl operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
@@ -116,11 +130,11 @@ The frontier owns work identity; the host scheduler owns permission to fetch now
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Networking | Controlled egress with application-level destination pinning; deny internal address space and credential endpoints. |
-| Frontier partitions | Spread URL records while coordinating host policy separately; a popular host must not bypass its limit. |
-| Storage | Compressed immutable content with explicit retention; quarantine oversized/malformed responses without retry loops. |
+| Networking | Controlled egress with application-level destination pinning. Deny internal address space and credential endpoints. |
+| Frontier partitions | Spread URL records while coordinating host policy separately. A popular host must not bypass its limit. |
+| Storage | Compressed immutable content with explicit retention. Quarantine oversized/malformed responses without retry loops. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -165,13 +179,13 @@ Service choice follows the contract: the box label gives the generic job, while 
 
 **Follow-up: A scheduler needs host-aware fairness: 500k queued URLs from one site must not monopolize workers. Compare global FIFO with per-host due queues.**
 
-**Senior expectation:** A malicious page expands into endless URLs. Set depth, URL, MIME, size and domain budgets; quarantine patterns without losing unrelated frontier work.
+**Senior expectation:** A malicious page expands into endless URLs. Set depth, URL, MIME, size and domain budgets. Quarantine patterns without losing unrelated frontier work.
 
 **Staff expectation:** Change normalization after years of indexing. Build dual keys/reconciliation, quantify duplicate and omission risk, and provide a reversible index migration.
 
 **Practice artifact:** Trace one URL from discovery to normalized frontier, host gate, fetch, content store, and extracted links. Then trace every row in the table, draw one failure, and state what the customer observes. Suggested rehearsal: 35 minutes design, 10 minutes to challenge the guarantees.
 
-**Evidence and origin:** The current community interview-question catalog lists web-crawler reports at ZoomInfo, Atlassian, Microsoft, Expedia and others; the reports’ interview dates are not published. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
+**Evidence and origin:** The current community interview-question catalog lists web-crawler reports at ZoomInfo, Atlassian, Microsoft, Expedia and others. The reports’ interview dates are not published. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/web-crawler-design/cm80gligm049vtvyjklc6gxdw).
 

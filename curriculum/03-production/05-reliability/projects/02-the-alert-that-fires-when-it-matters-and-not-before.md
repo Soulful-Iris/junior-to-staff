@@ -2,19 +2,27 @@
 
 ## Application background
 
-A reading-list team watches its save reliability objective. Alert conditions determine when to open an incident; recovery and acknowledgement rules determine when that incident can close.
+A team has defined how reliable bookmark saves should be. It now needs to decide when failures are serious enough to notify an on-call engineer. One brief spike and a sustained outage should not automatically produce the same response.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The alert compares recent failure rates over a short window and a longer window. Once an incident is open, it also needs recovery and acknowledgement rules. Deciding to open an incident and deciding to close it are different actions.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| The short window is bad but the long window is healthy | Do not open an incident under the declared two-window rule. |
+| Both windows exceed the failure-spending threshold | Open the incident. |
+| Both windows recover but nobody acknowledges the incident | Keep the incident state consistent with the declared closure rule. |
+
+Burn rate describes how quickly failures spend the allowed error budget. An incident is the tracked response to that signal, including ownership and closure.
 
 ## Your assignment
 
-**Deliver:** A two-window burn-rate decision and separate incident lifecycle, demonstrated with a sequence of degraded and recovered windows.
-
-Build alert logic for the save SLO. A page should require both short and long windows to burn too fast, but the incident owner wants the incident to remain open until both recover and someone acknowledges it. These are two different state rules.
+**Deliver:** Implement the two-window rule for opening an alert and the separate rule for closing its incident. Demonstrate both using a sequence of degraded and recovered periods.
 
 **Required behavior:** The current composite alarm is short_breach AND long_breach. The incident record is a separate latch with its own closure rule. Missing data has an explicit outcome and never silently becomes healthy.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and
 
 **Supplied file:** [`examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py). You can also [read or download the source here](../../../../examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'short': False, 'long': False, 'alarm': False, 'incident_open': False}
@@ -44,7 +52,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/02-the-alert-that-fires-when-it-matters-and-not-before/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/02-the-alert-that-fires-when-it-matters-and-not-before/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -72,7 +80,7 @@ Open an incident on qualifying breach, deduplicate repeated notifications and re
 
 ### 4. Cover sustained consumption and silence
 
-A 9× slow burn may deserve owned work even if it misses the fast-page threshold. Add a lower-severity policy and separate missing-telemetry signal. Demonstrate the notification timeline manually; do not install recurring checks in this repository.
+A 9× slow burn may deserve owned work even if it misses the fast-page threshold. Add a lower-severity policy and separate missing-telemetry signal. Demonstrate the notification timeline manually. Do not install recurring checks in this repository.
 
 ## Demonstrate the completed local result
 
@@ -86,13 +94,13 @@ A 9× slow burn may deserve owned work even if it misses the fast-page threshold
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 99.9% objective; 0.9% observed failure rate | Burn rate is 0.009 / 0.001 = 9× sustainable consumption. |
-| States F/F, T/F, T/T, F/T | AND alarm outputs F, F, T, F; either false operand clears the composite. |
-| Short five-minute and long one-hour teaching windows | Choose thresholds from response goals and traffic; these are exercise settings, not universal paging defaults. |
+| 99.9% objective. 0.9% observed failure rate | Burn rate is 0.009 / 0.001 = 9× sustainable consumption. |
+| States F/F, T/F, T/T, F/T | AND alarm outputs F, F, T, F. Either false operand clears the composite. |
+| Short five-minute and long one-hour teaching windows | Choose thresholds from response goals and traffic. These are exercise settings, not universal paging defaults. |
 
 ## Map the local implementation to AWS
 
@@ -102,15 +110,15 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Implement burn-rate alert and incident state rules: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-the-alert-that-fires-when-it-matters-and-not-before.svg)
 
-The composite expresses current metric truth; the incident store expresses the team’s response lifecycle. Separating them prevents confusing an alarm recovery with completed incident work.
+The composite expresses current metric truth. The incident store expresses the team’s response lifecycle. Separating them prevents confusing an alarm recovery with completed incident work.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: request counters and burn windows | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
-| Local boolean alert conditions | CloudWatch composite alarm: current breach condition | Translate measured window conditions into alarm expressions; keep incident acknowledgement and closure as explicit state. |
-| Local event dispatch | Amazon EventBridge: alarm transition routing | Define event rules/targets and delivery failure handling; persist logical event/run identity in the application. |
+| Local boolean alert conditions | CloudWatch composite alarm: current breach condition | Translate measured window conditions into alarm expressions. Keep incident acknowledgement and closure as explicit state. |
+| Local event dispatch | Amazon EventBridge: alarm transition routing | Define event rules/targets and delivery failure handling. Persist logical event/run identity in the application. |
 | Python operation or worker function | AWS Lambda: incident state application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: incident lifecycle store | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: incident lifecycle store | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local notification output | Amazon SNS: optional notification channel | Wire the alert topic and destination, define ownership and observe failed delivery. |
 
 ### Provision resources, then connect the application
@@ -118,10 +126,10 @@ The composite expresses current metric truth; the incident store expresses the t
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | Alarm configuration | State missing-data behavior explicitly and retain threshold/window version. |
-| Incident state | Idempotent transition identity; acknowledgement does not erase active breach evidence. |
-| Notifications | Deduplicate and route to a named owner; configuring actual recipients is outside this local lesson run. |
+| Incident state | Idempotent transition identity. Acknowledgement does not erase active breach evidence. |
+| Notifications | Deduplicate and route to a named owner. Configuring actual recipients is outside this local lesson run. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -142,7 +150,7 @@ An acknowledgement arrives before metrics recover. Keep it recorded, but do not 
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Add an explicit incident state distinct from the composite. Enter on AND breach; leave only on both-normal plus acknowledgment. Test both recovery orders and acknowledge-before-recovery.
+Add an explicit incident state distinct from the composite. Enter on AND breach. Leave only on both-normal plus acknowledgment. Test both recovery orders and acknowledge-before-recovery.
 
 </details>
 
@@ -153,7 +161,7 @@ Add an explicit incident state distinct from the composite. Enter on AND breach;
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity sustained condition with its own windows and owner; a nonpaging incident may still consume the entire budget.
+At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity sustained condition with its own windows and owner. A nonpaging incident may still consume the entire budget.
 
 </details>
 
@@ -161,6 +169,6 @@ At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity 
 
 - [Runnable reliability arithmetic and incident lab](../labs/reliability/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

@@ -2,19 +2,36 @@
 
 ## Application background
 
-Infrastructure agents report timestamped measurements identified by metric names and labels. Dashboards query recent values; capacity planning reads coarser history.
+Machines report measurements such as CPU use and request count. A metrics service stores those values over time so engineers can draw dashboards and compare current behavior with past capacity. Each measurement has a name, timestamp, value and identifying labels.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Labels distinguish measurements, for example `service=orders` and `region=west`. Adding a different request ID to every measurement creates a huge number of separate histories, even if the number of requests has not changed.
+
+### An input that changes the amount of stored state
+
+These two illustrative samples contain the same measurement but different labels:
+
+```json
+{"name":"request_duration_ms","value":12,"labels":{"service":"checkout","region":"west"}}
+{"name":"request_duration_ms","value":12,"labels":{"service":"checkout","region":"west","request_id":"req-987"}}
+```
+
+With a unique `request_id` on every sample, the second form can create a new series for every request. The supplied label-policy model rejects that extra label. Put request-level investigation details in a log or trace rather than this metric identity.
+
+A time series is one such history for a particular metric name and label combination. Cardinality is the number of distinct series, which directly affects storage and query work.
+
+### Sizing that affects this decision
+
+300,000 hosts reporting every ten seconds produce 30,000 host reports/s. At 100 series per report, that is three million samples/s and thirty million active host-series combinations before additional labels. A unique request-ID label would change the series count again, not just the size of one sample.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** A metric identity/admission policy, ingestion and aggregation path, and an operator response to an unexpected explosion in label combinations.
+**Deliver:** Build metric acceptance and storage rules, recent queries and retained aggregate history. Demonstrate an operating response to an unexpected increase in distinct label combinations.
 
-Build the metrics service used by 300,000 hosts. Teams need recent dashboards and one year of downsampled capacity history. A developer accidentally adds request IDs as labels, causing the number of time series to explode.
+**Required behavior:** Accept timestamped numeric samples with a bounded label schema, serve recent range queries, and retain downsampled history with explicit aggregation semantics. Missing data remains missing. It is not automatically zero.
 
-**Required behavior:** Accept timestamped numeric samples with a bounded label schema, serve recent range queries, and retain downsampled history with explicit aggregation semantics. Missing data remains missing; it is not automatically zero.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +45,11 @@ python3 examples/architecture-starts/metrics_platform.py
 
 **Supplied file:** [`examples/architecture-starts/metrics_platform.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/metrics_platform.py). You can also [read or download the source here](../../../../examples/architecture-starts/metrics_platform.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Unweighted average of averages: 55.0
@@ -42,7 +59,7 @@ Rejected labels: ['request_id']
 
 ### Set up your implementation workspace
 
-Create `work/metrics-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/metrics-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -76,7 +93,7 @@ Use hot retention for operational queries and S3-backed archived rollups for the
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The correct weighted average is 19, not 55; request_id is rejected as a label. |
+| Run the starting program | The correct weighted average is 19, not 55. Request_id is rejected as a label. |
 | Stop one host | The series shows a gap, not a fabricated zero. |
 | Submit a cardinality burst | The tenant gets an explicit admission outcome while existing series continue. |
 
@@ -84,13 +101,13 @@ Use hot retention for operational queries and S3-backed archived rollups for the
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 300,000 hosts reporting every ten seconds | 30,000 host reports/s; at 100 series/report, three million samples/s. |
-| 100 series/host | Thirty million active series before service labels and replicas; cardinality is a first-class capacity input. |
-| One year of downsampled history | Preserve count/sum and suitable histogram data; averaging averages without weights gives wrong results. |
+| 300,000 hosts reporting every ten seconds | 30,000 host reports/s. At 100 series/report, three million samples/s. |
+| 100 series/host | Thirty million active series before service labels and replicas. Cardinality is a first-class capacity input. |
+| One year of downsampled history | Preserve count/sum and suitable histogram data. Averaging averages without weights gives wrong results. |
 
 ## Map the local implementation to AWS
 
@@ -100,14 +117,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Ingest and query metrics with bounded cardinality: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/metrics-platform.svg)
 
-Prometheus-compatible storage handles recent operational queries; a separate rollup/archive path provides the stated long-term history. The diagram includes an ingestion adapter because a stream does not write itself into a metric store.
+Prometheus-compatible storage handles recent operational queries. A separate rollup/archive path provides the stated long-term history. The diagram includes an ingestion adapter because a stream does not write itself into a metric store.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local timing and correlation events | AWS Distro for OpenTelemetry: host collection | Instrument runtime spans and configure collection/export; propagate parent and request identity across boundaries. |
+| Local timing and correlation events | AWS Distro for OpenTelemetry: host collection | Instrument runtime spans and configure collection/export. Propagate parent and request identity across boundaries. |
 | Local event sequence or input stream | Amazon Kinesis: ingestion buffer | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
-| Local metric samples | Amazon Managed Service for Prometheus: recent metric store | Configure scrape/remote-write and retention/query behavior; reject or constrain unbounded label identities at ingestion. |
-| Application or worker process | Amazon ECS: rollup workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local metric samples | Amazon Managed Service for Prometheus: recent metric store | Configure scrape/remote-write and retention/query behavior. Reject or constrain unbounded label identities at ingestion. |
+| Application or worker process | Amazon ECS: rollup workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local file, object fixture or exported payload | Amazon S3: historical aggregate archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 | Local metrics report | Amazon Managed Grafana: dashboard interface | Connect the metric source and build symptom, capacity and recovery views with scoped access. |
 
@@ -115,11 +132,11 @@ Prometheus-compatible storage handles recent operational queries; a separate rol
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Managed ingestion | Verify workspace quotas and supported ingestion APIs; a consumer adapter translates the stream to the required protocol. |
+| Managed ingestion | Verify workspace quotas and supported ingestion APIs. A consumer adapter translates the stream to the required protocol. |
 | Cardinality | Enforce budgets at ingestion and alert on growth rate before memory is exhausted. |
-| Retention/query | Set each tier explicitly; wire a supported historical data source or query API for archived rollups. |
+| Retention/query | Set each tier explicitly. Wire a supported historical data source or query API for archived rollups. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -146,7 +163,7 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 ## Think from the contract to the boxes
 
-A metric identity is name plus label set; each distinct set creates another time series. Validate schema and cardinality at ingest, aggregate high-volume counters near the source, and separate high-resolution recent data from older rollups. Alert evaluation needs durable rules, missing-data semantics, and a notification path independent of the metrics query dashboard.
+A metric identity is name plus label set. Each distinct set creates another time series. Validate schema and cardinality at ingest, aggregate high-volume counters near the source, and separate high-resolution recent data from older rollups. Alert evaluation needs durable rules, missing-data semantics, and a notification path independent of the metrics query dashboard.
 
 **First diagram:** Estimate series count from hosts × metrics × label combinations. Draw ingest, rollup, query and alert paths separately.
 
@@ -154,14 +171,14 @@ A metric identity is name plus label set; each distinct set creates another time
 |---|---|---|
 | **Amazon Kinesis Data Streams** / metric event stream | Buffer high-rate metric batches and fan out consumers. | MSK where existing Kafka ecosystem and client guarantees dominate. |
 | **Amazon Managed Service for Apache Flink** / stream aggregation | Window, downsample and compute event-time rollups. | Lambda for simpler low-state aggregation. |
-| **Amazon Managed Service for Prometheus** / metrics store and PromQL query | Receive Prometheus remote-write samples and retain/query the configured window. | Amazon Timestream for InfluxDB for an InfluxDB-oriented workload; it is not the same API. Archive long-term rollups separately when retention requires it. |
+| **Amazon Managed Service for Prometheus** / metrics store and PromQL query | Receive Prometheus remote-write samples and retain/query the configured window. | Amazon Timestream for InfluxDB for an InfluxDB-oriented workload. It is not the same API. Archive long-term rollups separately when retention requires it. |
 | **Amazon Managed Grafana** / dashboard UI | Explore metrics and dashboard operational data. | Self-managed Grafana when plugins or tenancy controls require it. |
-| **Managed Prometheus ruler + alert manager** / evaluation, then routing | The ruler evaluates PromQL; alert manager groups, deduplicates, silences and routes firing alerts to a configured SNS receiver. | Self-managed Prometheus-compatible rule evaluator plus Alertmanager. CloudWatch Alarms evaluate CloudWatch metrics, not an arbitrary external store directly. |
+| **Managed Prometheus ruler + alert manager** / evaluation, then routing | The ruler evaluates PromQL. Alert manager groups, deduplicates, silences and routes firing alerts to a configured SNS receiver. | Self-managed Prometheus-compatible rule evaluator plus Alertmanager. CloudWatch Alarms evaluate CloudWatch metrics, not an arbitrary external store directly. |
 
 **Baseline data path:** agents validate/cardinality-limit samples, then remote-write
 to Managed Prometheus. A Kinesis/Flink path is optional for raw metric events or
-custom rollups; its consumer must explicitly convert output to a supported sink
-format. Grafana queries the store; it is not the rule evaluator. Preserve
+custom rollups. Its consumer must explicitly convert output to a supported sink
+format. Grafana queries the store. It is not the rule evaluator. Preserve
 one-year aggregates in an explicitly configured store/archive, not an assumed
 default retention setting.
 
@@ -171,13 +188,13 @@ resolved notification. Test silence and missing telemetry separately. Notificati
 deduplication is not a guarantee of exactly-once delivery to a person.
 
 **Availability note, checked 2026-09-23:** AWS closed **Amazon Timestream for
-LiveAnalytics** to new customers on June 20, 2025; existing eligible payer
+LiveAnalytics** to new customers on June 20, 2025. Existing eligible payer
 accounts remain supported. It is not this new-account design’s baseline.
 [AWS availability notice](https://docs.aws.amazon.com/timestream/latest/developerguide/AmazonTimestreamForLiveAnalytics-availability-change.html).
 Managed Prometheus’s [ruler](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-Ruler.html)
 and [alert manager](https://docs.aws.amazon.com/prometheus/latest/userguide/AMP-alert-manager.html)
 have different responsibilities. Check the chosen region, quotas and account
-permissions before provisioning; no account/region was deployed for this brief.
+permissions before provisioning. No account/region was deployed for this brief.
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
 
@@ -191,7 +208,7 @@ Service choice follows the contract: the box label gives the generic job, while 
 
 **Practice artifact:** Estimate series count from hosts × metrics × label combinations. Draw ingest, rollup, query and alert paths separately. Then trace every row in the table, draw one failure, and state what the customer observes. Suggested rehearsal: 35 minutes design, 10 minutes to challenge the guarantees.
 
-**Evidence and origin:** The current community interview-question catalog lists monitoring-platform reports at Meta, LinkedIn, Stripe, MongoDB and others; it does not disclose when each interview happened. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
+**Evidence and origin:** The current community interview-question catalog lists monitoring-platform reports at Meta, LinkedIn, Stripe, MongoDB and others. It does not disclose when each interview happened. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/metrics-monitoring-alerts/cm6k7xmwh024f11hvvc0uq1e5).
 

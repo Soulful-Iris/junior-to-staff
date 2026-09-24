@@ -56,3 +56,25 @@ The revision adds no automated test suite, scheduled check or publishing gate. M
 All 75 mechanism programs and four existing AI workflows were executed while writing their output examples. The new HTTP application was run with actual requests: save during title timeout (201), list (200), owner edit (200), stale edit (409), non-owner edit (404), per-member read state (200), and missing identity (401). Restarting the process with the same database retained the saved record and note. These are local observations, not AWS deployment evidence.
 
 The site was built and its representative project pages inspected at mobile and desktop widths. Review includes the tracing page, a design problem, a workflow brief, a continuing stage and the starter instructions. This document records the editorial review and observed local behavior; it adds no CI requirements.
+
+## Follow-up: introduce meaning before technical shorthand
+
+The next reading feedback showed that the first revision still assumed too much. “Commits the URL” could be mistaken for a Git commit. “Display title,” “timeout,” “save” and “reconstruct one caller's request” appeared before the page had shown what anyone sent, stored or received.
+
+All 90 project openings now begin with a concrete user action, explain the normal outcome and then introduce the failure. Each includes an example walkthrough or request/result view. Terms such as reconciliation, lease, cache fill, time series, backfill and prompt injection are explained in the scenario where the reader needs them. Assignment sentences now describe actions to perform rather than lists of technical nouns. The redundant earlier scenario paragraphs were removed.
+
+For request tracing, the opening shows a bookmark-save request, the relevant response fields and the meaning of 201 Created. It explains where a page title comes from, why a slow website can cause a timeout, and why the saved URL should remain. It then distinguishes a bookmark ID from a request ID and shows why interleaved diagnostic records need that request ID. The supplied title lookup is clearly identified as a local simulation.
+
+The editorial check asks: who acts, what do they send, what does the application store or return, what failure changes that result, and what must the learner build? Product examples describe intended behavior. Supplied-server examples identify what actually runs. Prose semicolons were removed while code syntax was preserved.
+
+The revision adds no tests, recurring checks or publication requirements. Main remains the publication source.
+
+## Follow-up: choose introductory evidence for each problem
+
+The further guidance is to use interview-style sizing vocabulary, current-flow animation, small code excerpts, API contracts and diagnostic evidence only when they improve that particular introduction. The [90-page evidence review](INTRODUCTION-EVIDENCE-REVIEW.md) records the choices and deliberate omissions.
+
+Four focused animations explain the existing bookmark save flow, a lost payment reply, connection-pool waiting and a worker returning after ownership changes. Each has an authored still and uses the existing motion controls. Small-screen layouts keep these narrow diagrams within the reading width.
+
+Selected pages now introduce concrete API responses, real excerpts from supplied local code, actual local-model output or explicitly illustrative incident records. No illustrative record is described as a production capture. Sizing appears early only when its calculation changes the design discussion. Several workflow/decision introductions use prose alone because extra diagrams or large traffic numbers would not help.
+
+The estimation reference also needed a correction: 30,000 reads/s multiplied by 100 microseconds is three accumulated seconds of waiting per second, not thirty. This does not alone establish disk saturation because I/O can overlap. The page now distinguishes latency from throughput, states rounding and peak assumptions, and separates request-based reliability from time-based availability.

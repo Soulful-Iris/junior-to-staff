@@ -2,15 +2,23 @@
 
 ## Application background
 
-A reading-list service has an API, title jobs and runtime configuration. A bad title-provider setting can break jobs even when the deployment and configuration syntax look valid.
+A reading-list service saves URLs and runs separate jobs to fetch their titles. An operator changes the title-provider address to an unavailable host. The configuration file is valid, but users stop receiving titles.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+You will reproduce this situation in a disposable environment and practice the response. The point is to observe user impact, how the responder discovers it, how the change is reversed and whether useful work actually resumes.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Apply the bad provider address in staging | Observe title jobs fail while recording which user actions still work. |
+| The responder identifies the configuration change | Restore the known working value. |
+| The configuration is restored | Wait for a successful title result and inspect remaining failed work. |
+
+Detection time, mitigation time and recovery time describe different moments. Record them separately instead of treating the rollback command as proof that users have recovered.
 
 ## Your assignment
 
-**Deliver:** One bounded staging incident record covering impact, detection, mitigation, verified recovery and the follow-up change.
-
-Run one controlled incident exercise in a disposable staging service. A valid JSON configuration routes every title job to an unavailable host. Record when users are affected, when the responder detects it, when rollback happens and when useful work actually recovers.
+**Deliver:** Run one bounded staging incident and record user impact, detection, mitigation and demonstrated recovery. Complete one follow-up repair based on what the exercise revealed.
 
 **Required behavior:** The drill has a named owner, bounded scope, observable stop condition and independently available rollback path. It produces a factual timeline and one completed repair. No recurring fault injection or production action is installed.
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/the_incident_you_caused_on_purpose.py
 
 **Supplied file:** [`examples/architecture-starts/the_incident_you_caused_on_purpose.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_incident_you_caused_on_purpose.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_incident_you_caused_on_purpose.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'detection_after_impact_s': 55, 'mitigation_after_alert_s': 60, 'recovery_after_impact_s': 205}
@@ -41,7 +49,7 @@ Rollback is a milestone; backlog clear establishes recovery.
 
 ### Set up your implementation workspace
 
-Create `work/the-incident-you-caused-on-purpose/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/the-incident-you-caused-on-purpose/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -83,12 +91,12 @@ Fix the discovered weakness: semantic configuration validation, independent roll
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Inject 10:00:00; first impact 10:00:05; alert 10:01:00 | Detection after first impact is 55 seconds. |
-| Rollback 10:02:00; backlog clear 10:03:30 | Mitigation after alert is 60 seconds; recovery after first impact is 205 seconds. |
+| Inject 10:00:00. First impact 10:00:05. Alert 10:01:00 | Detection after first impact is 55 seconds. |
+| Rollback 10:02:00. Backlog clear 10:03:30 | Mitigation after alert is 60 seconds. Recovery after first impact is 205 seconds. |
 | Maximum five-minute exercise window assumption | Stop earlier if the scoped impact or emergency-access condition is violated. |
 
 ## Map the local implementation to AWS
@@ -104,21 +112,21 @@ The exercise separates injection, detection, mitigation and recovery. A control 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local versioned configuration | AWS AppConfig: staging configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
-| Application or worker process | Amazon ECS: scoped title workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local pending-work collection | Amazon SQS: staging backlog | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: scoped title workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: staging backlog | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: incident evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
-| Manual operational commands | AWS Systems Manager: independent recovery access | Package scoped run procedures and record execution results; validate the recovery procedure against actual stored state. |
+| Manual operational commands | AWS Systems Manager: independent recovery access | Package scoped run procedures and record execution results. Validate the recovery procedure against actual stored state. |
 | Local file, object fixture or exported payload | Amazon S3: drill record | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Environment | Explicit staging resource IDs and synthetic data; finite drill duration and named stop owner. |
+| Environment | Explicit staging resource IDs and synthetic data. Finite drill duration and named stop owner. |
 | Recovery | Credentials and rollback instructions available independently of the failing application/configuration path. |
-| Evidence | Record applied version and actual useful recovery; retain a redacted timeline with timestamps. |
+| Evidence | Record applied version and actual useful recovery. Retain a redacted timeline with timestamps. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -139,7 +147,7 @@ The drill exposes a repair that cannot be completed immediately. Name the tempor
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Use pre-authorized independent recovery access and a time-bounded failure injection. Test its credentials and dependencies beforehand; a stop button inside the failed system is not an independent stop mechanism.
+Use pre-authorized independent recovery access and a time-bounded failure injection. Test its credentials and dependencies beforehand. A stop button inside the failed system is not an independent stop mechanism.
 
 </details>
 
@@ -158,6 +166,6 @@ Detection improved, recovery did not. Report both. Choose a separate repair such
 
 - [Raw incident evidence exercise](../labs/reliability/incident.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

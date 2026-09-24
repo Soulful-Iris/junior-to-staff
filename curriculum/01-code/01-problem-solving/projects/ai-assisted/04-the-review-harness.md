@@ -2,7 +2,19 @@
 
 ## Application background
 
-A reading-list API and its export job can share a parameter parser. Changing that parser may affect both features even when a commit message describes a small interface change.
+A reading-list API and its export command both use a helper that interprets a requested result limit. A change alters what a limit of zero means. The commit message calls it a small UI adjustment, so a reviewer could easily overlook the export behavior.
+
+You will build a small command that collects the actual code changes, likely callers and relevant existing checks. Its job is to help the reviewer locate evidence, including places where a search cannot establish coverage.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| The helper `parseLimit` changes | Report the changed function and its locations. |
+| The API and export command call that helper | List both callers. |
+| One caller is registered dynamically and a simple search misses it | Record that limitation when comparing the report with the actual application. |
+
+A diff is the code difference between two revisions. Static search inspects code without running it, so it can suggest affected callers without proving it found every runtime path.
 
 ## Your assignment
 
@@ -28,21 +40,21 @@ Leave the server running while sending the documented requests in a second termi
 
 2. Write a command that accepts those two revisions, collects the diff and searches direct call sites and existing checks. Include file locations and report `NONE` when no relevant existing check is found.
 
-3. Add a dynamically registered caller that static name search misses. Manually compare the report with actual calls and record the tool's limits; a generated review summary is evidence for a reviewer, not approval.
+3. Add a dynamically registered caller that static name search misses. Manually compare the report with actual calls and record the tool's limits. A generated review summary is evidence for a reviewer, not approval.
 
 ## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Diff changes `parseLimit`; callers are API list and export; only API list has `test_limit_zero`. | Report both callers; name that test for API list and `NONE` for the uncovered export behavior. |
-| Boundary / failure | A caller is registered dynamically and absent from simple text search. | Mark search limits and inspect runtime registration; do not claim complete call-graph coverage. |
-| Scope | Ten recorded diffs; collector supplies evidence, never an approval verdict. | Explain any additional assumption before implementing it. |
+| Small example | Diff changes `parseLimit`. Callers are API list and export. Only API list has `test_limit_zero`. | Report both callers. Name that test for API list and `NONE` for the uncovered export behavior. |
+| Boundary / failure | A caller is registered dynamically and absent from simple text search. | Mark search limits and inspect runtime registration. Do not claim complete call-graph coverage. |
+| Scope | Ten recorded diffs. Collector supplies evidence, never an approval verdict. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -57,7 +69,7 @@ flowchart TD
  D --> E["Unseen export caller"]
 ```
 
-The message describes intent; risk follows actual dependency edges. A named nearby test is not proof until it detects the proposed accident.
+The message describes intent. Risk follows actual dependency edges. A named nearby test is not proof until it detects the proposed accident.
 
 <details>
 <summary>Reveal the approach and decisions</summary>
@@ -73,7 +85,7 @@ Collect changed symbols, references, and tests, then identify the semantic risk.
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Introduce that condition on an isolated branch and run the named test. Capture the failure and restore the tree; a passing mutant disproves the coverage claim.
+Introduce that condition on an isolated branch and run the named test. Capture the failure and restore the tree. A passing mutant disproves the coverage claim.
 
 ```mermaid
 flowchart TD
@@ -91,7 +103,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Add the consumer contract and a provider negative fixture. Local references cannot enumerate deployed clients; identify a contract owner and document unknown consumers.
+Add the consumer contract and a provider negative fixture. Local references cannot enumerate deployed clients. Identify a contract owner and document unknown consumers.
 
 ```mermaid
 flowchart TD
@@ -104,9 +116,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Reproduce one real coverage gap and disprove one mistaken protection claim. **Additional lead scope:** Assign cross-service contract ownership and characterize collector blind spots. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Reproduce one real coverage gap and disprove one mistaken protection claim. **Additional lead scope:** Assign cross-service contract ownership and characterize collector blind spots. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -122,17 +134,17 @@ diffs from your history and tally how often the third answer is "none".
 
 **The thought process**
 
-A harness is not for replacing your reading; it is for making your tenth review
+A harness is not for replacing your reading. It is for making your tenth review
 of the day as good as your first. Attention degrades invisibly, and a procedure
 carries quality through fatigue — the reason experienced pilots still run the
-checklist. The commit message describes the intended change; the accidental one
+checklist. The commit message describes the intended change. The accidental one
 lives in the blast radius — every caller of a changed function, every other
 user of a touched helper or config key. That is greppable, so the script
 fetches evidence and holds no opinions.
 
 The third question must end in a test's name or the word "none" — never
 "probably the auth tests". Both answers are checkable: break the behaviour and
-the named test must fail; plant the accident and a true "none" leaves the suite
+the named test must fail. Plant the accident and a true "none" leaves the suite
 green. If all ten diffs come back covered, ask what the answers would look like
 if coverage were bad — the same, and the harness is agreeing with you, not
 reviewing.
@@ -148,7 +160,7 @@ questions, the mechanical evidence that answers it — commands, not
 judgment. The third answer must be a test name or the word NONE.
 ```
 
-The procedure must name commands you can run; any step beginning "consider
+The procedure must name commands you can run. Any step beginning "consider
 whether" is judgment smuggled in as evidence, so send it back.
 
 **2 — build the collector.**
@@ -180,7 +192,7 @@ means the NONE was true and the tally is data.
 It can run where the diff lives: **GitHub Actions**, on every pull request.
 Estimate runner usage for the current repository plan. AWS enters only if the harness calls a model per diff
 — then route it through **Bedrock** with invocation logging on, so each review
-has a visible cost in **CloudWatch**; a review bot nobody meters gets quietly
+has a visible cost in **CloudWatch**. A review bot nobody meters gets quietly
 expensive. And whatever runs it gets read-only credentials: it comments, it
 never merges.
 
@@ -189,7 +201,7 @@ never merges.
 The tally is the real product: a none-rate over time, saying whether the suite
 grows with the code or falls behind it. The failure mode is ritual — people
 reading the harness instead of the diff — so it cites evidence and asks
-questions, never concludes "looks good". Alarm on the none-rate rising; that is
+questions, never concludes "looks good". Alarm on the none-rate rising. That is
 the trend it exists to catch.
 
 **The learning**
@@ -203,10 +215,10 @@ percentage has.
 
 - Plant an in-passing edit to a shared helper in a test diff. If question two
   does not list it, the blast-radius logic is decorative.
-- Verify a named test the way you verify a NONE: break the behaviour; that
+- Verify a named test the way you verify a NONE: break the behaviour. That
   test, specifically, must fail.
 - Run the harness twice on one diff. Materially different answers mean a rumour
-  generator; pin every claim to collector output.
+  generator. Pin every claim to collector output.
 - Ten out of ten covered. In my own record, answers shaped that much like good
   news have usually been the instrument — check it before you believe it.
 

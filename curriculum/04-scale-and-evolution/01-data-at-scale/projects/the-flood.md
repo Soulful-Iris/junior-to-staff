@@ -2,19 +2,33 @@
 
 ## Application background
 
-An event application accepts producer messages and processes them with slower workers. Acceptance is a promise about retained work; a full waiting area requires a clear rejection or upstream slowdown.
+An application accepts events from producers and processes them with background workers. Each accepted event waits until a worker can handle it. During a short burst, producers may submit much faster than the workers can finish.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The waiting area is limited to 300 events in this exercise. If 100 arrive each second and only 20 finish, it cannot absorb the excess forever. The service needs to tell producers clearly whether their event was accepted or rejected.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| An event arrives while waiting space remains | Accept it under the declared storage guarantee. |
+| The waiting budget is full | Reject new work or make the producer slow down explicitly. |
+| The burst ends | Drain accepted work and show progress. |
+
+Backpressure means asking upstream producers to slow down when the receiver cannot keep up. A rejection must not look like acceptance, or the producer may discard work the service never retained.
+
+### Sizing that affects this decision
+
+During the ten-second burst, producers offer 1,000 events while workers finish at most 200. With space for 300 still waiting, 500 events must be rejected in the supplied discrete-time model. Without rejection, the queue would need to hold the remaining 800 events at that point.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** An admission/worker loop with a finite waiting budget and a timeline of accepted, rejected, pending and completed events.
-
-Build bounded ingestion for a small event-processing application. A ten-second burst sends 100 events/s, workers complete only 20/s, and the in-memory waiting budget is 300 events. Producers need an explicit answer about accepted versus rejected work.
+**Deliver:** Build event acceptance and worker processing with a finite waiting budget. Show which events are accepted, rejected, still waiting and completed through the burst and recovery.
 
 **Required behavior:** Accepted means durably owned work under a finite backlog policy. Keep event identity across retries, expose queue age, and reject excess before pretending it was accepted. A restart cannot lose previously acknowledged work.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/the_flood.py
 
 **Supplied file:** [`examples/architecture-starts/the_flood.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_flood.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_flood.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'offered': 1000, 'completed': 200, 'queued': 300, 'rejected': 500}
@@ -40,7 +54,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/the-flood/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/the-flood/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -56,7 +70,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Make acceptance explicit
 
-Validate an event envelope and stable producer/event ID. Commit accepted work before returning success. If capacity is exhausted, return a clear rejection with bounded retry guidance; an in-memory append is not durable acceptance.
+Validate an event envelope and stable producer/event ID. Commit accepted work before returning success. If capacity is exhausted, return a clear rejection with bounded retry guidance. An in-memory append is not durable acceptance.
 
 ### 2. Bound the actual queue
 
@@ -82,7 +96,7 @@ Stop arrivals, measure drain and reconcile offered = completed + queued + reject
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
@@ -102,11 +116,11 @@ SQS can retain work, but the application must decide how much waiting it promise
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: event submission API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: event submission API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: bounded admission | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: accepted-work authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local pending-work collection | Amazon SQS: worker delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
-| Application or worker process | Amazon ECS: event processors | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: accepted-work authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: worker delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: event processors | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: flow accounting | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
@@ -114,10 +128,10 @@ SQS can retain work, but the application must decide how much waiting it promise
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | Admission | Enforce unfinished-work budget independently of SQS storage capacity. |
-| Workers | Fixed initial concurrency tied to the measured 20/s dependency capacity; bounded retries. |
+| Workers | Fixed initial concurrency tied to the measured 20/s dependency capacity. Bounded retries. |
 | Retention | Durable accepted-work horizon and a named repair path for expired or quarantined events. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -138,7 +152,7 @@ An event costs ten times the average. Move from count-only admission toward esti
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Condition writes on the current fencing generation and job state. The old process may still execute; only the destination boundary can reject its stale mutation.
+Condition writes on the current fencing generation and job state. The old process may still execute. Only the destination boundary can reject its stale mutation.
 
 </details>
 
@@ -149,7 +163,7 @@ Condition writes on the current fencing generation and job state. The old proces
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs; stop scale-out at the database budget instead of scaling blindly on depth.
+Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs. Stop scale-out at the database budget instead of scaling blindly on depth.
 
 </details>
 
@@ -157,6 +171,6 @@ Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and
 
 - [Lease and provider recovery lab](../../04-migrations/labs/recovery-migration/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

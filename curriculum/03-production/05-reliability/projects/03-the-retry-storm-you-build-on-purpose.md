@@ -2,19 +2,31 @@
 
 ## Application background
 
-A bookmark save passes through a browser, an API and a dependency client. If every layer retries independently, one user action can become many calls to an already failing dependency.
+A user presses Save once in a reading-list app. When a dependency is unavailable, the browser tries again. The API handler also retries, and its dependency library has retries of its own. One visible user action can therefore produce many calls to the failing service.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Retries can help after a brief interruption, but uncoordinated layers multiply work. They can also repeat a write whose success response was lost. First count the calls, then choose which layer should own the retry decision.
+
+### Count the calls caused by one operation
+
+The supplied model prints:
+
+```text
+3 total attempts per layer -> 27 dependency attempts
+4 total attempts per layer -> 64 dependency attempts
+Start another attempt: False
+```
+
+There are three retrying layers. The first line is `3 × 3 × 3`, counting the original call among each layer's attempts. In the final line, only 500 ms remain but the suggested retry wait is 2,000 ms, so another attempt cannot fit the original deadline.
+
+Retry amplification is this multiplication of calls. A retry budget limits the total extra work, and idempotency prevents repeated attempts from creating repeated effects.
 
 ## Your assignment
 
-**Deliver:** A call-amplification trace and a revised retry policy with one owner, bounded attempts, an original deadline and safe duplicate handling.
-
-Investigate a save operation that explodes into dozens of dependency calls during an outage. The browser, API handler and SDK each retry independently. Reduce amplification while retaining a safe response to transient failures.
+**Deliver:** Count the dependency calls caused by one user operation. Revise the retry policy so one layer owns a bounded budget, preserves the original deadline and avoids repeated write effects.
 
 **Required behavior:** One layer owns the retry budget for a logical operation. Count total attempts explicitly, preserve the original deadline and operation identity, and retry writes only under a verified idempotency/reconciliation contract.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +40,11 @@ python3 examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py
 
 **Supplied file:** [`examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py). You can also [read or download the source here](../../../../examples/architecture-starts/03_the_retry_storm_you_build_on_purpose.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 3 total attempts per layer -> 27 dependency attempts
@@ -43,7 +55,7 @@ Bounded jitter delays ms: [130, 60, 260, 29, 214]
 
 ### Set up your implementation workspace
 
-Create `work/03-the-retry-storm-you-build-on-purpose/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/03-the-retry-storm-you-build-on-purpose/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -63,7 +75,7 @@ Attach one logical operation ID across browser, API and SDK. Count attempts at e
 
 ### 2. Assign one retry owner
 
-Disable or constrain nested retries so the total budget is explicit. Use a maximum total-attempt count, shared deadline and bounded exponential backoff with jitter. Stop when Retry-After exceeds remaining time; do not start work that cannot contribute to the response.
+Disable or constrain nested retries so the total budget is explicit. Use a maximum total-attempt count, shared deadline and bounded exponential backoff with jitter. Stop when Retry-After exceeds remaining time. Do not start work that cannot contribute to the response.
 
 ### 3. Preserve write identity
 
@@ -77,7 +89,7 @@ Use a finite local fault window and compare request count, attempt timing, usefu
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The two configurations produce 27 and 64 attempts; a two-second Retry-After cannot fit 500 ms remaining. |
+| Run the starting program | The two configurations produce 27 and 64 attempts. A two-second Retry-After cannot fit 500 ms remaining. |
 | Lose a successful write response | The retry uses the same intent identity and resolves the original effect. |
 | Recover 1,000 clients together | Jitter and bounded probes spread attempts within the configured budget. |
 
@@ -85,13 +97,13 @@ Use a finite local fault window and compare request count, attempt timing, usefu
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Three layers × three total attempts each | Worst-case 3³ = 27 dependency attempts for one user action. |
 | Three retries plus initial attempt at each layer | Four total attempts/layer gives 4³ = 64, not 27. |
-| 1,000 clients with identical backoff | Even a bounded attempt count can create synchronized recovery bursts; spread timing with jitter. |
+| 1,000 clients with identical backoff | Even a bounded attempt count can create synchronized recovery bursts. Spread timing with jitter. |
 
 ## Map the local implementation to AWS
 
@@ -106,10 +118,10 @@ The API and SDK are separate retry layers even when they run in one process. Exp
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local caller or request sequence | Client application: logical user action | Implement user-visible request identity, bounded retry/deadline behavior and explicit rejection/degraded states. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: HTTP entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: HTTP entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: retry-owning application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Controlled dependency fixture | External provider: dependency authority | Implement bounded provider calls with explicit success, failure and unknown-outcome semantics. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: operation evidence | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: operation evidence | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: retry operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
@@ -117,10 +129,10 @@ The API and SDK are separate retry layers even when they run in one process. Exp
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | SDK settings | Set retry mode/count deliberately and document whether configuration means retries or total attempts. |
-| Timeouts | Share the original deadline and cap queue/backoff time; cancel abandoned work where supported. |
+| Timeouts | Share the original deadline and cap queue/backoff time. Cancel abandoned work where supported. |
 | Provider state | Persist operation identity before the call and retain it for the required retry horizon. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -129,7 +141,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-The provider’s idempotency retention expires before your retry horizon. Shorten the automatic retry window or add a provider lookup/reconciliation path; do not assume an old key remains deduplicated forever.
+The provider’s idempotency retention expires before your retry horizon. Shorten the automatic retry window or add a provider lookup/reconciliation path. Do not assume an old key remains deduplicated forever.
 
 <details>
 <summary>Additional design reasoning and requirement changes</summary>
@@ -141,7 +153,7 @@ The provider’s idempotency retention expires before your retry horizon. Shorte
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Plot attempt timestamps as well as counts. Full jitter spreads retries, while an admission limit bounds total downstream concurrency; jitter does not create extra capacity or serialize one key.
+Plot attempt timestamps as well as counts. Full jitter spreads retries, while an admission limit bounds total downstream concurrency. Jitter does not create extra capacity or serialize one key.
 
 </details>
 
@@ -160,6 +172,6 @@ For local effects, atomically persist operation identity, payload and result wit
 
 - [Runnable reliability arithmetic and incident lab](../labs/reliability/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

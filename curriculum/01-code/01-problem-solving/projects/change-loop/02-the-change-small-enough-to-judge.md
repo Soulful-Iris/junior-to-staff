@@ -2,7 +2,19 @@
 
 ## Application background
 
-A reading-list feature can touch schema, validation, API and browser code. Reviewers need to understand each change, while users must still have a runnable application between releases.
+Adding tags to a reading list can touch database fields, input validation, API responses and browser controls. Putting all of it into one large change makes it difficult for a reviewer to see which part causes a behavior change.
+
+You will implement the same feature in smaller, ordered steps while keeping the application runnable between them. The order matters because a browser cannot use a new response field before the API provides it.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Add storage that the old application can still use | Keep existing save/list behavior working. |
+| Add validation and the supported API response | Make the new behavior available to callers. |
+| Update the UI to use it | Complete the feature without an intermediate broken caller. |
+
+A change stack is a sequence of dependent changes. Each step should have one understandable purpose and a clear relationship to the next.
 
 ## Your assignment
 
@@ -28,21 +40,21 @@ Leave the server running while sending the documented requests in a second termi
 
 2. Write the dependency order for rename, nullable schema, validation, API response and UI use. Implement the feature on one branch, then reconstruct it as separately runnable changes on a second branch.
 
-3. Run the application after each layer and record what is usable. Compare final trees and behavior; explain the failure when a caller expects the new API before it exists.
+3. Run the application after each layer and record what is usable. Compare final trees and behavior. Explain the failure when a caller expects the new API before it exists.
 
 ## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Rename → nullable tags column → validation → API behavior → UI, all from the same base. | All five stage tips build; the top matches the single-change implementation and seeded bugs have cited findings. |
-| Boundary / failure | The UI stage lands before the response includes tags. | A contract check rejects that stage; a smaller diff is not automatically a safe diff. |
-| Scope | One feature; compare identical behavior and preserve reviewer blinding. | Explain any additional assumption before implementing it. |
+| Small example | Rename → nullable tags column → validation → API behavior → UI, all from the same base. | All five stage tips build. The top matches the single-change implementation and seeded bugs have cited findings. |
+| Boundary / failure | The UI stage lands before the response includes tags. | A contract check rejects that stage. A smaller diff is not automatically a safe diff. |
+| Scope | One feature. Compare identical behavior and preserve reviewer blinding. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -65,7 +77,7 @@ Review time mixes mechanical changes with decisions. The counterexample is a tin
 <details>
 <summary>Reveal the approach and decisions</summary>
 
-Write the dependency graph before splitting by file count. Add compatible schema before consumers; keep mechanical changes separate. The invariant is deployable behavior at each stop, with an explainable final-tree comparison. Score correctly found defects rather than speed alone.
+Write the dependency graph before splitting by file count. Add compatible schema before consumers. Keep mechanical changes separate. The invariant is deployable behavior at each stop, with an explainable final-tree comparison. Score correctly found defects rather than speed alone.
 
 </details>
 
@@ -94,7 +106,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Rebase dependent layers and rerun their integration checks against the revised base. Reuse artifacts only when their input commit is unchanged; do not transfer a green result across a new dependency graph.
+Rebase dependent layers and rerun their integration checks against the revised base. Reuse artifacts only when their input commit is unchanged. Do not transfer a green result across a new dependency graph.
 
 ```mermaid
 flowchart TD
@@ -108,13 +120,13 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Demonstrate checkout-and-run at every stage and a blind defect review. **Additional lead scope:** Budget review dependencies and define who maintains abandoned stages. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Demonstrate checkout-and-run at every stage and a blind defect review. **Additional lead scope:** Budget review dependencies and define who maintains abandoned stages. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
-![The same week of work shipped two ways. As one 38-file commit, a production failure implicates all 38 cells and a cursor sweeps the whole row, searching. As five small changes run one at a time, the same fault implicates only Thursday's seven files; the other four changes stay proven good and the revert is one small commit.](../../../../../assets/diagrams/batch-size.svg)
+![The same week of work shipped two ways. As one 38-file commit, a production failure implicates all 38 cells and a cursor sweeps the whole row, searching. As five small changes run one at a time, the same fault implicates only Thursday's seven files. The other four changes stay proven good and the revert is one small commit.](../../../../../assets/diagrams/batch-size.svg)
 
 *You end up with one feature built as a single 40-file pull request and again
 as a stack of five, and numbers for what review actually caught in each.*
@@ -124,7 +136,7 @@ as a stack of five, and numbers for what review actually caught in each.*
 One real Stage 1 reading-list feature — tagging is the right size: a rename, a migration,
 behaviour, UI — built twice from one plan: as a single PR, and as a stack of
 five layers, each green and runnable alone. Two bugs planted blind in both at
-the same spots. Review both forms, timed; open the sealed answers last.
+the same spots. Review both forms, timed. Open the sealed answers last.
 
 **The thought process**
 
@@ -152,7 +164,7 @@ main is still runnable if the stack stops here. Renames and refactors
 get their own layer.
 ```
 
-No layer may need "and"; every stop-here claim must be plausible. The plan is
+No layer may need "and". Every stop-here claim must be plausible. The plan is
 the project — argue with it before anything is built.
 
 **2. The blob.**
@@ -209,7 +221,7 @@ previews are money and attack surface accumulating quietly.
 
 **The learning**
 
-A big diff does not get reviewed more slowly; it gets reviewed less. Attention
+A big diff does not get reviewed more slowly. It gets reviewed less. Attention
 per line collapses as the line count grows, and you now have your own numbers
 for that instead of a line from a book.
 
@@ -218,7 +230,7 @@ for that instead of a line from a book.
 - The stack's final tree differs from the blob's and you cannot explain each difference.
 - A middle layer fails checkout-and-run: the stack is one PR wearing five hats.
 - Neither review caught either bug: the instrument is broken — bugs too subtle, or review is theatre. Find out which before trusting anything else here.
-- You opened `sealed.txt` early. Say so; a contaminated measurement reported clean is worse than none.
+- You opened `sealed.txt` early. Say so. A contaminated measurement reported clean is worse than none.
 
 ---
 

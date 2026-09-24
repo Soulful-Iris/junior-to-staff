@@ -2,15 +2,23 @@
 
 ## Application background
 
-A reading-list product can appear healthy at its process endpoint while users cannot save or retrieve a link. A synthetic journey acts as a dedicated user and observes that complete path.
+A reading-list server can reply Healthy while a user still cannot save a bookmark. A more useful check follows a small user journey: sign in as a dedicated account, create a recognizable bookmark, read it back and remove it.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+This exercise starts with one manual run of that journey. The account and marker data must be separate from real users. If cleanup fails, operators need to know what remains rather than accumulating unexplained records.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Create marker bookmark `probe-17` | Receive its saved ID. |
+| Read the marker through the normal user path | Confirm that the saved content is accessible to the probe account. |
+| Remove the marker | Confirm cleanup or record the item that needs attention. |
+
+A synthetic journey is an operation performed by a controlled artificial user to observe real application behavior. Scheduling it repeatedly is a separate operating decision, not something this example installs.
 
 ## Your assignment
 
-**Deliver:** One manual create/read/cleanup journey and an operating plan for any future scheduled deployment, including ownership, isolation and cleanup.
-
-Design a synthetic user journey for a reading-list service: sign in as a dedicated probe account, create a marker link, read it and remove it. The exercise begins with a single manual run; no recurring monitor is installed in this repository.
+**Deliver:** Run one manual create/read/cleanup journey using an isolated probe account. Write the operating plan needed before anybody schedules it repeatedly.
 
 **Required behavior:** A run succeeds only when every required step succeeds. Dependent steps skipped after failure are reported as skipped. Cleanup is attempted independently, and missing runs are distinct from successful runs.
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/05_the_test_that_runs_in_production_forever
 
 **Supplied file:** [`examples/architecture-starts/05_the_test_that_runs_in_production_forever.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/05_the_test_that_runs_in_production_forever.py). You can also [read or download the source here](../../../../examples/architecture-starts/05_the_test_that_runs_in_production_forever.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Journey successful: False
@@ -42,7 +50,7 @@ Runner stale: True
 
 ### Set up your implementation workspace
 
-Create `work/05-the-test-that-runs-in-production-forever/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/05-the-test-that-runs-in-production-forever/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -76,7 +84,7 @@ A probe inside the application VPC does not exercise public DNS and routing. Use
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Failed create plus skipped read is not success; an absent runner becomes stale. |
+| Run the starting program | Failed create plus skipped read is not success. An absent runner becomes stale. |
 | Fail the read after creation | Cleanup still attempts deletion and records its own outcome. |
 | Stop the optional runner | The freshness signal detects absence independently of application errors. |
 
@@ -84,12 +92,12 @@ A probe inside the application VPC does not exercise public DNS and routing. Use
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | One-minute interval in the proposed deployed design | 1,440 runs/day and at least 4,320 create/read/delete operations before authentication and absence checks. |
-| Three missing intervals | A separate heartbeat policy detects a stopped runner; no result is not a healthy result. |
+| Three missing intervals | A separate heartbeat policy detects a stopped runner. No result is not a healthy result. |
 | Dedicated synthetic namespace | Probe data must not appear in real users’ lists, analytics or billing. |
 
 ## Map the local implementation to AWS
@@ -100,14 +108,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Design and run a synthetic reading-list journey: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-test-that-runs-in-production-forever.svg)
 
-The journey measures the user path; heartbeat evidence measures whether the journey ran. The proposed scheduler is part of the lesson architecture, not a change to this website’s publishing behavior.
+The journey measures the user path. Heartbeat evidence measures whether the journey ran. The proposed scheduler is part of the lesson architecture, not a change to this website’s publishing behavior.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Manual invocation or local schedule input | Amazon EventBridge Scheduler: optional journey schedule | Create schedules targeting the dispatcher and preserve occurrence identity across retries and overlapping invocation. |
 | Python operation or worker function | AWS Lambda: bounded journey runner | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: public application path | Create routes and an integration; translate requests and responses and configure identity validation. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: run and cleanup records | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: public application path | Create routes and an integration. Translate requests and responses and configure identity validation. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: run and cleanup records | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: journey operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 | Local provider configuration placeholder | AWS Secrets Manager: probe credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
 
@@ -115,11 +123,11 @@ The journey measures the user path; heartbeat evidence measures whether the jour
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Execution | A manually invoked runner is enough for this exercise; scheduling is an explicit later infrastructure choice. |
-| Identity | Probe account has only synthetic-data permissions; credentials never enter logs. |
-| Cleanup | Finite runtime and orphan-retention policy; cap synthetic data volume even if deletion repeatedly fails. |
+| Execution | A manually invoked runner is enough for this exercise. Scheduling is an explicit later infrastructure choice. |
+| Identity | Probe account has only synthetic-data permissions. Credentials never enter logs. |
+| Cleanup | Finite runtime and orphan-retention policy. Cap synthetic data volume even if deletion repeatedly fails. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -140,7 +148,7 @@ A probe passes while real users fail because its account has special permissions
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-No. Monitor heartbeat freshness separately from journey outcome; distinguish no eligible data from missing instrumentation. Alert on the absent run with the monitor’s owner and last successful timestamp.
+No. Monitor heartbeat freshness separately from journey outcome. Distinguish no eligible data from missing instrumentation. Alert on the absent run with the monitor’s owner and last successful timestamp.
 
 </details>
 
@@ -151,7 +159,7 @@ No. Monitor heartbeat freshness separately from journey outcome; distinguish no 
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Probe the actual public entry path from a second location and keep region-specific outcomes. Do not automatically collapse a single-location failure into global outage; correlate it with other evidence.
+Probe the actual public entry path from a second location and keep region-specific outcomes. Do not automatically collapse a single-location failure into global outage. Correlate it with other evidence.
 
 </details>
 

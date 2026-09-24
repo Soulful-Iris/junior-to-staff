@@ -2,19 +2,36 @@
 
 ## Application background
 
-A storefront reads product details repeatedly. A cache stores disposable copies to reduce database work, but prices and availability still originate in the database.
+A shop's product page repeatedly asks for the same product description and price. To reduce database work, the application keeps a reusable copy in a cache. If the copy is missing or too old, the application reads the database again.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Now a popular product expires from the cache just as thousands of shoppers arrive. They may all ask the database for the same data. Meanwhile, a slow read of the old price might finish after a newer price has already been cached.
+
+### The ordering rule in the supplied code
+
+The local model's `fill()` function contains this guard:
+
+```python
+current=cache.get(key)
+if current and current['version']>version: return 'stale fill rejected'
+```
+
+If version 5 is already cached, an older fetch returning version 4 cannot replace it. This snippet is from a single-process model. A shared cache needs an atomic compare-and-update operation, because two processes can otherwise pass a separate check before either writes.
+
+The database is the origin of product truth. A cache fill is the operation that loads a copy from that origin. Coordinate fills without turning a cache failure into unlimited database work.
+
+### Sizing that affects this decision
+
+The assumed two million reads/s cannot all fall through to a database budgeted for 10,000 reads/s. Even 99% cache hits would leave about 20,000 database reads/s. Under this simplified model, staying within 10,000 requires at least 99.5% hits, fewer admitted reads or more origin capacity.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** A bounded cache-fill path with single-flight coordination, version-aware replacement and an origin-protection response when cache nodes fail.
+**Deliver:** Build controlled cache reads and fills. Prevent a burst of misses from overwhelming the database and prevent an older fill from replacing a newer value.
 
-Build the cache tier for a product catalog. A popular item expires during peak traffic, a cache node disappears, and a price update races an old database read. Keep origin traffic bounded and prevent an older fill from replacing a newer value.
+**Required behavior:** GET cache entries returns a versioned value or a miss. The database remains authoritative. Define maximum acceptable staleness per field. Price-sensitive checkout still reads its own authority.
 
-**Required behavior:** GET cache entries returns a versioned value or a miss. The database remains authoritative. Define maximum acceptable staleness per field; price-sensitive checkout still reads its own authority.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +45,11 @@ python3 examples/architecture-starts/distributed_cache.py
 
 **Supplied file:** [`examples/architecture-starts/distributed_cache.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/distributed_cache.py). You can also [read or download the source here](../../../../examples/architecture-starts/distributed_cache.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 stale fill rejected
@@ -42,7 +59,7 @@ One hot miss: 1000 requests can still cause 10 origin reads across processes
 
 ### Set up your implementation workspace
 
-Create `work/distributed-cache/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/distributed-cache/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -58,7 +75,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Implement versioned cache-aside
 
-Read cache, fetch source on miss, and fill with source version and expiry. Protect fills against a newer cached version or invalidation generation. Explain the race where an old source read finishes after a fresh update; deleting a key alone may not prevent stale refill.
+Read cache, fetch source on miss, and fill with source version and expiry. Protect fills against a newer cached version or invalidation generation. Explain the race where an old source read finishes after a fresh update. Deleting a key alone may not prevent stale refill.
 
 ### 2. Coalesce and bound misses
 
@@ -76,7 +93,7 @@ Choose bounded stale serving for eligible fields, rejection for unsafe fields an
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Version 4 cannot replace cached version 5; process-local coalescing still allows multiple fleet-wide fills. |
+| Run the starting program | Version 4 cannot replace cached version 5. Process-local coalescing still allows multiple fleet-wide fills. |
 | Expire one hot key | Origin concurrency stays within its configured budget. |
 | Lose a cache node | Refill and degraded responses remain bounded instead of overwhelming the database. |
 
@@ -84,12 +101,12 @@ Choose bounded stale serving for eligible fields, rejection for unsafe fields an
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | 20 million keys × 2 KiB | About 38.1 GiB of raw values before keys, allocator overhead, replicas and spare capacity. |
-| Two million reads/s across 200 nodes | 10,000 reads/s/node on average; skew and node loss dominate the hot-key case. |
+| Two million reads/s across 200 nodes | 10,000 reads/s/node on average. Skew and node loss dominate the hot-key case. |
 | Origin budget: 10,000 reads/s assumption | A broad cache outage cannot be allowed to forward two million reads/s to the database. |
 
 ## Map the local implementation to AWS
@@ -100,14 +117,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Protect a database with versioned cache fills: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/distributed-cache.svg)
 
-ElastiCache supplies a cache service; the application supplies source-version handling, miss coalescing and origin protection. A custom cache project can implement those interfaces locally before attempting a new distributed storage engine.
+ElastiCache supplies a cache service. The application supplies source-version handling, miss coalescing and origin protection. A custom cache project can implement those interfaces locally before attempting a new distributed storage engine.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local HTTP listener | Application Load Balancer: application entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
-| Application or worker process | Amazon ECS: catalog application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local cache, counter or coordination state | Amazon ElastiCache: distributed cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: catalog authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: catalog application | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local cache, counter or coordination state | Amazon ElastiCache: distributed cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior. Keep the durable authority separate. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: catalog authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: cache operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 | Local versioned configuration | AWS AppConfig: degradation policy | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
 
@@ -115,11 +132,11 @@ ElastiCache supplies a cache service; the application supplies source-version ha
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Memory sizing | Include replicas, metadata and headroom; eviction policy must match object lifetimes and workload. |
-| Origin protection | Independent concurrency/rate limit survives cache outage; database pool size is a hard upper bound. |
+| Memory sizing | Include replicas, metadata and headroom. Eviction policy must match object lifetimes and workload. |
+| Origin protection | Independent concurrency/rate limit survives cache outage. Database pool size is a hard upper bound. |
 | Cache topology | Choose multi-AZ replication/failover settings and measure stale/read behavior during failover. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -141,12 +158,12 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 |---|---|---|
 | Node addition | Add 10% capacity | Move a bounded fraction of keys, not nearly every key. |
 | Hot key | One object gets 15k reads/s | Replicate or coalesce reads without violating allowed staleness. |
-| Cache miss storm | A shard restarts | Bound origin concurrency and jitter refill; do not stampede the database. |
+| Cache miss storm | A shard restarts | Bound origin concurrency and jitter refill. Do not stampede the database. |
 | Stale value | Source record changes | State invalidation/version/TTL behavior and maximum stale interval. |
 
 ## Think from the contract to the boxes
 
-State whether the cache is disposable or authoritative; this problem assumes disposable. Consistent hashing limits remapping, but replication and hot-key behavior still need a policy. Use request coalescing and per-key/origin budgets for misses. Invalidation carries a source version so delayed older fills cannot replace newer values. A cache outage must degrade to a bounded origin path, not unbounded reads.
+State whether the cache is disposable or authoritative. This problem assumes disposable. Consistent hashing limits remapping, but replication and hot-key behavior still need a policy. Use request coalescing and per-key/origin budgets for misses. Invalidation carries a source version so delayed older fills cannot replace newer values. A cache outage must degrade to a bounded origin path, not unbounded reads.
 
 **First diagram:** Draw key placement, replica choice, source-of-truth version, miss coalescing, and what a node-removal event remaps.
 
@@ -170,7 +187,7 @@ Service choice follows the contract: the box label gives the generic job, while 
 
 **Practice artifact:** Draw key placement, replica choice, source-of-truth version, miss coalescing, and what a node-removal event remaps. Then trace every row in the table, draw one failure, and state what the customer observes. Suggested rehearsal: 35 minutes design, 10 minutes to challenge the guarantees.
 
-**Evidence and origin:** The current community interview-question catalog lists distributed-cache design reports at Google, Microsoft, Meta and Amazon; interview dates are not displayed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
+**Evidence and origin:** The current community interview-question catalog lists distributed-cache design reports at Google, Microsoft, Meta and Amazon. Interview dates are not displayed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/distributed-cache-system/cm6d9gnep03c46hpqrwc062ir).
 

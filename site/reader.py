@@ -177,7 +177,7 @@ def compose(b, page, have, by_dest):
             code_tail[id(block)] = panel
             a['download'] = disk.name
             a['class'] = ['code-download']
-            a.string = label + ' (download file; source below)'
+            a.string = label + ' (download file, source below)'
         elif suffix == '.svg':
             # Static alternatives are inline controls beside their animation.
             if '-still' in disk.stem or 'static' in label.lower():

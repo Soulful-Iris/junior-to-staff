@@ -5,7 +5,7 @@ This directory supplies the first two checkpoints: a durable state machine and a
 controlled HTTP check. The guide specifies the scheduler, distributed workers,
 notification delivery, and monitoring that you add next.
 
-Python 3.12+; standard library only. Run from the repository root:
+Python 3.12+. Standard library only. Run from the repository root:
 
 ```bash
 python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-demo.sqlite3 demo
@@ -25,17 +25,17 @@ python3 fixture_server.py
 Then follow checkpoint 2 in the guide. The HTTP adapter is deliberately restricted
 to this loopback server. It disables redirects and proxies, caps the response at
 64 KiB, and uses a two-second socket timeout. A socket timeout is **not** a total
-wall-clock deadline against a server that slowly trickles bytes; the cloud fetcher
+wall-clock deadline against a server that slowly trickles bytes. The cloud fetcher
 must enforce a total deadline and public-address policy before internet use.
 
 | File | Responsibility |
 |---|---|
-| `watcher.py` | `classify` interprets responses; `record` commits observations, current state, transitions and pending notifications atomically; CLI prints durable state. |
+| `watcher.py` | `classify` interprets responses. `record` commits observations, current state, transitions and pending notifications atomically. CLI prints durable state. |
 | `fixture_server.py` | Reads `state.json` on each request, letting you reproduce status changes, content changes, throttling and delay. |
 | `infra-foundation.json` | Deployable CloudFormation storage, queues and alarm foundation. **No application workers or scheduler are included.** |
 
 The database and fixture-state files are ignored by git. Use a different database
-filename for an independent experiment; keep the same filename to test restarts.
+filename for an independent experiment. Keep the same filename to test restarts.
 
 ## Infrastructure foundation
 

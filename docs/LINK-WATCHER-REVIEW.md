@@ -48,3 +48,7 @@ Bruno first asked to improve only the link-rot watcher and review it before a wi
 ## Follow-up: application context and assignment clarity
 
 The next feedback was that code discovery, the local-to-AWS connection, learning titles and the actual assignment remained unclear. The [project clarity review](PROJECT-CLARITY-REVIEW.md) records the expanded 90-page scope, reordered reading flow and simulated junior/senior walkthrough. The link watcher now participates in the orientation/title improvements while retaining its engineering checkpoints. A new runnable reading-list API gives the backend exercises an actual application to modify. No tests, recurring checks or deployment gates were added.
+
+## Follow-up: explain the user's action before naming the mechanism
+
+Introduce the product through a concrete action and outcome. Explain the saved data, background work and reason for a failure before using terms such as commit, timeout or tracing. Use a short request/response or action/result example where it makes the introduction easier to follow. Keep examples accurate about what is supplied and what the reader must implement. Avoid semicolons in prose. This standard was applied to all 90 project openings and their assignment statements.

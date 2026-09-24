@@ -2,19 +2,33 @@
 
 ## Application background
 
-The Stage 2 reading list must serve more readers while fetching titles asynchronously. Background workers and caches improve responsiveness only if duplicates, stale work and origin load remain controlled.
+Your reading list works for a small group, but more readers and slower title websites now put pressure on it. You want saves to return promptly while a separate worker fetches titles. You also want to reuse suitable read results so every page view does not query the database.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+A queue holds title work waiting for workers. A cache holds reusable copies of read data. Both introduce new questions about repeated jobs, old workers and outdated or private results.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Save a bookmark | Return after storing the URL and its pending title work. |
+| A worker's ownership expires and another worker finishes | Reject a late update from the old worker. |
+| Many readers ask for the same allowed data | Reuse results under the freshness and access rules. |
+
+Adding a queue or cache is only part of the change. You must define who owns each result, when a copy may be reused and what happens when capacity is exhausted.
+
+### Sizing that affects this decision
+
+200 readers making one request/s offer 200 reads/s to a database budgeted for 100. Reusing allowed results or refusing excess work must close that gap. Ten application instances can also initiate ten separate fills for one hot key even if each instance combines its own duplicate requests.
+
+These are exercise assumptions. The [estimation reference](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** Extend your running application with durable title jobs, fenced worker completion, authorized cache keys and measured admission limits.
-
-Add asynchronous title jobs and caching to the working reading list. Two workers overlap after a lease expiry, and ten application instances face 200 readers while the database can sustain only 100 reads/s under this exercise workload.
+**Deliver:** Extend your application with saved title jobs and controlled caching. Prevent old workers from replacing current results and keep cache misses within the database's capacity budget.
 
 **Required behavior:** Job acceptance is durable, result publication is fenced by current ownership epoch, and cache misses cannot exceed the database budget. A cache improves reads without becoming the authority for ownership, deletion or job completion.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/reading_list_under_load.py
 
 **Supplied file:** [`examples/architecture-starts/reading_list_under_load.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/reading_list_under_load.py). You can also [read or download the source here](../../../../examples/architecture-starts/reading_list_under_load.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 rejected stale attempt {'epoch': 2, 'state': 'succeeded', 'title': 'New title'}
@@ -42,9 +56,9 @@ Ten local coalescers can still produce ten origin fills for one hot miss.
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
-Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point; it does not contain the previous stages' completed UI, operations, jobs or AI feature.
+Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point. It does not contain the previous stages' completed UI, operations, jobs or AI feature.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -60,9 +74,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/03-under-load/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/03-under-load/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -90,7 +104,7 @@ Key by group and source version, enforce authorization before response and coale
 
 ### 4. Observe useful load and recovery
 
-Record offered/completed/rejected requests, cache hit rate, origin reads, queue age and stale publication rejections. Stop a worker and clear the cache in a controlled local run; show bounded recovery instead of only a warm-cache latency number.
+Record offered/completed/rejected requests, cache hit rate, origin reads, queue age and stale publication rejections. Stop a worker and clear the cache in a controlled local run. Show bounded recovery instead of only a warm-cache latency number.
 
 ## Demonstrate the completed local result
 
@@ -104,13 +118,13 @@ Record offered/completed/rejected requests, cache hit rate, origin reads, queue 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 200 readers issuing one request/s | 200 reads/s offered; a 100 reads/s origin cannot serve every miss directly. |
-| Ten application instances | Per-process singleflight can still permit ten fills for one hot key; it is not a fleet-wide rate limit. |
-| Worker epoch 1 pauses; epoch 2 finishes | The late epoch-1 result must be rejected, even if its network fetch succeeded. |
+| 200 readers issuing one request/s | 200 reads/s offered. A 100 reads/s origin cannot serve every miss directly. |
+| Ten application instances | Per-process singleflight can still permit ten fills for one hot key. It is not a fleet-wide rate limit. |
+| Worker epoch 1 pauses. Epoch 2 finishes | The late epoch-1 result must be rejected, even if its network fetch succeeded. |
 
 ## Map the local implementation to AWS
 
@@ -124,22 +138,22 @@ The added services separate optional work and hot reads, but the original databa
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Application or worker process | Amazon ECS: reading-list API fleet | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local cache, counter or coordination state | Amazon ElastiCache: list/title cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
-| Local records and transaction boundary | Amazon RDS PostgreSQL: data and job authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local pending-work collection | Amazon SQS: title delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
-| Application or worker process | Amazon ECS: title workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: reading-list API fleet | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local cache, counter or coordination state | Amazon ElastiCache: list/title cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior. Keep the durable authority separate. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: data and job authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: title delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: title workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: load and recovery evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Worker configuration | Visibility/lease renewal and finite redrive policy; source-version checks survive retries. |
+| Worker configuration | Visibility/lease renewal and finite redrive policy. Source-version checks survive retries. |
 | Cache outage | Database budget applies even when every cache lookup misses. |
-| Fleet capacity | Sum per-instance pools and limits; a local semaphore does not enforce a global maximum by itself. |
+| Fleet capacity | Sum per-instance pools and limits. A local semaphore does not enforce a global maximum by itself. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -160,7 +174,7 @@ Continue to stage 4 by adding optional AI tags without putting model latency or 
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Refetch is allowed. Record outcome only with the current generation in an atomic completion transaction. Match payload hashes; a duplicate ID with different content is a conflict, not a replay.
+Refetch is allowed. Record outcome only with the current generation in an atomic completion transaction. Match payload hashes. A duplicate ID with different content is a conflict, not a replay.
 
 </details>
 
@@ -171,7 +185,7 @@ Refetch is allowed. Record outcome only with the current generation in an atomic
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Bound origin/bypass work and choose authorized bounded-stale responses or quick 429/503. If read-your-writes is required, use primary/session watermark/confirmed progress; a finite primary pin cannot cover unbounded replica lag.
+Bound origin/bypass work and choose authorized bounded-stale responses or quick 429/503. If read-your-writes is required, use primary/session watermark/confirmed progress. A finite primary pin cannot cover unbounded replica lag.
 
 </details>
 
@@ -181,6 +195,6 @@ Bound origin/bypass work and choose authorized bounded-stale responses or quick 
 - [Lease and provider recovery lab](../../../../curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/README.md) — includes its own run command, fixtures and validation limits.
 - [Reliability arithmetic and incident lab](../../../../curriculum/03-production/05-reliability/labs/reliability/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

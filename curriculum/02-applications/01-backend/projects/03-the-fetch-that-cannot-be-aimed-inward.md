@@ -2,19 +2,31 @@
 
 ## Application background
 
-A reading-list service receives URLs from users and retrieves page titles on their behalf. That server-side HTTP client can reach places the user's browser cannot, so each connection and redirect is an access boundary.
+Alice pastes a public article URL into a reading list. To display its title, the application's server makes an HTTP request to that URL. This is a server-side fetch, separate from the browser request that saved Alice's bookmark.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+An attacker can submit a URL too. They might point it at a private company service, or use a public address that redirects there. If the preview server fetches anything it is given, it becomes a way to reach systems the attacker cannot access directly.
+
+### A request that exposes the boundary
+
+These are outputs from the supplied address-policy model. It uses controlled resolved-address inputs and makes no network request:
+
+```text
+https://example.com True
+http://metadata.invalid False
+https://mixed.invalid False
+```
+
+The first input resolves only to a public address. The second uses `169.254.169.254`, a link-local address. The third includes both a public address and `127.0.0.1`, the local machine. Rejecting the mixed result matters too. Your real fetcher still needs to connect to the validated address and recheck redirects.
+
+SSRF means server-side request forgery. The attacker tricks your server into making an unintended request. Validation must apply to the address actually contacted, including each redirect.
 
 ## Your assignment
 
-**Deliver:** Replace the title fixture with a bounded public-URL fetch adapter whose address validation remains tied to the actual connection.
-
-Build server-side link previews for user-submitted URLs. A malicious URL resolves to an internal address or redirects to the instance metadata endpoint. Valid public pages should still work, but the preview service must never become a proxy into your private network.
+**Deliver:** Replace simulated title lookup with a public-URL fetcher. Validate the address actually contacted, repeat the check for redirects and limit time, response size and other work.
 
 **Required behavior:** Only explicitly supported public HTTP(S) destinations may be fetched. Validate the resolved addresses used by the actual connection and repeat the policy for every redirect. Bound all response work.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +40,11 @@ python3 examples/architecture-starts/03_the_fetch_that_cannot_be_aimed_inward.py
 
 **Supplied file:** [`examples/architecture-starts/03_the_fetch_that_cannot_be_aimed_inward.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/03_the_fetch_that_cannot_be_aimed_inward.py). You can also [read or download the source here](../../../../examples/architecture-starts/03_the_fetch_that_cannot_be_aimed_inward.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 https://example.com True
@@ -43,7 +55,7 @@ Policy demonstration only; the network adapter must pin the validated IP.
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -59,9 +71,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/03-the-fetch-that-cannot-be-aimed-inward/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/03-the-fetch-that-cannot-be-aimed-inward/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -85,17 +97,17 @@ Resolve the hostname, reject disallowed addresses and connect through an adapter
 
 ### 3. Control every redirect and body
 
-Disable automatic redirects in the HTTP client. Parse each Location, resolve and validate again, and stop after three redirects. Enforce a total deadline, decompressed byte limit and bounded content parsing; a tiny compressed response can expand into a large body.
+Disable automatic redirects in the HTTP client. Parse each Location, resolve and validate again, and stop after three redirects. Enforce a total deadline, decompressed byte limit and bounded content parsing. A tiny compressed response can expand into a large body.
 
 ### 4. Add network defense and diagnostics
 
-Restrict worker egress and metadata access independently of application checks. Return a generic unavailable preview to the user while recording a safe policy reason. Use local controlled public/private-address fixtures to observe denials; do not probe real internal services.
+Restrict worker egress and metadata access independently of application checks. Return a generic unavailable preview to the user while recording a safe policy reason. Use local controlled public/private-address fixtures to observe denials. Do not probe real internal services.
 
 ## Demonstrate the completed local result
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Public fixture address passes; metadata and mixed public/private resolutions fail. |
+| Run the starting program | Public fixture address passes. Metadata and mixed public/private resolutions fail. |
 | Return a redirect to loopback | The second hop is denied before a connection. |
 | Send an oversized compressed page | The worker stops at the decompressed byte limit. |
 
@@ -103,12 +115,12 @@ Restrict worker egress and metadata access independently of application checks. 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 100 previews/s; two-second total deadline | About 200 in-flight calls at full two-second occupancy unless admission caps it lower. |
-| 1 MiB maximum response; three redirects | At most 100 MiB/s body transfer at the stated rate; rejected oversized pages stop early. |
+| 100 previews/s. Two-second total deadline | About 200 in-flight calls at full two-second occupancy unless admission caps it lower. |
+| 1 MiB maximum response. Three redirects | At most 100 MiB/s body transfer at the stated rate. Rejected oversized pages stop early. |
 | DNS may change between checks | Resolving once for validation and again for connection creates a bypass window. |
 
 ## Map the local implementation to AWS
@@ -123,22 +135,22 @@ Network controls reduce exposure, while the HTTP adapter enforces which public d
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: preview request entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: preview request entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: URL policy and dispatcher | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Application or worker process | Amazon ECS: controlled fetch workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: controlled fetch workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Controlled title/page fixture | Public website: allowed external origin | Implement an outbound HTTP adapter with address/redirect validation, bounded work and explicit observation outcomes. |
-| Local network boundary assumed by the fixture | Amazon VPC: egress boundary | Configure subnets, routes and egress controls; application URL validation remains necessary. |
+| Local network boundary assumed by the fixture | Amazon VPC: egress boundary | Configure subnets, routes and egress controls. Application URL validation remains necessary. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: fetch diagnostics | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Worker placement | Use a network boundary that cannot reach sensitive internal services; do not attach broad cloud credentials to fetch workers. |
+| Worker placement | Use a network boundary that cannot reach sensitive internal services. Do not attach broad cloud credentials to fetch workers. |
 | HTTP adapter | Verify destination pinning, TLS hostname handling, redirects and proxy behavior in the selected client library. |
 | Resource limits | Total deadline, concurrency, redirect count and decompressed body cap are independent controls. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -147,7 +159,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-Allow customer-managed authenticated previews. Keep credentials scoped to approved origins and strip them on redirects; define whether cross-origin redirects are allowed at all.
+Allow customer-managed authenticated previews. Keep credentials scoped to approved origins and strip them on redirects. Define whether cross-origin redirects are allowed at all.
 
 <details>
 <summary>Additional design reasoning and requirement changes</summary>
@@ -170,7 +182,7 @@ For this exercise reject mixed unsafe answers rather than relying on client sele
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Reuse the same client and add restricted egress and least-privilege credentials. Application validation and network isolation protect different boundaries; neither proves the other.
+Reuse the same client and add restricted egress and least-privilege credentials. Application validation and network isolation protect different boundaries. Neither proves the other.
 
 </details>
 

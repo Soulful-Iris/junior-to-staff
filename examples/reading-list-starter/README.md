@@ -22,7 +22,7 @@ Already have a checkout? Open a terminal in that checkout instead of cloning aga
 python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3 --port 8080
 ```
 
-Leave it running. It prints its address and database path. Stop with Ctrl+C. Restarting with the same path preserves saved bookmarks; use a different database filename for a fresh exercise. If port 8080 is busy, pass `--port 8081` and change the request URLs below.
+Leave it running. It prints its address and database path. Stop with Ctrl+C. Restarting with the same path preserves saved bookmarks. Use a different database filename for a fresh exercise. If port 8080 is busy, pass `--port 8081` and change the request URLs below.
 
 ## Save and read a bookmark in terminal 2
 
@@ -34,9 +34,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
 curl -s http://127.0.0.1:8080/bookmarks -H 'X-Demo-User: alice'
 ```
 
-The first request returns **201**, an integer `id`, `title: null`, `title_status: "timeout"` and `version: 1`. The second returns that saved URL in `items`. The controlled timeout lasts about half a second. Use `"title_mode":"ok"` for a title of `"Example documentation"`. The fixture makes **no outbound HTTP request**; the submitted URL is stored as data.
+The first request returns **201**, an integer `id`, `title: null`, `title_status: "timeout"` and `version: 1`. The second returns that saved URL in `items`. The controlled timeout lasts about half a second. Use `"title_mode":"ok"` for a title of `"Example documentation"`. The fixture makes **no outbound HTTP request**. The submitted URL is stored as data.
 
-Use the returned ID in the following commands; `1` assumes a new database:
+Use the returned ID in the following commands. `1` assumes a new database:
 
 ```bash
 curl -s -X PATCH http://127.0.0.1:8080/bookmarks/1 \
@@ -48,7 +48,7 @@ curl -s -X PATCH http://127.0.0.1:8080/bookmarks/1/read \
   -d '{"is_read":true}'
 ```
 
-The edit returns `version: 2`. Repeating it with version 1 returns **409**. Bob can read the group's links and change his own reading status; editing Alice's note as Bob returns **404**. Missing or unknown demo identity returns **401**. No delete, tags, pagination or individual `GET /bookmarks/{id}` endpoint is supplied.
+The edit returns `version: 2`. Repeating it with version 1 returns **409**. Bob can read the group's links and change his own reading status. Editing Alice's note as Bob returns **404**. Missing or unknown demo identity returns **401**. No delete, tags, pagination or individual `GET /bookmarks/{id}` endpoint is supplied.
 
 ## Find the code you will change
 
@@ -63,7 +63,7 @@ Read [app.py](app.py). These names exist in that file:
 | Save transaction in `dispatch()` | Commits URL before title enrichment | Persist job intent in the same transaction for the durable-jobs exercise. |
 | Conditional note update | Owner and version condition | Build a UI that preserves a draft after a 409 response. |
 
-`X-Demo-User` is an explicit local shortcut, not authentication. Anyone who can call this server can select Alice or Bob. Keep it on loopback. A deployed version needs verified identity and a membership model; do not expose this teaching server to the internet.
+`X-Demo-User` is an explicit local shortcut, not authentication. Anyone who can call this server can select Alice or Bob. Keep it on loopback. A deployed version needs verified identity and a membership model. Do not expose this teaching server to the internet.
 
 ## How this code connects to AWS
 
@@ -71,10 +71,10 @@ Read [app.py](app.py). These names exist in that file:
 
 | Local component | Example AWS destination | Work you must do |
 |---|---|---|
-| `BaseHTTPRequestHandler` routes | API Gateway and a Lambda handler, or an ALB and a container | Translate the incoming event into application arguments; package the handler or container. The Python HTTP handler is not a Lambda handler. |
-| `X-Demo-User` | Cognito or another trusted identity provider | Validate issuer, audience and token lifetime; map the subject to group membership. Never trust the demo header. |
-| SQLite transactions | RDS PostgreSQL **or** a redesigned DynamoDB model | Write and exercise a storage adapter. SQLite SQL does not run unchanged on DynamoDB; preserve owner/version conditions and atomic job intent. |
+| `BaseHTTPRequestHandler` routes | API Gateway and a Lambda handler, or an ALB and a container | Translate the incoming event into application arguments. Package the handler or container. The Python HTTP handler is not a Lambda handler. |
+| `X-Demo-User` | Cognito or another trusted identity provider | Validate issuer, audience and token lifetime. Map the subject to group membership. Never trust the demo header. |
+| SQLite transactions | RDS PostgreSQL **or** a redesigned DynamoDB model | Write and exercise a storage adapter. SQLite SQL does not run unchanged on DynamoDB. Preserve owner/version conditions and atomic job intent. |
 | In-process title lookup | SQS plus a separately deployed worker | Add an outbox, duplicate handling, leases and durable status. Queue creation alone does not provide these behaviors. |
-| Local structured events you add | CloudWatch Logs | Configure log delivery, retention and scoped access; keep request/job identity in the event schema. |
+| Local structured events you add | CloudWatch Logs | Configure log delivery, retention and scoped access. Keep request/job identity in the event schema. |
 
-First complete the local assignment and record its visible result. Then use that page's AWS mapping and configuration as a separate extension. The [optional AWS foundation](../architecture-starts/infra/README.md) provisions only its documented resources; it does not deploy this API or connect it to a database.
+First complete the local assignment and record its visible result. Then use that page's AWS mapping and configuration as a separate extension. The [optional AWS foundation](../architecture-starts/infra/README.md) provisions only its documented resources. It does not deploy this API or connect it to a database.

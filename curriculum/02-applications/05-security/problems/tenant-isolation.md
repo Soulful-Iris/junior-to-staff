@@ -2,19 +2,27 @@
 
 ## Application background
 
-Several customer organizations share one reporting application. A report belongs to one organization; its API response, cached copy and exported file must follow that organization's current membership rules.
+Acme and Birch use the same report application, but each company expects its data to remain private. A company account is called a tenant. Its members may request reports, reuse previously generated results and download exported files.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Checking the company only on the first page is not enough. A guessed report ID, a saved download link or a queued export can reach the same data through another route. A person can also lose permission after work has already started.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| An Acme member requests a Birch report ID | Return no report content. |
+| An Acme export waits while its requester loses access | Check current permission before producing or exposing the file. |
+| The former member asks for a previously cached report | Do not return the stored copy just because it exists. |
+
+Every path to the data must use the current tenant and permission rules. A cache is a reusable copy of a result, not a separate source of permission.
 
 ## Your assignment
 
-**Deliver:** Tenant-scoped reads and exports, with a revocation walkthrough across live requests, cached results and queued work.
-
-Build a shared report-export service for 4,000 customer organizations. An administrator at Acme guesses a report ID owned by Birch. Later an Acme user loses access while their cached report and queued export still exist. Make every access path enforce the current tenant boundary.
+**Deliver:** Build report reads and exports that enforce the requesting company's current permissions. Demonstrate what happens to cached results and waiting exports when access is removed.
 
 **Required behavior:** Every request has one verified tenant context. GET /reports/{id}, export creation and export download must authorize the resource under that context. Do not trust an X-Tenant-ID header independently of membership.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/tenant_isolation.py
 
 **Supplied file:** [`examples/architecture-starts/tenant_isolation.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/tenant_isolation.py). You can also [read or download the source here](../../../../examples/architecture-starts/tenant_isolation.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 404 scoped resource
@@ -42,7 +50,7 @@ Acme revenue
 
 ### Set up your implementation workspace
 
-Create `work/tenant-isolation/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/tenant-isolation/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -50,15 +58,15 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
-| membership | (subject,tenant),role,revision | Current authorization basis; revocation changes the revision. |
+| membership | (subject,tenant),role,revision | Current authorization basis. Revocation changes the revision. |
 | reports | (tenant,report_id) | Tenant scope is part of every key and query. |
-| export_jobs | tenant,requester,report_id,policy_revision | Workers reauthorize before reading; downloads reauthorize before issuing access. |
+| export_jobs | tenant,requester,report_id,policy_revision | Workers reauthorize before reading. Downloads reauthorize before issuing access. |
 
 ## Implement the assignment
 
 ### 1. Create trusted request context
 
-Resolve the authenticated subject’s active organization and role. Reject a requested tenant without membership. Make repository methods require a tenant argument; avoid an unscoped get-by-ID convenience method that callers can accidentally use.
+Resolve the authenticated subject’s active organization and role. Reject a requested tenant without membership. Make repository methods require a tenant argument. Avoid an unscoped get-by-ID convenience method that callers can accidentally use.
 
 ### 2. Protect cached and asynchronous reads
 
@@ -84,12 +92,12 @@ Add per-tenant admitted-job counters and a fair scheduler. Show Acme over its li
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 4,000 organizations; 250 reports each | One million reports. A guessed global report ID is not proof of membership. |
-| 2,000 reads/s peak; 200 export jobs/min | Apply tenant scope to synchronous reads, caches, queue payloads and output downloads. |
+| 4,000 organizations. 250 reports each | One million reports. A guessed global report ID is not proof of membership. |
+| 2,000 reads/s peak. 200 export jobs/min | Apply tenant scope to synchronous reads, caches, queue payloads and output downloads. |
 | One tenant sends 1,000 jobs/min | Set per-tenant admission and worker shares before a shared queue becomes a noisy-neighbor outage. |
 
 ## Map the local implementation to AWS
@@ -100,14 +108,14 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Enforce tenant access in APIs, caches and exports: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/tenant-isolation.svg)
 
-A shared database can be safe when tenant scope is enforced consistently. Dedicated databases trade cost and operating complexity for a stronger isolation boundary; choose that for requirements that application-level scoping cannot satisfy.
+A shared database can be safe when tenant scope is enforced consistently. Dedicated databases trade cost and operating complexity for a stronger isolation boundary. Choose that for requirements that application-level scoping cannot satisfy.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: scoped report application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: tenant-scoped records | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local pending-work collection | Amazon SQS: export queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: tenant-scoped records | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: export queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: export worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Local file, object fixture or exported payload | Amazon S3: private export objects | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 
@@ -115,12 +123,12 @@ A shared database can be safe when tenant scope is enforced consistently. Dedica
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Aurora PostgreSQL | Tenant composite keys; row-level security as defense in depth with a non-bypass application role and transaction-scoped tenant setting. |
-| S3 private exports | Tenant-prefixed immutable objects; no public bucket access; scoped worker permissions and short-lived authorized downloads. |
-| SQS workers | Validate job schema and tenant relationship; bound tenant concurrency and expose backlog age per tier. |
-| Identity | Validate issuer/audience and membership; identity-provider authentication does not authorize each report. |
+| Aurora PostgreSQL | Tenant composite keys. Row-level security as defense in depth with a non-bypass application role and transaction-scoped tenant setting. |
+| S3 private exports | Tenant-prefixed immutable objects. No public bucket access. Scoped worker permissions and short-lived authorized downloads. |
+| SQS workers | Validate job schema and tenant relationship. Bound tenant concurrency and expose backlog age per tier. |
+| Identity | Validate issuer/audience and membership. Identity-provider authentication does not authorize each report. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -140,25 +148,25 @@ Offer dedicated storage to a regulated customer without forking the entire appli
 
 | Request or failure | Required result |
 |---|---|
-| Tenant A requests B's document ID | 404 or 403 under stated disclosure policy; no title or content leaks |
-| A signed URL for A's private file expires | New download requires fresh authorization; a cached URL must not bypass it |
+| Tenant A requests B's document ID | 404 or 403 under stated disclosure policy. No title or content leaks |
+| A signed URL for A's private file expires | New download requires fresh authorization. A cached URL must not bypass it |
 | Worker receives A's job ID with B's object key | Refuse the mixed-tenant work before reading bytes |
 | Tenant B floods export jobs | Tenant A retains its reserved share of processing capacity |
 
 ## Name the isolation boundary
 
-Derive tenant identity from authenticated claims and membership, never a caller-supplied URL or body field alone. Carry it in a typed request context, scope all primary and secondary indexes, object keys, cache keys, logs, and queued messages. Check membership again at the **read of sensitive content**; an old search hit cannot authorize a snippet. Write a negative test that deliberately reuses a valid ID from another tenant. Separate security isolation from noisy-neighbor capacity: both need enforcement.
+Derive tenant identity from authenticated claims and membership, never a caller-supplied URL or body field alone. Carry it in a typed request context, scope all primary and secondary indexes, object keys, cache keys, logs, and queued messages. Check membership again at the **read of sensitive content**. An old search hit cannot authorize a snippet. Write a negative test that deliberately reuses a valid ID from another tenant. Separate security isolation from noisy-neighbor capacity: both need enforcement.
 
 | AWS box | Job here | Alternative and deciding factor |
 |---|---|---|
 | Cognito or external OIDC | Verify caller identity and tenant membership claims | Existing identity provider with short-lived, verified tokens |
 | API Gateway + application policy | Validate claims and bind tenant context to operations | ALB + ECS application when existing identity integration is already owned |
-| DynamoDB scoped partition keys | Store records under tenant-prefixed keys; use conditional reads/writes | Separate tables or accounts for regulated tenants needing a stronger physical boundary |
-| S3 private objects | Store tenant-scoped bytes; issue short-lived links after authorization | Separate buckets/accounts for strict billing and administrative isolation |
+| DynamoDB scoped partition keys | Store records under tenant-prefixed keys. Use conditional reads/writes | Separate tables or accounts for regulated tenants needing a stronger physical boundary |
+| S3 private objects | Store tenant-scoped bytes. Issue short-lived links after authorization | Separate buckets/accounts for strict billing and administrative isolation |
 | SQS tenant-aware worker | Preserve tenant context and budgets in asynchronous jobs | Per-tenant queues for stronger rate isolation and operational cost |
 
-An IAM leading-key policy can provide defense in depth for correctly mapped sessions; an application role shared by all tenants does not magically make IAM understand end-user identity. Treat signed URLs as bearer capabilities until expiry and minimize their lifetime.
-A tenant prefix partitions keys; it neither authenticates a caller nor proves
+An IAM leading-key policy can provide defense in depth for correctly mapped sessions. An application role shared by all tenants does not magically make IAM understand end-user identity. Treat signed URLs as bearer capabilities until expiry and minimize their lifetime.
+A tenant prefix partitions keys. It neither authenticates a caller nor proves
 current object permission. A versioned cache key is safe only when its version
 comes from trusted permission state, not a caller or stale search result.
 
@@ -169,7 +177,7 @@ Already issued bearer downloads remain usable until their enforced expiry unless
 a read-time broker or revocation-aware edge checks them. Do not promise instant
 revocation from an application check that the download route bypasses.
 
-**Drill:** warm search, snippet, cache, export and direct-download routes; pause
+**Drill:** warm search, snippet, cache, export and direct-download routes. Pause
 indexing, revoke access and repeat each read. Distinguish a storage-key test, an
 IAM-session isolation test and an application ACL test. None replaces the others.
 
@@ -177,7 +185,7 @@ IAM-session isolation test and an application ACL test. None replaces the others
 
 **Staff follow-up:** Move one enterprise tenant into its own AWS account without changing public IDs. Plan key ownership, dual reads, rollback, cost attribution, and measurable proof that no pooled path still exposes data.
 
-**Practice artifact:** Draw boundaries for request, index/cache, object, and queue; write five cross-tenant negative tests and one saturation test. Explain why each box must carry or recover trusted tenant context.
+**Practice artifact:** Draw boundaries for request, index/cache, object, and queue. Write five cross-tenant negative tests and one saturation test. Explain why each box must carry or recover trusted tenant context.
 
 **Source boundary:** Original scenario. AWS's [pooled storage isolation](https://docs.aws.amazon.com/whitepapers/latest/saas-tenant-isolation-strategies/pooled-storage-isolation-strategies.html) and [multitenant DynamoDB strategies](https://docs.aws.amazon.com/whitepapers/latest/multi-tenant-saas-storage-strategies/multitenancy-on-dynamodb.html) describe the alternative isolation models.
 

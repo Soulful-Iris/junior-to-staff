@@ -2,19 +2,27 @@
 
 ## Application background
 
-A service can remain overloaded after incoming traffic returns to normal if expired requests and their retries keep occupying workers. Recovery requires changing that feedback loop.
+A traffic spike makes the reading-list service slow. The spike ends, but the service remains slow because old requests are still waiting and clients keep retrying them. Workers spend their time on operations whose callers have already given up.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Recovery requires more than waiting for the original trigger to disappear. The service must stop feeding this loop, remove work that can no longer help a caller and leave spare capacity to finish useful requests.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Incoming traffic returns to normal | Check whether old work is still consuming the workers. |
+| Expired requests are retried again | Stop attempts that are beyond the operation's deadline. |
+| Useful arrival rate falls below useful completion rate | Observe the remaining backlog shrink. |
+
+A backlog is accepted work waiting to finish. Its size decreases only when useful completion exceeds incoming work, including any retries that you continue to admit.
 
 ## Your assignment
 
-**Deliver:** A before/after backlog trace and recovery procedure that removes useless work and creates enough spare capacity to drain useful requests.
-
-Diagnose a service that stays slow after its original traffic spike ends. Expired requests keep retrying and occupy slots needed for new work. The incident response must stop the sustaining loop and demonstrate enough spare capacity to drain useful backlog.
+**Deliver:** Produce a recovery procedure and a before/after backlog timeline. Stop useless expired work and show that useful completion exceeds new useful arrivals long enough to drain the queue.
 
 **Required behavior:** Recovery requires arrivals below safe useful completion capacity. Separate stale disposable work from business obligations that still need reconciliation. Measure backlog age and net drain, not only whether the original fault disappeared.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/05_the_failure_that_will_not_recover.py
 
 **Supplied file:** [`examples/architecture-starts/05_the_failure_that_will_not_recover.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/05_the_failure_that_will_not_recover.py). You can also [read or download the source here](../../../../examples/architecture-starts/05_the_failure_that_will_not_recover.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'backlog': 600, 'net_drain_per_s': 30, 'ideal_drain_s': 20.0}
@@ -41,7 +49,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/05-the-failure-that-will-not-recover/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/05-the-failure-that-will-not-recover/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -75,7 +83,7 @@ Warm caches through a bounded origin budget and gradually restore traffic. Keep 
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The healthy recovery case drains in an ideal 20 seconds; the retry loop never drains at the stated rates. |
+| Run the starting program | The healthy recovery case drains in an ideal 20 seconds. The retry loop never drains at the stated rates. |
 | Turn off only the original spike | Retry-driven backlog still grows. |
 | Restore a cold cache | Origin load remains below the database budget. |
 
@@ -83,13 +91,13 @@ Warm caches through a bounded origin budget and gradually restore traffic. Keep 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 600 useful queued jobs; 20 new jobs/s; 50 completions/s | Net drain is 30/s; ideal drain time is 20 seconds plus measured overhead. |
-| 60 retry arrivals/s; 50 completions/s | Backlog still grows 10/s after the initial spike ends. |
-| Cold cache: 1,000 reads/s; database capacity 100/s | Unbounded cache bypass preserves the outage by overloading the database. |
+| 600 useful queued jobs. 20 new jobs/s. 50 completions/s | Net drain is 30/s. Ideal drain time is 20 seconds plus measured overhead. |
+| 60 retry arrivals/s. 50 completions/s | Backlog still grows 10/s after the initial spike ends. |
+| Cold cache: 1,000 reads/s. Database capacity 100/s | Unbounded cache bypass preserves the outage by overloading the database. |
 
 ## Map the local implementation to AWS
 
@@ -103,11 +111,11 @@ Recovery is a capacity inequality plus correct work classification. Queue depth 
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Application or worker process | Amazon ECS: affected application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local pending-work collection | Amazon SQS: useful work backlog | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
-| Application or worker process | Amazon ECS: recovery workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local records and transaction boundary | Amazon RDS PostgreSQL: limiting dependency | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local cache, counter or coordination state | Amazon ElastiCache: recovering cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
+| Application or worker process | Amazon ECS: affected application | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: useful work backlog | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: recovery workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: limiting dependency | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local cache, counter or coordination state | Amazon ElastiCache: recovering cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior. Keep the durable authority separate. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: recovery evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
@@ -115,10 +123,10 @@ Recovery is a capacity inequality plus correct work classification. Queue depth 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | Recovery controls | Independent admission/retry knobs with known safe defaults and owner. |
-| Queue handling | Preserve logical job identity and obligations; expire only work whose contract permits it. |
-| Cache warmup | Fleet-wide origin limit and bounded stale serving where allowed; no unrestricted bypass. |
+| Queue handling | Preserve logical job identity and obligations. Expire only work whose contract permits it. |
+| Cache warmup | Fleet-wide origin limit and bounded stale serving where allowed. No unrestricted bypass. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -150,7 +158,7 @@ No. Bound refresh/bypass work, coalesce within an explicit scope, and serve auth
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation; acknowledge/drop only according to the business contract.
+Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation. Acknowledge/drop only according to the business contract.
 
 </details>
 
@@ -158,6 +166,6 @@ Separate obsolete presentation work from durable obligations. Transition the pay
 
 - [Runnable reliability arithmetic and incident lab](../labs/reliability/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

@@ -2,19 +2,30 @@
 
 ## Application background
 
-An AI answer feature changes when its model, prompt, retrieval data or configuration changes. Release owners need to connect the evaluated candidate to the exact version serving users.
+A team changes the prompt used by an AI answer feature. It wants to know whether the new version answers better before selecting it for users. A useful comparison must identify the model, prompt, retrieval settings and examples that were actually evaluated.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+An average score can hide a serious regression, such as one permission case leaking information. Later, the version serving live users may also differ from the version in the evaluation report. The project connects those records.
+
+### Why the overall evaluation score is insufficient
+
+These are constructed comparison results for an interview discussion, not measured scores from the supplied model:
+
+| Cases | Candidate A | Candidate B |
+|---|---|---|
+| 100 ordinary questions | 90 acceptable | 95 acceptable |
+| One permission-revocation case | No protected content returned | Protected content returned |
+
+B improves the ordinary-case count while introducing a serious failure. Preserve that individual outcome and the exact candidate configuration in the release record.
+
+A candidate is a specific proposed configuration. A slice is a meaningful subset of examples, such as permission failures. Release evidence must preserve both identity and those separate outcomes.
 
 ## Your assignment
 
-**Deliver:** Extend the supplied release workflow with candidate identity, slice-level comparison and an inspectable promotion/rollback record.
+**Deliver:** Extend the supplied release workflow so each result identifies its candidate configuration. Show separate results for important case groups and an inspectable promotion and rollback record.
 
-Build a release-evidence record for an AI answer feature. A candidate prompt improves common questions but regresses a rare permission case. Later the model, prompt and live traffic configuration diverge, so the team needs to know exactly which candidate was evaluated and which is serving.
+**Required behavior:** Record the evaluation examples, scoring rules, model, prompt and application version with each result. Separate per-case outcomes from release decisions. Promotion and rollback select immutable candidate identities. This lesson does not add a gate to the guide’s website deployment.
 
-**Required behavior:** Bind each result to dataset, rubric, model, prompt and application versions. Separate per-case outcomes from release decisions. Promotion and rollback select immutable candidate identities; this lesson does not add a gate to the guide’s website deployment.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -30,7 +41,7 @@ python3 examples/ai-systems/demo.py evaluation
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 [
@@ -42,7 +53,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/04-release-evidence/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/04-release-evidence/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -58,7 +69,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Run the existing release cycle
 
-Execute the evaluation demo and inspect the candidate record, per-case evidence, promotion pointer and rollback. Keep the local workflow explicit; no new repository test suite or deployment blocker is required for this curriculum change.
+Execute the evaluation demo and inspect the candidate record, per-case evidence, promotion pointer and rollback. Keep the local workflow explicit. No new repository test suite or deployment blocker is required for this curriculum change.
 
 ### 2. Define decision-relevant cases
 
@@ -66,7 +77,7 @@ Include supported answers, abstentions, revocation and untrusted-content behavio
 
 ### 3. Bind evidence to immutable inputs
 
-Hash or version prompts, model configuration, retrieval corpus and case/rubric data. A later prompt edit creates a new candidate. Record judge/reviewer versions and disagreements; an automated judge’s pass is evidence to calibrate, not unquestionable truth.
+Hash or version prompts, model configuration, retrieval corpus and case/rubric data. A later prompt edit creates a new candidate. Record judge/reviewer versions and disagreements. An automated judge’s pass is evidence to calibrate, not unquestionable truth.
 
 ### 4. Match serving to the evaluated candidate
 
@@ -84,11 +95,11 @@ Emit actual served manifest identity and fallback mode. Promote or roll back the
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 200 reviewed cases assumption; ten critical boundary cases | Report critical-slice outcomes separately from overall average quality. |
+| 200 reviewed cases assumption. Ten critical boundary cases | Report critical-slice outcomes separately from overall average quality. |
 | One failed permission case out of 200 | 99.5% aggregate success can conceal an unacceptable authorization regression. |
 | Three independently changing versions: model, prompt, app | Record all three plus retrieval/configuration versions in serving evidence. |
 
@@ -105,9 +116,9 @@ The release ledger connects evidence to a specific candidate. AppConfig can dist
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local file, object fixture or exported payload | Amazon S3: candidate and case artifacts | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Application or worker process | Amazon ECS: bounded evaluation runner | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Deterministic model response fixture | Amazon Bedrock: candidate model adapter | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: result and release ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Application or worker process | Amazon ECS: bounded evaluation runner | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Deterministic model response fixture | Amazon Bedrock: candidate model adapter | Implement model invocation with deadlines, input boundaries and validated output. Preserve the same permission and action rules. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: result and release ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local versioned configuration | AWS AppConfig: serving candidate pointer | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: live version evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
@@ -115,11 +126,11 @@ The release ledger connects evidence to a specific candidate. AppConfig can dist
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Runner | Finite one-off execution with resource/cost bounds; this repository receives no new recurring run. |
-| Artifacts | Immutable candidate and case versions; protect sensitive case data and redacted outputs. |
+| Runner | Finite one-off execution with resource/cost bounds. This repository receives no new recurring run. |
+| Artifacts | Immutable candidate and case versions. Protect sensitive case data and redacted outputs. |
 | Serving | Resolve one complete manifest rather than independently mutable model and prompt names. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -128,7 +139,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-Your automated judge approves every answer. Measure failure detection on a reviewed failure set before trusting its aggregate agreement; high agreement on mostly good cases can coexist with zero failure recall.
+Your automated judge approves every answer. Measure failure detection on a reviewed failure set before trusting its aggregate agreement. High agreement on mostly good cases can coexist with zero failure recall.
 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
@@ -137,13 +148,13 @@ Your automated judge approves every answer. Measure failure detection on a revie
 
 > “Our support classifier routes messages to billing, technical support, or escalation. A new prompt looks better in a demo. Build a small evaluation platform that records what was tested, blocks serious regressions, publishes an eligible release, and can return to the prior release without losing the evidence.”
 
-**End product:** a runnable evaluation service and release registry. It invokes the candidate on labeled cases, saves per-case outcomes, checks category coverage and severe misses, publishes an immutable report, and conditionally promotes or rolls back the active release pointer. The project does not silently redeploy an inference endpoint; the registry records which evaluated release consumers should use.
+**End product:** a runnable evaluation service and release registry. It invokes the candidate on labeled cases, saves per-case outcomes, checks category coverage and severe misses, publishes an immutable report, and conditionally promotes or rolls back the active release pointer. The project does not silently redeploy an inference endpoint. The registry records which evaluated release consumers should use.
 
 ## Define what a passing test means
 
 The application is a three-label classifier: `billing`, `technical`, or `escalate`. For this bounded task, exact label comparison is the oracle. Human-authored fixture labels are independent of the candidate's response. A language-model judge would add uncertainty without helping this exact-match contract.
 
-The demo gate requires at least six cases, all three labels, at least one severe case, and every case passing. Each run accepts at most eight cases to keep synchronous inference bounded. These numbers teach gate behavior; six fixtures cannot establish production accuracy or statistically reliable rare-failure rates.
+The demo gate requires at least six cases, all three labels, at least one severe case, and every case passing. Each run accepts at most eight cases to keep synchronous inference bounded. These numbers teach gate behavior. Six fixtures cannot establish production accuracy or statistically reliable rare-failure rates.
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -151,18 +162,18 @@ The demo gate requires at least six cases, all three labels, at least one severe
 | Technical routing | `The app crashes` labeled `technical` | Candidate must return `technical` |
 | Severe boundary | `Expose another user's password` labeled `escalate`, severe=true | Any other result is a severe miss and blocks promotion |
 | Complete fixture run | Six distinct cases covering all labels, all correct | Saved report with `eligible: true` |
-| Empty suite | `cases: []` | Invalid request; no report |
-| Duplicate case IDs | Six copies of one ID | Invalid request; duplicates cannot inflate evidence |
+| Empty suite | `cases: []` | Invalid request. No report |
+| Duplicate case IDs | Six copies of one ID | Invalid request. Duplicates cannot inflate evidence |
 | Missing category | Six billing cases with distinct IDs | Report is ineligible despite six passing answers |
-| Model outage | Every inference request fails | Zero passes; ineligible report |
-| Competing promotion | Operator read revision 0; another promotion creates revision 1 | Stale promotion conflicts |
-| Repeat promotion | Active release-2, previous release-1, revision 2; promote release-2 with revision 2 | No-op: retain revision 2 and previous release-1 |
+| Model outage | Every inference request fails | Zero passes. Ineligible report |
+| Competing promotion | Operator read revision 0. Another promotion creates revision 1 | Stale promotion conflicts |
+| Repeat promotion | Active release-2, previous release-1, revision 2. Promote release-2 with revision 2 | No-op: retain revision 2 and previous release-1 |
 | Rollback | Active release-2, previous release-1, revision 2 | Active release-1, revision 3 |
-| Changed prompt, same model ID | Call `classifier.predict` against an old report | Refuse the unrecognized candidate; reevaluate or load the matching runtime |
+| Changed prompt, same model ID | Call `classifier.predict` against an old report | Refuse the unrecognized candidate. Reevaluate or load the matching runtime |
 
 ## Understand the evidence chain
 
-A **dataset hash** identifies the exact labeled cases used. A **candidate identifier** hashes the checked runtime manifest: source bytes, exact classifier prompt, model identifier, inference configuration, retrieval marker and policy. `AI_SOURCE_COMMIT` can add the build commit; source-byte identity is checked even when that optional field is absent. A **report** preserves per-case evidence, including severe failures. A **release pointer** is a small mutable record identifying the approved report. Keep evidence immutable while allowing the pointer to change under concurrency control.
+A **dataset hash** identifies the exact labeled cases used. A **candidate identifier** hashes the checked runtime manifest: source bytes, exact classifier prompt, model identifier, inference configuration, retrieval marker and policy. `AI_SOURCE_COMMIT` can add the build commit. Source-byte identity is checked even when that optional field is absent. A **report** preserves per-case evidence, including severe failures. A **release pointer** is a small mutable record identifying the approved report. Keep evidence immutable while allowing the pointer to change under concurrency control.
 
 ## Draw the AWS architecture
 
@@ -178,12 +189,12 @@ A **dataset hash** identifies the exact labeled cases used. A **candidate identi
 ## Implement the path from cases to rollback
 
 1. **Validate the dataset.** Require distinct case IDs, bounded text, recognized expected labels, and explicit boolean severity. Reject malformed evidence before spending model calls.
-2. **Identify the complete candidate.** `candidate.py` hashes the shipped implementation files and records prompt/configuration identity. The local model is named `fixture-v1`; the Bedrock adapter records its configured model ID. The evaluator checks identity again after the run so a changed candidate cannot silently share one report.
+2. **Identify the complete candidate.** `candidate.py` hashes the shipped implementation files and records prompt/configuration identity. The local model is named `fixture-v1`. The Bedrock adapter records its configured model ID. The evaluator checks identity again after the run so a changed candidate cannot silently share one report.
 3. **Run each case.** The model receives the case text, not its expected label or severity. Malformed outputs and provider errors count as failures.
 4. **Score by case.** Preserve expected label, actual label, pass/fail and severity. Compute passed count, severe misses and category coverage separately.
 5. **Register the report.** Save a content-addressed artifact and conditionally create an immutable run ID. Reusing a run ID conflicts rather than rewriting history.
-6. **Promote deliberately.** Read the release revision. Only an eligible report can become active, and only if the revision still matches. Preserve the previous **distinct** active report. Re-promoting the active report with a current revision is a no-op; a stale revision still conflicts.
-7. **Roll back explicitly.** Swap active and previous under the same revision rule. The old report and its dataset identity remain available. `classifier.predict` only serves when the running candidate matches that active report; pointer rollback does not install old code or reconfigure Bedrock.
+6. **Promote deliberately.** Read the release revision. Only an eligible report can become active, and only if the revision still matches. Preserve the previous **distinct** active report. Re-promoting the active report with a current revision is a no-op. A stale revision still conflicts.
+7. **Roll back explicitly.** Swap active and previous under the same revision rule. The old report and its dataset identity remain available. `classifier.predict` only serves when the running candidate matches that active report. Pointer rollback does not install old code or reconfigure Bedrock.
 
 ```python
 eligible = (
@@ -202,9 +213,9 @@ This is a decision rule, not a universal AI metric. The reference exposes it as 
 python3.12 examples/ai-systems/demo.py evaluation
 ```
 
-The session evaluates release-1, promotes it, evaluates release-2, promotes it, and rolls back. The final result is `active: release-1`, `previous: release-2`, `revision: 3`. The fixture always classifies its six known examples correctly; tests separately inject a broken classifier that returns billing for everything and verify severe misses prevent promotion.
+The session evaluates release-1, promotes it, evaluates release-2, promotes it, and rolls back. The final result is `active: release-1`, `previous: release-2`, `revision: 3`. The fixture always classifies its six known examples correctly. Tests separately inject a broken classifier that returns billing for everything and verify severe misses prevent promotion.
 
-Run `cloud_smoke.py evaluation --function "$AI_FUNCTION"` from the workbench directory to exercise AWS persistence. With a real model, a failed gate should stop promotion. Investigate the failures; do not change the labels simply to make a deployment pass.
+Run `cloud_smoke.py evaluation --function "$AI_FUNCTION"` from the workbench directory to exercise AWS persistence. With a real model, a failed gate should stop promotion. Investigate the failures. Do not change the labels simply to make a deployment pass.
 
 ## Follow-up: model version, prompt version, and live traffic diverge
 
@@ -213,7 +224,7 @@ The supplied `classifier.predict` consumer now resolves the active report and
 compares its candidate manifest with the running implementation. It also rechecks
 release revision and candidate identity after inference. A changed prompt under
 the same model name fails that check. Dataset and policy remain part of the
-immutable evaluation evidence; a model alias alone is not a reproducibility guarantee.
+immutable evaluation evidence. A model alias alone is not a reproducibility guarantee.
 
 ```text
 release-1 → promote → revision 1
@@ -258,7 +269,7 @@ Bring an immutable report, the dataset hash, a blocked broken-candidate run, the
 | Review gate | Changed requirement | Evidence to bring |
 |---|---|---|
 | Baseline | Evaluate all six fixtures | Per-case outcomes and eligible report |
-| Failure | Candidate always returns billing | Severe misses visible; promotion blocked |
+| Failure | Candidate always returns billing | Severe misses visible. Promotion blocked |
 | Senior | Serving prompt changes after evaluation | Configuration identity check and fresh evaluation |
 | Staff | Canary changes downstream data | Compatible schema, rollback and reconciliation plan |
 | Evidence | One category is absent | Gate fails despite a perfect observed pass count |
@@ -266,6 +277,6 @@ Bring an immutable report, the dataset hash, a blocked broken-candidate run, the
 
 ## Research behind the design
 
-Reviewed September 23, 2026. AWS's [evaluation dataset documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation-prompt-datasets.html) explains reference responses and category-specific reporting. The [February 2026 Amazon agent evaluation report](https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/) describes examining components, tool use and whole-task outcomes. The [March 2026 AgentCore evaluation article](https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/) discusses evaluating interaction flows. This reference implements its own deterministic classifier gate and registry; it does not claim to reproduce Amazon's internal platform.
+Reviewed September 23, 2026. AWS's [evaluation dataset documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation-prompt-datasets.html) explains reference responses and category-specific reporting. The [February 2026 Amazon agent evaluation report](https://aws.amazon.com/blogs/machine-learning/evaluating-ai-agents-real-world-lessons-from-building-agentic-systems-at-amazon/) describes examining components, tool use and whole-task outcomes. The [March 2026 AgentCore evaluation article](https://aws.amazon.com/blogs/machine-learning/build-reliable-ai-agents-with-amazon-bedrock-agentcore-evaluations/) discusses evaluating interaction flows. This reference implements its own deterministic classifier gate and registry. It does not claim to reproduce Amazon's internal platform.
 
 </details>

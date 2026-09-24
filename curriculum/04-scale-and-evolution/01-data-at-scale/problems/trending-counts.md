@@ -2,19 +2,27 @@
 
 ## Application background
 
-A sports app ranks topics by recent reactions. Events carry an identity and occurrence time; delivery order alone cannot determine whether a topic belongs in the current window.
+A sports app shows the most discussed topics from recent reactions. When a goal is scored, many people react to the same topic at once. The leaderboard should describe recent activity rather than count every reaction since the app launched.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Choose a time window, such as the last few minutes, and count each reaction in the appropriate window. Repeated messages and reactions delivered late can otherwise make a topic look more popular than it is.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Reaction `r-8` for goal-17 arrives twice | Count it once under the duplicate policy. |
+| A reaction arrives two minutes after it happened | Apply the defined late-arrival rule. |
+| An old window closes | Remove its contribution from the current ranking. |
+
+A hot key is one topic receiving a disproportionate share of work. Splitting that work can help capacity, but the partial counts still need a clear combination rule.
 
 ## Your assignment
 
-**Deliver:** A windowed topic counter with duplicate suppression, late-event policy and a leaderboard that states its freshness.
-
-Build the top trending topics for a live sports application. One goal causes a huge burst for a single topic. Duplicate reactions and events arriving two minutes late must not silently inflate a leaderboard presented as current.
+**Deliver:** Build a leaderboard for a declared recent time window. Handle repeated and late reactions, and tell readers how current the displayed ranking is.
 
 **Required behavior:** Return the top 20 topics for a named event-time window and region, with as-of time and revision. The exercise permits two minutes of lateness and targets updates within thirty seconds for timely events.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/trending_counts.py
 
 **Supplied file:** [`examples/architecture-starts/trending_counts.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/trending_counts.py). You can also [read or download the source here](../../../../examples/architecture-starts/trending_counts.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Partials: {('goal', 2): 1, ('goal', 3): 1, ('save', 1): 1}
@@ -41,7 +49,7 @@ Ranking: [('goal', 2), ('save', 1)]
 
 ### Set up your implementation workspace
 
-Create `work/trending-counts/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/trending-counts/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -51,7 +59,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 |---|---|---|
 | reactions | event_id,topic,region,event_time | Stable event identity and window attribution. |
 | partials | window,topic,shard,count | Distributed counts with deterministic shard placement. |
-| leaderboards | region,window,revision,as_of | Published ranked snapshot; provisional/final flag. |
+| leaderboards | region,window,revision,as_of | Published ranked snapshot. Provisional/final flag. |
 
 ## Implement the assignment
 
@@ -75,7 +83,7 @@ Prioritize current windows, retain enough state for the two-minute lateness rule
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Duplicate e1 contributes once; goal ranks above save. |
+| Run the starting program | Duplicate e1 contributes once. Goal ranks above save. |
 | Deliver a valid late reaction | The affected window gets a new revision. |
 | Delay an old merge result | It cannot replace the current pointer. |
 
@@ -83,12 +91,12 @@ Prioritize current windows, retain enough state for the two-minute lateness rule
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | 500,000 events/s peak | At 200 bytes/event, about 100 MB/s before transport overhead. |
-| Thirty-second freshness; two-minute lateness | Freshness of the current display and completeness of an older window are different properties. |
+| Thirty-second freshness. Two-minute lateness | Freshness of the current display and completeness of an older window are different properties. |
 | Hot topic receives 40% of traffic | 200,000 updates/s to one logical counter requires partial aggregation rather than one database row per event. |
 
 ## Map the local implementation to AWS
@@ -106,19 +114,19 @@ Partial aggregation absorbs hot-topic writes. A versioned snapshot avoids servin
 | Local event sequence or input stream | Amazon Kinesis: reaction event stream | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
 | Local window/aggregation loop | Managed Service for Apache Flink: partial aggregation | Implement stream processing with state, checkpoints, event-time handling and a declared late-event policy. |
 | Local file, object fixture or exported payload | Amazon S3: replay archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: leaderboard snapshots | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local cache, counter or coordination state | Amazon ElastiCache: current leaderboard cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
-| Application or worker process | Amazon ECS: trends API | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: leaderboard snapshots | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local cache, counter or coordination state | Amazon ElastiCache: current leaderboard cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior. Keep the durable authority separate. |
+| Application or worker process | Amazon ECS: trends API | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Partitioning | Use event/topic shards to spread a hot topic; monitor the largest partition rather than mean utilization. |
-| State retention | Retain dedupe/window state for lateness plus the replay contract; document later-event handling. |
-| Serving | Cache by window and revision; keep a short current-pointer lifetime and visible as-of metadata. |
+| Partitioning | Use event/topic shards to spread a hot topic. Monitor the largest partition rather than mean utilization. |
+| State retention | Retain dedupe/window state for lateness plus the replay contract. Document later-event handling. |
+| Serving | Cache by window and revision. Keep a short current-pointer lifetime and visible as-of metadata. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -140,28 +148,28 @@ Assume 500,000 events/s peak globally, a 30-second refresh target, and a two-min
 |---|---|
 | Event ID 17 delivered twice | Count once within the dedup retention policy |
 | Event occurred 12:01, arrives 12:03 | Update the 12:01 event-time window if within allowed lateness |
-| Event older than allowed lateness | Record late-drop or correction policy; never silently count in the current minute |
+| Event older than allowed lateness | Record late-drop or correction policy. Never silently count in the current minute |
 | One topic receives 100,000 events/s | Do not direct every increment to one serial counter |
 
 ## The aggregation contract
 
-Each input has event ID, topic ID, event timestamp, and receipt timestamp. Partition hot topics into deterministic or randomly salted partial counters, then merge into windows; make the top-ten projection derived and repairable. If event IDs are deduplicated, state retention and the cost of keeping them. A watermark says when you consider an event-time window complete; early results are provisional until lateness closes. Ties need a stable topic-ID rule. A continuously changing ranking cannot promise the same top ten across two simultaneous reads without a snapshot version.
+Each input has event ID, topic ID, event timestamp, and receipt timestamp. Partition hot topics into deterministic or randomly salted partial counters, then merge into windows. Make the top-ten projection derived and repairable. If event IDs are deduplicated, state retention and the cost of keeping them. A watermark says when you consider an event-time window complete. Early results are provisional until lateness closes. Ties need a stable topic-ID rule. A continuously changing ranking cannot promise the same top ten across two simultaneous reads without a snapshot version.
 
-Only three of the hundred partials are drawn. The 1,000 events/s per shard is an average, not an automatic maximum; the hash/salt distribution and slowest partition still need measurement.
+Only three of the hundred partials are drawn. The 1,000 events/s per shard is an average, not an automatic maximum. The hash/salt distribution and slowest partition still need measurement.
 
 ## Put the AWS names on the boxes
 
-**Why these boxes, and what changes the choice:** Kinesis partitions input; a hot topic must be salted or otherwise distributed, because a hot partition key stays hot. Lambda aggregates windows or Managed Service for Apache Flink handles complex event-time work; DynamoDB serves a versioned result and S3 enables replay.
+**Why these boxes, and what changes the choice:** Kinesis partitions input. A hot topic must be salted or otherwise distributed, because a hot partition key stays hot. Lambda aggregates windows or Managed Service for Apache Flink handles complex event-time work. DynamoDB serves a versioned result and S3 enables replay.
 
 
 
 **Senior follow-up:** One input partition goes idle while the rest advance. Explain the global watermark bottleneck and an idle-partition policy. Show what correction a user sees when #10 becomes #11 after a late event.
 
-**Staff follow-up:** A bot floods a topic. Decide which boundary verifies identity and abuse policy; quantify the effect of revoking events already included in materialized windows. Separate a fast approximate public display from an auditable billing count if the product needs both.
+**Staff follow-up:** A bot floods a topic. Decide which boundary verifies identity and abuse policy. Quantify the effect of revoking events already included in materialized windows. Separate a fast approximate public display from an auditable billing count if the product needs both.
 
 **Practice artifact:** Partition/merge boxes, annotated watermark timeline, rough per-shard write rate under 100-way salting, and a test for duplicate plus late arrival.
 
-**AWS translation:** Kinesis partitions by the chosen routing key; a single hot key can still bottleneck a shard. Use stream processing and a versioned materialized view; DynamoDB conditional aggregation on a single hot key may not absorb this rate. See the chapter's event-time windows and hot-partition cases for the mechanics.
+**AWS translation:** Kinesis partitions by the chosen routing key. A single hot key can still bottleneck a shard. Use stream processing and a versioned materialized view. DynamoDB conditional aggregation on a single hot key may not absorb this rate. See the chapter's event-time windows and hot-partition cases for the mechanics.
 
 **Evidence:** [Spotify's March 2026 Wrapped engineering post](https://engineering.atspotify.com/2026/3/inside-the-archive-2025-wrapped) discusses capacity, replay, recovery, and a high-stakes launch. These trend numbers and rules are constructed practice, not Spotify workload claims.
 

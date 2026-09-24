@@ -2,19 +2,27 @@
 
 ## Application background
 
-Volunteers register for an event through a public form. Organizers read registrations and export them for coordination; the same submission can arrive twice after a double tap or network retry.
+A community event needs a page where volunteers enter their name, phone number and a note. Pressing Submit should create one registration, and organizers should be able to download the registrations as a spreadsheet.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Mobile connections make the outcome less obvious. A volunteer may tap twice or retry because they never saw confirmation. The notes also come from users, so a spreadsheet should not interpret something like `=1+1` as a formula when the organizer opens it.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| A volunteer submits the form | Save one registration and show confirmation. |
+| The same submission is sent again with the same identity | Return the existing result instead of adding another person. |
+| An organizer exports a note beginning with `=` | Keep the note as text in the spreadsheet. |
+
+An idempotency key is an identity for one intended submission. Reusing that key lets the server recognize a repeat, even when the original response did not reach the browser.
 
 ## Your assignment
 
-**Deliver:** A form and submission endpoint with validation, durable duplicate handling and a CSV export that treats user-entered cells as text.
-
-Build a volunteer-registration form for a community event. People submit names, phone numbers and notes from mobile browsers; organizers download a spreadsheet. A double tap must not create two registrations, and notes such as =1+1 must remain text when exported.
+**Deliver:** Build the volunteer form, server validation and saved registrations. Recognize repeated submissions and provide a CSV export that keeps user-entered notes as text.
 
 **Required behavior:** The form has labeled accessible fields, server-side validation and a stable submission request ID. Store original text faithfully. Provide a deliberate spreadsheet-safe export without changing the stored source values.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/a_public_form.py
 
 **Supplied file:** [`examples/architecture-starts/a_public_form.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/a_public_form.py). You can also [read or download the source here](../../../../examples/architecture-starts/a_public_form.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 name,phone,notes
@@ -44,7 +52,7 @@ Please call after six"
 
 ### Set up your implementation workspace
 
-Create `work/a-public-form/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/a-public-form/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -60,7 +68,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Build the usable form
 
-Add explicit labels, input hints, keyboard-accessible errors and a submit state that preserves entered values. Validate again on the server. Return field-specific errors without clearing the entire form; allow a user to correct only the invalid field.
+Add explicit labels, input hints, keyboard-accessible errors and a submit state that preserves entered values. Validate again on the server. Return field-specific errors without clearing the entire form. Allow a user to correct only the invalid field.
 
 ### 2. Commit one submission
 
@@ -68,7 +76,7 @@ Generate a stable client request ID per attempted form submission and store its 
 
 ### 3. Store and export separately
 
-Keep phone and notes as text, including leading zeros and newlines. Use a real CSV writer for quoting. Offer an explicitly spreadsheet-safe view that neutralizes formula-leading text and preserves phone representation for the chosen target; document that CSV cannot carry universal cell typing across every spreadsheet importer.
+Keep phone and notes as text, including leading zeros and newlines. Use a real CSV writer for quoting. Offer an explicitly spreadsheet-safe view that neutralizes formula-leading text and preserves phone representation for the chosen target. Document that CSV cannot carry universal cell typing across every spreadsheet importer.
 
 ### 4. Operate a public endpoint
 
@@ -78,7 +86,7 @@ Add body-size and rate limits, CSRF protection where cookie authentication is in
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The export preserves text intent and quotes multiline notes; stored originals remain unchanged. |
+| Run the starting program | The export preserves text intent and quotes multiline notes. Stored originals remain unchanged. |
 | Double-submit the same request ID | One registration and the same receipt return. |
 | Submit one invalid field | The form keeps the other entered values and points to the correction. |
 
@@ -86,12 +94,12 @@ Add body-size and rate limits, CSRF protection where cookie authentication is in
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 500 registrations/day; 20 submissions/s event-opening burst | Small storage volume but burst admission and duplicate handling still matter. |
-| Phone value 00123 | Treat it as text; numeric conversion loses meaningful leading zeros. |
+| 500 registrations/day. 20 submissions/s event-opening burst | Small storage volume but burst admission and duplicate handling still matter. |
+| Phone value 00123 | Treat it as text. Numeric conversion loses meaningful leading zeros. |
 | Notes up to 2,000 characters | Bound input size and preserve intentional newlines with correct CSV quoting. |
 
 ## Map the local implementation to AWS
@@ -102,26 +110,26 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Build duplicate-safe form submission and CSV export: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/a-public-form.svg)
 
-The static UI handles usability; Lambda enforces validation and duplicate identity. Export formatting is a separate transformation so spreadsheet safety does not corrupt the original submission.
+The static UI handles usability. Lambda enforces validation and duplicate identity. Export formatting is a separate transformation so spreadsheet safety does not corrupt the original submission.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local static/media delivery path | Amazon CloudFront: accessible form delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: submission entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local static/media delivery path | Amazon CloudFront: accessible form delivery | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: submission entry | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: registration application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: submission authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: submission authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local file, object fixture or exported payload | Amazon S3: organizer export storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local fixture identity or caller supplied to the operation | Amazon Cognito: organizer identity | Configure an identity provider and validate tokens; retain resource ownership checks in application code. |
+| Local fixture identity or caller supplied to the operation | Amazon Cognito: organizer identity | Configure an identity provider and validate tokens. Retain resource ownership checks in application code. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Public endpoint | Limit payload bytes and request rate; keep abuse decisions separate from valid-field errors. |
-| Storage | Restrict organizer reads and export generation; avoid logging contact data. |
+| Public endpoint | Limit payload bytes and request rate. Keep abuse decisions separate from valid-field errors. |
+| Storage | Restrict organizer reads and export generation. Avoid logging contact data. |
 | Exports | Private bucket, short-lived authorized downloads and retention appropriate to the event. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 

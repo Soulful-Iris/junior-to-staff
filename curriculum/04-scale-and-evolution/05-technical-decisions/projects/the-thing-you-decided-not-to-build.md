@@ -2,15 +2,15 @@
 
 ## Application background
 
-A team needs occasional data exports. A dedicated scheduling platform and a small script are alternative ways to meet the same user need, with different ongoing ownership costs.
+A team produces two data exports each month. An engineer proposes a custom scheduling platform, while another suggests a small command an operator can run. Both options need to provide the required file to an authorized recipient and make failures recoverable.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The platform takes much longer to build and will still need maintenance. Compare the options against the same user need before deciding that more software is the better answer. The deliverable is a reasoned decision backed by a small working example.
+
+Include the time to operate and repair each option, not just initial coding time. A reconsideration trigger is a concrete change that would make the previous decision worth reopening.
 
 ## Your assignment
 
-**Deliver:** A build/buy/simplify decision comparing equivalent behavior, implementation effort, operations and explicit triggers for reconsideration.
-
-Decide whether to build a custom export scheduler for a team currently producing two exports a month. The proposed platform takes six engineer-weeks plus a day each month to maintain. A three-day script may satisfy the actual need, but the decision must include comparable behavior and operating cost.
+**Deliver:** Compare a script, a managed option and a custom platform against the same export need. Provide a usable small example, recommend an option and name the changes that would make you reconsider it.
 
 **Required behavior:** Produce a concrete build/buy/simplify/defer decision with assumptions, required behaviors, ownership and a trigger for reconsideration. A decision not to build still includes a usable smaller solution and evidence that it meets today’s need.
 
@@ -28,11 +28,11 @@ python3 examples/architecture-starts/the_thing_you_decided_not_to_build.py
 
 **Supplied file:** [`examples/architecture-starts/the_thing_you_decided_not_to_build.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_thing_you_decided_not_to_build.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_thing_you_decided_not_to_build.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'custom_engineer_days_year': 42, 'script_engineer_days_year': 6.0, 'exports_year': 24}
@@ -41,7 +41,7 @@ Decision candidate: use the bounded script; revisit if demand or guarantees chan
 
 ### Set up your implementation workspace
 
-Create `work/the-thing-you-decided-not-to-build/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/the-thing-you-decided-not-to-build/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -61,7 +61,7 @@ Sit with the operator, record inputs, recipients, file size, access checks and r
 
 ### 2. Build the smallest useful spike
 
-Implement one authorized export with a stable run ID, deterministic file naming and a visible success/failure record. Include retry and cleanup behavior. Time the real operator task before and after; do not make a polished platform mockup the only evidence.
+Implement one authorized export with a stable run ID, deterministic file naming and a visible success/failure record. Include retry and cleanup behavior. Time the real operator task before and after. Do not make a polished platform mockup the only evidence.
 
 ### 3. Compare equal requirements
 
@@ -83,13 +83,13 @@ Choose the small solution if it meets current needs, name its owner and document
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Custom: six five-day engineer-weeks + one day/month | Forty-two engineer-days over a year under these assumptions. |
-| Script: three days + 0.25 day/month maintenance assumption | Six engineer-days/year; include this explicit maintenance assumption in the comparison. |
-| Two exports/month | Twenty-four annual exports; current demand does not by itself justify a general scheduling platform. |
+| Script: three days + 0.25 day/month maintenance assumption | Six engineer-days/year. Include this explicit maintenance assumption in the comparison. |
+| Two exports/month | Twenty-four annual exports. Current demand does not by itself justify a general scheduling platform. |
 
 ## Map the local implementation to AWS
 
@@ -99,25 +99,25 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Compare a small export script with a custom platform: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-thing-you-decided-not-to-build.svg)
 
-The optional AWS path is deliberately smaller than a custom scheduling platform. Scheduling can be added when demand requires it; no periodic export or monitor is created by the supplied local example.
+The optional AWS path is deliberately smaller than a custom scheduling platform. Scheduling can be added when demand requires it. No periodic export or monitor is created by the supplied local example.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local manual decision or recovery function | Operator command: explicit export invocation | Implement an authenticated, scoped operational command with a recorded target, preconditions and visible result. |
 | Python operation or worker function | AWS Lambda: optional small export worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Local file, object fixture or exported payload | Amazon S3: private export artifact | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: run evidence | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: run evidence | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Manual invocation or local schedule input | Amazon EventBridge Scheduler: optional future scheduling | Create schedules targeting the dispatcher and preserve occurrence identity across retries and overlapping invocation. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Initial choice | A local/operator-invoked script may be sufficient; the AWS diagram is a small managed alternative to evaluate. |
-| Access | Restrict source reads and export downloads; record the operator and run identity. |
+| Initial choice | A local/operator-invoked script may be sufficient. The AWS diagram is a small managed alternative to evaluate. |
+| Access | Restrict source reads and export downloads. Record the operator and run identity. |
 | Cost | Compare one maintenance horizon and verify current prices before treating a managed-service cost as decisive. |
 
-For this decision project, provision resources only if a bounded implementation spike needs them; the diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+For this decision project, provision resources only if a bounded implementation spike needs them. The diagram is also usable as the concrete option being evaluated. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -126,7 +126,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-The script becomes business-critical while its author is unavailable. Treat ownership, documentation and recovery as part of the small solution; small code does not mean zero operating responsibility.
+The script becomes business-critical while its author is unavailable. Treat ownership, documentation and recovery as part of the small solution. Small code does not mean zero operating responsibility.
 
 <details>
 <summary>Additional design reasoning and requirement changes</summary>

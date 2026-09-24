@@ -2,7 +2,19 @@
 
 ## Application background
 
-A reading list needs tags so members can organize saved links. A tag update takes a bookmark ID and tag strings; callers must agree whether whitespace and case change tag identity.
+A reading-list app needs tags so users can group their bookmarks. Alice enters ` AI ` with spaces, then adds `ai`. One implementer might store two tags, while another might store a single normalized tag. Both could reasonably believe they followed the instruction “add tags.”
+
+Your job is to write a feature description precise enough that two independent implementers produce the same user-visible behavior. The document should settle meaningful questions without prescribing every internal function or file name.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Alice adds ` AI ` and `ai` to her bookmark | Trim spaces, lowercase the values and store one `ai` tag. |
+| Alice includes an empty tag | Reject the update without partly changing existing tags. |
+| Bob tries to change Alice's bookmark tags | Reject the unauthorized update. |
+
+A specification is the written behavior agreement. Normalization means converting equivalent input forms into the same stored identity. The comparison is about behavior, not identical source code.
 
 ## Your assignment
 
@@ -26,7 +38,7 @@ Leave the server running while sending the documented requests in a second termi
 
 1. Run the supplied reading-list API. It has no tag endpoint yet: define the proposed method, path, request body and response in `SPEC.md` before asking anyone to implement it.
 
-2. Write examples for `" AI "`, `"ai"`, an empty value and an unauthorized member. Pin atomic validation and the maximum tag length; leave internal file layout open.
+2. Write examples for `" AI "`, `"ai"`, an empty value and an unauthorized member. Pin atomic validation and the maximum tag length. Leave internal file layout open.
 
 3. Give the identical document to two fresh implementers or AI sessions. Run the same requests against both implementations and record each behavioral disagreement in `COMPARISON.md`. Revise the sentence responsible for each disagreement.
 
@@ -34,15 +46,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Add tags ` AI `, `ai`, and an empty string to item 7 owned by user A. | Trim and lowercase; store one `ai`; reject empty input with 400 and leave existing tags unchanged. |
-| Boundary / failure | User B sends a tag update to A’s item 7. | 404 with no row changed; matching happy paths cannot establish ownership safety. |
-| Scope | Closed normalization rule for this exercise; choose maximum length explicitly. | Explain any additional assumption before implementing it. |
+| Small example | Add tags ` AI `, `ai`, and an empty string to item 7 owned by user A. | Trim and lowercase. Store one `ai`. Reject empty input with 400 and leave existing tags unchanged. |
+| Boundary / failure | User B sends a tag update to A’s item 7. | 404 with no row changed. Matching happy paths cannot establish ownership safety. |
+| Scope | Closed normalization rule for this exercise. Choose maximum length explicitly. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -63,7 +75,7 @@ Two plausible implementations differ because behavior is underspecified. Agreeme
 <details>
 <summary>Reveal the approach and decisions</summary>
 
-Write probes before implementation, including authorization and atomic validation. The invariant is identical observable behavior for the pinned inputs, not identical code. Keep harmless implementation choices open; revise only ambiguities that affect the contract.
+Write probes before implementation, including authorization and atomic validation. The invariant is identical observable behavior for the pinned inputs, not identical code. Keep harmless implementation choices open. Revise only ambiguities that affect the contract.
 
 </details>
 
@@ -74,7 +86,7 @@ Write probes before implementation, including authorization and atomic validatio
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Run the same black-box probes against each implementation. Compare status, data, and side effects; ignore file layout and variable names.
+Run the same black-box probes against each implementation. Compare status, data, and side effects. Ignore file layout and variable names.
 
 ```mermaid
 flowchart TD
@@ -95,7 +107,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Separate normalized identity from display text. Define whether the first or latest spelling wins; retain a migration example for the existing `ai` value.
+Separate normalized identity from display text. Define whether the first or latest spelling wins. Retain a migration example for the existing `ai` value.
 
 ```mermaid
 flowchart TD
@@ -109,13 +121,13 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Supply a behavioral disagreement and the exact sentence that resolves it. **Additional lead scope:** Own spec versions and compatibility between released clients. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Supply a behavioral disagreement and the exact sentence that resolves it. **Additional lead scope:** Own spec versions and compatibility between released clients. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
-![A vague ask fans out into five different plausible systems; the same ask rewritten as a precise specification produces nearly the same system twice. Every place two builds differ is a sentence missing from the spec.](../../../../../assets/diagrams/spec-fidelity.svg)
+![A vague ask fans out into five different plausible systems. The same ask rewritten as a precise specification produces nearly the same system twice. Every place two builds differ is a sentence missing from the spec.](../../../../../assets/diagrams/spec-fidelity.svg)
 
 *You end up with a specification two fresh sessions turned into nearly the same
 system, and a diff showing exactly where it leaked.*
@@ -124,15 +136,15 @@ system, and a diff showing exactly where it leaked.*
 
 One specification for one small, real feature — tagging from Stage 1 reading-list is the right
 size. Hand the identical document to two fresh sessions with no other context,
-let each build it, and compare what comes back. The spec is the deliverable; the
+let each build it, and compare what comes back. The spec is the deliverable. The
 two builds are its test.
 
 **The thought process**
 
 The first decision is what gets pinned and what stays free. The rule: if two
 correct implementations could differ on it and nobody would notice, leave it
-out; if the difference would reach a user or a caller, pin it. Pin everything
-and the spec is code in worse syntax; pin nothing and it is a wish.
+out. If the difference would reach a user or a caller, pin it. Pin everything
+and the spec is code in worse syntax. Pin nothing and it is a wish.
 
 Second: what "the same" means, because you cannot diff source — variable names
 are not disagreement, behaviour on the same input is. So you fix the probes
@@ -154,7 +166,7 @@ spec does not. Split them: ones where any answer is fine, and ones
 where I would care which answer you picked.
 ```
 
-The second list is your fan-out, visible before it costs anything; fix the
+The second list is your fan-out, visible before it costs anything. Fix the
 cheap holes before anyone builds.
 
 **2 — the build, verbatim, to two fresh sessions.**
@@ -179,7 +191,7 @@ each write the one sentence missing from the spec that would have
 prevented it. Pin behaviour, not implementation.
 ```
 
-Accept or reject each sentence yourself; the check is a third stranger, who
+Accept or reject each sentence yourself. The check is a third stranger, who
 must not reproduce the differences you fixed.
 
 **On AWS**
@@ -187,7 +199,7 @@ must not reproduce the differences you fixed.
 The stranger must actually be a stranger, and a chat app is not one — it
 carries memory and custom instructions you have stopped seeing. A pinned model
 id behind an API is the clean subject. **Amazon Bedrock** and provider APIs may offer overlapping model families,
-with different versions, regions and capabilities; Bedrock earns it when your work already lives in AWS
+with different versions, regions and capabilities. Bedrock earns it when your work already lives in AWS
 — IAM credentials you already have, invocation logging, cost next to the rest
 of the bill. Otherwise the direct API is simpler. Nothing else here needs AWS:
 the artefact is a text file, and git is its home.
@@ -202,7 +214,7 @@ it wrong.
 
 **The learning**
 
-Some implementation differences reveal questions left open; others are plain
+Some implementation differences reveal questions left open. Others are plain
 implementation errors. Compare each result against the written contract before
 calling the specification incomplete. And precision stops being a feeling — it is measurable, as
 the distance between two strangers.
@@ -210,13 +222,13 @@ the distance between two strangers.
 **How you would know it is wrong**
 
 - The builds agree on unspecified behavior. Check for shared defaults or leaked
-  context; agreement alone does not establish specification completeness.
+  context. Agreement alone does not establish specification completeness.
 - Remove one important sentence and rerun its distinguishing probes. Agreement
-  may reflect a shared default; introduce a deliberate contrary behavior to
+  may reflect a shared default. Introduce a deliberate contrary behavior to
   verify that the probes can distinguish it.
 - The third stranger diverges where you already fixed. Your sentence pinned an
   implementation detail, not the behaviour.
-- An empty `ASSUMPTIONS.md`. The recording failed; it does not mean the spec
+- An empty `ASSUMPTIONS.md`. The recording failed. It does not mean the spec
   was complete.
 
 ---

@@ -2,7 +2,11 @@
 
 ## Application background
 
-A reading-list team spends review time on formatting and imports while subtle ownership changes can slip through. Different kinds of review evidence deserve different tools.
+A team reviews reading-list changes and repeatedly comments on formatting and import order. Those comments consume attention while a more important change, such as removing an ownership check, can go unnoticed. Some review work is mechanical, while other work needs product context.
+
+Collect a small set of review comments and decide which ones have an objective rule a tool can enforce. Then observe whether removing that mechanical work leaves the behavior decisions visible to the human reviewer.
+
+An automated review result is useful evidence about the rules it actually checks. It is not a substitute for every other kind of review.
 
 ## Your assignment
 
@@ -34,15 +38,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | 20 comments: 8 formatting, 4 imports, 3 naming, 5 behavioral concerns. | 12 deterministic comments map to formatter/linter checks; the 8 judgment comments retain a human owner. |
-| Boundary / failure | The AI review gives a style verdict and silently approves a missing owner check. | Its contract is violated; human behavioral review remains required. |
+| Small example | 20 comments: 8 formatting, 4 imports, 3 naming, 5 behavioral concerns. | 12 deterministic comments map to formatter/linter checks. The 8 judgment comments retain a human owner. |
+| Boundary / failure | The AI review gives a style verdict and silently approves a missing owner check. | Its contract is violated. Human behavioral review remains required. |
 | Scope | Five subsequent PRs form a small local experiment, not a universal productivity study. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -91,7 +95,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Choose and document an advisory fail-open policy with a human reviewer for this exercise. Deterministic gates still run. Record the skipped AI pass, then compare later findings; its absence must not silently become a behavioral approval.
+Choose and document an advisory fail-open policy with a human reviewer for this exercise. Deterministic gates still run. Record the skipped AI pass, then compare later findings. Its absence must not silently become a behavioral approval.
 
 ```mermaid
 flowchart TD
@@ -106,9 +110,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Catch the seeded behavioral bug after removing style noise. **Additional lead scope:** Assign rule ownership and a measurable exception-removal process. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Catch the seeded behavioral bug after removing style noise. **Additional lead scope:** Assign rule ownership and a measurable exception-removal process. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -132,7 +136,7 @@ dangerous territory is the middle — rules right often but not always — becau
 every false positive spends the gate's credibility, and credibility does not
 refill. Start strict and small.
 
-Second: enforce beats advise. A formatter that rewrites ends the argument; a
+Second: enforce beats advise. A formatter that rewrites ends the argument. A
 linter that complains starts one. The state you are buying is that style stops
 being reviewable because it stops being variable.
 
@@ -200,9 +204,9 @@ must not leave your boundary, run the model through **Bedrock** from a small
 **Lambda** on the PR webhook, the pipeline assuming an **OIDC** role. Bedrock
 rides IAM, so no vendor API key sits in repository secrets for project 3's
 scanner to find. Lambda beats **CodeBuild** for the bot because a diff fits in
-memory and the work lasts seconds; a build container is the wrong shape. The
+memory and the work lasts seconds. A build container is the wrong shape. The
 mechanical tools can stay in Actions. Estimate model invocations separately
-from CI usage; neither a small diff nor IAM integration proves a zero bill.
+from CI usage. Neither a small diff nor IAM integration proves a zero bill.
 
 **What productionising it means**
 
@@ -210,7 +214,7 @@ Keep a false-positive ledger: a rule overridden more than about weekly gets
 fixed or deleted, because an ignorable gate teaches ignoring gates. Pin
 formatter and linter versions — an unpinned formatter upgrade reformats the
 world mid-PR. And decide in writing whether the AI pass fails open or closed
-when its API is down; not deciding means finding out during an outage.
+when its API is down. Not deciding means finding out during an outage.
 
 **The learning**
 
@@ -221,7 +225,7 @@ noise, and almost nothing worth keeping lives in between.
 
 **How you would know it is wrong**
 
-- Plant one style violation and one real bug in the same PR. The machine must catch the style; the human pass must still catch the bug. A bug that sailed through on a green glow means you automated complacency.
+- Plant one style violation and one real bug in the same PR. The machine must catch the style. The human pass must still catch the bug. A bug that sailed through on a green glow means you automated complacency.
 - The comment mix is unchanged after a month: the tools are advisory, or not required, or not running.
 - Overrides rise week on week: the rules spend credibility faster than they earn it.
 - Turn the formatter off locally and push. The pipeline must catch it — advice dies, law holds.

@@ -107,3 +107,7 @@
 /* Source paths stay readable on narrow screens without widening the lesson. */
 main p,main li{overflow-wrap:anywhere}
 main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
+
+/* Intro timelines are authored for a narrow page and do not need horizontal panning. */
+.lesson-body img[src*="/project-context/"]{min-width:0;width:100%;max-width:520px;height:auto}
+.figwrap:has(img[src*="/project-context/"])+.visual-toolbar .diagram-scroll-hint{display:none}

@@ -2,7 +2,11 @@
 
 ## Application background
 
-A reading-list title lookup uses a timeout chosen during a failure investigation. Git history should preserve why that value changed so an on-call engineer can assess it later.
+An engineer sees a title-fetch timeout of 800 ms in a reading-list service and wants to know why it is not 300 ms. The Git history contains several commits named `wip`, mixing the timeout change with a helper rename. The final code works, but its explanation is hard to recover.
+
+In a private copy, reorganize that history so the reason for the behavior change is easy to find. Keep the final code identical. This exercise concerns Git commits, the saved revisions in source history, rather than database transactions.
+
+The quality of the history is measured by what it lets a reader understand. A prettier sequence that changes delivered behavior does not satisfy the assignment.
 
 ## Your assignment
 
@@ -28,21 +32,21 @@ Leave the server running while sending the documented requests in a second termi
 
 2. Create a second private branch and reorganize commits and messages to separate the behavior change from the rename. Include the timing observation that motivated the value. Never rewrite a shared branch for this exercise.
 
-3. Compare the branch tips with `git diff original..revised`: there should be no content difference. Give a fresh reader the timeout line and ask them to locate its rationale in each history; record the lookup and missing evidence.
+3. Compare the branch tips with `git diff original..revised`: there should be no content difference. Give a fresh reader the timeout line and ask them to locate its rationale in each history. Record the lookup and missing evidence.
 
 ## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Three commits change timeout 300 → 800, rename a helper, then add a timeout test. | The rewritten tip has an empty diff against the original tip; the reader cites the timeout decision and its test. |
+| Small example | Three commits change timeout 300 → 800, rename a helper, then add a timeout test. | The rewritten tip has an empty diff against the original tip. The reader cites the timeout decision and its test. |
 | Boundary / failure | A rewrite accidentally restores timeout 300. | The tip comparison fails even if all rewritten commits look tidy. |
-| Scope | Private practice branches; no rewriting a branch other people use. | Explain any additional assumption before implementing it. |
+| Scope | Private practice branches. No rewriting a branch other people use. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -64,7 +68,7 @@ The code records the chosen number, but not whether it came from a measured dead
 <details>
 <summary>Reveal the approach and decisions</summary>
 
-First inventory decisions, then group commits by behavior and dependency. Preserve intermediate runnable states when possible. The invariant is byte-identical final trees; a test run alone cannot prove it. Measure a cited, correct answer separately from elapsed time.
+First inventory decisions, then group commits by behavior and dependency. Preserve intermediate runnable states when possible. The invariant is byte-identical final trees. A test run alone cannot prove it. Measure a cited, correct answer separately from elapsed time.
 
 </details>
 
@@ -75,7 +79,7 @@ First inventory decisions, then group commits by behavior and dependency. Preser
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Keep the shared reference stable and create a separate rehearsal branch. Compare trees there; use improved messages only on future shared work. The expected outcome is zero forced updates to the teammate’s base.
+Keep the shared reference stable and create a separate rehearsal branch. Compare trees there. Use improved messages only on future shared work. The expected outcome is zero forced updates to the teammate’s base.
 
 ```mermaid
 flowchart TD
@@ -106,9 +110,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Show the empty diff and one correct independently cited answer. **Additional lead scope:** Define retention and the owner of decision artifacts. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Show the empty diff and one correct independently cited answer. **Additional lead scope:** Define retention and the owner of decision artifacts. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -130,7 +134,7 @@ supposed to map to decisions one for one, so until the list exists you cannot
 say what the commits should have been.
 
 Second: where rewriting is allowed. Shared history is a record other people
-have built on; rewriting it deletes their context. On a branch never pushed it
+have built on. Rewriting it deletes their context. On a branch never pushed it
 is a drill — with one honesty constraint: the final tree stays byte-identical.
 You change the story, never the code, and `git diff` between the tips is the
 proof.
@@ -187,11 +191,11 @@ Time it against both branches. Wrong-but-fast counts as wrong.
 **On AWS**
 
 The record belongs beside the code. **GitHub** fits this repository's review
-workflow; **CodeCommit** is an AWS-hosted Git option when IAM integration and
+workflow. **CodeCommit** is an AWS-hosted Git option when IAM integration and
 AWS account controls are part of the requirement. Compare current collaboration
 features and exportability rather than choosing by a historical service rumor.
 Keep an independent `git bundle` snapshot in a versioned **S3** bucket if you
-need an offsite repository record; verify that it restores the refs you intend
+need an offsite repository record. Verify that it restores the refs you intend
 and budget storage/retention. CodeCommit capability checked 2026-09-22 against
 [the official overview](https://docs.aws.amazon.com/codecommit/latest/userguide/welcome.html).
 

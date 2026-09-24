@@ -2,7 +2,11 @@
 
 ## Application background
 
-When extending a reading-list service, an engineer may accept unfamiliar timeout, retry or default-value behavior. Later maintainers need the assumption and its evidence, not just a confident comment.
+While changing a reading-list service, you accept a retry helper you do not fully understand. You assume it cannot save the same operation twice. A week later a duplicate record appears, and another engineer needs to know what you assumed and why.
+
+A useful decision log records the uncertainty when the decision is made, then revisits it using actual observations. Writing “looks fine” after the fact gives the next engineer little to work with.
+
+The deliverable is an actionable history of decisions. Each entry needs enough context for someone else to confirm it, repair it or decide what evidence is still missing.
 
 ## Your assignment
 
@@ -28,21 +32,21 @@ Leave the server running while sending the documented requests in a second termi
 
 2. Add entries covering timeout behavior, an unverified duplicate-write claim and a numeric fallback that treats zero as missing. Run the relevant examples and attach the observed values or responses.
 
-3. Revisit each entry and classify it as supported, unresolved debt or wrong. For a wrong assumption, attach the correction and changed observation; assign an owner and next step to unresolved debt.
+3. Revisit each entry and classify it as supported, unresolved debt or wrong. For a wrong assumption, attach the correction and changed observation. Assign an owner and next step to unresolved debt.
 
 ## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Three entries: fixed GET timeout verified; durable idempotency unverified; `quantity || old` accepted. | Classify as fine with evidence, debt with owner/date, and wrong after a zero-quantity regression demonstrates the defect. |
+| Small example | Three entries: fixed GET timeout verified. Durable idempotency unverified. `quantity || old` accepted. | Classify as fine with evidence, debt with owner/date, and wrong after a zero-quantity regression demonstrates the defect. |
 | Boundary / failure | Entry says only “accepted async stuff.” | Mark unusable and replace it with the concrete assumption and falsifying check. |
-| Scope | A judgment record; counts are descriptive and not an individual performance score. | Explain any additional assumption before implementing it. |
+| Scope | A judgment record. Counts are descriptive and not an individual performance score. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -92,7 +96,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Reopen the decision because its failure model changed. Require provider idempotency or an explicit uncertain-outcome/reconciliation state; a prior fine verdict is scoped to prior assumptions.
+Reopen the decision because its failure model changed. Require provider idempotency or an explicit uncertain-outcome/reconciliation state. A prior fine verdict is scoped to prior assumptions.
 
 ```mermaid
 flowchart TD
@@ -105,9 +109,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Bring one independently replayed decision and its falsifying input. **Additional lead scope:** Define review cadence and protect uncertainty reporting from punitive metrics. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Bring one independently replayed decision and its falsifying input. **Additional lead scope:** Define review cadence and protect uncertainty reporting from punitive metrics. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -125,11 +129,11 @@ of real Stage 1 reading-list work — then a revisit that ends each entry as *fi
 
 The first decision is the bar for "did not fully understand", and both failure
 directions are real: too strict and you are logging every line, which lasts a
-day; too loose and the log stays empty, which reads as competence and is
+day. Too loose and the log stays empty, which reads as competence and is
 actually blindness. The workable bar — log it if, had this been wrong, you
 would not have caught it. And an entry has to survive a week, because its
 reader is future-you, who has lost this context. "Accepted the retry logic" is
-dead in seven days; "accepted that retrying the fetch is safe because it is
+dead in seven days. "accepted that retrying the fetch is safe because it is
 claimed idempotent — did not verify" can be reopened by a stranger. Future-you
 is a fresh session with no context, the same reader the spec in project one had.
 
@@ -153,7 +157,7 @@ alternative, and what would reveal the wrong one.
 ```
 
 An empty list is flattery — ask instead for the three most fragile choices. You
-pick which lines enter the log; the model proposes, the log is yours.
+pick which lines enter the log. The model proposes, the log is yours.
 
 **2 — the revisit, one week later, in a fresh session.**
 
@@ -164,17 +168,17 @@ contradicted that assumption, and the one check that would settle
 it. End with SETTLED or UNSETTLED. Do not reassure me.
 ```
 
-Fresh, because it has no stake in defending last week's choices; every item
+Fresh, because it has no stake in defending last week's choices. Every item
 must end in something runnable, and you run at least three.
 
-**3 — the verdicts are yours; the model gets one job.**
+**3 — the verdicts are yours. The model gets one job.**
 
 ```
 Argue the strongest case that this entry was WRONG, citing the code
 as it is now. One paragraph. If the case is weak, say it is weak.
 ```
 
-Use it on anything you are about to mark *fine*; an entry that survives the
+Use it on anything you are about to mark *fine*. An entry that survives the
 strongest opposing case, with the checks run, has earned it. Then count.
 
 **On AWS**
@@ -184,7 +188,7 @@ lives, commit with it, and get reviewed with it. **DynamoDB** is the neighbour,
 and it earns a place only when the log spans many repositories and you want
 "all unresolved debt older than thirty days" answered across a team — partition
 key the repository, sort key the date, that is the entire schema. The revisit
-needs a schedule, and the honest tool is a calendar entry; the AWS version —
+needs a schedule, and the honest tool is a calendar entry. The AWS version —
 **EventBridge Scheduler** invoking a **Lambda** that opens an issue listing
 week-old entries — is worth building once the team is bigger than you.
 
@@ -193,7 +197,7 @@ week-old entries — is worth building once the team is bigger than you.
 The log becomes provenance: the next person reads it and learns which parts of
 the codebase are load-bearing guesses, which no amount of clean code
 communicates. The counts become a gauge — a *wrong* count that is not shrinking
-means the acceptance bar is too low; an empty week means the bar drifted, not
+means the acceptance bar is too low. An empty week means the bar drifted, not
 that you suddenly understand everything.
 
 **The learning**
@@ -205,7 +209,7 @@ now you were running on the feeling of it.
 
 **How you would know it is wrong**
 
-- A week of real work and an empty log. The bar is wrong; the work was not that
+- A week of real work and an empty log. The bar is wrong. The work was not that
   clean.
 - Every verdict came back *fine*. You graded your own homework — run the
   strongest-case argument on three and see if they hold.

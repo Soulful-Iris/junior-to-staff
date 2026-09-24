@@ -2,19 +2,33 @@
 
 ## Application background
 
-Creators upload videos; viewers request permission to play them and then download segments appropriate to their connection speed. Large media bytes and application metadata take different paths.
+A creator uploads a video while viewers use phones and TVs to watch published videos. An interrupted upload should resume from the pieces already received. During playback, the player switches between prepared video sizes as the connection changes.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The application handles video identity, status and access permission. The media files are much larger than those records and need their own storage and delivery path. A popular release can put most of its load on that delivery path.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| An upload stops after part 7 | Resume the same upload from the remaining parts. |
+| An authorized viewer requests a private video | Give the player access to the allowed playback files. |
+| The viewer's connection slows | Let the player request a smaller prepared rendition. |
+
+Separate the small control requests, such as permission checks, from the large video bytes. Both paths must work for the viewer to watch successfully.
+
+### Sizing that affects this decision
+
+Five million uploads/day averages about 58 uploads/s. At an assumed mean source size of 500 MB, that is 2.5 PB/day of source bytes before making playback renditions. The 20 GB maximum upload size is a per-request limit, not the average to use in that storage estimate. This is why media delivery cannot be sized from API request counts alone.
+
+These are exercise assumptions. The [estimation reference](../../../01-code/01-problem-solving/estimation-constants.md) explains the units and approximations. They do not establish the local demo's measured capacity.
 
 ## Your assignment
 
-**Deliver:** An upload session, processing/playback states and a private playback authorization path, with separate origin and delivery capacity estimates.
-
-Build a video platform where creators upload large files and viewers start playback on phones and TVs. A popular new video attracts a regional traffic spike. Playback needs adaptive renditions, private-content authorization and an upload path that can resume after interruption.
+**Deliver:** Build resumable upload and authorized playback flows. Track when a video is ready and estimate the application traffic separately from the much larger video traffic.
 
 **Required behavior:** Uploads are resumable and bounded to 20 GB. Playback returns a manifest only for a ready, authorized video. The target is p95 startup under two seconds, measured on a defined device/network cohort rather than promised for every connection.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/video_streaming_platform.py
 
 **Supplied file:** [`examples/architecture-starts/video_streaming_platform.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/video_streaming_platform.py). You can also [read or download the source here](../../../../examples/architecture-starts/video_streaming_platform.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Resume missing parts: [2]
@@ -43,7 +57,7 @@ ben 403
 
 ### Set up your implementation workspace
 
-Create `work/video-streaming-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/video-streaming-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -59,15 +73,15 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Complete one resumable upload
 
-Create multipart upload sessions scoped to one creator and source key. Track uploaded parts and finish only the intended object. Expire abandoned sessions and multipart data; accept completion idempotently and never trust a browser’s ready flag as processing evidence.
+Create multipart upload sessions scoped to one creator and source key. Track uploaded parts and finish only the intended object. Expire abandoned sessions and multipart data. Accept completion idempotently and never trust a browser’s ready flag as processing evidence.
 
 ### 2. Create adaptive playback output
 
-Transcode a defined bitrate ladder into HLS or DASH segments. Publish an immutable versioned manifest after all required outputs are ready. Choose segment duration with startup delay, switching granularity and request overhead in mind; document the exact profiles used in your small demo.
+Transcode a defined bitrate ladder into HLS or DASH segments. Publish an immutable versioned manifest after all required outputs are ready. Choose segment duration with startup delay, switching granularity and request overhead in mind. Document the exact profiles used in your small demo.
 
 ### 3. Authorize and distribute playback
 
-Check current visibility before issuing a short-lived playback authorization. Restrict S3 origin access so users cannot bypass the CDN policy. Document that already issued signed access may remain valid until expiry; proxy or shorten the window if immediate revocation is required.
+Check current visibility before issuing a short-lived playback authorization. Restrict S3 origin access so users cannot bypass the CDN policy. Document that already issued signed access may remain valid until expiry. Proxy or shorten the window if immediate revocation is required.
 
 ### 4. Measure a cold and warm start
 
@@ -77,20 +91,20 @@ Capture time to authorization, manifest, first segment and first rendered frame.
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Only part 2 needs resuming; only the authorized viewer receives manifest access. |
+| Run the starting program | Only part 2 needs resuming. Only the authorized viewer receives manifest access. |
 | Interrupt a large upload | Resume missing parts without restarting completed transfer. |
-| Request a processing video | Status is visible; no incomplete manifest is issued. |
+| Request a processing video | Status is visible. No incomplete manifest is issued. |
 
 **Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Five million uploads/day | About 58 uploads/s average; at an assumed 500 MB mean that is 2.5 PB/day of source data before renditions. |
-| 100 million viewers; 20 GB maximum upload | Maximum file size is a request bound, not the average storage assumption. |
+| Five million uploads/day | About 58 uploads/s average. At an assumed 500 MB mean that is 2.5 PB/day of source data before renditions. |
+| 100 million viewers. 20 GB maximum upload | Maximum file size is a request bound, not the average storage assumption. |
 | Two-second p95 playback start | Budget authorization, manifest fetch, first segment transfer and decoder startup independently. |
 
 ## Map the local implementation to AWS
@@ -101,16 +115,16 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Build resumable uploads and authorized video playback: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-streaming-platform.svg)
 
-The CDN carries repeated viewer bytes; the application handles identity, catalog state and publication. Keeping large transfers off API servers changes both capacity and failure behavior.
+The CDN carries repeated viewer bytes. The application handles identity, catalog state and publication. Keeping large transfers off API servers changes both capacity and failure behavior.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: upload and playback API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: upload and playback API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: video catalog application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Local file, object fixture or exported payload | Amazon S3: source upload storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 | Local rendition result fixture | AWS Elemental MediaConvert: adaptive transcoding | Submit identified conversion jobs, handle completion/failure events and publish only complete output sets. |
 | Local file, object fixture or exported payload | Amazon S3: playback segment origin | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local static/media delivery path | Amazon CloudFront: viewer delivery edge | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Local static/media delivery path | Amazon CloudFront: viewer delivery edge | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
 
 ### Provision resources, then connect the application
 
@@ -118,9 +132,9 @@ The CDN carries repeated viewer bytes; the application handles identity, catalog
 |---|---|
 | S3 lifecycle | Abort incomplete multipart uploads and separately retain source/rendition generations according to product policy. |
 | CloudFront | Restricted origin access, cache versioned segments long-term and keep authorization responses private. |
-| Cost model | Estimate storage, transcode minutes and delivered GB separately; show assumptions for watch duration and average bitrate. |
+| Cost model | Estimate storage, transcode minutes and delivered GB separately. Show assumptions for watch duration and average bitrate. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -129,7 +143,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-Add live streaming. Revisit segment latency, encoder failure, rolling manifest updates and origin failover; the immutable completed-video assumptions no longer cover the entire path.
+Add live streaming. Revisit segment latency, encoder failure, rolling manifest updates and origin failover. The immutable completed-video assumptions no longer cover the entire path.
 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
@@ -147,7 +161,7 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 ## Think from the contract to the boxes
 
-Separate the control path (upload authorization, job state, manifest) from media bytes. Transcode into aligned segments at multiple bitrates; publish a manifest only after required renditions pass validation. A CDN serves immutable segments, while signed access controls protect private content. Model the player’s buffer and bitrate adaptation, not just the upload pipeline.
+Separate the control path (upload authorization, job state, manifest) from media bytes. Transcode into aligned segments at multiple bitrates. Publish a manifest only after required renditions pass validation. A CDN serves immutable segments, while signed access controls protect private content. Model the player’s buffer and bitrate adaptation, not just the upload pipeline.
 
 **First diagram:** Show source upload, processing fan-out, manifest publish point, CDN cache, and authorization on segment fetch.
 
@@ -171,7 +185,7 @@ Service choice follows the contract: the box label gives the generic job, while 
 
 **Practice artifact:** Show source upload, processing fan-out, manifest publish point, CDN cache, and authorization on segment fetch. Then trace every row in the table, draw one failure, and state what the customer observes. Suggested rehearsal: 35 minutes design, 10 minutes to challenge the guarantees.
 
-**Evidence and origin:** The current community interview-question catalog lists YouTube-style streaming reports at companies including Datadog, Snapchat and Meta; report dates are not disclosed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
+**Evidence and origin:** The current community interview-question catalog lists YouTube-style streaming reports at companies including Datadog, Snapchat and Meta. Report dates are not disclosed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/creator-viewer-paths/cm6wu2x3y0000356pl299toa0).
 

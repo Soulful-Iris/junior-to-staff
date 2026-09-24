@@ -2,19 +2,34 @@
 
 ## Application background
 
-Two applications share a preview API returning a title and an elapsed duration. They can deploy independently, so a compatible JSON shape must also retain agreed field meanings and units.
+A preview API returns a page title and the time spent fetching it. Two separate applications read that response. They expect `durationMs` to be a number measured in milliseconds, such as `12`.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+A provider refactor could return `"12"` as text, or return `0.012` seconds while keeping the old field name. Both changes can break a caller even if the response still looks like valid JSON.
+
+### The response contract that callers rely on
+
+This is a proposed API agreement for the exercise, not a generated schema claiming the implementation is complete:
+
+| Field | Required meaning | Example |
+|---|---|---|
+| `title` | String containing the selected page title | `"Guide"` |
+| `durationMs` | Non-negative number in milliseconds, not numeric text or seconds | `12` |
+
+```json
+{"title":"Guide","durationMs":12}
+```
+
+The supplied decoder accepts that shape and rejects `"12"` as the duration. It cannot infer units from a JSON number, so the contract must state them.
+
+A contract describes meaning as well as shape. Agreement on field names alone does not establish agreement on types, units or error behavior.
 
 ## Your assignment
 
-**Deliver:** A producer/consumer contract and a comparison of representative responses, including string-versus-number and milliseconds-versus-seconds changes.
-
-Protect a preview API used by two separately deployed applications. It returns title and durationMs; a provider refactor changes durationMs from 12 to "12", and another changes the unit to seconds without changing the JSON type.
+**Deliver:** Write the producer/consumer response agreement and compare representative responses against it. Include both type changes and unit changes that leave the JSON shape intact.
 
 **Required behavior:** The provider and consumers agree on field presence, runtime types, units and error shapes. Static language declarations do not validate bytes received over HTTP. Compatibility is demonstrated with the supported old consumer behavior.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +43,11 @@ python3 examples/architecture-starts/02_the_contract_nobody_breaks_by_accident.p
 
 **Supplied file:** [`examples/architecture-starts/02_the_contract_nobody_breaks_by_accident.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/02_the_contract_nobody_breaks_by_accident.py). You can also [read or download the source here](../../../../examples/architecture-starts/02_the_contract_nobody_breaks_by_accident.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'title': 'Guide', 'durationMs': 12} shape accepted; unit meaning still requires the contract
@@ -41,7 +56,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/02-the-contract-nobody-breaks-by-accident/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/02-the-contract-nobody-breaks-by-accident/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -65,7 +80,7 @@ Parse and validate received data before domain logic uses it. Check booleans sep
 
 ### 3. Exercise old and new consumers directly
 
-Send the numeric response and then the string response through the actual decoding path. Add an optional field and observe whether each supported client tolerates it; do not assume every decoder ignores unknown fields.
+Send the numeric response and then the string response through the actual decoding path. Add an optional field and observe whether each supported client tolerates it. Do not assume every decoder ignores unknown fields.
 
 ### 4. Evolve with an explicit adapter
 
@@ -75,7 +90,7 @@ Introduce a new field/version for changed units or meaning, preserve the old rep
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Numeric 12 is accepted; string "12" is rejected. |
+| Run the starting program | Numeric 12 is accepted. String "12" is rejected. |
 | Change milliseconds to seconds without renaming | The semantic example reveals the incompatible meaning. |
 | Send an unexpected content type | The API follows the documented reject/parse policy instead of silently bypassing validation. |
 
@@ -83,13 +98,13 @@ Introduce a new field/version for changed units or meaning, preserve the old rep
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Two consumers released independently | A provider rollout cannot assume simultaneous consumer upgrades. |
 | 12 milliseconds versus "12" | The latter violates the numeric runtime contract even if a permissive caller coerces it. |
-| 0.012 seconds in durationMs | Type-valid but semantically wrong; units belong in the contract and examples. |
+| 0.012 seconds in durationMs | Type-valid but semantically wrong. Units belong in the contract and examples. |
 
 ## Map the local implementation to AWS
 
@@ -103,9 +118,9 @@ The gateway handles a configured request boundary. Provider response validation 
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: HTTP request boundary | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: HTTP request boundary | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: provider application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Application or worker process | Amazon ECS: consumer application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: consumer application | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
 | Local file, object fixture or exported payload | Amazon S3: versioned contract examples | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: boundary diagnostics | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
@@ -113,11 +128,11 @@ The gateway handles a configured request boundary. Provider response validation 
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Gateway | Configure body models/content-type handling deliberately; validate domain formats in the handler. |
+| Gateway | Configure body models/content-type handling deliberately. Validate domain formats in the handler. |
 | Versioning | Store schemas and supported consumer examples with the implementation commit. |
 | Diagnostics | Log safe schema error paths, not entire sensitive request/response bodies. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -157,6 +172,6 @@ The compatible addition should pass agreed consumer tolerance checks. Removing a
 
 - [Executable request/response boundary lab](../../01-backend/labs/api-contract/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

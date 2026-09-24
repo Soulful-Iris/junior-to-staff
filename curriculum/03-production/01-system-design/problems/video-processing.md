@@ -2,19 +2,27 @@
 
 ## Application background
 
-A training site accepts an instructor's source video and prepares smaller versions for different connections. Students access a playback manifest only after its referenced files exist.
+An instructor uploads a large training video. Students need smaller versions suited to different screens and internet speeds. The processing service creates those versions before making the video available to watch.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+A rendition is one prepared version of the video. A playback manifest lists the files a player can request. Publishing that list before its files exist would give students a video that starts and then fails.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| An instructor uploads a source video | Record a processing job. |
+| Two renditions finish and a third fails | Keep the incomplete playback set unpublished. |
+| The missing rendition is rebuilt successfully | Publish a manifest pointing only to complete files. |
+
+Upload success means the source file arrived. Playback readiness is a later result that the application must track explicitly.
 
 ## Your assignment
 
-**Deliver:** An upload/job record, per-rendition progress and an atomic manifest publication step with resumable failed work.
-
-Build upload-to-playback processing for a training company. An instructor uploads a video, processing creates several renditions, and one rendition fails. Students must never receive a manifest that points at unfinished or missing output.
+**Deliver:** Build upload and processing records for each video version. Publish a playback manifest only when all required output files are complete, and allow failed work to resume.
 
 **Required behavior:** Create an upload session, accept a completed source object, and expose processing status. Publish a versioned playback manifest only after every required rendition is verified. Reprocessing creates a new generation without overwriting the currently published one.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/video_processing.py
 
 **Supplied file:** [`examples/architecture-starts/video_processing.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/video_processing.py). You can also [read or download the source here](../../../../examples/architecture-starts/video_processing.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 still processing: ['1080p']
@@ -42,7 +50,7 @@ ready
 
 ### Set up your implementation workspace
 
-Create `work/video-processing/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/video-processing/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -70,13 +78,13 @@ Verify that each required output is present, readable and belongs to the current
 
 ### 4. Expose progress and repair
 
-Show queued, processing, failed and ready with a reason and last progress time. Track queue wait separately from encoding duration. Keep original input until the documented reprocessing/retention policy allows removal; clean orphan output after active attempts expire.
+Show queued, processing, failed and ready with a reason and last progress time. Track queue wait separately from encoding duration. Keep original input until the documented reprocessing/retention policy allows removal. Clean orphan output after active attempts expire.
 
 ## Demonstrate the completed local result
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Two renditions remain processing; the third enables publication. |
+| Run the starting program | Two renditions remain processing. The third enables publication. |
 | Deliver a duplicate source notification | One logical processing generation exists. |
 | Finish an old generation late | The current manifest pointer is unchanged. |
 
@@ -84,12 +92,12 @@ Show queued, processing, failed and ready with a reason and last progress time. 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 50,000 uploads/day | About 0.58 uploads/s average; the stated 300 concurrent processing jobs is a separate peak. |
-| 99% of files below 2 GB ready within ten minutes | Measure from completed upload to published manifest; separate upload time and processing queue time. |
+| 50,000 uploads/day | About 0.58 uploads/s average. The stated 300 concurrent processing jobs is a separate peak. |
+| 99% of files below 2 GB ready within ten minutes | Measure from completed upload to published manifest. Separate upload time and processing queue time. |
 | Three renditions/source assumption | Track 150,000 rendition outcomes/day, plus retries and reprocessing generations. |
 
 ## Map the local implementation to AWS
@@ -100,16 +108,16 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Process uploads and publish complete video renditions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-processing.svg)
 
-Transcoding completion and publication are separate decisions. Step Functions tracks workflow progress; DynamoDB’s conditional pointer makes one complete generation visible to readers.
+Transcoding completion and publication are separate decisions. Step Functions tracks workflow progress. DynamoDB’s conditional pointer makes one complete generation visible to readers.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local file, object fixture or exported payload | Amazon S3: source video storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local workflow transitions | AWS Step Functions: processing coordinator | Define workflow tasks and durable transition inputs; retries still need application-level idempotency and reconciliation. |
+| Local workflow transitions | AWS Step Functions: processing coordinator | Define workflow tasks and durable transition inputs. Retries still need application-level idempotency and reconciliation. |
 | Local rendition result fixture | AWS Elemental MediaConvert: transcoding service | Submit identified conversion jobs, handle completion/failure events and publish only complete output sets. |
 | Local file, object fixture or exported payload | Amazon S3: immutable rendition storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: publication authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local static/media delivery path | Amazon CloudFront: playback delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: publication authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local static/media delivery path | Amazon CloudFront: playback delivery | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
 
 ### Provision resources, then connect the application
 
@@ -117,9 +125,9 @@ Transcoding completion and publication are separate decisions. Step Functions tr
 |---|---|
 | S3 upload/output | Separate private prefixes or buckets, scoped upload authorization and lifecycle for abandoned multipart uploads. |
 | MediaConvert jobs | Explicit output profiles, account concurrency/quota review, bounded retries and completion-event reconciliation. |
-| Publication | Conditional generation change; CloudFront origin access restricted to the intended output bucket. |
+| Publication | Conditional generation change. CloudFront origin access restricted to the intended output bucket. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -135,37 +143,37 @@ Allow students to keep watching during reprocessing. Keep the previous manifest 
 
 
 
-Assume 50,000 uploads/day, peak 300 concurrent uploads, and a 99% target of publish-ready within ten minutes for videos under 2 GB. The target is a hypothetical exercise requirement; clarify whether larger files have a different SLA.
+Assume 50,000 uploads/day, peak 300 concurrent uploads, and a 99% target of publish-ready within ten minutes for videos under 2 GB. The target is a hypothetical exercise requirement. Clarify whether larger files have a different SLA.
 
 | Situation | Observable result |
 |---|---|
-| Upload session created, bytes never arrive | Expiring session; no playable video |
+| Upload session created, bytes never arrive | Expiring session. No playable video |
 | Client retries the last part | Already accepted part is not doubled in final object |
-| Transcoder writes one rendition, then crashes | Retry resumes or safely replaces output; no premature READY |
-| Creator revokes a published video | New playback requests denied; address old signed URLs' expiry |
+| Transcoder writes one rendition, then crashes | Retry resumes or safely replaces output. No premature READY |
+| Creator revokes a published video | New playback requests denied. Address old signed URLs' expiry |
 
 ## Design the state machine first
 
-CREATED → UPLOADING → RECEIVED → PROCESSING → READY, with FAILED and DELETED branches. A signed upload permission is scoped to one object key and expires; it is not a proof that the final object exists or passes validation. Verify completion, size, content type, owner, and malware policy before enqueueing work. Commit READY only after all required outputs and metadata are durable. Treat object events as triggers to reconcile state, not as unique commands.
+CREATED → UPLOADING → RECEIVED → PROCESSING → READY, with FAILED and DELETED branches. A signed upload permission is scoped to one object key and expires. It is not a proof that the final object exists or passes validation. Verify completion, size, content type, owner, and malware policy before enqueueing work. Commit READY only after all required outputs and metadata are durable. Treat object events as triggers to reconcile state, not as unique commands.
 
 ## Draw the byte path and the control path
 
-The small API path creates a session and reports status. Bytes travel directly to object storage; a worker creates renditions and publishes a manifest. Playback requests pass authorization and fetch content via CDN. Specify which objects get cleaned when an upload expires, a job fails, or a creator deletes the video. A video CDN reduces origin load; it does not itself authorize revoked users after a signed URL was issued.
+The small API path creates a session and reports status. Bytes travel directly to object storage. A worker creates renditions and publishes a manifest. Playback requests pass authorization and fetch content via CDN. Specify which objects get cleaned when an upload expires, a job fails, or a creator deletes the video. A video CDN reduces origin load. It does not itself authorize revoked users after a signed URL was issued.
 
 ## Put the AWS names on the boxes
 
-**Why these boxes, and what changes the choice:** Direct S3 upload keeps bytes away from API workers. MediaConvert handles managed media jobs; ECS with FFmpeg fits custom codecs and scheduling. DynamoDB moves status to READY only when outputs exist, SQS can redeliver, and CloudFront distributes authorized renditions.
+**Why these boxes, and what changes the choice:** Direct S3 upload keeps bytes away from API workers. MediaConvert handles managed media jobs. ECS with FFmpeg fits custom codecs and scheduling. DynamoDB moves status to READY only when outputs exist, SQS can redeliver, and CloudFront distributes authorized renditions.
 
 
 
-**Senior follow-up:** Publishing has a ten-minute target but the processing queue waits twelve minutes. Estimate arrivals × average work and worker demand. Prioritize small jobs fairly without starving large jobs; expose P50/P99 ingest-to-ready and DLQ age, not just successful worker duration.
+**Senior follow-up:** Publishing has a ten-minute target but the processing queue waits twelve minutes. Estimate arrivals × average work and worker demand. Prioritize small jobs fairly without starving large jobs. Expose P50/P99 ingest-to-ready and DLQ age, not just successful worker duration.
 
-**Staff follow-up:** A viral launch floods playback while an owner requests removal. State revocation delay and signed URL expiry; describe a stricter authorized delivery path when immediate revocation is mandatory. Budget transcoding and egress cost under peak demand.
+**Staff follow-up:** A viral launch floods playback while an owner requests removal. State revocation delay and signed URL expiry. Describe a stricter authorized delivery path when immediate revocation is mandatory. Budget transcoding and egress cost under peak demand.
 
 **Practice artifact:** Draw an upload status machine, two paths, and a failure timeline for a duplicated transcode. Explain what READY certifies and give three testable stop conditions.
 
-**AWS translation:** Short-lived S3 multipart upload URLs, private buckets, SQS for processing triggers, ECS/MediaConvert for conversion depending on requirements, and CloudFront for delivery. Standard SQS can redeliver; use job identity and compare state before committing output. Read [SQS visibility semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) and [CloudFront signed URL semantics](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-creating-signed-url-canned-policy.html).
+**AWS translation:** Short-lived S3 multipart upload URLs, private buckets, SQS for processing triggers, ECS/MediaConvert for conversion depending on requirements, and CloudFront for delivery. Standard SQS can redeliver. Use job identity and compare state before committing output. Read [SQS visibility semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) and [CloudFront signed URL semantics](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-creating-signed-url-canned-policy.html).
 
-**Source note:** Original scenario with exercise numbers; cloud service capabilities are linked, not attributed interview questions.
+**Source note:** Original scenario with exercise numbers. Cloud service capabilities are linked, not attributed interview questions.
 
 </details>

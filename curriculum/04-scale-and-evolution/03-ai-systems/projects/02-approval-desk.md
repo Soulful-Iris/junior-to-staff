@@ -2,19 +2,29 @@
 
 ## Application background
 
-Support staff use an assistant to propose customer credits. A proposal is a suggestion; a reviewer approves a specific amount and target before a restricted executor can contact the provider.
+A support assistant suggests giving a customer a $5 credit for a particular ticket. That suggestion appears for a human reviewer to inspect. Only after the reviewer approves the exact action should a separate executor contact the payment provider.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+An approval is not general permission to do whatever the assistant later suggests. If the amount changes to $50, the target changes or the approval becomes too old, the original click no longer authorizes the operation.
+
+### The proposed action the reviewer sees
+
+This is an illustrative proposal record, not the complete stored schema of the supplied workflow:
+
+```json
+{"proposal_id":"p-7","version":1,"ticket_id":"T7","action":"credit","amount_minor":500,"currency":"USD"}
+```
+
+`500` is five dollars expressed in cents. The approval must identify this proposal version and these effectful fields. Changing `amount_minor` to `5000` changes the proposed action to fifty dollars and requires new approval.
+
+The executor is the component allowed to perform the external action. It must verify the saved approval and current facts before using provider credentials.
 
 ## Your assignment
 
-**Deliver:** Extend the supplied proposal/approval workflow with a reviewer interface, expiry and changed-parameter handling, and external-outcome reconciliation.
+**Deliver:** Extend the supplied proposal and approval workflow with a reviewer interface. Handle changed parameters, expired approvals and uncertain provider outcomes before connecting real actions.
 
-Build an approval desk for support credits. The assistant may propose a $5 credit for ticket T7, but only an authorized reviewer can approve it. If the amount changes to $50 or the approval expires, the old approval cannot authorize execution.
+**Required behavior:** Proposal, approval and execution are separate durable states. Approval identifies the exact target and the same consistently represented parameters that execution will use. Different amounts or targets need different approval. The executor rechecks permission, expiry and operation identity before performing an external effect.
 
-**Required behavior:** Proposal, approval and execution are separate durable states. Approval binds the exact target and canonical parameters. The executor rechecks permission, expiry and operation identity before performing an external effect.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -30,7 +40,7 @@ python3 examples/ai-systems/demo.py agent
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 [
@@ -42,7 +52,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/02-approval-desk/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/02-approval-desk/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -58,11 +68,11 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Run the proposal-to-execution reference
 
-Execute the agent demo, inspect the immutable proposal and approval receipt, and identify the executor boundary in the retained implementation. The supplied demo shows approval and duplicate execution handling; add changed-parameter and expired-approval cases as explicit next implementation steps before connecting a real provider.
+Execute the agent demo, inspect the immutable proposal and approval receipt, and identify the executor boundary in the retained implementation. The supplied demo shows approval and duplicate execution handling. Add changed-parameter and expired-approval cases as explicit next implementation steps before connecting a real provider.
 
 ### 2. Build the reviewer interface
 
-Show target, amount, currency and effect in plain language. Keep approval attached to a proposal version/hash. Editing any effectful parameter creates a new proposal; the UI cannot silently reuse a previous click.
+Show target, amount, currency and effect in plain language. Keep approval attached to a proposal version/hash. Editing any effectful parameter creates a new proposal. The UI cannot silently reuse a previous click.
 
 ### 3. Add a restricted executor
 
@@ -84,13 +94,13 @@ Query or safely retry under the provider’s actual idempotency contract. Preser
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 500 proposed actions/day assumption | A small ledger can provide complete proposal/approval history; scale is not a reason to omit it. |
+| 500 proposed actions/day assumption | A small ledger can provide complete proposal/approval history. Scale is not a reason to omit it. |
 | Ten-minute approval lifetime | Expiry is checked at execution, even if the queued action was approved earlier. |
-| 1% ambiguous provider responses | Five cases/day require reconciliation at the stated volume; unknown is a first-class outcome. |
+| 1% ambiguous provider responses | Five cases/day require reconciliation at the stated volume. Unknown is a first-class outcome. |
 
 ## Map the local implementation to AWS
 
@@ -104,10 +114,10 @@ The durable approval ledger and restricted executor enforce authority. A queue m
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: approval desk API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: approval desk API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: proposal application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: approval ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local pending-work collection | Amazon SQS: approved execution queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: approval ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: approved execution queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: action executor | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Local provider configuration placeholder | AWS Secrets Manager: provider credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
 
@@ -115,11 +125,11 @@ The durable approval ledger and restricted executor enforce authority. A queue m
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Roles | Proposal generation cannot call effectful providers; execution credentials are isolated. |
-| Ledger | Conditional state transitions and durable operation identity; queue duplication cannot create fresh authority. |
+| Roles | Proposal generation cannot call effectful providers. Execution credentials are isolated. |
+| Ledger | Conditional state transitions and durable operation identity. Queue duplication cannot create fresh authority. |
 | Provider adapter | Document idempotency retention, lookup support and unknown-outcome repair before using real effects. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -137,22 +147,22 @@ Approve a batch of credits. Bind approval to the complete item set and per-item 
 
 > “Support staff spend time turning customer messages into refund requests. Build an AI assistant that proposes the refund amount, shows the operator exactly what would happen, and records one approved result even if the operator retries. Customers sometimes ask for more than they paid. The model sometimes invents a tool.”
 
-**End product:** a working proposal/approval workflow backed by a durable sandbox refund ledger. It parses customer messages with a model, validates the action in code, persists a proposal, binds approval to its digest, and atomically updates the order and receipt. It does not move real money; adding a payment provider is an explicit follow-up with different failure behavior.
+**End product:** a working proposal/approval workflow backed by a durable sandbox refund ledger. It parses customer messages with a model, validates the action in code, persists a proposal, binds approval to its digest, and atomically updates the order and receipt. It does not move real money. Adding a payment provider is an explicit follow-up with different failure behavior.
 
 ## Define the actual problem
 
-The model is allowed to propose one operation: `refund`. A proposal must contain an integer amount in cents, within 1..100,000, and no more than the remaining paid balance. It expires after 15 minutes. Orders support up to 20 proposal records in this bounded implementation. Separate invocations create and approve a proposal; the model has no path to call the approval handler.
+The model is allowed to propose one operation: `refund`. A proposal must contain an integer amount in cents, within 1..100,000, and no more than the remaining paid balance. It expires after 15 minutes. Orders support up to 20 proposal records in this bounded implementation. Separate invocations create and approve a proposal. The model has no path to call the approval handler.
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Normal proposal | Order paid 5,000 cents; message `Please refund USD 12.50` | `PENDING_APPROVAL`, amount 1,250 cents; balance still unchanged |
+| Normal proposal | Order paid 5,000 cents. Message `Please refund USD 12.50` | `PENDING_APPROVAL`, amount 1,250 cents. Balance still unchanged |
 | First approval | Operator submits the stored proposal digest before expiry | `COMMITTED`, one receipt, refunded balance becomes 1,250 |
-| Retry | Repeat the exact approval request | Same receipt; refunded balance remains 1,250 |
-| Changed request | Reuse `ticket-1` with message `Please refund USD 1.00` | Conflict; do not reinterpret an existing request ID |
-| Wrong digest | Approve a digest other than the stored proposal's | Reject; no balance change |
-| Expiry | Approve at or after the proposal's expiry timestamp | Reject; create a fresh request after review |
-| Competing refunds | Two pending 1,250-cent proposals against a 2,000-cent order | First may commit; second fails the fresh balance check |
-| Invented capability | Model returns tool `shell` or amount `true` | Reject; only the recognized tool and integer money contract pass |
+| Retry | Repeat the exact approval request | Same receipt. Refunded balance remains 1,250 |
+| Changed request | Reuse `ticket-1` with message `Please refund USD 1.00` | Conflict. Do not reinterpret an existing request ID |
+| Wrong digest | Approve a digest other than the stored proposal's | Reject. No balance change |
+| Expiry | Approve at or after the proposal's expiry timestamp | Reject. Create a fresh request after review |
+| Competing refunds | Two pending 1,250-cent proposals against a 2,000-cent order | First may commit. Second fails the fresh balance check |
+| Invented capability | Model returns tool `shell` or amount `true` | Reject. Only the recognized tool and integer money contract pass |
 
 ## Why proposal and execution are separate
 
@@ -201,19 +211,19 @@ The session creates a USD 50.00 order, proposes USD 12.50, approves, and repeats
 
 The sandbox's balance and receipt fit in one database update. A remote payment call cannot join that transaction. If the provider charges/refunds and the response is lost, a local timeout does not mean the payment failed.
 
-**Senior follow-up:** add `APPROVED → SUBMITTED → CONFIRMED / UNKNOWN` states. Persist a stable provider idempotency key before submission. On timeout, query/reconcile that key; do not generate a fresh refund ID. Record the provider receipt separately from the model proposal.
+**Senior follow-up:** add `APPROVED → SUBMITTED → CONFIRMED / UNKNOWN` states. Persist a stable provider idempotency key before submission. On timeout, query/reconcile that key. Do not generate a fresh refund ID. Record the provider receipt separately from the model proposal.
 
-**Staff follow-up:** add independent approver roles, limits by region, policy version migrations, and emergency revocation. The same person may not be allowed to propose and approve. Split handlers and IAM permissions or add a verified application authorization service; the current sandbox operator has both capabilities by design.
+**Staff follow-up:** add independent approver roles, limits by region, policy version migrations, and emergency revocation. The same person may not be allowed to propose and approve. Split handlers and IAM permissions or add a verified application authorization service. The current sandbox operator has both capabilities by design.
 
 ## Engineer FAQs
 
-**Is the digest a password?** No. It identifies the reviewed action. An attacker with approval authority and the digest could still approve; authentication and authorization remain separate requirements.
+**Is the digest a password?** No. It identifies the reviewed action. An attacker with approval authority and the digest could still approve. Authentication and authorization remain separate requirements.
 
 **Why store expiry instead of just a DynamoDB TTL?** TTL deletion is asynchronous. The application must compare the deadline when approving. A retained expired record also explains why an old request was rejected.
 
 **Can the model approve its own proposal?** The supplied model adapter only returns JSON. It has no tool execution loop, network credentials, or route to invoke `agent.approve`.
 
-**Why integer cents?** Decimal currency should not depend on binary floating-point arithmetic. Currency scale and supported currencies must be part of the contract; this project supports USD only.
+**Why integer cents?** Decimal currency should not depend on binary floating-point arithmetic. Currency scale and supported currencies must be part of the contract. This project supports USD only.
 
 **What does “once” actually mean?** At most one committed sandbox ledger effect for this request, because the receipt and amount are one conditional record update. Model inference may repeat after an interrupted proposal attempt. A real provider needs its own idempotency contract.
 

@@ -2,19 +2,27 @@
 
 ## Application background
 
-A design team shares folders across laptops. Each laptop may edit while offline, so syncing must preserve conflicting work and propagate deletions deliberately.
+Ana and Ben share a design folder across their laptops. Each laptop keeps local files and sends changes to a central service. If Ana edits while offline, her changes must be compared with any changes Ben made before she reconnects.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Files may be too large to upload in one uninterrupted request. Deletions also need a record so an old laptop does not mistake a missing file for something it should upload again.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Ana and Ben edit the same saved version offline | Preserve both versions or show an explicit conflict. |
+| Ana's upload stops halfway | Resume the remaining content under the same upload identity. |
+| An old laptop reconnects with a deleted file | Use the deletion record to prevent silent resurrection. |
+
+A tombstone is a retained record that a file was deleted. A change cursor is a position from which a client can ask for later folder changes.
 
 ## Your assignment
 
-**Deliver:** Versioned file metadata, resumable content uploads, a change cursor and conflict/tombstone behavior for an old client reconnecting.
-
-Build shared-folder synchronization for a small design team. Ana edits a file offline while Ben edits the same base version. Uploads may stop halfway, and a deleted file must not reappear when an old laptop reconnects.
+**Deliver:** Build file uploads, versioned metadata and a way for clients to retrieve later changes. Preserve conflicting edits and stop old clients from recreating deleted files.
 
 **Required behavior:** Upload immutable content, then conditionally publish a metadata version against the client’s base version. Conflicts preserve both users’ bytes for resolution. Deletions are versioned tombstones until supported offline clients can no longer replay older state.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/file_synchronization.py
 
 **Supplied file:** [`examples/architecture-starts/file_synchronization.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/file_synchronization.py). You can also [read or download the source here](../../../../examples/architecture-starts/file_synchronization.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'version': 4, 'manifest': 'hash-ana', 'deleted': False}
@@ -42,7 +50,7 @@ Generated IDs and timestamps may differ; compare the state transitions and outco
 
 ### Set up your implementation workspace
 
-Create `work/file-synchronization/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/file-synchronization/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -58,7 +66,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Upload content independently
 
-Split files into bounded chunks, hash them and resume only missing chunks. Verify size/checksum before accepting a chunk. Uploading content does not make it visible; orphan chunks can exist safely until metadata references them.
+Split files into bounded chunks, hash them and resume only missing chunks. Verify size/checksum before accepting a chunk. Uploading content does not make it visible. Orphan chunks can exist safely until metadata references them.
 
 ### 2. Publish metadata conditionally
 
@@ -66,7 +74,7 @@ Commit a file manifest only if the expected base version still matches. On confl
 
 ### 3. Replay changes and deletions
 
-Return bounded change pages after a folder cursor. Include rename and deletion tombstones with stable file identity; path strings alone are ambiguous under concurrent renames. Reject stale metadata publication after a deletion generation.
+Return bounded change pages after a folder cursor. Include rename and deletion tombstones with stable file identity. Path strings alone are ambiguous under concurrent renames. Reject stale metadata publication after a deletion generation.
 
 ### 4. Collect storage safely
 
@@ -76,20 +84,20 @@ Trace committed manifests and active uploads before deleting unreferenced chunks
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Ana publishes; Ben keeps a conflict; the old laptop cannot overwrite a later deletion. |
-| Stop after half the chunks | Resume only missing chunks; the old visible file stays intact. |
+| Run the starting program | Ana publishes. Ben keeps a conflict. The old laptop cannot overwrite a later deletion. |
+| Stop after half the chunks | Resume only missing chunks. The old visible file stays intact. |
 | Remove a folder member | New metadata reads and download authorizations are denied. |
 
 **Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | 100,000 daily users × 10 MB uploaded/day | About 1 TB/day of new upload traffic before deduplication and replicas. |
-| 4 MiB chunk size assumption | A 100 MiB file has 25 chunks; resume transfers by missing chunk hash. |
+| 4 MiB chunk size assumption | A 100 MiB file has 25 chunks. Resume transfers by missing chunk hash. |
 | Thirty-day offline support assumption | Tombstone/change-log retention must cover that horizon or require a full resynchronization. |
 
 ## Map the local implementation to AWS
@@ -100,26 +108,26 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Synchronize files with resumable uploads and conflicts: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/file-synchronization.svg)
 
-S3 holds immutable bytes; DynamoDB decides which manifest is current. That split allows interrupted uploads and conflicting edits without exposing partial files or overwriting the winner’s bytes.
+S3 holds immutable bytes. DynamoDB decides which manifest is current. That split allows interrupted uploads and conflicting edits without exposing partial files or overwriting the winner’s bytes.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: synchronization API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: synchronization API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: metadata application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: file metadata authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: file metadata authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local file, object fixture or exported payload | Amazon S3: immutable chunk storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Local pending-work collection | Amazon SQS: cleanup work queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local pending-work collection | Amazon SQS: cleanup work queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: reference-aware cleanup | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| S3 | Private objects, scoped upload/download authorization and checksum validation; no user-controlled unrestricted key access. |
-| Metadata | Conditional version writes and durable cursor ordering; retention tied to offline support. |
-| Cleanup | Separate role with narrowly scoped deletion rights; require reference checks and a safe age threshold. |
+| S3 | Private objects, scoped upload/download authorization and checksum validation. No user-controlled unrestricted key access. |
+| Metadata | Conditional version writes and durable cursor ordering. Retention tied to offline support. |
+| Cleanup | Separate role with narrowly scoped deletion rights. Require reference checks and a safe age threshold. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -144,13 +152,13 @@ week of changes. Preserve version authority and show how it recovers.”
 | Input | Expected behavior | Scope |
 |---|---|---|
 | Two finalize requests expecting v3 | One becomes v4, one conflicts | Bytes uploaded does not imply metadata accepted |
-| Abandoned upload | Never becomes a ready file; eventually cleaned | Cleanup has an owner and retention bound |
+| Abandoned upload | Never becomes a ready file. Eventually cleaned | Cleanup has an owner and retention bound |
 | Device cursor predates retained feed | Resnapshot plus new checkpoint | Cannot resume from a missing history gap |
 
 Prerequisites: [object upload lab](../../../03-production/03-infrastructure/aws/lab-2-upload.md), transactions and
 versions. This is a build brief: deliver server-owned upload sessions, verified
 conditional finalization, then change-feed recovery. The upload script demonstrates
-only bytes; it does not claim to implement this entire sync application.
+only bytes. It does not claim to implement this entire sync application.
 
 First separate byte transport from metadata authority. Next put ownership and
 expected version in the upload session, validate the object at finalization,
@@ -159,15 +167,15 @@ then make the change record durable with the metadata transition.
 <details>
 <summary>Worked approach and AWS mapping — open after your attempt</summary>
 
-**Prompt:** upload files, list folders, download, and propagate edits across devices. Assume 100,000 daily uploaders × 10 MB/day = about 1 TB/day of new payload. Metadata operations and bytes are separate capacity dimensions. Start with versioned files; exclude collaborative character-level editing.
+**Prompt:** upload files, list folders, download, and propagate edits across devices. Assume 100,000 daily uploaders × 10 MB/day = about 1 TB/day of new payload. Metadata operations and bytes are separate capacity dimensions. Start with versioned files. Exclude collaborative character-level editing.
 
 API issues an upload session containing object key, expected version, and short-lived upload capability. Browser uploads bytes directly to object storage. Finalization checks the object and conditionally updates metadata. Store file id, owner, parent id, object version/key, checksum, size, and metadata version. Upload completion and application visibility are separate transitions.
 
-**AWS mapping:** S3 for bytes, API Gateway/Lambda for metadata, DynamoDB or RDS for ownership and versions, SQS for asynchronous processing, CloudFront for authorized downloads where justified. S3 events can be duplicated or arrive out of order; treat them as triggers to validate state, not unquestionable proof of the newest version.
+**AWS mapping:** S3 for bytes, API Gateway/Lambda for metadata, DynamoDB or RDS for ownership and versions, SQS for asynchronous processing, CloudFront for authorized downloads where justified. S3 events can be duplicated or arrive out of order. Treat them as triggers to validate state, not unquestionable proof of the newest version.
 
 **Before/after:** proxying large uploads through the API holds application capacity and adds a bandwidth hop. Direct upload reduces that pressure but introduces abandoned sessions, multipart cleanup, and capability security. Version conflicts need an explicit user-visible resolution policy.
 
-**Implement:** AWS lab 2; two clients upload from the same metadata version. **Expected:** one finalize wins; the other gets a conflict, not silent overwrite. **Senior:** resume interrupted multipart uploads and recover missed change-feed updates. **Staff:** region/data residency, account deletion, retention, and compatibility for old clients.
+**Implement:** AWS lab 2. Two clients upload from the same metadata version. **Expected:** one finalize wins. The other gets a conflict, not silent overwrite. **Senior:** resume interrupted multipart uploads and recover missed change-feed updates. **Staff:** region/data residency, account deletion, retention, and compatibility for old clients.
 
 </details>
 
@@ -176,7 +184,7 @@ API issues an upload session containing object key, expected version, and short-
 Use the [expired-history replay fixture](../../04-migrations/labs/recovery-migration/migration.md)
 to prove the server refuses incomplete catch-up. **Senior:** preserve unsynced
 local drafts during a resnapshot and prove one winner for concurrent finalization.
-**Lead follow-up:** a region cannot store this tenant's bytes; route authority
+**Lead follow-up:** a region cannot store this tenant's bytes. Route authority
 according to residency and define deletion/retention across replicas and backups.
 Assessor evidence distinguishes object versions, metadata versions, feed positions,
 and local draft identity. A new cursor without a corresponding snapshot is not

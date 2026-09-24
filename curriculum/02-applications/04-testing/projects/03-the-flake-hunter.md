@@ -2,15 +2,27 @@
 
 ## Application background
 
-A bookmark application uses a shared store during development checks. One case leaves data behind and a later case incorrectly assumes the store is empty.
+A development check for the bookmark store expects the store to be empty when it begins. It passes when run alone but sometimes fails when the whole collection of checks runs. One earlier check has left a bookmark behind.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The apparent randomness comes from shared state and execution order. Repeating the run until it passes hides that relationship. Your task is to find the smallest sequence that explains the failure, then give each case the state it is supposed to start with.
+
+### Reproduction evidence you should be able to explain
+
+This is an illustrative execution record for the exercise, not output attributed to a real incident:
+
+```text
+Run A: empty_store -> PASS
+Run B: create_bookmark -> PASS, empty_store -> FAIL
+Observed before empty_store in Run B: one saved bookmark
+```
+
+The order of operations changes the starting data. Your report should identify which operation created that record and show what isolation changes the result.
+
+A flaky result changes between runs without an intended code change. In this exercise, isolation means preventing one case's leftover data from becoming another case's hidden input.
 
 ## Your assignment
 
-**Deliver:** A minimal order-dependent reproduction, a demonstrated isolation fix and a short cause-and-effect report.
-
-Diagnose an intermittent failure in a shared-store exercise. A case that expects an empty store passes alone but fails after another case creates an item. Rerunning until green hides the dependency rather than explaining it.
+**Deliver:** Produce the smallest sequence that reproduces the order-dependent failure, explain its cause and show the result after isolating the shared state.
 
 **Required behavior:** Produce a minimal deterministic reproduction and a causal explanation. Distinguish shared state, timing, external dependency and resource collision. A retry is evidence of variability, not proof of repair.
 
@@ -28,11 +40,11 @@ python3 examples/architecture-starts/03_the_flake_hunter.py
 
 **Supplied file:** [`examples/architecture-starts/03_the_flake_hunter.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/03_the_flake_hunter.py). You can also [read or download the source here](../../../../examples/architecture-starts/03_the_flake_hunter.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 isolated False ['created', 'unexpected leftover'] ['empty', 'created']
@@ -41,7 +53,7 @@ isolated True ['created', 'empty'] ['empty', 'created']
 
 ### Set up your implementation workspace
 
-Create `work/03-the-flake-hunter/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/03-the-flake-hunter/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -57,7 +69,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Reduce the failure
 
-Preserve the failing order and remove unrelated cases until the two-operation dependency remains. Record the initial store, process reuse and cleanup behavior. Avoid adding sleeps; they change timing without establishing ownership.
+Preserve the failing order and remove unrelated cases until the two-operation dependency remains. Record the initial store, process reuse and cleanup behavior. Avoid adding sleeps. They change timing without establishing ownership.
 
 ### 2. Give state a clear lifecycle
 
@@ -65,7 +77,7 @@ Allocate a fresh store per independent case, unique temporary paths and explicit
 
 ### 3. Force a suspected race
 
-When only parallel execution fails, use a barrier to overlap the relevant operations and capture the shared filename/port/key. Replace accidental shared resources with unique identities or proper synchronization; a hundred lucky reruns are weaker than one controlled explanation.
+When only parallel execution fails, use a barrier to overlap the relevant operations and capture the shared filename/port/key. Replace accidental shared resources with unique identities or proper synchronization. A hundred lucky reruns are weaker than one controlled explanation.
 
 ### 4. Record the bounded repair
 
@@ -75,7 +87,7 @@ Compare the minimal reproduction before and after isolation. Keep an owner and e
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Shared state makes one order fail; fresh stores make both independent. |
+| Run the starting program | Shared state makes one order fail. Fresh stores make both independent. |
 | Reuse one file in parallel | The forced overlap exposes the collision. |
 | Remove arbitrary sleeps | The repaired ownership still explains the result. |
 
@@ -83,13 +95,13 @@ Compare the minimal reproduction before and after isolation. Keep an owner and e
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
 | Two orderings: create→expect-empty and expect-empty→create | The same inputs produce different outcomes only when state leaks between cases. |
 | Twenty parallel runs share one filename assumption | A resource collision can remain invisible in every sequential ordering. |
-| One fixed seed and recorded order | Reproduction must retain both; a seed alone may not capture external scheduling. |
+| One fixed seed and recorded order | Reproduction must retain both. A seed alone may not capture external scheduling. |
 
 ## Map the local implementation to AWS
 
@@ -104,19 +116,19 @@ Cloud isolation can help reproduce resource collisions, but the first diagnosis 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
 | Local file, object fixture or exported payload | Amazon S3: reproduction evidence | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
-| Application or worker process | Amazon ECS: isolated reproduction tasks | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local records and transaction boundary | Amazon RDS PostgreSQL: disposable state fixture | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: isolated reproduction tasks | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: disposable state fixture | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
 | Local diagnostic events | Amazon CloudWatch Logs: execution timeline | Emit structured JSON from the deployed runtime and configure log delivery, retention and query permissions. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Isolation | Unique run identity in files, schema names and object prefixes; never point the exercise at shared production data. |
-| Timing | Injectable clock and explicit barriers for controlled schedules; avoid arbitrary sleep-based repairs. |
+| Isolation | Unique run identity in files, schema names and object prefixes. Never point the exercise at shared production data. |
+| Timing | Injectable clock and explicit barriers for controlled schedules. Avoid arbitrary sleep-based repairs. |
 | Cleanup | Run even after failure and record cleanup errors separately from the original symptom. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -137,7 +149,7 @@ The failure depends on a third-party API. Replace it with a controlled response 
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Use a barrier to overlap two operations on a shared resource. Give files/ports unique test identities or synchronize intentional sharing; preserve the forced overlap as a regression.
+Use a barrier to overlap two operations on a shared resource. Give files/ports unique test identities or synchronize intentional sharing. Preserve the forced overlap as a regression.
 
 </details>
 
@@ -148,7 +160,7 @@ Use a barrier to overlap two operations on a shared resource. Give files/ports u
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Remove it from the blocking gate only with an owner, expiry and visible nonblocking execution. Its passing reruns must not be treated as repair evidence; track the protected behavior’s temporary coverage gap.
+Remove it from the blocking gate only with an owner, expiry and visible nonblocking execution. Its passing reruns must not be treated as repair evidence. Track the protected behavior’s temporary coverage gap.
 
 </details>
 

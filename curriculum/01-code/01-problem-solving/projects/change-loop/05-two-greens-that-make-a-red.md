@@ -2,7 +2,19 @@
 
 ## Application background
 
-Two reading-list engineers change the same title-lookup interface from different branches. Git can merge their files without a text conflict while leaving a caller incompatible with the new signature.
+Two engineers branch from the same version of a reading-list app. One changes the title helper to take an options object. The other adds a new caller using the old arguments. Each engineer's branch works with the code it started from.
+
+Git may combine their files without reporting a text conflict, yet the combined application can fail. The problem is the relationship between the helper and its new caller, not whether Git could join the text.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Branch A changes `fetchTitle(url, ms)` to `fetchTitle(url, {timeoutMs})` | Update A's existing callers. |
+| Branch B adds another caller with the old signature | B still works against its original helper. |
+| Combine A and B | Observe the incompatible call and update it before accepting the combined result. |
+
+An integration check evaluates the combined revision that would run after merging. Success on two separate branch revisions does not establish success on their combination.
 
 ## Your assignment
 
@@ -26,7 +38,7 @@ Leave the server running while sending the documented requests in a second termi
 
 1. Use a disposable repository with a title helper and two callers. Record the original behavior and create branches A and B from the same revision.
 
-2. On A, change the helper to require an options object and update its current caller. On B, add another caller using the old signature. Run each branch and then a temporary combined revision; record the actual combined failure.
+2. On A, change the helper to require an options object and update its current caller. On B, add another caller using the old signature. Run each branch and then a temporary combined revision. Record the actual combined failure.
 
 3. Update the incompatible caller and rerun the combined application. If practicing merge-queue configuration, do so only in this disposable repository and record the exact candidate tree checked.
 
@@ -34,15 +46,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | A changes `fetchTitle(url, ms)` to `fetchTitle(url, {timeoutMs})`; B adds a caller in another file. | A and B pass alone; their temporary merge fails a behavioral contract check; a merge gate refuses B after A. |
+| Small example | A changes `fetchTitle(url, ms)` to `fetchTitle(url, {timeoutMs})`. B adds a caller in another file. | A and B pass alone. Their temporary merge fails a behavioral contract check. A merge gate refuses B after A. |
 | Boundary / failure | CI reruns only the unchanged PR head after main moves. | The stale green result is not accepted as proof of the combined tree. |
-| Scope | A controlled semantic conflict with no textual conflict; a test must exercise the new caller. | Explain any additional assumption before implementing it. |
+| Scope | A controlled semantic conflict with no textual conflict. A test must exercise the new caller. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -64,7 +76,7 @@ The green checks are true about two different trees. The integration failure is 
 <details>
 <summary>Reveal the approach and decisions</summary>
 
-Construct the failing combination first. Test a speculative merge against current main plus preceding queued changes and bind the result to that exact tree. The invariant is that the admitted tree is the checked tree; queue serialization cannot compensate for an absent contract test.
+Construct the failing combination first. Test a speculative merge against current main plus preceding queued changes and bind the result to that exact tree. The invariant is that the admitted tree is the checked tree. Queue serialization cannot compensate for an absent contract test.
 
 </details>
 
@@ -75,7 +87,7 @@ Construct the failing combination first. Test a speculative merge against curren
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Recompute the speculative tree and rerun checks affected by the new base. Compare tree or input hashes explicitly; a commit’s unchanged PR head says nothing about dependency changes on main.
+Recompute the speculative tree and rerun checks affected by the new base. Compare tree or input hashes explicitly. A commit’s unchanged PR head says nothing about dependency changes on main.
 
 ```mermaid
 flowchart TD
@@ -93,7 +105,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Reproduce fixture contamination and isolate state before trusting the queue. Track ejection reasons. A retry may gather diagnostic evidence but does not repair the oracle; the merge queue amplifies flaky gates into team-wide delay.
+Reproduce fixture contamination and isolate state before trusting the queue. Track ejection reasons. A retry may gather diagnostic evidence but does not repair the oracle. The merge queue amplifies flaky gates into team-wide delay.
 
 ```mermaid
 flowchart TD
@@ -106,9 +118,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Show four original outcomes and rejection of the exact combined tree. **Additional lead scope:** Balance throughput, check duration, bypass policy, and flake ownership. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Show four original outcomes and rejection of the exact combined tree. **Additional lead scope:** Balance throughput, check duration, bypass policy, and flake ownership. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -119,7 +131,7 @@ green alone, red together — and the machinery that stops it reaching main.*
 
 PR A changes a function's contract. PR B, branched before A landed, adds a new
 call site written against the old contract, in a different file. No textual
-conflict; both green on their own base; together they break main. Then a merge
+conflict. Both green on their own base. Together they break main. Then a merge
 queue — real or hand-rolled — catches the second one before main ever sees it.
 
 **The thought process**
@@ -127,7 +139,7 @@ queue — real or hand-rolled — catches the second one before main ever sees i
 Start by naming why CI lied: "this PR is green" actually means "this PR was
 green against the main that existed when its checks ran". It is a statement
 about a moment. Main moved, and nobody tested the combination — no tool was
-wrong; the claim was smaller than everyone assumed.
+wrong. The claim was smaller than everyone assumed.
 
 Second, the construction discipline: the pair must merge cleanly. If git
 reports a textual conflict you built the wrong failure — that one is caught
@@ -135,10 +147,10 @@ for free. You want a semantic dependency with no textual overlap, which is why
 the new call site lives in a different file.
 
 Third, the prevention menu: require-branches-up-to-date serialises humans, who
-then babysit rebases; test-after-merge-and-revert is optimistic and lets main
-go red sometimes, which tiny teams tolerate; a merge queue serialises machines,
+then babysit rebases. Test-after-merge-and-revert is optimistic and lets main
+go red sometimes, which tiny teams tolerate. A merge queue serialises machines,
 testing each PR against main plus everything ahead of it and ejecting what
-fails. Team size times CI duration picks the answer; the queue won because it
+fails. Team size times CI duration picks the answer. The queue won because it
 converts human waiting into machine time.
 
 **How to organise the prompts**
@@ -195,7 +207,7 @@ A merge queue spends CI capacity on speculative combined trees. Estimate
 required runs and duration before selecting hosted **Actions** or **CodeBuild**
 for a needed VPC/machine shape. Cache reusable build inputs without reusing a
 green result for a different source tree. Store immutable images by digest in
-**ECR**, and reports/bundles by source SHA in **S3**; a generic S3 tarball is not
+**ECR**, and reports/bundles by source SHA in **S3**. A generic S3 tarball is not
 an image-registry endpoint. Include storage, transfer and cleanup in the current
 account estimate instead of assuming a fixed free allowance.
 
@@ -210,7 +222,7 @@ bypass log from project 3 applies doubly at 6pm on a Friday.
 **The learning**
 
 Green is a statement about a moment, not a property of a change. Integration
-is a race; the queue removes the race without a person holding a lock — and
+is a race. The queue removes the race without a person holding a lock — and
 you know exactly which failure it removes, because you built that failure
 with your own hands.
 

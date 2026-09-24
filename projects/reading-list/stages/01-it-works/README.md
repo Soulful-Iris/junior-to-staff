@@ -2,19 +2,27 @@
 
 ## Application background
 
-Alice and Bob save documentation links for their study group. Both can browse shared URLs and notes; each has separate reading progress, and only a note's owner edits it.
+Alice and Bob want a shared place to keep articles for their study group. Alice pastes a URL, saves it and adds a note about why it is useful. Bob opens the list, reads the article and marks it as read for himself. Alice should still see it as unread until she changes her own status.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The application has a browser interface and an API, the server endpoints the browser calls. The repository supplies the local API and SQLite storage. You will add the usable interface and the identity and permission behavior required for the finished stage.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Alice sends a save request with a URL | Store a bookmark and return its ID. |
+| Bob asks for the list | Show the shared bookmark and Bob's own reading state. |
+| Alice's title lookup is slow | Keep the URL saved and show that its title is not available yet. |
+
+The title is the readable page name displayed beside a URL. Looking it up is optional extra work, so it must not determine whether the original URL can be saved.
 
 ## Your assignment
 
-**Deliver:** A persisted, authorized browser-to-API reading list built from the supplied local server, with save/list/edit/read-state flows.
-
-Build the first usable version of a reading list for Alice and Bob’s study group. They can save links, browse shared notes and track their own reading. A failed title lookup must not lose the saved URL, and one member must not edit another member’s private fields.
+**Deliver:** Build a usable browser-to-API reading list from the supplied server. Complete saving, listing, editing and personal reading status, with persistent data and verified user permissions in the finished application.
 
 **Required behavior:** Complete one authenticated create→list→edit journey. Group membership controls visibility, ownership controls the chosen edit policy, and read state belongs to each user. Optional metadata failure remains visible without undoing the save.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/reading_list_it_works.py
 
 **Supplied file:** [`examples/architecture-starts/reading_list_it_works.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/reading_list_it_works.py). You can also [read or download the source here](../../../../examples/architecture-starts/reading_list_it_works.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 Saved despite missing title: [(7, 'alice', 'https://example.invalid/guide', None)]
@@ -41,7 +49,7 @@ Personal progress: [('alice', 7, 1), ('bob', 7, 0)]
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -57,9 +65,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/01-it-works/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/01-it-works/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -75,7 +83,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Create the smallest application layout
 
-Put HTTP routes in app.py, database operations in store.py and the browser page in web/. Add a migration for links, membership and personal read state. Start with a local database and two seeded users; production identity is a later adapter, not a client-supplied owner field.
+Put HTTP routes in app.py, database operations in store.py and the browser page in web/. Add a migration for links, membership and personal read state. Start with a local database and two seeded users. Production identity is a later adapter, not a client-supplied owner field.
 
 ### 2. Implement save and list end to end
 
@@ -101,13 +109,13 @@ Provide one command to start the local app and a short create/list/edit walkthro
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Two initial users; 200 group links | A single local relational database is sufficient for the first working application. |
-| Two personal read markers per link | Up to 400 read-state rows; one shared is_read field cannot represent both users. |
-| 500 ms list target assumption | Read stored data locally; remote title fetching is outside the critical list path. |
+| Two initial users. 200 group links | A single local relational database is sufficient for the first working application. |
+| Two personal read markers per link | Up to 400 read-state rows. One shared is_read field cannot represent both users. |
+| 500 ms list target assumption | Read stored data locally. Remote title fetching is outside the critical list path. |
 
 ## Map the local implementation to AWS
 
@@ -121,11 +129,11 @@ The AWS option maps the same application boundaries onto managed services. The f
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local static/media delivery path | Amazon CloudFront: group web application | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reading-list API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local static/media delivery path | Amazon CloudFront: group web application | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reading-list API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: list application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: cloud storage option | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local fixture identity or caller supplied to the operation | Amazon Cognito: production identity option | Configure an identity provider and validate tokens; retain resource ownership checks in application code. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: cloud storage option | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local fixture identity or caller supplied to the operation | Amazon Cognito: production identity option | Configure an identity provider and validate tokens. Retain resource ownership checks in application code. |
 | Local file, object fixture or exported payload | Amazon S3: static web assets | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 
 ### Provision resources, then connect the application
@@ -133,10 +141,10 @@ The AWS option maps the same application boundaries onto managed services. The f
 | Resource or boundary | Initial configuration and reason |
 |---|---|
 | Local milestone | Complete the workflow with SQLite before substituting cloud adapters. |
-| Cloud keys | Include group/owner scope and version conditions; separate personal read records. |
-| Identity | Resolve trusted subjects and current membership; do not authorize from raw user IDs in request JSON. |
+| Cloud keys | Include group/owner scope and version conditions. Separate personal read records. |
+| Identity | Resolve trusted subjects and current membership. Do not authorize from raw user IDs in request JSON. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -157,7 +165,7 @@ Continue to stage 2 with the same app and data model. Identify every acknowledge
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Give the synchronous fetch a small total deadline and save a visible title-failed/pending state. A later durable queue is an explicit next stage; do not leave untracked in-process background work.
+Give the synchronous fetch a small total deadline and save a visible title-failed/pending state. A later durable queue is an explicit next stage. Do not leave untracked in-process background work.
 
 </details>
 
@@ -176,6 +184,6 @@ Upsert separate `(user_id,item_id)` read-state rows. Verify group membership at 
 
 - [Runnable browser/API/store slice](../../../../curriculum/02-applications/03-frontend/labs/bookmark-editor/README.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

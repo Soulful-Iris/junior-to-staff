@@ -4,9 +4,9 @@ Alice and Bob belong to a study group. They save documentation links, browse sha
 
 ## Start with a real application
 
-The repository includes a [runnable HTTP API and step-by-step setup](../../examples/reading-list-starter/README.md). It already saves data to SQLite and supports list, note edit and per-member reading state. Run it and send the supplied requests before starting Stage 1. You will add the browser UI and production identity; later stages add operations, queues, AI suggestions and migration.
+The repository includes a [runnable HTTP API and step-by-step setup](../../examples/reading-list-starter/README.md). It already saves data to SQLite and supports list, note edit and per-member reading state. Run it and send the supplied requests before starting Stage 1. You will add the browser UI and production identity. Later stages add operations, queues, AI suggestions and migration.
 
-Each stage also links a small Python mechanism demonstration. Those demonstrations isolate one concept; they are not completed stage implementations. Continue your own application between stages. The AWS diagrams show the target deployment and each stage explains the adapters you still need to write.
+Each stage also links a small Python mechanism demonstration. Those demonstrations isolate one concept. They are not completed stage implementations. Continue your own application between stages. The AWS diagrams show the target deployment and each stage explains the adapters you still need to write.
 
 ## Follow the stages in order
 

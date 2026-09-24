@@ -2,19 +2,27 @@
 
 ## Application background
 
-Employees search for a free meeting room and reserve a time interval. Rooms cannot host overlapping reservations; recurring meetings use the organizer's local time zone.
+An employee chooses a room and meeting time in an office calendar. The application shows availability, then saves the reservation. The displayed result can become old before the employee clicks Confirm because another organizer may reserve the room first.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+Time zones add another problem. A meeting repeated at 09:00 London time should follow London's clock when daylight-saving time changes, even though its UTC time may change.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| Ana requests room 4 from 09:00 to 10:00 | Save the reservation if no conflicting booking exists. |
+| Ben requests room 4 from 09:30 to 10:30 | Reject the overlap and ask him to choose another slot. |
+| A weekly London meeting crosses a clock change | Keep the declared local-time rule. |
+
+The final reservation operation must check and save together. A previous availability search is useful information, but it cannot guarantee the room is still free.
 
 ## Your assignment
 
-**Deliver:** Availability and reservation operations with atomic overlap protection, plus an explicit daylight-saving policy for recurring bookings.
+**Deliver:** Build room search and reservation operations that cannot accept overlapping bookings. Define and demonstrate how recurring meetings behave across clock changes.
 
-Build room booking for a company with offices in London and New York. Two organizers select the last available room for overlapping meetings. A weekly 09:00 meeting must stay at 09:00 local time when daylight-saving time changes.
+**Required behavior:** POST /rooms/{id}/bookings accepts an interval and request ID. Conflicting room occupancy returns 409. GET /availability is advisory. The booking transaction decides whether the interval is still available.
 
-**Required behavior:** POST /rooms/{id}/bookings accepts an interval and request ID; conflicting room occupancy returns 409. GET /availability is advisory. The booking transaction decides whether the interval is still available.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +36,11 @@ python3 examples/architecture-starts/calendar_availability.py
 
 **Supplied file:** [`examples/architecture-starts/calendar_availability.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/calendar_availability.py). You can also [read or download the source here](../../../../examples/architecture-starts/calendar_availability.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 (600, 660) 201 reserved
@@ -43,7 +51,7 @@ Minutes from midnight: [(600, 660), (660, 720)]
 
 ### Set up your implementation workspace
 
-Create `work/calendar-availability/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+Create `work/calendar-availability/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement. They are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
 
 ## Local components and state to implement
 
@@ -51,7 +59,7 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
-| bookings | room_id,booking_id,start_utc,end_utc | Committed occupancy; enforce no overlap at the database. |
+| bookings | room_id,booking_id,start_utc,end_utc | Committed occupancy. Enforce no overlap at the database. |
 | series | series_id,local_time,IANA_zone,rule,revision | Recurrence intent plus exception dates. |
 | booking_operations | organizer,request_id,payload_hash | Exact retries reuse one booking. |
 
@@ -59,11 +67,11 @@ This table names the records, interfaces or decision inputs for your deliverable
 
 ### 1. Implement one room first
 
-Store UTC instants and require end after start. In PostgreSQL, use a GiST exclusion constraint combining room equality with overlapping tstzrange values; enable btree_gist where required. A SELECT availability followed by an unconstrained INSERT can double-book under concurrency.
+Store UTC instants and require end after start. In PostgreSQL, use a GiST exclusion constraint combining room equality with overlapping tstzrange values. Enable btree_gist where required. A SELECT availability followed by an unconstrained INSERT can double-book under concurrency.
 
 ### 2. Add recurrence without losing local intent
 
-Keep the IANA timezone, local recurrence rule and occurrence exceptions. For this exercise skip nonexistent local times and choose the earlier instant for ambiguous times; display that policy. Recompute future materialized occurrences after rule edits under a series revision.
+Keep the IANA timezone, local recurrence rule and occurrence exceptions. For this exercise skip nonexistent local times and choose the earlier instant for ambiguous times. Display that policy. Recompute future materialized occurrences after rule edits under a series revision.
 
 ### 3. Separate browsing from committing
 
@@ -71,13 +79,13 @@ Cache availability briefly with an as-of timestamp. On submit, recheck through t
 
 ### 4. Handle series edits and cancellation
 
-Change only the explicitly chosen occurrence or future series segment. Use stable occurrence IDs and transactionally update occupancy; notify attendees asynchronously from an outbox. A failed email must not roll back an already reserved room.
+Change only the explicitly chosen occurrence or future series segment. Use stable occurrence IDs and transactionally update occupancy. Notify attendees asynchronously from an outbox. A failed email must not roll back an already reserved room.
 
 ## Demonstrate the completed local result
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | The overlap at 10:30 conflicts; the back-to-back 11:00 booking succeeds. |
+| Run the starting program | The overlap at 10:30 conflicts. The back-to-back 11:00 booking succeeds. |
 | Submit two overlapping reservations concurrently | One commits and the other returns a conflict from the authoritative write. |
 | Cross a daylight-saving transition | The recurring event follows the published local-time policy. |
 
@@ -85,12 +93,12 @@ Change only the explicitly chosen occurrence or future series segment. Use stabl
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| 100 million calendars; 3 million active/day | 3% daily activity; partitioning every request by calendar avoids global scans. |
-| 100 bookings/s exercise peak; 60-day availability view | Expand bounded recurrence horizons; do not materialize an infinite series. |
+| 100 million calendars. 3 million active/day | 3% daily activity. Partitioning every request by calendar avoids global scans. |
+| 100 bookings/s exercise peak. 60-day availability view | Expand bounded recurrence horizons. Do not materialize an infinite series. |
 | Intervals are [start,end) | A 10:00–11:00 booking and an 11:00–12:00 booking do not overlap. |
 
 ## Map the local implementation to AWS
@@ -105,10 +113,10 @@ A relational occupancy constraint fits interval exclusion directly. DynamoDB con
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: booking API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: booking API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: booking application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: occupancy authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Local pending-work collection | Amazon SQS: notification queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: occupancy authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: notification queue | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Python operation or worker function | AWS Lambda: notification worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
 | Local notification delivery fixture | Amazon SES: email transport | Implement email submission and provider outcome tracking with verified sender configuration and scoped credentials. |
 
@@ -116,11 +124,11 @@ A relational occupancy constraint fits interval exclusion directly. DynamoDB con
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Aurora PostgreSQL | Use a supported engine and range/exclusion constraint; cap pooled connections and keep reservation transactions short. |
+| Aurora PostgreSQL | Use a supported engine and range/exclusion constraint. Cap pooled connections and keep reservation transactions short. |
 | Application configuration | Store timezone identifiers, not fixed UTC offsets. Pin and deliberately update timezone data used for expansion. |
 | Notification queue | Bound retries, record delivery state and keep room occupancy independent of provider health. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -140,18 +148,18 @@ This is a **commonly listed system-design interview prompt** with a concrete pra
 
 | Situation | Input / condition | Expected result |
 |---|---|---|
-| Overlap | Room booked 09:00–10:00; request 09:30–10:30 | Reject or offer another slot under one conflict rule. |
+| Overlap | Room booked 09:00–10:00. Request 09:30–10:30 | Reject or offer another slot under one conflict rule. |
 | DST boundary | Recurring 09:00 local meeting crosses clock change | Preserve local wall time with explicit zone and recurrence semantics. |
-| Concurrent booking | Two users claim the last room | One transaction/constraint wins; loser sees conflict. |
+| Concurrent booking | Two users claim the last room | One transaction/constraint wins. Loser sees conflict. |
 | Invite response | Guest accepts after organizer cancels | Reject stale event version or mark response to canceled event. |
 
 ## Think from the contract to the boxes
 
-Store each occurrence as UTC instants, but retain the recurring series' **local wall-time anchor**, IANA zone, recurrence rule, version and exceptions. Expand future occurrences in that zone, not by repeatedly adding 24 hours in UTC. This exercise skips nonexistent spring-forward times and chooses the earlier offset for ambiguous fall-back times; expose that policy to the organizer. Use interval overlap semantics `[start,end)` so adjacent meetings do not conflict. A precomputed free/busy view accelerates reads, but booking must check authoritative intervals at commit. Make invitations versioned events; a delayed response cannot resurrect a canceled meeting.
+Store each occurrence as UTC instants, but retain the recurring series' **local wall-time anchor**, IANA zone, recurrence rule, version and exceptions. Expand future occurrences in that zone, not by repeatedly adding 24 hours in UTC. This exercise skips nonexistent spring-forward times and chooses the earlier offset for ambiguous fall-back times. Expose that policy to the organizer. Use interval overlap semantics `[start,end)` so adjacent meetings do not conflict. A precomputed free/busy view accelerates reads, but booking must check authoritative intervals at commit. Make invitations versioned events. A delayed response cannot resurrect a canceled meeting.
 
 ### One room, one conflict authority
 
-`POST /rooms/{room}/bookings` includes an idempotency key, start and end; identity and room permission are server-checked. The PostgreSQL authority commits booking, replay result and outbox together. For a disposable PostgreSQL database, the core constraint is:
+`POST /rooms/{room}/bookings` includes an idempotency key, start and end. Identity and room permission are server-checked. The PostgreSQL authority commits booking, replay result and outbox together. For a disposable PostgreSQL database, the core constraint is:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS btree_gist;
@@ -166,15 +174,15 @@ CREATE TABLE room_booking (
 );
 ```
 
-Concurrent overlaps conflict at this constraint; a preceding availability SELECT is only a hint. Cancel/update uses a version condition in the same authority. Event changes and outbox rows commit together; the relay sends to EventBridge/SQS and consumers deduplicate `(event_id, version)`. EventBridge routes events—it cannot make a separate database write and publish atomic.
+Concurrent overlaps conflict at this constraint. A preceding availability SELECT is only a hint. Cancel/update uses a version condition in the same authority. Event changes and outbox rows commit together. The relay sends to EventBridge/SQS and consumers deduplicate `(event_id, version)`. EventBridge routes events—it cannot make a separate database write and publish atomic.
 
 | Trace to test | Expected result |
 |---|---|
 | Insert 09:00–10:00 and 09:30–10:30 concurrently | Only one active booking commits. |
 | Insert 09:00–10:00 and 10:00–11:00 | Both commit: half-open intervals are adjacent. |
-| Cancellation races with a new booking | Outcome follows commit order; no overlapping active pair. |
-| Replica still shows an old free slot | Final write rechecks the primary constraint; strict free/busy reads use the primary. |
-| Crash after database commit, before event send | Outbox relay resumes; no missing accepted event, duplicates tolerated. |
+| Cancellation races with a new booking | Outcome follows commit order. No overlapping active pair. |
+| Replica still shows an old free slot | Final write rechecks the primary constraint. Strict free/busy reads use the primary. |
+| Crash after database commit, before event send | Outbox relay resumes. No missing accepted event, duplicates tolerated. |
 | A 09:00 recurring meeting crosses DST | It remains 09:00 local under the declared expansion policy. |
 
 This is a schema and test schedule to execute, not evidence that PostgreSQL or AWS was deployed.
@@ -184,16 +192,16 @@ This is a schema and test schedule to execute, not evidence that PostgreSQL or A
 | AWS service / general role | Why it fits this design | Alternative and when it fits better |
 |---|---|---|
 | **Amazon API Gateway** / calendar API entry | Authenticate calendar reads and writes. | ALB + ECS for long-lived sync clients. |
-| **Amazon Aurora PostgreSQL** / event + room store | Range constraints/transactions prevent conflicting reservations. | DynamoDB with one fenced per-room decision owner, or a fixed-slot model that transactionally claims every slot; arbitrary overlap is not a conditional item check. |
-| **Amazon ElastiCache** / free/busy cache | Speed repeated availability reads. | Read replicas for explicitly stale views; primary or a verified watermark for strict reads. |
-| **Amazon EventBridge** / change event router | Route changes delivered by the database outbox relay. | Outbox relay → SQS when a queue is enough; routing and atomic publication are different jobs. |
+| **Amazon Aurora PostgreSQL** / event + room store | Range constraints/transactions prevent conflicting reservations. | DynamoDB with one fenced per-room decision owner, or a fixed-slot model that transactionally claims every slot. Arbitrary overlap is not a conditional item check. |
+| **Amazon ElastiCache** / free/busy cache | Speed repeated availability reads. | Read replicas for explicitly stale views. Primary or a verified watermark for strict reads. |
+| **Amazon EventBridge** / change event router | Route changes delivered by the database outbox relay. | Outbox relay → SQS when a queue is enough. Routing and atomic publication are different jobs. |
 | **Amazon SQS** / notification queue | Retry mail/push without blocking calendar writes. | EventBridge Scheduler for delayed reminders. |
 
 Service choice follows the contract: the box label gives the generic job, while the table explains the AWS product and a reasonable substitute. Name which component owns durable truth, where retries happen, and the guarantee each managed service does **not** provide by itself.
 
 ## Pressure-test the design
 
-**Follow-up: Adjacent intervals are legal; overlapping half-open intervals conflict. Compare 09:00–10:00 against 10:00–11:00 and 09:59–10:30.**
+**Follow-up: Adjacent intervals are legal. Overlapping half-open intervals conflict. Compare 09:00–10:00 against 10:00–11:00 and 09:59–10:30.**
 
 **Senior expectation:** A calendar write succeeds but an invitation email is delayed. Explain source of truth, outbox, notification dedupe, and what the guest sees before delivery.
 
@@ -201,7 +209,7 @@ Service choice follows the contract: the box label gives the generic job, while 
 
 **Practice artifact:** Draw event authority, free/busy projection, notification delivery, and a conflict check using the exact interval boundary. Then trace every row in the table, draw one failure, and state what the customer observes. Suggested rehearsal: 35 minutes design, 10 minutes to challenge the guarantees.
 
-**Evidence and origin:** The current community interview-question catalog lists calendar/free-busy reports at Microsoft, Oracle and LinkedIn; individual interview dates are not provided. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
+**Evidence and origin:** The current community interview-question catalog lists calendar/free-busy reports at Microsoft, Oracle and LinkedIn. Individual interview dates are not provided. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/calendar-free-busy/cm8c1h59t005n8pgzdq4ynqjo).
 

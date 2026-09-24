@@ -20,10 +20,10 @@ Three constants do almost all of the work, and none of them needs a calculator.
 
 **A day is about 100,000 seconds.**
 
-The exact figure is 86,400. Round it up to 10<sup>5</sup>. That is roughly 16%
-high, and it is the single most useful rounding in this subject: no design
-decision you will ever make turns on 16%, and dividing by 100,000 is arithmetic
-you can do out loud while drawing a box.
+The exact figure is 86,400. Round it up to 10<sup>5</sup>. That rounded day length is roughly 16% high, so the resulting request-rate
+estimate is about 14% below the exact rate. It is useful for an initial
+order-of-magnitude calculation. Use 86,400 and more precise inputs when the
+difference could change a capacity decision.
 
 So **requests per day ÷ 100,000 = requests per second**, and because both sides
 are powers of ten it collapses to a ladder worth memorising once:
@@ -39,8 +39,9 @@ Ten times the traffic per day is ten times the traffic per second. Nothing else
 to remember.
 
 **One caution the ladder hides, and it is yours to add:** that is an *average*
-second. Real traffic has a daily shape. Multiply by two or three for the busy
-hour before you size anything, and say out loud that you have done it. An
+second. Real traffic has a daily shape. Use a stated peak factor or a specific burst scenario before sizing. A factor
+of two or three can be a starting assumption in an exercise, but it is not a
+rule for every product. A concert launch can be much more concentrated. An
 interviewer who hears "three thousand a second at peak, not one thousand"
 learns more about you than the estimate itself does.
 
@@ -52,11 +53,11 @@ learns more about you than the estimate itself does.
 | Local SSD | 100 µs | ~1,000× slower |
 | Round trip across the world | 150 ms | ~1,000,000× slower |
 
-The absolute numbers move with hardware. The **ratios do not**, and the ratios
-are the part that decides architectures. Memory, then disk, then the network —
-each step is about a thousand times worse than the last. That is why a cache is
-not a micro-optimisation, and why one extra cross-region hop can cost more than
-every other thing on your diagram put together.
+These are illustrative latency assumptions, not guaranteed device or network
+measurements. The ratios change with the operation, hardware, distance and
+load. Use the large differences to ask where time is spent, then measure the
+relevant path. A remote request may dominate a small calculation, but these
+single-operation latencies do not tell you a database or disk's maximum throughput.
 
 **Each extra nine divides annual downtime by ten.**
 
@@ -67,20 +68,20 @@ every other thing on your diagram put together.
 | 99.999% (five nines) | ~5 minutes |
 
 Start from three nines being most of a working day, and the rest is division.
-This is the constant that makes an availability target concrete: five nines
-means your total budget for a bad deploy, a failover and a cloud incident is
-five minutes for the entire year, which is a sentence that ends a lot of
-optimistic conversations.
+This makes a time-based availability target concrete: five nines allows about
+five minutes of counted downtime in a 365-day year. First define what counts
+as unavailable. A request-based objective instead counts failed eligible
+requests, so do not substitute minutes for requests without stating the model.
 
-```mermaid
-flowchart LR
-  Ask["20 M daily users, 5 saves, 50 opens"] --> Day[Per day]
-  Day -->|"÷ 100,000"| Sec[Per second]
-  Sec -->|"× 2-3"| Peak[Peak second]
-  Peak --> Where{Fits in memory?}
-  Where -->|Yes| Cache[Cache or replica]
-  Where -->|No| Disk[Disk, and accept the 1,000×]
-```
+| Convert the interview input | Question it helps answer |
+|---|---|
+| Users × actions per user per day | How many reads and writes occur each day? |
+| Daily operations ÷ 86,400, or ÷ 100,000 for a rough estimate | What is the average rate in requests per second (RPS)? |
+| A stated peak factor or burst arrival rate | What load must the service handle during the busy period? |
+| Record count × bytes per record | What raw storage is needed before indexes, copies and backups? |
+| Arrival rate × mean time in the system, under stable conditions | Roughly how much work is in flight at once? |
+
+
 
 ## The same question, worked
 
@@ -90,14 +91,20 @@ Back to the whiteboard. Twenty million people, five saves and fifty opens each.
   peak**.
 - Reads: 20 M × 50 = **1 B per day** → 10,000 per second → **30,000 at peak**.
 
-Now the latency constant does something the traffic numbers alone cannot. Thirty
-thousand reads a second, each touching an SSD at 100 µs, is thirty seconds of
-disk time per second of wall clock. The disk cannot do it. You need the working
-set in memory, or you need to spread it across replicas, and you now know that
-before you have drawn a single box.
+Now use latency without confusing it with throughput. If each of 30,000 reads/s
+waits 100 µs for an I/O operation, the accumulated waiting is
+`30,000 × 0.0001 = 3 seconds` across all requests in each wall-clock second.
+It is **not thirty seconds**, and it does not by itself prove that a disk is
+saturated. Independent operations can overlap. Under stable conditions, the
+same rate and mean time imply about three operations in flight on average.
+
+To decide whether the storage can keep up, consider actual IOPS, access pattern,
+queue depth, caching and the rest of the request path. A cache or read replica
+may be useful, but choose it because the measured or justified capacity model
+needs it. An in-memory system can also run out of CPU or network capacity.
 
 That is the whole point of carrying these. **The constants do not design the
-system. They rule out the designs that were never going to work**, in the first
+system. They expose assumptions you need to check**, in the first
 two minutes, out loud, in front of someone.
 
 ## When to reach for this
@@ -105,9 +112,9 @@ two minutes, out loud, in front of someone.
 Any time a problem hands you a population and asks for a structure. In this
 curriculum that means:
 
-- [Design services from requirements to failure behavior](../../03-production/01-system-design/README.md) — every
-  problem in the chapter opens with a workload you must size before you can
-  choose a mechanism.
+- [Design services from requirements to failure behavior](../../03-production/01-system-design/README.md) — use
+  the workload where it changes the design, after understanding the user
+  action and required behavior.
 - [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)
   — the nines table is what turns an availability target into an error budget.
 - [Measure capacity and control performance costs](../../04-scale-and-evolution/02-performance-cost/README.md)
@@ -116,12 +123,14 @@ curriculum that means:
   caching, replication and partitioning are all answers to "this does not fit or
   does not keep up", which is an arithmetic finding.
 
-If a question gives you user counts and you start drawing boxes before you have
-a per-second number, you are designing against a feeling.
+Start by understanding the product action. Then estimate the quantities that
+change the decision. A small ownership bug may need two users and one record,
+while a video platform needs a bandwidth model. Do not invent huge traffic
+just to make a simple problem look like a large system.
 
 ## Where this came from
 
 Bruno sent a short video by [@arjay_mccandless](https://www.tiktok.com/@arjay_mccandless)
 laying out the same three groups of constants. The numbers are standard
-engineering reference values; the worked example, the peak-traffic caution and
+engineering reference values. The worked example, the peak-traffic caution and
 the curriculum links above are this guide's.

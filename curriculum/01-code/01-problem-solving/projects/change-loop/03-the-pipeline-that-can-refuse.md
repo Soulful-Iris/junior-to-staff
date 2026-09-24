@@ -2,7 +2,19 @@
 
 ## Application background
 
-A project can display successful automation while an important ownership rule is never checked. This exercise studies repository policy using a disposable application, not this guide's publishing workflow.
+A development team uses automated jobs before merging application changes. A green build icon means some job succeeded, but it does not show that ownership behavior was checked. Even a failed ownership job may be only advisory if repository settings still allow the merge.
+
+This exercise uses a separate disposable repository to distinguish running a check from requiring its result. It does not change this guide's automatic publication from main.
+
+### Example walkthrough
+
+| Action | Expected behavior |
+|---|---|
+| A deliberately invalid change reaches the build job | Observe the job's failure. |
+| A failed ownership job is advisory | Observe that the repository may still permit the merge. |
+| The exercise repository requires that status | Observe that the normal merge path refuses the failing revision. |
+
+A required status is a repository rule tied to a named job result. The checked revision, workflow configuration and any authorized bypass all affect what the result establishes.
 
 ## Your assignment
 
@@ -34,15 +46,15 @@ Leave the server running while sending the documented requests in a second termi
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
-| Small example | Four mutations: syntax error, format violation, fake secret fixture, and removal of owner filtering. | Build/test, formatting, secret scan, and ownership checks respectively refuse their mutation; protected merge refuses each PR. |
+| Small example | Four mutations: syntax error, format violation, fake secret fixture, and removal of owner filtering. | Build/test, formatting, secret scan, and ownership checks respectively refuse their mutation. Protected merge refuses each PR. |
 | Boundary / failure | A failed ownership job is advisory rather than required. | The exercise fails even though the job is red: merging remains possible. |
-| Scope | Test repository and inert secret fixtures; never plant a real credential. | Explain any additional assumption before implementing it. |
+| Scope | Test repository and inert secret fixtures. Never plant a real credential. | Explain any additional assumption before implementing it. |
 
 Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
 ## Deployment scope
 
-This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository. They do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
 ## Additional reasoning and harder requirements
 
@@ -73,7 +85,7 @@ The invariant is that a candidate commit with any named harm cannot enter protec
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Record actor, commit, reason, and follow-up validation. The bypass remains an explicit operating decision; pretending it cannot happen prevents measuring it. Replay with a deliberately failed check in a sandbox repository.
+Record actor, commit, reason, and follow-up validation. The bypass remains an explicit operating decision. Pretending it cannot happen prevents measuring it. Replay with a deliberately failed check in a sandbox repository.
 
 ```mermaid
 flowchart TD
@@ -91,7 +103,7 @@ flowchart TD
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Keep untrusted code execution separate from privileged deployment. Pin OIDC trust to the intended repository and execution context; do not expose a deploy role to arbitrary fork code. A green check is evidence about one commit and one workflow, not permission to execute it with secrets.
+Keep untrusted code execution separate from privileged deployment. Pin OIDC trust to the intended repository and execution context. Do not expose a deploy role to arbitrary fork code. A green check is evidence about one commit and one workflow, not permission to execute it with secrets.
 
 ```mermaid
 flowchart TD
@@ -106,9 +118,9 @@ flowchart TD
 
 ## Record the evidence and limitations
 
-Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
+Build in three stops: reproduce the small case and baseline failure. Implement the protected boundary. Then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
-**Senior expectation:** Show both refusal and merge enforcement for every named harm. **Additional lead scope:** Define emergency authority, audit review, and credential boundaries. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
+**Senior expectation:** Show both refusal and merge enforcement for every named harm. **Additional lead scope:** Define emergency authority, audit review, and credential boundaries. Completion demonstrates practice evidence. It does not establish interview readiness or multi-team delivery experience.
 
 ## Detailed implementation and AI-assisted prompts
 
@@ -130,16 +142,16 @@ The entry bar is a named harm — a way a bad change could actually reach main
 in this repository. Work back from harms, never forward from a list of
 available tools.
 
-Second: advice versus law. A local hook is advice; it runs on machines you do
+Second: advice versus law. A local hook is advice. It runs on machines you do
 not control and dies to `--no-verify`. The pipeline on the protected branch is
 law. Fast advice locally, law remotely — and never law that exists only
 locally.
 
 Third: a check has to name itself. One fat "CI" job that fails is a puzzle at
-the worst moment; four named jobs make red self-explanatory.
+the worst moment. Four named jobs make red self-explanatory.
 
 Fourth, the section's rule made physical: a gate is unproven until you have
-watched it refuse. Building the refusals is not extra credit; it is the
+watched it refuse. Building the refusals is not extra credit. It is the
 deliverable.
 
 **How to organise the prompts**
@@ -164,7 +176,7 @@ named job, so a failure names itself. Show me a green run on a no-op
 pull request.
 ```
 
-The job list should read like the threat list; then confirm the green run.
+The job list should read like the threat list. Then confirm the green run.
 
 **3. The red suite.**
 
@@ -174,7 +186,7 @@ it — fail. Open one PR per change and report which job went red on
 each.
 ```
 
-Every job goes red exactly once. A job you cannot make fail is not a check;
+Every job goes red exactly once. A job you cannot make fail is not a check.
 it is decoration with a duration.
 
 **4. The lock.**
@@ -192,7 +204,7 @@ changes.
 
 **GitHub Actions** is a natural default beside a GitHub repository.
 **CodeBuild** earns its place when a check needs private VPC resources or a
-particular build environment. **CodePipeline** orchestrates release stages;
+particular build environment. **CodePipeline** orchestrates release stages.
 it is not itself the build machine. Pick from execution and access requirements,
 then estimate build minutes, machine class and logs under the account's current
 pricing and free-tier eligibility. A permanent **EC2** runner adds idle cost and
@@ -210,7 +222,7 @@ Decide who can bypass the gate and make bypass loud — an admin merge nobody
 sees is a side door that voids the exercise. Give the pipeline a time budget
 and treat a breach as a defect: a slow gate quietly recreates big batches,
 because people amortise the wait. And when a required check starts flaking,
-fix or quarantine it that day; a gate that cries wolf trains everyone to stop
+fix or quarantine it that day. A gate that cries wolf trains everyone to stop
 reading it.
 
 **The learning**

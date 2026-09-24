@@ -2,19 +2,31 @@
 
 ## Application background
 
-The accumulated reading-list application now has a UI, workers, exports and optional AI suggestions. Changing tag identity affects all those consumers while members continue editing data.
+Your reading list now includes a UI, title workers, exports and optional AI tag suggestions. It still stores tags as words. You want permanent tag IDs so a display name can change without changing which tag a bookmark refers to.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+People continue editing and deleting bookmarks while you convert existing data. An old conversion result must not undo a newer edit or bring back a deleted bookmark. Every component that reads tags must understand the transition.
+
+### A backfill result that is already outdated
+
+This is an illustrative timeline of one bookmark, not a log captured from the starter:
+
+```text
+12:00 backfill reads bookmark 41 at version 7
+12:01 user deletes bookmark 41, creating deletion version 8
+12:02 backfill tries to save converted version 7
+```
+
+The final write must not recreate the bookmark. Compare versions and preserve the newer deletion when applying the converted data.
+
+Backfill is the conversion of existing records. Reconciliation compares old and new representations to find missing or incorrect changes before retiring the old one.
 
 ## Your assignment
 
-**Deliver:** Carry out a compatibility-first migration with version-aware backfill, deletion protection, reconciliation and retirement of the old format.
-
-Evolve the completed reading list from text tags to stable tag IDs while users keep editing and deleting links. An old backfill row arrives after a live edit and deletion. The migration must include browsers, workers, exports and AI inputs, not just the database table.
+**Deliver:** Migrate the running application to stable tag IDs. Protect newer edits and deletions during conversion, keep supported consumers working and demonstrate when old-format support can be removed.
 
 **Required behavior:** Versioned apply preserves the newest source state including deletion. One write authority exists at a time. Supported old contracts are adapted until retirement, and the irreversible rollback boundary is recorded before incompatible writes begin.
 
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +40,11 @@ python3 examples/architecture-starts/reading_list_it_changes.py
 
 **Supplied file:** [`examples/architecture-starts/reading_list_it_changes.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/reading_list_it_changes.py). You can also [read or download the source here](../../../../examples/architecture-starts/reading_list_it_changes.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 5 applied
@@ -43,9 +55,9 @@ Final: {'version': 6, 'tags': [], 'deleted': True}
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
-Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point; it does not contain the previous stages' completed UI, operations, jobs or AI feature.
+Continue the application you built in the preceding stage. The supplied server is only a Stage 1 starting point. It does not contain the previous stages' completed UI, operations, jobs or AI feature.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -61,9 +73,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/05-it-changes/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/05-it-changes/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -105,13 +117,13 @@ Observe actual old-consumer usage, adapt or drain old queue messages and record 
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../../curriculum/01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Backfill version 4; live edit 5; deletion 6 | Applying 4 last must leave the version-6 tombstone intact. |
+| Backfill version 4. Live edit 5. Deletion 6 | Applying 4 last must leave the version-6 tombstone intact. |
 | Four active consumer families | Browser/API, title worker, export and AI-tagging paths all need compatibility decisions. |
-| 10,000 links; 100 rows/s exercise backfill | About 100 seconds ideal copy time, plus live-change catch-up and reconciliation. |
+| 10,000 links. 100 rows/s exercise backfill | About 100 seconds ideal copy time, plus live-change catch-up and reconciliation. |
 
 ## Map the local implementation to AWS
 
@@ -125,22 +137,22 @@ This stage changes the same system built in the earlier stages. The migration su
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local records and transaction boundary | Amazon RDS PostgreSQL: old reading-list authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Application or worker process | Amazon ECS: migration workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: new representation | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: old reading-list authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: migration workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: new representation | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local versioned configuration | AWS AppConfig: migration routing state | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
-| Local pending-work collection | Amazon SQS: versioned background jobs | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local pending-work collection | Amazon SQS: versioned background jobs | Publish committed job intent, consume messages and persist deduplication/ownership state. Add visibility, retry and dead-letter handling. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: completion evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Authority | Enforce fencing at writes; configuration changes alone do not stop stale processes. |
+| Authority | Enforce fencing at writes. Configuration changes alone do not stop stale processes. |
 | Compatibility | Keep old response/job adapters until recorded retirement conditions, then remove dead paths. |
 | Recovery | Preserve the earlier backup/restore procedure and verify how the new representation changes it. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -161,7 +173,7 @@ Choose the next change from observed user demand or operating limits. Carry forw
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon; name gaps in the source log and resnapshot if history expired.
+Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon. Name gaps in the source log and resnapshot if history expired.
 
 </details>
 
@@ -172,7 +184,7 @@ Use tombstone/version/value-level reconciliation, not just counts. Replay the mi
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections; distinguish route admission from data readiness.
+No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections. Distinguish route admission from data readiness.
 
 </details>
 
@@ -180,6 +192,6 @@ No. Require reverse projection/compatibility before cutover or define a stop-and
 
 - [Live migration and rollback fixture](../../../../curriculum/04-scale-and-evolution/04-migrations/labs/recovery-migration/migration.md) — includes its own run command, fixtures and validation limits.
 
-These exercises verify specific boundaries; completing their reference tests does not implement or assess the full project.
+These exercises verify specific boundaries. Completing their reference tests does not implement or assess the full project.
 
 </details>

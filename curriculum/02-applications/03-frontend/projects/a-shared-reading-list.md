@@ -2,19 +2,35 @@
 
 ## Application background
 
-A study group shares links and notes while each member marks their own progress. The API supplies shared bookmark data plus the current member's reading state; browsers may edit stale versions.
+Alice and Bob belong to a study group. Alice saves a link and adds a note about which chapter is useful. Bob can browse that link and note, then mark the article as read for himself. Alice's reading status should remain unchanged.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The browser also needs to handle an edit made from an old view. If Alice changes her note on a laptop while the same note is open on her phone, the phone should not silently overwrite the newer text or discard its own draft.
+
+### The conflict response your interface must handle
+
+The supplied local API accepts a note edit at `PATCH /bookmarks/1`. This body says the browser edited version 1:
+
+```json
+{"version":1,"note":"Read the storage section"}
+```
+
+If the stored note is already version 2, the API returns **409 Conflict** with:
+
+```json
+{"error":"Version conflict; refresh before editing"}
+```
+
+Keep the typed note visible, fetch the current list and let the user decide how to reconcile the two versions. Do not replace the draft just because the request failed.
+
+Shared bookmark data and personal reading state are different records. The supplied API provides those operations. Your main task here is the browser interface that makes the outcomes understandable.
 
 ## Your assignment
 
-**Deliver:** A usable browser interface over the supplied API, with separate member state and draft-preserving conflict handling.
+**Deliver:** Build a browser interface over the supplied API. Keep each person's reading status separate and preserve unsaved note text when the API reports a version conflict.
 
-Build a reading list for a six-person study group. Members share saved links and notes, but each person tracks their own read state. Two people edit the same note on different devices, and an unsaved draft must survive a conflict.
+**Required behavior:** Group membership controls link visibility. Shared link metadata and per-user read state are separate. Conditional edits return a conflict without discarding the user’s draft. Delayed responses cannot overwrite newer UI state.
 
-**Required behavior:** Group membership controls link visibility. Shared link metadata and per-user read state are separate. Conditional edits return a conflict without discarding the user’s draft; delayed responses cannot overwrite newer UI state.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +44,11 @@ python3 examples/architecture-starts/a_shared_reading_list.py
 
 **Supplied file:** [`examples/architecture-starts/a_shared_reading_list.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/a_shared_reading_list.py). You can also [read or download the source here](../../../../examples/architecture-starts/a_shared_reading_list.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 {'state': 'saved', 'server': {'version': 4, 'note': 'Ana note'}}
@@ -42,7 +58,7 @@ Personal read state: {('ana', 'l7'): True, ('ben', 'l7'): False}
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -58,9 +74,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/a-shared-reading-list/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/a-shared-reading-list/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -84,7 +100,7 @@ Store read/unread by authenticated user and link. Marking a link read changes on
 
 ### 3. Implement an explicit editor state machine
 
-Keep base version and draft separately from the latest server record. Save with expected version; on 409 show current server text beside the preserved draft. Use request generations so an older save response cannot replace a newer draft.
+Keep base version and draft separately from the latest server record. Save with expected version. On 409 show current server text beside the preserved draft. Use request generations so an older save response cannot replace a newer draft.
 
 ### 4. Handle membership and accessibility
 
@@ -94,7 +110,7 @@ Reauthorize API reads and writes after revocation, including warm caches. Provid
 
 | Action | Expected visible result |
 |---|---|
-| Run the starting program | Ana saves; Ben retains a conflicting draft; their read states remain independent. |
+| Run the starting program | Ana saves. Ben retains a conflicting draft. Their read states remain independent. |
 | Deliver an older save response late | The newer local draft is not replaced. |
 | Revoke membership | New list and save requests are denied even with cached group data. |
 
@@ -102,13 +118,13 @@ Reauthorize API reads and writes after revocation, including warm caches. Provid
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| Six members × 200 saved links | 1,200 potential personal read-state rows for 200 shared links; do not put one global read flag on the link. |
-| 50 concurrent active readers exercise peak | Begin with paginated database reads; a cache is optional after measuring. |
-| Two edits from revision 3 | Exactly one revision-3 conditional update can win; the second client keeps its draft. |
+| Six members × 200 saved links | 1,200 potential personal read-state rows for 200 shared links. Do not put one global read flag on the link. |
+| 50 concurrent active readers exercise peak | Begin with paginated database reads. A cache is optional after measuring. |
+| Two edits from revision 3 | Exactly one revision-3 conditional update can win. The second client keeps its draft. |
 
 ## Map the local implementation to AWS
 
@@ -122,22 +138,22 @@ The UI needs its own explicit state model as much as the backend needs condition
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local static/media delivery path | Amazon CloudFront: reading-list web UI | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
-| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: group API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local static/media delivery path | Amazon CloudFront: reading-list web UI | Configure an origin, cache policy and private-content access. Distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: group API | Create routes and an integration. Translate requests and responses and configure identity validation. |
 | Python operation or worker function | AWS Lambda: reading-list application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: shared and personal state | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
-| Local fixture identity or caller supplied to the operation | Amazon Cognito: member identity | Configure an identity provider and validate tokens; retain resource ownership checks in application code. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: shared and personal state | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
+| Local fixture identity or caller supplied to the operation | Amazon Cognito: member identity | Configure an identity provider and validate tokens. Retain resource ownership checks in application code. |
 | Local file, object fixture or exported payload | Amazon S3: static UI assets | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
 
 ### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| API data | Include group scope in every key/query; conditional versions on shared edits. |
-| Frontend delivery | Cache versioned static assets; keep private API responses out of shared caches. |
-| Identity | Membership remains an application decision after token validation; revocation affects current reads/writes. |
+| API data | Include group scope in every key/query. Conditional versions on shared edits. |
+| Frontend delivery | Cache versioned static assets. Keep private API responses out of shared caches. |
+| Identity | Membership remains an application decision after token validation. Revocation affects current reads/writes. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -153,12 +169,12 @@ Add offline editing. Queue operations with base versions and identities, then su
 
 ## Follow-up 1 · Many groups
 
-**Changed requirement:** Alice belongs to two groups; Bob belongs to one. Which rows can Bob list? Predict which boundary must change before opening the design.
+**Changed requirement:** Alice belongs to two groups. Bob belongs to one. Which rows can Bob list? Predict which boundary must change before opening the design.
 
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Filter by verified membership at the data access boundary; never trust a client-supplied group ID alone. Test list, detail, edit and title-job paths for cross-group leakage.
+Filter by verified membership at the data access boundary. Never trust a client-supplied group ID alone. Test list, detail, edit and title-job paths for cross-group leakage.
 
 </details>
 
@@ -169,7 +185,7 @@ Filter by verified membership at the data access boundary; never trust a client-
 <details>
 <summary>Expected reasoning and changed diagram</summary>
 
-Atomically save the item and durable title job, return pending, and let a guarded bounded worker complete the title. Retry execution may repeat fetching; conditional versions protect the current result.
+Atomically save the item and durable title job, return pending, and let a guarded bounded worker complete the title. Retry execution may repeat fetching. Conditional versions protect the current result.
 
 </details>
 

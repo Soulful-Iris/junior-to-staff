@@ -2,19 +2,33 @@
 
 ## Application background
 
-A reading list originally stores tags as free text. Stable tag IDs will support renaming and consistent display, but old browsers, queued jobs and exports still consume the old representation.
+A reading list currently stores tags as words such as `databases`. The team wants tags to have permanent IDs so their display names can change. A tag might become `{id: "tag-7", name: "databases"}` while keeping the same identity after a rename.
 
-This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
+The change affects more than database rows. Browsers display tags, workers read them, exports include them and optional AI suggestions use them. Some of those consumers will still use the old format while the move is underway.
+
+### The data shape being changed
+
+These are proposed old and new representations for the same bookmark:
+
+```json
+{"id":41,"tags":["databases"]}
+```
+
+```json
+{"id":41,"tagObjects":[{"id":"tag-7","name":"databases"}]}
+```
+
+During migration, the server may need to derive both representations from one authoritative model. An old browser still expects strings, while a new browser can keep `tag-7` when its display name changes.
+
+A backfill converts existing records. Compatibility keeps old and new consumers working during that conversion. The migration is unfinished while an active consumer still depends on a retired format.
 
 ## Your assignment
 
-**Deliver:** A staged tag migration with compatibility adapters, resumable backfill, reconciliation and explicit retirement of old readers and writers.
+**Deliver:** Move tags to stable IDs while old clients and jobs continue working. Build the conversion, compatibility handling and record comparison, then retire the old format only when its remaining users are gone.
 
-Migrate a live reading-list application from free-text tags to stable tag IDs. Old browsers and queued title jobs still use the previous shape. The migration is complete only when data, readers, writers, background workers and rollback/repair paths all agree on the new contract.
+**Required behavior:** One writer authority exists at each phase. Backfill and live changes carry source versions, including deletions. Old clients remain supported through an adapter until a documented retirement point. A progress percentage alone does not prove completion.
 
-**Required behavior:** One writer authority exists at each phase. Backfill and live changes carry source versions, including deletions. Old clients remain supported through an adapter until a documented retirement point; a progress percentage alone does not prove completion.
-
-The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope. The cloud architecture is a later extension, not something the starter has already provisioned.
 
 ## Get the code and run the supplied example
 
@@ -28,11 +42,11 @@ python3 examples/architecture-starts/the_migration_you_actually_finish.py
 
 **Supplied file:** [`examples/architecture-starts/the_migration_you_actually_finish.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_migration_you_actually_finish.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_migration_you_actually_finish.py).
 
-This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only. It does not establish the workload or failure guarantees of the application you will build.
 
 **Example output from the supplied run:**
 
-Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+Generated IDs and timestamps may differ. Compare the state transitions and outcomes.
 
 ```text
 5 applied
@@ -43,7 +57,7 @@ Final target: {'version': 6, 'tags': [], 'deleted': True}
 
 ### Run the application you will extend
 
-The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism. The server is where you integrate it.
 
 For a first run, start this in **terminal 1** from the repository root:
 
@@ -59,9 +73,9 @@ curl -i http://127.0.0.1:8080/bookmarks \
   -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
 ```
 
-Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline. The assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`. Alice or Ana corresponds to `alice`.
 
-Work in your own branch or copy `examples/reading-list-starter/` to `work/the-migration-you-actually-finish/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+Work in your own branch or copy `examples/reading-list-starter/` to `work/the-migration-you-actually-finish/`. `app.py` exists in that directory. Add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
 
 ## Local components and state to implement
 
@@ -89,7 +103,7 @@ Compare canonical records at an aligned watermark, accounting for deletes and ta
 
 ### 4. Finish retirement and repair
 
-Observe supported-client usage, drain or adapt old queue payloads, update exports and remove old fields only after every required consumer is covered. Name the first target write that old code cannot interpret; after that point use a prepared reverse adapter or forward repair rather than a misleading rollback button.
+Observe supported-client usage, drain or adapt old queue payloads, update exports and remove old fields only after every required consumer is covered. Name the first target write that old code cannot interpret. After that point use a prepared reverse adapter or forward repair rather than a misleading rollback button.
 
 ## Demonstrate the completed local result
 
@@ -103,12 +117,12 @@ Observe supported-client usage, drain or adapt old queue payloads, update export
 
 ## Workload assumptions and capacity decisions
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+These are constructed exercise assumptions. The stated workload is a design target. The local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
 
 | Input or objective | Calculation / consequence |
 |---|---|
-| One million links; 500 rows/s backfill assumption | About 33 minutes ideal copy time, excluding live changes, indexes and retries. |
-| Live update version 5; deletion version 6; late backfill version 4 | Target must retain the version-6 tombstone. |
+| One million links. 500 rows/s backfill assumption | About 33 minutes ideal copy time, excluding live changes, indexes and retries. |
+| Live update version 5. Deletion version 6. Late backfill version 4 | Target must retain the version-6 tombstone. |
 | Four consumer types | Browser, API, worker and AI/tagging input all belong in the compatibility inventory. |
 
 ## Map the local implementation to AWS
@@ -119,13 +133,13 @@ Read the diagram by following the arrows from the entry point: application code 
 
 ![Migrate tags across data, clients and workers: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-migration-you-actually-finish.svg)
 
-The backfill worker transports and transforms data; source versions and writer fencing preserve correctness. Configuration routing is coordination metadata, not a substitute for rejecting stale writers.
+The backfill worker transports and transforms data. Source versions and writer fencing preserve correctness. Configuration routing is coordination metadata, not a substitute for rejecting stale writers.
 
 | Local responsibility | Cloud destination and role | Implementation still required |
 |---|---|---|
-| Local records and transaction boundary | Amazon Aurora PostgreSQL: existing data authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
-| Application or worker process | Amazon ECS: backfill and change workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
-| Local dictionary, SQLite records or state model | Amazon DynamoDB: target tag representation | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: existing data authority | Write PostgreSQL schema/migrations and a database adapter. Configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: backfill and change workers | Build a container and task definition. Supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: target tag representation | Design partition/sort keys and write a storage adapter with conditional updates or transactions. Python state and SQL are not uploaded as a database. |
 | Local versioned configuration | AWS AppConfig: migration phase routing | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
 | Local counters, timestamps and diagnostic output | Amazon CloudWatch: migration evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
 | Local file, object fixture or exported payload | Amazon S3: reconciliation artifacts | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
@@ -134,11 +148,11 @@ The backfill worker transports and transforms data; source versions and writer f
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
-| Workers | Bound copy load so live requests retain capacity; checkpoints are durable and replay-safe. |
+| Workers | Bound copy load so live requests retain capacity. Checkpoints are durable and replay-safe. |
 | Routing | Enforce writer authority at the write boundary, not only in cached client routing. |
-| Completion | Record old consumer usage and schema compatibility; remove old resources only after the declared retirement conditions. |
+| Completion | Record old consumer usage and schema compatibility. Remove old resources only after the declared retirement conditions. |
 
-Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement. It is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
@@ -147,7 +161,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 ## Extend the design after the baseline works
 
 
-A previously unknown export tool still reads the old table. Add it to the inventory and decide whether to adapt or retire it; migration completion is about actual consumers, not only the services you remembered initially.
+A previously unknown export tool still reads the old table. Add it to the inventory and decide whether to adapt or retire it. Migration completion is about actual consumers, not only the services you remembered initially.
 
 <details>
 <summary>Additional design reasoning and requirement changes</summary>
@@ -169,7 +183,7 @@ delayed/offline writers.
 
 ## Follow-up 2 · A team cannot cut over
 
-**Changed requirement:** One team must keep old clients for a quarter; DNS caches
+**Changed requirement:** One team must keep old clients for a quarter. DNS caches
 last 300 seconds. What can rollback promise?
 
 <details>
@@ -187,7 +201,7 @@ consumers and replay obligations are gone.
 - [Live migration and rollback fixture](../labs/recovery-migration/migration.md) — its own commands, fixtures and validation limits.
 - [Region loss and rebalancing exercise](../labs/recovery-migration/regions.md) — its own commands, fixtures and validation limits.
 
-These verify specific boundaries; passing their reference tests does not implement
+These verify specific boundaries. Passing their reference tests does not implement
 or assess the full project.
 
 </details>
