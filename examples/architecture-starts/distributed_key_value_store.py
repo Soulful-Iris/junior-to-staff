@@ -3,8 +3,7 @@ import json,os,tempfile
 with tempfile.TemporaryDirectory() as directory:
     path=directory+'/wal.jsonl'
     with open(path,'w') as log:
-        log.write(json.dumps({'index':1,'term':3,'key':'a','value':'saved'})+'
-')
+        log.write(json.dumps({'index':1,'term':3,'key':'a','value':'saved'})+'\n')
         log.flush(); os.fsync(log.fileno())
     recovered={}
     with open(path) as log:
