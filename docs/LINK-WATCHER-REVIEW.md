@@ -38,3 +38,7 @@ this checklist as his approval.
 4. Where does each piece of state live, and what happens after a crash or retry?
 5. How does local code map to AWS, and what must be configured explicitly?
 6. Which checks prove each requirement, and which guarantees remain unverified?
+
+- Publication feedback: pushes to main must automatically appear on the website.
+  Remove manual directory-migration requirements and optional verification gates
+  from the publishing path; do not confuse GitHub checks with deployment status.

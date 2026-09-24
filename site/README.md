@@ -53,7 +53,7 @@ The mobile contents drawer supports Escape, focus containment and return to its 
 
 ## Deployment
 
-`deploy.sh` preserves the existing automatic deployment job. It builds into a staging directory, validates the built links and learning flow, and swaps the published directory only after success. It installs the pinned Python requirements into a dedicated virtual environment and the declared Node tools when their manifests change. A failed build remains retryable even after the checkout advances to the new commit. Existing notification behavior is preserved.
+`deploy.sh` preserves the existing automatic deployment job. It builds main into a staging directory and publishes after the build succeeds. Content/link checks are manual and do not block publication. Existing output directories are adopted automatically. It installs the pinned Python requirements into a dedicated virtual environment and the declared Node tools when their manifests change. A failed build remains retryable even after the checkout advances to the new commit. Existing notification behavior is preserved.
 
 See [redesign verification](REDESIGN.md) for the completed checks and their limits.
 

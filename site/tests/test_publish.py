@@ -68,13 +68,6 @@ class PublishTests(unittest.TestCase):
         self.assert_old()
         self.assertEqual(len(list((self.root/'.releases').glob('*/index.html'))), 1)
 
-    def test_legacy_directory_is_left_untouched(self):
-        self.live.unlink(); self.live.mkdir(); (self.live/'index.html').write_text('legacy')
-        with self.assertRaisesRegex(ValueError, 'legacy'):
-            self.publish()
-        self.assertEqual((self.live/'index.html').read_text(), 'legacy')
-        self.assertTrue(self.stage.exists())
-
     def test_incomplete_stage_is_rejected_before_publication(self):
         (self.stage/'index.html').unlink()
         with self.assertRaises(ValueError):

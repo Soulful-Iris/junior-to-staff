@@ -1,10 +1,10 @@
-"""Publish a verified static release through one atomic POSIX symlink switch.
+"""Publish a built static release, automatically adopting an existing out directory.
 
-Run only against disposable directories in tests. The live server is not changed
-by importing this module. Old releases are retained; cleanup is an operator task.
+Old releases are retained. After initial adoption, releases use a symlink switch.
 """
 import argparse
 import fcntl
+import json
 import os
 from pathlib import Path
 import re
@@ -50,16 +50,24 @@ def publish(stage, live, revision, marker):
     live.parent.mkdir(parents=True, exist_ok=True)
     with (live.parent / '.publish.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        if live.exists() and not live.is_symlink():
-            raise ValueError('legacy live directory: migrate it explicitly before pointer publication')
+        if live.exists() and not live.is_symlink() and not live.is_dir():
+            raise ValueError('live path must be a directory or symlink')
         smoke(stage)
+        (stage / 'version.json').write_text(
+            json.dumps({'commit': revision}) + '\n')
         previous = os.readlink(live) if live.is_symlink() else None
         releases = live.parent / '.releases'
         releases.mkdir(exist_ok=True)
         release = releases / (revision + '-' + uuid.uuid4().hex)
         os.replace(stage, release)
         switched = False
+        adopted = False
         try:
+            if live.is_dir() and not live.is_symlink():
+                legacy = releases / ('legacy-' + uuid.uuid4().hex)
+                os.replace(live, legacy)
+                previous = os.path.relpath(legacy, live.parent)
+                adopted = True
             replace_link(live, os.path.relpath(release, live.parent))
             switched = True
             smoke(live)
@@ -68,7 +76,7 @@ def publish(stage, live, revision, marker):
             # Never delete old releases, even if restoration itself fails.
             # A failure before the switch leaves old live; after it, either
             # the complete new release or the restored old release is reachable.
-            if switched and previous is not None:
+            if (switched or adopted) and previous is not None:
                 replace_link(live, previous)
             raise
         return release

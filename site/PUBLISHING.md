@@ -1,59 +1,33 @@
-# Static-site publication contract
+# Automatic publication from main
 
-The build and both content checks run in a unique staging directory. Publication
-moves that complete directory into `.releases/`, then replaces the `out` symlink
-in one same-filesystem operation. The previous release is not deleted. A failed
-post-switch check restores the old pointer; `last-deployed` advances only after
-successful publication. A deployment lock covers fetch, build and publication.
+The existing `j2s-deploy.timer` polls main every two minutes. On a new commit,
+`site/deploy.sh` fetches main, installs changed build dependencies, builds the site
+in staging, then publishes the completed output. GitHub verification results are
+not consulted. Content/link checks are available manually and do not gate publishing.
+The automatic Repository verification workflow has been removed.
 
-```text
-out -> .releases/old       stage/new is checked
-out -> .releases/new       one pointer replacement
-.releases/old remains      delayed requests can fetch old hashed assets
-```
+An existing `site/out` directory is adopted automatically: it is retained under
+`.releases/legacy-*` and replaced by the new release pointer. No manual migration,
+maintenance approval, or deletion of the existing website is required. This first
+adoption uses two renames, so the path can be briefly absent between them.
+Subsequent updates switch the symlink in one rename. Failure during the switch
+restores the previous release. A failed build leaves the live website unchanged.
 
-This is POSIX process-failure handling, not a tested power-loss guarantee.
-`serve.py` reads the live path for requests and falls back to retained releases
-only for fingerprinted reader scripts/styles and Mermaid SVGs. It does not serve
-retired HTML as a fallback. Unversioned assets still use their documented cache
-policy. The full browser, proxy and host deployment remain separate checks.
+Server-local tracked and untracked changes are saved in a local git stash before
+checking out main, rather than blocking the deployment or discarding the changes.
+Ignored build output and dependencies stay in place. The publication branch is main.
 
-## Existing installations
+Every release includes `/version.json` containing the published commit SHA.
+The normal HTML cache policy requests revalidation. To identify the published
+version, fetch that endpoint rather than inferring deployment from a CI email.
 
-An existing real `site/out` directory is **left untouched** and publication is
-refused. Do not delete it to make the deploy pass. The operator must schedule a
-one-time layout migration: retain it as `.releases/legacy`, create `out` as a
-relative symlink to that retained directory, verify its pages, and restart the
-static server with the updated serving code. The legacy directory-to-symlink
-conversion is not an atomic live switch; perform it under a maintenance window
-or route traffic to an unchanged instance. Ordinary releases after that use the
-atomic pointer protocol. No migration is run by the test suite.
-
-## Retention and dependencies
-
-No automatic release cleanup runs. Set an explicit old-client support window
-before implementing garbage collection; removing an old asset ends that window
-for an uncached old tab. Preserve the active release and rollback target, and
-monitor disk usage. Retention is deliberate, not a claim of unlimited disk.
-
-**Open dependency gate (SITE-05):** direct Node versions are pinned, but a reviewed
-transitive `package-lock.json` is not yet committed. The existing install policy
-is retained rather than pretending that a lock was generated or introducing an
-unconditionally failing `npm ci`. Do not call this a fully reproducible website
-release until the lock is reviewed, committed, and enforced with `npm ci`.
-Python pins likewise do not establish hash-locked transitive reproducibility.
-
-## Reproduce the focused tests
+Manual server command, if the timer needs restarting or immediate execution:
 
 ```bash
-python -m unittest discover -s site/tests -p test_publish.py -v
-python -m unittest discover -s site/tests -p test_retained_assets.py -v
-# Requires Python Playwright and Chromium (or its installed Playwright browser):
-python -m unittest discover -s site/tests -p test_reader_storage.py -v
-bash -n site/deploy.sh
+systemctl --user start j2s-deploy.service
+journalctl --user -u j2s-deploy.service -n 40 --no-pager
 ```
 
-Publication tests inject failures only in temporary directories. The HTTP test
-loads old HTML, switches releases, then fetches its uncached old script and
-checks exact bytes. The preference tests run the real reader script in Chromium
-with controlled Storage responses; they do not prove cross-reload persistence.
+Old releases remain available for rollback and fingerprinted assets. No automatic
+cleanup is performed. The only publication prerequisites are a successful build,
+a usable output directory and working filesystem operations.
