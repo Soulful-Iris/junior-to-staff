@@ -419,14 +419,14 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .counter-state>div.extra strong{border-color:#d9c898;background:#faf5e6;color:#82691e}
 .counter-state>p{margin:10px 0 0;padding:8px 5px 0;border-top:1px solid var(--line);color:#985245;font:700 9px/1.35 var(--sans);text-align:center}
 .counter-state>p.complete{color:var(--accent)}
-.sample-panel.sample-animate .window-frame{animation:windowScan 15s cubic-bezier(.55,.06,.25,1) infinite}
-.sample-panel.sample-animate .story-one,.sample-panel.sample-animate .count-one{animation:stageOne 15s ease infinite}
-.sample-panel.sample-animate .story-two,.sample-panel.sample-animate .count-two{animation:stageTwo 15s ease infinite}
-.sample-panel.sample-animate .story-three,.sample-panel.sample-animate .count-three{animation:stageThree 15s ease infinite}
-.sample-panel.sample-animate .story-four,.sample-panel.sample-animate .count-four{animation:stageFour 15s ease infinite}
-.sample-panel.sample-animate .story-five,.sample-panel.sample-animate .count-five{animation:stageFive 15s ease infinite}
-.sample-panel.sample-animate .story-six,.sample-panel.sample-animate .count-six{animation:stageSix 15s ease infinite}
-.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(n+10){animation:windowWinner 15s ease infinite}
+.sample-panel.sample-animate .window-frame{animation:windowScan 21s cubic-bezier(.55,.06,.25,1) infinite}
+.sample-panel.sample-animate .story-one,.sample-panel.sample-animate .count-one{animation:stageOne 21s ease infinite}
+.sample-panel.sample-animate .story-two,.sample-panel.sample-animate .count-two{animation:stageTwo 21s ease infinite}
+.sample-panel.sample-animate .story-three,.sample-panel.sample-animate .count-three{animation:stageThree 21s ease infinite}
+.sample-panel.sample-animate .story-four,.sample-panel.sample-animate .count-four{animation:stageFour 21s ease infinite}
+.sample-panel.sample-animate .story-five,.sample-panel.sample-animate .count-five{animation:stageFive 21s ease infinite}
+.sample-panel.sample-animate .story-six,.sample-panel.sample-animate .count-six{animation:stageSix 21s ease infinite}
+.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(n+10){animation:windowWinner 21s ease infinite}
 
 /* Architecture animation: events arrive in causal order. */
 .payment-route{position:relative;overflow:hidden}
@@ -457,20 +457,21 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .sample-panel.sample-animate .aws-database strong{animation:awsFailoverLabel 13.2s ease infinite}
 
 @keyframes windowScan{
-  0%,13%{left:0;width:30.77%;opacity:1}
-  17%,29%{left:0;width:46.15%;opacity:1}
-  33%,44%{left:7.69%;width:38.46%;opacity:1}
-  48%,60%{left:7.69%;width:76.92%;opacity:1}
-  64%,75%{left:46.15%;width:53.85%;opacity:1}
-  80%,100%{left:69.23%;width:30.77%;opacity:1}
+  0%,12%{left:0;width:30.77%;opacity:1}
+  15%,27%{left:0;width:46.15%;opacity:1}
+  30%,42%{left:7.69%;width:38.46%;opacity:1}
+  45%,57%{left:7.69%;width:76.92%;opacity:1}
+  60%,72%{left:46.15%;width:53.85%;opacity:1}
+  75%,80%{left:69.23%;width:30.77%;opacity:1}
+  92%,100%{left:0;width:30.77%;opacity:1}
 }
-@keyframes stageOne{0%,13%{opacity:1;transform:none}16%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageTwo{0%,13%{opacity:0;transform:translateY(4px)}17%,29%{opacity:1;transform:none}32%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageThree{0%,29%{opacity:0;transform:translateY(4px)}33%,44%{opacity:1;transform:none}47%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageFour{0%,44%{opacity:0;transform:translateY(4px)}48%,60%{opacity:1;transform:none}63%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageFive{0%,60%{opacity:0;transform:translateY(4px)}64%,75%{opacity:1;transform:none}78%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageSix{0%,75%{opacity:0;transform:translateY(4px)}80%,100%{opacity:1;transform:none}}
-@keyframes windowWinner{0%,75%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}82%{transform:scale(1.1)}88%,100%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}}
+@keyframes stageOne{0%,12%{opacity:1;transform:none}15%,80%{opacity:0;transform:translateY(-4px)}84%,100%{opacity:1;transform:none}}
+@keyframes stageTwo{0%,12%{opacity:0;transform:translateY(4px)}15%,27%{opacity:1;transform:none}30%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageThree{0%,27%{opacity:0;transform:translateY(4px)}30%,42%{opacity:1;transform:none}45%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageFour{0%,42%{opacity:0;transform:translateY(4px)}45%,57%{opacity:1;transform:none}60%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageFive{0%,57%{opacity:0;transform:translateY(4px)}60%,72%{opacity:1;transform:none}75%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageSix{0%,72%{opacity:0;transform:translateY(4px)}75%,80%{opacity:1;transform:none}84%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes windowWinner{0%,72%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}76%{transform:scale(1.1)}78%,80%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}88%,100%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}}
 @keyframes paymentFirstSequence{0%{opacity:0;transform:translateY(10px)}8%,100%{opacity:1;transform:none}}
 @keyframes paymentPacketFirst{0%,8%{left:13%;opacity:0}13%{opacity:1}27%{left:76%;opacity:1}31%,100%{left:86%;opacity:0}}
 @keyframes paymentPacketRetry{0%,51%{left:13%;opacity:0}56%{opacity:1}67%{left:62%;opacity:1}71%,100%{left:68%;opacity:0}}
