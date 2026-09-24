@@ -192,27 +192,86 @@ A provisioned queue or table does not make the local program use it. Configure r
 Join work across three services with imperfect clocks. Add parent/child span relationships and elapsed durations. Do not infer cross-host causality from timestamps alone.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The title becomes a queued job
 
-**Changed requirement:** The response finishes before the worker starts. How do support and operations join the story? Predict which boundary must change before opening the design.
+**Changed requirement:** The response finishes before the worker starts. How do support and operations join the story?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Store job ID and parent request ID in the enqueue transaction and propagate them as data. The worker has its own attempt ID. Retries are distinct attempts linked to one job.
+
+Alice now needs the save response immediately, even if the linked website takes several seconds. The existing handler performs title lookup before sending its response. Move that lookup into a separate process so it can continue after the request ends or the API restarts.
+
+| Boundary | Baseline | Revised design |
+|---|---|---|
+| Save | Store bookmark, then fetch title | Store bookmark and pending job in one database transaction |
+| Response | Title is ready or timed out | Return 201 with `title_status: "pending"` |
+| Work identity | One request ID | Request ID → stable job ID → separate attempt IDs |
+| Recovery | Request ends the work | A dispatcher can rediscover unsent jobs after a restart |
+
+**Implement it locally.** In `Handler.dispatch()`, replace the direct `lookup_title()` call with a transaction that inserts the bookmark and a title-job row. Add `job_id`, `bookmark_id`, `bookmark_version`, `parent_request_id` and status to that row. Create a worker command that claims a pending job, records a fresh attempt ID and calls the existing title fixture. Complete only if its ownership and the bookmark version still match. A later browser read observes the title result. The code for this extension is yours to add.
+
+For AWS, retain the durable job intent in the database and have a dispatcher publish its ID to SQS. This stored intent is an **outbox**: work saved alongside the bookmark so an API crash cannot lose the instruction to fetch its title. Database writes and SQS sends are separate operations. A crash after sending but before marking sent can publish twice, so the worker still needs duplicate-safe completion. The queue message should identify the job, not carry a secret-bearing URL. Load the authorized current URL from storage. The [AWS transactional outbox guide](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html) explains the database/message boundary. The [SQS visibility documentation](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) explains why visibility does not eliminate duplicate delivery.
+
+**Walk through one interrupted job.** The identifiers below are illustrative:
+
+```json
+{"event":"bookmark.saved","request_id":"req-A","bookmark_id":41,"job_id":"job-7"}
+{"event":"title.started","parent_request_id":"req-A","job_id":"job-7","attempt_id":"try-1"}
+{"event":"title.started","parent_request_id":"req-A","job_id":"job-7","attempt_id":"try-2"}
+{"event":"title.completed","parent_request_id":"req-A","job_id":"job-7","attempt_id":"try-2"}
+```
+
+Stop attempt 1 after it starts, then let attempt 2 finish. Extend `trace_request.py` to show both attempts under job 7. Report attempt 1 as incomplete, not successful. Keep queue waiting time separate from execution duration. Across hosts, use explicit parent links and local elapsed durations rather than assuming wall clocks perfectly agree. Support should be able to start with Alice's response ID and reach the later title outcome.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+A["API request req-A"] --> T["Database: bookmark and pending job"]
+ T --> R["201: title pending"]
+ T --> D["Outbox dispatcher"]
+ D --> Q["SQS: job ID"]
+ Q --> W["Worker: job-7, new attempt ID"]
+ W -->|conditional completion| T
+ W --> L["Linked diagnostic events"]
+```
 
 </details>
 
 ## Follow-up 2 · Logging fails
 
-**Changed requirement:** The log destination is temporarily unavailable. Should user work stop? State what evidence would make you reject your first design.
+**Changed requirement:** The log destination is temporarily unavailable. Should user work stop?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Choose bounded buffering/drop counters for ordinary diagnostics. Handle audit events according to their stronger contract. Bound memory, alarm on lost evidence, and avoid recursive logging failures.
+
+The bookmark database is healthy, but the diagnostic destination is unreachable. If every save waits indefinitely for a log write, a support tool has become a dependency that can stop the product. If logs simply vanish, support may mistake missing evidence for success.
+
+**Implement two explicit contracts.** Ordinary request diagnostics use a bounded nonblocking buffer and may be dropped when it fills. A mandatory audit event, such as a permission change that must retain evidence, belongs in durable transactional state before that business change is acknowledged. The bookmark tracing exercise needs ordinary diagnostics. Do not turn every trace event into a mandatory audit transaction.
+
+Use an illustrative buffer budget of 1 MiB and a maximum encoded event size of 1 KiB, with both byte and event-count limits. At 100 requests/s and six maximum-sized events per request, an empty buffer fills in about 1.7 seconds without draining. This is a brief outage cushion, not durable retention. Account for object overhead separately when choosing the process memory limit.
+
+Add buffer depth, dropped-event count and last successful delivery time. Update the drop counter without invoking the failing logger. Expose these counters through a separate health or metrics path. If that path shares the same failed destination, the responder may still have no evidence, so report that limitation. Keep a separate local status record for the exercise.
+
+**Demonstrate the result.** Disable diagnostic delivery, continue saving bookmarks and fill the buffer. Saves still return 201, buffer memory stays bounded and the drop counter increases. Restore delivery and show the remaining records drain. The support command must label the missing interval as incomplete evidence. For the optional audit variant, interrupt archive delivery and show the durable outbox retains unsent audit events. State what happens if even that durable store cannot accept a write.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+A["Bookmark save handler"] --> B["Bookmark database"]
+ A --> Q["Bounded diagnostic buffer"]
+ Q -->|destination available| L["CloudWatch Logs or local sink"]
+ Q -->|full| D["Drop counter"]
+ D --> M["Separate status path"]
+ U["Mandatory audit mutation"] --> T["Business state and durable audit outbox"]
+```
 
 </details>
 

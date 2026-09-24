@@ -81,41 +81,31 @@ Write probes before implementation, including authorization and atomic validatio
 
 ## Follow-up 1 · A third implementation
 
-**Changed requirement:** A third engineer uses a different framework. What do you compare? Predict which boundary must change before opening the design.
+**Changed requirement:** A third engineer uses a different framework. What do you compare?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Run the same black-box probes against each implementation. Compare status, data, and side effects. Ignore file layout and variable names.
 
-```mermaid
-flowchart TD
- P["Versioned behavior probes"] --> A["Implementation A"]
- P --> B["Implementation B"]
- P --> C["Implementation C"]
- A --> R["Response and state comparison"]
- B --> R
- C --> R
-```
+**Compare observable behavior.** Give implementation C the same operation sequence used for A and B. Compare response status, normalized tag data, uniqueness and durable side effects. Different function names, routing frameworks or file layouts are irrelevant to that contract.
+
+Hand over a three-column result table with one normal input and one boundary case. If an implementation differs, identify whether the specification left the behavior ambiguous or the implementation violated a stated rule. Do not silently update expected output to match the newest implementation.
 
 </details>
 
 ## Follow-up 2 · The product rule changes
 
-**Changed requirement:** Users now need case-preserving display with case-insensitive uniqueness. Which field changes? State what evidence would make you reject your first design.
+**Changed requirement:** Users now need case-preserving display with case-insensitive uniqueness. Which field changes?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Separate normalized identity from display text. Define whether the first or latest spelling wins. Retain a migration example for the existing `ai` value.
 
-```mermaid
-flowchart TD
- I["Input: AI"] --> N["Identity: ai"]
- I --> D["Display: AI"]
- N --> U["Unique item and normalized tag"]
- D --> V["Rendered tag"]
-```
+**Separate identity from presentation.** Store normalized `ai` as the uniqueness key and `AI` as display text under an explicit spelling policy. For this exercise, keep the first accepted spelling. Existing `ai` records migrate with display text `ai` unless a user deliberately edits it.
+
+Insert AI, then ai, for the same item. One tag identity remains and its display stays AI. Show a separate item preserving its own display policy. Deliver the schema change and migration example so the rule is understandable without guessing what normalization means.
 
 </details>
 

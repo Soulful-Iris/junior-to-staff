@@ -140,6 +140,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Revoke a creator without waiting for every feed copy to disappear
+
+A popular creator has millions of copied feed entries. Deleting every projection first can take minutes or hours. Ranking snapshots solve pagination, but do not authorize serving revoked content.
+
+| Starting design | Changed requirement |
+|---|---|
+| Feed projections contain copied post IDs and ranking data. | A removed creator must stop appearing even while projection cleanup is behind. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+P["Ranked feed projection"] --> F["Visibility filter"]
+ R["Current creator revocation"] --> F
+ F --> U["Authorized page and cursor"]
+ R --> Q["Projection cleanup queue"]
+ Q --> P
+ N["New posts"] --> P
+```
+
+**What to implement.** Keep source visibility and creator status authoritative. Before returning feed candidates, filter them using a revocation decision with a stated freshness bound and fail-closed behavior. Repair projections asynchronously. Use a snapshot or ranking version for pagination, but let revocation override that snapshot. Separate fanout workers from cleanup workers and budget both so a removal does not freeze new posts. The cache stores candidates, not an irrevocable permission grant.
+
+**Walk through the result.** Fetch page one under rank version 12, remove creator C, then fetch page two while cleanup is paused. C must be filtered and pagination must not repeat prior visible posts. Explain that the page may contain fewer items. Hand over the cursor fields, revocation bound and repair-progress metric.
+
+
 
 
 Introduce ranked ordering. Freeze or version enough ranking context to make pagination understandable, then explain how you avoid duplicate posts when new scores arrive between pages.

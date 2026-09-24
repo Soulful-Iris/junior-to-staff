@@ -143,6 +143,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Allocate custom aliases across two regions
+
+Two customers in different regions both request /launch. Checking each regional cache can return available twice. Replication after both writes cannot retroactively give both customers the promised alias.
+
+| Starting design | Changed requirement |
+|---|---|
+| One database decides whether an alias is available. | Both regions accept traffic, but one authority owns alias creation. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Region A create API"] --> C["Home-region alias allocator"]
+ B["Region B create API"] --> C
+ C --> D["DynamoDB: conditional reservation"]
+ D --> E["Regional mapping caches"]
+ E --> F["Redirect handlers"]
+```
+
+**What to implement.** Route all alias mutations to a designated home-region allocator. Store alias, tenant, destination and request identity in one conditional create. Regional resolvers may read cached mappings under the existing expiry and takedown rules. During loss of the allocation authority, keep safe redirects working and return a retryable failure for new aliases. Promotion requires fencing the old allocator and proving the promoted state contains acknowledged reservations. A second DynamoDB table or DNS change alone supplies neither guarantee.
+
+**Walk through the result.** Submit launch from regions A and B simultaneously. One tenant receives success and the other a conflict. Next disconnect B from the allocator. B must not allocate launch locally. Record the added cross-region allocation latency and the availability sacrificed to retain uniqueness.
+
+
 
 
 At multi-region scale, choose one owner for alias allocation or a globally consistent authority. Do not let two independent regional caches reserve the same alias. Quantify added write latency and what a region does during loss of the allocation authority.

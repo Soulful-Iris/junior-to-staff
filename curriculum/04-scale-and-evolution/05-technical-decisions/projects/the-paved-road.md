@@ -140,27 +140,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 The template grows fifty optional switches. Revisit the common service path and split genuinely different products instead of exposing every implementation detail as another mandatory choice.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · An existing service drifts
 
-**Changed requirement:** A manual console edit removes retention after deployment. What notices? Predict which boundary must change before opening the design.
+**Changed requirement:** A manual console edit removes retention after deployment. What notices?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Compare actual resources against the declared policy on a schedule or relevant event. Report ownership and remediation. Do not claim a repository template makes all future console changes impossible.
+
+**Separate creation defaults from continuing compliance.** A template sets retention when the resource is created. A later console edit changes actual state without changing the repository. Add an inventory comparison in the hypothetical platform, with resource ID, declared value, observed value and owning team.
+
+Remove retention from a disposable resource and show a drift record. Choose whether remediation is automatic or owner-approved based on the impact, and preserve the evidence of the change. This lesson describes a platform capability to implement. It does not add a scheduled check or deployment gate to the guide repository.
 
 </details>
 
 ## Follow-up 2 · A legitimate exception exists
 
-**Changed requirement:** A security archive needs a different retention policy. Does your check block useful work? State what evidence would make you reject your first design.
+**Changed requirement:** A security archive needs a different retention policy. Does your check block useful work?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Support a reviewed, expiring exception with reason and owner. Validate the exception itself. Count repeated exceptions to discover whether the default is wrong.
+
+**Represent the exception as data.** Store resource scope, permitted deviation, reason, approving role, owner and expiry. The evaluator must match the exact resource and rule, not accept a global “ignore” flag. An expired exception returns to unresolved drift until renewed or repaired.
+
+Show a security archive retaining data longer than the default while an unrelated service still receives a violation. Report repeated requests for the same exception so the platform owner can reconsider the default. The deliverable is the exception record and three evaluation outcomes, not another architecture layer.
 
 </details>
 

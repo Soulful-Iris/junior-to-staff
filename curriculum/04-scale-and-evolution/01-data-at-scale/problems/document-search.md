@@ -132,6 +132,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Add vector retrieval without bypassing document permissions
+
+An embedding can remain in an index after a document is revoked. Filtering only when indexing grants old derived data more authority than current source permissions.
+
+| Starting design | Changed requirement |
+|---|---|
+| Lexical search returns candidate document IDs. | A vector index supplies additional candidates that may contain stale permissions. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+Q["Search query"] --> L["Lexical candidates"]
+ Q --> V["Vector candidates"]
+ L --> M["Merge bounded document IDs"]
+ V --> M
+ M --> A["Current permission and source version"]
+ A -->|allowed chunks| R["Snippets or grounded answer"]
+```
+
+**What to implement.** Use lexical and vector indexes for candidate discovery, then merge bounded candidates by stable document ID and source version. Fetch authorized source chunks through a trusted document service. Recheck permission before returning snippets or generated text if revocation may occur during processing. Rebuild embedding generations separately and preserve deletion markers during backfill. OpenSearch or another vector engine is a retrieval component, not the permission owner.
+
+**Walk through the result.** Pause the vector indexer, revoke document D, then query text that strongly matches D. It may remain an internal candidate but must not appear in the response or model context. Show the source-version check and denial. Deliver a trace separating candidate recall, authorization filtering and answer generation.
+
+
 
 
 Add semantic retrieval. Keep the same authorization boundary for vector candidates and source chunks. Embeddings are not a substitute for tenant isolation or revocation.

@@ -138,6 +138,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Isolate tenant backlogs and add an explicit fallback policy
+
+A global FIFO lets one campaign delay every other customer. A second channel also creates a new side effect: an unknown email outcome does not prove that the customer received nothing.
+
+| Starting design | Changed requirement |
+|---|---|
+| All notifications share delivery capacity. | One tenant floods the queue while another needs timely delivery, and email may fall back to SMS. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Tenant A backlog"] --> S["Fair delivery scheduler"]
+ B["Tenant B backlog"] --> S
+ S --> C["Current consent and channel policy"]
+ C --> L["Delivery attempt ledger"]
+ L --> E["Email provider"]
+ L -->|explicit fallback decision| M["SMS provider"]
+```
+
+**What to implement.** Introduce per-tenant pending work and a scheduler that grants bounded sends under the shared provider rate. Store consent and channel policy with a version, then recheck current authorization before delivery. Keep a delivery attempt ledger per channel. Product must choose whether uncertain email may trigger SMS and accept possible duplicate contact. SQS can buffer ready work, while a database scheduler owns fair selection and quota accounting.
+
+**Walk through the result.** Give A 10,000 pending messages and B ten. Show B making progress while total sends stay under the provider budget. Lose an email response for one recipient and record UNKNOWN. Demonstrate either delayed reconciliation or an explicitly permitted SMS fallback, with both attempts visible. Do not relabel UNKNOWN as failed to make the policy easier.
+
+
 
 
 Add SMS fallback. Define whether an unknown email attempt justifies sending a second channel, and let the product choose the user-visible duplication tradeoff.

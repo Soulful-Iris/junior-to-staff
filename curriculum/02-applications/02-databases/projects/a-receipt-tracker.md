@@ -138,27 +138,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add currencies with different minor-unit conventions and tax-line reconciliation. Make the currency exponent part of the conversion policy instead of multiplying every amount by 100.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The upload is retried
 
-**Changed requirement:** The phone loses the completion response and submits the same upload ID twice. What is counted? Predict which boundary must change before opening the design.
+**Changed requirement:** The phone loses the completion response and submits the same upload ID twice. What is counted?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use an owner-scoped upload identity, verify object metadata and finalize idempotently. A repeated completion must not create another receipt or queue an unbounded duplicate extraction.
+
+**Separate upload from finalization.** An object arriving in storage is not yet a receipt counted in the monthly total. Create an upload record scoped to its owner, verify the expected object and checksum, then atomically finalize one receipt and one extraction intent. A repeated finalization returns that same receipt.
+
+Lose the first completion response and submit upload U twice. Show one receipt ID and one logical extraction job. Reuse U with a different object hash and show conflict. Cleanup must also find uploads that never finalized, without deleting objects still referenced by completed receipts.
 
 </details>
 
 ## Follow-up 2 · Several currencies
 
-**Changed requirement:** The month contains USD 19.99 and JPY 500. What does the summary show? State what evidence would make you reject your first design.
+**Changed requirement:** The month contains USD 19.99 and JPY 500. What does the summary show?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Group totals by currency unless conversion is explicitly requested. Conversion needs rate source, rate date, rounding and audit trail. Adding 1999 and 500 would combine different units.
+
+**Use a unit-bearing result.** Return separate totals such as `[{"currency":"USD","amount_minor":1999},{"currency":"JPY","amount_minor":500}]`. Under the chosen currency rules, that means USD 19.99 and JPY 500. No meaningful combined total is 2499.
+
+If the user explicitly requests USD conversion, create a separate report that records rate, source, effective date and rounding. Preserve original receipt amounts. Hand over the grouped response and one conversion example so another engineer can reproduce it. A table is more useful here than adding new services.
 
 </details>
 

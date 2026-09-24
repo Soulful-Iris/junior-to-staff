@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Move one tenant into dedicated storage
+
+An enterprise customer wants independent recovery and access controls. Forking every endpoint would make the two products drift. The new responsibility is deciding where a tenant lives and preventing stale workers from writing to its old home.
+
+| Starting design | Changed requirement |
+|---|---|
+| All tenant rows share one storage placement. | A placement registry routes one tenant to its own database or account. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Authenticated tenant request"] --> P["Placement registry"]
+ P -->|shared tenant| S["Pooled storage"]
+ P -->|dedicated tenant| D["Dedicated storage"]
+ W["Background worker"] --> P
+ M["Copy and reconcile"] --> S
+ M --> D
+```
+
+**What to implement.** Add a trusted placement record keyed by tenant with location, state and generation. Resolve it after authentication in both HTTP and worker paths. Copy one snapshot, apply newer changes and tombstones, then briefly quiesce that tenant's writers to reconcile and switch placement. Fence old-generation writes at the storage boundary. Move credentials and encryption access with the placement. In AWS, the dedicated target can be a separate RDS database or account-scoped table, with an assumed role restricted to that tenant.
+
+**Walk through the result.** Move tenant T while tenant U continues normally. Resume an old T export after cutover. It must refresh its placement or fail, not read from the pooled copy. Reconcile values and deletions before routing. Keep the old copy inaccessible until its retention and rollback obligations end.
+
+
 
 
 Offer dedicated storage to a regulated customer without forking the entire application. Define tenant placement metadata, connection routing, restore scope and the migration boundary between shared and dedicated storage.

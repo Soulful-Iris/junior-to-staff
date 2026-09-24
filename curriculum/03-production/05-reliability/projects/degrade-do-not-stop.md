@@ -162,27 +162,46 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add an optional AI summary. Give it its own latency/cost budget and source-version identity. A failed summary must not remove access to the saved article.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The provider recovers
 
-**Changed requirement:** The breaker opens, then probes recovery. How many requests probe at once? Predict which boundary must change before opening the design.
+**Changed requirement:** The breaker opens, then probes recovery. How many requests probe at once?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use a bounded half-open probe set, not all waiting callers. Close only according to tested success criteria. A failed probe returns to the open state while the fallback remains usable.
+
+**Bound the half-open state.** Give the breaker a small probe allowance and a decision rule for reopening or closing. Other callers continue using the fallback while the probes run. Define whether the allowance is per process or shared across the fleet.
+
+Use two probe slots in a controlled example with fifty waiting requests. Only two call the recovered dependency initially. One fails, so the breaker returns to open and the remaining callers keep their fallback. Hand over the state transitions and actual call count.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+O["Open: serve fallback"] -->|cooldown elapsed| H["Half-open: bounded probes"]
+ H -->|probe failure| O
+ H -->|success rule met| C["Closed: normal calls"]
+ C -->|failure threshold| O
+ W["Other waiting callers"] --> F["Fallback while probing"]
+```
 
 </details>
 
 ## Follow-up 2 · Everything is high priority
 
-**Changed requirement:** Critical arrivals exceed capacity even after optional work is disabled. What gives? State what evidence would make you reject your first design.
+**Changed requirement:** Critical arrivals exceed capacity even after optional work is disabled. What gives?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Bound interactive admission too. Choose finite queueing or fast overload response, reserve recovery capacity, and report denied critical work. Priority cannot guarantee service beyond capacity.
+
+**Keep the fallback affordable.** Disabling title enrichment does not help if the database save path itself is saturated. Apply admission before taking a database connection and reserve control capacity for recovery operations. A finite queue is useful only while requests can still meet their deadline.
+
+Show the service with enrichment fully disabled and critical arrivals above sustainable throughput. Record accepted, completed, queued and rejected work. Your deliverable must include denied critical requests rather than hiding them inside an improved average latency for the accepted subset.
 
 </details>
 

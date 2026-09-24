@@ -156,27 +156,48 @@ A provisioned queue or table does not make the local program use it. Configure r
 The mitigation lowers alert delay but leaves backlog drain unchanged. Report faster detection separately from recovery. Do not claim the entire incident became shorter without measuring it.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · An async boundary appears
 
-**Changed requirement:** The user request ends before the worker starts. Which trace relationship do you preserve? Predict which boundary must change before opening the design.
+**Changed requirement:** The user request ends before the worker starts. Which trace relationship do you preserve?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Link the enqueue span to the job and each worker attempt. Show queue wait separately from execution. A retry must not overwrite the first attempt’s evidence.
+
+**Preserve causal links as data.** Persist request ID and job ID with the pending work before returning the user response. Each worker attempt receives a new attempt/span ID linked to the stored job. Emit enqueue, claim, execution and completion events. Never overwrite attempt 1's failure with attempt 2's success.
+
+Show a request that returns at 10:00, a job claimed at 10:02 and two 500 ms attempts. The two-minute wait should not appear as a two-minute provider call. Use durable timestamps with known clock uncertainty for cross-host waiting, and local elapsed clocks for attempt duration.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+R["Request span"] --> J["Durable job with parent ID"]
+ J --> Q["Queue waiting interval"]
+ Q --> A["Attempt 1: incomplete"]
+ Q --> B["Attempt 2: completed"]
+ A --> T["Support timeline"]
+ B --> T
+ R --> T
+```
 
 </details>
 
 ## Follow-up 2 · Telemetry disappears
 
-**Changed requirement:** The collector fails while the application continues. How does the responder distinguish healthy traffic from silence? State what evidence would make you reject your first design.
+**Changed requirement:** The collector fails while the application continues. How does the responder distinguish healthy traffic from silence?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use an independently observed heartbeat and delivery/drop counters, and state what remains unknowable. Do not score undefined good/total as 100% availability.
+
+**Show the observer failing independently.** Add collector delivery age and dropped-event counts beside request outcomes. Send a heartbeat through a separate observation path where possible. If both depend on the same unavailable backend, explicitly mark application health unknown.
+
+Stop the collector while a controlled user request succeeds. The incident view should show successful direct observation alongside missing telemetry, not a fabricated 100% service-wide result. Hand over the evidence that still exists and the interval that cannot be reconstructed.
 
 </details>
 

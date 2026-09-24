@@ -136,6 +136,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Cross the point where an old schema cannot represent new writes
+
+The new tag model permits color and organization ownership, while the old model stores only strings. Sending traffic back to old code can silently discard meaning even when both databases are healthy.
+
+| Starting design | Changed requirement |
+|---|---|
+| Old and new readers can interpret every accepted write. | The target permits a value that the old schema cannot encode. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+C["Copy and catch up"] --> V["Compatible serving"]
+ V -->|lossless reverse path exists| R["Reversible cutover"]
+ V -->|target-only semantics enabled| F["Forward-repair boundary"]
+ F --> N["New writers only"]
+ O["Old writer"] -->|fenced| X["Reject stale generation"]
+```
+
+**What to implement.** Use explicit migration phases: copy, catch up, compatible serving, then target-only writes. Before that last phase, either implement a lossless reverse representation or declare forward repair as the recovery strategy. Fence old writers and retain versioned change records. Keep a per-tenant cutover record so one tenant's target-only write does not accidentally authorize all tenants to cross the boundary. AWS routing changes select servers, while the database migration controller owns data readiness.
+
+**Walk through the result.** Create tag {name: urgent, color: red} after cutover. Attempt the documented rollback. It must either preserve color through the compatibility adapter or refuse and invoke forward repair. Supply a phase table with permitted writers and recovery action for each phase.
+
+
 
 
 The target accepts data the old schema cannot represent. Mark that first write as an explicit rollback boundary. Design a forward repair path and explain why flipping traffic back would lose meaning even if every server is healthy.

@@ -74,37 +74,31 @@ First inventory decisions, then group commits by behavior and dependency. Preser
 
 ## Follow-up 1 · A shared branch already exists
 
-**Changed requirement:** A teammate has based two commits on the old history. How do you run the drill safely? Predict which boundary must change before opening the design.
+**Changed requirement:** A teammate has based two commits on the old history. How do you run the drill safely?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Keep the shared reference stable and create a separate rehearsal branch. Compare trees there. Use improved messages only on future shared work. The expected outcome is zero forced updates to the teammate’s base.
 
-```mermaid
-flowchart TD
- A["Shared main"] -->|unchanged base| B["Teammate commits"]
- A -->|copy| C["Private rehearsal"]
- C -->|compare final trees| D["Original tip"]
-```
+**Preserve the teammate's base.** Create a private rehearsal branch from the relevant history and perform the explanatory rewrite there. Compare final trees against the original tip. Do not force-update the shared branch used by the teammate's two commits.
+
+Deliver the two branch names and an empty final-tree diff, then ask the reader to answer the same why-question from each history. The improvement should come from recoverable reasoning in messages, not from secretly changing the code.
 
 </details>
 
 ## Follow-up 2 · The explanation lives outside Git
 
-**Changed requirement:** The decision cites a benchmark file that will disappear. What must survive a year? State what evidence would make you reject your first design.
+**Changed requirement:** The decision cites a benchmark file that will disappear. What must survive a year?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Attach the input, units, observed result, and a stable artifact identifier to the decision record. A narrative with a broken evidence link is not recoverable. Re-run the stranger exercise from an offline clone or exported bundle.
 
-```mermaid
-flowchart TD
- A["Decision commit"] -->|why| B["Measured deadline"]
- A -->|artifact ID| C["Versioned benchmark fixture"]
- C -->|replay| D["Cited result"]
-```
+**Keep the evidence recoverable.** Save the benchmark input, command, runtime conditions, units and result with an immutable artifact identifier. Link that identifier from the decision commit. An expiring dashboard URL is not enough to reproduce the argument a year later.
+
+Use an offline clone or exported bundle to answer the original question. If the artifact is too large to include, document its durable location, hash and access owner. Hand over what the reader can establish without the original author or a working chat link.
 
 </details>
 

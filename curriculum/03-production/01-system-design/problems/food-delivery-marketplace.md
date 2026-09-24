@@ -132,6 +132,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Coordinate restaurant acceptance before capturing payment
+
+A restaurant cannot fulfill an item even though discovery showed it available. Capturing money and declaring success before acceptance leaves the system with a business obligation that a database rollback cannot erase.
+
+| Starting design | Changed requirement |
+|---|---|
+| Checkout reserves items under an accepted quote. | The restaurant may reject or time out, and substitutions need customer consent. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+O["Accepted quote"] --> R["Restaurant decision"]
+ O --> P["Payment authorization"]
+ R -->|accepted unchanged| C["Capture eligibility"]
+ P --> C
+ R -->|substitution| U["Renew customer consent"]
+ R -->|reject or timeout| X["Cancel and reconcile authorization"]
+```
+
+**What to implement.** Persist the accepted quote, promotion version and substitution permissions. Track restaurant acceptance and payment authorization separately. Capture only when the chosen policy permits fulfillment. On timeout, move the order to a visible unresolved or cancellation state and void authorization where supported. A changed price or unapproved substitution creates a new customer decision. Use durable workflow state and idempotent provider adapters, with compensation recorded as its own operation.
+
+**Walk through the result.** Order O authorizes payment, then the restaurant proposes a more expensive replacement. Show awaiting customer approval with no capture. Decline the replacement and record cancellation plus the authorization-release outcome. If release is uncertain, retain repair work rather than marking every component rolled back.
+
+
 
 
 Add restaurant-specific promotions and substitutions. Define which changes require renewed customer consent and which can be applied within the accepted quote. Preserve the exact accepted policy version.

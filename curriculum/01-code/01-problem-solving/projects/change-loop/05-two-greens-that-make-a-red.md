@@ -82,37 +82,31 @@ Construct the failing combination first. Test a speculative merge against curren
 
 ## Follow-up 1 · Main changes during CI
 
-**Changed requirement:** A third commit lands while the speculative check is running. May the old result be reused? Predict which boundary must change before opening the design.
+**Changed requirement:** A third commit lands while the speculative check is running. May the old result be reused?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Recompute the speculative tree and rerun checks affected by the new base. Compare tree or input hashes explicitly. A commit’s unchanged PR head says nothing about dependency changes on main.
 
-```mermaid
-flowchart TD
- A["Main advances"] -->|invalidate old tree| B["Rebuild speculative merge"]
- B --> C["Run checks on new tree"]
- C -->|matching tree only| D["Land merge"]
-```
+**Bind evidence to the combined tree.** PR B's head may be unchanged while main acquires a conflicting semantic change. Recompute the speculative merge and record its tree identity. Reuse a prior result only if all relevant source and execution inputs truly match.
+
+Deliver the old base, new base and both combined-tree IDs. Show the original result marked stale and the new result attached to the new tree. The exercise demonstrates why “this PR was green earlier” does not describe its current integration behavior.
 
 </details>
 
 ## Follow-up 2 · The suite is flaky
 
-**Changed requirement:** The correct integration test fails 10% of the time due to leaked fixture state. Does a retry establish correctness? State what evidence would make you reject your first design.
+**Changed requirement:** The correct integration test fails 10% of the time due to leaked fixture state. Does a retry establish correctness?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Reproduce fixture contamination and isolate state before trusting the queue. Track ejection reasons. A retry may gather diagnostic evidence but does not repair the oracle. The merge queue amplifies flaky gates into team-wide delay.
 
-```mermaid
-flowchart TD
- A["Shared mutable fixture"] -->|contamination| B["False queue ejection"]
- C["Per-test isolated fixture"] -->|deterministic input| D["Stable integration check"]
- D --> E["Reliable admission"]
-```
+**Repair the source of nondeterminism.** Preserve the input order and shared fixture state that produced the false failure. Isolate mutable files, database rows or clocks as appropriate, then replay that specific contamination sequence. Record retry outcomes as observations rather than turning any later pass into approval.
+
+At a 10% independent false-failure probability, repeated checks can create substantial queue churn even when every change is correct. Independence itself may not hold with shared state. Deliver the cause, deterministic reproduction and ownership of any temporary quarantine.
 
 </details>
 

@@ -72,40 +72,31 @@ Predefine the holdout checkpoint, then parameterize only genuine variables. Comp
 
 ## Follow-up 1 · A model upgrade
 
-**Changed requirement:** The same prompts run on a new model version. What evidence expires? Predict which boundary must change before opening the design.
+**Changed requirement:** The same prompts run on a new model version. What evidence expires?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Re-run the saved task probes and track model/configuration versions. Earlier observations remain historical. They do not establish present behavior.
 
-```mermaid
-flowchart TD
- V["Versioned prompt"] --> A["Old model results"]
- V --> B["New model results"]
- P["Same holdout probes"] --> A
- P --> B
- A --> D["Behavior comparison"]
- B --> D
-```
+**Retain comparable evidence.** Run the saved task and scoring rule against both model configurations without rewriting the prompt after seeing the new result. Record exact prompt, model configuration, task input and outcome. The old observation remains valid history.
+
+Show one constraint that still prevents its named failure and one that no longer helps, if observed. If all remain useful, report that honestly with the sampled scope. The deliverable is an updated evidence record, not an automatic requirement to replace every prompt on a model upgrade.
 
 </details>
 
 ## Follow-up 2 · Several teams adopt it
 
-**Changed requirement:** A payments team needs stronger review than a UI prototype. How does the library avoid unsafe blanket rules? State what evidence would make you reject your first design.
+**Changed requirement:** A payments team needs stronger review than a UI prototype. How does the library avoid unsafe blanket rules?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Give entries applicability conditions and owners. Reuse the verified stopping point while letting domain-specific correctness requirements remain explicit.
 
-```mermaid
-flowchart TD
- L["Shared constraint library"] --> G["Applicability check"]
- G --> P["Payments-specific oracle"]
- G --> U["UI-specific oracle"]
-```
+**Publish applicability alongside the wording.** A rule to stop after a visual check may suit a prototype but not a payment operation with uncertain external effects. Each shared entry needs the failure it addresses, conditions where it applies and an owning team.
+
+Compare the same entry in a UI prototype and a payments change. Record keep, adapt or reject with the concrete reason. Shared language can reduce repeated work without centralizing every domain's correctness decision. No extra infrastructure is needed for this follow-up.
 
 </details>
 

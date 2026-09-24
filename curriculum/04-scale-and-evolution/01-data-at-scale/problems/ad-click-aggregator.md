@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Separate revisable click reports from finalized invoices
+
+An advertiser paid for yesterday's clicks using fraud policy 3. Recomputing the dashboard with policy 4 may lower the count, but overwriting the invoice would erase what was actually charged.
+
+| Starting design | Changed requirement |
+|---|---|
+| Late events can revise dashboard aggregates. | A finalized invoice must remain explainable after fraud policy changes. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+E["Retained click events"] --> D["Revisable dashboard aggregates"]
+ E --> F["Versioned invoice calculation"]
+ F --> I["Final invoice evidence"]
+ E --> N["New fraud policy calculation"]
+ N --> A["Adjustment referencing invoice"]
+ I --> A
+```
+
+**What to implement.** Keep raw event IDs and versioned metric definitions. At invoice finalization, retain the time range, attribution policy, fraud version and evidence manifest used for its lines. Later corrections create adjustment entries that reference the original invoice. The dashboard can show a newer provisional generation with its own watermark. Use the warehouse for recomputation and a transactional billing ledger for final documents and adjustments.
+
+**Walk through the result.** Invoice I contains 1,000 billable clicks under policy 3. Policy 4 excludes 100 of those clicks. Show the original invoice unchanged, a separately approved adjustment for 100 and a dashboard count of 900 under policy 4. Deliver the three linked records and explain which is authoritative for each question.
+
+
 
 
 An advertiser disputes yesterday’s invoice after fraud filtering changes. Define immutable invoice evidence, correction entries and the relationship between a revisable dashboard and a finalized financial document.

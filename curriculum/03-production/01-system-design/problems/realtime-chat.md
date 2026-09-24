@@ -134,6 +134,32 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Order a chat room across regions and scale its delivery
+
+Connection proximity does not determine message order. If two regions independently allocate sequence 42, reconnecting clients cannot know which message belongs at that position.
+
+| Starting design | Changed requirement |
+|---|---|
+| One room sequencer orders durable messages. | Users connect in several regions and a hot room needs multiple fanout workers. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Region A gateway"] --> S["Room sequencing authority"]
+ B["Region B gateway"] --> S
+ S --> L["Durable room log"]
+ L --> F["Recipient-partitioned fanout"]
+ F --> C["Connected clients"]
+ C -->|resume cursor| R["Authorized log replay"]
+ R --> L
+```
+
+**What to implement.** Choose a home sequencer for each room. Remote gateways forward sends to it and acknowledge only after the room log is durable under the stated recovery contract. Partition delivery by recipient, not by independent room writers. Every client keeps its last received sequence and deduplicates replayed messages. Recheck room membership before backlog delivery. On failover, fence the old sequencer and verify log coverage before the new owner allocates sequence numbers.
+
+**Walk through the result.** Deliver message 42 to half the room, stop a fanout worker and reconnect a client at cursor 41. It receives 42 once visibly, then 43. Remove another member before replay and show denial. Your diagram and transcript must distinguish ordering, durable acknowledgement and delivery, which are three separate responsibilities.
+
+
 
 
 Add cross-region conversations. State which region orders a conversation and what happens during its outage. Global delivery does not imply independent regions can allocate the same conversation sequence safely.

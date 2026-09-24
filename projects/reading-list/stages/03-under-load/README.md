@@ -165,27 +165,46 @@ A provisioned queue or table does not make the local program use it. Configure r
 Continue to stage 4 by adding optional AI tags without putting model latency or model guesses on the critical save/list path.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The owner stops after fetching
 
-**Changed requirement:** A crash occurs after the remote GET but before the durable record. How does retry recover? Predict which boundary must change before opening the design.
+**Changed requirement:** A crash occurs after the remote GET but before the durable record. How does retry recover?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Refetch is allowed. Record outcome only with the current generation in an atomic completion transaction. Match payload hashes. A duplicate ID with different content is a conflict, not a replay.
+
+**Recover the logical job, not the old process.** The remote GET may run again because its response was never durably recorded. Keep the original job ID and payload fingerprint, acquire a new generation and create a new attempt ID. Completion atomically stores the result only for the current owner and bookmark version.
+
+Pause A after fetching, let B finish, then resume A. Show two fetch attempts but one published title result. Reuse the job ID with another URL and show conflict. If fetching later becomes billable or has side effects, this safe-repeat assumption must be revisited.
 
 </details>
 
 ## Follow-up 2 · The cache disappears
 
-**Changed requirement:** Traffic remains 1,000 reads/s but the database can handle only 100/s. What should users see? State what evidence would make you reject your first design.
+**Changed requirement:** Traffic remains 1,000 reads/s but the database can handle only 100/s. What should users see?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Bound origin/bypass work and choose authorized bounded-stale responses or quick 429/503. If read-your-writes is required, use primary/session watermark/confirmed progress. A finite primary pin cannot cover unbounded replica lag.
+
+**Make cache failure an admission problem.** Keep a hard origin budget shared across instances or explicitly partitioned so its total stays within 100/s. Coalesce identical misses where possible. Serve stale content only within its freshness and authorization contract. Preserve read-your-writes using confirmed version progress or the primary path, rather than a timer that assumes replicas caught up.
+
+At 1,000 offered reads/s, show how every request is completed, coalesced or rejected while origin traffic remains bounded. Hand over the recovery timeline and an immediate read after a save during replica lag.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+R["1,000 offered reads per second"] --> C["Cache and miss coalescing"]
+ C --> A["Origin admission: at most 100 per second"]
+ A --> D["Primary or caught-up replica"]
+ A -->|no safe capacity| X["Authorized stale response or overload"]
+ W["Session version requirement"] --> D
+```
 
 </details>
 

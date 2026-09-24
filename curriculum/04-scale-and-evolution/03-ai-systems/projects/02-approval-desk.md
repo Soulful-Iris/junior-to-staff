@@ -136,6 +136,32 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Turn an approved batch into individually accountable effects
+
+Approval of ten credits must not become permission for an eleventh. A crash after credit three also must not cause credits one through three to be submitted with new identities.
+
+| Starting design | Changed requirement |
+|---|---|
+| One approved proposal produces one local receipt. | A batch can partly execute against a real provider before the process stops. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+P["Exact batch proposal"] --> A["Approval hash and limits"]
+ A --> E["Restricted item executor"]
+ E --> L["Per-item durable attempts"]
+ L --> R["External provider"]
+ R -->|uncertain| U["Reconcile same operation ID"]
+ U --> L
+ L --> V["Partial completion view"]
+```
+
+**What to implement.** Hash the complete approved item set, per-item amounts, currencies and aggregate limits. Persist a batch record and a stable provider operation ID for every item. Execute only items covered by a still-valid approval and recheck limits before each effect. Keep confirmed, unknown and not-started states separately. An uncertain item is reconciled with its original provider before automatic continuation or retry. A reviewer sees partial completion rather than one misleading batch-failed label.
+
+**Walk through the result.** Approve three credits of $5. Confirm item 1, lose the response for item 2 and stop before item 3. Restart and recover item 2 by its original identity. Add a fourth item and show rejection because the plan hash changed. Deliver the batch approval and three-item outcome ledger.
+
+
 
 
 Approve a batch of credits. Bind approval to the complete item set and per-item limits, then report partial execution and repair without turning one approval into an unlimited batch capability.

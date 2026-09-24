@@ -164,7 +164,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 A previously unknown export tool still reads the old table. Add it to the inventory and decide whether to adapt or retire it. Migration completion is about actual consumers, not only the services you remembered initially.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The backfill meets live writes
 
@@ -172,12 +172,28 @@ A previously unknown export tool still reads the old table. Add it to the invent
 without losing either? Predict the failure before opening the design.
 
 <details>
-<summary>Expected reasoning and diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Apply only increasing versions and retain tombstones for the replay horizon.
 Track checkpoint coverage, source counts/checksums and semantic mismatches.
 A counter at zero needs a blind-spot analysis, including dynamic consumers and
 delayed/offline writers.
+
+**Work through one record.** The snapshot contains item 7 at v1, a live edit produces v2, and deletion produces tombstone v3. Deliver them to the target in the order v2, v3, v1. The target must retain deleted v3 because every apply checks that the incoming version is newer. A tombstone is a versioned deletion record, not an ordinary missing row.
+
+Persist copy checkpoints and stream coverage separately. If change history expires before catch-up, stop and resnapshot the affected range. Deliver the record timeline, a version/value/deletion reconciliation result and the point where you permit cutover.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+S["Snapshot row v1"] --> A["Conditional version apply"]
+ L["Live edit v2"] --> A
+ D["Delete tombstone v3"] --> A
+ A --> T["Target retains newest state"]
+ T --> R["Value and deletion reconciliation"]
+ R --> C["Tenant cutover decision"]
+```
 
 </details>
 
@@ -187,12 +203,16 @@ delayed/offline writers.
 last 300 seconds. What can rollback promise?
 
 <details>
-<summary>Expected reasoning and diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Preserve old/new data compatibility and choose explicit cohorts. Load-balancer
 admission, DNS propagation and existing connection drain have different timing.
 Keep partial gains measurable, but retire duplicated maintenance only after
 consumers and replay obligations are gone.
+
+**Keep compatibility alive for the actual consumer horizon.** Route migrated cohorts to the new path while the delayed team keeps an owned adapter. Old writers must still preserve the new system's invariants, or be fenced before target-only semantics begin. A quarter of dual support has an operational cost that belongs in the plan.
+
+Show an old mobile write arriving during the overlap and a rollback after a target-only field is created. DNS with a 300-second TTL does not instantly move cached clients or existing connections. Deliver a compatibility table and distinguish traffic rollback from data repair.
 
 </details>
 

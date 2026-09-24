@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Rebuild multilingual story groups without losing attribution
+
+Two headlines about an election may describe different events. A similarity score can nominate a pair but cannot safely replace stable article identity. A mistaken merge must be reversible.
+
+| Starting design | Changed requirement |
+|---|---|
+| Stories are grouped using one canonicalization policy. | A new policy groups related stories across languages and can split old groups. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Immutable articles and attribution"] --> O["Current grouping index"]
+ A --> N["Candidate multilingual index"]
+ N --> E["False-merge and missed-match review"]
+ E --> P["Active mapping version"]
+ O --> P
+ P --> F["Reader feed"]
+```
+
+**What to implement.** Keep immutable article IDs, source URLs and language metadata. Build a separately versioned article-to-story mapping, leaving the old mapping available while the new one is evaluated. Compare known false merges and missed duplicates by language. Switch readers to one mapping version and preserve cursor behavior across the switch. Use S3 for retained source material and a separate index generation for derived groups, with explicit attribution in each result.
+
+**Walk through the result.** Construct three articles: two translations of the same announcement and one later correction. Show the desired grouping and the evidence that distinguishes the correction. Introduce an incorrect merge, roll back the mapping pointer and demonstrate that source URLs and article identities never changed. Deliver a before/after membership table.
+
+
 
 
 Add multilingual story grouping. Preserve original language and attribution, and evaluate false merges separately from missed duplicates. Similarity is a candidate signal, not identity.

@@ -143,27 +143,46 @@ A provisioned queue or table does not make the local program use it. Configure r
 An event costs ten times the average. Move from count-only admission toward estimated work units while retaining a hard memory/byte bound for the queue.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A worker pauses past visibility
 
-**Changed requirement:** A second worker completes before the first resumes. What stops the stale completion? Predict which boundary must change before opening the design.
+**Changed requirement:** A second worker completes before the first resumes. What stops the stale completion?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Condition writes on the current fencing generation and job state. The old process may still execute. Only the destination boundary can reject its stale mutation.
+
+**Put authority in the completion write.** Queue visibility reduces ordinary duplicate overlap, but it cannot prove that an old process stopped. Persist a monotonically increasing job generation and require completion to match the current generation and state. Publication and result recording belong in that guarded transaction.
+
+A holds generation 4, pauses, and B claims 5 and completes. Resume A and show its update rejected. If A performed an external effect first, separately demonstrate the provider idempotency or reconciliation path. Local fencing cannot undo external work.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+A["Worker A: generation 4"] --> C["Conditional completion"]
+ B["Worker B: generation 5"] --> C
+ S["Current job generation: 5"] --> C
+ C -->|A rejected| X["Stale result discarded"]
+ C -->|B accepted| R["One published result"]
+```
 
 </details>
 
 ## Follow-up 2 · The backlog must drain
 
-**Changed requirement:** After the burst, arrivals return to 5/s with completion 20/s. How long to drain 300 jobs? State what evidence would make you reject your first design.
+**Changed requirement:** After the burst, arrivals return to 5/s with completion 20/s. How long to drain 300 jobs?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Ideal net drain is 15/s, giving 20 seconds plus actual overhead. Measure age and per-job costs. Stop scale-out at the database budget instead of scaling blindly on depth.
+
+**Compute net drain, not worker throughput.** Use `backlog / (completion rate - new accepted rate)` only while completion exceeds new accepted work. A backlog of 30,000 events with 500/s completion and 400/s accepted arrivals needs at least 300 seconds under constant rates. If arrivals remain 600/s, it grows.
+
+Deliver a recovery table with offered, accepted, completed, rejected and queued counts. Cap replay separately from fresh traffic and retain the hard byte limit when event sizes vary. A dead-letter queue stores failures but contributes no processing capacity by itself.
 
 </details>
 

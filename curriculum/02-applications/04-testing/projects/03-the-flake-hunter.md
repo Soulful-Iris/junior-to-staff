@@ -140,27 +140,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 The failure depends on a third-party API. Replace it with a controlled response timeline for diagnosis, then document which live integration behavior remains outside that local reproduction.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Parallel execution fails
 
-**Changed requirement:** Sequential shuffled runs pass, but concurrent runs fail. What experiment comes next? Predict which boundary must change before opening the design.
+**Changed requirement:** Sequential shuffled runs pass, but concurrent runs fail. What experiment comes next?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use a barrier to overlap two operations on a shared resource. Give files/ports unique test identities or synchronize intentional sharing. Preserve the forced overlap as a regression.
+
+**Force the overlap you suspect.** Have operations A and B both pause immediately before writing the same temporary path, then release them together. This barrier makes the race reproducible instead of relying on lucky timing. If the resource is not meant to be shared, allocate one directory and port per run. If it is shared intentionally, define synchronization.
+
+Record the two operation IDs, resource name and ordering before and after the fix. A hundred sequential passes do not demonstrate that the concurrent case is repaired.
 
 </details>
 
 ## Follow-up 2 · The fix will take a week
 
-**Changed requirement:** The flaky test blocks every merge while a repair is underway. How do you quarantine it honestly? State what evidence would make you reject your first design.
+**Changed requirement:** The flaky test blocks every merge while a repair is underway. How do you quarantine it honestly?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Remove it from the blocking gate only with an owner, expiry and visible nonblocking execution. Its passing reruns must not be treated as repair evidence. Track the protected behavior’s temporary coverage gap.
+
+**Make quarantine visible.** Record the failing case, protected behavior, repair owner, expiry and alternative coverage. Move its result out of the blocking decision while keeping the failure visible in the exercise's report. A later successful rerun is another observation, not the repair.
+
+Show the report while quarantine is active and after its expiry. Someone should be able to identify the temporary coverage gap without reading a chat thread. This is a policy exercise for the sample project, not a request to change this guide's automatic deployment.
 
 </details>
 

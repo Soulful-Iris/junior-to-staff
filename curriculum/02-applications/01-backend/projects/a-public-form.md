@@ -141,27 +141,48 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add a second export for a machine consumer that needs exact original strings. Name the two export contracts clearly and avoid making spreadsheet-oriented escaping part of the canonical data.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A school shares one IP
 
-**Changed requirement:** Two hundred legitimate users submit behind the same NAT. What does per-IP throttling do? Predict which boundary must change before opening the design.
+**Changed requirement:** Two hundred legitimate users submit behind the same NAT. What does per-IP throttling do?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 It can block the school. Combine coarse abuse limits with fairer account/session or challenge policies where possible, and measure legitimate rejection. Managed throttles reduce load but are not exact hard spending caps.
+
+**Compare two populations.** Two hundred pupils submit from one school gateway, while an attacker rotates addresses. A strict one-user-per-IP assumption both harms the school and misses the attacker. Keep coarse per-IP protection for infrastructure, then apply verified account or session limits where available. Anonymous sessions can be recreated, so document their weaker identity guarantee.
+
+Deliver an admission table for a school user, a repeated session and a new anonymous session. Include the challenge or retry message seen by a legitimate rejected user. Measure total accepted work and legitimate rejection separately. Do not describe a managed throttle as an exact billing ceiling.
 
 </details>
 
 ## Follow-up 2 · The export contains private data
 
-**Changed requirement:** A download link is forwarded to another person. What authorizes access? State what evidence would make you reject your first design.
+**Changed requirement:** A download link is forwarded to another person. What authorizes access?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Check owner authorization before issuing a short-lived private object URL, or authorize every delivery for stricter revocation. Record that a signed URL remains usable until expiry unless an additional revocation mechanism exists.
+
+**Choose the download contract.** Put exports in private object storage and store owner, generation, status and expiry in the application database. A download endpoint authenticates the caller and checks current ownership. It can issue a short-lived signed URL if the product accepts its remaining usable lifetime, or proxy/authorize every delivery for stricter revocation.
+
+Create Alice's export and send its application download URL to Bob. Bob is denied. If you chose signed URLs, show that forwarding the already issued bearer URL is a different case and state its expiry. Deliver both outcomes rather than claiming an initial owner check prevents all later sharing.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+E["Export worker"] --> S["Private S3 object"]
+ E --> D["Owner and export metadata"]
+ U["Download request"] --> A["Current owner authorization"]
+ D --> A
+ A -->|allowed| P["Chosen delivery path"]
+ S --> P
+ A -->|denied| X["No download"]
+```
 
 </details>
 

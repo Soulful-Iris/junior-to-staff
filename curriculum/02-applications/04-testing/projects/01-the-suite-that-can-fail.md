@@ -137,27 +137,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 All twenty selected defects are detected. Report that result and the sampled risks honestly. Expand coverage only for a concrete uncovered behavior, not to meet a quota of failures.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A mutant hangs
 
-**Changed requirement:** One mutant creates an infinite loop. Does that count as a successful detection? Predict which boundary must change before opening the design.
+**Changed requirement:** One mutant creates an infinite loop. Does that count as a successful detection?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Record timeout separately and impose a runner deadline. If termination is part of the contract it is a detected harm, but it is not a passing assertion. Retain the smallest hanging input.
+
+**Extend the runner contract.** Execute each candidate in a child process with an explicit elapsed-time limit and a termination path. Classify assertion failure, timeout, crash and infrastructure error separately. A timeout can reveal a termination defect, but it does not prove the expected output assertion ran.
+
+Hand over a smallest hanging input, its deadline and the observed process exit. Show that the next candidate still executes after the hung child is stopped. Keep this inside the exercise workspace. It does not require adding checks to this curriculum repository.
 
 </details>
 
 ## Follow-up 2 · All relevant mutants are caught
 
-**Changed requirement:** The suite kills all twenty selected semantic mutants. Must you invent a current regression? State what evidence would make you reject your first design.
+**Changed requirement:** The suite kills all twenty selected semantic mutants. Must you invent a current regression?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. Preserve the passing regressions and report the sampled scope. Add new challenge cases based on risks, not a quota of failures. A seeded defect demonstrates sensitivity even after its repair.
+
+**Report what the evidence actually covers.** Use a ledger with mutation ID, behavior changed, observed detection and reason for any exclusion. Twenty caught mutations means those twenty changes were detected under those inputs. It is not a probability that arbitrary software is correct.
+
+Preserve the now-passing regression examples. Add future challenges when a new risk appears, such as an unexercised overflow boundary. Your handoff should let a reader reproduce one detected defect and see which behaviors were never challenged, without inventing a failure quota.
 
 </details>
 

@@ -134,6 +134,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Restore the application without rewriting audit history
+
+The restored permission row says version 7, but the archive contains versions 8 and 9. Resuming writes as version 8 could give two different changes the same historical identity.
+
+| Starting design | Changed requirement |
+|---|---|
+| The live database and its audit archive advance together. | The live database is restored to an earlier point while the archive retains later events. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Fresh database restore"] --> C["Recovery reconciliation"]
+ B["Retained audit archive"] --> C
+ L["Authoritative change data"] --> C
+ C -->|proven state| W["Reopen mutation admission"]
+ C -->|missing evidence| Q["Quarantine affected resources"]
+```
+
+**What to implement.** Keep mutation admission closed during recovery. Compare the restored checkpoint with retained audit sequences and recover resource state from an authoritative change log or a later verified backup. An audit event may be only evidence, not sufficient data to replay the business mutation. Record those gaps instead of guessing. Give the restored deployment a new recovery epoch, preserve original event IDs and rebuild the search projection separately. On AWS, restore RDS or DynamoDB into a fresh target and use S3 retained evidence without editing the archive.
+
+**Walk through the result.** Use resource R at restored v7 with archived v8 granting access and v9 revoking it. Demonstrate that the first post-recovery read does not expose the v8 grant. Resume mutations only after proving v9 state or explicitly quarantining R. Supply a recovery ledger listing recovered and unresolved resources.
+
+
 
 
 Design recovery when the database is restored to yesterday but the archive contains today’s events. Identify the latest proven resource version before permitting new changes. An append-only bucket cannot repair an application that reuses old event identities.

@@ -165,27 +165,48 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add offline editing. Queue operations with base versions and identities, then surface genuine conflicts on reconnect instead of replaying last-write-wins over other members’ work.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Many groups
 
-**Changed requirement:** Alice belongs to two groups. Bob belongs to one. Which rows can Bob list? Predict which boundary must change before opening the design.
+**Changed requirement:** Alice belongs to two groups. Bob belongs to one. Which rows can Bob list?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Filter by verified membership at the data access boundary. Never trust a client-supplied group ID alone. Test list, detail, edit and title-job paths for cross-group leakage.
+
+**Change the data access boundary.** Store group membership independently from bookmark ownership. Every list, edit and background enrichment request derives the authorized group set from trusted membership. A submitted group ID selects within that set, it does not add membership. Include group identity in relevant cache and job keys.
+
+Alice belongs to research and finance. Bob belongs only to research. Show Bob listing research successfully, then requesting a known finance bookmark ID and receiving no data. Remove Alice from finance while a title job waits and define whether that group-owned job may continue under a service identity. User departure and group data ownership are different decisions.
 
 </details>
 
 ## Follow-up 2 · The title provider stalls
 
-**Changed requirement:** Saving must return in 300 ms while the provider takes ten seconds. What moves? State what evidence would make you reject your first design.
+**Changed requirement:** Saving must return in 300 ms while the provider takes ten seconds. What moves?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Atomically save the item and durable title job, return pending, and let a guarded bounded worker complete the title. Retry execution may repeat fetching. Conditional versions protect the current result.
+
+**Move waiting out of the HTTP handler.** Save the bookmark with `title_status: pending` and a durable job in one transaction. Return the bookmark ID immediately. A dispatcher forwards committed intent to a bounded worker queue. The UI displays the URL while polling or subscribing for the later title. Completion checks the bookmark version so an old job cannot overwrite a user's edited URL.
+
+Pause the title provider for ten seconds. Show the save returning within the 300 ms exercise target on your measured local run, then restart the API before dispatch and recover the pending job. Deliver the pending and ready responses plus the new worker start command.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+B["Browser save"] --> A["API: atomic bookmark and job"]
+ A --> R["201 with pending title"]
+ A --> D["Durable-job dispatcher"]
+ D --> Q["SQS or local durable queue"]
+ Q --> W["Bounded title worker"]
+ W -->|matching bookmark version| A
+ B -->|later read| A
+```
 
 </details>
 

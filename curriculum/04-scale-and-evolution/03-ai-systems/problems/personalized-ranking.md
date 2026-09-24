@@ -139,6 +139,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Keep ten thousand ranking candidates out of the serving path
+
+Loading a separate model and feature namespace for every candidate multiplies memory, observations and operational ownership before the candidates have shown value.
+
+| Starting design | Changed requirement |
+|---|---|
+| A small number of evaluated ranking versions serve traffic. | Research produces 10,000 candidates, most of which should never receive live infrastructure. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+C["Candidate artifact registry"] --> O["Offline slice evaluation"]
+ O --> S["Bounded shadow shortlist"]
+ S --> K["Canary with exposure records"]
+ K --> G{"Guardrails acceptable"}
+ G -->|yes| P["Promote serving version"]
+ G -->|no| R["Restore previous version"]
+```
+
+**What to implement.** Use an offline candidate registry containing artifact digest, feature contract, training data identity and evaluation report. Evaluate against fixed and held-out slices, then promote only a bounded shortlist into shadow serving. Shadow results must not change user-visible rankings. A later canary records exposure and guardrails by candidate version. Keep feature access subject to deletion and privacy policy throughout the pipeline.
+
+**Walk through the result.** With an illustrative 200 MiB artifact per candidate, 10,000 artifacts already require about 1.9 TiB before replicas or features. Show 10,000 registered, ten shadowed and one canaried as an example policy, not a universal ratio. A candidate improving average CTR but harming a language cohort must remain visible in the decision record.
+
+
 
 
 Run 10,000 model variants. Estimate artifact, feature and observation cardinality, then choose whether all variants deserve live infrastructure or whether most can be evaluated offline first.

@@ -159,27 +159,48 @@ A provisioned queue or table does not make the local program use it. Configure r
 Continue to stage 5 by migrating the tag representation while old browsers, queued jobs and model prompts still refer to the previous contract.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · All regressions pass
 
-**Changed requirement:** A bug was fixed and all required cases now pass. What should the release record show? Predict which boundary must change before opening the design.
+**Changed requirement:** A bug was fixed and all required cases now pass. What should the release record show?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Keep those passing regressions. Demonstrate that a seeded wrong-tag or cross-user-data mutation is caught, report challenge coverage and stochastic variability separately, and do not tune on held-out labels.
+
+**Make the release report reproducible.** Bind outcomes to code, prompt, model configuration and dataset identity. Keep the fixed regression passing. In the isolated exercise, a known-bad candidate that adds another user's data must be rejected by the relevant case.
+
+Report deterministic regressions, exploratory challenge results and repeated stochastic runs separately. Hand over one result from each applicable category and explain what was held out from tuning. A perfect fixed regression count is compatible with honest uncertainty about new inputs.
 
 </details>
 
 ## Follow-up 2 · Budget expires mid-task
 
-**Changed requirement:** Two attempts consume the task budget before a valid suggestion arrives. What gets committed? State what evidence would make you reject your first design.
+**Changed requirement:** Two attempts consume the task budget before a valid suggestion arrives. What gets committed?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Persist a visible exhausted/no-suggestion outcome without changing confirmed tags. Reserve budget before calls, bound attempts and elapsed time, and measure time-to-usable-suggestion. First-token latency is only relevant if streaming is actually shown.
+
+**Keep suggestions separate from confirmed tags.** Reserve task budget before a model call and persist attempt status. If two attempts consume the allowed budget without a valid result, record exhausted and leave confirmed tags unchanged. A late response must not bypass the exhausted task state.
+
+Show a task with two invalid outputs, an exhausted UI state and the original confirmed tags. Then deliver a delayed third result and show it rejected unless a new explicitly authorized task was created. Supply the budget ledger and conditional publication rule.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+T["Suggestion task"] --> B["Reserve remaining budget"]
+ B --> M["Model attempt"]
+ M --> V{"Valid and task still active"}
+ V -->|yes| S["Unconfirmed suggestion"]
+ V -->|no budget remains| E["Exhausted, tags unchanged"]
+ U["User confirmation"] --> C["Confirmed tags"]
+ S --> U
+```
 
 </details>
 

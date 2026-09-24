@@ -142,6 +142,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Add a second payment provider without charging twice
+
+A charges order 41 but its response disappears. Sending the same order to B is not a retry from B's perspective. B has never seen A's idempotency key and may create a second charge.
+
+| Starting design | Changed requirement |
+|---|---|
+| Every payment attempt belongs to provider A. | New attempts can use A or B, while uncertain attempts stay with their original provider. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+N["New checkout"] --> R["Choose provider once"]
+ R --> L["Order store: pinned attempt"]
+ L --> A["Provider A"]
+ L --> B["Provider B"]
+ A -->|lost response| U["UNKNOWN: reconcile with A"]
+ U --> L
+```
+
+**What to implement.** Persist provider_id, attempt_id, cart fingerprint and provider key before submission. A router chooses the provider only when creating a new attempt. A timeout moves that attempt to UNKNOWN. A reconciliation worker queries the original provider and records its receipt or an unresolved outcome. After its safe retry window expires, stop automatic resubmission. Switching providers for that order requires a verified terminal outcome and an explicit new decision. Use the existing order store and SQS worker, with separate provider adapters and credentials.
+
+**Walk through the result.** Make A report success through status lookup after the API timed out. The order becomes PAID using A's receipt. B receives zero calls for that attempt. Then create order 42 while A is disabled and show B handling that new attempt. Hand over both provider call ledgers.
+
+
 
 
 Add two payment providers. Define which provider owns an attempt before failover: switching providers after a timeout can create two charges because their idempotency domains are independent. Route only new attempts automatically. Reconcile ambiguous existing ones with their original provider.

@@ -133,6 +133,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Erase data while an export worker is still running
+
+Alice asks for deletion after the worker has read her records. Removing a queued message cannot stop bytes already held by a running process. The worker may finish and create a fresh downloadable copy after deletion.
+
+| Starting design | Changed requirement |
+|---|---|
+| A worker publishes an export when its job completes. | Publication also requires current permission and a matching deletion generation. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+W["Export worker"] --> O["S3: private temporary object"]
+ W --> P["Conditional publication"]
+ D["Deletion generation"] --> P
+ P -->|current and authorized| R["Download pointer"]
+ P -->|cancelled or stale| C["Object cleanup"]
+ D -->|revoke| R
+```
+
+**What to implement.** Add a subject deletion generation and a publication pointer separate from the uploaded object. Upload into a private temporary prefix. Publish the pointer only through an atomic condition that checks job ownership, cancellation and the unchanged deletion generation. Deletion increments that generation and revokes the pointer before asynchronous object cleanup. Authorize every download if immediate revocation is required. On AWS, use a conditional database transaction for publication and S3 for private generation-specific objects.
+
+**Walk through the result.** Pause worker A after upload. Delete the subject, then resume A. Publication must fail and the temporary object must appear in cleanup work. The status page reports cancelled rather than ready. Show how cleanup finds an orphan even if A crashes before reporting the failed publication.
+
+
 
 
 Add data erasure while an export is running. Define how the worker discovers cancellation, how the current pointer is revoked, and how object cleanup is proven without assuming that queue cancellation stops an already running process.

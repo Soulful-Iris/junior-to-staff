@@ -130,7 +130,7 @@ A provisioned queue or table does not make the local program use it. Configure r
 A team requests a new datastore for developer preference alone. Ask for the unmet guarantee or measured operating improvement, then compare it against the additional ownership burden without treating novelty as either sufficient or forbidden.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A new workload breaks the default
 
@@ -138,11 +138,15 @@ A team requests a new datastore for developer preference alone. Ask for the unme
 than current row state. Should enforcement block the design?
 
 <details>
-<summary>Expected reasoning and diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Route it through a documented exception review that names the mismatched
 constraint and maintenance owner. Do not make a default impossible to challenge.
 measure exception recurrence as feedback on the policy.
+
+**Compare the actual contracts.** A current-state database answers “what is the balance now?” An independently replayable event log must also answer “what happened, in what order, and from which checkpoint can I rebuild?” Treat that requirement as a concrete reason to challenge the default.
+
+Write an exception record naming replay retention, ordering scope, consumer independence and operating owner. Compare extending the default with adopting a stream. Deliver one replay example and the maintenance cost of the alternative. Keep the decision conditional on those requirements rather than turning every future team into an exception applicant.
 
 </details>
 
@@ -152,12 +156,16 @@ measure exception recurrence as feedback on the policy.
 months later. Which part of the memo changes?
 
 <details>
-<summary>Expected reasoning and diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Separate stable invariants from dated capability/cost observations. Reverify the
 source, update the constraint and rerun the decision comparison. A recent access
 date does not make an old study recent evidence. A rule can also remain valid
 when the changed capability does not affect its rationale.
+
+**Keep a decision ledger with two kinds of entries.** Stable requirements include who may read data and how much acknowledged loss is acceptable. Dated observations include service capabilities, measured latency and prices. Only the affected observations need refreshing when a provider changes.
+
+Use one changed capability to rerun the original option comparison. Record whether it changes the decision and why. Preserve the earlier record so a reader can understand what was reasonable at the time. A newer access date alone does not establish that the underlying evidence changed.
 
 </details>
 

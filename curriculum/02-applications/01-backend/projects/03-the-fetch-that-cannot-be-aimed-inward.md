@@ -162,27 +162,47 @@ A provisioned queue or table does not make the local program use it. Configure r
 Allow customer-managed authenticated previews. Keep credentials scoped to approved origins and strip them on redirects. Define whether cross-origin redirects are allowed at all.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · DNS returns mixed addresses
 
-**Changed requirement:** One hostname returns both a public IPv4 and private IPv6 address. What does your policy do? Predict which boundary must change before opening the design.
+**Changed requirement:** One hostname returns both a public IPv4 and private IPv6 address. What does your policy do?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 For this exercise reject mixed unsafe answers rather than relying on client selection order. Test IPv4-mapped IPv6 and redirects with the same canonical address policy.
+
+**Walk the connection boundary.** A lookup returns public address P and private address Q. Reject the destination before choosing either address under this exercise policy. Canonicalize IPv4, IPv6 and IPv4-mapped IPv6 before classification. For an accepted destination, connect using a validated address while preserving the intended HTTP host and TLS identity. An unrestricted second DNS lookup in the HTTP client would reopen the gap.
+
+**Your deliverable:** record decisions for mixed answers, a public-to-private redirect and a redirect loop. Apply the same destination policy at every redirect and keep one total deadline and byte budget. Do not make real requests to internal metadata addresses to demonstrate rejection.
 
 </details>
 
 ## Follow-up 2 · A future worker reuses fetching
 
-**Changed requirement:** The queued worker gains new credentials and network routes. Is the guard enough? State what evidence would make you reject your first design.
+**Changed requirement:** The queued worker gains new credentials and network routes. Is the guard enough?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Reuse the same client and add restricted egress and least-privilege credentials. Application validation and network isolation protect different boundaries. Neither proves the other.
+
+**This is an architecture change.** A worker with database credentials and private network routes has a different failure impact from a public-only preview process. Split URL fetching into a narrowly privileged service. Let the job worker submit a destination and receive bounded content through a defined interface. Keep application destination validation in that service and enforce network egress independently.
+
+For AWS, an ECS fetching task can be placed behind controlled egress with no unnecessary data-store role. Merely placing it in a private subnet does not block every private destination. Define which outbound paths are actually allowed. Deliver an access matrix for the worker and fetcher, plus a rejected redirect transcript.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+Q["Queued preview job"] --> W["Job worker"]
+ W --> F["Restricted fetch service"]
+ F --> V["Destination and redirect validation"]
+ V --> E["Controlled network egress"]
+ E --> P["Allowed public destination"]
+ F -->|bounded result| W
+```
 
 </details>
 

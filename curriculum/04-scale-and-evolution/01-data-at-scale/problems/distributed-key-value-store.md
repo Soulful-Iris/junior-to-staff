@@ -133,6 +133,33 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Choose a cross-region replication protocol explicitly
+
+Adding replica icons on a map does not define consistency. Quorum overlap alone is insufficient without version ordering, concurrent-write rules and the required read/write protocol.
+
+| Starting design | Changed requirement |
+|---|---|
+| A replica group operates within one region. | The store must explain write acknowledgement and recovery across a regional partition. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+W["Write request"] --> L["Current leader"]
+ L --> A["Replica A"]
+ L --> B["Replica B"]
+ L --> C["Replica C"]
+ A --> Q["Durable majority decision"]
+ B --> Q
+ C --> Q
+ Q --> R["Acknowledge or remain unavailable"]
+```
+
+**What to implement.** For this extension, choose a consensus-led group with one leader and a durable majority acknowledgement. Place replicas across three failure domains and state which regional loss leaves a majority. Minority partitions refuse writes. Reads requiring the latest value must use the protocol's authoritative read path. Budget repair separately from foreground traffic. This is a storage-protocol design exercise, not a claim that a managed AWS database exposes these exact internal controls.
+
+**Walk through the result.** With one voting replica in each of A, B and C, disconnect A. Show B and C retaining a majority and A refusing writes. Then leave only B reachable and show writes unavailable. Explain the remote round-trip cost and what happens to an unacknowledged write from the old leader. Deliver the leader epoch and acknowledgement trace.
+
+
 
 
 Add multi-region replicas. Quantify the write-latency cost of cross-region quorum and state the availability behavior under partition. Do not promise both independent regional writes and single-copy semantics without a protocol that actually provides them.

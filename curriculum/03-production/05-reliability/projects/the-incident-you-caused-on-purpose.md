@@ -138,27 +138,45 @@ A provisioned queue or table does not make the local program use it. Configure r
 The drill exposes a repair that cannot be completed immediately. Name the temporary operating limit and owner, and preserve the evidence rather than declaring the exercise successful solely because the service eventually recovered.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The normal control plane fails
 
-**Changed requirement:** You cannot reach the deployment dashboard. How do you stop the drill? Predict which boundary must change before opening the design.
+**Changed requirement:** You cannot reach the deployment dashboard. How do you stop the drill?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use pre-authorized independent recovery access and a time-bounded failure injection. Test its credentials and dependencies beforehand. A stop button inside the failed system is not an independent stop mechanism.
+
+**Draw the stop path before injecting failure.** The normal deployment UI and its credentials may depend on the system you are about to disrupt. Use a separately accessible recovery identity and an injection that expires automatically. Keep both paths scoped to the disposable exercise environment.
+
+Make the normal dashboard unreachable, then stop the drill through the independent path. Record the dependency chain and elapsed recovery time. If both paths share the same failed identity service, describe that unresolved dependency instead of calling the second button independent.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+I["Time-bounded fault injection"] --> S["Exercise service"]
+ N["Normal dashboard unavailable"] --> X["Cannot stop through this path"]
+ R["Independent recovery access"] --> I
+ T["Automatic expiry"] --> I
+```
 
 </details>
 
 ## Follow-up 2 · The fix changes only the alert
 
-**Changed requirement:** The page arrives sooner, but users still wait the same time for backlog drain. What improved? State what evidence would make you reject your first design.
+**Changed requirement:** The page arrives sooner, but users still wait the same time for backlog drain. What improved?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Detection improved, recovery did not. Report both. Choose a separate repair such as bounded retries or gradual admission, then measure net drain rather than claiming an earlier page solved capacity.
+
+**Separate the clocks.** Record impact start, detection, operator action, dependency recovery and backlog cleared. An earlier alert changes the first response interval. It does not change the worker's net drain rate.
+
+With 6,000 queued jobs, 120 completions/s and 100 new arrivals/s, net drain is 20/s and the ideal drain time is 300 seconds. State the simplifying constant-rate assumption. Deliver before/after timelines and choose a capacity or admission change if the recovery interval remains unacceptable.
 
 </details>
 

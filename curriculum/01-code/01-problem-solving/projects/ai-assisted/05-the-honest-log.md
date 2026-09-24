@@ -72,38 +72,31 @@ Record the assumption at acceptance, a contrary outcome, and the check that woul
 
 ## Follow-up 1 · The author leaves
 
-**Changed requirement:** A different engineer inherits the debt entry. What needs to survive? Predict which boundary must change before opening the design.
+**Changed requirement:** A different engineer inherits the debt entry. What needs to survive?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Include affected commit, code location, contract, owner, and a runnable probe. The handoff succeeds when the new owner can execute the check without the original conversation.
 
-```mermaid
-flowchart TD
- E["Decision with commit and assumption"] --> P["Reproducible probe"]
- E --> O["New owner"]
- O --> P
- P --> V["Recorded verdict"]
-```
+**Give the next engineer a runnable starting point.** A debt entry saying “retry is probably safe” is incomplete without the operation, assumptions and evidence. Include commit, file or interface, observed failure, owner and exact local reproduction command. Preserve any fixture input beside the decision.
+
+Ask a reader with only the checkout to reproduce the outcome and identify the reopening trigger. Record what they could not find. This improves the handoff record without adding a new service or decorating the decision with an architecture diagram.
 
 </details>
 
 ## Follow-up 2 · The assumption changes
 
-**Changed requirement:** The GET becomes a billable provider operation. Does the old “safe retry” verdict still apply? State what evidence would make you reject your first design.
+**Changed requirement:** The GET becomes a billable provider operation. Does the old “safe retry” verdict still apply?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Reopen the decision because its failure model changed. Require provider idempotency or an explicit uncertain-outcome/reconciliation state. A prior fine verdict is scoped to prior assumptions.
 
-```mermaid
-flowchart TD
- A["Old read-only contract"] --> F["Fine verdict"]
- B["New billable side effect"] --> R["Reopen assumption"]
- R --> U["Provider key or reconciliation"]
-```
+**Change the verdict when the effect changes.** The old operation fetched public data. The new provider bills each accepted request, even if the response disappears. Reusing the earlier safe-retry conclusion now risks repeated charges.
+
+Add an attempt identity and an unknown-outcome state to the revised design. Require a provider-supported replay/status protocol or stop automatic retry. Deliver a short before/after assumption table and one lost-response trace. Keep the original verdict as historical evidence with its original scope.
 
 </details>
 

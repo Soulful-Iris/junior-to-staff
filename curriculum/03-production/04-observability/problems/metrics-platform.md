@@ -143,6 +143,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Budget temporary diagnostic metrics separately
+
+An optional label with thousands of values can multiply every existing series. A time-to-live on samples does not prevent the ingestion and indexing cost incurred before they expire.
+
+| Starting design | Changed requirement |
+|---|---|
+| Production metric labels have fixed cardinality limits. | An engineer requests richer labels for a short investigation. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+I["Incoming metric"] --> A["Series and rate admission"]
+ P["Owner budget and expiry"] --> A
+ A -->|approved diagnostic| D["Temporary namespace"]
+ A -->|ordinary bounded labels| S["Production namespace"]
+ A -->|over budget| R["Reject and count"]
+```
+
+**What to implement.** Create a separate diagnostic namespace with an owner, expiry, label allowlist, maximum active series and ingestion-rate budget. Enforce admission before expensive storage allocation. Expiry stops new writes and removes the temporary dashboard when its retention ends. Keep monitoring-path health separate from the application's health. A separate CloudWatch namespace or backend tenant helps identify cost, but application admission must enforce the chosen budget.
+
+**Walk through the result.** Grant an illustrative 5,000-series diagnostic allowance for 30 minutes. Attempt to introduce the 5,001st active series and show rejection with a bounded counter. Stop the collector and display telemetry missing, not service healthy. Hand over the request record, admission result and expiry behavior.
+
+
 
 
 Allow ad hoc labels for one debugging session. Design an expiring, separately budgeted diagnostic namespace so temporary investigation does not permanently multiply production series.

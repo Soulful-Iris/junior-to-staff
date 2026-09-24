@@ -140,6 +140,32 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Revoke a source while an answer is being generated
+
+Alice starts an answer using a payroll passage and loses access while the model is running. Checking only before retrieval would still deliver a new answer containing now-revoked material.
+
+| Starting design | Changed requirement |
+|---|---|
+| Authorized documents enter the model context at request start. | Permission can change before the generated answer is returned. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+R["Authorized retrieval"] --> M["Buffered model generation"]
+ R --> S["Source ID and version manifest"]
+ M --> A["Final authorization check"]
+ S --> A
+ P["Current permission authority"] --> A
+ A -->|allowed| U["Deliver answer"]
+ A -->|revoked or unknown| X["Discard or safely regenerate"]
+```
+
+**What to implement.** Keep the source IDs, versions and permission scope used in each generation. Before releasing the complete answer, check that the caller remains authorized for every cited or included source. If any decision is unavailable or revoked, discard or regenerate from an authorized subset under a documented policy. For a strict contract, buffer the answer until this check. Already streamed text cannot be recalled. In two regions, either reach the authoritative decision or expose a bounded-revocation contract explicitly.
+
+**Walk through the result.** Pause after retrieval, revoke source D and resume generation. No text from D reaches the user. Show a safe insufficient-evidence outcome and record the suppressed answer only if your privacy policy permits it. Repeat with the permission service unavailable. Hand over the source manifest, final authorization point and user response.
+
+
 
 
 Add a document revision that contradicts an older policy. Decide which version is authoritative and show the conflict explicitly instead of asking the model to choose without a policy.

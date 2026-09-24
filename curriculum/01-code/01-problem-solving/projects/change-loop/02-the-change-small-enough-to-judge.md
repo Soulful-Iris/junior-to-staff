@@ -83,38 +83,31 @@ Write the dependency graph before splitting by file count. Add compatible schema
 
 ## Follow-up 1 · The work stops halfway
 
-**Changed requirement:** Funding disappears after the schema stage. Can that stage remain deployed for a month? Predict which boundary must change before opening the design.
+**Changed requirement:** Funding disappears after the schema stage. Can that stage remain deployed for a month?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use an additive nullable field or a safe default while existing readers remain compatible. Defer deleting or requiring the field. Verify both the old reader and old writer against the new schema.
 
-```mermaid
-flowchart TD
- A["Old reader and writer"] -->|compatible access| B["Expanded nullable schema"]
- C["Future tag behavior"] -.->|not yet deployed| B
- B -->|run old-client fixtures| T["Read and write still pass"]
-```
+**Make the intermediate state a supported state.** Add the new nullable field or safe default without requiring new callers to use it yet. Keep old reads and writes meaningful for the month the project may pause. Defer destructive cleanup. Assign an owner to the temporarily expanded schema.
+
+Show the old client creating and reading a record after only the schema stage is deployed. Report whether it preserves unknown fields during updates. The deliverable is a stage compatibility table and a clear condition for retiring the old representation.
 
 </details>
 
 ## Follow-up 2 · A lower stage changes
 
-**Changed requirement:** Review changes the validation API after the UI branch already exists. Which checks become stale? State what evidence would make you reject your first design.
+**Changed requirement:** Review changes the validation API after the UI branch already exists. Which checks become stale?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Rebase dependent layers and rerun their integration checks against the revised base. Reuse artifacts only when their input commit is unchanged. Do not transfer a green result across a new dependency graph.
 
-```mermaid
-flowchart TD
- A["Revised validation commit"] -->|new base| B["Rebased API stage"]
- B -->|new contract| C["Rebased UI stage"]
- B --> D["Run contract checks"]
- C --> D
-```
+**Track dependency identity through the stack.** The API stage now depends on a revised validation commit, and the UI depends on that API result. Rebase or merge the new base into dependent stages, then repeat the relevant integration demonstration. A result from the old combined tree is stale.
+
+Show the before/after commit graph and identify exactly which artifacts can still be reused because their inputs are unchanged. Keep this focused on the sample change stack rather than adding mandatory gates to this guide's publishing workflow.
 
 </details>
 

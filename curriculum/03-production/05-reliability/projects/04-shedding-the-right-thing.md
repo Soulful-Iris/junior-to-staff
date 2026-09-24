@@ -139,27 +139,47 @@ A provisioned queue or table does not make the local program use it. Configure r
 An accepted bulk job represents a paid obligation. Distinguish admission rejection from cancellation of already accepted work, and preserve status/refund or rescheduling semantics.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Critical traffic exceeds capacity
 
-**Changed requirement:** All 120 requests/s are critical. How does the design remain live? Predict which boundary must change before opening the design.
+**Changed requirement:** All 120 requests/s are critical. How does the design remain live?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Reserve a bounded critical queue only if the latency budget allows it, then shed excess. Record denied critical work explicitly. Inspect absolute arrival/capacity evidence before blaming classification.
+
+**Use absolute rates.** If critical arrivals are 120/s and sustainable completion is 100/s, a queue grows by 20 requests each second unless work is rejected or capacity changes. A 200-request queue only absorbs ten seconds at that gap. It does not solve sustained overload.
+
+Choose a maximum waiting time, reserve capacity for recovery and reject excess before expensive work begins. Hand over the queue-depth timeline and explicit critical-rejection count. The response should tell callers whether retry is appropriate without encouraging synchronized immediate retries.
 
 </details>
 
 ## Follow-up 2 · Work costs differ
 
-**Changed requirement:** An export takes 100 times the database work of a save. Are request-count limits enough? State what evidence would make you reject your first design.
+**Changed requirement:** An export takes 100 times the database work of a save. Are request-count limits enough?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use separate concurrency/work budgets and per-tenant fairness. The shared database budget constrains all classes. Protect control and recovery operations too.
+
+**Separate work classes.** Give exports their own bounded worker pool and database concurrency allowance. Let saves use an interactive allocation, but enforce a total shared database budget across both. Request-count quotas alone permit one expensive request to consume the capacity of many cheap ones.
+
+For an illustrative export costing 100 save-equivalent work units, show the allocation while one export and a save burst arrive together. Deliver queue age and completion rates for both classes. Explain how batch work eventually progresses without allowing it to starve interactive requests.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+S["Save requests"] --> I["Interactive admission"]
+ E["Export requests"] --> B["Bounded batch queue"]
+ I --> T["Shared database-work budget"]
+ B --> T
+ T --> D["Database"]
+ R["Recovery reserve"] --> T
+```
 
 </details>
 

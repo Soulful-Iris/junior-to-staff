@@ -156,27 +156,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Continue to stage 2 with the same app and data model. Identify every acknowledged operation that would disappear if the process or disk failed now.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The title never arrives
 
-**Changed requirement:** A remote page hangs for sixty seconds. How does the save remain useful? Predict which boundary must change before opening the design.
+**Changed requirement:** A remote page hangs for sixty seconds. How does the save remain useful?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Give the synchronous fetch a small total deadline and save a visible title-failed/pending state. A later durable queue is an explicit next stage. Do not leave untracked in-process background work.
+
+**Keep stage one small and explicit.** The supplied save stores the bookmark before title enrichment. Add a total deadline to the real fetching adapter and return the stored URL even when no title is available. Show a user-facing state such as title unavailable rather than an endless spinner.
+
+Use the local timeout fixture and display the saved row after the response. Do not launch an untracked background thread and call it durable processing. If the requirement changes to eventual title completion after restarts, move to the durable job architecture in stage three and add the missing state deliberately.
 
 </details>
 
 ## Follow-up 2 · Two people update their read state
 
-**Changed requirement:** Alice and Bob mark item 7 read at the same time. Which rows change? State what evidence would make you reject your first design.
+**Changed requirement:** Alice and Bob mark item 7 read at the same time. Which rows change?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Upsert separate `(user_id,item_id)` read-state rows. Verify group membership at the server and test that reversing either user’s action does not change the other.
+
+**Name the key that owns the action.** Read status belongs to the pair of member and bookmark. The shared bookmark row does not own a single global read flag. Store `(alice, 7, true)` and `(bob, 7, true)` independently after verifying current membership.
+
+Mark both read, then let Alice mark hers unread. Show Alice seeing false and Bob still seeing true. Deliver the two database rows and both API responses. This is a schema ownership change, so a small state table explains it better than extra cloud boxes.
 
 </details>
 

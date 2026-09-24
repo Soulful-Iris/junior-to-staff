@@ -136,6 +136,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Change experiment cohorts without mixing two experiments
+
+A user who saw the treatment yesterday may become control today. Combining both exposures under one experiment name makes outcomes difficult to attribute and can hide incompatibility between services.
+
+| Starting design | Changed requirement |
+|---|---|
+| One stable hash salt assigns users to a rollout cohort. | Changing the salt creates different assignments and must create a new experiment identity. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+C["Experiment configuration"] --> A["Stable cohort assignment"]
+ A --> E["Actual exposure record"]
+ E --> O["Outcome attribution"]
+ N["New salt"] --> I["New experiment identity"]
+ I --> A
+ K["Emergency disable"] --> A
+```
+
+**What to implement.** Persist experiment ID, salt version, allocation and behavior version in configuration. Record actual exposure, not just eligibility. Treat a salt change as a new experiment and keep old outcome records attached to the original assignment. During a cross-service rollout, accept compatible configuration versions before increasing exposure. Retain an emergency disable independent of cohort assignment.
+
+**Walk through the result.** Compute assignments for the same small user set under salts 1 and 2 and display who moved. An outcome caused by a salt-1 exposure remains in experiment 1. Roll one service back while another still runs the newer reader and demonstrate that the shared contract remains valid. Deliver the exposure record and version compatibility table.
+
+
 
 
 Let product change the hash salt mid-rollout. Explain cohort churn and experiment contamination, then make salt changes an explicit new experiment rather than a harmless configuration edit.

@@ -80,38 +80,31 @@ Fix window endpoints and which events count. Hand-work the edge, write the simpl
 
 ## Follow-up 1 · The clock moves backward
 
-**Changed requirement:** The wall clock jumps from 60 to 55. What should happen? Predict which boundary must change before opening the design.
+**Changed requirement:** The wall clock jumps from 60 to 55. What should happen?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use a monotonic elapsed clock for local rate accounting or reject non-monotonic test input by contract. Do not silently let expired history reappear. Verify the chosen policy explicitly.
 
-```mermaid
-flowchart TD
- W["Wall clock changes"] -.->|must not drive accounting| L["Limiter"]
- M["Monotonic clock"] --> L
- T["Injected backward-time fixture"] --> L
- L --> R["Explicit policy result"]
-```
+**Choose which clock the contract uses.** Local elapsed-time accounting should use a monotonic clock that does not jump with wall-clock corrections. If the harness accepts injected timestamps, define whether backward input is invalid or represents a supported scenario. Do not silently clamp values without specifying the resulting semantics.
+
+Provide the sequence 59, 60, 55 and the expected decision at each step under your chosen contract. Keep human-readable wall time only for diagnostics. A monotonic value from one process is not a globally comparable timestamp across replicas.
 
 </details>
 
 ## Follow-up 2 · Ten replicas
 
-**Changed requirement:** Ten API processes share one account limit. Does a process-local harness prove fleet safety? State what evidence would make you reject your first design.
+**Changed requirement:** Ten API processes share one account limit. Does a process-local harness prove fleet safety?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. Put atomic admission at shared authority or divide quotas with a documented weaker guarantee. Test simultaneous arrivals at the shared boundary and count accepted requests across all replicas.
 
-```mermaid
-flowchart TD
- A["Replica A"] -->|admit key| S["Atomic shared limiter"]
- B["Replica B"] -->|admit key| S
- S --> H["Shared accepted history"]
-```
+**Move admission to a shared authority.** Ten local limiters each permitting 100 requests can admit 1,000 for the same account. Put the atomic decision behind one shared service/store, or allocate disjoint budgets whose sum stays within 100. Keep account and policy period in the key.
+
+Race requests from two replicas for the final permit and record the total accepted count. One succeeds and one receives rejection. Then disconnect a replica from the authority and show the chosen unavailable-state behavior. The original single-process harness remains useful but does not establish this fleet property.
 
 </details>
 

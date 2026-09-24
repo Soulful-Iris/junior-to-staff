@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Keep one driver owner during a region crossing
+
+A GPS update makes the driver visible in region B before an offer from A expires. If B treats location as ownership, it may assign the driver to another rider.
+
+| Starting design | Changed requirement |
+|---|---|
+| A city dispatch service owns a driver assignment. | A driver changes location while an active offer still belongs to the previous city. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+G["GPS update"] --> I["Regional candidate indexes"]
+ I --> O["Assignment owner registry"]
+ O --> A["Region A: active offer"]
+ A --> H["Fence and transfer state"]
+ H --> B["Region B: new generation"]
+ S["Stale offer acceptance"] -->|generation mismatch| X["Reject"]
+```
+
+**What to implement.** Separate the location index from an assignment record with owner_region and generation. Keep A authoritative until the active offer is accepted, rejected or expires. A later handoff first fences A, transfers the current assignment state, then enables B under a new generation. Stale offers carry the old generation and cannot be accepted. Regional indexes remain candidate discovery only. Use the conditional database write as the acceptance boundary.
+
+**Walk through the result.** Driver D appears in B while offer O from A is active. B can discover D but cannot issue a competing accepted assignment. After transfer to generation 8, replay acceptance of generation 7. It must fail without changing the new assignment. Show both rider-facing outcomes.
+
+
 
 
 Let a driver cross a regional boundary while an offer is active. Choose one assignment authority until the ride completes or perform an explicit authority transfer. Do not independently mark the driver free in both regions.

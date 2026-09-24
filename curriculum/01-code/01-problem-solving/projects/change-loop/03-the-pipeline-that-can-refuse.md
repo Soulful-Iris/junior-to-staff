@@ -80,39 +80,31 @@ The invariant is that a candidate commit with any named harm cannot enter protec
 
 ## Follow-up 1 · An administrator can bypass
 
-**Changed requirement:** An emergency change uses an authorized bypass. How will reviewers know the gate was skipped? Predict which boundary must change before opening the design.
+**Changed requirement:** An emergency change uses an authorized bypass. How will reviewers know the gate was skipped?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Record actor, commit, reason, and follow-up validation. The bypass remains an explicit operating decision. Pretending it cannot happen prevents measuring it. Replay with a deliberately failed check in a sandbox repository.
 
-```mermaid
-flowchart TD
- A["Required checks"] -->|pass| B["Normal merge"]
- C["Authorized emergency bypass"] -->|actor and reason| D["Audit record"]
- C --> E["Post-merge verification"]
-```
+**Record the exception at the moment it happens.** Preserve actor, exact commit, reason, skipped condition and responsible follow-up owner in an append-only decision record. An emergency bypass must not appear later as an ordinary passing result.
+
+Use a disposable repository for the exercise and show an authorized bypass while a named check is failing. The audit record should let another engineer reconstruct the decision without asking the operator. Define which emergency authority exists and where it ends.
 
 </details>
 
 ## Follow-up 2 · A workflow changes its own gate
 
-**Changed requirement:** An untrusted PR edits the workflow and asks for AWS credentials. Where is the trust boundary? State what evidence would make you reject your first design.
+**Changed requirement:** An untrusted PR edits the workflow and asks for AWS credentials. Where is the trust boundary?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Keep untrusted code execution separate from privileged deployment. Pin OIDC trust to the intended repository and execution context. Do not expose a deploy role to arbitrary fork code. A green check is evidence about one commit and one workflow, not permission to execute it with secrets.
 
-```mermaid
-flowchart TD
- subgraph U["Untrusted PR boundary"]
- A["Proposed code"] --> B["Isolated checks"]
- end
- B -->|reviewed commit| C["Protected workflow"]
- C -->|restricted OIDC trust| D["AWS role"]
-```
+**Keep privileged execution on a trusted path.** An untrusted branch can propose workflow code, but that proposal must not obtain deployment credentials merely by running successfully. Separate unprivileged code evaluation from the reviewed deployment workflow and restrict the identity trust conditions to the intended repository and execution context.
+
+Draw where code becomes reviewed and which process receives the role. Submit an exercise change that tries to request credentials from the untrusted side and show it cannot cross that boundary. A passed result describes one source/workflow combination, not general permission to execute arbitrary code with secrets.
 
 </details>
 

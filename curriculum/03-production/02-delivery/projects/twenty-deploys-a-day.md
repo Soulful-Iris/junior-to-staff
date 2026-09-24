@@ -152,6 +152,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Recover external effects after a code rollback
+
+Restoring yesterday's binary can stop further bad requests, but it cannot recall an email or erase a provider charge. The release needs a repair record as well as a code version.
+
+| Starting design | Changed requirement |
+|---|---|
+| Rollback restores the previous application artifact. | A failed release has already sent messages or changed an external account. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+B["Release B effects"] --> L["Durable operation ledger"]
+ R["Restore release A"] --> S["Stop new affected work"]
+ L --> U["Classify unresolved attempts"]
+ U --> P["Original provider status"]
+ P --> C["Authorized repair or confirmation"]
+ C --> L
+```
+
+**What to implement.** Record external operation identity, source release and result in durable state. During rollback, stop new affected work and classify existing attempts as confirmed, failed or unknown. Reconcile unknowns with the original provider identity. Any compensating action needs its own authorization and receipt. Keep data schemas readable by the restored code during the rollback window. This extends the sample application's operating design, not this guide's deployment workflow.
+
+**Walk through the result.** Release B creates three provider operations. Two succeed and one loses its response. Restore A and show that the ledger still lists all three. Query the unknown operation and record its actual outcome. Deliver a served-version transcript alongside a separate repair ledger so nobody mistakes code recovery for business recovery.
+
+
 
 
 An external effect completed before rollback. Define the reconciliation or compensation operation separately. Switching code cannot reverse a sent email or completed payment.

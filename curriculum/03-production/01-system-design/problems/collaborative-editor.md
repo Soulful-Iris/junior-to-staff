@@ -134,6 +134,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Merge offline edits using stable character identities
+
+Integer character offsets describe a particular document version. After one user deletes a character, the other user's insert-at-position-1 can refer to a different place. A box named merge does not settle this ambiguity.
+
+| Starting design | Changed requirement |
+|---|---|
+| Online edits are serialized against a document version. | Two disconnected users edit the same position and reconnect later. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Alice: delete b"] --> M["Operation set by stable ID"]
+ B["Bob: insert x after b"] --> M
+ M --> T["Retain b as tombstone anchor"]
+ T --> O["Deterministic sibling ordering"]
+ O --> R["Both replicas render AX"]
+```
+
+**What to implement.** For a small demonstrator, implement a sequence with immutable character IDs, insertion anchors and deletion tombstones. Define a deterministic sibling ordering, such as the ordered pair of logical counter and client ID. Retain deleted anchors while offline operations may reference them. This is an explicit toy operation model, not a complete text-editor CRDT. Replacing it with a library still requires a documented operation format and snapshot/history-expiry behavior.
+
+**Walk through the result.** Start with A(id=a) followed by B(id=b). Alice emits delete(b). Bob emits insert(id=x, after=b, value=X). With tombstoned anchors retained, applying either order gives AX. Then let both insert after a and show the tie-break rule yields the same result on both replicas. Supply the operations and resulting character-ID sequence.
+
+
 
 
 Allow two offline users to delete and insert at the same position. Show the chosen algorithm’s actual operation data and convergence rule. A diagram labeled merge is not enough to define the result.

@@ -142,6 +142,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Choose between regional durability and regional write availability
+
+If region A acknowledges before B has a durable copy, A can fail during that gap. Zero acknowledged loss requires that the chosen acknowledgement boundary already spans the failure being promised.
+
+| Starting design | Changed requirement |
+|---|---|
+| Acknowledgement may precede replication to a second region. | The business asks whether every acknowledged write must survive loss of the first region. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+W["Incoming write"] --> C{"Acknowledgement contract"}
+ C -->|local durable copy| A["Async: acknowledge locally"]
+ A --> B["Replicate later"]
+ C -->|remote durable copy required| S["Wait for remote durability"]
+ S -->|confirmed| K["Acknowledge"]
+ S -->|partition| U["Wait within deadline or reject"]
+```
+
+**What to implement.** Present two concrete choices. With asynchronous replication, local acknowledgement stays fast but failover can lose the unreplicated suffix. With synchronous cross-region durability, acknowledgement waits for the required remote durable copy and partitions can block writes. Specify the actual protocol and failure assumptions, not just two database icons. Promotion also needs storage-enforced writer fencing. Do not infer either contract from a product name or DNS failover.
+
+**Walk through the result.** Use a constructed 70 ms cross-region round trip and a local 20 ms write target. Explain why a write that waits for that remote acknowledgement cannot retain the 20 ms target on this path. At 3,000 writes/s and 20 seconds of measured lag, up to 60,000 writes may be exposed in the asynchronous scenario. Record which trade the product accepts.
+
+
 
 
 Product rejects both any data loss and the latency cost of synchronous regional durability. Write a decision record with the failure cases and measurable options. No infrastructure diagram can make contradictory guarantees simultaneously true.

@@ -141,6 +141,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Migrate URL identity rules without duplicating the crawl
+
+Removing a tracking parameter may correctly merge duplicates, while removing an item parameter can collapse different pages. Rekeying every row in place makes those mistakes difficult to reverse.
+
+| Starting design | Changed requirement |
+|---|---|
+| A normalization function produces the frontier key. | A revised rule changes which raw URLs are considered the same resource. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+R["Raw URL records"] --> O["Current normalization keys"]
+ R --> N["Candidate normalization keys"]
+ O --> C["Collision and alias reconciliation"]
+ N --> C
+ C --> P["Frontier ownership switch"]
+ P --> H["Per-host due queues"]
+```
+
+**What to implement.** Retain raw URLs and version the normalization algorithm. Build a candidate mapping from old keys to new keys, preserving aliases and recording collisions. Classify collision samples before switching scheduling ownership. During transition, use a migration authority to prevent both keys from independently scheduling the same fetch. Keep per-host pacing attached to the actual destination host. Use a shadow frontier generation and a bounded migration worker rather than restarting the entire crawl.
+
+**Walk through the result.** Compare /item?id=1&utm_source=x with /item?id=1 and /item?id=2. The first two may merge under the stated rule, while the third remains distinct. Revert the candidate mapping and show that all raw URLs and prior fetch records remain available. Deliver collision counts and reviewed examples, not only total row counts.
+
+
 
 
 Change normalization rules after 500 million URLs are stored. Plan identity migration and aliasing so new rules do not duplicate the whole crawl or collapse URLs whose query parameters carry meaning.

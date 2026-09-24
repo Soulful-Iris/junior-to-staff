@@ -139,6 +139,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Enforce one hard quota across regions
+
+An organization has 100 admissions left. If both regions cache that value and admit 100, the product has sold the same allowance twice. A hard global maximum needs coordination or preallocated capacity.
+
+| Starting design | Changed requirement |
+|---|---|
+| All gateways spend from one shared counter. | Regional gateways spend explicit portions of one global allowance. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+G["Global budget: 100 permits"] -->|allocate 60| A["Region A admission authority"]
+ G -->|allocate 40| B["Region B admission authority"]
+ A --> C["Atomic regional spend"]
+ B --> D["Atomic regional spend"]
+ C --> E["Allowed request or 429"]
+ D --> E
+```
+
+**What to implement.** For this variant, allocate 60 permits to A and 40 to B in a durable global budget ledger. Each regional authority atomically spends only its allocation and records request identities. Do not let gateway processes each hold their own copy of those 60 permits. Persist the period and allocation generation. If A is unreachable, its unreported capacity is unavailable until you can prove it cannot still be spent. Reallocating it blindly weakens the hard cap. Use conditional storage operations for both the ledger and regional admission owners.
+
+**Walk through the result.** A admits 60 and B admits 40. The next request is rejected even if the other region is unreachable. If A disappears after spending 10, up to 50 permits may be stranded for this period. Present that lost-capacity trade alongside a single home-region admission alternative.
+
+
 
 
 Replace fixed windows with a rolling 60-second policy. Estimate the state needed for an exact timestamp log versus buckets, then state the approximation error if you choose buckets. A token bucket is a different burst contract, not merely a faster implementation of the same words.

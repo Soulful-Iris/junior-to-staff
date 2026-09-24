@@ -133,6 +133,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Execute a multi-step approved workflow safely
+
+Approving refund then notify does not grant permission for the model to add a second refund later. A failure after the first step also cannot be represented by one undifferentiated failed status.
+
+| Starting design | Changed requirement |
+|---|---|
+| One approval authorizes one precisely defined action. | A proposal includes several steps that may partly complete before policy or facts change. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+P["Immutable proposed plan"] --> A["Approval bound to plan hash"]
+ A --> E["Restricted step executor"]
+ E --> L["Per-step outcome ledger"]
+ L --> C{"Authority still valid"}
+ C -->|yes| E
+ C -->|no or unknown effect| S["Stop and reconcile"]
+```
+
+**What to implement.** Bind approval to an immutable plan hash, ordered step IDs, parameters, limits, policy version and expiry. Persist each step's attempt and result separately. Before starting a remaining step, recheck current authority and relevant facts. Stop on a changed plan or revoked approval. Use the original provider operation identity for uncertain effects and reconcile them before continuing. Compensation is another authorized business action, not automatic erasure of history.
+
+**Walk through the result.** Approve a $5 credit followed by a notification. Confirm the credit, then revoke approval before notification. The record shows credit confirmed and notification stopped. Alter the plan to $50 and show it requires new approval. Deliver the per-step ledger and the exact condition permitting the next step.
+
+
 
 
 Allow a workflow containing several approved steps. Define which steps share one approval, what happens after partial completion, and which changed facts invalidate the remaining authority.

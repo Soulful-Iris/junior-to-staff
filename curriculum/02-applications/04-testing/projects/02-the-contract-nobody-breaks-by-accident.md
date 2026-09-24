@@ -144,27 +144,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add a strict consumer that rejects unknown fields. Decide whether an additive response change requires a version for that supported client, and document the evidence behind the decision.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The request content type differs
 
-**Changed requirement:** A caller sends `text/plain` and a malformed numeric query parameter. Which gateway checks apply? Predict which boundary must change before opening the design.
+**Changed requirement:** A caller sends `text/plain` and a malformed numeric query parameter. Which gateway checks apply?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 REST basic validation checks required parameter presence/nonblank values, not numeric formats. Body validation requires a matching model or a deliberate `$default`/reject policy. Validate domain types in the handler.
+
+**Trace one rejected request.** Consider `POST /items?limit=abc` with `Content-Type: text/plain`. A required parameter is present, but it is not a valid integer. Define allowed content types explicitly and reject unsupported ones before interpreting the body. Parse and validate limit in the handler with bounds.
+
+Deliver a small decision table: unsupported media type → 415, malformed supported body → documented 400, invalid numeric limit → documented 400. Keep these application choices separate from the gateway's particular validation features. A gateway presence check is not proof of domain validity.
 
 </details>
 
 ## Follow-up 2 · The provider evolves
 
-**Changed requirement:** Add an optional field while an old consumer remains deployed. What should fail? State what evidence would make you reject your first design.
+**Changed requirement:** Add an optional field while an old consumer remains deployed. What should fail?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 The compatible addition should pass agreed consumer tolerance checks. Removing a required field or changing its meaning must fail. Include strict-consumer behavior explicitly instead of assuming all additions are harmless.
+
+**Compare old and new consumers.** Add optional `display_title` while retaining required `url`. A tolerant consumer ignores the addition, while a strict consumer that rejects unknown fields may still break. Record that difference rather than declaring every additive JSON change compatible.
+
+Supply two serialized responses and the consumer behavior for each. Then change the meaning of an existing numeric field without changing its type and show why schema shape alone misses the break. Name the owner who approves the wire contract and the deployed clients included in the compatibility claim.
 
 </details>
 

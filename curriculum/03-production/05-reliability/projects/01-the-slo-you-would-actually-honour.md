@@ -144,27 +144,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Product instead wants 99.9% of one-minute windows to be usable. Define usable per window and the low-traffic rule. That is a different SLO with a different denominator.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Traffic is uneven
 
-**Changed requirement:** A quiet interval has 1/10 failures and a busy interval has 0/990. Is mean interval success 95%? Predict which boundary must change before opening the design.
+**Changed requirement:** A quiet interval has 1/10 failures and a busy interval has 0/990. Is mean interval success 95%?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No: total success is 999/1000=99.9%. Sum counts before dividing. Averaging percentages gives the quiet interval unjustified weight.
+
+**Work through the denominator.** The quiet interval has nine successful requests out of ten. The busy interval has 990 out of 990. Summing gives 999 successful requests out of 1,000, or 99.9%. Averaging 90% and 100% gives 95%, which answers a different question.
+
+Keep raw good and eligible counts through aggregation. Deliver the two interval rows and the combined result, including your treatment of missing observations. No architecture expansion is needed unless the metric pipeline currently discards counts and retains only percentages.
 
 </details>
 
 ## Follow-up 2 · Product wants a time SLO
 
-**Changed requirement:** The requirement becomes “the service is usable in 99.9% of one-minute windows.” What changes? State what evidence would make you reject your first design.
+**Changed requirement:** The requirement becomes “the service is usable in 99.9% of one-minute windows.” What changes?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Define a good window and its probing/traffic rule, then count eligible windows. Thirty days contain 43,200 minutes, yielding 43.2 bad-window minutes at 0.1%. State discrete rounding and no-traffic treatment.
+
+**Change the stored unit of evidence.** Persist a record for each eligible minute with a declared good-window rule. For example, the exercise may require a completed public journey within its latency bound. Define whether missing observations make a window bad or unknown, and how unknown affects reporting.
+
+A thirty-day period has 43,200 minutes. At 99.9%, 43 fully bad windows fit within the budget and 44 exceed it. Deliver a minute-level ledger showing a no-traffic interval and a missing probe. A request success ratio cannot be relabeled as this time-based objective.
 
 </details>
 

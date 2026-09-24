@@ -139,27 +139,47 @@ A provisioned queue or table does not make the local program use it. Configure r
 A probe passes while real users fail because its account has special permissions. Compare its identity, data size and routing with the user population and remove privileges that bypass the behavior being measured.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The scheduler stops
 
-**Changed requirement:** No probe result arrives for three intervals. Is that equivalent to success? Predict which boundary must change before opening the design.
+**Changed requirement:** No probe result arrives for three intervals. Is that equivalent to success?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. Monitor heartbeat freshness separately from journey outcome. Distinguish no eligible data from missing instrumentation. Alert on the absent run with the monitor’s owner and last successful timestamp.
+
+**Model three outcomes.** A journey can succeed, fail, or have no trustworthy observation. Persist expected run time, actual start, completion and result separately. A heartbeat watcher needs a failure path independent enough to notice the scheduler's silence.
+
+Pause the scheduler for three intervals in the exercise and show stale observation with the last completed timestamp. Do not fill the missing slots with success or include them silently in a success denominator. Provide an owner and a recovery action for the monitor itself.
 
 </details>
 
 ## Follow-up 2 · A regional path fails
 
-**Changed requirement:** The probe in the application VPC passes, but public DNS fails for a region. What changes? State what evidence would make you reject your first design.
+**Changed requirement:** The probe in the application VPC passes, but public DNS fails for a region. What changes?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Probe the actual public entry path from a second location and keep region-specific outcomes. Do not automatically collapse a single-location failure into global outage. Correlate it with other evidence.
+
+**Change where the observation starts.** The internal probe skips public DNS, edge routing and some network paths. Add a second vantage point that uses the same public hostname and TLS path as the affected users. Record location and journey version with each result.
+
+Construct a result table where the VPC probe passes and one public location fails DNS. Classify it as a path-specific problem until more evidence establishes the scope. The architecture change is an independent observation path, not running the same internal command twice.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+I["Internal probe"] --> A["Application entry"]
+ P["Public-location probe"] --> D["Public DNS and edge"]
+ D --> A
+ I --> R["Location-specific outcomes"]
+ P --> R
+ H["Expected-run heartbeat"] --> R
+```
 
 </details>
 

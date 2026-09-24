@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Change a recurring schedule without sending twice
+
+A customer moves a daily report from New York time to London time. Two scheduler processes may still hold the old and new definitions. Without a version boundary they can each create a report for the same intended occurrence.
+
+| Starting design | Changed requirement |
+|---|---|
+| A schedule version creates future occurrences. | A timezone edit introduces a new version with a defined transition instant. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+E["Timezone edit"] --> S["Versioned schedule store"]
+ S --> M["Occurrence materializer"]
+ M -->|unique business key| O["Durable occurrence ledger"]
+ O --> Q["Dispatch queue"]
+ Q --> W["Idempotent report worker"]
+ W --> O
+```
+
+**What to implement.** Choose this exercise policy: already materialized occurrences keep their UTC instant, and the edit applies only to future unmaterialized occurrences. Store timezone identifier, schedule generation and effective boundary. Serialize edits with occurrence creation. Give each occurrence a stable ID and unique business key, then dispatch it through the existing durable job path. A timezone rule change is another explicit schedule revision. EventBridge or another trigger wakes the scheduler, but the application store owns the occurrence identity.
+
+**Walk through the result.** Create tomorrow's occurrence under generation 4, change timezone to generation 5, then run both schedulers. Tomorrow's existing occurrence remains unchanged and no second copy is created. Show the next newly calculated occurrence with its local time, UTC instant and generation. Document your daylight-saving gap and repeated-hour policy.
+
+
 
 
 Allow a customer to move a recurring schedule between timezones. Specify whether already materialized occurrences keep their original instant. Show the state and version boundary that prevents both versions from sending the same report.

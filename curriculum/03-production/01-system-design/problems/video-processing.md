@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Publish a new video generation while viewers use the old one
+
+Overwriting segment files in place lets a player combine an old manifest with new bytes. Deleting the old generation immediately can break viewers who already loaded its manifest.
+
+| Starting design | Changed requirement |
+|---|---|
+| A completed transcode publishes one manifest. | Reprocessing builds a replacement without disrupting existing playback. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+U["Source video"] --> T["Transcode generation 5"]
+ T --> S["Immutable segments"]
+ S --> V["Verify complete manifest"]
+ V --> P["Conditional active pointer"]
+ P --> N["New viewer: generation 5"]
+ O["Existing viewer: generation 4"] --> R["Retained old segments"]
+```
+
+**What to implement.** Write segments under immutable generation-specific S3 keys. Record a manifest only after all required outputs are complete and verified. Atomically change the active generation pointer using the expected prior version. Existing sessions keep their old manifest until the documented session and delivery-cache retention bound. Garbage collection checks that bound before deleting old objects. Failed reprocessing leaves the old pointer intact.
+
+**Walk through the result.** Play generation 4 while generation 5 fails halfway through encoding. New sessions must still receive 4. Complete 5 and switch the pointer once. Show an existing session fetching a generation-4 segment and a new session fetching generation 5. Hand over the publication condition and deletion eligibility rule.
+
+
 
 
 Allow students to keep watching during reprocessing. Keep the previous manifest valid until the new generation is complete, and define when old segments can be removed without breaking active sessions.

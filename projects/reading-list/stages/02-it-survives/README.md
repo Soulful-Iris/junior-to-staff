@@ -163,27 +163,57 @@ A provisioned queue or table does not make the local program use it. Configure r
 Continue to stage 3 with the recovery procedure intact. Add asynchronous work without weakening what an accepted job or a published result means.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A deploy crashes
 
-**Changed requirement:** A candidate version exits immediately. What keeps the previous version available? Predict which boundary must change before opening the design.
+**Changed requirement:** A candidate version exits immediately. What keeps the previous version available?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Build once, route only to ready instances, preserve the previous artifact and compatible config, and prove rollback by observing served version. Data compatibility remains a separate gate.
+
+**Preserve a usable old release during startup failure.** Keep the previous immutable artifact and compatible configuration available while the candidate starts. Route requests only after the candidate can serve its required dependencies. A process that exits immediately must not replace all healthy capacity.
+
+Deploy a deliberately exiting candidate in the disposable application environment and query the served version. It must remain the prior release. Then deploy a working candidate and show the version change. Record separately whether the schema still permits the old binary to run. This exercise does not alter the guide's main-to-site publishing path.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+A["New immutable artifact"] --> N["Candidate runtime"]
+ N -->|ready| R["Traffic routing"]
+ N -->|startup fails| X["Candidate withdrawn"]
+ O["Previous healthy runtime"] --> R
+ R --> U["Served version evidence"]
+```
 
 </details>
 
 ## Follow-up 2 · The primary and its credentials are lost
 
-**Changed requirement:** Can an unfamiliar engineer recover without depending on the failed primary? State what evidence would make you reject your first design.
+**Changed requirement:** Can an unfamiliar engineer recover without depending on the failed primary?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use independently accessible backup, documented scoped recovery identity and a fresh target. Verify row contents and application behavior before routing traffic. Retain evidence of missing acknowledged writes.
+
+**Make recovery independent of the lost primary.** The backup location, decryption permissions and recovery instructions cannot require credentials available only inside the failed database. Restore into a fresh target with a scoped recovery identity. Compare application records against the last known acknowledged operations before redirecting users.
+
+Use a backup that predates one acknowledged bookmark. Show the restored database missing that row and report the loss honestly. Recover it only from a trustworthy later log if available. Hand over the commands, identity requirements and observed recovery point, not just a successful restore message.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+B["Independent backup copy"] --> T["Fresh recovery target"]
+ I["Scoped recovery identity"] --> T
+ L["Known acknowledged operations"] --> V["Reconcile restored state"]
+ T --> V
+ V -->|accepted recovery point| R["Route application traffic"]
+```
 
 </details>
 

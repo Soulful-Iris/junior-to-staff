@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Reserve three rooms as one booking
+
+The organizer should not receive a successful meeting with only two rooms. Independent availability checks are stale as soon as another organizer reserves a room.
+
+| Starting design | Changed requirement |
+|---|---|
+| A booking checks one room for an overlapping interval. | One meeting must acquire all three requested rooms or none. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Three-room booking"] --> T["Database transaction"]
+ T --> L["Lock room IDs in order"]
+ L --> C{"All intervals available"}
+ C -->|yes| S["Save meeting and three reservations"]
+ C -->|no| R["Roll back all reservations"]
+ S --> O["Invitation outbox"]
+```
+
+**What to implement.** For rooms in one relational store, acquire room locks in a stable ID order and enforce interval exclusion inside one transaction. Insert the meeting and all reservations together. Roll back the entire transaction if any room conflicts. Use an outbox for invitations after the booking is saved. If rooms belong to independent providers, use expiring holds and a visible pending booking, then compensate partial holds. That alternative has a different user contract.
+
+**Walk through the result.** Request R1, R2 and R3 for 09:00–10:00 while R2 is already occupied. The result is a conflict and no new reservation for R1 or R3. Compare that with the external-provider variant, where the user sees pending until all holds are confirmed. Hand over both the transaction boundary and cancellation behavior.
+
+
 
 
 Add a meeting requiring three rooms atomically. Compare a database transaction spanning all room constraints with independent reservations and compensation. Explain what the organizer sees if only two rooms can be acquired.

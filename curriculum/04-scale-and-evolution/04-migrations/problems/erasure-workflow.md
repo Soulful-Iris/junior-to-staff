@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Keep erased data suppressed while a downstream store is offline
+
+The search index is unavailable for two days. A customer should not reappear in search when it returns merely because its delete task was waiting. Technical completion and an external vendor's assurance also need separate records.
+
+| Starting design | Changed requirement |
+|---|---|
+| Deletion workers remove data from known stores. | A suppression decision blocks access before every store finishes physical deletion. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+R["Erasure request"] --> S["Subject suppression"]
+ R --> M["Deletion manifest"]
+ M --> P["Primary-store deletion"]
+ M --> I["Index and vendor deletion"]
+ H["Search results"] --> S
+ S -->|eligible results only| U["User response"]
+```
+
+**What to implement.** Create a deletion manifest listing each store, responsible owner, task identity and evidence state. Write the subject suppression record first and consult it before serving derived results. Retry physical deletion by store, then verify absence after recovery. Store vendor completion receipts as claims with scope and timestamp. Mark insufficient evidence unresolved until the designated policy owner accepts it. SQS can carry tasks and a database can track the manifest, but an empty queue is not proof of erasure.
+
+**Walk through the result.** Pause search deletion, complete primary deletion and return a stale search hit. The read path must suppress it. Resume the index, finish its task and attach evidence. Show the customer status as access blocked, deletion still in progress until required stores and approvals are accounted for.
+
+
 
 
 A vendor says deletion is complete but cannot provide object-level evidence. Decide which assurance is sufficient for that processor, who accepts it and what the customer sees. Keep technical progress distinct from policy approval.

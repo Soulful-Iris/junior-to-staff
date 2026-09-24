@@ -139,27 +139,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add recurring shifts across a daylight-saving transition. Keep local recurrence intent separate from UTC occurrences and define the policy for nonexistent or ambiguous local times.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A link was cached
 
-**Changed requirement:** You add CloudFront for static assets. What happens to the protected schedule route? Predict which boundary must change before opening the design.
+**Changed requirement:** You add CloudFront for static assets. What happens to the protected schedule route?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use a cache-disabled behavior for protected schedule data and no-store responses. Validate the token against the authoritative store for every new request. Fail closed if it is unavailable. Static shell assets may remain cached.
+
+**Split delivery by resource type.** Cache the HTML, JavaScript and styles of the app, but route protected schedule data through the authorization handler on every new request. Set the protected response to no-store and ensure the delivery layer has no response-caching rule that overrides the intended behavior. Current token state lives in the authoritative store.
+
+Warm a schedule request, revoke its token and repeat the identical URL. It must be denied while the static shell remains available. Disconnect the token store and show fail-closed behavior. The deliverable is a route/cache-policy table and those three requests, not merely a diagram containing CloudFront.
 
 </details>
 
 ## Follow-up 2 · Product accepts bounded revocation
 
-**Changed requirement:** Product now allows up to 60 seconds before a revoked link stops working globally. What must be specified? State what evidence would make you reject your first design.
+**Changed requirement:** Product now allows up to 60 seconds before a revoked link stops working globally. What must be specified?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Choose and verify a bounded authorization propagation/cache policy. An object TTL alone is not necessarily the token-decision bound. Measure warm identical GETs across delivery locations and define fail-closed behavior. Signed expiry bounds access only under its actual expiry semantics.
+
+**Define a complete sixty-second bound.** Record when an authorization decision was obtained and refuse to use it after its maximum age. Budget propagation delay and clock uncertainty inside the promised bound. A cached response whose TTL restarts at each layer can violate the contract.
+
+Use a timeline: revoke at t=0, allow only decisions whose permitted validity cannot extend beyond t=60 under the stated assumptions, then deny all new reads after that boundary. If a region cannot refresh permission before expiry, deny rather than extend stale authority. State that already downloaded schedules remain outside technical revocation. Deliver the worst-case timeline across two cache layers.
 
 </details>
 

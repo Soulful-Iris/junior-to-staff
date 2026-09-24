@@ -144,27 +144,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 The provider’s idempotency retention expires before your retry horizon. Shorten the automatic retry window or add a provider lookup/reconciliation path. Do not assume an old key remains deduplicated forever.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Every client starts together
 
-**Changed requirement:** A dependency recovers and 1,000 clients have identical backoff. Does the request count alone reveal the risk? Predict which boundary must change before opening the design.
+**Changed requirement:** A dependency recovers and 1,000 clients have identical backoff. Does the request count alone reveal the risk?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Plot attempt timestamps as well as counts. Full jitter spreads retries, while an admission limit bounds total downstream concurrency. Jitter does not create extra capacity or serialize one key.
+
+**Show the burst shape.** Record attempt timestamps for a controlled group of clients with identical backoff, then with full jitter. Compare peak attempts per small interval, not only the total count. Add a separate admission semaphore or work budget before calling the dependency.
+
+A thousand clients spread across one second can still overwhelm a dependency that handles 100/s. Deliver the timestamp histogram or table, maximum in-flight calls and rejected/deferred count. State the scope of the limiter: a per-process cap multiplied by ten replicas is not one fleet-wide cap.
 
 </details>
 
 ## Follow-up 2 · The first write succeeded
 
-**Changed requirement:** The provider performed a write before the response disappeared. What determines retry safety? State what evidence would make you reject your first design.
+**Changed requirement:** The provider performed a write before the response disappeared. What determines retry safety?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 For local effects, atomically persist operation identity, payload and result with the effect. For a remote effect, use its idempotency/status protocol or reconcile an unknown outcome. Compare duplicate conflicting payloads before replay.
+
+**Trace one uncertain write.** Use operation K and a fixed payload hash. The provider applies K, the response disappears, and the client retries. The next attempt must ask about or replay K under the provider's actual idempotency contract. A new key describes a new effect.
+
+Add an UNKNOWN state and a reconciliation command to the exercise. Show the same receipt returned after recovery and a changed-payload retry rejected. Record the provider retention horizon. After that horizon, a local deduplication row does not make an external retry safe.
 
 </details>
 

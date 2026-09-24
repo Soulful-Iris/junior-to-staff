@@ -157,27 +157,45 @@ A provisioned queue or table does not make the local program use it. Configure r
 Add parallel metadata providers. Cancel losing requests, cap total fan-out and decide whether one successful provider is enough to finish the request.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The response is lost
 
-**Changed requirement:** The create committed but the connection broke. The same key is retried concurrently. What is atomic? Predict which boundary must change before opening the design.
+**Changed requirement:** The create committed but the connection broke. The same key is retried concurrently. What is atomic?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 The deduplication record and stored item/result must commit together. Replays return the recorded result. Key reuse with different content returns conflict. A separate marker before an external side effect is not enough.
+
+**Make the failure concrete.** Request K creates item 41, then the socket closes before the client receives 201. Add a request-result table keyed by trusted owner and K. Store the payload fingerprint, item and replayable response in one transaction. Concurrent retries must read the same completed result or wait within their remaining deadline. They must not create item 42.
+
+**Your deliverable:** show two concurrent retries of K returning item 41, then reuse K with a different URL and show conflict. Set a retention horizon for K that covers your accepted retry window. If the operation becomes a remote charge, this local transaction no longer covers the external effect. Use the provider protocol instead.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+R["Request identity and fingerprint"] --> T["Atomic result and item transaction"]
+ T -->|new identity| C["Create item and result"]
+ T -->|same payload| P["Replay stored result"]
+ T -->|different payload| X["Conflict"]
+```
 
 </details>
 
 ## Follow-up 2 · Several layers retry
 
-**Changed requirement:** Client, API and SDK each permit three attempts. How many leaf calls can occur? State what evidence would make you reject your first design.
+**Changed requirement:** Client, API and SDK each permit three attempts. How many leaf calls can occur?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 The maximum is 3×3×3=27. Three retries after the initial attempt would be 4×4×4=64. Disable redundant retry layers, then assert the actual dependency call count and remaining deadline.
+
+**Move retry ownership.** Let the API own a single end-to-end attempt budget and disable independent retries in the SDK adapter. Pass remaining time to every dependency call. Before sleeping or starting another attempt, subtract elapsed time and reserve enough for a response. A timeout is not evidence that a write did nothing.
+
+**Worked budget:** with 700 ms remaining, a proposed 300 ms backoff plus a 500 ms attempt does not fit. Stop rather than start work that cannot meet the deadline. Record each actual dependency attempt in the local demo and hand over its timeline. Compare 27 possible leaf calls under three nested three-attempt policies with the chosen bounded total. Jitter spreads attempts but does not reduce that maximum by itself.
 
 </details>
 

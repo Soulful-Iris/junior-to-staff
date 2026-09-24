@@ -141,6 +141,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Replace completed-video publishing with a live stream
+
+Live playback cannot wait for the final file because the event has not ended. Segment duration, upload completion and manifest refresh now contribute directly to how far behind the event a viewer is.
+
+| Starting design | Changed requirement |
+|---|---|
+| A complete immutable manifest is published after processing finishes. | An encoder continuously produces segments and a moving playback window. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+E["Active encoder generation"] --> S["Complete immutable segments"]
+ S --> M["Single rolling-manifest publisher"]
+ M --> C["CloudFront delivery"]
+ C --> P["Player buffer"]
+ F["Encoder failover"] -->|new generation| E
+ M --> R["Retention for rewind window"]
+```
+
+**What to implement.** Give each encoder run a generation and each segment a sequence number. Upload a complete immutable segment before adding it to the rolling manifest. One fenced publisher owns that manifest. An encoder failover starts a new generation and declares the discontinuity instead of overwriting an existing sequence. Keep old segments long enough for the advertised rewind window and delayed viewers. The AWS path can use an ECS encoder with S3 origin and CloudFront delivery, or a managed media pipeline after checking its contract.
+
+**Walk through the result.** With illustrative two-second segments and a three-segment player buffer, the buffer alone contributes about six seconds before network and encoding delay. Stop the encoder after segment 100. Show the last safe manifest, the new generation and how the player resumes without requesting a partially uploaded segment. Deliver the rolling-manifest example.
+
+
 
 
 Add live streaming. Revisit segment latency, encoder failure, rolling manifest updates and origin failover. The immutable completed-video assumptions no longer cover the entire path.

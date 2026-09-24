@@ -133,6 +133,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Admit a new language runtime without trusting its code
+
+A runtime is executable code inside the worker boundary. A container image label does not demonstrate that the submitted program cannot reach another submission or the host.
+
+| Starting design | Changed requirement |
+|---|---|
+| Workers run an approved set of language images. | A third party submits a runtime that could access files, credentials or the network. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+I["Proposed runtime image"] --> A["Admission and version registry"]
+ A --> Q["Submission scheduler"]
+ Q --> B["Isolated execution boundary"]
+ B --> F["Fresh per-job filesystem"]
+ B --> R["Bounded result collector"]
+ X["Runtime revocation"] --> A
+```
+
+**What to implement.** Create an image admission record with immutable digest, builder provenance, supported language version, owner and retirement date. Run each submission with fresh storage, resource limits, no application credentials and denied outbound access unless the exercise explicitly needs it. Separate the scheduling service from the execution boundary. Choose an isolation mechanism appropriate to hostile code rather than treating ECS placement alone as a sandbox. Keep old result metadata reproducible without leaving retired vulnerable workers available to new jobs.
+
+**Walk through the result.** Submit a program that attempts to read another job's file, contact an internal address and exceed its time budget. Record the denied capabilities and termination reason from a disposable local exercise. Then revoke one runtime digest and show new submissions refused while historical results still name the original digest.
+
+
 
 
 Allow third-party language runtimes. Define the image admission process, patch ownership, version retirement and how old submissions remain reproducible without keeping vulnerable hosts publicly reachable.

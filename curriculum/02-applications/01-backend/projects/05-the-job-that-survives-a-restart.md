@@ -157,27 +157,47 @@ A provisioned queue or table does not make the local program use it. Configure r
 Let users edit the URL while an old fetch runs. Add a source URL version to the job and reject results for an earlier source even if the worker still owns its lease.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A expires during work
 
-**Changed requirement:** A resumes after expiry but before B claims. May it still commit? Predict which boundary must change before opening the design.
+**Changed requirement:** A resumes after expiry but before B claims. May it still commit?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Under this exercise’s strict policy, no: the commit checks both generation and lease validity using authoritative time. A must reacquire a new generation. This closes the gap where “owner matches” alone accepts an expired owner.
+
+**Follow the exact race.** A owns generation 7 until time 100. It resumes at time 101, before B has claimed. An ownership check alone still sees A and would accept an expired worker. Put job state, generation and lease-expiry predicates in the same storage transaction that records completion. Use the storage authority's time policy.
+
+Show A rejected at 101, A reacquiring generation 8 if the job remains available, and completion succeeding only under 8. Then let B acquire 8 first and demonstrate A cannot overwrite it. Queue visibility and local timers are not the final write authority.
 
 </details>
 
 ## Follow-up 2 · The provider charges per operation
 
-**Changed requirement:** Replace the read with a billable enrichment API that succeeds but loses its response. Can you safely repeat? State what evidence would make you reject your first design.
+**Changed requirement:** Replace the read with a billable enrichment API that succeeds but loses its response. Can you safely repeat?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use a provider-supported idempotency key or status lookup tied to the same operation identity. Otherwise record outcome unknown and reconcile before retrying a non-idempotent effect. Local fencing protects your store, not an external provider.
+
+**Add a durable external-attempt ledger.** Save operation ID, provider key, payload fingerprint and submitted state before making the billable call. On a lost response, mark the outcome unknown and query the provider with that identity. A new worker must recover this attempt rather than generate a fresh charge key.
+
+Demonstrate provider success followed by a worker crash before local completion. The restarted worker records the existing receipt. If the provider supports neither safe idempotency nor status lookup, stop automatic replay and hand the unresolved attempt to an operator. Local fencing only decides which worker may publish local state.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+J["Durable job"] --> A["External attempt ledger"]
+ A --> P["Billable provider"]
+ P -->|response lost| U["Unknown outcome"]
+ U --> R["Status lookup or operator reconciliation"]
+ R --> A
+ A --> C["Guarded local completion"]
+```
 
 </details>
 

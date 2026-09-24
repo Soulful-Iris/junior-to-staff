@@ -137,6 +137,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Make release approval control the runtime that serves users
+
+Changing an approved report pointer does not replace a running process. A serving runtime that silently uses another prompt is no longer the candidate described by the report.
+
+| Starting design | Changed requirement |
+|---|---|
+| The local registry identifies an evaluated release. | A deployment loader must run the matching code, prompt and model configuration. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+E["Immutable evaluation report"] --> R["Approved release identity"]
+ R --> L["Runtime loader and identity check"]
+ A["Code, prompt and model artifacts"] --> L
+ L --> C["Canary serving cohort"]
+ C --> O["Exposure and quality evidence"]
+ O -->|promote or restore| R
+```
+
+**What to implement.** Bind each report to immutable runtime, prompt, model configuration and dataset identities. Add a loader that resolves the approved runtime artifact and refuses mismatches. Route a bounded canary cohort only after readiness, and record which users were actually exposed. Keep delayed quality signals attached to their serving version. Rollback changes traffic and loads the prior compatible runtime. Data or provider effects produced by the failed release still need separate reconciliation.
+
+**Walk through the result.** Approve candidate B, then alter its prompt without new evidence. The loader must refuse it. Run an unchanged B canary, trigger a guardrail and restore A. Show served identity A in actual responses, not just registry state. Separately, a judge that always passes has zero failure recall on a reviewed failure set even if aggregate agreement is high.
+
+
 
 
 Your automated judge approves every answer. Measure failure detection on a reviewed failure set before trusting its aggregate agreement. High agreement on mostly good cases can coexist with zero failure recall.

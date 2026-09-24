@@ -157,27 +157,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Change units from milliseconds to seconds. Use a new field name or version and explicit conversion. Keeping a JSON number type does not preserve its semantic contract.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Usage cannot be seen
 
-**Changed requirement:** Both clients call the same URL, and the server cannot tell which JSON field they read. How do you measure retirement? Predict which boundary must change before opening the design.
+**Changed requirement:** Both clients call the same URL, and the server cannot tell which JSON field they read. How do you measure retirement?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use explicit version/capability telemetry where feasible, client inventories and owner acknowledgments. Endpoint traffic alone cannot reveal field access. The removal decision must name uninstrumented and offline clients.
+
+**Make retirement evidence specific.** A server log showing 10,000 calls to `/bookmarks` cannot tell whether a browser reads `duration_ms`. Add an explicit client contract version where you control clients and maintain an owner inventory for integrations you do not. Keep unknown traffic as its own category. An offline mobile client may not appear during the observation week.
+
+Deliver a retirement table with client, version, owner, last observation and migration evidence. For a client with no telemetry, record the unsupported inference instead of calling it unused. A decision to break that client must be a named product decision.
 
 </details>
 
 ## Follow-up 2 · A team misses the sunset
 
-**Changed requirement:** One consumer cannot migrate before the announced date. Must the compatibility test turn green on removal anyway? State what evidence would make you reject your first design.
+**Changed requirement:** One consumer cannot migrate before the announced date. Must the compatibility test turn green on removal anyway?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. A date is a policy input, not evidence of safety. Choose extended support, a versioned endpoint, or explicit accepted breakage with an owner. Revise the go/no-go gate accordingly.
+
+**Offer a concrete compatibility path.** Keep the old endpoint or field interpretation behind a version adapter while the delayed consumer migrates. Put the conversion in one owned module rather than scattering old/new checks through business logic. Give the exception a review date and support owner.
+
+For a milliseconds-to-seconds change, an old client receiving 1500 must still interpret 1.5 seconds. A new `duration_seconds: 1.5` field may coexist with `duration_ms: 1500`. Show both responses and a delayed-client request after the announced sunset. The date does not convert 1500 into 1.5 or prove the client stopped calling.
 
 </details>
 

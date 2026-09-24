@@ -144,27 +144,46 @@ A provisioned queue or table does not make the local program use it. Configure r
 Use a realistic distribution of request costs rather than one cheap endpoint. Weight the workload by user behavior and report which route or tenant class consumes the limiting resource.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The generator saturates
 
-**Changed requirement:** Doubling generators raises measured service throughput from 80/s to 100/s. What was the earlier limit? Predict which boundary must change before opening the design.
+**Changed requirement:** Doubling generators raises measured service throughput from 80/s to 100/s. What was the earlier limit?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 The earlier result included generator capacity. Measure generator CPU, sockets and offered rate, then rerun with enough headroom. Do not label 80/s an application limit.
+
+**Separate offered load from completed work.** Record intended arrivals, actual sends, accepted requests and completed requests using the same interval. Also record generator CPU and connection limits. If one generator cannot send more than 80/s, the service has not been challenged above 80/s.
+
+Run the bounded exercise with enough generator headroom to sustain the target arrival pattern, then identify whether queue delay grows in the generator or service. Hand over a table of those four rates. More generators are justified by measurement, not by assuming the first bottleneck belongs to the API.
 
 </details>
 
 ## Follow-up 2 · Only one tenant is hot
 
-**Changed requirement:** One tenant produces 90% of traffic. Does a global average show everyone’s experience? State what evidence would make you reject your first design.
+**Changed requirement:** One tenant produces 90% of traffic. Does a global average show everyone’s experience?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Split latency, errors and admission by bounded tenant class, and test fairness. Use a concurrency/rate budget at admission to keep one hot tenant from consuming all downstream work.
+
+**Add fairness at admission.** Split a controlled workload into a hot tenant and ordinary tenants. Use bounded tenant classes for aggregate metrics and detailed tenant IDs only in scoped diagnostic records. Give each tenant a concurrency allowance and keep the sum within downstream capacity.
+
+Show the ordinary class's p95 and rejection count before and after one tenant generates 90% of arrivals. A global improvement can hide starvation of the smaller group. Your implementation change is the admission boundary and allocation policy, not merely another dashboard.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+H["Hot tenant traffic"] --> A["Per-tenant admission"]
+ N["Ordinary tenant traffic"] --> A
+ A --> B["Shared downstream budget"]
+ B --> S["Service workers"]
+ A --> R["Bounded rejection by class"]
+```
 
 </details>
 

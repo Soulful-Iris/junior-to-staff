@@ -140,6 +140,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Revoke a shared bookmark even when its content is cached
+
+Alice shares item 41 with Bob, then withdraws the share. A cached copy can still contain the correct bookmark text while carrying an obsolete access decision. Content freshness and permission freshness now have different owners.
+
+| Starting design | Changed requirement |
+|---|---|
+| Only an authenticated owner can read a bookmark. | A recipient can read through a share token until the owner revokes it. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Shared-link request"] --> B["API: authorize token"]
+ B --> C["Share store: current permission"]
+ B -->|allowed| D["Content cache"]
+ B -->|revoked or unknown| E["Deny response"]
+ D --> F["Bookmark response"]
+```
+
+**What to implement.** Add a share record with token hash, item ID, expiry and revoked state. In the read handler, check the share against authoritative state before serving cached content. Keep private responses out of browser and CDN response caches. For the immediate-revocation contract, deny new reads when the permission store cannot be reached. A response already delivered cannot be recalled. On AWS, keep this decision in the API handler with a suitable consistent database read. CloudFront may still cache the static app.
+
+**Walk through the result.** Warm token S by reading item 41. Revoke S, leave the content cache untouched, then repeat the same request. It must be denied. Document the ordering point: revocation completed before the new authorization check. Your deliverable is the share schema, revised read path and this request transcript.
+
+
 
 
 Add revocable sharing only after private reads work. State the authorization decision point, recheck it on cache hits, and demonstrate that a revoked share token cannot authorize a new response. At ten times the read rate, measure query latency and hot owners before adding a cache.

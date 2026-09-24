@@ -143,6 +143,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Cache missing products without hiding a new product
+
+A read misses product P at generation 4. Another request creates P at generation 5. If the old read finishes later and fills not-found, new readers can incorrectly see absence.
+
+| Starting design | Changed requirement |
+|---|---|
+| Cache entries represent known product values and versions. | A not-found result is cached and must become obsolete when a product is created. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+M["Missing read at generation 4"] --> F["Atomic cache fill guard"]
+ C["Create product at generation 5"] --> G["Known source generation"]
+ G --> F
+ F -->|older result| R["Reject stale absence"]
+ F -->|current result| V["Versioned cache entry"]
+```
+
+**What to implement.** Represent absence as a versioned cache value, not a bare null. Maintain a source generation for the key and use an atomic compare-and-fill operation that rejects a result older than the known invalidation generation. Product creation advances that generation and publishes invalidation. Define a short negative-cache freshness bound for cases where invalidation is delayed. With Redis, the compare and fill must be one server-side atomic operation, not a Python read followed by a write.
+
+**Walk through the result.** Pause the generation-4 missing read. Create P at generation 5 and apply its invalidation. Resume the old fill and show it rejected. Repeat with invalidation delayed and report the maximum absence window your contract actually permits. Add the miss-storm admission limit so dropping negative entries cannot flood the source.
+
+
 
 
 Add negative caching for missing products. Define how a newly created product invalidates an older not-found result and how the version/generation rule applies to absence.

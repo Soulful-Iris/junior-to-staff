@@ -136,6 +136,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Assemble a multi-file invoice before extraction
+
+Page one may contain the supplier and subtotal while page two contains tax and the final total. Treating each upload as a complete invoice can publish partial or duplicate results.
+
+| Starting design | Changed requirement |
+|---|---|
+| One immutable source document produces a versioned result. | One invoice arrives as several files, sometimes out of order. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+F["Uploaded source files"] --> B["Versioned bundle manifest"]
+ C["Explicit completion signal"] --> B
+ B -->|complete and closed| E["Extraction by bundle hash"]
+ E --> V["Domain validation and review"]
+ V --> P["Conditional result publication"]
+ N["Corrected member"] -->|new version| B
+```
+
+**What to implement.** Create a bundle manifest with invoice identity, expected members, object hashes, version and closed state. Do not infer completeness merely from a quiet queue. A sender completion signal or an explicit operator decision closes the bundle. Derive extraction identity from the complete ordered manifest and extraction version. Corrected members create a new bundle version. Publish a reviewed result only if it still matches the current accepted source version.
+
+**Walk through the result.** Upload page two first and show waiting for source completion. Upload page one, close bundle v1 and extract once. Replace page two with a corrected total to create v2, then replay v1. The old result remains historical and cannot replace v2. Deliver the manifest, completion rule and result-version timeline.
+
+
 
 
 One invoice is split across several files. Define the complete source bundle identity and completion rule before extracting. A partial bundle must not be published as a final invoice.

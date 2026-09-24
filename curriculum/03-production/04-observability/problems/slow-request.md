@@ -141,6 +141,30 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Investigate one slow tenant without exploding metric labels
+
+A global p99 can hide a small tenant's timeouts. Adding every tenant and request ID to permanent metrics can make telemetry itself expensive and unreliable.
+
+| Starting design | Changed requirement |
+|---|---|
+| Service metrics use a bounded set of labels. | A temporary investigation needs request-level evidence for one tenant. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+R["Request instrumentation"] --> M["Bounded service metrics"]
+ R --> C{"Temporary capture policy"}
+ C -->|selected within budget| T["Detailed trace and logs"]
+ C -->|not selected| S["Count sampling decision"]
+ T --> P["Pool wait versus query analysis"]
+```
+
+**What to implement.** Keep service-wide rate, error and latency metrics partitioned by bounded route and tier. Add an expiring, access-controlled diagnostic capture for the affected tenant, with a request cap and sampling decision recorded in logs. Include queue wait, connection acquisition and dependency duration separately. Keep request IDs in traces or logs rather than metric dimensions. CloudWatch or another backend stores the evidence, while application instrumentation defines the phases.
+
+**Walk through the result.** Use one slow request with 1,700 ms pool wait and 40 ms query time. The investigation should implicate waiting for a connection, not the SQL execution. Turn capture off automatically at its expiry and show the stable metric-series count. Deliver one causal timeline and state which unsampled requests remain unknowable.
+
+
 
 
 Only one tenant produces the slow tail. Add bounded tenant-tier or targeted diagnostic analysis without turning every tenant and request ID into permanent metric labels.

@@ -133,6 +133,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Answer during a policy revision without mixing incompatible sources
+
+An answer can cite every sentence accurately yet combine rules that never applied together. Permission checks alone do not establish temporal or policy consistency.
+
+| Starting design | Changed requirement |
+|---|---|
+| Retrieved sources are individually authorized. | Some documents describe policy 4 while others already describe policy 5. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+Q["Question and applicable date"] --> S["Policy snapshot selection"]
+ S --> R["Authorized versioned retrieval"]
+ R --> C{"Evidence agrees"}
+ C -->|yes| G["Grounded answer"]
+ C -->|no| X["Conflict or insufficient evidence"]
+ G --> A["Final permission check"]
+```
+
+**What to implement.** Attach policy family, revision, effective interval and source version to indexed chunks. Select an applicable policy snapshot before generation. If required sources conflict or are missing, return a clear conflict or insufficient-evidence outcome rather than asking the model to choose authority. Recheck access before delivering the answer. Keep the previous index generation available while the new corpus is being built.
+
+**Walk through the result.** Policy 4 permits refunds within 30 days and policy 5 permits 14. Ask about a purchase during the transition. Show which effective-date rule selects the policy and cite that revision. If the effective date is absent, ask for it or decline the definitive answer. Deliver the retrieval filter and conflict response.
+
+
 
 
 Allow answers using multiple document versions during an ongoing policy update. Decide whether mixed-version evidence is acceptable and how conflicts are surfaced rather than silently resolved by the model.

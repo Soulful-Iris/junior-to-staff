@@ -138,27 +138,46 @@ A provisioned queue or table does not make the local program use it. Configure r
 Job cost varies by 100×. Replace a simple job-count estimate with remaining work units and identify the oldest expensive obligation rather than predicting recovery from queue count alone.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · The cache is cold
 
-**Changed requirement:** Cache loss sends 1,000 reads/s to a database that can handle 100/s. Should every miss bypass? Predict which boundary must change before opening the design.
+**Changed requirement:** Cache loss sends 1,000 reads/s to a database that can handle 100/s. Should every miss bypass?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. Bound refresh/bypass work, coalesce within an explicit scope, and serve authorized bounded-stale data or return 429/503. TTL jitter alone cannot protect a single expired hot key.
+
+**Add a recovery controller before the origin.** Coalesce repeated requests for the same key within a stated scope, cap global origin work, and refill gradually. Keep user authorization independent of whether a stale value is available. If no safe value can be served, return a prompt overload response.
+
+At 1,000 offered reads/s and a 100/s origin limit, account for the other 900/s through coalescing, permitted stale responses or rejection. Show that the origin stays within its budget during cache restart. A TTL with random jitter spreads many expirations but does not protect one extremely hot key.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+R["Cache-miss traffic"] --> C["Per-key request coalescing"]
+ C --> A["Origin admission budget"]
+ A -->|within budget| D["Database"]
+ A -->|over budget| F["Authorized stale response or 503"]
+ D --> W["Gradual cache refill"]
+```
 
 </details>
 
 ## Follow-up 2 · Expired work has business value
 
-**Changed requirement:** A job expired by latency policy but represents a payment request. May the worker drop it? State what evidence would make you reject your first design.
+**Changed requirement:** A job expired by latency policy but represents a payment request. May the worker drop it?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Separate obsolete presentation work from durable obligations. Transition the payment to a visible timeout/unknown state with an owner and reconciliation. Acknowledge/drop only according to the business contract.
+
+**Split deadline expiry from business completion.** A suggestion can become useless after the user leaves. A submitted payment may already have changed external state and still needs an answer. Store user-response timeout separately from payment outcome.
+
+Expire the interactive wait, then let provider confirmation arrive later. The record should move from unknown to confirmed without initiating another payment. Deliver an operator view listing unresolved obligations and the owner who reconciles them. Dropping a queue message must not erase that obligation.
 
 </details>
 

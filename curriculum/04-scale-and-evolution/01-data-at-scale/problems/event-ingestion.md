@@ -138,6 +138,32 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Correct a week of events while fresh events keep arriving
+
+A device firmware bug reported cents as dollars. Replaying the same raw bytes through the old decoder reproduces the error, and writing replay results directly into the live view can overwrite newer corrections.
+
+| Starting design | Changed requirement |
+|---|---|
+| One decoder writes the live derived view. | A versioned replay rebuilds affected history without replacing current results with old work. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+R["Raw event archive"] --> B["Corrected replay decoder"]
+ L["Live event stream"] --> C["Current decoder"]
+ L --> B
+ C --> V["Current view"]
+ B --> N["Candidate view generation"]
+ N --> P["Reconcile and switch query pointer"]
+ V --> P
+```
+
+**What to implement.** Retain raw event identity and schema version. Add a decoder version and output generation to derived records. Rebuild the affected range into a separate generation, catch up to a recorded input watermark and compare semantic totals before switching the query pointer. Give replay a separate capacity budget so new events retain their freshness objective. S3 holds the original bytes, while stream consumers and the materialized store own versioned transformation and publication.
+
+**Walk through the result.** Use raw amount 1999 under schema cents-v1. The corrected value is 19.99 in the chosen decimal representation, not 1999 dollars. Deliver one live event during replay and show it appears after cutover. Report the corrected historical generation and its watermark rather than silently changing previously exported totals.
+
+
 
 
 Change an event field from cents to decimal currency. Introduce an explicit schema version and conversion rule. Identical field names do not make historical data semantically compatible.

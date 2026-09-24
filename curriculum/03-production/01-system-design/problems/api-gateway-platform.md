@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Let teams own routes without editing the whole gateway
+
+A typo in one team's route should not remove another team's checkout endpoint. Moving edits into a UI does not by itself reduce the blast radius.
+
+| Starting design | Changed requirement |
+|---|---|
+| A central gateway loads one configuration. | Each team owns a namespace and can publish a scoped route revision. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+T["Team-scoped route proposal"] --> V["Ownership and conflict validation"]
+ V --> C["Immutable configuration revision"]
+ C --> A["Canary gateways"]
+ C --> B["Stable gateways"]
+ A --> O["Per-route outcomes"]
+ O -->|promote or restore| C
+```
+
+**What to implement.** Separate the control plane, which accepts route changes, from the data plane, which serves requests. Validate ownership, route conflicts, target permissions and retry policy before producing an immutable configuration revision. Gateway instances acknowledge the revision they loaded and retain the last known good one if the control plane fails. Roll out by gateway cohort and keep old revision compatibility for in-flight requests. On AWS, an ECS gateway and a versioned configuration store can demonstrate this separation.
+
+**Walk through the result.** Let team A change /a while team B serves /b. Submit a wildcard from A that would capture /b and show rejection. Then make A's accepted revision fail on a small cohort and restore the old revision without changing B's routes. Supply configuration IDs and per-route outcomes.
+
+
 
 
 Offer team-managed routing. Define ownership namespaces, validation and blast-radius limits so a team can change its service without editing a global configuration file that can disable unrelated routes.

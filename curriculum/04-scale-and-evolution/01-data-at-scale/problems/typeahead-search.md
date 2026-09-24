@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Personalize suggestions without sharing private history
+
+Caching the final personalized response under prefix iph can expose one person's history to another. Disabling all caching is unnecessary if public candidates and private ranking are separated.
+
+| Starting design | Changed requirement |
+|---|---|
+| Hot prefixes share a public candidate cache. | A user-specific reranker uses private history after public candidate retrieval. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+P["Normalized prefix and locale"] --> C["Shared public candidates"]
+ C --> R["Bounded per-user reranker"]
+ H["Authorized private history"] --> R
+ R --> U["Personalized response"]
+ H -->|unavailable| F["Public-order fallback"]
+ C --> F
+```
+
+**What to implement.** Keep the shared key limited to public vocabulary version, locale and normalized prefix. Bound the candidate list before loading user-scoped features. Rerank within a short budget and fall back to the public order when private features are unavailable. Do not put account IDs into the shared candidate payload. Any personalized response cache must include trusted user identity and an explicit deletion policy.
+
+**Walk through the result.** Alice often searches iPhone repairs and Bob searches iPhone photography. Both reuse the same public iph candidates but receive independently ranked results. Remove Alice's history and repeat. The public cache survives while her private feature record disappears. Deliver the cache keys and one response pair.
+
+
 
 
 Personalize ranking while preserving a hot-prefix cache. Separate a globally eligible candidate set from a small per-user rerank, and define how private history is isolated.

@@ -80,37 +80,31 @@ Collect changed symbols, references, and tests, then identify the semantic risk.
 
 ## Follow-up 1 · Prove a named test
 
-**Changed requirement:** The tool says `test_limit_zero` catches an inverted condition. How do you verify that statement? Predict which boundary must change before opening the design.
+**Changed requirement:** The tool says `test_limit_zero` catches an inverted condition. How do you verify that statement?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Introduce that condition on an isolated branch and run the named test. Capture the failure and restore the tree. A passing mutant disproves the coverage claim.
 
-```mermaid
-flowchart TD
- M["Invert limit condition"] --> T["Named test"]
- T --> F["Expected failing assertion"]
- F --> R["Restore clean tree"]
-```
+**Verify the exact protection claim.** In the exercise checkout, introduce the named inverted condition and run only `test_limit_zero` first. Capture its failing assertion and then restore the original source. If it passes, the tool's claim is unsupported even if another case fails in the full suite.
+
+Hand over the changed line, named case and observed result. Keep the experiment isolated from shared main. This is the subject of the lesson, not an instruction to create new tests for the curriculum edit.
 
 </details>
 
 ## Follow-up 2 · The change crosses a service
 
-**Changed requirement:** The parser determines an outbound payload used by an independently deployed consumer. What evidence is missing? State what evidence would make you reject your first design.
+**Changed requirement:** The parser determines an outbound payload used by an independently deployed consumer. What evidence is missing?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Add the consumer contract and a provider negative fixture. Local references cannot enumerate deployed clients. Identify a contract owner and document unknown consumers.
 
-```mermaid
-flowchart TD
- P["Changed provider"] --> C["Versioned wire contract"]
- C --> U["Independent consumer"]
- C --> T["Provider contract test"]
-```
+**Add evidence beyond local references.** A parser may emit a payload read by a separately deployed service. Local code search cannot enumerate that consumer's behavior. Obtain its versioned wire contract, representative input/output and owner, then track which versions are still deployed.
+
+Change a field from milliseconds to seconds while preserving its numeric type. Show the old consumer interpreting the value incorrectly. Deliver a producer/consumer compatibility matrix and identify unknown consumers. The larger boundary is independent deployment, not merely another directory in the repository.
 
 </details>
 

@@ -133,6 +133,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Use approximate trends without pretending every rank is exact
+
+A topic near rank ten may be omitted by a small candidate summary or move after late events. A compact counting structure alone does not define which topic IDs you retain.
+
+| Starting design | Changed requirement |
+|---|---|
+| The system keeps exact counts for every topic in a window. | Memory limits require bounded candidate tracking before exact reporting. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+S["Event-time stream"] --> A["Bounded candidate summary"]
+ A --> P["Provisional ranking"]
+ S --> R["Retained raw events"]
+ R --> E["Exact window recomputation"]
+ E --> C["Candidate and count comparison"]
+ P --> C
+```
+
+**What to implement.** Choose and document both a candidate-discovery algorithm and a count estimator. Keep the algorithm's error conditions and merge rules with the result schema. For this exercise, use approximate candidates for a provisional display and retain raw events for a later exact top-ten calculation. Compare the candidate set against exact counts on a bounded slice. Do not use approximate public rankings as billing evidence. Preserve the existing event-time and late-arrival policy.
+
+**Walk through the result.** Construct a window where ranks ten and eleven differ by two events. Add a late event and show both the provisional result and the finalized exact result. Report candidate recall and count error separately. If the approximation cannot distinguish the boundary, label the display provisional rather than inventing a stable rank.
+
+
 
 
 Limit memory with approximate heavy-hitter sketches. Specify false-positive/false-negative and count-error behavior, then decide whether the product can display an approximate ranking without misleading users.

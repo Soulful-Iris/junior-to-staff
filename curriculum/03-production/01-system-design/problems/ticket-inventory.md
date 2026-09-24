@@ -142,6 +142,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Claim four adjacent seats without partial success
+
+The seating map can suggest A10–A13, but another buyer may take A12 before checkout. Four independent writes can strand three seats under a reservation the customer never wanted.
+
+| Starting design | Changed requirement |
+|---|---|
+| Each seat has one authoritative reservation state. | A buyer must acquire a specific adjacent set atomically. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+S["Seat-map suggestion"] --> A["Reservation authority"]
+ A --> T["Atomic four-seat claim"]
+ T -->|all available| H["Expiring hold"]
+ T -->|one conflict| C["No seats claimed"]
+ H --> P["Payment and confirmation"]
+ H --> E["Expiry release"]
+```
+
+**What to implement.** Have the API submit the complete seat set, event ID, hold identity and expiry. Verify adjacency against venue metadata, then conditionally reserve all four in one transaction. If one condition fails, reserve none and return a new suggestion or a clear conflict. Bound search retries near sellout. Keep one write authority per event when regions are added. On AWS, use a suitable database transaction, with SQS for later expiry or payment reconciliation rather than seat ownership.
+
+**Walk through the result.** Race two requests for A10–A13 and A12–A15. At most one overlapping set succeeds. Inspect all six seat rows to prove there is no partial loser. Separately, 2,000 admissions/s into a 300 writes/s service adds 51,000 queued requests in 30 seconds if each admission needs one write. Reduce admission before the store.
+
+
 
 
 Let users reserve any four adjacent seats. The search result is a suggestion. The selected set still needs one atomic claim. Quantify retries near sellout and choose when to stop searching rather than spin indefinitely.

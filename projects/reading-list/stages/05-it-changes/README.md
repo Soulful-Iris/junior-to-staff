@@ -164,27 +164,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 Choose the next change from observed user demand or operating limits. Carry forward the same discipline: concrete scenario, measurable contract, explicit state authority, runnable path and honest recovery evidence.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · A delete is missed
 
-**Changed requirement:** Counts match but item 7 is present in the target after deletion. What check was missing? Predict which boundary must change before opening the design.
+**Changed requirement:** Counts match but item 7 is present in the target after deletion. What check was missing?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Use tombstone/version/value-level reconciliation, not just counts. Replay the missing deletion idempotently and keep it beyond the maximum replay horizon. Name gaps in the source log and resnapshot if history expired.
+
+**Compare identities and versions, not only counts.** Source contains items 8 and 9, while target contains 7 and 8. Both counts are two, but item 7 should be deleted and item 9 is missing. Retain versioned tombstones and compare values or canonical hashes per identity.
+
+Replay deletion v3 for item 7 after an old v1 copy arrives. The target must remain deleted at v3. If replay history has expired, flag incomplete coverage and resnapshot. Deliver the mismatch ledger before and after repair, including missing and extra identities.
 
 </details>
 
 ## Follow-up 2 · Rollback after target-only writes
 
-**Changed requirement:** New writers now create fields the old path cannot read. Can routing alone restore service? State what evidence would make you reject your first design.
+**Changed requirement:** New writers now create fields the old path cannot read. Can routing alone restore service?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 No. Require reverse projection/compatibility before cutover or define a stop-and-fix-forward boundary. DNS changes also wait for resolver caches and existing connections. Distinguish route admission from data readiness.
+
+**Write the recovery rule before enabling new semantics.** A new tag has a color the old schema cannot store. Either keep a lossless compatibility representation until the rollback window ends, or announce that target-only writes cross into forward repair. Route changes alone cannot preserve the color.
+
+Create one target-only record and follow the documented rollback procedure. Show preserved meaning or an explicit refusal to switch to the old writer. Hand over the migration phase, active writer generation and repair command. Keep DNS propagation and connection draining as traffic timing, separate from data compatibility.
 
 </details>
 

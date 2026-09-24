@@ -136,6 +136,32 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Allocate scarce database work across competing products
+
+Priority labels cannot create connections or CPU. A cheap read and an expensive export also should not consume the same unit of budget merely because each is one HTTP request.
+
+| Starting design | Changed requirement |
+|---|---|
+| Routes are marked critical or optional. | Every product claims priority but their combined work exceeds database capacity. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+S["Interactive saves"] --> A["Shared work-budget admission"]
+ E["Expensive exports"] --> A
+ R["Recovery operations"] --> A
+ A --> I["Interactive allocation"]
+ A --> B["Bounded batch allocation"]
+ I --> D["Shared database capacity"]
+ B --> D
+```
+
+**What to implement.** Measure approximate database work per operation and reserve a small control/recovery share. Give each product a minimum allocation plus bounded borrowing from unused capacity. Enforce total active work at a shared admission boundary, then use separate queues or worker pools for exports and interactive requests. Expire queued work that can no longer meet its user deadline. Keep durable business obligations visible for later reconciliation.
+
+**Walk through the result.** Use an illustrative budget of 100 work units/s. Saves cost one unit and exports cost 100. One export must not consume an unbounded slot alongside 100 supposedly admitted saves. Show the chosen allocation, denied work and recovery reserve during a 60-second overload. Deliver absolute rates as well as percentages.
+
+
 
 
 Product labels every route critical. Use dependency consumption and user consequences to produce an allocation that fits actual capacity. A label cannot reserve resources that do not exist.

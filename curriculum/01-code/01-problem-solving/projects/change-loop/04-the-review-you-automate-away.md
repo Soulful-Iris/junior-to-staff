@@ -72,39 +72,31 @@ Classify comments with examples, enforce a small deterministic set, and keep the
 
 ## Follow-up 1 · The repository is already large
 
-**Changed requirement:** Turning on a formatter touches 500 files. How do reviewers retain a useful history? Predict which boundary must change before opening the design.
+**Changed requirement:** Turning on a formatter touches 500 files. How do reviewers retain a useful history?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Land one behavior-preserving mechanical change and a separate enforcement change. Existing tests should remain unmodified. Record formatter version and exclude unrelated fixes so blame and rollback remain interpretable.
 
-```mermaid
-flowchart TD
- A["Pinned formatter"] -->|mechanical-only commit| B["500 formatted files"]
- B -->|unchanged tests| C["Behavior check"]
- D["Separate required job"] -->|future diffs| B
-```
+**Keep mechanical and behavioral review separate.** Pin the formatter version and make one formatting-only change. Put enabling the exercise's future enforcement in a distinct change. Avoid bundling renamed variables, bug fixes or test edits into the mechanical diff.
+
+Hand over the formatter command, version and a sample blame/history walkthrough showing how a reviewer can reach the earlier behavioral change. The goal is readable history and review, not making a 500-file diff appear small by describing it briefly.
 
 </details>
 
 ## Follow-up 2 · The AI endpoint is unavailable
 
-**Changed requirement:** The model is down during an urgent security patch. Should the patch wait? State what evidence would make you reject your first design.
+**Changed requirement:** The model is down during an urgent security patch. Should the patch wait?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Choose and document an advisory fail-open policy with a human reviewer for this exercise. Deterministic gates still run. Record the skipped AI pass, then compare later findings. Its absence must not silently become a behavioral approval.
 
-```mermaid
-flowchart TD
- A["Pull request"] --> B["Deterministic required checks"]
- A --> C["AI first pass unavailable"]
- C -->|record skip| D["Human behavior review"]
- B --> E["Merge decision"]
- D --> E
-```
+**Make the missing advice visible.** Record the unavailable AI pass and route the patch to a human reviewer under the exercise's advisory policy. Keep any independently required deterministic checks as their own decision inputs. An absent model result is neither approval nor proof of a defect.
+
+Show the review record during an outage and a later comparison with recovered model findings. Identify who can proceed and what evidence they used. This explains a sample team policy and does not change the guide repository's automatic deployment.
 
 </details>
 

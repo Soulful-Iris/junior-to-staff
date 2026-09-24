@@ -129,27 +129,35 @@ A provisioned queue or table does not make the local program use it. Configure r
 The script becomes business-critical while its author is unavailable. Treat ownership, documentation and recovery as part of the small solution. Small code does not mean zero operating responsibility.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Demand changes
 
-**Changed requirement:** Three teams now each need daily exports with an audit trail. Does the old no remain binding? Predict which boundary must change before opening the design.
+**Changed requirement:** Three teams now each need daily exports with an audit trail. Does the old no remain binding?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Reopen because the specified trigger occurred. Reuse the original analysis, update workload and support costs, and evaluate whether the smaller intervention still meets the contract.
+
+**Reopen the smallest useful solution first.** Three teams now need daily exports with audit evidence. Compare extending the existing script with a shared scheduled service before proposing a general platform. Count executions, support interruptions, access controls and recovery ownership.
+
+Deliver a new decision table containing the original demand assumption and the new observation. If you choose the service, name the first shared boundary and the migration of the three teams. If the script still meets the need, keep it and explain what future trigger would change that answer.
 
 </details>
 
 ## Follow-up 2 · A competitor launches it
 
-**Changed requirement:** A competitor advertises a similar feature, but your customers have not asked. Is that enough? State what evidence would make you reject your first design.
+**Changed requirement:** A competitor advertises a similar feature, but your customers have not asked. Is that enough?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Treat it as new evidence to investigate, not proof of your demand. Seek user behavior and contract gaps, then bound a reversible experiment. State which downside cannot be recovered if you wait.
+
+**Turn the announcement into a bounded question.** Ask which current customer task the competitor's feature would improve and what evidence would demonstrate unmet demand. A reversible prototype or customer walkthrough may answer that question without creating a supported production system.
+
+Specify the observation period, target users, success measure and maximum effort. State the cost of waiting where it is real, such as a contractual deadline. Your deliverable is an evidence-gathering decision with a stopping condition, not a competitive feature checklist.
 
 </details>
 

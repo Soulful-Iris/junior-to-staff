@@ -134,6 +134,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Move a file between folders with different permissions
+
+Copying bytes and deleting the old entry can leave two visible names or preserve a link that was authorized under the old folder. Object identity, metadata version and download authority need separate treatment.
+
+| Starting design | Changed requirement |
+|---|---|
+| A file version has one parent folder and access policy. | A move changes its parent and the policy that authorizes future downloads. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+M["Move request"] --> A["Source and destination authorization"]
+ A --> T["Atomic parent and policy update"]
+ T --> C["Versioned change feed"]
+ T --> D["Current download authorization"]
+ O["Private object bytes"] --> D
+ C --> S["Client metadata reconciliation"]
+```
+
+**What to implement.** For folders in one metadata store, atomically change parent, metadata version and policy reference after checking permission on both source and destination. Emit one versioned change-feed event for clients. Bytes can stay under the same private object identity. Recheck current metadata for each authorized download, or state the residual lifetime of already issued signed URLs. An offline client with expired feed history must resnapshot without losing its unsynced drafts.
+
+**Walk through the result.** Move file F from a public team folder into a private folder. A stale client submits an edit using the old metadata version and receives a conflict. A new download through the old path is denied. Keep the old signed-link lifetime visible if you chose that weaker contract. Supply the move transaction and client reconciliation example.
+
+
 
 
 Add cross-folder moves with different permissions. Define the atomic metadata boundary and ensure old download authorization does not silently grant access under the destination’s policy.

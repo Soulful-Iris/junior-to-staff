@@ -393,6 +393,34 @@ time before increasing total concurrency. **Third extension:** accept user-submi
 URLs and explain how your URL, DNS, redirect and egress controls prevent requests
 to internal services.
 
+## Extend the watcher with host-aware scheduling
+
+### Worked follow-up: Isolate hosts when the watched URL set grows
+
+Adding workers alone can make the slow host receive more concurrent requests while unrelated hosts wait behind its backlog. The new scheduling unit is the destination host as well as the URL.
+
+| Starting design | Changed requirement |
+|---|---|
+| One weekly job set checks a modest handbook with bounded fetching. | Many teams register URLs, and one host begins throttling or hanging. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+A["Host A due URLs"] --> D["Host-aware fair dispatcher"]
+ B["Host B due URLs"] --> D
+ P["Durable host backoff and allowance"] --> D
+ D --> Q["SQS: ready check jobs"]
+ Q --> W["Bounded fetch workers"]
+ W -->|429 or completion| P
+ W --> O["Existing observation and outbox path"]
+```
+
+**What to implement.** Keep durable due work per host and a host policy record with next allowed attempt time, in-flight allowance and observed backoff. A fair dispatcher selects eligible hosts and places only bounded ready work on the existing check queue. Each check still uses the established job generation and observation identity. Keep deadlines, redirect validation and byte limits in the fetch adapter. On AWS, DynamoDB can hold due/host state and SQS can carry ready jobs, but the application must implement fair selection and recovery of abandoned host reservations.
+
+**Walk through the result.** Give host A 10,000 pending URLs and host B ten. Make A return 429 with a retry delay. B should continue making progress while A pauses according to policy. Restart the dispatcher and show A does not lose its backoff state. Deliver per-host oldest-due age, active requests and a dispatch transcript. Treat this as an extension after the existing watcher checkpoints, not code already supplied.
+
+
 ## Service references
 
 - [Lambda with SQS: visibility, batching and concurrency](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html)

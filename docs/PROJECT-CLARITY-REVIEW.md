@@ -78,3 +78,9 @@ Four focused animations explain the existing bookmark save flow, a lost payment 
 Selected pages now introduce concrete API responses, real excerpts from supplied local code, actual local-model output or explicitly illustrative incident records. No illustrative record is described as a production capture. Sizing appears early only when its calculation changes the design discussion. Several workflow/decision introductions use prose alone because extra diagrams or large traffic numbers would not help.
 
 The estimation reference also needed a correction: 30,000 reads/s multiplied by 100 microseconds is three accumulated seconds of waiting per second, not thirty. This does not alone establish disk saturation because I/O can overlap. The page now distinguishes latency from throughput, states rounding and peak assumptions, and separates request-based reliability from time-based availability.
+
+## Follow-ups and complete-course review — September 24, 2026
+
+The reader approved the tracing lesson's introduction and assignment as the quality benchmark. New feedback: follow-ups need equally careful explanation, substantial architecture changes where requirements justify them, and actual revised diagrams when a section promises one. Reviewed all 90 briefs and expanded 133 worked scenarios. See [the per-page follow-up record](FOLLOW-UP-DESIGN-REVIEW.md).
+
+The next authorized work extends beyond projects: distinguish parts, chapters, lessons and in-page sections in the table of contents, then review every remaining lesson individually. UI lessons need visible interface examples. Select screenshots, diagrams, animations, code, API examples, logs and sizing only where they improve the particular explanation. Preserve automatic publication from main. Do not add tests or scheduled publishing checks.

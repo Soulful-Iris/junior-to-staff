@@ -141,27 +141,47 @@ A provisioned queue or table does not make the local program use it. Configure r
 An acknowledgement arrives before metrics recover. Keep it recorded, but do not close until the separately defined recovery condition becomes true.
 
 <details>
-<summary>Additional design reasoning and requirement changes</summary>
+<summary>Follow-up scenarios and worked designs</summary>
 
 ## Follow-up 1 · Operations wants a hold
 
-**Changed requirement:** Keep the incident open until both windows recover and an owner acknowledges. How do you implement that? Predict which boundary must change before opening the design.
+**Changed requirement:** Keep the incident open until both windows recover and an owner acknowledges. How do you implement that?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 Add an explicit incident state distinct from the composite. Enter on AND breach. Leave only on both-normal plus acknowledgment. Test both recovery orders and acknowledge-before-recovery.
+
+**Use incident state, not only an alarm expression.** Store incident ID, open time, recovery state and acknowledgment time. Open when both burn windows breach. Keep the incident open when only one recovers. Close only after both recover and acknowledgment has occurred.
+
+Walk three sequences: acknowledge first, short window recovers first, and long window recovers first. Each must produce the same closure rule. Hand over the transition table and avoid sending a second incident notification for every repeated breach.
+
+**Revised flow.** These are proposed components to implement, not extra services started by the supplied demo.
+
+```mermaid
+flowchart TD
+N["No incident"] -->|both windows breach| O["Open incident"]
+ O -->|one recovers| P["Still open"]
+ P -->|both recovered| R["Recovered, awaiting acknowledgment"]
+ O -->|acknowledged early| A["Acknowledged, awaiting recovery"]
+ A -->|both recovered| C["Closed"]
+ R -->|acknowledged| C
+```
 
 </details>
 
 ## Follow-up 2 · Slow burn still matters
 
-**Changed requirement:** A sustained 0.9% error rate never reaches the fast-page threshold. May it be ignored? State what evidence would make you reject your first design.
+**Changed requirement:** A sustained 0.9% error rate never reaches the fast-page threshold. May it be ignored?
 
 <details>
-<summary>Expected reasoning and changed diagram</summary>
+<summary>Worked design and implementation</summary>
 
 At a 99.9% objective it burns at 9× the sustainable rate. Add a lower-severity sustained condition with its own windows and owner. A nonpaging incident may still consume the entire budget.
+
+**Calculate the sustained impact.** An allowed error fraction of 0.1% and observed 0.9% gives burn rate nine. If sustained uniformly, that consumes a thirty-day request-based budget in roughly 3.3 days at comparable traffic. A fast-page threshold can intentionally ignore brief small errors while a slower rule still creates owned work.
+
+Add a lower-severity sustained condition with its own observation windows and missing-data policy. Deliver a timeline where the fast rule stays quiet but the slow rule opens an incident. Specify who responds and when, rather than generating an unowned dashboard warning.
 
 </details>
 

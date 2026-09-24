@@ -135,6 +135,31 @@ For concrete provisioning commands, configuration wiring and cleanup, use the [A
 A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
 ## Extend the design after the baseline works
+### Worked follow-up: Rotate webhook secrets while deliveries are pending
+
+A queued event may be delivered hours after it was created. If the receiver deletes the old secret immediately, otherwise valid delayed attempts fail authentication.
+
+| Starting design | Changed requirement |
+|---|---|
+| Every delivery uses one shared signing secret. | Receivers accept a controlled overlap of old and new secret versions. |
+
+**Revised architecture.** Follow the changed responsibility and failure path below. This is a design to implement. The supplied local example does not provision these components.
+
+```mermaid
+flowchart TD
+Q["Queued immutable event"] --> W["Delivery worker"]
+ K["Current secret version"] --> W
+ W --> H["Attempt timestamp and signature"]
+ H --> R["Receiver verifies accepted keys"]
+ R --> D["Deduplicate event ID"]
+ R -->|invalid or expired| X["Reject"]
+```
+
+**What to implement.** Choose signing at attempt time for this exercise. Keep event ID and payload bytes stable, but add a current timestamp, key ID and signature to each attempt. Announce the receiver overlap window and retain both verification keys during it. Never place signing secrets in queue payloads. Store key references in protected configuration and restrict access to the delivery runtime. Keep endpoint concurrency isolated so a receiver returning 429 cannot consume every worker.
+
+**Walk through the result.** Queue event E while key K1 is active, activate K2, then deliver E signed with K2. Retry E later with a fresh timestamp and the same event ID. The receiver validates the signature and deduplicates the event. After overlap ends, an old K1 signature must be rejected. Supply the header contract and rotation timeline.
+
+
 
 
 Allow customers to rotate a secret while attempts wait. Decide whether you sign with the current secret or an event-bound version, publish the overlap contract, and show how receivers verify a replay.
