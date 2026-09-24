@@ -1,5 +1,87 @@
 # Job scheduler: fire once on time, recover after a crash
 
+## What you are building
+
+> Build scheduled report delivery for a SaaS platform. Customers can schedule a one-time report or a recurring local-time report. A scheduler restart and duplicate queue delivery must not create two logical runs for the same occurrence.
+
+**Working contract:** POST /schedules stores a timezone-aware schedule and version. Each due occurrence has identity (schedule_id, version, scheduled_at). Pausing a schedule stops new admissions; it does not silently retract an already committed external effect.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 10,000 due jobs/s at peak | A one-minute dispatcher outage creates 600,000 overdue occurrences before new arrivals. |
+| 50 million future jobs | At 512 bytes each, about 25.6 GB of raw scheduling metadata before indexes and replicas. |
+| One year of run history | Retain compact run evidence separately from payloads; estimate from the actual average run rate, not peak. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/job_scheduler.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/job_scheduler.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| schedules | id,version,next_due,time_zone,enabled | Customer intent and recurrence policy. |
+| occurrences | schedule_id,version,scheduled_at | Unique logical run regardless of dispatcher retries. |
+| leases | partition,epoch,expires_at | Dispatcher ownership; stale owners cannot advance a partition checkpoint. |
+
+## AWS implementation
+
+![Job scheduler: fire once on time, recover after a crash: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/job-scheduler.svg)
+
+This design builds the scheduling index explicitly to expose dispatch ownership and occurrence identity. EventBridge Scheduler can remove substantial control-plane work for suitable workloads; it does not remove downstream idempotency or product decisions about late runs.
+
+## Build it in this order
+
+### 1. Implement one-time scheduling
+
+Store UTC instants and an indexed next_due field. Query bounded due ranges and atomically create the unique occurrence plus delivery intent. Advance next_due only in the same transactional decision. A missed scan must be recoverable from durable state.
+
+### 2. Handle recurrence explicitly
+
+Store IANA timezone and local recurrence separately from computed UTC occurrences. Decide how a nonexistent daylight-saving time is skipped and which ambiguous occurrence is chosen. Editing a schedule creates a version so old messages cannot silently use new parameters.
+
+### 3. Partition dispatch
+
+Bucket near-term due times and shard each bucket by stable schedule hash. Lease partitions with incrementing epochs; workers condition checkpoint updates on that epoch. Size buckets so an hour boundary does not send all work to one hot key.
+
+### 4. Define overdue policy
+
+Choose catch-up-all, latest-only or expire for each job type. Display scheduled time, admitted time and started time. A report may tolerate delay; a reservation-expiry action must check current state even if its timer fires late.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| DynamoDB | Separate future schedule lookup from occurrence identity. Conditional writes and transactional outbox publication are required. |
+| ECS dispatchers | Multiple replicas, partition leases, bounded scan pages and clock-skew monitoring. |
+| SQS + workers | Retries retain occurrence identity; workers validate schedule version and use effect-specific idempotency. |
+| EventBridge Scheduler alternative | Prefer a managed scheduler if its current limits, timing precision and cancellation semantics satisfy the product; evaluate quotas before adopting at this scale. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Two dispatchers create one logical occurrence. |
+| Pause dispatch for 60 seconds | Overdue age rises; recovery follows the chosen catch-up/expiry policy. |
+| Edit a schedule while a message waits | The worker identifies the old version and follows its documented cancellation rule. |
+
+## The next design decision
+
+Allow a customer to move a recurring schedule between timezones. Specify whether already materialized occurrences keep their original instant. Show the state and version boundary that prevents both versions from sending the same report.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “Customers schedule one-time and recurring jobs. Workers can crash after doing the work but before acknowledging it. Schedule accuracy is one minute; a retry must not silently perform a financial action twice.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 10,000 jobs/s at peak, 50 million future schedules and execution history retained for one year. Clarify service guarantees and a first version before filling the board with services.
@@ -73,3 +155,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists a distributed job-scheduler prompt at Robinhood, DoorDash, NVIDIA, Airbnb and other companies; the listed interview dates are not supplied. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/job-scheduler-cron-history/cm7w828yv00sejmejlmofwtvp).
+
+</details>

@@ -22,5 +22,47 @@
     "starter": "examples/architecture-starts/checkout_payment.py",
     "diagram": "assets/architecture-guides/checkout-payment.svg",
     "batch": "transactional-designs-1"
+  },
+  {
+    "path": "curriculum/02-applications/05-security/problems/audit-trail.md",
+    "starter": "examples/architecture-starts/audit_trail.py",
+    "diagram": "assets/architecture-guides/audit-trail.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/02-applications/05-security/problems/tenant-isolation.md",
+    "starter": "examples/architecture-starts/tenant_isolation.py",
+    "diagram": "assets/architecture-guides/tenant-isolation.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/problems/durable-jobs.md",
+    "starter": "examples/architecture-starts/durable_jobs.py",
+    "diagram": "assets/architecture-guides/durable-jobs.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/03-production/05-reliability/problems/job-scheduler.md",
+    "starter": "examples/architecture-starts/job_scheduler.py",
+    "diagram": "assets/architecture-guides/job-scheduler.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/04-migrations/problems/erasure-workflow.md",
+    "starter": "examples/architecture-starts/erasure_workflow.py",
+    "diagram": "assets/architecture-guides/erasure-workflow.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/04-migrations/problems/multi-tenant-migration.md",
+    "starter": "examples/architecture-starts/multi_tenant_migration.py",
+    "diagram": "assets/architecture-guides/multi-tenant-migration.svg",
+    "batch": "security-jobs-migrations"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/04-migrations/problems/regional-failover.md",
+    "starter": "examples/architecture-starts/regional_failover.py",
+    "diagram": "assets/architecture-guides/regional-failover.svg",
+    "batch": "security-jobs-migrations"
   }
 ]

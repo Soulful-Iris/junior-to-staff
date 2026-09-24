@@ -1,5 +1,87 @@
 # Durable jobs: the queue drained, the work did not
 
+## What you are building
+
+> Build CSV exports for a billing dashboard. The API must return a status URL quickly, and a worker must finish the export after an API or worker restart. Two workers may process the same message; only the current owner may publish the download pointer.
+
+**Working contract:** POST /exports with a tenant-scoped request ID returns 202 plus a stable job URL after durable acceptance. GET /exports/{id} returns accepted, running, succeeded, failed or cancelled. A download is available only through a committed result pointer.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 500 exports/min; 20 seconds mean service | 500 / 60 × 20 ≈ 167 busy worker slots at steady state, before spare capacity. |
+| 50 worker slots | Capacity is 150/min; backlog grows 350/min under the stated ordinary load. |
+| 40,000 requests in one minute | Admission must reject or defer beyond an explicit backlog budget; an unbounded queue is not extra processing capacity. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/durable_jobs.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/durable_jobs.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| jobs | tenant,request_id,job_id,state,epoch | Durable status and ownership authority. |
+| attempt_objects | job_id/epoch/checksum | Immutable bytes; uploading is not publishing. |
+| result_pointer | job_id → object_key,checksum,size | Updated only by the current ownership epoch. |
+
+## AWS implementation
+
+![Durable jobs: the queue drained, the work did not: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/durable-jobs.svg)
+
+SQS can redeliver, so DynamoDB owns job state and the publication condition. ECS accommodates longer exports; short bounded jobs could run in Lambda. S3 stores complete bytes, while the conditional result pointer decides which bytes users receive.
+
+## Build it in this order
+
+### 1. Accept durably
+
+Commit job identity and dispatch intent in one database transaction. A lost response followed by the same request ID returns the original job. Queue publication happens from the outbox; a queue message is a request to advance a job, not its authoritative status.
+
+### 2. Claim and renew ownership
+
+Store an incrementing epoch with lease expiry. Claim using a conditional update; renew only the matching epoch. SQS visibility reduces concurrent work but cannot prevent every duplicate. A worker must stop publishing if renewal or the conditional ownership check fails.
+
+### 3. Publish an immutable result
+
+Upload to an attempt-specific object key. Conditionally write succeeded and the object pointer under the current epoch. Acknowledge the queue message after that commit. If redelivered, read completed state and acknowledge without generating another visible result.
+
+### 4. Operate a bounded service
+
+Reject new work with Retry-After once admitted backlog exceeds the product’s wait budget. Add cancellation and tenant fairness. Garbage-collect unreferenced attempt objects only after active leases and retry windows; authorize current access when issuing a download.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| DynamoDB jobs | Conditional claims/publication; durable request identity; strongly consistent ownership reads where required. |
+| SQS | Start visibility at 60 s for 20 s average work and renew for longer jobs. Set a finite redrive policy and a DLQ repair procedure. |
+| ECS workers | Bound worker count by database and export-source capacity, not queue depth alone. Keep job deadlines below lease-renewal safety margins. |
+| S3 | Private immutable attempt keys; result pointer stored separately; lifecycle only for proven orphan/expired output. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Epoch 5 publishes; the late epoch 4 attempt is rejected. |
+| Kill the worker after upload | A retry may produce an orphan object, but users see one committed result. |
+| Limit the pool to 50 workers | At 500 arrivals/min the oldest-job age grows; admission eventually closes at the declared bound. |
+
+## The next design decision
+
+Add data erasure while an export is running. Define how the worker discovers cancellation, how the current pointer is revoked, and how object cleanup is proven without assuming that queue cancellation stops an already running process.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “Users request a CSV export. The API returns ‘accepted’ and puts a job on a queue. A worker writes the file, then dies before acknowledging the message. A second worker receives it. Later one customer sends 40,000 exports in a minute. Make completion, retries, and overload observable.”
 
 Assume 500 ordinary exports/minute, 20-second average processing time, and a 60-second API request timeout. The job should survive a worker crash; accepted means durably recorded, not completed.
@@ -56,3 +138,5 @@ Read the smaller label under each service first: it names the architectural job.
 **AWS translation:** SQS standard queues can redeliver and occasionally reorder; tune visibility timeout, DLQ policy, and worker concurrency. Store authoritative jobs in DynamoDB/RDS and outputs in private S3. Read [SQS standard delivery](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues.html) and [visibility timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html).
 
 **Source note:** Constructed exercise; service delivery facts come from AWS documentation.
+
+</details>
