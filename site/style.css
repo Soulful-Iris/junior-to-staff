@@ -393,25 +393,17 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .window-story strong{color:var(--ink);font:600 11px/1.4 var(--sans)}
 .window-story code{padding:1px 4px;border:1px solid #ced8c8;border-radius:3px;background:#f7faf4;font:700 10px/1 var(--mono)}
 .window-animation-grid{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:18px;align-items:stretch}
-.window-track-column{align-self:center;min-width:0}
-.window-scan-track{position:relative;margin:30px 2px 10px}
+.window-track-column{align-self:start;min-width:0;padding-top:8px}
+.window-scan-track{position:relative;margin:8px 2px 5px}
 .window-scan-track .letter-row{position:relative;z-index:1}
 .window-scan-track .letter-row b.target-letter{border-color:#b9cab3;background:#edf2e9;color:var(--accent)}
 .window-frame{position:absolute;z-index:2;top:-7px;bottom:-7px;left:69.23%;width:30.77%;border:2px solid var(--accent);border-radius:7px;background:rgba(134,164,114,.13);box-shadow:0 0 0 3px rgba(134,164,114,.07);pointer-events:none}
-.index-rail{position:relative;height:43px;margin:0 2px 7px}
-.index-pointer{position:absolute;left:3.845%;display:grid;place-items:center;width:19px;height:19px;transform:translateX(-50%)}
-.index-pointer::before{position:absolute;bottom:16px;content:"↑";font:700 10px/1 var(--sans)}
-.index-pointer b{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;font:800 10px/1 var(--mono)}
+.index-rail{position:relative;height:32px;margin:0 2px}
+.index-pointer{position:absolute;left:3.845%;display:grid;place-items:center;width:12px;height:12px;transform:translateX(-50%)}
+.index-pointer::before{position:absolute;bottom:9px;content:"↑";font:700 9px/1 var(--sans)}
+.index-pointer b{font:800 11px/1 var(--mono)}
 .pointer-i{top:0;color:var(--accent)}
-.pointer-i b{border:1px solid #9db797;background:#e7eee3;color:var(--accent)}
-.pointer-j{top:22px;color:#82691e}
-.pointer-j b{border:1px solid #d6c17e;background:#faf3d9;color:#765e19}
-.edge-legend{display:flex;flex-wrap:wrap;justify-content:space-between;gap:7px 12px;color:var(--muted);font:550 8px/1.35 var(--sans)}
-.edge-legend .edge-window{color:var(--accent);font-weight:700}
-.edge-legend i{display:inline-block;width:13px;height:8px;margin-right:5px;border:2px solid var(--accent);border-radius:2px;vertical-align:-1px}
-.edge-legend b{display:inline-grid;place-items:center;width:15px;height:15px;margin-right:4px;border-radius:50%;font:800 8px/1 var(--mono)}
-.edge-i b{background:#e7eee3;color:var(--accent)}
-.edge-j b{background:#faf3d9;color:#765e19}
+.pointer-j{top:17px;color:#765e19}
 .counter-demo{align-self:stretch;min-height:210px;padding:13px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper)}
 .counter-demo header{display:flex;align-items:flex-start;flex-direction:column;gap:2px;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .counter-demo header span{color:var(--accent);font:750 9px/1.3 var(--sans);letter-spacing:.9px}
@@ -430,26 +422,26 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .counter-state>div.extra strong{border-color:#d9c898;background:#faf5e6;color:#82691e}
 .counter-state>p{margin:10px 0 0;padding:8px 5px 0;border-top:1px solid var(--line);color:#985245;font:700 9px/1.35 var(--sans);text-align:center}
 .counter-state>p.complete{color:var(--accent)}
-.sample-panel.sample-animate .window-frame{animation:windowScan 32s ease-in-out infinite}
-.sample-panel.sample-animate .pointer-i{animation:pointerI 32s ease-in-out infinite}
-.sample-panel.sample-animate .pointer-j{animation:pointerJ 32s ease-in-out infinite}
-.sample-panel.sample-animate .story-one{animation:stageOne 32s ease infinite}
-.sample-panel.sample-animate .story-two{animation:stageTwo 32s ease infinite}
-.sample-panel.sample-animate .story-three{animation:stageThree 32s ease infinite}
-.sample-panel.sample-animate .story-four{animation:stageFour 32s ease infinite}
-.sample-panel.sample-animate .story-five{animation:stageFive 32s ease infinite}
-.sample-panel.sample-animate .story-six{animation:stageSix 32s ease infinite}
-.sample-panel.sample-animate .count-one{animation:countOne 32s ease infinite}
-.sample-panel.sample-animate .count-two{animation:countTwo 32s ease infinite}
-.sample-panel.sample-animate .count-three{animation:countThree 32s ease infinite}
-.sample-panel.sample-animate .count-four{animation:countFour 32s ease infinite}
-.sample-panel.sample-animate .count-five{animation:countFive 32s ease infinite}
-.sample-panel.sample-animate .count-six{animation:countSix 32s ease infinite}
-.sample-panel.sample-animate .count-seven{animation:countSeven 32s ease infinite}
-.sample-panel.sample-animate .count-eight{animation:countEight 32s ease infinite}
-.sample-panel.sample-animate .count-nine{animation:countNine 32s ease infinite}
-.sample-panel.sample-animate .count-ten{animation:countTen 32s ease infinite}
-.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(10),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(11),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(13){animation:windowWinner 32s ease infinite}
+.sample-panel.sample-animate .window-frame{animation:windowScan 26s ease-in-out infinite}
+.sample-panel.sample-animate .pointer-i{animation:pointerI 26s ease-in-out infinite}
+.sample-panel.sample-animate .pointer-j{animation:pointerJ 26s ease-in-out infinite}
+.sample-panel.sample-animate .story-one{animation:stageOne 26s ease infinite}
+.sample-panel.sample-animate .story-two{animation:stageTwo 26s ease infinite}
+.sample-panel.sample-animate .story-three{animation:stageThree 26s ease infinite}
+.sample-panel.sample-animate .story-four{animation:stageFour 26s ease infinite}
+.sample-panel.sample-animate .story-five{animation:stageFive 26s ease infinite}
+.sample-panel.sample-animate .story-six{animation:stageSix 26s ease infinite}
+.sample-panel.sample-animate .count-one{animation:countOne 26s ease infinite}
+.sample-panel.sample-animate .count-two{animation:countTwo 26s ease infinite}
+.sample-panel.sample-animate .count-three{animation:countThree 26s ease infinite}
+.sample-panel.sample-animate .count-four{animation:countFour 26s ease infinite}
+.sample-panel.sample-animate .count-five{animation:countFive 26s ease infinite}
+.sample-panel.sample-animate .count-six{animation:countSix 26s ease infinite}
+.sample-panel.sample-animate .count-seven{animation:countSeven 26s ease infinite}
+.sample-panel.sample-animate .count-eight{animation:countEight 26s ease infinite}
+.sample-panel.sample-animate .count-nine{animation:countNine 26s ease infinite}
+.sample-panel.sample-animate .count-ten{animation:countTen 26s ease infinite}
+.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(10),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(11),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(13){animation:windowWinner 26s ease infinite}
 
 /* Architecture animation: events arrive in causal order. */
 .payment-route{position:relative;overflow:hidden}
@@ -556,7 +548,7 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 
 @media(max-width:760px){
   .window-story{min-height:72px}
-  .window-scan-track{margin:28px 0 10px}
+  .window-scan-track{margin:8px 0 5px}
   .window-animation-grid{grid-template-columns:1fr}
   .counter-demo{width:100%;max-width:240px;min-height:205px;margin:0 auto}
 }
