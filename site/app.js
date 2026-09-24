@@ -107,6 +107,32 @@
     history.replaceState(null,'','#'+encodeURIComponent(a.dataset.heading));node.tabIndex=-1;node.focus({preventScroll:true});node.scrollIntoView({block:'start'});
   }));
   if(location.hash) {try{const node=revealHeading(decodeURIComponent(location.hash.slice(1)));if(node)requestAnimationFrame(()=>node.scrollIntoView());}catch{/* An invalid old bookmark must not break the reader. */}}
+  const sampleTabs=[...document.querySelectorAll('[data-sample-tab]')];
+  const samplePanels=[...document.querySelectorAll('[data-sample-panel]')];
+  function showSample(name, moveFocus=false){
+    sampleTabs.forEach(tab=>{
+      const selected=tab.dataset.sampleTab===name;
+      tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;
+      if(selected&&moveFocus)tab.focus();
+    });
+    samplePanels.forEach(panel=>{
+      const selected=panel.dataset.samplePanel===name;
+      panel.classList.toggle('active',selected);panel.setAttribute('aria-hidden',String(!selected));panel.inert=!selected;
+    });
+  }
+  sampleTabs.forEach((tab,index)=>{
+    tab.addEventListener('click',()=>showSample(tab.dataset.sampleTab));
+    tab.addEventListener('keydown',event=>{
+      let target;
+      if(event.key==='ArrowRight')target=(index+1)%sampleTabs.length;
+      if(event.key==='ArrowLeft')target=(index-1+sampleTabs.length)%sampleTabs.length;
+      if(event.key==='Home')target=0;
+      if(event.key==='End')target=sampleTabs.length-1;
+      if(target===undefined)return;
+      event.preventDefault();showSample(sampleTabs[target].dataset.sampleTab,true);
+    });
+  });
+  document.querySelectorAll('[data-sample-next]').forEach(button=>button.addEventListener('click',()=>showSample(button.dataset.sampleNext,true)));
   const observer = new IntersectionObserver(entries => {
     const hit=entries.find(e=>e.isIntersecting);if(!hit)return;
     headingLinks.forEach(a => a.classList.toggle('current-heading',a.dataset.heading===hit.target.id));
