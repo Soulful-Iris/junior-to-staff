@@ -8,6 +8,8 @@ Reason about caches, replication, partitioning, streams, and coordination scope.
 
 [Reliability and incident response](../../03-production/05-reliability/README.md)
 
+Caching, replication and partitioning are answers to "this does not fit or does not keep up", which is an arithmetic finding first: see [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md).
+
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
 ## Learn in this order

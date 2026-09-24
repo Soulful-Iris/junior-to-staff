@@ -8,6 +8,8 @@ Budget failures, bound overload, and recover from evidence.
 
 [Observability](../04-observability/README.md)
 
+An availability target is only concrete once it is a downtime budget: the nines table in [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) is what turns 99.99% into fifty-three minutes a year.
+
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
 ## Learn in this order

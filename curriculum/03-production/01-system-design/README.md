@@ -10,6 +10,8 @@ Turn requirements and workload estimates into an explainable architecture.
 
 [Security](../../02-applications/05-security/README.md)
 
+Every problem below opens with a workload. Size it before choosing a mechanism: [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) is the per-second, latency and availability arithmetic these designs assume.
+
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
 ## Learn in this order

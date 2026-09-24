@@ -17,6 +17,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 1 | [The change loop](change-loop.md) |
 | 2 | [Working with an AI that writes the code](working-with-ai.md) |
 | 3 | [Practice an AI-assisted change](ai-assisted-practice.md) |
+| 4 | [The constants you estimate with](estimation-constants.md) |
 
 ## Go deeper on the same problem
 

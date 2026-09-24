@@ -8,6 +8,8 @@ Measure the bottleneck and defend an improvement with resource and cost evidence
 
 [Data at scale](../01-data-at-scale/README.md)
 
+Before measuring, know which layer can possibly be the cost: the memory / disk / network ladder in [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) separates the thousand-fold steps from the rounding errors.
+
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
 ## Learn in this order
