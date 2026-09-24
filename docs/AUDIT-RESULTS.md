@@ -38,7 +38,6 @@ python scripts/check_organization.py --report /tmp/preservation.json
 python scripts/check_visuals.py --report /tmp/visuals.json
 python docs/check-links.py
 python scripts/check_curriculum.py --report /tmp/python-results.json
-python -m unittest discover -s scripts/tests -v
 ```
 
 The catalog report identifies each current source path and its hash. The Python

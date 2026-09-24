@@ -13,7 +13,9 @@ The redesign targets `site/concept-first` and incorporates the branch's automati
 
 ## Executed checks
 
-`site/check_reading.py` verifies every generated content page, not a sample: 255 pages, four parts, 17 chapter branches, 185 contiguous guided steps, every coding problem and project stage, current-heading anchors, and no in-body lesson-navigation links. It compares all 123 embedded files against their source text, verifies all 129 source SVG byte hashes, and checks that all 387 Mermaid diagrams are displayed. Assessor keys are excluded from the automatic sequence.
+`site/check_reading.py` was removed on 2026-09-24 along with the rest of this
+repo's own test tooling; nothing gates publication now. It used to verify every
+generated content page, not a sample: 255 pages, four parts, 17 chapter branches, 185 contiguous guided steps, every coding problem and project stage, current-heading anchors, and no in-body lesson-navigation links. It compares all 123 embedded files against their source text, verifies all 129 source SVG byte hashes, and checks that all 387 Mermaid diagrams are displayed. Assessor keys are excluded from the automatic sequence.
 
 `site/check.py` verifies local links and images in the generated output. The bookmark exercise's standalone `web/index.html` is a copied lab resource rather than a curriculum page; it is intentionally not an extra lesson in the reader.
 

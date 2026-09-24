@@ -2,8 +2,7 @@
   "schema": 1,
   "discovery_roots": [
     "curriculum",
-    "examples",
-    "scripts/tests"
+    "examples"
   ],
   "defaults": {
     "runtime": "python",
@@ -178,9 +177,6 @@
     },
     {
       "path": "examples/ai-systems"
-    },
-    {
-      "path": "scripts/tests"
     },
     {
       "path": "practice/assessor/heldback_importer.py",

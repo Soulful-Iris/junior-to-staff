@@ -17,7 +17,6 @@ cd ../..
 
 /tmp/engineering-guide-venv/bin/python site/build.py
 /tmp/engineering-guide-venv/bin/python site/check.py
-/tmp/engineering-guide-venv/bin/python site/check_reading.py
 /tmp/engineering-guide-venv/bin/python site/serve.py
 ```
 

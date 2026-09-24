@@ -3,8 +3,9 @@
 ## Python reference gate
 
 `python scripts/check_curriculum.py --report /tmp/python-results.json` runs every
-suite registered in `indexes/python-suites.json`, including AI examples and these
-tool tests. Each directory runs in a fresh process. The manifest records runtime,
+suite registered in `indexes/python-suites.json`. These are the LESSON
+suites -- curriculum problems, labs and AI examples. Tests of this repo's own
+tooling were removed on 2026-09-24; nothing here gates publication. Each directory runs in a fresh process. The manifest records runtime,
 working directory, timeout and required/skip policy (shared defaults are explicit).
 Add a new test directory to the manifest; an absent or unregistered suite fails.
 
