@@ -109,7 +109,7 @@
   if(location.hash) {try{const node=revealHeading(decodeURIComponent(location.hash.slice(1)));if(node)requestAnimationFrame(()=>node.scrollIntoView());}catch{/* An invalid old bookmark must not break the reader. */}}
   const sampleTabs=[...document.querySelectorAll('[data-sample-tab]')];
   const samplePanels=[...document.querySelectorAll('[data-sample-panel]')];
-  function replaySample(panel){
+  function restartSampleAnimation(panel){
     if(!panel)return;
     panel.classList.remove('sample-animate');
     void panel.offsetWidth;
@@ -125,7 +125,7 @@
       const selected=panel.dataset.samplePanel===name;
       panel.classList.toggle('active',selected);panel.setAttribute('aria-hidden',String(!selected));panel.inert=!selected;
     });
-    replaySample(samplePanels.find(panel=>panel.dataset.samplePanel===name));
+    restartSampleAnimation(samplePanels.find(panel=>panel.dataset.samplePanel===name));
   }
   sampleTabs.forEach((tab,index)=>{
     tab.addEventListener('click',()=>showSample(tab.dataset.sampleTab));
@@ -140,7 +140,6 @@
     });
   });
   document.querySelectorAll('[data-sample-next]').forEach(button=>button.addEventListener('click',()=>showSample(button.dataset.sampleNext,true)));
-  document.querySelectorAll('[data-replay-sample]').forEach(button=>button.addEventListener('click',()=>replaySample(button.closest('[data-sample-panel]'))));
   const observer = new IntersectionObserver(entries => {
     const hit=entries.find(e=>e.isIntersecting);if(!hit)return;
     headingLinks.forEach(a => a.classList.toggle('current-heading',a.dataset.heading===hit.target.id));

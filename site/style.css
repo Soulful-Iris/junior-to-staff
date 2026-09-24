@@ -384,14 +384,9 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 }
 
 /* The sampler demonstrates three different visual explanations, not static cards. */
-.sample-replay{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--accent);font:700 9px/1 var(--sans);cursor:pointer}
-.sample-replay i{font:700 13px/1 var(--sans);font-style:normal}
-.sample-replay:hover{border-color:var(--accent)}
-.sample-replay:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sample-panel.sample-animate .sample-replay i{animation:sampleReplaySpin .55s ease-out both}
-
 /* Algorithm animation: one maintained window scans and contracts. */
 .window-demo{position:relative;overflow:hidden}
+.window-animation-grid{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:16px;align-items:center}
 .window-scan-track{position:relative;margin:56px 2px 26px}
 .window-scan-track .letter-row{position:relative;z-index:1}
 .window-scan-track .letter-row b:nth-child(n+10){animation:none}
@@ -400,23 +395,42 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .window-readout span{position:absolute;inset:0;display:grid;place-items:center}
 .window-first,.window-searching{opacity:0}
 .window-best{opacity:1}
-.sample-panel.sample-animate .window-frame{animation:windowScan 5.8s cubic-bezier(.55,.06,.25,1) both}
-.sample-panel.sample-animate .window-first{animation:windowFirst 5.8s ease both}
-.sample-panel.sample-animate .window-searching{animation:windowSearching 5.8s ease both}
-.sample-panel.sample-animate .window-best{animation:windowBest 5.8s ease both}
-.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(n+10){animation:windowWinner 5.8s ease both}
+.counter-demo{align-self:stretch;padding:13px 11px;border:1px solid var(--line);border-radius:7px;background:var(--paper)}
+.counter-demo header{display:flex;align-items:flex-start;flex-direction:column;gap:2px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+.counter-demo header span{color:var(--accent);font:750 9px/1.3 var(--sans);letter-spacing:.9px}
+.counter-demo header small{color:var(--muted);font:550 8px/1.3 var(--sans)}
+.counter-states{display:grid;margin-top:11px}
+.counter-state{grid-area:1/1;align-self:center;opacity:0}
+.counter-state.counter-final{opacity:1}
+.counter-state>em{display:block;margin-bottom:8px;color:var(--muted);font:650 9px/1.2 var(--sans);font-style:normal}
+.counter-state>div{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.counter-state>div span{display:grid}
+.counter-state>div span b,.counter-state>div span strong{display:grid;place-items:center;min-height:24px;font:700 10px/1 var(--mono)}
+.counter-state>div span b{border-radius:4px 4px 0 0;background:#e6ece2;color:var(--accent)}
+.counter-state>div span strong{border:1px solid var(--line);border-top:0;border-radius:0 0 4px 4px;background:#fbfbf8;color:var(--ink)}
+.counter-state>p{display:flex;justify-content:space-between;margin:10px 0 0;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font:600 9px/1.3 var(--sans)}
+.counter-state>p strong{color:var(--accent);font:750 11px/1 var(--sans)}
+.sample-panel.sample-animate .window-frame{animation:windowScan 7.8s cubic-bezier(.55,.06,.25,1) infinite}
+.sample-panel.sample-animate .window-first{animation:windowFirst 7.8s ease infinite}
+.sample-panel.sample-animate .window-searching{animation:windowSearching 7.8s ease infinite}
+.sample-panel.sample-animate .window-best{animation:windowBest 7.8s ease infinite}
+.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(n+10){animation:windowWinner 7.8s ease infinite}
+.sample-panel.sample-animate .counter-building{animation:counterBuilding 7.8s ease infinite}
+.sample-panel.sample-animate .counter-valid{animation:counterValid 7.8s ease infinite}
+.sample-panel.sample-animate .counter-gap{animation:counterGap 7.8s ease infinite}
+.sample-panel.sample-animate .counter-final{animation:counterFinal 7.8s ease infinite}
 
 /* Architecture animation: events arrive in causal order. */
 .payment-route{position:relative;overflow:hidden}
 .payment-packet{position:absolute;z-index:3;top:50%;left:13%;width:9px;height:9px;margin-top:-4px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px rgba(49,93,72,.12);opacity:0;text-decoration:none}
-.sample-panel.sample-animate .first-attempt{animation:paymentEventReveal .42s .15s ease both}
-.sample-panel.sample-animate .first-attempt .payment-packet{animation:paymentPacketFirst 1.15s .55s ease-in-out both}
-.sample-panel.sample-animate .first-attempt>strong{animation:paymentSuccess .4s 1.55s ease both}
-.sample-panel.sample-animate .lost-reply{animation:paymentLost .5s 2.05s ease both}
-.sample-panel.sample-animate .payment-route.retry{animation:paymentEventReveal .45s 2.75s ease both}
-.sample-panel.sample-animate .payment-route.retry .payment-packet{animation:paymentPacketRetry 1s 3.15s ease-in-out both}
-.sample-panel.sample-animate .payment-route.retry>strong{animation:paymentSuccess .4s 4s ease both}
-.sample-panel.sample-animate .no-second-charge{animation:paymentConclusion .55s 4.55s cubic-bezier(.2,.8,.2,1) both}
+.sample-panel.sample-animate .first-attempt{animation:paymentFirstSequence 7.2s ease infinite}
+.sample-panel.sample-animate .first-attempt .payment-packet{animation:paymentPacketFirst 7.2s ease-in-out infinite}
+.sample-panel.sample-animate .first-attempt>strong{animation:paymentFirstSuccess 7.2s ease infinite}
+.sample-panel.sample-animate .lost-reply{animation:paymentLost 7.2s ease infinite}
+.sample-panel.sample-animate .payment-route.retry{animation:paymentRetrySequence 7.2s ease infinite}
+.sample-panel.sample-animate .payment-route.retry .payment-packet{animation:paymentPacketRetry 7.2s ease-in-out infinite}
+.sample-panel.sample-animate .payment-route.retry>strong{animation:paymentReturnSequence 7.2s ease infinite}
+.sample-panel.sample-animate .no-second-charge{animation:paymentConclusion 7.2s cubic-bezier(.2,.8,.2,1) infinite}
 
 /* AWS animation: packets reroute as health and database roles change. */
 .aws-entry,.aws-database,.aws-zones section{position:relative;overflow:hidden}
@@ -424,45 +438,50 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .aws-entry-packet{top:50%;left:12%;margin-top:-4px}
 .zone-packet{top:-5px;left:50%;margin-left:-4px}
 .database-packet{top:50%;left:16%;margin-top:-4px}
-.sample-panel.sample-animate .aws-entry-packet{animation:awsEntryPacket 1.15s .15s ease-in-out both}
-.sample-panel.sample-animate .aws-zones .failed{animation:awsZoneFailure 5.3s ease both}
-.sample-panel.sample-animate .aws-zones .failed header span,.sample-panel.sample-animate .aws-zones .failed small{animation:awsFailureLabel 5.3s ease both}
-.sample-panel.sample-animate .aws-zones .failed .zone-packet{animation:awsFailedPacket 1.05s 1.15s ease-in both}
-.sample-panel.sample-animate .aws-zones .healthy{animation:awsHealthyPulse 5.3s ease both}
-.sample-panel.sample-animate .aws-zones .healthy .zone-packet{animation:awsHealthyPackets 2.7s 2.25s ease-in-out both}
-.sample-panel.sample-animate .aws-database{animation:awsDatabaseWake 5.3s ease both}
-.sample-panel.sample-animate .database-packet{animation:awsDatabasePacket 1.15s 3.55s ease-in-out both}
-.sample-panel.sample-animate .aws-database strong{animation:awsFailoverLabel .45s 4.45s ease both}
+.sample-panel.sample-animate .aws-entry-packet{animation:awsEntryPacket 7.4s ease-in-out infinite}
+.sample-panel.sample-animate .aws-zones .failed{animation:awsZoneFailure 7.4s ease infinite}
+.sample-panel.sample-animate .aws-zones .failed header span,.sample-panel.sample-animate .aws-zones .failed small{animation:awsFailureLabel 7.4s ease infinite}
+.sample-panel.sample-animate .aws-zones .failed .zone-packet{animation:awsFailedPacket 7.4s ease-in infinite}
+.sample-panel.sample-animate .aws-zones .healthy{animation:awsHealthyPulse 7.4s ease infinite}
+.sample-panel.sample-animate .aws-zones .healthy .zone-packet{animation:awsHealthyPackets 7.4s ease-in-out infinite}
+.sample-panel.sample-animate .aws-database{animation:awsDatabaseWake 7.4s ease infinite}
+.sample-panel.sample-animate .database-packet{animation:awsDatabasePacket 7.4s ease-in-out infinite}
+.sample-panel.sample-animate .aws-database strong{animation:awsFailoverLabel 7.4s ease infinite}
 
-@keyframes sampleReplaySpin{from{transform:rotate(-210deg)}to{transform:rotate(0)}}
 @keyframes windowScan{
   0%{left:0;width:7.69%;opacity:0}
-  6%{opacity:1}
-  24%{left:0;width:46.15%}
-  38%{left:23.08%;width:38.46%}
-  52%{left:38.46%;width:46.15%}
-  66%{left:61.54%;width:38.46%}
-  78%,100%{left:69.23%;width:30.77%;opacity:1}
+  7%{opacity:1}
+  27%{left:0;width:46.15%}
+  43%{left:23.08%;width:38.46%}
+  58%{left:38.46%;width:46.15%}
+  72%{left:61.54%;width:38.46%}
+  87%,100%{left:69.23%;width:30.77%;opacity:1}
 }
-@keyframes windowFirst{0%,15%{opacity:0;transform:translateY(5px)}24%,34%{opacity:1;transform:none}43%,100%{opacity:0;transform:translateY(-5px)}}
-@keyframes windowSearching{0%,35%{opacity:0}44%,67%{opacity:1}75%,100%{opacity:0}}
-@keyframes windowBest{0%,70%{opacity:0;transform:translateY(5px)}80%,100%{opacity:1;transform:none}}
-@keyframes windowWinner{0%,72%{border-color:var(--line);background:var(--paper);color:#78827a;transform:scale(1)}80%{transform:scale(1.12)}88%,100%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}}
-@keyframes paymentEventReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes paymentPacketFirst{0%{left:13%;opacity:0}12%{opacity:1}82%{left:76%;opacity:1}100%{left:86%;opacity:0}}
-@keyframes paymentPacketRetry{0%{left:13%;opacity:0}14%{opacity:1}78%{left:62%;opacity:1}100%{left:68%;opacity:0}}
-@keyframes paymentSuccess{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
-@keyframes paymentLost{0%{opacity:0;transform:scale(.8)}55%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
-@keyframes paymentConclusion{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
-@keyframes awsEntryPacket{0%{left:12%;opacity:0}15%{opacity:1}85%{left:76%;opacity:1}100%{left:82%;opacity:0}}
-@keyframes awsZoneFailure{0%,30%{border-color:var(--line);background:var(--paper);transform:none}36%{transform:translateX(-3px)}40%{transform:translateX(3px)}45%,100%{border-color:#dcc6bf;background:#faf3f0;transform:none}}
-@keyframes awsFailureLabel{0%,38%{opacity:0}48%,100%{opacity:1}}
-@keyframes awsFailedPacket{0%{top:-5px;opacity:0;background:var(--accent)}18%{opacity:1}68%{top:48%;opacity:1;background:var(--accent)}82%{background:#9a574a;box-shadow:0 0 0 7px rgba(154,87,74,.14)}100%{top:52%;opacity:0;background:#9a574a}}
-@keyframes awsHealthyPulse{0%,46%{box-shadow:none}58%{box-shadow:0 0 0 5px rgba(49,93,72,.09)}70%,100%{box-shadow:none}}
-@keyframes awsHealthyPackets{0%{top:-5px;opacity:0}10%{opacity:1}42%{top:48%;opacity:1}50%{opacity:0;top:52%}58%{top:-5px;opacity:0}68%{opacity:1}92%{top:48%;opacity:1}100%{top:52%;opacity:0}}
-@keyframes awsDatabaseWake{0%,64%{border-color:transparent;filter:saturate(.35)}76%,100%{border-color:#9eb3c0;filter:none}}
-@keyframes awsDatabasePacket{0%{left:16%;opacity:0}15%{opacity:1}84%{left:68%;opacity:1}100%{left:76%;opacity:0}}
-@keyframes awsFailoverLabel{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes windowFirst{0%,17%{opacity:0;transform:translateY(5px)}27%,38%{opacity:1;transform:none}47%,100%{opacity:0;transform:translateY(-5px)}}
+@keyframes windowSearching{0%,39%{opacity:0}48%,75%{opacity:1}84%,100%{opacity:0}}
+@keyframes windowBest{0%,78%{opacity:0;transform:translateY(5px)}88%,100%{opacity:1;transform:none}}
+@keyframes windowWinner{0%,80%{border-color:var(--line);background:var(--paper);color:#78827a;transform:scale(1)}88%{transform:scale(1.12)}94%,100%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}}
+@keyframes counterBuilding{0%,18%{opacity:1;transform:none}27%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes counterValid{0%,22%{opacity:0}28%,38%{opacity:1}44%,55%{opacity:0}61%,75%{opacity:1}81%,100%{opacity:0}}
+@keyframes counterGap{0%,39%{opacity:0;transform:translateY(4px)}45%,53%{opacity:1;transform:none}60%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes counterFinal{0%,80%{opacity:0;transform:translateY(4px)}88%,100%{opacity:1;transform:none}}
+@keyframes paymentFirstSequence{0%{opacity:0;transform:translateY(10px)}8%,100%{opacity:1;transform:none}}
+@keyframes paymentPacketFirst{0%,8%{left:13%;opacity:0}13%{opacity:1}27%{left:76%;opacity:1}31%,100%{left:86%;opacity:0}}
+@keyframes paymentPacketRetry{0%,51%{left:13%;opacity:0}56%{opacity:1}67%{left:62%;opacity:1}71%,100%{left:68%;opacity:0}}
+@keyframes paymentFirstSuccess{0%,25%{opacity:0;transform:scale(.88)}32%,100%{opacity:1;transform:scale(1)}}
+@keyframes paymentLost{0%,32%{opacity:0;transform:scale(.8)}39%{opacity:1;transform:scale(1.08)}45%,100%{opacity:1;transform:scale(1)}}
+@keyframes paymentRetrySequence{0%,43%{opacity:0;transform:translateY(10px)}51%,100%{opacity:1;transform:none}}
+@keyframes paymentReturnSequence{0%,67%{opacity:0;transform:scale(.88)}74%,100%{opacity:1;transform:scale(1)}}
+@keyframes paymentConclusion{0%,75%{opacity:0;transform:translateY(9px)}86%,100%{opacity:1;transform:none}}
+@keyframes awsEntryPacket{0%{left:12%;opacity:0}4%{opacity:1}17%{left:76%;opacity:1}20%,100%{left:82%;opacity:0}}
+@keyframes awsZoneFailure{0%,24%{border-color:var(--line);background:var(--paper);transform:none}29%{transform:translateX(-3px)}33%{transform:translateX(3px)}38%,100%{border-color:#dcc6bf;background:#faf3f0;transform:none}}
+@keyframes awsFailureLabel{0%,31%{opacity:0}40%,100%{opacity:1}}
+@keyframes awsFailedPacket{0%,17%{top:-5px;opacity:0;background:var(--accent)}21%{opacity:1}32%{top:48%;opacity:1;background:var(--accent)}36%{background:#9a574a;box-shadow:0 0 0 7px rgba(154,87,74,.14)}39%,100%{top:52%;opacity:0;background:#9a574a}}
+@keyframes awsHealthyPulse{0%,39%{box-shadow:none}48%{box-shadow:0 0 0 5px rgba(49,93,72,.09)}60%,100%{box-shadow:none}}
+@keyframes awsHealthyPackets{0%,39%{top:-5px;opacity:0}43%{opacity:1}54%{top:48%;opacity:1}58%{opacity:0;top:52%}62%{top:-5px;opacity:0}66%{opacity:1}75%{top:48%;opacity:1}79%,100%{top:52%;opacity:0}}
+@keyframes awsDatabaseWake{0%,61%{border-color:transparent;filter:saturate(.35)}72%,100%{border-color:#9eb3c0;filter:none}}
+@keyframes awsDatabasePacket{0%,64%{left:16%;opacity:0}68%{opacity:1}79%{left:68%;opacity:1}83%,100%{left:76%;opacity:0}}
+@keyframes awsFailoverLabel{0%,78%{opacity:0;transform:scale(.8)}86%,100%{opacity:1;transform:scale(1)}}
 
 @media(prefers-reduced-motion:reduce){
   .sample-panel.sample-animate *{animation:none!important}
@@ -470,10 +489,13 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
   .window-first,.window-searching{opacity:0}
   .window-best{opacity:1}
   .window-scan-track .letter-row b:nth-child(n+10){border-color:var(--accent);background:var(--accent);color:#fff}
+  .counter-state{opacity:0!important}
+  .counter-state.counter-final{opacity:1!important}
   .payment-packet,.aws-entry-packet,.zone-packet,.database-packet{display:none}
 }
 
 @media(max-width:760px){
   .window-scan-track{margin:45px 0 24px}
-  .sample-replay{font-size:8px}
+  .window-animation-grid{grid-template-columns:1fr}
+  .counter-demo{width:122px;margin:0 auto}
 }
