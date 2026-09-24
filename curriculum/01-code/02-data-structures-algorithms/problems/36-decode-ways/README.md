@@ -1,6 +1,6 @@
 # Count valid digit decodings
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A legacy format encodes letters as decimal integers 1 through 26, then removes
 > separators. Count how many letter sequences a digit string could represent.

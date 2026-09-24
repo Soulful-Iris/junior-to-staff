@@ -4,7 +4,7 @@ A checkout team proposes replacing its relational store with a key-value databas
 
 You will write the decision portion of the document: the problem, alternatives, evidence, chosen boundary and conditions for changing course. A list of services or API routes does not answer those questions by itself.
 
-[Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
+[Curriculum](../../README.md) · [Technical decisions and engineering effectiveness](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 

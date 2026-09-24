@@ -4,7 +4,7 @@ A reading-list service stores tags as strings and is moving to stable tag IDs. U
 
 You will define which store owns writes during each phase, how copied and live changes are ordered, and what permits the final switch. A backfill is the bulk copy of existing data. It does not include all changes that happen after the copy begins.
 
-[Curriculum](../../README.md) · [Migrate live systems and verify recovery](README.md)
+[Curriculum](../../README.md) · [Live migrations](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
@@ -156,7 +156,7 @@ intentionally irreversible step needs a tested restore or forward-fix policy.
 
 [Database foundations](../../02-applications/02-databases/data-models-and-queries.md) ·
 [Recovery lab](labs/recovery-migration/README.md) ·
-[Make technical decisions and improve team workflows](../05-technical-decisions/README.md)
+[Technical decisions and engineering effectiveness](../05-technical-decisions/README.md)
 
 ## Draw it from memory · Draw coexistence before drawing cutover
 

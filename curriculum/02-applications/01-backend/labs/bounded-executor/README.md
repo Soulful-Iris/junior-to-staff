@@ -1,6 +1,6 @@
 # Bound accepted work and make executor shutdown predictable
 
-[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+[Curriculum](../../../../README.md) · [APIs and background work](../../README.md)
 
 ## Application and assignment
 

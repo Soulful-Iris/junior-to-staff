@@ -1,6 +1,6 @@
 # Prevent overselling and write skew with the right transaction boundary
 
-[Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
+[Curriculum](../../../../README.md) · [Data models and transactions](../../README.md)
 
 ## Application and assignment
 

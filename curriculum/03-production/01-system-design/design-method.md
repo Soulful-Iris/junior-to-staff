@@ -1,6 +1,6 @@
 # Design a service from its contract, workload and failure limits
 
-[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
+[Curriculum](../../README.md) · [System design under constraints](README.md)
 
 > Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 

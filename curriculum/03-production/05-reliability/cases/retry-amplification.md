@@ -1,6 +1,6 @@
 # Bound retry load and reconcile a lost payment response
 
-[Curriculum](../../../README.md) · [Set reliability objectives and recover from failures](../README.md)
+[Curriculum](../../../README.md) · [Reliability and incident recovery](../README.md)
 
 ## Application and assignment
 

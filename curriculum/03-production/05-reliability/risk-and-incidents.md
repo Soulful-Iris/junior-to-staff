@@ -1,6 +1,6 @@
 # Mitigate an incident, verify recovery and complete the follow-up
 
-[Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
+[Curriculum](../../README.md) · [Reliability and incident recovery](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 

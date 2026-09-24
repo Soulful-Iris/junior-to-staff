@@ -1,6 +1,6 @@
 # Find the bottleneck and measure cost per useful operation
 
-[Curriculum](../../README.md) · [Measure capacity and control performance costs](README.md)
+[Curriculum](../../README.md) · [Capacity, performance and cost](README.md)
 
 > Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 

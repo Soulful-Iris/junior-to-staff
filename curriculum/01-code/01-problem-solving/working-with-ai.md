@@ -4,7 +4,7 @@ A stock-management screen lets a user change the quantity of an item. The item c
 
 Your job is to define those meanings, inspect the proposed implementation, and gather evidence from the actual boundary being changed. The lesson is about deciding whether a patch implements the product rule, regardless of who wrote it.
 
-[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+[Curriculum](../../README.md) · [AI-assisted code changes](README.md)
 
 > Project connection · feeds **every project in this guide**
 

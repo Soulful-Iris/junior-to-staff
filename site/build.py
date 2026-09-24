@@ -65,14 +65,71 @@ SITE_LEDE = (
 
 # ---------------------------------------------------------------- content map
 
-# Four groups, in reading order. The accent is an identity mark used in small
+# Five core parts and one optional specialization, in reading order. Source
+# directories do not define pedagogy: chapter URLs stay stable while the book
+# presents them in the order a reader needs them.
+#
+# The accent is an identity mark used in small
 # doses — a chip, a rule, the active nav item — not a theme. Green stays the
 # base ink throughout so the site reads as one thing.
 GROUPS = {
-    "01-code": ("Write correct code", "#1f5b76", "Correctness, data structures, and directing an AI without losing the judgment."),
-    "02-applications": ("Build a complete application", "#2f6f4e", "Backend, data, frontend, tests, and authorisation that actually holds."),
-    "03-production": ("Design, ship, and operate", "#a8682f", "Design under constraints, then deliver it and keep it alive at three in the morning."),
-    "04-scale-and-evolution": ("Scale and evolve", "#6f4a7d", "Load, cost, models, migrations, and the decisions that outlast you."),
+    "code": ("Coding and problem solving", "#1f5b76", "Data structures, coding problems, and AI-assisted changes without losing independent judgment."),
+    "applications": ("Production applications", "#2f6f4e", "APIs, data, interfaces, tests, and access boundaries that agree about user-visible behavior."),
+    "design": ("System design and scale", "#a8682f", "Requirements and failure modes first, then data scale, capacity, performance, and cost."),
+    "operations": ("Production operations", "#9b6334", "Provision, deploy, observe, and recover a running application."),
+    "evolution": ("System evolution and leadership", "#6f4a7d", "Migrate live systems and make technical decisions other teams can carry forward."),
+    "ai-specialization": ("AI systems", "#735078", "Optional specialization in evaluation, budgets, permissions, and controlled model actions."),
+}
+
+GROUP_INTROS = {
+    "code": "curriculum/01-code/README.md",
+    "applications": "curriculum/02-applications/README.md",
+    "design": "curriculum/parts/system-design-and-scale.md",
+    "operations": "curriculum/03-production/README.md",
+    "evolution": "curriculum/04-scale-and-evolution/README.md",
+    "ai-specialization": "curriculum/parts/ai-systems.md",
+}
+
+GROUP_LABELS = {
+    "code": "PART A",
+    "applications": "PART B",
+    "design": "PART C",
+    "operations": "PART D",
+    "evolution": "PART E",
+    "ai-specialization": "OPTIONAL SPECIALIZATION",
+}
+
+CHAPTER_ORDER = {
+    "code": [
+        ("curriculum/01-code/02-data-structures-algorithms", "Choose structures, trace their state, and defend time and memory costs."),
+        ("curriculum/01-code/03-coding-practice", "Solve unfamiliar problems and explain correctness, boundaries, and trade-offs."),
+        ("curriculum/01-code/01-problem-solving", "Specify and review bounded changes while keeping responsibility for the result."),
+    ],
+    "applications": [
+        ("curriculum/02-applications/01-backend", "Trace requests, define contracts, and coordinate bounded background work."),
+        ("curriculum/02-applications/02-databases", "Model authoritative state, inspect queries, and protect concurrent changes."),
+        ("curriculum/02-applications/03-frontend", "Preserve user intent across browser, API, and persisted state."),
+        ("curriculum/02-applications/04-testing", "Reproduce defects and choose evidence that can distinguish a repair."),
+        ("curriculum/02-applications/05-security", "Enforce identity, ownership, and trust boundaries beyond the interface."),
+    ],
+    "design": [
+        ("curriculum/03-production/01-system-design", "Turn requirements, workload estimates, and failures into an explainable design."),
+        ("curriculum/04-scale-and-evolution/01-data-at-scale", "Reason about caches, replication, partitioning, streams, and coordination."),
+        ("curriculum/04-scale-and-evolution/02-performance-cost", "Measure bottlenecks and defend capacity and cost decisions with units."),
+    ],
+    "operations": [
+        ("curriculum/03-production/03-infrastructure", "Map application mechanisms to AWS resources, permissions, and limits."),
+        ("curriculum/03-production/02-delivery", "Build once, preserve compatibility, and release with stop conditions."),
+        ("curriculum/03-production/04-observability", "Use logs, metrics, and traces to explain production behavior."),
+        ("curriculum/03-production/05-reliability", "Set reliability objectives, bound overload, and recover from incidents."),
+    ],
+    "evolution": [
+        ("curriculum/04-scale-and-evolution/04-migrations", "Move live data and clients through compatibility, repair, and retirement."),
+        ("curriculum/04-scale-and-evolution/05-technical-decisions", "Make scope, ownership, adoption, and cross-team decisions explicit."),
+    ],
+    "ai-specialization": [
+        ("curriculum/04-scale-and-evolution/03-ai-systems", "Evaluate AI features, protect permissions, and enforce task budgets."),
+    ],
 }
 
 # Content kinds, derived from the tree rather than invented. Each one changes
@@ -219,26 +276,6 @@ def chapter_sequence(chapter_readme: Path) -> list[tuple[str, str]]:
     return out + rest
 
 
-def chapter_blurbs() -> dict[str, str]:
-    """The `You will learn to...` line each part README already gives per chapter.
-
-    Harvested rather than written again, so the subtitle on the contents page
-    and the one in the markdown cannot say different things.
-    """
-    out: dict[str, str] = {}
-    row = re.compile(r"\|\s*\d+\s*\|\s*\[[^\]]+\]\(([^)/]+)/README\.md\)\s*\|\s*([^|]+?)\s*\|")
-    for gdir in GROUPS:
-        f = ROOT / "curriculum" / gdir / "README.md"
-        if not f.exists():
-            continue
-        for m in row.finditer(f.read_text(encoding="utf-8")):
-            out[f"{gdir}/{m.group(1)}"] = m.group(2).strip()
-    return out
-
-
-CHAPTER_BLURBS: dict[str, str] = {}
-
-
 def collect() -> list[dict]:
     """Every page we publish, in reading order.
 
@@ -256,7 +293,7 @@ def collect() -> list[dict]:
     contents page still reaches any chapter in one click. They are there so
     that reading straight through has a moment that says "this is what the
     next two chapters are for", which is what a book does and what jumping
-    from chapter 2 straight into part 2 does not.
+    from one chapter straight into the next part does not.
     """
     pages: list[dict] = []
     chapter_no = [0]
@@ -268,29 +305,27 @@ def collect() -> list[dict]:
 
     add(Path("README.md"), kind="home", title=SITE_TITLE, group=None, subject=None)
 
-    for gi, (gdir, (gname, gcolour, gblurb)) in enumerate(GROUPS.items(), 1):
-        gpath = ROOT / "curriculum" / gdir
-        if not gpath.is_dir():
-            continue
-        add(Path("curriculum") / gdir / "README.md", kind="group",
-            title=gname, group=gdir, subject=None, gnum=gi)
+    for gi, (group, (gname, gcolour, gblurb)) in enumerate(GROUPS.items(), 1):
+        add(Path(GROUP_INTROS[group]), kind="group", title=gname, group=group,
+            subject=None, gnum=gi, part_label=GROUP_LABELS[group])
 
-        for sdir in sorted(p for p in gpath.iterdir() if p.is_dir()):
-            srel = Path("curriculum") / gdir / sdir.name
+        for chapter_source, blurb in CHAPTER_ORDER[group]:
+            srel = Path(chapter_source)
+            sdir = ROOT / srel
             chapter_no[0] += 1
             ch = chapter_no[0]
-            add(srel / "README.md", kind="subject", group=gdir, subject=sdir.name,
-                gnum=gi, chapter=ch,
-                blurb=CHAPTER_BLURBS.get(f"{gdir}/{sdir.name}", ""))
+            add(srel / "README.md", kind="subject", group=group, subject=sdir.name,
+                gnum=gi, chapter=ch, blurb=blurb,
+                part_label=GROUP_LABELS[group])
 
             # Sub-chapters in the order the chapter README states, not the
             # order the filesystem happens to be in.
             sub_no = 0
             for rels, section in chapter_sequence(sdir / "README.md"):
                 sub_no += 1
-                add(Path(rels), kind=kind_for(Path(rels)), group=gdir,
+                add(Path(rels), kind=kind_for(Path(rels)), group=group,
                     subject=sdir.name, gnum=gi, chapter=ch, sub=sub_no,
-                    section=section)
+                    section=section, part_label=GROUP_LABELS[group])
 
     for extra in ("curriculum/README.md",):
         add(Path(extra), kind="toc", group=None, subject=None)

@@ -1,6 +1,6 @@
 # Windows: move boundaries, avoid rescanning
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 > “Our analyzer receives abba. How long is its longest contiguous span with no repeated character?”
 

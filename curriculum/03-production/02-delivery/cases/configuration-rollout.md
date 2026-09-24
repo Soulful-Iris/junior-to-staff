@@ -1,6 +1,6 @@
 # Roll out routing configuration without activating unusable backends
 
-[Curriculum](../../../README.md) · [Deploy changes and control feature exposure](../README.md)
+[Curriculum](../../../README.md) · [Delivery and controlled rollouts](../README.md)
 
 ## Application and assignment
 

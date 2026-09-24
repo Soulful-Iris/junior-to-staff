@@ -1,4 +1,4 @@
-# Solve coding problems and explain trade-offs
+# Coding problems and trade-offs
 
 Turn a clear brief into a working solution, then handle changed requirements.
 
@@ -30,4 +30,6 @@ The contents panel gives every problem its own step. Stateful caches, expiry, ev
 
 Read the highlighted brief and examples first. Predict a boundary case. Implement a direct solution, then remove its repeated work. Check the reference only after an attempt. Follow-up questions change the same problem rather than restarting a separate level.
 
-[Choose data structures and reason about algorithms](../02-data-structures-algorithms/README.md) · [All coding problems](../../../indexes/coding.md)
+[Data structures and algorithms](../02-data-structures-algorithms/README.md) · [All coding problems](../../../indexes/coding.md)
+
+Next chapter: [AI-assisted code changes](../01-problem-solving/README.md).

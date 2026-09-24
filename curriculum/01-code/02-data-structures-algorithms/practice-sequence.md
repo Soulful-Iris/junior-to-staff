@@ -1,6 +1,6 @@
 # Choose a coding problem and work through its contract
 
-[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
 
 ## Your first complete attempt
 

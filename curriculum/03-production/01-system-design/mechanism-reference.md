@@ -1,6 +1,6 @@
 # Choose architecture mechanisms from the boundary they enforce
 
-[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
+[Curriculum](../../README.md) · [System design under constraints](README.md)
 
 [Practice drawing the architecture](whiteboard.md) · [Motion gallery](../../../assets/learning/README.md)
 

@@ -1,6 +1,6 @@
 # Drive conflicting transactions in two PostgreSQL sessions
 
-[Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
+[Curriculum](../../../../README.md) · [Data models and transactions](../../README.md)
 
 ## Application and assignment
 

@@ -1,6 +1,6 @@
 # Shortest path through a grid
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “Our warehouse viewer marks open cells and shelves. A picker moves one cell
 > north, south, east, or west, with each move costing one step. Return the shortest

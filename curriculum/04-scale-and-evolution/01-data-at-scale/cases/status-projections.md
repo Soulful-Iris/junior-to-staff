@@ -1,6 +1,6 @@
 # Keep job status current without repeating completed work
 
-[Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
+[Curriculum](../../../README.md) · [Data systems at scale](../README.md)
 
 ## Application and assignment
 

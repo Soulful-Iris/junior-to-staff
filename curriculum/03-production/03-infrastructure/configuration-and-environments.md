@@ -1,6 +1,6 @@
 # Build once and supply configuration safely at runtime
 
-[Curriculum](../../README.md) · [Provision and operate application infrastructure on AWS](README.md)
+[Curriculum](../../README.md) · [AWS infrastructure](README.md)
 
 > Project connection · feeds [Reading-list stage 1: build the reading-list application](../../../projects/reading-list/stages/01-it-works/README.md) and sets up [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 
@@ -263,7 +263,7 @@ On **P1**, add:
 
 **Not covered here:** infrastructure as code, progressive delivery (canaries and
 feature flags), and deployment pipelines with real gates continue in
-[Deploy changes and control feature exposure](../02-delivery/README.md) and the [AWS implementation index](../../../indexes/aws.md). This section is the minimum that makes P1 reproducible by
+[Delivery and controlled rollouts](../02-delivery/README.md) and the [AWS implementation index](../../../indexes/aws.md). This section is the minimum that makes P1 reproducible by
 somebody who is not you.
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)

@@ -1,6 +1,6 @@
 # Repair decimal amounts and restart recovery in a transaction importer
 
-[Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
+[Curriculum](../../../../README.md) · [Testing and debugging](../../README.md)
 
 ## Application and assignment
 

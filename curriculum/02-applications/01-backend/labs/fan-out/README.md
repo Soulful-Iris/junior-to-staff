@@ -1,6 +1,6 @@
 # Fetch a bounded batch while preserving order and partial results
 
-[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+[Curriculum](../../../../README.md) · [APIs and background work](../../README.md)
 
 ## Application and assignment
 

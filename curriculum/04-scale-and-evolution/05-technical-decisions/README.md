@@ -1,4 +1,4 @@
-# Make technical decisions and improve team workflows
+# Technical decisions and engineering effectiveness
 
 Make options, ownership, adoption, and cross-team decisions explicit.
 
@@ -16,7 +16,7 @@ Write a decision record with options and consequences, find the actual delivery 
 
 ## Prerequisites
 
-[Migrate live systems and verify recovery](../04-migrations/README.md)
+[Live migrations](../04-migrations/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -33,7 +33,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Design services from requirements to failure behavior](../../03-production/01-system-design/README.md) · [Migrate live systems and verify recovery](../04-migrations/README.md).
+Related prerequisites for deeper follow-ups: [System design under constraints](../../03-production/01-system-design/README.md) · [Live migrations](../04-migrations/README.md).
 
 ## Build a project
 
@@ -45,4 +45,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Continue with an unfamiliar [assessment](../../../practice/README.md) and use its debrief to select the concept to revisit.
+Optional specialization: [AI evaluation and guardrails](../03-ai-systems/README.md).

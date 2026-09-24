@@ -504,7 +504,7 @@ elapsed" side by side is the cheapest possible honesty mechanism, because the
 two lines diverging is visible to everybody at once and cannot be narrated away
 in a status update.
 
-And a note that connects this to [Migrate live systems and verify recovery](../../../curriculum/04-scale-and-evolution/04-migrations/README.md): the most
+And a note that connects this to [Live migrations](../../../curriculum/04-scale-and-evolution/04-migrations/README.md): the most
 important kill criterion in a migration project is usually about the
 *dual-running period*, because that is where the cost lives and where the
 abandonment happens. Write that one first.

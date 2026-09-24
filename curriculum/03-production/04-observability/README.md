@@ -1,4 +1,4 @@
-# Trace requests and diagnose production symptoms
+# Production observability
 
 Use logs, metrics, and traces to answer a concrete system question.
 
@@ -16,7 +16,7 @@ Read a structured event, trace the timed operations, and choose bounded metric d
 
 ## Prerequisites
 
-[Provision and operate application infrastructure on AWS](../03-infrastructure/README.md)
+[AWS infrastructure](../03-infrastructure/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -32,7 +32,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Set reliability objectives and recover from failures](../05-reliability/README.md).
+Related prerequisites for deeper follow-ups: [Reliability and incident recovery](../05-reliability/README.md).
 
 ## Build a project
 
@@ -42,4 +42,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Set reliability objectives and recover from failures](../05-reliability/README.md).
+Next chapter: [Reliability and incident recovery](../05-reliability/README.md).

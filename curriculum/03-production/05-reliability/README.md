@@ -1,4 +1,4 @@
-# Set reliability objectives and recover from failures
+# Reliability and incident recovery
 
 Budget failures, bound overload, and recover from evidence.
 
@@ -16,7 +16,7 @@ Separate successful user work from attempts, calculate the error allowance, and 
 
 ## Prerequisites
 
-[Trace requests and diagnose production symptoms](../04-observability/README.md)
+[Production observability](../04-observability/README.md)
 
 An availability target is only concrete once it is a downtime budget: the nines table in [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md) is what turns 99.99% into fifty-three minutes a year.
 
@@ -38,7 +38,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Trace requests and diagnose production symptoms](../04-observability/README.md) · [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Migrate live systems and verify recovery](../../04-scale-and-evolution/04-migrations/README.md).
+Related prerequisites for deeper follow-ups: [Production observability](../04-observability/README.md) · [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Live migrations](../../04-scale-and-evolution/04-migrations/README.md).
 
 ## Build a project
 
@@ -58,4 +58,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
+Next chapter: [Live migrations](../../04-scale-and-evolution/04-migrations/README.md).

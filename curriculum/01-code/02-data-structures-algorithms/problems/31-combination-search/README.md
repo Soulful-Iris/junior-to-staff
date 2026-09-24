@@ -1,6 +1,6 @@
 # Search for unique combinations
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A package builder fills an exact capacity using reusable positive-size blocks.
 > Users want every distinct combination, not every ordering of the same blocks.

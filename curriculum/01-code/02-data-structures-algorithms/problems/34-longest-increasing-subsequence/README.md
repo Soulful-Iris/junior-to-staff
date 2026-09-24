@@ -1,6 +1,6 @@
 # Longest increasing subsequence
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A telemetry analyzer receives ordered integer measurements. It may skip noisy
 > measurements but cannot reorder them. Return a longest strictly increasing

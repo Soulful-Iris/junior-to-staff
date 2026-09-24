@@ -1,6 +1,6 @@
 # Sorted data: binary search and intervals
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 > “Where would target 3 first fit in sorted [1,3,3,8]? Now decide whether bookings ending and starting at time 3 overlap.”
 

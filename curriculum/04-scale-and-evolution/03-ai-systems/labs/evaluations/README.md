@@ -1,6 +1,6 @@
 # Evaluate tag suggestions without hiding rare failures or outage cost
 
-[Curriculum](../../../../README.md) · [Build AI features with evidence and controlled actions](../../README.md)
+[Curriculum](../../../../README.md) · [AI evaluation and guardrails](../../README.md)
 
 ## Application and assignment
 

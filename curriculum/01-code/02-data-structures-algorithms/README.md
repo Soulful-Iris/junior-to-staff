@@ -1,4 +1,4 @@
-# Choose data structures and reason about algorithms
+# Data structures and algorithms
 
 Learn the structures and algorithms before using them in a coding interview.
 
@@ -36,4 +36,4 @@ Given a small example, draw the state after each operation. Name the assumption 
 
 You can revisit a folded refresher inside each coding problem. The main reading flow will assume these foundations rather than introduce the same structure repeatedly.
 
-Next chapter: [Solve coding problems and explain trade-offs](../03-coding-practice/README.md).
+Next chapter: [Coding problems and trade-offs](../03-coding-practice/README.md).

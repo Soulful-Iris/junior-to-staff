@@ -1,4 +1,4 @@
-# Connect a usable interface to an API
+# Frontend state and API integration
 
 Preserve user intent across browser, API, and persisted state.
 
@@ -20,7 +20,7 @@ The confirmed title and editable draft are deliberately different. The browser p
 
 ## Prerequisites
 
-[Model data and enforce transactional rules](../02-databases/README.md)
+[Data models and transactions](../02-databases/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -37,7 +37,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Build HTTP APIs and reliable background work](../01-backend/README.md) · [Model data and enforce transactional rules](../02-databases/README.md) · [Enforce identity, ownership and tenant boundaries](../05-security/README.md).
+Related prerequisites for deeper follow-ups: [APIs and background work](../01-backend/README.md) · [Data models and transactions](../02-databases/README.md) · [Identity and authorization](../05-security/README.md).
 
 ## Build a project
 
@@ -47,4 +47,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Find defects and evaluate engineering evidence](../04-testing/README.md).
+Next chapter: [Testing and debugging](../04-testing/README.md).

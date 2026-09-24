@@ -17,8 +17,9 @@ beside the concepts they need, including caching and concurrency. Later-topic
 follow-ups link their dependencies so you can return after learning them.
 
 Testing and ownership checks belong in the first implementation. The dedicated
-testing and security chapters deepen those skills. System design comes before
-CI/CD and infrastructure so service choices follow an understood architecture.
+testing and security chapters deepen those skills. System design is followed by
+data scale and capacity reasoning before the production sequence moves through
+infrastructure, delivery, observability and reliability.
 
 ## One problem, increasing depth
 

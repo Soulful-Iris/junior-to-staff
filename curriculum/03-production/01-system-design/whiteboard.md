@@ -1,6 +1,6 @@
 # Draw a bookmark request, then change its failure boundary
 
-[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
+[Curriculum](../../README.md) · [System design under constraints](README.md)
 
 ## The application you are drawing
 

@@ -1,6 +1,6 @@
 # Deploy compatible versions and control feature exposure
 
-[Curriculum](../../README.md) · [Deploy changes and control feature exposure](README.md)
+[Curriculum](../../README.md) · [Delivery and controlled rollouts](README.md)
 
 > Project connection · feeds [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 

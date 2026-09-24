@@ -1,4 +1,4 @@
-# Build AI features with evidence and controlled actions
+# AI evaluation and guardrails
 
 Design, implement, evaluate, and operate AI features with explicit permission, state, quality and task-budget boundaries.
 
@@ -16,7 +16,7 @@ Use the evaluation primer and local fixture first. The workbench then supplies f
 
 ## Prerequisites
 
-[Measure capacity and control performance costs](../02-performance-cost/README.md)
+[Capacity, performance and cost](../02-performance-cost/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -35,7 +35,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Enforce identity, ownership and tenant boundaries](../../02-applications/05-security/README.md) · [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md).
+Related prerequisites for deeper follow-ups: [Identity and authorization](../../02-applications/05-security/README.md) · [Reliability and incident recovery](../../03-production/05-reliability/README.md).
 
 ## Build a project
 
@@ -52,4 +52,4 @@ Then use the open-ended brief to design your own feature:
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Migrate live systems and verify recovery](../04-migrations/README.md).
+Continue with the [Company Interview Studio](../../../companies/README.md) or return to an unfamiliar [assessment](../../../practice/README.md).

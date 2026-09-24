@@ -4,7 +4,7 @@ Five teams deploy five different kinds of services. Operations supports five rel
 
 You will derive a supported default, define the exception boundary, and choose an adoption sequence. The result should help a sixth team make a concrete decision rather than merely announce a preferred technology.
 
-[Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
+[Curriculum](../../README.md) · [Technical decisions and engineering effectiveness](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 

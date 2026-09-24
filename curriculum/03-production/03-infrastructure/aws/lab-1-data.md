@@ -1,6 +1,6 @@
 # Use DynamoDB conditions to reject duplicate creates and stale edits
 
-[Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
+[Curriculum](../../../README.md) · [AWS infrastructure](../README.md)
 
 ## Application and assignment
 

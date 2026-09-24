@@ -8,19 +8,21 @@ The machine-readable [source map](reorganization-map.json) accounts for all 477 
 including lessons, code, fixtures, assessments, research, and every visual.
 It records original hashes so preservation can be checked after the move.
 
-## Agreed reading order
+## Current reading order
 
-Four groups contain familiar domain chapters. System design precedes delivery and infrastructure.
+Five core parts contain familiar domain chapters. System design is immediately followed by scale and capacity. Production then moves from infrastructure through delivery, observability and reliability.
 Testing, authorization and verification are practiced from the first examples; their chapters provide deeper treatment.
-AI-assisted work is a method used within lessons. AI systems is a separate technical subject.
+AI-assisted change work follows independent coding foundations. AI systems is an optional specialization rather than a prerequisite for conventional software-engineering interviews.
 Difficulty increases inside each lesson; seniority does not select a separate reading route.
 
 | Group | Ordered chapters |
 |---|---|
-| Write correct code | Problem solving and AI-assisted engineering → Data structures and algorithms |
-| Build a complete application | Backend and APIs → Databases and transactions → Frontend and full-stack integration → Testing, debugging, and code review → Security |
-| Design, ship, and operate the application | System design → CI/CD and progressive delivery → Infrastructure as code and AWS → Observability → Reliability and incident response |
-| Scale and evolve the system | Data at scale → Performance and cost → AI systems → Migrations and recovery → Technical decisions and engineering effectiveness |
+| Coding and problem solving | Data structures and algorithms → Coding problems and trade-offs → AI-assisted code changes |
+| Production applications | APIs and background work → Data models and transactions → Frontend state and API integration → Testing and debugging → Identity and authorization |
+| System design and scale | System design under constraints → Data systems at scale → Capacity, performance and cost |
+| Production operations | AWS infrastructure → Delivery and controlled rollouts → Production observability → Reliability and incident recovery |
+| System evolution and leadership | Live migrations → Technical decisions and engineering effectiveness |
+| Optional specialization | AI evaluation and guardrails |
 
 ## Preservation and verification
 
@@ -36,7 +38,7 @@ Difficulty increases inside each lesson; seniority does not select a separate re
 
 ## Completed move
 
-The first pushed checkpoint recorded the source map. The structural checkpoint moves existing lessons and rebuilds the root, four group indexes, 17 subject indexes and reference indexes. The original source branch stays at its existing commit. Seniority is an assessment depth, and AI-assisted work is a practice mode within the curriculum.
+The first pushed checkpoint recorded the source map. A later navigation pass presents the stable source URLs as five core parts, 18 chapters, and one optional specialization. The original source branch stays at its existing commit. Seniority is an assessment depth, and AI-assisted work is a practice mode within the curriculum.
 
 After the move:
 

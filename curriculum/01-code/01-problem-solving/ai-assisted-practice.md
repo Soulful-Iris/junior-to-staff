@@ -4,7 +4,7 @@ An inventory API accepts partial updates to a product. A missing quantity means 
 
 This is a focused review exercise. You will write the input/output contract, explain the failing expression, propose the smallest repair and demonstrate the real runtime inputs. You are not being asked to build a complete inventory service.
 
-[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+[Curriculum](../../README.md) · [AI-assisted code changes](README.md)
 
 ## Your starting input and finish line
 

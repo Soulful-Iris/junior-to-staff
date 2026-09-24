@@ -1,4 +1,4 @@
-# Build HTTP APIs and reliable background work
+# APIs and background work
 
 Trace a request, define its contract, and coordinate bounded work.
 
@@ -16,7 +16,7 @@ Start with the supplied local HTTP/SQLite API. Each project tells you which beha
 
 ## Prerequisites
 
-[Choose data structures and reason about algorithms](../../01-code/02-data-structures-algorithms/README.md)
+[Data structures and algorithms](../../01-code/02-data-structures-algorithms/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -35,7 +35,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Model data and enforce transactional rules](../02-databases/README.md) · [Enforce identity, ownership and tenant boundaries](../05-security/README.md) · [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md).
+Related prerequisites for deeper follow-ups: [Data models and transactions](../02-databases/README.md) · [Identity and authorization](../05-security/README.md) · [Reliability and incident recovery](../../03-production/05-reliability/README.md).
 
 ## Build a project
 
@@ -55,4 +55,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Model data and enforce transactional rules](../02-databases/README.md).
+Next chapter: [Data models and transactions](../02-databases/README.md).

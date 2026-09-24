@@ -1,6 +1,6 @@
 # Bounded blocking queue with shutdown
 
-[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [APIs and background work](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “Several producer threads submit items to worker threads. Memory must stay bounded:
 > producers wait when the queue is full, consumers wait when empty. Shutdown must

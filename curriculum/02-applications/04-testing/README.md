@@ -1,4 +1,4 @@
-# Find defects and evaluate engineering evidence
+# Testing and debugging
 
 Reproduce a defect, build a check that catches it, and assess a proposed repair.
 
@@ -16,7 +16,7 @@ Start with the small quantity bug, then investigate the supplied multi-module im
 
 ## Prerequisites
 
-[Connect a usable interface to an API](../03-frontend/README.md)
+[Frontend state and API integration](../03-frontend/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -33,7 +33,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Build HTTP APIs and reliable background work](../01-backend/README.md) · [Model data and enforce transactional rules](../02-databases/README.md).
+Related prerequisites for deeper follow-ups: [APIs and background work](../01-backend/README.md) · [Data models and transactions](../02-databases/README.md).
 
 ## Build a project
 
@@ -51,4 +51,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Enforce identity, ownership and tenant boundaries](../05-security/README.md).
+Next chapter: [Identity and authorization](../05-security/README.md).

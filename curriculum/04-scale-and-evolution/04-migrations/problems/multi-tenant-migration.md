@@ -167,7 +167,7 @@ The target accepts data the old schema cannot represent. Mark that first write a
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [Migrate live systems and verify recovery](../README.md)
+[Curriculum](../../../README.md) · [Live migrations](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

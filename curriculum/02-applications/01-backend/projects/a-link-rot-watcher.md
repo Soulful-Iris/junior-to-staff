@@ -1,6 +1,6 @@
 # Build a link monitor with durable history and change alerts
 
-[Curriculum](../../../README.md) · [Build HTTP APIs and reliable background work](../README.md) · [Project index](../../../../indexes/projects.md)
+[Curriculum](../../../README.md) · [APIs and background work](../README.md) · [Project index](../../../../indexes/projects.md)
 
 ## Application background
 

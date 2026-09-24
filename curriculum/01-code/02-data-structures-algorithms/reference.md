@@ -1,6 +1,6 @@
 # Compare coding contracts, return values and complexity
 
-[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
 
 ## Which implementation are you looking at?
 

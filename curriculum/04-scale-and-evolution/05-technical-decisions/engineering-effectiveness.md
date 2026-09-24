@@ -4,7 +4,7 @@ Every routine deployment waits for Maya because she knows which commands are saf
 
 You will identify why work waits, choose a limited intervention and see whether another engineer can complete the task without private help. Faster output is useful only if the failure and support burden have not simply moved elsewhere.
 
-[Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
+[Curriculum](../../README.md) · [Technical decisions and engineering effectiveness](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 

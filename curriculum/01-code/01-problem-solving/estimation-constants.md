@@ -1,6 +1,6 @@
 # Estimate request rates, storage, latency and availability
 
-[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+[Curriculum](../../README.md) · [AI-assisted code changes](README.md)
 
 > Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 
@@ -118,14 +118,14 @@ two minutes, out loud, in front of someone.
 Any time a problem hands you a population and asks for a structure. In this
 curriculum that means:
 
-- [Design services from requirements to failure behavior](../../03-production/01-system-design/README.md) — use
+- [System design under constraints](../../03-production/01-system-design/README.md) — use
   the workload where it changes the design, after understanding the user
   action and required behavior.
-- [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)
+- [Reliability and incident recovery](../../03-production/05-reliability/README.md)
   — the nines table is what turns an availability target into an error budget.
-- [Measure capacity and control performance costs](../../04-scale-and-evolution/02-performance-cost/README.md)
+- [Capacity, performance and cost](../../04-scale-and-evolution/02-performance-cost/README.md)
   — the latency ladder tells you which layer is worth measuring first.
-- [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) —
+- [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) —
   caching, replication and partitioning are all answers to "this does not fit or
   does not keep up", which is an arithmetic finding.
 

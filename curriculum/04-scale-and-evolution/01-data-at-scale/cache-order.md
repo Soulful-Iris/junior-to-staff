@@ -1,6 +1,6 @@
 # Trace LRU eviction before implementing its linked order
 
-[Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
+[Curriculum](../../README.md) · [Data systems at scale](README.md)
 
 ## What the cache remembers
 

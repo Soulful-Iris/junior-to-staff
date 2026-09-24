@@ -1,6 +1,6 @@
 # Bound cache misses across instances and preserve fresh reads
 
-[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md)
+[Curriculum](../../../../README.md) · [Data systems at scale](../../README.md)
 
 ## Application and assignment
 

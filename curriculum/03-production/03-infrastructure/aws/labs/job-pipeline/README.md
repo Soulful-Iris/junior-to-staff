@@ -1,6 +1,6 @@
 # Process duplicate SQS jobs with one conditional DynamoDB result
 
-[Curriculum](../../../../../README.md) · [Provision and operate application infrastructure on AWS](../../../README.md)
+[Curriculum](../../../../../README.md) · [AWS infrastructure](../../../README.md)
 
 ## Application and assignment
 

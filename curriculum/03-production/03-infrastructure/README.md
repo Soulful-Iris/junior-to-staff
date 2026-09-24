@@ -1,4 +1,4 @@
-# Provision and operate application infrastructure on AWS
+# AWS infrastructure
 
 Map a mechanism to explicit infrastructure, permissions, and operational limits.
 
@@ -16,7 +16,7 @@ Begin with reproducible local execution and the service mapping. The conditional
 
 ## Prerequisites
 
-[Deploy changes and control feature exposure](../02-delivery/README.md)
+[Delivery and controlled rollouts](../02-delivery/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -34,8 +34,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Set reliability objectives and recover from failures](../05-reliability/README.md) · [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
+Related prerequisites for deeper follow-ups: [Reliability and incident recovery](../05-reliability/README.md) · [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Trace requests and diagnose production symptoms](../04-observability/README.md).
+Next chapter: [Delivery and controlled rollouts](../02-delivery/README.md).

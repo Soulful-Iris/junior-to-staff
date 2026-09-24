@@ -1,6 +1,6 @@
 # Use logs, metrics and traces to explain one slow request
 
-[Curriculum](../../README.md) · [Trace requests and diagnose production symptoms](README.md)
+[Curriculum](../../README.md) · [Production observability](README.md)
 
 > Project connection · feeds [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 

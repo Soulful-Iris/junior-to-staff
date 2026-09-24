@@ -165,7 +165,7 @@ Allow a workflow containing several approved steps. Define which steps share one
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [Build AI features with evidence and controlled actions](../README.md)
+[Curriculum](../../../README.md) · [AI evaluation and guardrails](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

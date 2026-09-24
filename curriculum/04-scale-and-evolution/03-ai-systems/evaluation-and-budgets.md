@@ -1,6 +1,6 @@
 # Evaluate an AI feature and enforce task-level limits
 
-[Curriculum](../../README.md) · [Build AI features with evidence and controlled actions](README.md)
+[Curriculum](../../README.md) · [AI evaluation and guardrails](README.md)
 
 > Project connection · feeds [Reading-list stage 4: add an evaluated AI feature](../../../projects/reading-list/stages/04-it-reasons/README.md)
 

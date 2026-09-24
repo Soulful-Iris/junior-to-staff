@@ -1,6 +1,6 @@
 # The Engineering Guide
 
-The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains four core parts, 18 chapters, their ordered lessons, and an elective company interview studio at the end. The current lesson's subsections appear in the same panel. Every guided page has Previous/Next navigation.
+The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains five core parts, 18 chapters, an optional AI systems specialization, and an elective company interview studio. The current lesson's subsections appear in the same panel. Every guided page has Previous/Next navigation.
 
 ## Build and check
 
@@ -32,13 +32,13 @@ The browser script starts and stops its own local server. `SITE_SCREENSHOTS` sel
 
 ## Reading sequence and content
 
-- `course.py` defines the teaching order over existing source documents. The 23 foundations lessons precede a separate coding-practice chapter. Problem pages keep shared-tool explanations in optional refreshers. The five reading-list stages appear in their relevant chapters. Candidate exercises follow the relevant material; assessor keys stay outside the automatic sequence.
+- `build.py` maps stable source URLs into five core parts and an optional specialization. `course.py` orders lessons inside that map. The 23 foundations lessons precede coding practice, followed by AI-assisted change work. Scale and capacity sit beside system design; infrastructure, delivery, observability, and reliability form the production sequence. The five reading-list stages appear in their relevant chapters. Candidate exercises follow the relevant material; assessor keys stay outside the automatic sequence.
 - `companies/` is a six-page senior interview studio after the core sequence: a qualitative room guide plus five company rehearsals, each with eight original coding drills, five design prompts, a worked mock, source/uncertainty labels, a distinct motion study, and before/after box diagrams. Drill summaries are prompts, not additions to the 42 fully worked and tested coding bundles.
 - `reader.py` composes the content and interface. Code and test files are displayed beside their references. References outside a protected answer are placed in an inline disclosure; existing answer disclosures stay closed until the learner opens them. Ordinary cross-links become contextual text, while their full documents remain in the sequence or reference shelf. External citations appear under Sources at the end of the lesson.
 - `build.py` retains Markdown parsing, heading generation and cached Mermaid rendering. Original Markdown, code and visual assets remain untouched.
 - `style.css` and `app.js` provide the reading layout, nested contents, mobile drawer, subsection navigation, search, local progress, copy-code controls and diagram sizing/motion controls.
 
-The build publishes **289 content pages**, **218 guided steps** plus the homepage, and a separate visual reference. All **42 fully worked coding problems**, **45 project briefs**, **180 source SVGs** and **398 Mermaid diagrams** remain available. **123 referenced code/fixture files** are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
+The current build publishes **333 pages**, **250 guided steps** and **311 Mermaid diagrams**, plus a separate visual reference. All **42 fully worked coding problems** and existing project/design briefs remain available at their stable URLs. Referenced code and fixture files are embedded at their point of use. Indexes and repository notes remain available under the reference shelf; they are not extra reading choices between lessons.
 
 Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
 

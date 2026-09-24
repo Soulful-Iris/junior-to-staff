@@ -171,7 +171,7 @@ Add revocable sharing only after private reads work. State the authorization dec
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [Design services from requirements to failure behavior](../README.md)
+[Curriculum](../../../README.md) · [System design under constraints](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

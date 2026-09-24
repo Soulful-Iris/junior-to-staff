@@ -1,6 +1,6 @@
 # Count event-time windows with late arrivals
 
-[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data systems at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “Our event counter receives records out of order. Count events in fixed time
 > windows according to when they occurred, not when they arrived. A separate source

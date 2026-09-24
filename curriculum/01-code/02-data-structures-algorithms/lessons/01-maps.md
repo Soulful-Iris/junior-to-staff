@@ -1,6 +1,6 @@
 # Maps: remember earlier work
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 > “Given prices [2,7,11,15] and a budget of 9, return two different positions that exactly spend it. Can the same position count twice?”
 

@@ -238,6 +238,10 @@ def compose(b, page, have, by_dest):
 def href(base, page): return base.rstrip('/') + page['url']
 
 
+def part_label(page):
+    return page.get('part_label') or f'PART {chr(64 + page["gnum"])}'
+
+
 def toc(pages, sequence, current, base):
     def link(p, label=None, css='', lesson=False):
         on = p['src'] == current['src']
@@ -251,7 +255,7 @@ def toc(pages, sequence, current, base):
               '<div class="search-box"><span aria-hidden="true">⌕</span><label class="sr-only" for="contents-search">Search the curriculum</label><input id="contents-search" type="search" placeholder="Find a concept…" autocomplete="off"><kbd>/</kbd></div><div id="search-results" hidden aria-live="polite"></div>',
               '<div class="contents-label">TABLE OF CONTENTS <button id="collapse-contents" aria-label="Collapse all chapters">−</button></div><div id="contents-tree">', link(pages[0], 'Overview', 'overview')]
     for group in [p for p in sequence if p['kind']=='group']:
-        result.append(f'<section class="toc-area part-{group["gnum"]}"><h2><span class="part-label">PART {chr(64+group["gnum"])}</span><span class="part-title">{E(group["title"])}</span></h2>')
+        result.append(f'<section class="toc-area part-{group["gnum"]}"><h2><span class="part-label">{E(part_label(group))}</span><span class="part-title">{E(group["title"])}</span></h2>')
         result.append(link(group, 'Part introduction', 'part-intro'))
         for chapter in [p for p in sequence if p['kind']=='subject' and p['group']==group['group']]:
             active = current.get('chapter') == chapter['chapter']
@@ -307,11 +311,12 @@ def overview(b, sequence, base):
 <div class="hero-actions"><a class="primary-button" data-start href="{href(base,sequence[1])}">Start learning <span aria-hidden="true">↗</span></a><span>One sequence. Deeper questions at every step.</span></div>
 <div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>90</strong><span>build &amp; design briefs</span></div></div></header>
 <section class="home-mechanism"><div class="section-label">THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
-<section class="journey-section"><div class="section-label">PARTS A–D / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">{chr(64+i)}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for i,(name,desc,detail) in enumerate([
-('Write correct code','Clarify a problem. Work with AI deliberately. Choose a data structure and defend its invariant.','Problem solving · Algorithms'),
-('Build a complete application','Follow state from a browser to an API and database. Test behavior and enforce ownership.','Backend · Data · Frontend · Testing · Security'),
-('Design, ship, and operate','Design under constraints. Release safely, observe the system, and recover when it fails.','System design · CI/CD · AWS · Reliability'),
-('Scale and evolve','Handle more load, evaluate AI, migrate live systems, and make decisions across teams.','Scale · Performance · AI systems · Technical decisions')],1))}</div></section>
+<section class="journey-section"><div class="section-label">PARTS A–E / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">{label}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for label,name,desc,detail in [
+('A','Coding and problem solving','Choose the state, solve the problem, then use AI without losing independent judgment.','Algorithms · Coding · Review'),
+('B','Production applications','Connect browser, API, database, tests, and access boundaries.','Backend · Data · Frontend · Security'),
+('C','System design and scale','Design from requirements, then reason about data scale, capacity, performance, and cost.','Architecture · Scale · Cost'),
+('D','Production operations','Provision, deploy, observe, and recover a running application.','AWS · Delivery · Observability · Reliability'),
+('E','System evolution and leadership','Migrate live systems and make decisions other teams can execute.','Migrations · Technical leadership')])}</div><div class="specialization-note"><strong>Optional specialization · AI systems</strong><span>Evaluate model behavior, budgets, permissions, and controlled actions after the core journey.</span></div></section>
 <section class="learning-contract"><div class="section-label">EVERY LESSON HAS A JOB</div><h2>Start with a problem.<br>Leave with a reason.</h2><ol><li><span>01</span><div><h3>Understand the situation</h3><p>A concrete brief, examples, expected behavior, and the boundary of the problem.</p></div></li><li><span>02</span><div><h3>Trace it. Build it. Check it.</h3><p>Visual explanations, a baseline, implementation details, and observable outcomes in the same reading flow.</p></div></li><li><span>03</span><div><h3>Change the requirement</h3><p>Follow-ups deepen the same problem into senior and staff-level reasoning.</p></div></li></ol><p class="quiet-note">Use Next to follow the sequence. The contents on the left are always available when you want to revisit a concept. Reference answers remain closed until you choose to inspect them.</p></section>'''
 
 
@@ -345,8 +350,8 @@ def shell(b, page, body, pages, sequence, base):
     prev=sequence[position-1] if position is not None and position>0 else None
     nxt=sequence[position+1] if position is not None and position+1<len(sequence) else None
     is_home=page['kind']=='home'
-    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'PART {chr(64+page["gnum"])} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
-    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else f'PART {chr(64+page["gnum"])}' if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
+    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'{part_label(page)} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
+    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else part_label(page) if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
     nav=''
     if position is not None:
         previous=(f'<a class="previous-step" href="{href(base,prev)}"><span>← PREVIOUS</span><strong>{E(prev["title"])}</strong></a>' if prev else '<span></span>')
@@ -378,7 +383,6 @@ def shell(b, page, body, pages, sequence, base):
 def build(b):
     base=os.environ.get('SITE_BASE','/')
     if not base.startswith('/') or not base.endswith('/'): raise ValueError('SITE_BASE must be an absolute path ending in /')
-    b.CHAPTER_BLURBS.update(b.chapter_blurbs())
     pages=b.collect()
     source_refs = content_checks.source_references(b.ROOT, pages); sequence=course.organize(pages)
     blocks=b.mermaid_blocks(pages); have=b.render_mermaid(blocks)

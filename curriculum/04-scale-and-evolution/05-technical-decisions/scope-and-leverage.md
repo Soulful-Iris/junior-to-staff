@@ -4,7 +4,7 @@ Three teams consume order events from the same producer. One expects an amount i
 
 You will compare the local repair with the broader intervention, including migration and support work. “Scope” means the boundary of the problem you take responsibility for. A larger boundary is useful only when its benefit justifies its cost.
 
-[Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
+[Curriculum](../../README.md) · [Technical decisions and engineering effectiveness](README.md)
 
 > Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 

@@ -1,6 +1,6 @@
 # Coding foundations · complete practice problems
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 These are constructed practice questions, with no company attribution. Read the
 candidate brief and contract before opening each page's solution disclosure.

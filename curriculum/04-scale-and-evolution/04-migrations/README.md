@@ -1,4 +1,4 @@
-# Migrate live systems and verify recovery
+# Live migrations
 
 Move live data and clients through compatibility, reconciliation, rollback, and retirement.
 
@@ -16,7 +16,7 @@ Follow the migration method, then drive the local recovery schedules. Name the w
 
 ## Prerequisites
 
-[Build AI features with evidence and controlled actions](../03-ai-systems/README.md)
+[AI evaluation and guardrails](../03-ai-systems/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -36,7 +36,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Model data and enforce transactional rules](../../02-applications/02-databases/README.md) · [Process, search and store data at scale](../01-data-at-scale/README.md) · [Deploy changes and control feature exposure](../../03-production/02-delivery/README.md).
+Related prerequisites for deeper follow-ups: [Data models and transactions](../../02-applications/02-databases/README.md) · [Data systems at scale](../01-data-at-scale/README.md) · [Delivery and controlled rollouts](../../03-production/02-delivery/README.md).
 
 ## Build a project
 
@@ -46,4 +46,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Make technical decisions and improve team workflows](../05-technical-decisions/README.md).
+Next chapter: [Technical decisions and engineering effectiveness](../05-technical-decisions/README.md).

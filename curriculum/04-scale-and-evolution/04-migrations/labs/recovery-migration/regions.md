@@ -1,6 +1,6 @@
 # Move write authority between shards and account for regional data loss
 
-[Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
+[Curriculum](../../../../README.md) · [Live migrations](../../README.md)
 
 ## Application and assignment
 

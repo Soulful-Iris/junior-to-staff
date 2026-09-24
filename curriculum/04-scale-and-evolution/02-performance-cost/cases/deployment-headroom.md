@@ -1,6 +1,6 @@
 # Reserve capacity for rollout, zone loss and backlog recovery
 
-[Curriculum](../../../README.md) · [Measure capacity and control performance costs](../README.md)
+[Curriculum](../../../README.md) · [Capacity, performance and cost](../README.md)
 
 ## Application and assignment
 

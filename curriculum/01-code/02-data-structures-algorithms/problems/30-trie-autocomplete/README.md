@@ -1,6 +1,6 @@
 # Prefix autocomplete
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “An editor suggests dictionary words after a user types a prefix. Repeatedly
 > scanning the whole dictionary wastes work. Build a reusable index that returns

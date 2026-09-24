@@ -1,6 +1,6 @@
 # Explain algorithm invariants and the changes that invalidate them
 
-[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
 
 ## Compare the state, not just the code
 

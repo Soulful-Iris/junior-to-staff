@@ -1,6 +1,6 @@
 # Reject stale workers and recover uncertain external effects
 
-[Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
+[Curriculum](../../../../README.md) · [Live migrations](../../README.md)
 
 ## Application and assignment
 

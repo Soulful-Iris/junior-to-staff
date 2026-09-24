@@ -1,6 +1,6 @@
 # Graphs: visit once, then track prerequisites
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 > “A deployment must fetch before parsing and parse before saving. Return a legal order, or explain why a newly added dependency makes one impossible.”
 

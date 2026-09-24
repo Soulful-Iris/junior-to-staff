@@ -1,4 +1,4 @@
-# Model data and enforce transactional rules
+# Data models and transactions
 
 Model authoritative data, explain a query plan, and protect concurrent writes.
 
@@ -16,7 +16,7 @@ Model identity and access patterns first. Then inspect query plans and drive con
 
 ## Prerequisites
 
-[Build HTTP APIs and reliable background work](../01-backend/README.md)
+[APIs and background work](../01-backend/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -32,7 +32,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Migrate live systems and verify recovery](../../04-scale-and-evolution/04-migrations/README.md).
+Related prerequisites for deeper follow-ups: [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Live migrations](../../04-scale-and-evolution/04-migrations/README.md).
 
 ## Build a project
 
@@ -42,4 +42,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Connect a usable interface to an API](../03-frontend/README.md).
+Next chapter: [Frontend state and API integration](../03-frontend/README.md).

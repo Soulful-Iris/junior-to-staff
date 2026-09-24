@@ -1,6 +1,6 @@
 # Full stack · one user action across every boundary
 
-[Curriculum](../../README.md) · [Connect a usable interface to an API](README.md)
+[Curriculum](../../README.md) · [Frontend state and API integration](README.md)
 
 A bookmark title travels through three places: the text field where Alice edits it, the API that accepts the save, and the database that stores the confirmed version. While the save is travelling, Alice can type more. This lesson connects those three places so a delayed response does not erase her newer text.
 

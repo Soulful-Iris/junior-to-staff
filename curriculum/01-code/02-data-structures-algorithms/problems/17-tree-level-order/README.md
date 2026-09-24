@@ -1,6 +1,6 @@
 # Tree level order: keep the next frontier separate
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [node identity](../14-reverse-linked-list/README.md); this page introduces binary trees and traversal depth.
 

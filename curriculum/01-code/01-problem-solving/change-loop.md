@@ -4,7 +4,7 @@ A shop stores prices in cents. A developer needs to fix a discount so an item pr
 
 You will separate a coherent behavior change from unrelated work, write the reason beside the patch, and distinguish reverting source code from recovering data or external effects.
 
-[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+[Curriculum](../../README.md) · [AI-assisted code changes](README.md)
 
 > Project connection · feeds [Reading-list stage 1: build the reading-list application](../../../projects/reading-list/stages/01-it-works/README.md)
 

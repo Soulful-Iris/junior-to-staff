@@ -1,4 +1,4 @@
-# Design services from requirements to failure behavior
+# System design under constraints
 
 Turn requirements and workload estimates into an explainable architecture.
 
@@ -18,7 +18,7 @@ Use the design method and mechanism reference first. Each brief supplies a scena
 
 ## Prerequisites
 
-[Enforce identity, ownership and tenant boundaries](../../02-applications/05-security/README.md)
+[Identity and authorization](../../02-applications/05-security/README.md)
 
 Start each project with its application background and assignment. Run its local example, then use the workload to size the implementation: [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md) is the per-second, latency and availability arithmetic these designs assume.
 
@@ -58,8 +58,8 @@ Work through each project from the application background to the local demonstra
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Set reliability objectives and recover from failures](../05-reliability/README.md) · [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Measure capacity and control performance costs](../../04-scale-and-evolution/02-performance-cost/README.md).
+Related prerequisites for deeper follow-ups: [Reliability and incident recovery](../05-reliability/README.md) · [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) · [Capacity, performance and cost](../../04-scale-and-evolution/02-performance-cost/README.md).
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Deploy changes and control feature exposure](../02-delivery/README.md).
+Next chapter: [Data systems at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).

@@ -1,6 +1,6 @@
 # Upload private object bytes directly and finalize application metadata
 
-[Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
+[Curriculum](../../../README.md) · [AWS infrastructure](../README.md)
 
 ## Application and assignment
 

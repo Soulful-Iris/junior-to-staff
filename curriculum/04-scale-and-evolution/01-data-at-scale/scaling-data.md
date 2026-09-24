@@ -1,6 +1,6 @@
 # Protect shared storage with bounded cache loads and consistent reads
 
-[Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
+[Curriculum](../../README.md) · [Data systems at scale](README.md)
 
 > Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 

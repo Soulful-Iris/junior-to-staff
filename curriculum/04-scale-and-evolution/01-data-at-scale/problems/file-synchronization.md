@@ -166,7 +166,7 @@ Add cross-folder moves with different permissions. Define the atomic metadata bo
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
+[Curriculum](../../../README.md) · [Data systems at scale](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

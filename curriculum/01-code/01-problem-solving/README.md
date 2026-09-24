@@ -1,4 +1,4 @@
-# Specify, implement and review changes with AI
+# AI-assisted code changes
 
 Clarify a requirement, make a bounded change, and verify the result.
 
@@ -33,7 +33,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Find defects and evaluate engineering evidence](../../02-applications/04-testing/README.md).
+Related prerequisites for deeper follow-ups: [Testing and debugging](../../02-applications/04-testing/README.md).
 
 ## Build a project
 
@@ -57,4 +57,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Choose data structures and reason about algorithms](../02-data-structures-algorithms/README.md).
+Next chapter: [APIs and background work](../../02-applications/01-backend/README.md).

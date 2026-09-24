@@ -1,6 +1,6 @@
 # Search: choose, recurse, undo
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 > “Find AB on a row [A,B]. Can ABA use the same A again? How would you store many dictionary words that share a prefix?”
 

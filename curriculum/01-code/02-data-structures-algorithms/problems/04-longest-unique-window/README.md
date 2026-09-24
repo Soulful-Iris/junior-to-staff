@@ -1,6 +1,6 @@
 # Longest unique window: move the boundary forward
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [maps](../01-two-sum/README.md) and [window basics](../../lessons/02-windows.md).
 

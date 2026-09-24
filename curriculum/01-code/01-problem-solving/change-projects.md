@@ -1,6 +1,6 @@
 # Practice reviewable changes and integration decisions
 
-[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+[Curriculum](../../README.md) · [AI-assisted code changes](README.md)
 
 Read [the section](change-loop.md) first. Work in this order; each project isolates one skill. Each link opens one complete build brief with a concrete contract, a baseline, two changed requirements, and the original staged AI prompts.
 

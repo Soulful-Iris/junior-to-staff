@@ -1,6 +1,6 @@
 # Choose a backend project: tracing, deadlines, fetching, contracts or jobs
 
-[Curriculum](../../README.md) · [Build HTTP APIs and reliable background work](README.md)
+[Curriculum](../../README.md) · [APIs and background work](README.md)
 
 Read [the section](request-lifecycle.md) first. Work in this order; each project isolates one skill. Each link opens one complete build brief with a concrete contract, a baseline, two changed requirements, and the original staged AI prompts.
 

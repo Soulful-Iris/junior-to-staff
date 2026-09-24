@@ -1,6 +1,6 @@
 # Advanced coding progression
 
-[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
+[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
 
 These are constructed practice questions, with candidate briefs before hidden
 worked solutions. Attempt each independently and record your invariant, tests,

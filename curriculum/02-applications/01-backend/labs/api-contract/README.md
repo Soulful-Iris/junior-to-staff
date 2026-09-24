@@ -1,6 +1,6 @@
 # Validate provider responses before returning an API result
 
-[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+[Curriculum](../../../../README.md) · [APIs and background work](../../README.md)
 
 ## Application and assignment
 

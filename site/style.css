@@ -118,6 +118,12 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .toc-area.part-2{--part-ink:#315d48;--part-tint:#e5ede6}
 .toc-area.part-3{--part-ink:#82501f;--part-tint:#f3eadc}
 .toc-area.part-4{--part-ink:#70467a;--part-tint:#efe6f1}
+.toc-area.part-5{--part-ink:#5e537e;--part-tint:#ebe9f2}
+.toc-area.part-6{--part-ink:#68446f;--part-tint:#f0e7f1}
+.specialization-note{display:flex;align-items:flex-start;gap:18px;margin-top:18px;padding:18px 20px;border:1px solid var(--line);border-left:4px solid #735078;border-radius:8px;background:#f4eef5;color:var(--ink)}
+.specialization-note strong{min-width:210px;font:700 13px/1.5 var(--sans);text-transform:uppercase;letter-spacing:.5px;color:#68446f}
+.specialization-note span{font:400 15px/1.55 var(--sans)}
+@media(max-width:760px){.specialization-note{display:block}.specialization-note strong,.specialization-note span{display:block}.specialization-note span{margin-top:8px}}
 .toc-area>h2,.home .toc-area>h2{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin:24px 0 8px;padding:13px 10px;border-left:3px solid var(--part-ink);background:var(--part-tint);font:650 13px/1.45 var(--sans);letter-spacing:0;color:var(--part-ink)}
 .toc-area>h2 .part-label,.home .toc-area>h2 .part-label{font:750 9px/1.5 var(--sans);letter-spacing:1.1px;color:var(--part-ink);min-width:0}
 .toc-area>h2 .part-title,.home .toc-area>h2 .part-title{font:650 13px/1.45 var(--sans);letter-spacing:0;color:var(--ink)}

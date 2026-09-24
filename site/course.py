@@ -25,24 +25,25 @@ CODING_ORDER = [
 ]
 # These existing standalone materials were previously outside the reading flow.
 INSERT = {
-    3: ['practice/coding-mock.md', 'practice/candidate/coding.md'],
+    2: ['practice/coding-mock.md', 'practice/candidate/coding.md'],
     6: ['projects/reading-list/stages/01-it-works/README.md', 'practice/candidate/full-stack.md'],
     7: ['practice/candidate/practical-debug.md'],
     9: ['practice/candidate/design.md'],
-    11: ['practice/candidate/infra.md'],
-    13: ['projects/reading-list/stages/02-it-survives/README.md'],
-    14: ['projects/reading-list/stages/03-under-load/README.md'],
-    16: ['projects/reading-list/stages/04-it-reasons/README.md'],
-    17: ['projects/reading-list/stages/05-it-changes/README.md'],
+    10: ['projects/reading-list/stages/03-under-load/README.md'],
+    12: ['practice/candidate/infra.md'],
+    15: ['projects/reading-list/stages/02-it-survives/README.md'],
+    16: ['projects/reading-list/stages/05-it-changes/README.md'],
+    18: ['projects/reading-list/stages/04-it-reasons/README.md'],
 }
 
 
 def organize(pages):
     by_src = {p['src']: p for p in pages}
     # Preserve published lesson URLs while separating teaching from rehearsal.
+    foundations = by_src['curriculum/01-code/02-data-structures-algorithms/README.md']
     practice = by_src['curriculum/01-code/03-coding-practice/README.md']
     for p in pages:
-        if p.get('chapter') == 2 and p.get('sub') and '/lessons/' not in p['src']:
+        if p.get('chapter') == foundations['chapter'] and p.get('sub') and '/lessons/' not in p['src']:
             p.update(chapter=practice['chapter'], subject=practice['subject'],
                      subject_title=practice['title'])
     sequence = [pages[0]]
@@ -52,7 +53,7 @@ def organize(pages):
             number = chapter['chapter']
             sequence.append(chapter)
             children = [p for p in pages if p.get('chapter') == number and p.get('sub') and Path(p['src']).name not in NAV_NAMES]
-            if number == 2:
+            if number == foundations['chapter']:
                 prefix = str(Path(chapter['src']).parent) + '/lessons/'
                 ordered = []
                 for label, stems in FOUNDATION_ORDER:
@@ -62,7 +63,7 @@ def organize(pages):
                         ordered.append(p)
                 assert {p['src'] for p in children} == {p['src'] for p in ordered}, 'Unsequenced foundations'
                 children = ordered
-            if number == 3:
+            if number == practice['chapter']:
                 prefix = 'curriculum/01-code/02-data-structures-algorithms/'
                 ordered = []
                 for label, keys in CODING_ORDER:
@@ -77,6 +78,7 @@ def organize(pages):
                 p = by_src[source]
                 p.update(group=group['group'], subject=chapter['subject'], chapter=number,
                          gnum=group['gnum'], subject_title=chapter['title'], group_title=group['title'],
+                         part_label=group.get('part_label'),
                          section='Projects and practical assessment', sub=0)
                 children.append(p)
             for n, p in enumerate(children, 1):

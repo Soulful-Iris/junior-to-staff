@@ -1,4 +1,4 @@
-# Process, search and store data at scale
+# Data systems at scale
 
 Reason about caches, replication, partitioning, streams, and coordination scope.
 
@@ -16,7 +16,7 @@ Start with the cache and consistency models, then study projections, partition s
 
 ## Prerequisites
 
-[Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)
+[Reliability and incident recovery](../../03-production/05-reliability/README.md)
 
 Caching, replication and partitioning are answers to "this does not fit or does not keep up", which is an arithmetic finding first: see [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md).
 
@@ -49,7 +49,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Build HTTP APIs and reliable background work](../../02-applications/01-backend/README.md) · [Model data and enforce transactional rules](../../02-applications/02-databases/README.md) · [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md) · [Migrate live systems and verify recovery](../04-migrations/README.md).
+Related prerequisites for deeper follow-ups: [APIs and background work](../../02-applications/01-backend/README.md) · [Data models and transactions](../../02-applications/02-databases/README.md) · [Reliability and incident recovery](../../03-production/05-reliability/README.md) · [Live migrations](../04-migrations/README.md).
 
 ## Build a project
 
@@ -59,4 +59,4 @@ Each project explains its application, names the deliverable, links the supplied
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Measure capacity and control performance costs](../02-performance-cost/README.md).
+Next chapter: [Capacity, performance and cost](../02-performance-cost/README.md).

@@ -1,6 +1,6 @@
 # Search race · the latest user intent wins
 
-[Curriculum](../../../../README.md) · [Connect a usable interface to an API](../../README.md)
+[Curriculum](../../../../README.md) · [Frontend state and API integration](../../README.md)
 
 The search box shows bookmarks returned by an API. Alice types `cat`, then changes it to `car` before the first request finishes. The server may complete those requests in either order. The screen should keep answering the current query, `car`.
 

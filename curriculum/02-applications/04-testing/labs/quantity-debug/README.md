@@ -1,6 +1,6 @@
 # Preserve zero when applying a quantity update
 
-[Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
+[Curriculum](../../../../README.md) · [Testing and debugging](../../README.md)
 
 ## Application and assignment
 

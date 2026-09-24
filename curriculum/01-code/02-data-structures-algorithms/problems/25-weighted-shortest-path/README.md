@@ -1,6 +1,6 @@
 # Cheapest route with nonnegative costs
 
-[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A delivery planner knows directed road costs. The route with the fewest roads
 > can be expensive, so return minimum total cost and the route itself. All supplied

@@ -1,6 +1,6 @@
 # Choose an evidence exercise: defects, contracts, load or user journeys
 
-[Curriculum](../../README.md) · [Find defects and evaluate engineering evidence](README.md)
+[Curriculum](../../README.md) · [Testing and debugging](README.md)
 
 Read [the section](testing-strategy.md) first. Work in this order; each project isolates one skill. Each link opens one complete build brief with a concrete contract, a baseline, two changed requirements, and the original staged AI prompts.
 

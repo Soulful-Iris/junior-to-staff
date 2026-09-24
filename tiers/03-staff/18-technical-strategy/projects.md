@@ -434,7 +434,7 @@ have.
 The first idea is the section's sharpest test: **if nothing and nobody objects,
 it is advisory — and advisory strategy is a description of what people already
 felt like doing.** This is not cynicism. It is the same standard applied to
-strategy that [Find defects and evaluate engineering evidence](../../../curriculum/02-applications/04-testing/README.md) applies to tests: a
+strategy that [Testing and debugging](../../../curriculum/02-applications/04-testing/README.md) applies to tests: a
 check that cannot fail is not a check.
 
 Second, the diagnostic value is in *which* thing objected, and the three

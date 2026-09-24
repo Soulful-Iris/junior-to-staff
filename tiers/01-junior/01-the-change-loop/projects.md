@@ -494,7 +494,7 @@ private free for twelve months, checked 2026-09-22); everything else in
 The queue gets metrics — depth, time-in-queue, ejection rate — a queue nobody
 watches is a delay nobody can explain. Flakiness is now existential:
 one flaky test ejects innocent PRs and stalls every merge behind them; the
-quarantine rule from [Find defects and evaluate engineering evidence](../../../curriculum/02-applications/04-testing/README.md) stops being optional.
+quarantine rule from [Testing and debugging](../../../curriculum/02-applications/04-testing/README.md) stops being optional.
 
 **The learning**
 

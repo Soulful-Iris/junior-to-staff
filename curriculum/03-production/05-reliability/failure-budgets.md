@@ -1,6 +1,6 @@
 # Set an error budget and bound retries during overload
 
-[Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
+[Curriculum](../../README.md) · [Reliability and incident recovery](README.md)
 
 > Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 
