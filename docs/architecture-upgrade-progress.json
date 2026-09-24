@@ -106,5 +106,47 @@
     "starter": "examples/architecture-starts/webhook_delivery.py",
     "diagram": "assets/architecture-guides/webhook-delivery.svg",
     "batch": "collaboration-notifications"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/food-delivery-marketplace.md",
+    "starter": "examples/architecture-starts/food_delivery_marketplace.py",
+    "diagram": "assets/architecture-guides/food-delivery-marketplace.svg",
+    "batch": "marketplace-feed-news"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/social-feed.md",
+    "starter": "examples/architecture-starts/social_feed.py",
+    "diagram": "assets/architecture-guides/social-feed.svg",
+    "batch": "marketplace-feed-news"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/news-aggregator.md",
+    "starter": "examples/architecture-starts/news_aggregator.py",
+    "diagram": "assets/architecture-guides/news-aggregator.svg",
+    "batch": "marketplace-feed-news"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/video-processing.md",
+    "starter": "examples/architecture-starts/video_processing.py",
+    "diagram": "assets/architecture-guides/video-processing.svg",
+    "batch": "media-execution-gateway"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/video-streaming-platform.md",
+    "starter": "examples/architecture-starts/video_streaming_platform.py",
+    "diagram": "assets/architecture-guides/video-streaming-platform.svg",
+    "batch": "media-execution-gateway"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/online-judge.md",
+    "starter": "examples/architecture-starts/online_judge.py",
+    "diagram": "assets/architecture-guides/online-judge.svg",
+    "batch": "media-execution-gateway"
+  },
+  {
+    "path": "curriculum/03-production/01-system-design/problems/api-gateway-platform.md",
+    "starter": "examples/architecture-starts/api_gateway_platform.py",
+    "diagram": "assets/architecture-guides/api-gateway-platform.svg",
+    "batch": "media-execution-gateway"
   }
 ]

@@ -1,6 +1,85 @@
 # API gateway: route safely across many teams
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build the shared API entry layer for 150 internal services. Teams need consistent authentication, coarse admission limits and routing, while each service still owns resource authorization. A malformed route configuration must not take every service offline.
+
+**Working contract:** The gateway verifies identity and routes using a versioned configuration snapshot. Backends authorize requested objects. The gateway adds at most 15 ms p99 overhead under the stated load and propagates a request deadline and trace context.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 25,000 requests/s across 150 services | Mean per service is about 167/s, but hot routes must be sized separately. |
+| 15 ms p99 added overhead | Measure gateway time independently of backend latency and client network time. |
+| Configuration rollout to 100 instances assumption | Track applied version and rejection reason; a successful upload is not proof every instance activated it. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/api_gateway_platform.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/api_gateway_platform.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| route_config | version,route,upstream,timeout,auth_policy | Validated immutable snapshot with rollback pointer. |
+| request_context | subject,claims,deadline,trace_id | Trusted metadata passed through a protected backend boundary. |
+| config_status | instance_id,applied_version,error | Evidence of rollout convergence and failed adoption. |
+
+## AWS implementation
+
+![API gateway: route safely across many teams: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-gateway-platform.svg)
+
+This is a custom proxy platform behind an ALB. Managed API Gateway is an alternative when its routing, authentication and quota features fit; its control plane and deployment model are different from an AppConfig-driven proxy.
+
+## Build it in this order
+
+### 1. Implement one protected route
+
+Validate issuer, audience, signature and token expiry. Strip untrusted identity headers before adding trusted context. Protect the gateway-to-backend network/authentication boundary so a caller cannot bypass the gateway and forge context.
+
+### 2. Bound each request
+
+Propagate an absolute remaining deadline and use bounded connections, body sizes and queueing. Do not retry non-idempotent backend operations merely because the gateway timed out. Measure authentication, routing and upstream waiting separately.
+
+### 3. Ship configuration as an atomic snapshot
+
+Validate routes, auth rules and timeout bounds before activation. A custom proxy can consume AppConfig; AppConfig does not automatically reprogram API Gateway. Instances retain the last valid snapshot on parse failure and report the exact applied version.
+
+### 4. Roll out by limited traffic scope
+
+Start with a subset of instances or routes, compare errors/latency, and restore the prior snapshot on an observed regression. Keep configuration change ownership and emergency access explicit without moving object authorization into a universal gateway rule.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Gateway fleet | At least two AZs, bounded connection pools and graceful draining; size from measured per-task capacity. |
+| Configuration consumer | Poll/cache versioned snapshots with validation and a last-known-good fallback; expose applied version. |
+| Authentication | Pin trusted issuers/audiences, handle key rotation and define behavior when key refresh fails. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Invalid configuration leaves version 1 active; valid version 3 activates atomically. |
+| Forge a subject header | The gateway discards it and the backend receives only verified context. |
+| Slow one upstream | Its bounded pool saturates without exhausting unrelated service routes. |
+
+## The next design decision
+
+Offer team-managed routing. Define ownership namespaces, validation and blast-radius limits so a team can change its service without editing a global configuration file that can disable unrelated routes.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Build a shared gateway for dozens of product teams. It validates identity, routes API versions, enforces quotas, and protects downstream services. One team deploys a bad route rule.”
 
@@ -58,3 +137,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists an API gateway platform prompt at MongoDB. It does not publish when that report occurred. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/api-gateway-design/cmi7ehcp402t108adh7as55gb).
+
+</details>

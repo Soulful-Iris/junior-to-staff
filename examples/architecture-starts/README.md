@@ -24,3 +24,10 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [Collaborative editor: two people edit the same sentence](../../curriculum/03-production/01-system-design/problems/collaborative-editor.md) | [collaborative_editor.py](collaborative_editor.py) |
 | [Notification platform](../../curriculum/03-production/01-system-design/problems/notification-platform.md) | [notification_platform.py](notification_platform.py) |
 | [Webhook delivery: a timeout is not a rejection](../../curriculum/03-production/01-system-design/problems/webhook-delivery.md) | [webhook_delivery.py](webhook_delivery.py) |
+| [Food delivery: quote the right nearby options](../../curriculum/03-production/01-system-design/problems/food-delivery-marketplace.md) | [food_delivery_marketplace.py](food_delivery_marketplace.py) |
+| [Social feed: a popular author changes the shape](../../curriculum/03-production/01-system-design/problems/social-feed.md) | [social_feed.py](social_feed.py) |
+| [News aggregator: freshness without a write storm](../../curriculum/03-production/01-system-design/problems/news-aggregator.md) | [news_aggregator.py](news_aggregator.py) |
+| [Video processing: accept once, publish when ready](../../curriculum/03-production/01-system-design/problems/video-processing.md) | [video_processing.py](video_processing.py) |
+| [Video streaming: keep playback smooth at the edge](../../curriculum/03-production/01-system-design/problems/video-streaming-platform.md) | [video_streaming_platform.py](video_streaming_platform.py) |
+| [Online judge: untrusted code gets a small box](../../curriculum/03-production/01-system-design/problems/online-judge.md) | [online_judge.py](online_judge.py) |
+| [API gateway: route safely across many teams](../../curriculum/03-production/01-system-design/problems/api-gateway-platform.md) | [api_gateway_platform.py](api_gateway_platform.py) |

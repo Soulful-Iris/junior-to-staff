@@ -1,6 +1,85 @@
 # Video processing: accept once, publish when ready
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build upload-to-playback processing for a training company. An instructor uploads a video, processing creates several renditions, and one rendition fails. Students must never receive a manifest that points at unfinished or missing output.
+
+**Working contract:** Create an upload session, accept a completed source object, and expose processing status. Publish a versioned playback manifest only after every required rendition is verified. Reprocessing creates a new generation without overwriting the currently published one.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 50,000 uploads/day | About 0.58 uploads/s average; the stated 300 concurrent processing jobs is a separate peak. |
+| 99% of files below 2 GB ready within ten minutes | Measure from completed upload to published manifest; separate upload time and processing queue time. |
+| Three renditions/source assumption | Track 150,000 rendition outcomes/day, plus retries and reprocessing generations. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/video_processing.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/video_processing.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| uploads | upload_id,owner,source_key,checksum | Authorized source object and completion evidence. |
+| processing_jobs | video_id,generation,required_outputs,state | Current ownership and expected rendition set. |
+| manifests | video_id,generation,object_keys | Atomic pointer to verified complete output. |
+
+## AWS implementation
+
+![Video processing: accept once, publish when ready: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-processing.svg)
+
+Transcoding completion and publication are separate decisions. Step Functions tracks workflow progress; DynamoDB’s conditional pointer makes one complete generation visible to readers.
+
+## Build it in this order
+
+### 1. Accept and verify a source upload
+
+Issue a short-lived upload authorization scoped to owner, key, size and allowed type. On completion, inspect object metadata and checksum where available. Object notifications may duplicate, so create processing identity from video and source version rather than notification delivery ID.
+
+### 2. Run versioned processing
+
+Store the required rendition list and generation before submission. Use MediaConvert for supported managed transcoding or a bounded container worker for custom processing. Retry failed work under the same logical job while writing immutable attempt-specific outputs.
+
+### 3. Publish a complete manifest
+
+Verify that each required output is present, readable and belongs to the current source generation. Commit ready plus the manifest pointer conditionally. A late success from an old generation must not replace newer output.
+
+### 4. Expose progress and repair
+
+Show queued, processing, failed and ready with a reason and last progress time. Track queue wait separately from encoding duration. Keep original input until the documented reprocessing/retention policy allows removal; clean orphan output after active attempts expire.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| S3 upload/output | Separate private prefixes or buckets, scoped upload authorization and lifecycle for abandoned multipart uploads. |
+| MediaConvert jobs | Explicit output profiles, account concurrency/quota review, bounded retries and completion-event reconciliation. |
+| Publication | Conditional generation change; CloudFront origin access restricted to the intended output bucket. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Two renditions remain processing; the third enables publication. |
+| Deliver a duplicate source notification | One logical processing generation exists. |
+| Finish an old generation late | The current manifest pointer is unchanged. |
+
+## The next design decision
+
+Allow students to keep watching during reprocessing. Keep the previous manifest valid until the new generation is complete, and define when old segments can be removed without breaking active sessions.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Creators upload 4 GB videos. Processing produces three renditions and a thumbnail. The mobile connection drops mid-upload; a transcode task times out after writing one rendition. Design the upload and watch experience without making the API hold a 4 GB request open.”
 
@@ -42,3 +121,5 @@ Read the smaller label under each service first: it names the architectural job.
 **AWS translation:** Short-lived S3 multipart upload URLs, private buckets, SQS for processing triggers, ECS/MediaConvert for conversion depending on requirements, and CloudFront for delivery. Standard SQS can redeliver; use job identity and compare state before committing output. Read [SQS visibility semantics](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) and [CloudFront signed URL semantics](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-creating-signed-url-canned-policy.html).
 
 **Source note:** Original scenario with exercise numbers; cloud service capabilities are linked, not attributed interview questions.
+
+</details>

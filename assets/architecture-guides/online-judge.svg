@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="750" viewBox="0 0 1080 750" role="img" aria-labelledby="t d"><title id="t">Online judge: untrusted code gets a small box</title><desc id="d">AWS implementation with service roles and labelled data flow.</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526776"/></marker></defs><rect width="1080" height="750" rx="16" fill="#f8fafc"/><style>text{font-family:Arial,sans-serif;fill:#193444}.name{font-size:23px;font-weight:bold}.role{font-size:19px}.detail{font-size:17px;fill:#526575}.edge{font-size:16px;font-weight:bold}</style>
+<text x="36" y="44" class="name" style="font-size:23px">Online judge: untrusted code gets a small box</text><text x="36" y="77" class="detail">AWS service • general architectural role • responsibility in this project</text>
+<path d="M446 183 L626 183" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="502.8" y="150" width="66.4" height="23" fill="#f8fafc"/><text x="536.0" y="166" class="edge" text-anchor="middle">submit</text>
+<path d="M626 213 L556 213 L556 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="498.4" y="267.0" width="83.2" height="23" fill="#f8fafc"/><text x="540" y="283.0" class="edge" text-anchor="middle">dispatch</text>
+<path d="M446 383 L626 383" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="515.4" y="350" width="41.2" height="23" fill="#f8fafc"/><text x="536.0" y="366" class="edge" text-anchor="middle">run</text>
+<path d="M446 613 L536 613 L536 353 L626 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="477.4" y="467.0" width="125.2" height="23" fill="#f8fafc"/><text x="540" y="483.0" class="edge" text-anchor="middle">broker stages</text>
+<path d="M831 443 L831 518" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="760.0" y="458.5" width="142.0" height="23" fill="#f8fafc"/><text x="831" y="474.5" class="edge" text-anchor="middle">publish verdict</text>
+<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role">(submission entry)</text>
+<text x="54" y="207" class="detail">Authenticated user; admission limits</text>
+<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">AWS Lambda</text><text x="644" y="180" class="role">(submission application)</text>
+<text x="644" y="207" class="detail">Durable status and dispatch intent</text>
+<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon SQS</text><text x="54" y="380" class="role">(judge work queue)</text>
+<text x="54" y="407" class="detail">Contest priority and backpressure</text>
+<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon EC2</text><text x="644" y="380" class="role">(isolated sandbox fleet)</text>
+<text x="644" y="407" class="detail">MicroVM boundary; no code credentials</text>
+<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">Amazon S3</text><text x="54" y="580" class="role">(private source and case storage)</text>
+<text x="54" y="607" class="detail">Broker access; controlled sandbox input</text>
+<rect x="626" y="518" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="550" class="name" style="font-size:23px">Amazon DynamoDB</text><text x="644" y="580" class="role">(submission result authority)</text>
+<text x="644" y="607" class="detail">Attempts and committed verdict</text>
+<text x="36" y="722" class="detail">Proposed cloud implementation; the local starting code demonstrates the named mechanism only.</text></svg>

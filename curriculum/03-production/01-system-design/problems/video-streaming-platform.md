@@ -1,6 +1,85 @@
 # Video streaming: keep playback smooth at the edge
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build a video platform where creators upload large files and viewers start playback on phones and TVs. A popular new video attracts a regional traffic spike. Playback needs adaptive renditions, private-content authorization and an upload path that can resume after interruption.
+
+**Working contract:** Uploads are resumable and bounded to 20 GB. Playback returns a manifest only for a ready, authorized video. The target is p95 startup under two seconds, measured on a defined device/network cohort rather than promised for every connection.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Five million uploads/day | About 58 uploads/s average; at an assumed 500 MB mean that is 2.5 PB/day of source data before renditions. |
+| 100 million viewers; 20 GB maximum upload | Maximum file size is a request bound, not the average storage assumption. |
+| Two-second p95 playback start | Budget authorization, manifest fetch, first segment transfer and decoder startup independently. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/video_streaming_platform.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/video_streaming_platform.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| upload_sessions | creator,session,object_key,parts | Resumable source transfer and expiry. |
+| video_catalog | video_id,owner,visibility,generation,state | Current publication and access authority. |
+| playback_sessions | viewer,video,generation,expires_at | Authorized access to a specific published rendition set. |
+
+## AWS implementation
+
+![Video streaming: keep playback smooth at the edge: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-streaming-platform.svg)
+
+The CDN carries repeated viewer bytes; the application handles identity, catalog state and publication. Keeping large transfers off API servers changes both capacity and failure behavior.
+
+## Build it in this order
+
+### 1. Complete one resumable upload
+
+Create multipart upload sessions scoped to one creator and source key. Track uploaded parts and finish only the intended object. Expire abandoned sessions and multipart data; accept completion idempotently and never trust a browser’s ready flag as processing evidence.
+
+### 2. Create adaptive playback output
+
+Transcode a defined bitrate ladder into HLS or DASH segments. Publish an immutable versioned manifest after all required outputs are ready. Choose segment duration with startup delay, switching granularity and request overhead in mind; document the exact profiles used in your small demo.
+
+### 3. Authorize and distribute playback
+
+Check current visibility before issuing a short-lived playback authorization. Restrict S3 origin access so users cannot bypass the CDN policy. Document that already issued signed access may remain valid until expiry; proxy or shorten the window if immediate revocation is required.
+
+### 4. Measure a cold and warm start
+
+Capture time to authorization, manifest, first segment and first rendered frame. Compare a cold CDN object with a warm one and a constrained client connection. Tune the first-rendition choice and caching using the measured bottleneck, not only server response latency.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| S3 lifecycle | Abort incomplete multipart uploads and separately retain source/rendition generations according to product policy. |
+| CloudFront | Restricted origin access, cache versioned segments long-term and keep authorization responses private. |
+| Cost model | Estimate storage, transcode minutes and delivered GB separately; show assumptions for watch duration and average bitrate. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Only part 2 needs resuming; only the authorized viewer receives manifest access. |
+| Interrupt a large upload | Resume missing parts without restarting completed transfer. |
+| Request a processing video | Status is visible; no incomplete manifest is issued. |
+
+## The next design decision
+
+Add live streaming. Revisit segment latency, encoder failure, rolling manifest updates and origin failover; the immutable completed-video assumptions no longer cover the entire path.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Creators upload large videos. Viewers start playback quickly and continue across different bandwidths and devices. Design ingest, processing, storage, and delivery.”
 
@@ -48,3 +127,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists YouTube-style streaming reports at companies including Datadog, Snapchat and Meta; report dates are not disclosed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/creator-viewer-paths/cm6wu2x3y0000356pl299toa0).
+
+</details>

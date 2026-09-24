@@ -1,6 +1,85 @@
 # News aggregator: freshness without a write storm
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build a news reader that polls publisher feeds and groups duplicate stories. Editors expect responsive feeds to appear within a minute, but some publishers throttle requests or stop updating. Readers need to see when a source was last checked successfully.
+
+**Working contract:** Ingest RSS/Atom updates, retain source attribution and publish normalized stories with stable IDs. Freshness is measured per reachable source; a publisher outage must not be presented as an empty successful feed.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 50,000 feeds; one poll/minute baseline | About 833 requests/s before retries; coordinate by host as well as feed. |
+| 20 million daily readers | Reader traffic belongs behind a cacheable read model, separate from outbound polling capacity. |
+| Average feed response 50 KiB assumption | About 41 MiB/s if every poll returns full content; conditional requests can materially reduce transfer. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/news_aggregator.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/news_aggregator.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| sources | feed_id,url,etag,last_modified,next_poll | Poll state and publisher-specific backoff. |
+| articles | source_id,source_item_id,canonical_url,revision | Provenance-preserving normalized records. |
+| clusters | cluster_id,article_ids,merge_version | Reversible grouping; not destructive deduplication. |
+
+## AWS implementation
+
+![News aggregator: freshness without a write storm: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/news-aggregator.svg)
+
+Polling and reader delivery have different scaling patterns. Conditional requests save transfer, while source/item identity preserves corrections without manufacturing duplicate stories.
+
+## Build it in this order
+
+### 1. Poll one source correctly
+
+Send If-None-Match/If-Modified-Since when supported. Treat 304 as successful unchanged content, not deletion. Bound response size and parsing time, disable unsafe XML entity expansion, and preserve the original feed/item identity.
+
+### 2. Coordinate host load
+
+Schedule next_poll by source freshness and host allowance. Respect bounded Retry-After and back off failing publishers. Apply outbound destination validation to feed URLs and redirects; a submitted feed must not become an internal-network fetch endpoint.
+
+### 3. Normalize without losing attribution
+
+Keep publisher item IDs, observed canonical URLs, published/updated times and retrieved time separately. Group likely duplicates while retaining each source record. A corrected headline updates a revision; a mistaken cluster merge must be reversible.
+
+### 4. Serve an explicit read model
+
+Index published stories and serve bounded pages with cache headers. Show source freshness and partial ingestion status in the editor view. A feed disappearing should trigger a source incident, not mass deletion of historical articles.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Fetch workers | Fixed outbound concurrency, host limits, response byte cap and a total request deadline. |
+| Read projection | Version updates and expose oldest indexing lag; keep source originals outside the index. |
+| Retention | Store only required feed snapshots and attribution; separate diagnostic retention from reader history. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | A corrected title replaces one source item; 304 retains the existing record. |
+| Return 429 from one publisher | That host backs off while unrelated hosts continue. |
+| Merge two stories incorrectly | Editors can split the cluster without losing either source article. |
+
+## The next design decision
+
+Add multilingual story grouping. Preserve original language and attribution, and evaluate false merges separately from missed duplicates; similarity is a candidate signal, not identity.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Collect articles from publishers, remove duplicates, and make a personalized feed from topics and followed sources. A major story arrives from hundreds of sources at once.”
 
@@ -63,3 +142,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists personalized news-aggregation reports at Amazon, Microsoft and Rippling; interview dates are not shown. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/news-aggregator-feed/cm96lh25n0039ad08067audlg).
+
+</details>

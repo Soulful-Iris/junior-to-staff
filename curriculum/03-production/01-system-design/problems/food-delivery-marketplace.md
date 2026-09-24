@@ -1,6 +1,85 @@
 # Food delivery: quote the right nearby options
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build restaurant discovery and order placement for a delivery marketplace. A customer sees a meal at £12.50, but the restaurant changes its price or sells out before checkout. Search should stay responsive without making stale catalog data the authority for an order.
+
+**Working contract:** GET /restaurants searches nearby open restaurants. POST /orders submits item IDs, displayed price version and request identity. The order service revalidates availability and returns either a committed priced order or an explicit change requiring customer acceptance.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 200,000 restaurants; two million concurrent shoppers | Popular restaurants and geographic cells are hot spots even when total capacity is sufficient. |
+| Catalog freshness target: 30 seconds | Search may be stale; price and stock are checked again at the order boundary. |
+| 100 items/restaurant assumption | 20 million menu records before option combinations and search-index overhead. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/food_delivery_marketplace.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/food_delivery_marketplace.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| menu_items | restaurant,item,price_minor,currency,version | Authoritative price and sale availability. |
+| search_documents | restaurant,location,menu_revision | Discovery projection with freshness metadata. |
+| orders | customer,request_id,priced_items,state | Immutable accepted price snapshot and fulfillment state. |
+
+## AWS implementation
+
+![Food delivery: quote the right nearby options: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/food-delivery-marketplace.svg)
+
+OpenSearch finds candidates; Aurora decides what is being purchased. A location service provides geography and routing, not inventory ownership or a restaurant’s ability to fulfill an order.
+
+## Build it in this order
+
+### 1. Build discovery as a projection
+
+Store restaurant opening rules, service area and menu revision in the source database. Index geographic/search fields asynchronously. Return an as-of marker and stable IDs; do not place the only copy of availability in the search index.
+
+### 2. Make checkout authoritative
+
+Load current items and versions inside the order transaction. Calculate integer minor-unit totals, currency, fees and taxes under an explicit pricing policy. A changed price returns a new quote for acceptance instead of silently charging more.
+
+### 3. Track fulfillment transitions
+
+Record created, restaurant_accepted, preparing, assigned, delivered or cancelled with conditional versions. A restaurant rejection and a payment success need an explicit refund/reconciliation path. Separate estimated delivery time from a guaranteed promise.
+
+### 4. Add dispatch and degraded browsing
+
+Use location/routing services for candidate travel estimates. When search indexing lags, show stale discovery honestly and keep authoritative checkout available where possible. Bound restaurant-level order intake so a viral promotion cannot create impossible kitchen demand.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Search index | Version source updates and tombstones; monitor oldest unapplied change, not just cluster health. |
+| Order database | Unique customer/request identity, short transactions and explicit price snapshots. |
+| Location integration | Treat route estimates as time-sensitive predictions; cache within a documented freshness bound. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The old £12.50 cart receives a £14.00 change requiring acceptance. |
+| Remove an item while search is stale | Checkout rejects the unavailable item. |
+| Retry a committed order | The original order returns without another charge. |
+
+## The next design decision
+
+Add restaurant-specific promotions and substitutions. Define which changes require renewed customer consent and which can be applied within the accepted quote; preserve the exact accepted policy version.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Customers search nearby restaurants, place an order, and track delivery. Restaurants change hours and menus; couriers move; inventory can sell out between browse and checkout. Design the customer path.”
 
@@ -63,3 +142,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists food-delivery design reports at Uber, Meta and Twilio; the report dates are not shown. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/nearby-restaurants-app/cmacvonzo00r0ad08c9ona48e).
+
+</details>

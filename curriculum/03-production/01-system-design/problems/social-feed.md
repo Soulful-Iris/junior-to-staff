@@ -1,6 +1,85 @@
 # Social feed: a popular author changes the shape
 
-*Design brief · diagrams and reasoning exercises; no complete application is supplied.*
+## What you are building
+
+> Build a following feed for a creator network. Ordinary authors have hundreds of followers, while one celebrity has ten million. A post deleted or made private must not remain readable simply because its ID is in a follower’s cached feed.
+
+**Working contract:** GET /feed returns up to 30 currently authorized posts using a stable cursor. New eligible posts should appear within ten seconds under normal load. Feed materialization is a candidate index; post visibility is checked before returning content.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 20 million daily users; 15,000 writes/s and 120,000 reads/s peak | Read amplification, fan-out and content storage need separate capacity models. |
+| 30 items/page | 120,000 reads/s can require 3.6 million candidate checks/s before batching and caching. |
+| Celebrity with ten million followers | One post can create ten million inbox writes; use a different delivery strategy for such authors. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/social_feed.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/social_feed.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| posts | author,post_id,version,visibility,deleted | Current content and authorization authority. |
+| feed_entries | reader,sort_key,post_id | Candidate references, never independent permission grants. |
+| follow_edges | follower,author,revision | Relationship source for fan-out and read-time eligibility. |
+
+## AWS implementation
+
+![Social feed: a popular author changes the shape: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/social-feed.svg)
+
+The hybrid design spends writes for ordinary authors and reads for celebrities. Neither path owns privacy; current source state decides which content can leave the service.
+
+## Build it in this order
+
+### 1. Build a read-time feed first
+
+Query recent posts by followed authors and merge by a deterministic order. Use opaque cursors that preserve ordering across pages. Measure the cost before introducing fan-out; this baseline is also a recovery path when materialization lags.
+
+### 2. Materialize ordinary-author candidates
+
+Emit post events from an outbox and append idempotent references to follower inboxes. Record fan-out progress and age. Treat deletion as a source version change so late create events cannot resurrect a removed post.
+
+### 3. Handle celebrities on read
+
+Keep very large-author streams separate and merge them with the reader’s materialized candidates. Choose a threshold from measured fan-out cost and read frequency, not follower count alone. Bound candidate fetches so one empty/private stream cannot cause unbounded refill work.
+
+### 4. Authorize before returning content
+
+Batch-fetch current post metadata and apply membership, blocks, privacy and deletion rules. Cached candidates may survive; restricted content must not. Define whether a cursor remains usable when eligibility changes, and tolerate shorter pages rather than leaking an item.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Feed storage | Partition inboxes by reader and time range; bound retained candidates and large-author fan-out. |
+| Caching | Keep content authorization outside cached candidate membership; never cache a shared private response under an unscoped key. |
+| Operations | Track ten-second freshness attainment, fan-out lag, candidate rejection rate and read amplification. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | A cached private candidate is filtered; revoking the remaining post produces an empty result. |
+| Pause fan-out | Freshness age rises and the bounded read-time fallback remains available. |
+| Deliver an old create after deletion | Its version cannot make the post visible again. |
+
+## The next design decision
+
+Introduce ranked ordering. Freeze or version enough ranking context to make pagination understandable, then explain how you avoid duplicate posts when new scores arrive between pages.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
 
 > **Interviewer:** “Build a home feed. Most authors have hundreds of followers; one has eight million. People expect their own new post immediately and friends' posts within ten seconds. Show what happens when the popular author posts four times in a minute.”
 
@@ -44,3 +123,5 @@ Read the smaller label under each service first: it names the architectural job.
 **Practice artifact:** Baseline and hybrid box diagrams, fanout estimate, freshness calculation, one privacy revocation test, and a failure-injection recovery plan.
 
 **AWS translation:** S3 for large media; DynamoDB/RDS for posts and follower relationships subject to access patterns; SQS/Kinesis for asynchronous fanout as appropriate; ElastiCache for hot candidates. Queue delivery can duplicate, so projection writes must be idempotent. [Spotify's 2026 engineering discussion](https://engineering.atspotify.com/2026/1/why-we-use-separate-tech-stacks-for-personalization-and-experimentation) separates serving and evaluation responsibilities; this exercise makes the simpler feed/data ownership distinction without claiming to reproduce Spotify's design.
+
+</details>
