@@ -1,6 +1,6 @@
 # The Engineering Guide
 
-The site presents the existing curriculum as a guided book. Its homepage explains the purpose and progression; the persistent left-hand contents contains five core parts, 18 chapters, an optional AI systems specialization, and an elective company interview studio. The current lesson's subsections appear in the same panel. Every guided page has Previous/Next navigation.
+The site presents the existing curriculum as a guided book. Its homepage gives newcomers a short sample lesson and direct links into the five core parts. The complete searchable curriculum stays one click away in a Browse curriculum drawer. Lesson pages keep the persistent left-hand contents, including 18 chapters, an optional AI systems specialization, an elective company interview studio, and the current lesson's subsections. Every lesson has Previous/Next navigation.
 
 ## Build and check
 
@@ -42,7 +42,7 @@ The current build publishes **333 pages**, **250 guided steps** and **311 Mermai
 
 Progress is stored on the current device. Visiting a page saves a resume location; following Next marks the current step complete. Completion records practice, not mastery. Reading and navigation continue if local storage is unavailable.
 
-Previous and Next remain pinned above the lesson on desktop and mobile, with the same destinations as the bottom controls. The mobile header retains the current lesson title and chapter/step while scrolling. On the final lesson, either Finish control marks completion; both controls reflect the saved state when revisiting.
+Previous and Next remain pinned above each lesson on desktop and mobile, with the same destinations as the bottom controls. They are intentionally absent from the curriculum overview. The mobile header retains the current lesson title and chapter/step while scrolling. On the final lesson, either Finish control marks completion; both controls reflect the saved state when revisiting.
 
 ## Visuals and accessibility
 

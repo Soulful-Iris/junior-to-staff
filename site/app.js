@@ -27,11 +27,14 @@
   document.querySelectorAll('[data-page]').forEach(a => {
     if (progress.completed.includes(a.dataset.page)) a.classList.add('completed');
   });
-  const start = document.querySelector('[data-start]');
-  if (start && progress.last && typeof progress.last.url === 'string' && progress.last.url.startsWith(base) && !progress.last.url.startsWith('//')) {
-    start.href = progress.last.url;
-    start.innerHTML = 'Continue learning <span aria-hidden="true">↗</span>';
-    start.nextElementSibling.textContent = 'Resume: ' + progress.last.title;
+  const starts = [...document.querySelectorAll('[data-start]')];
+  if (starts.length && progress.last && typeof progress.last.url === 'string' && progress.last.url.startsWith(base) && !progress.last.url.startsWith('//')) {
+    starts.forEach(start => {
+      start.href = progress.last.url;
+      start.textContent = 'Continue learning ';
+      const arrow = document.createElement('span');arrow.setAttribute('aria-hidden','true');arrow.textContent = '↗';start.append(arrow);
+    });
+    document.querySelectorAll('[data-resume-label]').forEach(label => { label.textContent = 'Resume: ' + progress.last.title; });
   }
   function complete(src) {
     if (!progress.completed.includes(src)) progress.completed.push(src);
@@ -55,24 +58,27 @@
     write(key, {completed: [], last: null}); location.reload();
   });
   const sidebar = document.getElementById('sidebar');
+  const openers = [...document.querySelectorAll('[data-open-contents]')];
   const opener = document.getElementById('open-contents');
+  let lastOpener = opener;
   const backdrop = document.getElementById('close-contents');
   const mobile = () => matchMedia('(max-width: 760px)').matches;
+  const drawerMode = () => mobile() || document.body.classList.contains('home');
   function setDrawer(open) {
     document.body.classList.toggle('contents-open', open);
-    opener.setAttribute('aria-expanded', String(open)); backdrop.hidden = !open;
-    if (mobile()) sidebar.inert = !open;
-    document.querySelector('.reading-shell').inert = open && mobile();
-    document.body.style.overflow = open && mobile() ? 'hidden' : '';
-    if (open) document.getElementById('dismiss-contents').focus(); else opener.focus();
+    openers.forEach(button => button.setAttribute('aria-expanded', String(open))); backdrop.hidden = !open;
+    if (drawerMode()) sidebar.inert = !open;
+    document.querySelector('.reading-shell').inert = open && drawerMode();
+    document.body.style.overflow = open && drawerMode() ? 'hidden' : '';
+    if (open) document.getElementById('dismiss-contents').focus(); else lastOpener?.focus();
   }
-  opener.addEventListener('click', () => setDrawer(true));
+  openers.forEach(button => button.addEventListener('click', () => {lastOpener=button;setDrawer(true);}));
   backdrop.addEventListener('click', () => setDrawer(false));
   document.getElementById('dismiss-contents').addEventListener('click', () => setDrawer(false));
-  if (mobile()) sidebar.inert = true;
+  if (drawerMode()) sidebar.inert = true;
   matchMedia('(max-width: 760px)').addEventListener('change', () => {
-    document.body.classList.remove('contents-open');opener.setAttribute('aria-expanded','false');backdrop.hidden=true;
-    sidebar.inert=mobile();document.querySelector('.reading-shell').inert=false;document.body.style.overflow='';
+    document.body.classList.remove('contents-open');openers.forEach(button=>button.setAttribute('aria-expanded','false'));backdrop.hidden=true;
+    sidebar.inert=drawerMode();document.querySelector('.reading-shell').inert=false;document.body.style.overflow='';
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.body.classList.contains('contents-open')) setDrawer(false);
@@ -115,14 +121,18 @@
   const motionButton=document.getElementById('motion-toggle');
   function applyMotion(){
     document.querySelectorAll('img[data-motion]').forEach(img=>{img.src=still?img.dataset.still:img.dataset.motion;});
-    motionButton.textContent=still?'Static visuals':'Motion on';motionButton.setAttribute('aria-pressed',String(still));
+    if(motionButton){motionButton.textContent=still?'Animations off':'Animations on';motionButton.setAttribute('aria-pressed',String(!still));}
   }
-  motionButton.addEventListener('click',()=>{still=!still;write('engineering-guide:still',still);applyMotion();});
+  motionButton?.addEventListener('click',()=>{still=!still;write('engineering-guide:still',still);applyMotion();});
   media.addEventListener('change',()=>{still=read('engineering-guide:still',media.matches,boolean);applyMotion();});applyMotion();
   document.querySelectorAll('.mer,.figwrap,.featured-diagram').forEach(figure=>{
     const img=figure.querySelector('img');if(!img)return;
     const toolbar=document.createElement('div');toolbar.className='visual-toolbar';const hint=document.createElement('span');hint.className='diagram-scroll-hint';hint.textContent='Wide diagram? Swipe to explore.';toolbar.append(hint);
-    if(img.dataset.still){const toggle=document.createElement('button');toggle.textContent='Animation / still';toggle.addEventListener('click',()=>{img.src=img.getAttribute('src')===img.dataset.still?img.dataset.motion:img.dataset.still;});toolbar.append(toggle);}
+    if(img.dataset.still){
+      const toggle=document.createElement('button');
+      const updateToggle=()=>{const showingStill=img.getAttribute('src')===img.dataset.still;toggle.textContent=showingStill?'Play animation':'Show still';toggle.setAttribute('aria-pressed',String(!showingStill));};
+      toggle.addEventListener('click',()=>{img.src=img.getAttribute('src')===img.dataset.still?img.dataset.motion:img.dataset.still;updateToggle();});updateToggle();toolbar.append(toggle);
+    }
     const zoom=document.createElement('button');zoom.textContent='Fit diagram';zoom.addEventListener('click',()=>{
       const fitted=img.dataset.fit==='true';img.dataset.fit=String(!fitted);img.style.maxWidth=fitted?'':'100%';img.style.minWidth=fitted?'':'0';zoom.textContent=fitted?'Fit diagram':'Actual size';
     });toolbar.append(zoom);figure.after(toolbar);

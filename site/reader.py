@@ -255,7 +255,7 @@ def toc(pages, sequence, current, base):
               '<div class="search-box"><span aria-hidden="true">⌕</span><label class="sr-only" for="contents-search">Search the curriculum</label><input id="contents-search" type="search" placeholder="Find a concept…" autocomplete="off"><kbd>/</kbd></div><div id="search-results" hidden aria-live="polite"></div>',
               '<div class="contents-label">TABLE OF CONTENTS <button id="collapse-contents" aria-label="Collapse all chapters">−</button></div><div id="contents-tree">', link(pages[0], 'Overview', 'overview')]
     for group in [p for p in sequence if p['kind']=='group']:
-        result.append(f'<section class="toc-area part-{group["gnum"]}"><h2><span class="part-label">{E(part_label(group))}</span><span class="part-title">{E(group["title"])}</span></h2>')
+        result.append(f'<section class="toc-area part-{group["gnum"]}"><div class="toc-part-heading"><span class="part-label">{E(part_label(group))}</span><span class="part-title">{E(group["title"])}</span></div>')
         result.append(link(group, 'Part introduction', 'part-intro'))
         for chapter in [p for p in sequence if p['kind']=='subject' and p['group']==group['group']]:
             active = current.get('chapter') == chapter['chapter']
@@ -276,7 +276,7 @@ def toc(pages, sequence, current, base):
         result.append('</section>')
     members={p['src'] for p in sequence}
     extra=[p for p in pages if p['src'] not in members and not p['src'].startswith('companies/')]
-    result.append('<section class="toc-area reference-area"><h2>REFERENCE SHELF</h2><p class="shelf-note">Indexes, assessment keys & source notes</p>')
+    result.append('<section class="toc-area reference-area"><div class="toc-part-heading">REFERENCE SHELF</div><p class="shelf-note">Indexes, assessment keys & source notes</p>')
     for title, predicate in [
         ('Concept references & indexes',lambda p:p['src'].startswith(('curriculum/','indexes/','projects/','examples/'))),
         ('Assessment & study guides',lambda p:p['src'].startswith('practice/')),
@@ -288,7 +288,7 @@ def toc(pages, sequence, current, base):
         result.extend(link(p) for p in items); result.append('</div></details>')
     result.append(f'<a class="toc-link" href="{base}gallery/">Visual reference</a>')
     studio=[p for p in sequence if p['src'].startswith('companies/')]
-    result.append('</section><section class="toc-area company-area"><h2><span class="part-label">OPTIONAL STUDIO</span><span class="part-title">Company interview practice</span></h2>')
+    result.append('</section><section class="toc-area company-area"><div class="toc-part-heading"><span class="part-label">OPTIONAL STUDIO</span><span class="part-title">Company interview practice</span></div>')
     result.append(link(studio[0], 'Start here · the interview room', 'part-intro'))
     for p in studio[1:]:
         active = current['src'] == p['src']
@@ -305,19 +305,36 @@ def toc(pages, sequence, current, base):
 
 
 def overview(b, sequence, base):
+    start = sequence[1]
+    preview = next(p for p in sequence if p['src'] == 'curriculum/02-applications/01-backend/projects/01-the-request-you-can-trace-end-to-end.md')
+    interview = next(p for p in sequence if p['src'] == 'companies/README.md')
+    ai_part = next(p for p in sequence if p['kind'] == 'group' and p['group'] == 'ai-specialization')
+    parts = [
+        ('A', 'code', 'Coding and problem solving', 'Choose the state, solve the problem, and review AI-assisted changes.', 'Algorithms · Coding · Review'),
+        ('B', 'applications', 'Production applications', 'Connect browser, API, database, tests, and access boundaries.', 'Backend · Data · Frontend · Security'),
+        ('C', 'design', 'System design and scale', 'Design from requirements, then reason about capacity, performance, and cost.', 'Architecture · Scale · Cost'),
+        ('D', 'operations', 'Production operations', 'Provision, deploy, observe, and recover a running application.', 'AWS · Delivery · Reliability'),
+        ('E', 'evolution', 'System evolution and leadership', 'Migrate live systems and make decisions other teams can execute.', 'Migrations · Technical leadership'),
+    ]
+    group_pages = {p['group']: p for p in sequence if p['kind'] == 'group'}
+    journey = ''.join(
+        f'<a class="journey-card" href="{href(base,group_pages[group])}"><span class="journey-number">{label}</span>'
+        f'<div><h3>{E(name)} <span aria-hidden="true">&#8599;</span></h3><p>{E(desc)}</p><span class="journey-meta">{E(detail)}</span></div></a>'
+        for label, group, name, desc, detail in parts
+    )
     return f'''<header class="home-hero"><div class="eyebrow"><span class="status-dot"></span> A PRACTICAL SOFTWARE ENGINEERING CURRICULUM</div>
 <h1>Build the judgment.<br><em>Then write the code.</em></h1>
-<p class="hero-lede">Understand the problem. Make the trade-offs. Build something that holds up.<br class="desktop-only"> One guided journey from your first correct solution to systems you can defend.</p>
-<div class="hero-actions"><a class="primary-button" data-start href="{href(base,sequence[1])}">Start learning <span aria-hidden="true">↗</span></a><span>One sequence. Deeper questions at every step.</span></div>
-<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>90</strong><span>build &amp; design briefs</span></div></div></header>
-<section class="home-mechanism"><div class="section-label">THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
-<section class="journey-section"><div class="section-label">PARTS A–E / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">{label}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for label,name,desc,detail in [
-('A','Coding and problem solving','Choose the state, solve the problem, then use AI without losing independent judgment.','Algorithms · Coding · Review'),
-('B','Production applications','Connect browser, API, database, tests, and access boundaries.','Backend · Data · Frontend · Security'),
-('C','System design and scale','Design from requirements, then reason about data scale, capacity, performance, and cost.','Architecture · Scale · Cost'),
-('D','Production operations','Provision, deploy, observe, and recover a running application.','AWS · Delivery · Observability · Reliability'),
-('E','System evolution and leadership','Migrate live systems and make decisions other teams can execute.','Migrations · Technical leadership')])}</div><div class="specialization-note"><strong>Optional specialization · AI systems</strong><span>Evaluate model behavior, budgets, permissions, and controlled actions after the core journey.</span></div></section>
-<section class="learning-contract"><div class="section-label">EVERY LESSON HAS A JOB</div><h2>Start with a problem.<br>Leave with a reason.</h2><ol><li><span>01</span><div><h3>Understand the situation</h3><p>A concrete brief, examples, expected behavior, and the boundary of the problem.</p></div></li><li><span>02</span><div><h3>Trace it. Build it. Check it.</h3><p>Visual explanations, a baseline, implementation details, and observable outcomes in the same reading flow.</p></div></li><li><span>03</span><div><h3>Change the requirement</h3><p>Follow-ups deepen the same problem into senior and staff-level reasoning.</p></div></li></ol><p class="quiet-note">Use Next to follow the sequence. The contents on the left are always available when you want to revisit a concept. Reference answers remain closed until you choose to inspect them.</p></section>'''
+<p class="hero-lede">Start with code. End with systems you can defend.</p>
+<div class="hero-actions"><a class="primary-button" data-start href="{href(base,start)}">Start with Part A <span aria-hidden="true">&#8599;</span></a><a class="sample-link" href="#sample-lesson">See a sample lesson <span aria-hidden="true">&#8595;</span></a><span data-resume-label>New here? Start at the beginning.</span></div>
+<div class="hero-promises" aria-label="What you will practice"><span>Solve unfamiliar problems</span><span>Build production systems</span><span>Defend design decisions</span></div></header>
+<section class="home-mechanism" id="sample-lesson"><div class="section-label">A QUICK TASTE</div><div class="section-heading"><h2>A save worked.<br>The title did not.</h2><p>This is how a lesson starts: one person, one action, and one failure you need to explain.</p></div>
+<div class="sample-brief"><div><span class="sample-kicker">THE SITUATION</span><p>Alice saves a documentation URL. The bookmark reaches the database, but its title lookup times out. Bob saves another link at the same time and gets a title normally. How does support separate their stories?</p></div><div class="sample-evidence" aria-label="Example API result"><code>POST /bookmarks</code><strong>201 Created</strong><span>title_status: "timeout"</span></div></div>
+<figure class="featured-diagram"><figcaption><span class="diagram-label">FOLLOW THE REQUEST</span><span>Find every place it can stop</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="A request moving through browser, routing, identity checks, handler and database boundaries"><div class="diagram-caption">Trace the request, decide what evidence each boundary owes you, then change the design when the requirement moves.</div></figure>
+<div class="learning-rhythm" aria-label="How lessons progress"><div><span>01</span><strong>Understand the situation</strong><p>See the request, expected result, and failure.</p></div><div><span>02</span><strong>Build and explain it</strong><p>Use supplied code, diagrams, and observable outcomes.</p></div><div><span>03</span><strong>Change the requirement</strong><p>Redesign when retries, queues, scale, or failure changes.</p></div></div>
+<a class="text-link" href="{href(base,preview)}">Open the full request-tracing project <span aria-hidden="true">&#8594;</span></a></section>
+<section class="journey-section"><div class="section-label">THE CORE JOURNEY</div><h2>Choose a part,<br>or follow the full path.</h2><div class="journey-grid">{journey}</div></section>
+<section class="optional-paths" aria-label="Optional learning paths"><a href="{href(base,ai_part)}"><span>OPTIONAL SPECIALIZATION</span><strong>AI systems</strong><small>Evaluation, budgets, permissions, and controlled actions.</small></a><a href="{href(base,interview)}"><span>OPTIONAL STUDIO</span><strong>Company interview practice</strong><small>Rehearse coding and design conversations under interview pressure.</small></a></section>
+<section class="home-finish"><div><span class="section-label">READY WHEN YOU ARE</span><h2>Start at the beginning.<br>Or browse for what you need.</h2></div><div><a class="primary-button" data-start href="{href(base,start)}">Start with Part A <span aria-hidden="true">&#8599;</span></a><button class="browse-button" data-open-contents aria-controls="sidebar" aria-expanded="false">Browse the curriculum</button><p data-resume-label>Progress stays on this device.</p></div></section>'''
 
 
 def intro(b, page, sequence, base, authored):
@@ -353,12 +370,12 @@ def shell(b, page, body, pages, sequence, base):
     subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'{part_label(page)} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
     meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else part_label(page) if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
     nav=''
-    if position is not None:
+    if position is not None and not is_home:
         previous=(f'<a class="previous-step" href="{href(base,prev)}"><span>← PREVIOUS</span><strong>{E(prev["title"])}</strong></a>' if prev else '<span></span>')
         nextlink=(f'<a class="next-step" data-complete="{E(page["src"])}" href="{href(base,nxt)}"><span>{"BEGIN THE JOURNEY" if is_home else "NEXT STEP"} →</span><strong>{E(nxt["title"])}</strong></a>' if nxt else '<div class="course-end"><span>YOU’VE REACHED THE END</span><strong>Return to a difficult problem. Explain it again, without the reference.</strong><button data-finish>Mark final step complete</button></div>')
         nav=f'<nav class="step-navigation" aria-label="Lesson sequence">{previous}{nextlink}</nav>'
     sticky_nav = ''
-    if position is not None:
+    if position is not None and not is_home:
         sticky_previous = (f'<a class="sticky-previous" href="{href(base,prev)}" '
                            f'aria-label="Previous: {E(prev["title"])}" title="{E(prev["title"])}">'
                            '<span aria-hidden="true">←</span> Previous</a>' if prev else
@@ -375,9 +392,11 @@ def shell(b, page, body, pages, sequence, base):
     mobile_location = (f'<span class="mobile-location"><span class="mobile-page-title" title="{E(page["title"])}">'
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'
                        f'<span class="mobile-page-position">{"Guided curriculum" if is_home else meta}</span></span>')
+    browse_label = 'Browse curriculum' if is_home else 'Contents'
+    motion_control = '' if is_home else '<button id="motion-toggle" aria-pressed="false">Animations on</button>'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
-<body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">Skip to lesson</a><div class="mobile-bar"><button id="open-contents" aria-expanded="false" aria-controls="sidebar">☰ <span>Contents</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span><button id="motion-toggle" aria-pressed="false">Motion on</button></div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
+<body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">{'Skip to overview' if is_home else 'Skip to lesson'}</a><div class="mobile-bar"><button id="open-contents" data-open-contents aria-expanded="false" aria-controls="sidebar">☰ <span>{browse_label}</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
 
 
 def build(b):
