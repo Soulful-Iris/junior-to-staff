@@ -265,7 +265,7 @@ def toc(pages, sequence, current, base):
     extra=[p for p in pages if p['src'] not in members and not p['src'].startswith('companies/')]
     result.append('<section class="toc-area reference-area"><h2>REFERENCE SHELF</h2><p class="shelf-note">Indexes, assessment keys & source notes</p>')
     for title, predicate in [
-        ('Concept references & indexes',lambda p:p['src'].startswith(('curriculum/','indexes/','projects/'))),
+        ('Concept references & indexes',lambda p:p['src'].startswith(('curriculum/','indexes/','projects/','examples/'))),
         ('Assessment & study guides',lambda p:p['src'].startswith('practice/')),
         ('Research & repository notes',lambda p:p['src'].startswith(('docs/','scripts/'))),
     ]:
