@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="750" viewBox="0 0 1080 750" role="img" aria-labelledby="t d"><title id="t">Support assistant</title><desc id="d">AWS implementation with service roles and labelled data flow.</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#526776"/></marker></defs><rect width="1080" height="750" rx="16" fill="#f8fafc"/><style>text{font-family:Arial,sans-serif;fill:#193444}.name{font-size:23px;font-weight:bold}.role{font-size:19px}.detail{font-size:17px;fill:#526575}.edge{font-size:16px;font-weight:bold}</style>
+<text x="36" y="44" class="name" style="font-size:23px">Support assistant</text><text x="36" y="77" class="detail">AWS service • general architectural role • responsibility in this project</text>
+<path d="M446 183 L626 183" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="498.6" y="150" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="536.0" y="166" class="edge" text-anchor="middle">request</text>
+<path d="M626 213 L556 213 L556 353 L446 353" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="511.0" y="267.0" width="58.0" height="23" fill="#f8fafc"/><text x="540" y="283.0" class="edge" text-anchor="middle">draft</text>
+<path d="M831 243 L831 318" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="793.6" y="258.5" width="74.80000000000001" height="23" fill="#f8fafc"/><text x="831" y="274.5" class="edge" text-anchor="middle">propose</text>
+<path d="M626 413 L556 413 L556 553 L446 553" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="469.0" y="467.0" width="142.0" height="23" fill="#f8fafc"/><text x="540" y="483.0" class="edge" text-anchor="middle">approved action</text>
+<path d="M626 583 L446 583" fill="none" stroke="#526776" stroke-width="2.2" marker-end="url(#a)"/>
+<rect x="481.8" y="550" width="108.4" height="23" fill="#f8fafc"/><text x="536.0" y="566" class="edge" text-anchor="middle">credentials</text>
+<rect x="36" y="118" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="54" y="150" class="name" style="font-size:23px">Amazon API Gateway</text><text x="54" y="180" class="role">(support application entry)</text>
+<text x="54" y="207" class="detail">Verified agent and tenant</text>
+<rect x="626" y="118" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="644" y="150" class="name" style="font-size:23px">AWS Lambda</text><text x="644" y="180" class="role">(assistant coordinator)</text>
+<text x="644" y="207" class="detail">Read-only draft and typed proposals</text>
+<rect x="36" y="318" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="350" class="name" style="font-size:23px">Amazon Bedrock</text><text x="54" y="380" class="role">(language generation)</text>
+<text x="54" y="407" class="detail">Summaries and suggested responses</text>
+<rect x="626" y="318" width="410" height="125" rx="10" fill="white" stroke="#327cba" stroke-width="2"/><text x="644" y="350" class="name" style="font-size:23px">Amazon DynamoDB</text><text x="644" y="380" class="role">(proposal and approval ledger)</text>
+<text x="644" y="407" class="detail">Exact parameters; expiry; operation ID</text>
+<rect x="36" y="518" width="410" height="125" rx="10" fill="white" stroke="#c27720" stroke-width="2"/><text x="54" y="550" class="name" style="font-size:23px">AWS Lambda</text><text x="54" y="580" class="role">(authorized action executor)</text>
+<text x="54" y="607" class="detail">Fresh permission check; bounded tools</text>
+<rect x="626" y="518" width="410" height="125" rx="10" fill="white" stroke="#8557a3" stroke-width="2"/><text x="644" y="550" class="name" style="font-size:23px">AWS Secrets Manager</text><text x="644" y="580" class="role">(tool credentials)</text>
+<text x="644" y="607" class="detail">Executor-only provider access</text>
+<text x="36" y="722" class="detail">Proposed cloud implementation; the local starting code demonstrates the named mechanism only.</text></svg>

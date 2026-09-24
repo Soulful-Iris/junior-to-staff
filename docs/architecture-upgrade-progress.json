@@ -202,5 +202,47 @@
     "starter": "examples/architecture-starts/web_crawler.py",
     "diagram": "assets/architecture-guides/web-crawler.svg",
     "batch": "storage-search-crawl"
+  },
+  {
+    "path": "curriculum/03-production/02-delivery/problems/feature-rollout.md",
+    "starter": "examples/architecture-starts/feature_rollout.py",
+    "diagram": "assets/architecture-guides/feature-rollout.svg",
+    "batch": "rollout-observability-overload"
+  },
+  {
+    "path": "curriculum/03-production/04-observability/problems/slow-request.md",
+    "starter": "examples/architecture-starts/slow_request.py",
+    "diagram": "assets/architecture-guides/slow-request.svg",
+    "batch": "rollout-observability-overload"
+  },
+  {
+    "path": "curriculum/03-production/04-observability/problems/metrics-platform.md",
+    "starter": "examples/architecture-starts/metrics_platform.py",
+    "diagram": "assets/architecture-guides/metrics-platform.svg",
+    "batch": "rollout-observability-overload"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/02-performance-cost/problems/overload-shedding.md",
+    "starter": "examples/architecture-starts/overload_shedding.py",
+    "diagram": "assets/architecture-guides/overload-shedding.svg",
+    "batch": "rollout-observability-overload"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/problems/knowledge-assistant.md",
+    "starter": "examples/architecture-starts/knowledge_assistant.py",
+    "diagram": "assets/architecture-guides/knowledge-assistant.svg",
+    "batch": "ai-design-boundaries"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md",
+    "starter": "examples/architecture-starts/support_assistant.py",
+    "diagram": "assets/architecture-guides/support-assistant.svg",
+    "batch": "ai-design-boundaries"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/03-ai-systems/problems/personalized-ranking.md",
+    "starter": "examples/architecture-starts/personalized_ranking.py",
+    "diagram": "assets/architecture-guides/personalized-ranking.svg",
+    "batch": "ai-design-boundaries"
   }
 ]

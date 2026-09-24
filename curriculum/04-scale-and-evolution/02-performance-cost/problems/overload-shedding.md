@@ -1,5 +1,86 @@
 # Overload: protect the requests that can finish
 
+## What you are building
+
+> Protect a subscription API during a traffic surge. Forty thousand requests/s arrive but the healthy service can finish only twenty thousand. Paid writes, interactive reads and bulk exports have different consequences when rejected; the queue must not consume all memory.
+
+**Working contract:** Admission is bounded by class and dependency capacity. Accepted work has a finite deadline. Rejected work returns a clear retryable or non-retryable outcome before expensive side effects begin.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 40,000 arrivals/s; 20,000 completions/s | Backlog grows 20,000/s; a 100,000-request queue fills in five seconds. |
+| 12,000 paid writes/s plus 8,000 reads/s desired allocation | At full healthy capacity those consume the entire budget; bulk work needs a separate or deferred share. |
+| Database capacity halves to 10,000/s | The original paid-write promise no longer fits; define explicit priority and rejection within that class. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/overload_shedding.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/overload_shedding.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| admission_policy | request_class,rate,concurrency,deadline | Product priority and resource budget. |
+| queue_state | class,depth,oldest_age | Bounded waiting and expiry. |
+| outcomes | admitted,completed,rejected,expired | Honest accounting of work under pressure. |
+
+## AWS implementation
+
+![Overload: protect the requests that can finish: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/overload-shedding.svg)
+
+Admission protects the scarce dependency. SQS is suitable for explicitly deferred work, but it cannot turn an unbounded interactive wait into a successful user experience.
+
+## Build it in this order
+
+### 1. Locate the constrained dependency
+
+Measure completed throughput, active work and queue age as arrivals rise. Identify whether CPU, database connections or a downstream quota saturates. Adding API instances cannot create more capacity in a fixed database dependency.
+
+### 2. Classify and admit early
+
+Derive class from trusted route/account context. Reserve explicit budgets for critical work and reject excess before allocating expensive connections or starting external effects. Keep fairness within a paid class so one tenant cannot spend the entire reserve.
+
+### 3. Bound waiting and retries
+
+Cap queue length and maximum age, expire work that cannot finish before its deadline, and propagate cancellation. Return bounded Retry-After and document client retry budgets with jitter. Retrying rejected traffic at every service layer multiplies the original overload.
+
+### 4. Recover without a second surge
+
+Reduce concurrency when the dependency degrades and ramp it back gradually after recovery. Keep hysteresis between shedding and reopening. Report completed useful work and class-specific rejection, not merely a lower response latency caused by rejecting everything.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Application limits | Set per-class concurrency, queue size and deadline independently of autoscaling. |
+| Database pools | Sum all API and worker pools against one dependency budget; reserve emergency operating headroom. |
+| Scaling | Scale only while useful throughput improves; bounded admission remains active during scale-up and dependency failure. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The queue reaches 100,000 at five seconds, then rejects excess arrivals. |
+| Halve database capacity | Admission shrinks and exposes the chosen within-class priorities. |
+| Restore the database | Traffic ramps up without replaying the whole backlog at once. |
+
+## The next design decision
+
+Product labels every route critical. Use dependency consumption and user consequences to produce an allocation that fits actual capacity; a label cannot reserve resources that do not exist.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “An API receives 40,000 requests/s after a partner retry storm. At 20,000/s its database already saturates. Paid writes, free reads, and internal health checks share one worker pool. What happens in the next minute?”
 
 **Your contract.** Keep paid writes available where capacity permits; shed work early with a stable policy; reserve enough capacity for health and recovery. Define an admission signal that does not wait for every caller to time out. Constructed scenario and workload.
@@ -38,3 +119,5 @@ A cache is only a substitute for database reads that may legally be stale. API G
 **Practice artifact:** Compute backlog under three loads, draw priority lanes and degradation response, then describe how to test shedding safely under a load ramp.
 
 **Source boundary:** Original scenario. [Meta's September 2026 shared proxy account](https://engineering.fb.com/2026/09/03/core-infra/zgateway-proxy-zippydb-meta/) discusses overload protection; the [AWS Builders' Library on retries](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/) describes retry amplification. Neither is an interview-question report.
+
+</details>

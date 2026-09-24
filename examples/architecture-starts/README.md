@@ -40,3 +40,10 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [Typeahead: useful suggestions before the next keystroke](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/typeahead-search.md) | [typeahead_search.py](typeahead_search.py) |
 | [File synchronization](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md) | [file_synchronization.py](file_synchronization.py) |
 | [Web crawler: be fast without attacking one site](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/web-crawler.md) | [web_crawler.py](web_crawler.py) |
+| [Feature rollout: the switch that failed after 100%](../../curriculum/03-production/02-delivery/problems/feature-rollout.md) | [feature_rollout.py](feature_rollout.py) |
+| [Slow request: the healthy average hid a timeout](../../curriculum/03-production/04-observability/problems/slow-request.md) | [slow_request.py](slow_request.py) |
+| [Metrics platform: query the right time window](../../curriculum/03-production/04-observability/problems/metrics-platform.md) | [metrics_platform.py](metrics_platform.py) |
+| [Overload: protect the requests that can finish](../../curriculum/04-scale-and-evolution/02-performance-cost/problems/overload-shedding.md) | [overload_shedding.py](overload_shedding.py) |
+| [Knowledge assistant: the citation that lost access](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/knowledge-assistant.md) | [knowledge_assistant.py](knowledge_assistant.py) |
+| [Support assistant](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md) | [support_assistant.py](support_assistant.py) |
+| [Personalized ranking: low latency and evidence of quality](../../curriculum/04-scale-and-evolution/03-ai-systems/problems/personalized-ranking.md) | [personalized_ranking.py](personalized_ranking.py) |

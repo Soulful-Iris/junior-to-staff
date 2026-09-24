@@ -1,5 +1,86 @@
 # Feature rollout: the switch that failed after 100%
 
+## What you are building
+
+> Roll out a new invoice-calculation path to a subscription product. The web path looks healthy at 5% exposure, but a daily renewal worker will not execute until midnight. Users must remain in a stable cohort and operators need an immediate way to restore the old compatible behavior.
+
+**Working contract:** Evaluate a versioned flag against a stable subject identity. Exposure is deterministic for a given flag salt and subject. Turning the flag off restores the supported old path; it cannot undo irreversible writes already made by the new path.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100,000 eligible accounts; 5% initial exposure | About 5,000 accounts, with random variation; hash cohorts are not an exact-count allocation. |
+| Daily renewal job | A ten-minute observation window cannot reveal a defect in a path that runs once per day. |
+| One-minute configuration freshness bound | Record applied version and age; define the fallback when refresh is stale. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/feature_rollout.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/feature_rollout.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| flag_config | flag_id,version,salt,percentage,overrides | Deterministic exposure and explicit emergency control. |
+| exposure_event | subject,flag_version,variant,path | Evidence of which behavior actually ran. |
+| release_record | code_version,config_version,data_compatibility | Rollback boundary and owner. |
+
+## AWS implementation
+
+![Feature rollout: the switch that failed after 100%: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/feature-rollout.svg)
+
+AppConfig distributes the policy; application code evaluates exposure and preserves compatible behavior. A flag cannot reverse an external charge or repair incompatible stored data.
+
+## Build it in this order
+
+### 1. Keep both paths compatible
+
+Introduce the new code behind a flag while retaining the old reader/writer contract. Inventory web requests, scheduled jobs, retries and admin tools that use the behavior. Record any data change the old code cannot understand before calling the flag a rollback mechanism.
+
+### 2. Assign and record stable cohorts
+
+Hash a stable subject with a fixed flag salt; increasing percentage should include the previous cohort. Record actual exposure at execution time, not only configuration assignment. Keep employee overrides and emergency-off precedence explicit.
+
+### 3. Observe the relevant work cycle
+
+Compare errors, latency and business outcomes for equivalent exposed/control cohorts. Wait through the daily renewal path and representative traffic before widening exposure. Low traffic may require a longer observation window rather than a claim that zero errors proves safety.
+
+### 4. Exercise rollback and cleanup
+
+Turn the flag off and confirm the old path processes records written during exposure. Reconcile external effects that cannot be undone. After adoption, remove dead code and retire the flag under a named owner/date so configurations do not accumulate indefinitely.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Config consumer | Validate snapshots, expose applied version and keep a documented stale-config fallback. |
+| Metrics | Record bounded variant/path labels and stable release identity; protect personal cohort identifiers. |
+| Rollback | Limit controller permissions to the relevant application/environment; retain the prior valid configuration. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Assignment repeats consistently, a larger rollout retains prior exposure, and 0% disables everyone. |
+| Disable after a new-path write | The old path can still read/process the record or the documented repair is required. |
+| Observe only daytime traffic | The rollout remains unproven for the midnight renewal path. |
+
+## The next design decision
+
+Let product change the hash salt mid-rollout. Explain cohort churn and experiment contamination, then make salt changes an explicit new experiment rather than a harmless configuration edit.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “A new checkout path works in staging. Release it to 5% of customers, then 50%, then everyone. A billing bug appears only after a full day. How do you make activation, observation, and rollback safe?”
 
 **Your contract.** Use a stable customer assignment (not a fresh coin toss per request), a compatible control path during the rollback window, and a meaningful error signal. A percentage rollout alone cannot catch a bug that appears after a daily job runs. This is a constructed exercise.
@@ -65,3 +146,5 @@ AWS AppConfig can roll back on configured CloudWatch alarms during deployment an
 **Practice artifact:** Draw control plane, request path, and measurement path. Trace one customer across 5%, 50%, rollback, and next-day batch processing.
 
 **Source boundary:** Original prompt. [AWS AppConfig rollback documentation](https://docs.aws.amazon.com/appconfig/latest/userguide/monitoring-deployments.html) establishes AWS behavior; a [May 2026 Meta ingestion migration](https://engineering.fb.com/2026/05/12/data-infrastructure/migrating-data-ingestion-systems-at-meta-scale/) illustrates why transition and rollback strategies matter, without implying Meta asks this question.
+
+</details>
