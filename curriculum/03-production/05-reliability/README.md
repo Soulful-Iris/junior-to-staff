@@ -2,13 +2,23 @@
 
 Budget failures, bound overload, and recover from evidence.
 
+<section class="chapter-context" markdown="1">
+
+## Choose failure behavior before the dependency slows down
+
+A dependency that normally takes 200 ms begins taking two seconds. Slots stay occupied, queues grow, and retries add more attempts. Even after the dependency recovers, the service needs spare capacity to catch up.
+
+Separate successful user work from attempts, calculate the error allowance, and bound admission and waiting. The local arithmetic and incident exercises supply reproducible inputs. Follow recovery until useful work is current again, not merely until one alert clears.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
 
 [Trace requests and diagnose production symptoms](../04-observability/README.md)
 
-An availability target is only concrete once it is a downtime budget: the nines table in [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) is what turns 99.99% into fifty-three minutes a year.
+An availability target is only concrete once it is a downtime budget: the nines table in [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md) is what turns 99.99% into fifty-three minutes a year.
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -16,11 +26,11 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Reliability](failure-budgets.md) |
-| 2 | [Reliability: count users, attempts, and work separately](labs/reliability/README.md) |
-| 3 | [Retries spend the capacity needed for recovery](cases/retry-amplification.md) |
-| 4 | [Risk and incidents](risk-and-incidents.md) |
-| 5 | [Incident desk: the page cleared, the queue did not](labs/reliability/incident.md) |
+| 1 | [Set an error budget and bound retries during overload](failure-budgets.md) |
+| 2 | [Calculate error budgets, retry amplification and recovery capacity](labs/reliability/README.md) |
+| 3 | [Bound retry load and reconcile a lost payment response](cases/retry-amplification.md) |
+| 4 | [Mitigate an incident, verify recovery and complete the follow-up](risk-and-incidents.md) |
+| 5 | [Diagnose stale work after the request-error alert clears](labs/reliability/incident.md) |
 | 6 | [Build restartable CSV export jobs](problems/durable-jobs.md) |
 | 7 | [Schedule reports without duplicate logical runs](problems/job-scheduler.md) |
 

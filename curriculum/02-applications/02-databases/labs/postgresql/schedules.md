@@ -1,6 +1,14 @@
-# Candidate worksheet: drive two independent sessions
+# Drive conflicting transactions in two PostgreSQL sessions
 
 [Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
+
+## Application and assignment
+
+This worksheet makes concurrency visible one statement at a time. Session A represents one buyer or doctor, and session B represents another. Keeping a transaction open lets you choose exactly when the other session reads or tries to write.
+
+Follow the numbered columns in order, record returned rows and waits, and reset the stated fixture between scenarios. The starting schema and complete lab setup are linked below. Running both columns in one connection would remove the conflict you are trying to study.
+
+## Contract and starting evidence
 
 Read the [problem contract and diagrams](README.md) first. This is a worksheet
 for that lab, not an additional problem. Open two terminals with

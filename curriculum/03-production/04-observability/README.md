@@ -2,6 +2,16 @@
 
 Use logs, metrics, and traces to answer a concrete system question.
 
+<section class="chapter-context" markdown="1">
+
+## Explain an affected user’s request from recorded evidence
+
+Ana’s save takes 1.2 seconds while the overall dashboard looks normal. You need enough evidence to locate her request and distinguish waiting for a database connection from executing a query. Raw URLs and private payloads are not required to make that relationship visible.
+
+Read a structured event, trace the timed operations, and choose bounded metric dimensions. Extend the evidence across queued work, then discuss sampling, collection failure, and retention. The deliverable is an explanation supported by records, not a dashboard screenshot alone.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,7 +24,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Observability](logs-metrics-traces.md) |
+| 1 | [Use logs, metrics and traces to explain one slow request](logs-metrics-traces.md) |
 | 2 | [Find database-pool waiting in slow API requests](problems/slow-request.md) |
 | 3 | [Ingest and query metrics with bounded cardinality](problems/metrics-platform.md) |
 

@@ -1,6 +1,14 @@
-# Quantity investigation · zero is intentional
+# Preserve zero when applying a quantity update
 
 [Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
+
+## Application and assignment
+
+A shop user changes an item quantity from five to zero. The application reports success but keeps five. In this exercise, zero is an intentional value, while an omitted field means “leave the quantity unchanged”. JavaScript truthiness does not express that distinction.
+
+Repair the small TypeScript function below and state the runtime validation policy for null, strings, negative values, and fractions. This is a focused code exercise with an inline baseline. The linked importer is a separate, larger package investigation.
+
+## Contract and starting evidence
 
 > “A customer changes quantity from five to zero, presses Save, and sees five again.
 > The UI and API both say success. Reproduce this before changing the fallback.”

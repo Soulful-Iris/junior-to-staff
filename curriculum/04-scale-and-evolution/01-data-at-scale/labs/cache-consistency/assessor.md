@@ -1,4 +1,6 @@
-# Assessor notes: cache and authorization boundaries
+# Review cache load, fresh-read and revocation guarantees
+
+Open after the [cache exercise](README.md) and [revocation extension](revocation.md). Follow one miss, one stale read and one revoked request across the actual enforcement boundaries. The table separates a result demonstrated in one process from a guarantee across several instances.
 
 Keep this separate from the candidate attempt. These are constructed exercises;
 passing reference tests does not establish independent interview readiness.

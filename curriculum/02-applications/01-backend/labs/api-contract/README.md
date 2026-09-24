@@ -1,6 +1,14 @@
-# A valid HTTP 200 with an invalid body
+# Validate provider responses before returning an API result
 
 [Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+
+## Application and assignment
+
+A shop asks a pricing provider for the cost of two items. Its own client expects a whole number of cents, so `200` means $2.00. A provider can return HTTP 200 while sending the wrong JSON type, such as the string `"200"`. Transport success and a valid application result are different facts.
+
+Use the supplied Python boundary model to follow one request through media-type, input, and provider-response validation. First predict which layer rejects each example. Then inspect the validators and extend one boundary. The AWS diagram explains where those checks belong, while this local exercise creates no gateway or function.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Our quote API accepts quantity 2 and should
 return integer `total_cents: 200`. The provider changes its response to string

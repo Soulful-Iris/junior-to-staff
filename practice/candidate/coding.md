@@ -1,4 +1,6 @@
-# Candidate · event consumer
+# Consume inventory events without counting replays twice
+
+A fulfillment dashboard tracks changes in item counts. An event `e1` adds two books, while `e2` removes one. Delivery may repeat `e1`, but that does not mean two more books arrived. Implement the in-memory consumer described below. This session does not require a database or message broker.
 
 > “A fulfillment dashboard receives events with `id`, `item` and integer `delta`.
 > Redelivery is normal. Implement a consumer that returns item totals and never counts

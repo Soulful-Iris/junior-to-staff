@@ -1,10 +1,32 @@
-# The change loop
+# Make code changes reviewable and recoverable
+
+A shop stores prices in cents. A developer needs to fix a discount so an item priced at 1999 cents with a 200-cent discount costs 1799 cents. The same patch also renames files and removes a database column. If checkout breaks after release, those unrelated changes make the cause and recovery path harder to identify.
+
+You will separate a coherent behavior change from unrelated work, write the reason beside the patch, and distinguish reverting source code from recovering data or external effects.
 
 [Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
-> Project connection · feeds **P1 (it works)**
+> Project connection · feeds [Reading-list stage 1: build the reading-list application](../../../projects/reading-list/stages/01-it-works/README.md)
 
-## At the whiteboard
+## Compare the patch with the behavior being requested
+
+```diff
+- return price_cents - discount_percent
++ return price_cents - discount_cents
+```
+
+This illustrative patch changes one unit mismatch. It is not sufficient by itself: the caller must actually pass a discount in cents, and invalid or excessive discounts need a defined policy. A useful review description says: “The caller provides a 200-cent discount. The handler treated that value as a percentage field. This change uses the agreed cents value and preserves the existing total representation.”
+
+| Proposed work | Include with this repair? | Reason |
+|---|---|---|
+| Correct discount calculation and its caller | Yes | Implements the named behavior |
+| Demonstrate 1999 minus 200 returns 1799 | Yes | Shows the observable result |
+| Rename unrelated logging modules | Separate change | Does not explain or repair the discount |
+| Delete a column still used by old code | Separate staged migration | Requires its own compatibility and recovery plan |
+
+A Git commit records a source change. A database commit records a transaction's stored changes. A successful Git revert does not undo database writes already performed by the released code.
+
+## Reason through the changed situation
 
 > “A checkout fix also renames thirty files and removes a database column.
 > Ten percent of checkouts now fail. Make the next change easy to review,
@@ -24,7 +46,7 @@ flowchart TD
   Schema --> Review
 ```
 
-## The mental model
+## Follow the mechanism and its limits
 
 ![A change moves through edit, commit, review, merge and execution; production observations feed the next change.](../../../assets/diagrams/change-loop.svg)
 
@@ -92,7 +114,7 @@ Cite the relevant hunks. State unknowns and checks you did not run.
 Approve, request changes, or ask a specific question, with evidence.
 ```
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 Start [Stage 1: Build the shared reading-list application](../../../projects/reading-list/stages/01-it-works/README.md) with a
 repository, `.gitignore`, a lockfile decision and a short scope note. Build a
@@ -132,4 +154,4 @@ flowchart TD
 **Redraw challenge:** show why a clean Git revert cannot undo an already sent
 payment or restore a deleted database row.
 
-[Testing](../../02-applications/04-testing/testing-strategy.md) · [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
+[Choose checks that reveal the behavior a change can break](../../02-applications/04-testing/testing-strategy.md) · [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)

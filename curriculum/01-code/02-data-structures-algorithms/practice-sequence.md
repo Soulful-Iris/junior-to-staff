@@ -1,6 +1,12 @@
-# Coding interviews · start here
+# Choose a coding problem and work through its contract
 
 [Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+
+## Your first complete attempt
+
+Begin with [Two sum](problems/01-two-sum/README.md). A reconciliation tool receives amounts such as `[3,3]` and asks for two distinct positions totaling 6. Write `(0,1)` before choosing the implementation, then explain why a single `[3]` cannot reuse its own position.
+
+Repeat that method through the progression below: concrete result first, state and invariant next, then code and a changed requirement. This page is a route through exercises, not another algorithm you need to implement.
 
 > “I will give you a concrete input and a required output. Explain the contract,
 > show a simple correct approach, then improve it and respond when a constraint
@@ -67,4 +73,4 @@ Open [Two sum](problems/01-two-sum/README.md). Clarify → trace → code → te
 
 **Junior:** correctness, tests, complexity. **Senior:** add changed constraints and practical integration. **Staff:** keep the same coding fluency; add API ownership, failure boundaries, and migration tradeoffs. These are practice targets, not company-wide leveling rules.
 
-[Contracts and solutions](reference.md) · [Why the patterns work](pattern-notes.md) · [Current interview evidence](../../../docs/research/interview-evidence.md) · [Interview home](../../../practice/interview-guide.md)
+[Contracts and solutions](reference.md) · [Explain algorithm invariants and the changes that invalidate them](pattern-notes.md) · [Current interview evidence](../../../docs/research/interview-evidence.md) · [Interview home](../../../practice/interview-guide.md)

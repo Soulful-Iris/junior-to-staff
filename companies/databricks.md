@@ -1,5 +1,14 @@
 # Databricks · senior backend / product engineering
 
+## Your worked rehearsal: schedule dependent work and reject stale completions
+
+A data workflow has tasks A and B that must both finish before task C starts. If A finishes first, C is still waiting. If a worker crashes after an external effect but before reporting success, repeating the task can duplicate that effect unless its destination recognizes the operation.
+
+Implement deterministic readiness for one process, then add concurrent completion and crash recovery. Distinguish task identity, attempt identity, and downstream effect identity before choosing a queue or durable store.
+
+**Starting point:** these drills are build briefs. Implement in a local file or draw the requested architecture. The worked answer is an explanation, not a supplied end-to-end application. Choose one drill per session, then change one requirement after the baseline works.
+
+
 A [2026 anonymized candidate account summarized by Interview Query](https://www.interviewquery.com/guides/databricks-software-engineer) mentions a dependency scheduler, multithreaded logger, a graph problem, and a bookshop architecture discussion across interviews. This is **one edited, unverified report**, not a measured question-frequency list. Databricks' [Lakebase product](https://www.databricks.com/product/lakebase) grounds the data-platform follow-ups below; its features are not evidence of interview questions.
 
 ## The room · correctness under concurrency
@@ -10,7 +19,7 @@ A [2026 anonymized candidate account summarized by Interview Query](https://www.
 
 ![Animated dependency scheduler exposing why early enqueue violates prerequisites and a ready queue fixes the issue](../assets/companies/databricks-dag.svg)
 
-## Coding bench · eight drills
+## Choose a coding exercise · eight drills
 
 Only categories 01–03 are mentioned by that single candidate summary; exact inputs, wording, and frequency remain unknown.
 
@@ -25,7 +34,7 @@ Only categories 01–03 are mentioned by that single candidate summary; exact in
 | 07 · Merge sorted event runs without losing duplicates | `[1,3]` + `[1,2]` → `[1,1,2,3]` | Spill to disk and backpressure |
 | 08 · Idempotent SQL-style upsert by `(tenant,event_id)` | replay `e1` with same payload → one row | Conflicting replay, transaction isolation |
 
-## Design board · five prompts
+## Choose an architecture exercise · five prompts
 
 | Prompt | Initial requirement | Change the requirement |
 | --- | --- | --- |
@@ -35,7 +44,7 @@ Only categories 01–03 are mentioned by that single candidate summary; exact in
 | Operational-to-analytics sync · original | Copy changed rows | Late updates, deletes, backfill, lakehouse freshness |
 | Query service · original | Run isolated tenant queries | Hot tenants, runaway scans, cost budgets |
 
-## Niche mock · schedule the work, not the hope
+## Worked session · schedule the work, not the hope
 
 **Interviewer:** “Implement `run(tasks, dependencies, workers=2)`; no task starts before all prerequisites finish. Tasks can fail. Make the first version deterministic; then tell me what changes with several workers and a crash.”
 
@@ -76,7 +85,25 @@ flowchart TD
  end
 ```
 
-**Follow-up 1 (senior):** “A worker crashes after side effects but before reporting success.” Retry with attempt IDs and idempotent downstream effects; distinguish at-least-once execution from exactly-once business outcome. **Follow-up 2 (staff):** “The platform serves hundreds of tenants.” Add fair scheduling, tenant quotas, per-region recovery, dead-letter policy, lag metrics, and a bounded graph-size contract. Explain how you migrate scheduler state while work is running.
+**Follow-up 1 (senior):** “A worker crashes after side effects but before reporting success.” Use attempt IDs for execution ownership and a stable logical-operation key for idempotent downstream effects; distinguish at-least-once execution from exactly-once business outcome. **Follow-up 2 (staff):** “The platform serves hundreds of tenants.” Add fair scheduling, tenant quotas, per-region recovery, dead-letter policy, lag metrics, and a bounded graph-size contract. Explain how you migrate scheduler state while work is running.
+
+### Worked extension: recover ownership without repeating a business effect
+
+Give each attempt its own ID, but keep a stable logical operation key for a downstream effect that must not repeat across attempts. A new attempt ID used as a new payment key would permit a second payment. Reject completions from stale attempts at the authoritative state transition. Update task success and dependent readiness atomically, or persist enough event identity to replay the transition without decrementing a child twice.
+
+```mermaid
+flowchart TD
+  Ready["Durable ready task"] --> Claim["Claim attempt and epoch"]
+  Claim --> Worker["Worker"]
+  Worker -->|"stable effect key"| Provider["Idempotent destination"]
+  Worker --> Commit["Conditional completion"]
+  Claim --> Commit
+  Commit --> Children["Advance dependent readiness once"]
+  Old["Stale attempt"] --> Commit
+  Commit -->|"epoch mismatch"| Reject["Reject stale result"]
+```
+
+For multiple tenants, bound each tenant’s ready and running work and decide how shared capacity is allocated. A graph-size cap also bounds scheduler metadata. Regional recovery must preserve the current write authority and accepted tasks, not only reconstruct a queue from process memory.
 
 <details><summary>Debrief · what a strong answer contains</summary>
 

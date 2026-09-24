@@ -1,8 +1,29 @@
-# AI systems
+# Evaluate an AI feature and enforce task-level limits
 
 [Curriculum](../../README.md) · [Build AI features with evidence and controlled actions](README.md)
 
-> Project connection · feeds **P4 (it reasons, provably)**
+> Project connection · feeds [Reading-list stage 4: add an evaluated AI feature](../../../projects/reading-list/stages/04-it-reasons/README.md)
+
+## The optional feature and the decision you need to make
+
+A research team saves technical articles to a reading list. Members can tag them manually. You are adding a button that suggests tags from an allowed set such as `database` and `frontend`. The suggestion is optional. A model outage must not prevent saving a link or choosing a tag manually.
+
+For an article titled “SQL and CSS”, both tags might be appropriate. For a private document outside the member’s access, the feature must not retrieve its contents at all. These are different checks: suggestion quality and permission enforcement.
+
+### Define one task before scoring it
+
+An illustrative feature response might be:
+
+```json
+{"suggested_tags":["database","frontend"],"status":"suggested","attempts":1}
+```
+
+A fallback would report `status: "unavailable"` and an empty suggestion list, while leaving manual controls usable. Do not report a fallback as a successful model answer.
+
+Your task is to decide whether a candidate tagger is useful enough to release, with evidence for supported cases, serious mistakes, latency, and cost. The [evaluation lab](labs/evaluations/README.md) uses a deterministic provider fixture so you can reproduce failures without credentials or a model bill. A hosted model and real corpus evaluation are additional work, not results established by that fixture.
+
+The 10-cent and one-second budgets below are hypothetical product limits. They are not current provider prices. Count the whole task, including retries and failed charged calls.
+
 
 > “Our tag suggestions pass twenty regressions, but a judge with 99% agreement missed a serious failure. The provider now times out. Tell us whether to release and how the reading list remains usable within a 10-cent, one-second task budget.”
 
@@ -18,7 +39,7 @@ Constructed optional AI-product exercise. Work from a contract and a failure mod
 
 Start by stating the oracle and severity; separate tuning cases from regressions and held-out labels; test sensitivity to a known defect; calculate class-specific metrics; then combine quality with independent permission, cost and latency gates. The [runnable evaluation lab](labs/evaluations/README.md) supplies cases, real mutants, a fake-provider outage and a separate scored decision.
 
-## The one-liner
+## The principle behind the design
 
 Putting a model inside your product is an engineering problem, not a prompting
 problem. The work is deciding what the model sees, proving the output is any
@@ -26,7 +47,7 @@ good, stopping it being turned against you, and knowing what each answer costs
 in money and in milliseconds. If you cannot do the second one, you do not have a
 feature, you have a demo.
 
-## The failure it prevents
+## Follow the failure through the system
 
 Two failures, and they look nothing alike.
 
@@ -40,7 +61,7 @@ the same disease as a test suite that cannot fail, wearing a model.
 content from the outside world, and it can send things out — an email, a
 request, a tool call. That combination creates an exfiltration risk. Treat an external document that requests a tool action as untrusted data. Authorization must remain outside model-generated instructions.
 
-## The mental model
+## Mechanisms and their limits
 
 ### Context engineering, of which retrieval is one part
 
@@ -89,7 +110,7 @@ A task may make several model/tool calls. Measure cost per task, including retri
 Options to compare on the measured workload: prompt caching (order your prompt
 static-first so the cacheable prefix is stable), model routing with a measured
 escalation rate, a batch tier for anything not interactive, and a hard spend cap
-per key — because a runaway loop is not a probabilistic risk, it is a Tuesday.
+per key — because a loop can spend repeatedly without completing useful work.
 
 For streaming, total completion latency alone misses the early user experience. Users feel
 **time-to-first-token** and then the gap between tokens. Budget those separately
@@ -116,7 +137,7 @@ Done badly:
 - Cost discovered at the end of the month.
 - A model doing something a lookup table would do more accurately, for free, in microseconds.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — error analysis before any metric**
 
@@ -180,7 +201,7 @@ Do not propose a filter as the fix.
 6. **Measure time-to-first-token from the user's side**, not from the API's. The queue in front of the model is part of the latency.
 7. **Turn the model off** and see what your product does. That is your degradation path, whether or not you designed it.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P4**, the reading list gets one AI feature — a summary, a tag suggestion, a
 "what should I read next". Small. The feature is not the work.
@@ -190,7 +211,7 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 - A judge, if used, with a confusion matrix, failure precision/recall, severity misses and independent label provenance.
 - Per-task cost recorded and a hard cap in code.
 - Time-to-first-token measured from the browser.
-- A written trifecta analysis for your own design, with the leg you cut named.
+- A written trifecta analysis for your own design, with the enforced boundary and remaining disclosure routes named.
 - A stated answer to "why is this a model and not a rule", and it must be honest.
 
 **Acceptance criteria:**
@@ -200,7 +221,7 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 - Turning the model off leaves the product usable.
 - The cost cap has been tested by hitting it.
 
-## Words you now own
+## Terms used in this lesson
 
 - **context engineering** — deciding everything the model can see when it answers. Retrieval is one input to it.
 - **hybrid retrieval** — keyword and embedding search combined, then reranked.
@@ -219,7 +240,7 @@ On **P4**, the reading list gets one AI feature — a summary, a tag suggestion,
 **Not covered here:** training or fine-tuning models, and the research side of
 evaluation. This section is for an application engineer shipping a feature. The
 security material here is the product-facing slice; the general case is
-**11 · Security**.
+[the security lesson](../../02-applications/05-security/trust-and-authorization.md).
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
 

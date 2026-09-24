@@ -1,10 +1,33 @@
-# Working with an AI that writes the code
+# Specify and verify an AI-generated change
+
+A stock-management screen lets a user change the quantity of an item. The item currently has seven units. Setting it to zero means it is out of stock, while omitting the quantity from a partial update means leave it unchanged. An assistant generated code that accidentally treats both situations as the same.
+
+Your job is to define those meanings, inspect the proposed implementation, and gather evidence from the actual boundary being changed. The lesson is about deciding whether a patch implements the product rule, regardless of who wrote it.
 
 [Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
 > Project connection · feeds **every project in this guide**
 
-## At the whiteboard
+## See why a plausible one-line implementation loses zero
+
+```javascript
+const current = 7;
+const supplied = 0;
+console.log(supplied || current); // 7: zero selects the fallback
+```
+
+`||` chooses its right side when the left side is falsy. Zero is falsy in JavaScript, but zero is valid product data here. Replacing `||` with `??` preserves zero, yet still treats null as absent. This exercise rejects null, so the repair needs an explicit presence/type decision as well.
+
+| Wire input | Meaning | Expected stored quantity |
+|---|---|---:|
+| `{"quantity":0}` | Explicitly set stock to zero | 0 |
+| `{}` | No quantity change requested | 7 |
+| `{"quantity":null}` | Invalid under this contract | 7, with rejection |
+| `{"quantity":"0"}` | String, not an allowed integer | 7, with rejection |
+
+Write this table before inspecting the assistant's expected results. An **oracle** is the expectation used to judge an observed result. If the expectation merely copies the generated expression, both can repeat the same mistake. The [quantity investigation](../../02-applications/04-testing/labs/quantity-debug/README.md) isolates this defect.
+
+## Reason through the changed situation
 
 > “An assistant implemented quantity updates and supplied passing tests.
 > A customer cannot save zero. What should you check before accepting a repair?”
@@ -48,7 +71,7 @@ flowchart TD
   Tests --> Decision[Review results and remaining limits]
 ```
 
-## The mental model
+## Follow the mechanism and its limits
 
 ![Specification and generation lead to verification; the result must be checked against an independently chosen expectation.](../../../assets/diagrams/verify-bottleneck.svg)
 
@@ -103,7 +126,7 @@ A short homemade replacement is not automatically safer than a maintained
 library. Compare the required behavior, security surface, maintenance cost,
 license and dependency graph—not just line count.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 Before P1, keep a short `DECISIONS.md`: the chosen contract, meaningful
 alternatives, unresolved assumptions and how they were checked. Record actual

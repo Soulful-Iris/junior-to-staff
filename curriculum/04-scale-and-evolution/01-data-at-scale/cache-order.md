@@ -1,6 +1,12 @@
-# Stateful coding: design an LRU cache
+# Trace LRU eviction before implementing its linked order
 
 [Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
+
+## What the cache remembers
+
+A preview service keeps a few decoded objects so repeated reads can reuse them. Capacity counts entries in this exercise. When a new entry would exceed the limit, the service removes the entry whose most recent successful use is oldest. Reading a present entry changes that order even though its value stays the same.
+
+Your task is to trace the sequence below, then implement the complete linked-list problem. No AWS cache is required. The shared `LRU` helper linked at the end uses an ordered-map library, while the standalone problem deliberately asks you to implement recency pointers yourself.
 
 > “Capacity is two entries: put a, put b, get a, then put c. Which key must disappear, and what must remain constant-time?”
 
@@ -15,6 +21,14 @@ This is a short prerequisite lesson. Attempt the complete [manual lru cache prob
 [Static diagram](../../../assets/learning/lru-order-still.svg)
 
 **The idea:** The map finds an entry. Recency order chooses eviction. A get moves the existing node to the most-recent end.
+
+| Operation | Least recent → most recent | Outcome |
+|---|---|---|
+| Put a | a | One entry |
+| Put b | a, b | Capacity reached |
+| Get a | b, a | Reading a refreshes its position |
+| Put c | a, c | Evict b, which was used least recently |
+
 
 ## Your 45-minute session
 

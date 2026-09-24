@@ -1,4 +1,4 @@
-# Interview practice within the curriculum
+# Turn a worked lesson into an independent interview practice session
 
 [Practice drawing the architecture](../curriculum/03-production/01-system-design/whiteboard.md) · [Motion gallery](../assets/learning/README.md)
 
@@ -7,8 +7,8 @@ Understand the concept. Implement the mechanism. Explain the tradeoff under time
 ## What the interviewer is asking you to demonstrate
 
 > “A user retries a save after a timeout. Show me the input, the promised state
-> change, and what the retry may safely repeat. Now suppose the first save
-> committed but its response was lost.”
+> change, and what the retry may safely repeat. Now suppose the database stored the first save,
+> but the response never reached the caller.”
 
 The opening problem is the teaching anchor. Clarify success and failure,
 trace a tiny example, draw or implement a baseline, then change the design only
@@ -21,7 +21,7 @@ constraints until after your attempt.
 
 Follow the [curriculum](../curriculum/README.md) for prerequisites. Use [assessment depth](depth.md) to judge the same problem under harder constraints, and [the assessment packs](README.md) for independent sessions. Coding, full-stack, architecture and operational exercises all refer to the same subject pages.
 
-## How to study a module
+## Move from the reference to your own attempt
 
 Begin with the question before expanding the solution. Predict the visual, implement from memory, test an adversarial input, then answer one follow-up that changes the constraints. Copying a solution into your editor is the start of study, not its completion.
 

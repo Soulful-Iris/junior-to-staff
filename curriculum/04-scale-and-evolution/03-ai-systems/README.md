@@ -2,6 +2,16 @@
 
 Design, implement, evaluate, and operate AI features with explicit permission, state, quality and task-budget boundaries.
 
+<section class="chapter-context" markdown="1">
+
+## Keep AI suggestions useful, authorized and bounded
+
+A document assistant must answer from documents the caller may read. A support agent may propose an action without being allowed to approve it. An extraction pipeline may need human review instead of repeatedly retrying malformed data.
+
+Use the evaluation primer and local fixture first. The workbench then supplies four complete reference workflows and separate AWS adapters. A deterministic fixture proves state transitions, not real-model quality. Evaluate actual model behavior separately when you connect a provider.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,8 +24,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [AI systems](evaluation-and-budgets.md) |
-| 2 | [May we ship a tagger that passes every regression?](labs/evaluations/README.md) |
+| 1 | [Evaluate an AI feature and enforce task-level limits](evaluation-and-budgets.md) |
+| 2 | [Evaluate tag suggestions without hiding rare failures or outage cost](labs/evaluations/README.md) |
 | 3 | [Draft support replies without granting tool authority](problems/support-assistant.md) |
 | 4 | [Serve recommendations with safe fallback ranking](problems/personalized-ranking.md) |
 | 5 | [Build a document assistant with current permissions](problems/knowledge-assistant.md) |

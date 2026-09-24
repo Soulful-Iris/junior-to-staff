@@ -51,7 +51,7 @@ leave any existing state unchanged unless the contract says otherwise.
 | Representative | `"abba"` | `(0, 2)` for `"ab"` | The left edge never moves backward. |
 | Empty | `""` | `(0, 0)` | Half-open indices still form a valid empty slice. |
 | All repeated | `"aaaa"` | `(0, 1)` | A repeated character closes the longer window. |
-| Tie | `"abcaef"` | earliest maximum window | Equal lengths do not replace the earlier answer. |
+| Tie | `"abba"` | `(0,2)` for `"ab"`, before tied `"ba"` | Equal lengths do not replace the earlier answer. |
 | Exact code points | `"aA"` | `(0, 2)` | Case-sensitive symbols are distinct. |
 | Invalid | non-string input | `ValueError` | The API does not coerce collections to text. |
 

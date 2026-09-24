@@ -58,15 +58,15 @@ Predict each expected result, then trace the state that produces it. Explain the
 | Source A, isolated D | Distance to D is infinity | Do not invent a route. |
 | Edge cost −1 | Reject for Dijkstra | Its nonnegative-weight assumption fails. |
 
-For the *largest-observations stream*, each of `n` arrivals costs at most O(log(k+1)); retained state is O(k), and presenting a descending snapshot costs O(k log(k+1)). The quoted `O(n + u log(k+1))` above belongs to a **different task**—counting `n` samples and retaining the k most frequent of `u` distinct values. Keep those bounds separate. For Dijkstra, `V` is vertices and `E` edges; a heap may contain stale tentative routes, so storage can reach O(V+E), and heap operations cost up to O(log(E+1)).
+For the *largest-observations stream*, each of `n` arrivals costs at most O(log(k+1)); retained state is O(k), and presenting a descending snapshot costs O(k log(k+1)). Counting `n` samples and retaining the k most frequent of `u` distinct values is a different task with a bound such as `O(n + u log(k+1))`. Keep frequency and magnitude problems separate. For Dijkstra, `V` is vertices and `E` edges; a heap may contain stale tentative routes, so storage can reach O(V+E), and heap operations cost up to O(log(E+1)).
 
 **Pass before moving on:** Explain what the root guarantees and why FIFO BFS cannot replace Dijkstra for weighted edges.
 
-**Changed requirement:** Your K is almost the number of unique values. Compare sorting with a heap.
+**Changed requirement:** Your K is almost the number of observations retained for a finite batch. Compare sorting with a heap, including the cost of returning a sorted snapshot.
 
 <details>
 <summary>After attempting: reference and explanation</summary>
 
-Compare `top_k_frequent, shortest_paths` in [algorithms.py](../algorithms.py). Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
+Compare the [largest-observations implementation](../problems/26-top-k-stream/solution.py) with `shortest_paths` in [algorithms.py](../algorithms.py). `top_k_frequent` solves a different ranking question. Use [pattern notes](../pattern-notes.md) for the invariant and [contracts](../reference.md) for complexity edge cases. Reimplement tomorrow without copying.
 
 </details>

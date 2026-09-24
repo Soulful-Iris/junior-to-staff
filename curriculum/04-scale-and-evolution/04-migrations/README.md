@@ -2,6 +2,16 @@
 
 Move live data and clients through compatibility, reconciliation, rollback, and retirement.
 
+<section class="chapter-context" markdown="1">
+
+## Move live data while preserving authority and history
+
+A backfill copies version 1 after a user has already saved version 2. A deleted record can reappear if the migration treats absence as the only evidence of deletion. Switching readers back is unsafe if new writes exist only in the new store.
+
+Follow the migration method, then drive the local recovery schedules. Name the write authority, versions, deletion records, replay checkpoint, and retirement boundary. Extend the same reasoning to a hot tenant and regional recovery.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,10 +24,10 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Migrations](migration-method.md) |
-| 2 | [A worker resumes after somebody else finished](labs/recovery-migration/README.md) |
-| 3 | [Move live rows without losing the writes between copies](labs/recovery-migration/migration.md) |
-| 4 | [Move a hot tenant, then lose a region](labs/recovery-migration/regions.md) |
+| 1 | [Migrate live data while preserving writes, deletions and recovery](migration-method.md) |
+| 2 | [Reject stale workers and recover uncertain external effects](labs/recovery-migration/README.md) |
+| 3 | [Copy live rows while preserving new writes and deletions](labs/recovery-migration/migration.md) |
+| 4 | [Move write authority between shards and account for regional data loss](labs/recovery-migration/regions.md) |
 | 5 | [Migrate tenant data with a resumable backfill](problems/multi-tenant-migration.md) |
 | 6 | [Design and rehearse regional write failover](problems/regional-failover.md) |
 | 7 | [Erase account data across stores and in-flight work](problems/erasure-workflow.md) |

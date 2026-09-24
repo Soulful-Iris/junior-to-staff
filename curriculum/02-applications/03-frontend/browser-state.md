@@ -1,387 +1,144 @@
-# Frontend
+# Keep browser drafts, saved data and search results consistent
 
-[Curriculum](../../README.md) · [Connect a usable interface to an API](README.md)
+Alice uses a reading-list app to save documentation links for her team. The browser shows bookmarks returned by an HTTP API. Alice can search the list and edit a bookmark's display title. The database stores accepted changes, while the browser also holds text she has typed but has not saved yet.
 
-> Project connection · feeds **P1 (it works)**
+Those two versions can differ legitimately. Alice saves “Database setup guide,” then keeps typing “— team notes” while the response is delayed. The server has accepted the earlier title. The text field must still contain her newer draft.
 
-## At the whiteboard
+This lesson explains how to represent that situation, handle responses arriving out of order, and make the state understandable through the interface. You can follow the examples first, then run the [supplied bookmark editor](labs/bookmark-editor/README.md). It includes the HTML, TypeScript, HTTP server and SQLite storage. Its demo identity is local-only. You do not need an AWS account for this lesson.
 
-> “A user searches for `cat`, then `car`. The `car` response arrives first, but
-> the screen later switches back to cats. Explain what state the page needs and
-> how you would prove the older response cannot replace the newer intent.”
+## See the interface and the state it represents
 
-The frontend owns the user's **current intent** while the server owns confirmed
-data. These are different facts; a response arriving last is not necessarily new.
+This is a screenshot of the supplied editor after the earlier save completed:
 
-| Event | Expected visible result |
-|---|---|
-| Search `cat`, generation `1` | Loading for `cat` |
-| Search `car`, generation `2` | Loading for `car` |
-| Generation `2` succeeds | Show cars |
-| Generation `1` succeeds afterward | Continue showing cars |
+![The actual editor shows server title Database setup guide at version 2, retains Database setup guide — team notes in the focused title input, and says the newer draft is unsaved.](../../../assets/ui-lessons/bookmark-confirmed-draft.png)
 
-**Ask first:** should old results remain visible while loading, and what should
-the user see when the current request fails?
+Read the screen as three separate facts. **Server** describes the confirmed database record. **Title** contains Alice's current draft. The status sentence explains why they differ. “Saved” alone would be misleading because the visible text has not all been saved.
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant UI as Search UI
-  participant API as Search API
-  U->>UI: cat then car
-  UI->>API: request 1 and request 2
-  API-->>UI: response 2, cars
-  API-->>UI: response 1, cats
-  UI-->>U: Wrong if every arrival replaces state
-```
-
-## Reason through the state
-
-1. Assign each new intent a generation. A response may commit only if its
-   generation still matches the current intent.
-2. Keep loading, success, empty, and failure explicit. An empty array is not a
-   network failure, and a disabled button is not server-side deduplication.
-3. Abort old work to save resources, but retain the generation check because a
-   loader may ignore cancellation.
-4. Test reverse completion and keyboard interaction, not only fast successful
-   responses on your own machine.
-
-**Follow-up:** “The current search fails while an older one succeeds. Can the
-older success clear the error?” No: the same generation rule owns every terminal
-state, not just the result list.
-
-```mermaid
-stateDiagram-v2
-  [*] --> Loading: new intent
-  Loading --> Results: current success
-  Loading --> Empty: current empty result
-  Loading --> Error: current failure
-  Loading --> Loading: ignore stale completion
-  Error --> Loading: retry
-  Results --> Loading: new search
-  Empty --> Loading: new search
-```
-
-Before asking an AI to build the component, write this transition contract. For
-interview practice, implement the coordinator and explain what unmount changes.
-
-## The one-liner
-
-The frontend is the part of your system that runs on hardware you did not
-choose, over a network you cannot trust, in front of the only person whose
-opinion of the software counts. It is not the pretty part. It is a small set of
-placement decisions — where the page gets built, where each fact lives, what
-the user sees while the truth is still in transit — and every one of them is
-checkable.
-
-## The failure it prevents
-
-The reading list demos perfectly on your laptop. Then a real person opens it on
-a phone, on hotel wifi.
-
-They tap **add**. The request is in flight but the screen does not say so, so
-they tap four more times: five copies of the same URL, because the button never
-disabled and the server never checked. The fifth request times out; the list
-code assumed responses succeed, so the page renders nothing at all — just
-white. They give up and reopen the app, and the three items they marked read
-yesterday are unread again, because "read" lived in the page's memory and never
-reached the database.
-
-Nothing in that chain is exotic: a slow network, a missing pending state, a
-server that trusts the client, a fact in the wrong home. Each was invisible on
-the machine it was built on, because a fast network and a mouse hide all four.
-
-The demo did not lie. It was measured on the one machine where none of this can
-happen.
-
-## The mental model
-
-Three placement decisions, made per page rather than per app.
-
-**1. Where does the page get built?** Four answers, and every framework is a
-bundle of defaults over them:
-
-- **Ahead of time (static).** Built once, before anyone asks. Fastest and
-  cheapest to serve; stale by definition. Right for content that changes when
-  you deploy.
-- **On the server, per request.** Fresh every time, and secrets stay on the
-  server. Costs a round trip and server work on every view.
-- **In the browser (client).** The server sends data plus a program that builds
-  the page. Interactions after load feel instant; the first load pays to ship
-  and run that program on the user's device.
-- **Streamed.** The server sends what is ready first and the rest as it comes —
-  a schedule mixing the above.
-
-The question underneath is **who pays, and when**: your build machine
-yesterday, your server now, or the user's phone — the only one you do not
-control and the only one that is ever slow.
-
-"Fast enough" is measured, not felt on your laptop. The field benchmark
-(checked 2026-09-21 at web.dev) is Core Web Vitals at the 75th percentile of
-real visits: main content painted within 2.5 s (LCP), a response to any
-interaction within 200 ms (INP), layout shift under 0.1 (CLS). The human
-thresholds underneath are older than the web: a tenth of a second feels
-instant; a second keeps the thread of thought.
-
-**2. Where does each fact live?** State is any fact the interface must
-remember: the list, the filter, the open dropdown, who is signed in. Each fact
-needs exactly one home, chosen by what the fact must survive.
-
-![Where state lives, as a decision ladder: must another device or person see it, the server; should refresh or a shared link reproduce it, the URL; do far-apart parts of the page need it at once, a shared store; otherwise component memory. One fact in two homes drifts.](../../../assets/diagrams/where-state-lives.svg)
-
-Choose authority **per fact**, not per machine:
-
-| State | Example | Lifetime |
+| Fact | Example | Who may change it? |
 |---|---|---|
-| Confirmed remote state | Saved title A, version 2 | Durable server record |
-| Reconstructible cache | Previously fetched title A | May refetch or evict |
-| Uncommitted local intent | New draft B typed after saving A | Preserve until saved or deliberately discarded |
+| Confirmed record | `Database setup guide`, version 2 | A successful authorized server operation |
+| Current draft | `Database setup guide — team notes` | Alice's typing or an explicit discard/replace action |
+| Pending save | Snapshot of the title sent with its expected version and mutation key | The save coordinator, until the operation resolves |
+| Editor lifetime | Which bookmark is currently open | Selecting or closing the editor |
 
-A save acknowledgment confirms A, not B. Losing B is data loss, not cache
-invalidation. Define reload/navigation persistence explicitly; memory-only drafts
-do not survive refresh. See the [editor trace](labs/bookmark-editor/README.md).
+A **mutation** is an operation that changes server data. Its key identifies this particular save, so retrying a lost response can refer to the same operation. A **version** identifies the server record being edited. These are different identities.
 
-**3. The boundary.** Between the page and the server, data arrives late,
-broken, or not at all. So every server-backed view has four states —
-**loading, error, empty, data** — and only one is the happy path. The empty
-state is the first thing every new user sees. The error state is the difference
-between "the system failed" and the far worse "no items yet" shown over data
-that is fine. "There is nothing" and "I could not find out" must never look the
-same.
+## Follow a save while the user keeps typing
 
+| Event | Confirmed title | Browser draft | Visible status |
+|---|---|---|---|
+| Open the bookmark | Original title, v1 | Original title | Ready to edit |
+| Type A and press Save | Original title, v1 | A | Saving |
+| Type B while A is in flight | Original title, v1 | B | Saving the earlier edit. Newer draft retained |
+| Server confirms A/v2 | A, v2 | B | Earlier edit saved. Newer draft is unsaved |
 
+The implementation captures a draft revision when sending the request. A revision is a counter incremented on each local edit. When the save returns, it replaces the draft only if no newer local edit exists.
 
-## What good looks like
+This excerpt from the [supplied TypeScript](labs/bookmark-editor/web/app.ts) shows that decision. The surrounding handler also checks editor lifetime, mutation identity and response validity:
 
-Accessibility is part of the behavior you must test: operate the page by
-keyboard, keep focus visible, label controls, announce errors and asynchronous
-status, and verify contrast and target usability. The exercises below assess
-those concrete interactions. A generic checklist does not establish legal
-compliance for every product, market, or user need.
-
-Done well:
-
-- For every fact on screen you can say, in one sentence, where it lives and
-  what it survives.
-- Every server-backed view has loading, error and empty designed, and you can
-  force each on demand.
-- The URL reproduces the view: refresh, back, and a pasted link land on the
-  same page, filter and item.
-- The server validates everything it stores; client validation is a courtesy
-  copy, never the enforcement.
-- The whole main flow works with Tab, Enter and Escape; every field has a
-  visible label; focus never disappears.
-- Contrast and target sizes were measured, not eyeballed.
-- Someone has watched it load on a throttled connection and a mid-range phone
-  profile, recently.
-
-Done badly:
-
-- A spinner that never resolves, or a blank page with the real error in a
-  console no user opens.
-- Filters and half-written forms vanish on refresh; the back button loses the
-  view or exits the app.
-- The same fact in three homes, synchronised by effects and luck.
-- Delete works with a mouse and not a keyboard; clickable `<div>`s;
-  `outline: none` because somebody disliked the focus ring.
-- "Validation" that a raw HTTP request walks straight past.
-- The error state and the empty state are the same grey nothing.
-
-When a model writes the interface, the misses cluster — fluent at layout,
-weakest exactly where this section lives. Judge these first:
-
-- **Happy path only.** Loading, error and empty exist only if you demanded them.
-- **Semantics traded for looks.** A `<div>` with a click handler instead of a
-  button, a placeholder doing a label's job, the focus outline removed, ARIA
-  attributes sprinkled where a native element was the fix.
-- **State over-copied.** Server data duplicated into local variables and kept
-  in sync by effects — drift, scheduled.
-- **Client-only validation.** The endpoint believes whatever arrives.
-- **Dependencies by reflex.** A store, a fetching library and a form library
-  for a page that needed none of them.
-- **Plausible inventions.** Endpoints and options that look right and do not
-  exist. Read each as a claim, not a fact.
-
-## Ask Claude for this
-
-**Request 1 — the view, with its state placed first**
-
-```
-Build the list view for the reading list. Before writing any code, list
-every piece of state on this screen, and for each one tell me where it
-lives — server, URL, shared store, or component memory — and what it
-must survive: a refresh, a shared link, another device.
-
-Then implement the view with explicit loading, error and empty states,
-and give me a way to force each of the three so I can look at them.
+```typescript
+if (current.version >= confirmed.version) confirmed = current;
+if (revision === mutation.revision) draft = confirmed.title;
+pending = null;
+saving = false;
+paintEditor(draft === confirmed.title
+  ? 'Saved.'
+  : 'Earlier edit saved. Your newer draft is unsaved.');
 ```
 
-*Why it is asked that way:* the inventory-before-code turns placement into a
-decision you can review instead of a default you inherit. "A way to force each
-state" is the constraint doing the work — an error state you cannot summon
-ships unseen.
+Do not copy only the final assignment into an unrelated component. The guard depends on capturing `mutation.revision` when sending the save and incrementing `revision` when the user types.
 
-*What you should get back:* a table of fact → home → what it survives, then a
-view where you can kill the API, open an empty account, and watch the pending
-state. If every fact landed in a store, the question was not answered; it was
-avoided.
+**Try it:** run the editor, open a bookmark, change its title and save. Use the browser's network throttling to make the pending state visible, then type another suffix before the response returns. Inspect the server label, input and status separately. The screenshot above was captured with the actual server response deliberately held after its database write, so the ordering was controlled rather than inferred from a fast click.
 
-*Push back on:* server data copied into a store or component "for performance"
-with no story for when the copy goes stale; an error state that logs to the
-console and renders nothing; an empty state that is just the absence of rows.
+The supplied editor keeps drafts in memory. Closing the editor or reloading discards unsaved text. Adding a navigation warning or durable local drafts is a separate requirement. Server persistence does not automatically preserve an unsent browser draft.
 
-**Request 2 — the form that does not trust the browser**
+## Let the latest search intent own the results
 
-```
-Add the "add a URL" form. Validate on the client for fast feedback and
-on the server as the real check — the same rules in both places.
+Alice searches for `cat`, then corrects it to `car`. The car response arrives first. The older cat response must not replace it afterward.
 
-Then show me exactly what happens in three cases: the form submitted
-by a raw HTTP request that skips the page entirely; the same URL
-submitted twice; and a submission that takes ten seconds. The submit
-button must not be clickable while a submission is in flight.
-```
+![Search requests complete in reverse order, with a generation check preventing the older response from replacing the current search.](../../../assets/learning/browser-race.svg)
 
-*Why:* the three cases are the three ways forms actually fail, and naming them
-forces the enforcement point onto the server. Left unnamed, you get a polished
-client and an endpoint that believes anything.
+Give each search intent a **generation**, an increasing counter. Capture the generation before awaiting the request, then compare it with the current generation before displaying either results or an error.
 
-*What you should get back:* server-side checks that reject garbage no matter
-what the page did, a pending and disabled submit, and a decision — not an
-accident — about duplicates.
+```typescript
+let generation = 0;
 
-*Push back on:* any suggestion that bypassing the page "won't happen" — the
-client is optional and curl exists; two diverging implementations of "the same
-rules"; errors surfaced only as a toast that vanishes in three seconds.
-
-**Request 3 — the audit you make it do element by element**
-
-```
-Audit this page against WCAG 2.2 AA. Walk it interactive element by
-interactive element: can it be reached with Tab, does it have an
-accessible name, is focus visible on it, does the Tab order match the
-visual order, is its text contrast at least 4.5:1?
-
-List every failure with the exact line that causes it. Do not fix
-anything yet.
+async function runSearch(query: string) {
+  const mine = ++generation;
+  showLoading(query);
+  try {
+    const results = await loadResults(query);
+    if (mine !== generation) return;
+    showResults(results);
+  } catch {
+    if (mine !== generation) return;
+    showError(query);
+  }
+}
 ```
 
-*Why:* "make it accessible" produces a coat of aria-labels; element by element
-against named criteria produces findings you can verify. "List, don't fix"
-keeps the judgment with you.
+This is explanatory pseudocode with UI helpers, not another supplied application. The [search-race lab](labs/search-race/README.md) supplies the focused exercise. Abort obsolete requests where supported to save work, but keep the generation check because cancellation can arrive too late or be ignored. Closing a view must also invalidate outstanding work.
 
-*What you should get back:* a concrete failure list — an input with no label, a
-clickable div, a focus order that jumps across the page, a grey caption below
-4.5:1.
+The guard applies to errors too. An old successful request must not clear the error from the current search, and an old error must not replace current results.
 
-*Push back on:* `aria-label` used where a real `<label>` or `<button>` is the
-fix — prefer the native element that carries the behaviour for free; and any
-fix that quietly removes the visible focus indicator.
+## Distinguish empty results from unavailable results
 
-## How you would know it is wrong
+An empty result means the API answered successfully and found no matches. An error means the browser could not obtain a trustworthy answer. They need different messages and actions.
 
-Seven checks, each capable of going red:
+![Actual bookmark editor with a no-such-bookmark search and the message No bookmarks found.](../../../assets/ui-lessons/bookmark-empty.png)
 
-1. **Unplug the mouse.** Tab through sign-in → add → tag → mark read → delete.
-   Anything you cannot reach, or cannot see focused, is red — and in the EU,
-   illegal since June 2025.
-2. **Throttle the network** in the dev tools and click **add** twice. Count
-   the rows in the database, and watch the screen during the wait: if nothing
-   acknowledges the click, real users will do what you just did.
-3. **Measure contrast with a tool**, never your eye — your eye knows what the
-   design intended. Body text below 4.5:1 is red.
-4. **Stop the API mid-session.** A readable failure is green; a blank page or
-   an eternal spinner is red. "No items yet" over data that exists is the worst
-   result here, because it lies.
-5. **Bypass the client.** Send the form endpoint a raw request with a garbage
-   "URL". Anything other than a rejection and zero new rows means the
-   validation was theatre.
-6. **Give a screen reader five minutes** — VoiceOver ships with macOS and iOS,
-   Narrator with Windows, NVDA is free. Do buttons announce as buttons, with
-   names? "Clickable, clickable, clickable" means the page is divs.
-7. **Open a brand-new account.** The first screen is either the empty state you
-   designed or the proof that you never designed one.
+The query above has no matching rows. The user's next action is to change or clear the query. That is different from the controlled API failure below:
 
-> The rule under all seven: the demo on your own laptop, with your own mouse,
-> on your own fast network, is the canonical check that cannot fail — so it
-> proves nothing.
+![Actual bookmark editor after a controlled API 503 response, showing Search failed and a Retry search button.](../../../assets/ui-lessons/bookmark-error.png)
 
-## Your slice of the project
+The failure screenshot uses the real interface with an intentionally unavailable API response. It demonstrates presentation behavior, not a deployed outage.
 
-On **P1**, add:
+| State | What is known | Useful next action |
+|---|---|---|
+| Loading | A request is pending | Wait briefly or cancel where supported |
+| Empty | A successful response contains no matching rows | Clear the filter or create an item if supported |
+| Failed | The requested result is unknown | Retry or retain an explicitly labeled previous result |
+| Loaded | A current response contains rows | Read, edit or paginate |
 
-- The list view with all four states explicit — loading, error, empty, data —
-  and a documented way to force each one.
-- The add-URL form with a pending state, a submit disabled in flight,
-  server-side validation, and a written decision about duplicates.
-- The current filter (and page, if you paginate) carried in the URL.
-- A state inventory in your decisions file: every fact on screen, its home,
-  what it survives. Three columns, however many rows.
+Choose whether previous results remain visible during refresh. If they do, label them as previous data. Do not silently treat them as the answer to a different query. Bound waiting with a deadline or a clear recovery action.
 
-**Acceptance criteria you can check yourself:**
+## Put each kind of state where its lifetime belongs
 
-- Stop the API: the list shows a readable failure that a stranger could tell
-  apart from "empty".
-- A raw request with an invalid body gets a rejection and writes zero rows.
-- A filtered URL pasted into a private window reproduces the same view.
-- The whole flow — sign in, add, tag, mark read — completes with the keyboard
-  only.
-- On a throttled network, double-clicking **add** produces one row, or exactly
-  the duplicate behaviour you wrote down.
+A shared bookmark belongs on the server because other people and devices need it. A shareable search filter can belong in the URL. An unsaved draft belongs to the editing interaction, with a persistence policy chosen deliberately. A tooltip's open state can remain in component memory.
 
-## Words you now own
+![Decision guide for choosing server state, URL state, shared browser state or component memory according to the lifetime and sharing required.](../../../assets/diagrams/where-state-lives.svg)
 
-- **rendering** — turning data into the page; the question is always where and
-  when.
-- **hydration** — attaching interactivity in the browser to HTML that was built
-  on the server.
-- **state** — any fact the interface must remember.
-- **source of truth** — authority for a particular fact: the server owns the
-  confirmed record; a local draft owns the user's not-yet-committed intent.
-- **optimistic update** — showing a result before the server confirms, with a
-  plan to roll back.
-- **pending state** — the screen acknowledging work in flight; its absence is
-  behind most double-submits.
-- **empty state** — what a view shows when there is genuinely nothing; must be
-  distinguishable from an error.
-- **accessible name** — what a control is called when read aloud; supplied by a
-  label, its own text, or ARIA.
-- **focus order** — the sequence Tab walks through the page; it should match
-  the order the eye reads.
-- **contrast ratio** — measured, not judged: 4.5:1 minimum for body text at
-  WCAG AA.
-- **progressive enhancement** — the basic flow works before the client-side
-  program loads; the program improves it.
-- **Core Web Vitals** — the three field metrics (LCP, INP, CLS) at the 75th
-  percentile of real users, not your machine.
+A cache is a reconstructible copy. It may be evicted or refreshed. A draft is new user input that may exist nowhere else. Treating them as interchangeable is how a refresh erases unsaved work.
 
----
+For a filter stored in the URL, demonstrate refresh, Back and opening the same URL in another tab. For private data, the server still checks the requesting user's permissions. A URL carrying an item ID is not authorization to read that item.
 
-**Not covered here:** CSS itself — layout, typography, design systems — is a
-craft this section only borders. Build tooling, caching, offline behaviour,
-real-time updates and animation are deliberately out; performance returns in
-the operating concepts as a budget you defend with numbers. And nothing here helps you
-choose a framework, on purpose: every placement decision above outlives
-whichever one you pick.
+## Make the flow usable with a keyboard and assistive technology
 
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
+Use a real `<label>` for each input and native buttons for actions. Keep focus visible. When a conflict needs a decision, move focus to a useful control without erasing the draft. Announce asynchronous status through an appropriate live region. The supplied editor uses `role="status"` for save and search outcomes.
 
-## Draw it from memory · Separate browser intent from server truth
+Walk the actual task using Tab, Shift+Tab and Enter. Open an editor, type, save, encounter a conflict, resolve it and close the editor. Focus should return to a sensible place. Keyboard operation is one part of accessibility, not proof of complete conformance.
 
-```mermaid
-flowchart TD
-  User["User intent"] --> View["Rendered view"]
-  View --> Local["Draft and pending state"]
-  Local --> Request["Request generation"]
-  Request --> API["Authorized API"]
-  API --> DB[("Server-owned facts")]
-  API --> Guard["Current-generation guard"]
-  Guard -->|"current"| View
-  Guard -->|"obsolete"| Drop["Ignore response"]
-```
+Measure contrast against the applicable [WCAG contrast criteria](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html). Ordinary text generally needs 4.5:1 at level AA, while qualifying large text uses 3:1, with stated exceptions. Inspect labels, focus, status announcements and targets as separate requirements. A generic checklist cannot establish every product's legal obligations.
 
-**Redraw challenge:** Draw two requests completing in reverse order. Which box decides what the user sees?
+## Choose rendering and performance work from the user journey
 
-![Separate browser intent from server truth: mechanism in motion](../../../assets/learning/browser-race.svg)
+| Rendering choice | Where the HTML is produced | A useful fit |
+|---|---|---|
+| Static | During the build | Guides and other content published with a release |
+| Server-rendered | For a request | Pages needing current server data before display |
+| Browser-rendered | By JavaScript on the device | Interactive state after the initial load |
+| Streamed | In pieces as work becomes ready | A page where useful sections can arrive independently |
 
-[Static view](../../../assets/learning/browser-race-still.svg)
+These can coexist. Rendering on the server does not eliminate browser state, and browser rendering does not move authorization out of the server.
+
+Measure loading, responsiveness and visual stability on representative devices. [Core Web Vitals](https://web.dev/articles/vitals) use LCP, INP and CLS, with good thresholds of 2.5 seconds, 200 milliseconds and 0.1 respectively at the 75th percentile. Those page-level measures do not answer whether an edit was lost. Keep correctness and performance evidence separate.
+
+Before adding virtualization or another state library, identify a measured problem: too many rendered rows, an expensive event handler, repeated requests or unclear ownership. Use a bounded list first and record the improvement under the same workload.
+
+## Apply the lesson to your reading-list UI
+
+Start with the [real bookmark editor](labs/bookmark-editor/README.md) to inspect draft and response behavior. For the continuing reading-list project, use its [HTTP API starter](../../../examples/reading-list-starter/README.md) and build your own list and form. These are two different supplied applications. The editor reference edits seeded bookmarks. The reading-list starter supports creating bookmarks, notes and member reading state but does not include a browser UI.
+
+Your result should show loading, empty, failed and loaded states, preserve newer drafts after an earlier save, and reject obsolete search completions. Keep server validation and ownership checks even when the browser disables a button. A raw HTTP caller can bypass the UI.
+
+Explain one complete save using the browser draft, pending request and confirmed database row. Then change the requirement: the user reloads before saving. Choose a discard warning or durable draft design, state its privacy and expiry behavior, and show what appears on return.

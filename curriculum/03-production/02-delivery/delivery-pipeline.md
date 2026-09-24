@@ -1,10 +1,36 @@
-# Delivery
+# Deploy compatible versions and control feature exposure
 
 [Curriculum](../../README.md) · [Deploy changes and control feature exposure](README.md)
 
-> Project connection · feeds **P2 (it survives)**
+> Project connection · feeds [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 
-## At the whiteboard
+## The release you need to make
+
+An order API currently saves the purchaser’s address in `email`. You want to rename it to `contact_email`. Customers continue placing orders while servers update one at a time. For part of the rollout, old and new application versions read the same database.
+
+A deploy replaces running code. It does not rewind records already written. Your task is to sequence this rename so both versions can serve during the supported rollback window, then explain when removing the old field becomes safe. This is a worked release plan for an application, not a request to add checks or approvals to this guide’s publishing pipeline.
+
+### Make the incompatibility visible
+
+These JSON objects illustrate the data each version expects. They are a proposed example, not a route already supplied in the repository.
+
+```json
+{"order_id":"o-42","email":"ana@example.org"}
+```
+
+If the new reader requires `contact_email`, that existing row is missing required data. Renaming the column immediately also breaks an old server still querying `email`.
+
+| Moment | Required behavior |
+|---|---|
+| Old server writes during rollout | The new reader can still interpret its row |
+| New server writes, then rolls back | The old reader can still interpret that row |
+| A backfill stops halfway | Its checkpoint allows a safe restart |
+| Old code and external consumers are retired | Removing the old field has an explicit owner and recovery plan |
+
+Use the [configuration rollout case](cases/configuration-rollout.md) to follow one deployed change through mixed versions. For a running migration exercise, use the [local data migration fixture](../../04-scale-and-evolution/04-migrations/labs/recovery-migration/migration.md). Cloud release routing is a separate deployment choice.
+
+## Plan for versions that coexist
+
 
 > “Version B reads a new required field. Half our instances still run version A,
 > which never writes it. We need to release without stopping traffic. What is
@@ -58,17 +84,16 @@ A strong answer distinguishes deploying code, exposing behavior, and enforcing a
 new data contract. Lead depth adds the owner and completion criteria for each
 stage, including consumers outside the releasing team.
 
-## The one-liner
+## The principle behind the design
 
-[Shipping it](../03-infrastructure/configuration-and-environments.md) made one deploy
+[Build once and supply configuration safely at runtime](../03-infrastructure/configuration-and-environments.md) made one deploy
 reproducible. This section makes deploying so small, frequent and reversible
 that it stops being an event — and treats the pipeline that does it as what it
-is: the most privileged system you own. Two ideas carry everything. Risk lives
-in the size of a change, not in the number of deploys. And putting code on
+is: the most privileged system you own. Two ideas carry everything. Change size affects diagnosis and recovery, while risk also depends on the behavior and data being changed. And putting code on
 servers is a different event from putting a feature in front of users, which
 you can control separately.
 
-## The failure it prevents
+## Follow the failure through the system
 
 The team ships every six weeks, "to limit risk". Release 4.2 is six weeks of
 work: forty-odd changes, a schema migration, a pricing feature marketing has
@@ -93,7 +118,7 @@ rate while exposure is still 1%. Switching the flag off stops new exposure;
 in-flight work and committed effects still need their own recovery plan. Small
 batches help isolate a change, but do not make a dangerous change safe.
 
-## The mental model
+## Mechanisms and their limits
 
 **Small batches make evidence easier to inspect.** A small change is usually
 easier to review, diagnose and reverse than an unrelated bundle of changes.
@@ -121,53 +146,13 @@ control has an owner, review date and tests for both states. Keep the supported
 paths and schema compatible throughout the declared rollback window. Retiring
 the old path closes that window; document the repair/roll-forward plan first.
 
-**The pipeline is the most privileged system you own.** It holds credentials
-to production, and it runs code that arrives in pull requests — dependency
-lifecycle scripts, test code, build plugins, third-party actions. Anyone who
-can influence what it executes is one step from your cloud account; the configuration lesson's npm-worm story was exactly this, harvesting CI credentials at install
-time. Three hardening moves, each from GitHub's own guidance (checked
-2026-09-21):
+### Limit the deployment identity’s authority
 
-- **Pin third-party actions to a full commit SHA.** A version tag can be moved
-  to point at new code after you reviewed it; a SHA cannot. GitHub's docs are
-  blunt: pinning to a full-length SHA is currently the only way to use an
-  action as an immutable release.
-- **Use OIDC instead of static cloud keys.** The pipeline proves its identity
-  to the cloud per run and receives a short-lived, scoped credential. There is
-  no long-lived secret sitting in CI to steal, and the blast radius of a
-  compromise drops from "until someone notices and rotates" to minutes.
-- **Least-privilege job permissions.** Default the CI token to read-only and
-  grant write scopes per job, only where that job needs them.
+A build can execute dependency scripts, plugins, and repository code. A deployment identity can change the running service. Keep those capabilities separate where untrusted changes could otherwise gain production access. Use immutable action revisions, scoped job permissions, and short-lived workload credentials when supported. A short-lived credential reduces exposure duration but can still do serious damage during its lifetime.
 
-**Merge queues.** "All checks passed" contains a quiet lie: each pull request
-was tested against the main branch as it stood when the PR last updated, not
-as it will stand when the PR lands. Two changes can each pass alone and fail
-combined — one renames a function, the other adds a call to the old name; both
-are green, main is broken, and every check told the truth. A merge queue
-closes the gap: it builds a temporary branch of the target plus your change
-plus every queued change ahead of yours, runs the required checks against that
-combined state, and merges only if they pass; a failing change is ejected and
-the rest are retested without it (GitHub's documentation, checked 2026-09-21).
-The cost is latency between approval and merge. The purchase is a main branch
-that is green because it was tested, not because everyone got lucky in the
-same direction.
+A merge queue evaluates combined changes before merging. It is one option for repositories that need that workflow, with waiting time and operational cost. It is not a prerequisite for every automatic publishing pipeline. This guide publishes from main without adding that gate.
 
-**Infrastructure as code, and drift.** The repo describes reality — servers,
-DNS, queues, permissions — and an apply makes reality match the description.
-The point is not automation; it is that the description is reviewable,
-diffable and recreatable, which is what P2 means by destroying the
-infrastructure and getting it back. **Drift** is the enemy: someone fixes
-production by hand at 2am, reality changes, and the description now lies — the
-next apply either reverts their fix or fails strangely. Treat a non-empty plan
-against live infrastructure as a finding, and write hand-made changes back
-into code the next morning. On tools, the licensing facts as of 2026-09-21:
-Terraform has been under the Business Source License since August 2023 —
-source-available, not open source — and HashiCorp has been part of IBM since
-the acquisition closed on 27 February 2025. OpenTofu is the Linux Foundation
-fork that kept the MPL 2.0 licence, and it has genuinely diverged rather than
-trailing: state and plan encryption at rest is an OpenTofu-side feature, and
-it runs its own release line (1.12, May 2026). Neither choice is wrong. Not
-knowing which one you are on, and why, is.
+Infrastructure code records the intended resources and permissions. Compare the proposed plan with current state. Differences can be intentional source changes, manual edits, or provider behavior. Review the cause rather than assuming every difference is unauthorized drift.
 
 **Rollback is a feature you build, and it has a boundary.** Going back must be
 one action, and rehearsed — a rollback nobody has run is a hope with a
@@ -210,7 +195,7 @@ Done badly:
 - A rollback runbook that has never been run, and a migrations folder full of
   one-way doors.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — map the pipeline's privilege before touching it**
 
@@ -297,9 +282,7 @@ touches twelve files is a removal that will not happen.
    should never take traffic: stopped at the health gate, or rolled back
    automatically. If the pipeline exits green while the broken build serves,
    your deploy verifies "the commands ran", not "the deploy worked".
-2. **Find out what your CI token can actually reach.** Print the token's
-   permission set in a job log; list what the cloud role allows, not what you
-   meant it to allow; then, from a pull-request branch in a sandbox, attempt
+2. **Find out what your CI token can actually reach.** Inspect permission metadata without printing a credential value. List what the cloud role allows, not what you meant it to allow. Then, from a pull-request branch in a sandbox, attempt
    one thing it should not be able to do. The gap between intended and actual
    is the finding.
 3. **Roll back and time it**, from decision to the old version serving, with
@@ -309,9 +292,7 @@ touches twelve files is a removal that will not happen.
 4. **Audit flags by age.** List every flag with its creation date. A flag
    older than six months with no owner and no removal date is not a rollout
    tool anymore; it is an unmerged fork of your product. Count them.
-5. **Run a plan against live infrastructure** and read the diff. Non-empty
-   means reality was edited by hand; every line is a change that bypassed
-   review, and one of them is the 2am fix the next apply will silently revert.
+5. **Run a plan against live infrastructure** and read the diff. A difference may come from an intentional code change, provider behavior, defaults, or a manual edit. Explain each difference before applying it. A manual incident repair may need to be incorporated into the source.
 6. **Manufacture the merge-queue failure.** Two branches: one renames a
    function, the other adds a call to the old name. Both pass CI alone. Put
    them through your merge process. If main ends up red, you have just watched
@@ -321,7 +302,7 @@ touches twelve files is a removal that will not happen.
 > have looked like. A pipeline that has never been seen to stop a bad build is
 > not a gate. It is a corridor with green paint.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P2**, the reading list from P1 gets its delivery machinery:
 
@@ -348,10 +329,9 @@ On **P2**, the reading list from P1 gets its delivery machinery:
   it.
 - The rollback time is a measured number, not an estimate.
 
-## Words you now own
+## Terms used in this lesson
 
-- **batch size** — how much change ships per deploy. The dial that actually
-  controls risk.
+- **batch size** — how much change ships per deploy. One influence on review and recovery cost.
 - **deploy** — putting a new artefact on servers. Says nothing about who sees
   it.
 - **release** — routing users onto the new path. The event users experience.
@@ -371,7 +351,7 @@ On **P2**, the reading list from P1 gets its delivery machinery:
 - **OIDC (workload identity)** — CI proving who it is per run and getting a
   short-lived credential, instead of storing a key.
 - **roll forward** — fixing with a new small deploy instead of going back.
-  Only an option because deploys are small.
+  Its usefulness depends on how quickly a compatible repair can be built and deployed.
 
 ---
 
@@ -380,8 +360,8 @@ in-place and their trade-offs; mobile releases, where the store controls the
 deploy and flags stop being optional; versioned artefacts consumed by others —
 libraries and APIs release on contracts, not traffic; and what happens when a
 release goes wrong anyway — detection and response live in
-[Reliability](../05-reliability/failure-budgets.md), and the supply chain beyond your own
-pipeline in [Security](../../02-applications/05-security/trust-and-authorization.md).
+[Set an error budget and bound retries during overload](../05-reliability/failure-budgets.md), and the supply chain beyond your own
+pipeline in [Enforce who can act on each resource and what the server can reach](../../02-applications/05-security/trust-and-authorization.md).
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
 

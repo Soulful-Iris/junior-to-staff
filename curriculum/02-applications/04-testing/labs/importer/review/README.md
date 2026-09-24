@@ -1,6 +1,14 @@
-# Three PRs before the finance release
+# Review three importer patches against data and retry contracts
 
 [Curriculum](../../../../../README.md) · [Find defects and evaluate engineering evidence](../../../README.md)
+
+## Application and assignment
+
+The importer now correctly stores finance records and resumes from its checkpoint. Three teams propose changes to storage, retry timing, and logging. A patch can look smaller or faster while weakening a guarantee another module relies on.
+
+Review the three supplied diff files against the working reference. They are proposals, not edits already applied to your checkout. Submit a separate decision for each patch, with a minimal input or schedule that supports it. Keep the answer key closed until you have made those decisions.
+
+## Contract and starting evidence
 
 > “Three teams want to merge changes before tonight's reconciliation. You have
 > 25 minutes. Which change blocks release, which needs a contract decision, and

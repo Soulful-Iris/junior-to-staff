@@ -1,5 +1,7 @@
 # Run an unfamiliar coding mock
 
+You are practicing how to turn an unfamiliar contract into working code under a training timebox. Start with the [inventory event consumer](candidate/coding.md): repeated deliveries must not increase stock twice. Your output is an implementation, a narrated example, and an explanation of how it changes under a new requirement. The schedule below guides the session, not the algorithm.
+
 Pick one unfamiliar variant from a completed topic. Close the reference files. Use the tools allowed in your target interview.
 
 | Minutes | Do | Evidence |

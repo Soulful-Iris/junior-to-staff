@@ -4,6 +4,18 @@
 
 AWS is the implementation platform for this path. It is not a claim that all interviewers expect AWS product names. Explain the vendor-neutral requirement, then choose a service and show its operational consequences.
 
+## What connects local code to these services
+
+A Python dictionary can demonstrate deduplication, but it cannot share that decision across Lambda invocations. A local SQLite file can demonstrate a transaction, but moving its rows to DynamoDB requires a different storage adapter and data model. The table below names candidate infrastructure roles. It is not a list of services already deployed by every project.
+
+Choose one learning path before creating resources:
+
+- **Understand a boundary locally:** the contract, cache, and recovery models run without AWS credentials.
+- **Exercise a real service directly:** the conditional-write and upload labs provide small CLI/script paths and cleanup.
+- **Deploy a supplied application slice:** the queue lab includes a SAM template, worker, resource permissions, and result contract.
+
+For example, the queue worker reads an SQS message, validates its operation ID and payload, then conditionally writes a DynamoDB result. The template connects the event source and permits the worker’s data access. Both the application code and that infrastructure definition are needed. A diagram alone supplies neither.
+
 ## Service decisions
 
 | Need | Candidate AWS services | Decision to explain | Implementation proof |

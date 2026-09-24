@@ -2,6 +2,16 @@
 
 Turn a clear brief into a working solution, then handle changed requirements.
 
+<section class="chapter-context" markdown="1">
+
+## Solve a specified problem before changing its requirements
+
+A transaction list, a schedule, or a dependency graph gives you concrete input to work with. Each problem states what to return, how ties and invalid values behave, and which changes would require a different approach.
+
+Keep the reference closed for your first attempt. Produce a solution, walk a small example, explain its cost, then handle the follow-up. The problems reuse the preceding foundations and include separate runnable references for comparison.
+
+</section>
+
 The preceding **Data structures and algorithms** chapter teaches the shared tools once. Here the focus is the problem: what to return, what can go wrong, which state to keep, and how the design changes under a follow-up. A folded refresher is available when you need one.
 
 ## Concepts and worked examples

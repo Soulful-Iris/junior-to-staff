@@ -1,4 +1,6 @@
-# Review assessor key
+# Review key: distinguish data corruption, retry policy and useful logging
+
+Open after reviewing the [three proposed importer patches](README.md). The table identifies the smallest input that supports each decision. A review should say what would change for the user or stored data, then name the narrow repair.
 
 | PR | Decision and minimal reproduction | Regression / lead follow-through |
 |---|---|---|

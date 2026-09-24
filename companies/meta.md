@@ -1,5 +1,14 @@
 # Meta · senior product engineering
 
+## Your worked rehearsal: deliver notifications while preserving preferences and recovery
+
+When Alice posts, Bob may receive an inbox item if he opted in. Alice’s Save must not wait for every follower’s inbox write, and a repeated queue delivery must not create duplicate inbox items. A push notification is a separate external delivery that may already be on a device.
+
+Design durable acceptance and an inbox update first. Then introduce a large sender, queue delay, and privacy changes. The session uses constructed product requirements and does not claim to match Meta’s production services.
+
+**Starting point:** these drills are build briefs. Implement in a local file or draw the requested architecture. The worked answer is an explanation, not a supplied end-to-end application. Choose one drill per session, then change one requirement after the baseline works.
+
+
 Meta's [published full-loop guide](https://d3no4ktch0fdq4.cloudfront.net/public/course/files/Meta_SWE_full_loop_guide.pdf) describes coding, system/product design, and behavioral conversations, generally 45 minutes each in a four-to-six-interview loop. It discusses solving two coding problems in roughly 40 minutes and evaluating communication, problem solving, and verification. A [self-reported E5 *infrastructure* account](https://www.reddit.com/r/leetcode/comments/1pfmd8u/my_meta_e5_infra_interview_experience_coding_ai/) from within the past year describes tree/graph and array/string coding, a staged AI coding exercise, design, and behavioral rounds. Infra is not product; that report is a single anecdote, **not a general Meta E5 blueprint**.
 
 ## The room · time-boxed clarity
@@ -10,7 +19,7 @@ Meta's [published full-loop guide](https://d3no4ktch0fdq4.cloudfront.net/public/
 
 ![Animated notification fanout with a celebrity write bypassing per-follower synchronous writes](../assets/companies/meta-fanout.svg)
 
-## Coding bench · eight original drills
+## Choose a coding exercise · eight original drills
 
 The first three mirror *categories* in one E5 infra report, not its exact prompts; the remainder are original practice.
 
@@ -25,7 +34,7 @@ The first three mirror *categories* in one E5 infra report, not its exact prompt
 | 07 · LRU media metadata cache | capacity 2, `a,b,get(a),c` → evict `b` | Thread safety and stale versions |
 | 08 · Progressive mini-system: implement inbox then add `mark_read` and dedupe | replay `e1` twice → one unread item | Revise design live, document AI use if permitted |
 
-## Design board · five original prompts
+## Choose an architecture exercise · five original prompts
 
 | Prompt | First-pass requirement | Interviewer changes it |
 | --- | --- | --- |
@@ -35,7 +44,7 @@ The first three mirror *categories* in one E5 infra report, not its exact prompt
 | People search | Search public profiles | Freshness, privacy and blocked users |
 | Stories | Publish expiring media | View counts, deletion, cost |
 
-## Niche mock · notification fanout
+## Worked session · notification fanout
 
 **Interviewer:** “When someone posts, notify their followers. Design a product API and service for ordinary and very large accounts. What does a user see if they were offline?”
 
@@ -74,6 +83,24 @@ flowchart TD
 ```
 
 **Follow-up 1 (senior):** “The notification queue is six hours behind.” Prioritize recent/interactive traffic, cap retries, expose lag, and make the inbox serve the durable source rather than claim eventual processing is instantaneous. **Follow-up 2 (staff):** “A privacy deletion crosses regions while push has already gone out.” Specify what can be recalled, enforce checks before new deliveries, build deletion propagation and audit metrics; avoid promising retractable push notifications.
+
+### Worked extension: isolate urgent work from a six-hour backlog
+
+A single FIFO backlog can make a fresh reply notification wait behind old bulk work. Define classes from product requirements, apply bounded admission, and allocate processing capacity. Do not simply relabel every delayed item “urgent”. At 500 useful writes/s and 350 new writes/s, only 150/s remains for catch-up. A backlog of 90,000 items takes at least ten minutes under those constant-rate assumptions.
+
+```mermaid
+flowchart TD
+  Outbox["Durable notification intent"] --> Classify["Priority and expiry policy"]
+  Classify --> Urgent["Interactive queue"]
+  Classify --> Bulk["Bulk queue"]
+  Urgent --> Workers["Bounded capacity allocation"]
+  Bulk --> Workers
+  Workers --> Access["Current preference and visibility"]
+  Access --> Inbox["Conditional inbox item"]
+  Access --> Drop["Recorded expiry or denial"]
+```
+
+Recheck permission before new delivery. A deletion can remove an inbox item or suppress a pending push, but cannot guarantee recall of content already displayed by another device. Name that limit in both the product response and recovery plan.
 
 <details><summary>Debrief · what a strong answer contains</summary>
 

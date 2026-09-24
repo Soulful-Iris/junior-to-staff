@@ -1,6 +1,12 @@
-# Coding reference · contracts and complexity
+# Compare coding contracts, return values and complexity
 
 [Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+
+## Which implementation are you looking at?
+
+The course has complete standalone problem bundles and an older shared helper module. Similar names do not guarantee identical behavior. For example, a longest-window helper returns a length, while the standalone problem returns positions so a UI can highlight the original text.
+
+Use this page to compare contracts and costs after your attempt. Follow a standalone problem’s own reference when checking its exact output and rejection behavior. The tables below describe shared variants explicitly.
 
 A pattern is useful when you can explain its invariant and recognize when it stops applying. Recent reports support studying maps/prefix sums, windows, graphs, caches, and practical implementation. They do **not** establish a global frequency ranking. [Evidence](../../../docs/research/interview-evidence.md).
 

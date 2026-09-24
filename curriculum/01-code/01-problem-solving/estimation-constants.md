@@ -1,10 +1,16 @@
-# The constants you estimate with
+# Estimate request rates, storage, latency and availability
 
 [Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
-> Project connection · feeds **P3 (it holds under load)**
+> Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 
-## At the whiteboard
+## Start with the user action and the unit
+
+A bookmark service stores a URL each time a member presses Save and reads several rows when a member opens a list. Those are different operations with different storage and traffic costs. Estimation turns a product description into quantities you can compare with a capacity or freshness requirement.
+
+Your task here is arithmetic, not an AWS deployment. Work the example using rough figures, then identify which approximation could change the design. The twenty-million-user workload is hypothetical. A small application can use the same method with tens of users, and an ownership problem may need no capacity estimate at all.
+
+## Convert a daily workload into rates
 
 > "Design the bookmark service. Twenty million people use it daily. Each one
 > saves about five links and opens their list about fifty times."
@@ -16,7 +22,7 @@ there is nothing to design against.
 
 Three constants do almost all of the work, and none of them needs a calculator.
 
-## The mental model
+## Three useful estimates and their limits
 
 **A day is about 100,000 seconds.**
 
@@ -85,7 +91,7 @@ requests, so do not substitute minutes for requests without stating the model.
 
 ## The same question, worked
 
-Back to the whiteboard. Twenty million people, five saves and fifty opens each.
+Use twenty million daily users, five saves and fifty opens each. For this exercise, **assume a peak three times the approximate daily-average rate**. That factor is a workload assumption, not a general law.
 
 - Writes: 20 M × 5 = **100 M per day** → 1,000 per second → call it **3,000 at
   peak**.

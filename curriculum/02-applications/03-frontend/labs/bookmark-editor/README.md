@@ -30,6 +30,18 @@ text. Those are explicit scope limits, not a promise of reload/offline durabilit
 A production editor must add a discard warning or durable draft storage before
 promising that navigation loses nothing.
 
+## See the editor before running it
+
+The screenshot below is from this repository's actual local application. Alice has already saved the shorter title. She has typed a longer draft that the completed save must not erase.
+
+![Real bookmark editor showing confirmed version 2 beside a longer unsaved draft and an explicit status message.](../../../../../assets/ui-lessons/bookmark-confirmed-draft.png)
+
+Read **Server** as the last confirmed record and the **Title** field as current user input. The phrase “Earlier edit saved” applies to the shorter title. The extra words remain unsaved. You will follow the exact state and HTTP operations responsible for this result below.
+
+The preceding pending state looks like this. The screenshot holds the real save response after the database write so the newer typing can happen before the browser receives confirmation:
+
+![The title input retains a newer draft while the save button says Saving and the status explains that the earlier edit is still in flight.](../../../../../assets/ui-lessons/bookmark-pending-draft.png)
+
 ## Run locally
 
 Python 3.10+ and Node 24+ are enough for the application. No npm dependency is required

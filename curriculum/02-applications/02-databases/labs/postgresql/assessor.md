@@ -1,4 +1,6 @@
-# PostgreSQL assessor key
+# Review observed PostgreSQL schedules and transaction reasoning
+
+Use this key after the [two-session PostgreSQL exercise](README.md). Compare the actual reservation, on-call and retry outcomes with the table below. Ask the learner to explain the statement order that produced each result before naming an isolation level.
 
 The candidate should operate two independent sessions and narrate observed state,
 not merely recite isolation names. The [runner](run_schedules.py) automates the

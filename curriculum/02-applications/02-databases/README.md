@@ -2,6 +2,16 @@
 
 Model authoritative data, explain a query plan, and protect concurrent writes.
 
+<section class="chapter-context" markdown="1">
+
+## Decide what a row means and who may change it
+
+Several people can read the same bookmark while each has their own read/unread state. Two buyers can also race for the last item in stock. These examples show why a correct-looking table and a transaction keyword do not by themselves enforce the product’s rules.
+
+Model identity and access patterns first. Then inspect query plans and drive conflicting writes in two PostgreSQL sessions. Keep the supplied PostgreSQL lab separate from the starter API’s SQLite database. Explain both returned rows and rejected operations.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,9 +24,9 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Data and databases](data-models-and-queries.md) |
-| 2 | [Two buyers, one unit, and a transaction that is not enough](labs/postgresql/README.md) |
-| 3 | [Candidate worksheet: drive two independent sessions](labs/postgresql/schedules.md) |
+| 1 | [Model shared data and enforce changes with database constraints](data-models-and-queries.md) |
+| 2 | [Prevent overselling and write skew with the right transaction boundary](labs/postgresql/README.md) |
+| 3 | [Drive conflicting transactions in two PostgreSQL sessions](labs/postgresql/schedules.md) |
 
 ## Explore failures and changed requirements
 

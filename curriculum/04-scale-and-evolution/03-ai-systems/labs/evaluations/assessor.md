@@ -1,4 +1,6 @@
-# Assessor: release decision
+# Review the tag-suggestion release decision and cumulative task budget
+
+Use this after the [tag-suggestion evaluation exercise](README.md). The feature proposes tags, and a separate judge tries to detect failures. Decide whether the supplied evidence supports the declared release scope. The worked values below explain why an overall agreement percentage can hide the most consequential missed failure.
 
 The ordinary reference regressions may all pass. They have demonstrated sensitivity to three named mutants. That is positive evidence about the narrow contract, not proof of semantic tag quality or absence of security defects outside the fixture.
 

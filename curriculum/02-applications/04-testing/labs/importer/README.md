@@ -1,6 +1,14 @@
-# Transaction importer · diagnose another team's package
+# Repair decimal amounts and restart recovery in a transaction importer
 
 [Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
+
+## Application and assignment
+
+A finance job downloads pages of transaction records from a partner and stores amounts as integer cents. It remembers a page cursor so a later invocation can continue. If amounts are rounded incorrectly or progress advances before a page is stored, reconciliation is wrong even when every HTTP response succeeds.
+
+You receive an unfamiliar Python package, fixtures, and a separate reference solution. Diagnose the 29-cent loss and skipped-page symptom, repair the package, and explain how identity and progress remain correct after a restart. The exercise stores synthetic records. It moves no real money.
+
+## Contract and starting evidence
 
 > “Finance imports USD transactions from a partner. Yesterday's reconciliation lost
 > 29 cents and a restart skipped a page. The partner says its API is healthy.

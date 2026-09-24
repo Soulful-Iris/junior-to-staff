@@ -1,10 +1,24 @@
-# Scope and leverage
+# Choose the scope that removes repeated engineering work
+
+Three teams consume order events from the same producer. One expects an amount in cents, another expects decimal dollars, and a third still reads an old field name. Engineers spend time repairing failures after each producer change. You can keep patching each consumer or introduce a shared versioned contract.
+
+You will compare the local repair with the broader intervention, including migration and support work. “Scope” means the boundary of the problem you take responsibility for. A larger boundary is useful only when its benefit justifies its cost.
 
 [Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## Make the repeated incompatibility visible
+
+| Consumer | Current expectation | Event arriving today |
+|---|---|---|
+| A | `amount_minor: 1999`, currency USD | Field missing |
+| B | `amount_decimal: "19.99"`, currency USD | Compatible |
+| C | `total: 1999` with undocumented units | Meaning ambiguous |
+
+The shared intervention might define one versioned producer envelope and owned adapters for A and C. It should not force unrelated domain calculations into one central service. Deliver one example event, the three adaptation decisions and an estimate of maintenance work removed versus work introduced. The arithmetic below uses constructed team-day estimates, not a claim about universal platform savings.
+
+## Reason through the changed situation
 
 > “Three teams each spend a day a week repairing incompatible event payloads.
 > You can fix this week's failures or propose a shared contract. How do you
@@ -111,7 +125,7 @@ trade-off, owner and measure of success. They may approve unchanged. An exercise
 can test that reasoning but cannot manufacture employment history or predict a
 hiring outcome.
 
-[Writing that decides](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
+[Write a design document that supports a decision](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
 
 ## Draw it from memory · Show who owns the shared constraint
 

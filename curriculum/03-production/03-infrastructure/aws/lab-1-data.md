@@ -1,6 +1,14 @@
-# Lab 1 · create once, then compare intent
+# Use DynamoDB conditions to reject duplicate creates and stale edits
 
 [Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
+
+## Application and assignment
+
+The application is saving bookmark `bookmark-1`. Two callers might both try to create that ID, or edit it from the same old version. Reading first and writing later leaves a gap in which another caller can act. A condition attached to the write lets storage decide atomically.
+
+Run the supplied CLI sequence against one disposable DynamoDB table. Observe the first create, repeated create, valid versioned edit, and stale repeat. The commands bypass an application API to isolate the storage mechanism. Production authentication and HTTP error mapping are not supplied by this lab.
+
+## Starting contract
 
 A “check then insert” sequence has a race: two callers can both observe absence. A conditional write evaluates absence at the storage boundary.
 

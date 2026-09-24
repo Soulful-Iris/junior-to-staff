@@ -1,10 +1,32 @@
-# Performance and cost
+# Find the bottleneck and measure cost per useful operation
 
 [Curriculum](../../README.md) · [Measure capacity and control performance costs](README.md)
 
-> Project connection · feeds **P3 (it holds under load)**
+> Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 
-## At the whiteboard
+## The page that remains slow after an optimization
+
+A user opens a reading-list page containing 40 bookmarks. The API first loads the list, then issues another database lookup for each bookmark’s author. The page waits for the combined result. This repeated lookup pattern is often called **N+1**: one list query plus N related queries.
+
+An engineer speeds up a formatting helper, but users barely notice. Your task is to account for elapsed time before choosing the next change, then compare that change under the same data size and offered load. A faster helper and a faster page are different results.
+
+### Recognize the work in code
+
+The following pseudocode illustrates the problem. It is not a claim that the supplied editor performs these queries.
+
+```python
+bookmarks = load_page(group_id, limit=40)
+for bookmark in bookmarks:
+    bookmark.author = load_author(bookmark.author_id)
+return bookmarks
+```
+
+A bounded batch can fetch the distinct authors needed by this page. It must still restrict access, handle missing authors, and preserve the page’s order. Replacing 40 calls with one call over the entire database would introduce a different resource problem.
+
+Use the [deployment headroom case](cases/deployment-headroom.md) for a worked capacity example, or measure a request in the [local bookmark editor](../../02-applications/03-frontend/labs/bookmark-editor/README.md). Local timing is local evidence. A cloud cost claim additionally needs the billed units and allocated idle capacity.
+
+## Attribute the time before choosing a change
+
 
 > “A list endpoint takes 900 ms. An engineer made one helper four times faster,
 > but the endpoint barely improved. Show me the measurements you want before
@@ -60,14 +82,14 @@ Senior depth explains the bottleneck and verifies the result. Lead depth include
 capacity forecasts, workload isolation, budgets, and the ongoing cost of the
 optimization itself.
 
-## The one-liner
+## The principle behind the design
 
 Performance and cost are the same skill pointed at different units. Both are
 found by measuring where the time or the money actually goes, and both are lost
 by optimising what you assumed. The hard part is not making things faster. It is
 finding out what is slow, which is almost never what you think.
 
-## The failure it prevents
+## Follow the failure through the system
 
 An engineer spends three days making a function four times faster. It was
 already 0.4% of the request. Nothing measurable changes, and the change ships
@@ -83,7 +105,7 @@ did it, because cost was never attributed to anything. By the time somebody
 cares it is archaeology, and the usual response is to turn off the thing that
 *looks* expensive rather than the thing that *is*.
 
-## The mental model
+## Mechanisms and their limits
 
 Three things, and the first is the whole section.
 
@@ -99,8 +121,7 @@ A p99 is a distribution boundary, not a claim that exactly 1% take four seconds.
 Measure page-level elapsed time and dependency correlation rather than inferring
 them from marginal percentiles.
 
-So: **percentiles, always.** p50 to know what typical feels like, p99 to know
-what bad feels like, and the gap between them to know how consistent you are.
+Report distributions alongside counts and error rates. p50 describes a median and p99 a tail boundary. Small sample sizes make extreme percentiles unstable. Averages remain useful for capacity arithmetic, but do not explain the tail on their own.
 
 **Identify what the profiler sampled.** A CPU flame graph attributes sampled
 CPU activity; an allocation profile attributes allocations. Neither is
@@ -160,7 +181,7 @@ Done badly:
 - Cost discovered monthly, by whoever opens the invoice.
 - A performance fix with no before-and-after at the same percentile, which is indistinguishable from no fix at all.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — read the profile, do not theorise about the code**
 
@@ -227,12 +248,12 @@ second.
 1. **Measure the same percentile before and after.** A p50 improvement quoted against a p99 baseline is not a comparison. This is the commonest way a performance claim turns out to be empty.
 2. **Check the optimisation applied at all.** Assert the new code path actually ran — a flag not set, a cache not warmed, a config not deployed all produce "no change", and so does a change that did nothing.
 3. **Look at the p99, specifically, after a caching change.** If it got worse, you moved cost from the typical case to the unlucky one.
-4. **Profile in production, not on your machine.** Different data volume, different cache state, different network. A laptop profile is a hypothesis.
+4. **Use evidence from a representative environment.** Production profiles can reveal real workload behavior. Controlled local profiles are useful for hypotheses, but account for data volume, cache state, contention, and network differences.
 5. **Compute the unit cost and ask somebody else on the team for theirs.** If nobody can produce one, cost is unattributed, whatever the tagging policy says.
 6. **Turn the profiler on and measure its own overhead** on your workload. The published figure is somebody else's workload.
 7. **Ask what you rejected.** If every optimisation you ever measured turned out to be worth doing, you are only measuring the ones you already believed in.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P3**, after the load test:
 
@@ -248,17 +269,17 @@ On **P3**, after the load test:
 - You have four numbers: p50 and p99, before and after, measured the same way.
 - The change you made is the one the profile pointed at, and you can show the profile.
 - The unit cost has its guesses marked.
-- The rejected optimisation is written down with its reason. If there isn't one, you were choosing what to measure by what you wanted to fix.
+- The rejected optimisation is written down with its reason. If none was rejected, state the alternatives considered and the evidence available rather than inventing a rejection.
 
-## Words you now own
+## Terms used in this lesson
 
-- **percentile** — the value below which that share of requests fall. p99 is the unlucky hundredth person.
+- **percentile** — the value below which that share of requests fall. p99 is a boundary in a measured sample or distribution, not an identity assigned to one person.
 - **tail latency** — the slow end of the distribution. Where the people who leave live.
 - **flame graph** — a profile whose width represents its sampled quantity
   (for example CPU samples or allocated bytes); read the profiler and units first.
 - **diff flame graph** — two profiles compared, so you see what a release changed rather than what is slow.
 - **continuous profiling** — always-on sampling in production, cheap enough to leave running.
-- **N+1** — one query to get a list, then one per item. The commonest real cause of slow pages.
+- **N+1** — one query to get a list, then one per item. A repeated-access pattern that can add avoidable calls.
 - **attribution** — knowing which service, team or feature owns a line on the bill.
 - **unit cost** — what one request, user or job costs. The number that makes cost decidable.
 - **coordinated omission** — a load generator that waits for slow responses and so never sends the requests that would have been slowest, quietly under-reporting your tail.
@@ -266,7 +287,7 @@ On **P3**, after the load test:
 ---
 
 **Not covered here:** the measurement plumbing — metrics, traces, cardinality
-and what telemetry itself costs — is [Observability](../../03-production/04-observability/logs-metrics-traces.md).
+and what telemetry itself costs — is [Use logs, metrics and traces to explain one slow request](../../03-production/04-observability/logs-metrics-traces.md).
 This section is what you do with the numbers once you can see them. Micro-
 benchmarking individual functions is deliberately absent: it is a specialist
 skill and, for this whole-system question, almost always the wrong instrument for the question.

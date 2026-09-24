@@ -18,16 +18,16 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 
 ## The tool before the challenge
 
-An interval has two endpoints. This problem uses **closed** endpoints: `[1,3]` and `[3,4]` share 3 and merge. Sorting by start gives one current merged boundary:
+An interval has two endpoints. This problem uses **half-open** intervals: `[1,3)` excludes 3 and `[3,4)` includes it. They do not overlap, but their union has no gap, so this contract explicitly merges touching ranges. Sorting by start gives one current merged boundary:
 ```python
 intervals = [[3, 4], [1, 3]]
 print(sorted(intervals))  # [[1, 3], [3, 4]]
 ```
-Compare the next start with the current end; extending with `max` matters for a fully nested interval. Calendar meetings may instead be half-open.
+Compare the next start with the current end; extending with `max` matters for a fully nested interval. A reservation system may choose to preserve separate touching meetings even though their covered time is contiguous.
 
 ### A design choice worth saying aloud
 
-Make a sorted **copy** of the intervals if the caller retains ownership of its input; sorting the received list in place would be an observable side effect. The active merged interval stores the covered end, so use `max(current_end, next_end)` for nesting. Write down the closed-endpoint rule before deciding whether touching ranges merge.
+Make a sorted **copy** of the intervals if the caller retains ownership of its input; sorting the received list in place would be an observable side effect. The active merged interval stores the covered end, so use `max(current_end, next_end)` for nesting. State half-open endpoint semantics and the separate merge-touching policy before choosing the comparison.
 
 <!-- interview-rehearsal:start -->
 

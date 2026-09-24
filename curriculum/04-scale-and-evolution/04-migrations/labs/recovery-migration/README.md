@@ -1,6 +1,14 @@
-# A worker resumes after somebody else finished
+# Reject stale workers and recover uncertain external effects
 
 [Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
+
+## Application and assignment
+
+A background worker fetches a bookmark’s display title. Worker A pauses long enough for its claim on the job to expire. Worker B takes over and saves a newer result. A resumes and tries to overwrite it. The expired claim did not stop A’s code from running.
+
+Use the local reference to identify the authority checked at the final write. Then extend the reasoning to a provider that may complete a billable operation before its response is lost. A local result constraint and a provider’s idempotency record protect different effects.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Worker A fetches an old page title and pauses.
 Its five-second lease expires; B takes the job and stores the new title. A

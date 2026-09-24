@@ -1,8 +1,21 @@
-# Reliability
+# Set an error budget and bound retries during overload
 
 [Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
 
-> Project connection · feeds **P3 (it holds under load)**
+> Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
+
+## Keep saving bookmarks while optional work slows down
+
+The reading-list application stores a URL when someone clicks Save. It also fetches the remote page’s title so the list can display “Database setup guide” instead of a long address. Saving the URL is the essential action. Fetching its title can finish later or report that it is unavailable.
+
+In this constructed scenario, twenty worker slots are shared by work that calls a dependency. A call normally takes 200 ms, then starts taking two seconds. Each occupied slot finishes work more slowly, and retries add more attempts. A timeout can limit one wait while an unbounded queue still grows behind it.
+
+Your task is to define successful user work, allocate its failure allowance, and choose explicit admission, waiting, and retry limits. First calculate the small example below. Then use the [local reliability lab](labs/reliability/README.md), whose deterministic model lets you inspect request counts and attempt counts separately. Those model outputs do not measure a deployed AWS fleet.
+
+### Distinguish one user action from its attempts
+
+A single Save is one eligible user event. An original dependency call plus two retries is three attempts for that event. If the save misses its agreed deadline, a later successful retry does not retroactively make that user experience fast.
+
 
 > “Our reading-list service has twenty workers. Dependency calls rise from 200 ms to two seconds, and retries keep arriving after recovery. Preserve bounded latency and useful throughput. Which counters would distinguish user requests from attempts?”
 
@@ -18,7 +31,7 @@ This opening scenario is constructed practice. Start with the contract before tu
 
 Work in this order: name the eligible user event; aggregate counters; trace the attempt tree; calculate the capacity and waiting-work budget; bound intake and deadlines; then measure recovery with fresh arrivals still present. Run the [arithmetic and incident exercises](labs/reliability/README.md) for exact assertions and a separate assessor key.
 
-## The one-liner
+## The principle behind the design
 
 Reliability is not uptime you hope for. It is behaviour you designed for the
 moments when part of the system is failing — and part of it always is. The
@@ -26,7 +39,7 @@ senior version has numbers: how much failure is allowed, what happens when the
 allowance runs out, how long each call waits, and who gets dropped first when
 there is not enough system to go around.
 
-## The failure it prevents
+## Follow the failure through the system
 
 The following timeline is a constructed illustration, not a measured incident.
 
@@ -45,7 +58,7 @@ The review will call the database the cause. It was only the trigger. The
 outage was designed in months earlier, one locally reasonable retry policy at a
 time.
 
-## The mental model
+## Mechanisms and their limits
 
 Five ideas, one discipline: **decide the failure behaviour on a calm afternoon,
 or the system decides it during the incident.**
@@ -140,7 +153,7 @@ Done badly, you see:
 - A circuit breaker whose open state has never once been exercised.
 - Postmortems that stop at the trigger and never name the loop that kept it down three more hours.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — the policy, not the maths**
 
@@ -235,7 +248,7 @@ cleanly" that never says what queued retries and cold caches do in minute six.
    exhausted and nothing froze, you have arithmetic, not a policy.
 6. **Shed under load and diff the classes.** Past the threshold, lower-priority work should shed first while critical demand remains within measured capacity. Repeat above critical capacity and verify explicit bounded refusal; both classes may then degrade.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P3**, the reading list meets load. From this section:
 
@@ -262,7 +275,7 @@ On **P3**, the reading list meets load. From this section:
 - The worst-case number of database calls for one click is written down, and
   the measured amplification matches it.
 
-## Words you now own
+## Terms used in this lesson
 
 - **SLO** — the target on a measurement (the SLI) over a window.
 - **error budget** — one minus the SLO: the failure you are allowed to spend.

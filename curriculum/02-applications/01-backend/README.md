@@ -2,6 +2,16 @@
 
 Trace a request, define its contract, and coordinate bounded work.
 
+<section class="chapter-context" markdown="1">
+
+## Follow one save from HTTP input to durable data
+
+A research team saves links in a shared reading list. The API accepts a URL, records it, and may attempt to obtain a display title. The URL can be safely saved even when that optional lookup fails. The later lessons introduce concurrent work, deadlines, tracing, and durable jobs around this interaction.
+
+Start with the supplied local HTTP/SQLite API. Each project tells you which behavior is already implemented and which boundary you will add. AWS diagrams describe deployment responsibilities, while local commands remain the first runnable step.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,12 +24,12 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Backend](request-lifecycle.md) |
-| 2 | [A valid HTTP 200 with an invalid body](labs/api-contract/README.md) |
-| 3 | [Runtime boundaries · which work can overlap?](labs/bounded-executor/runtime.md) |
-| 4 | [Bounded fan-out · preserve order under partial failure](labs/fan-out/README.md) |
+| 1 | [Follow an HTTP request from validation to durable state](request-lifecycle.md) |
+| 2 | [Validate provider responses before returning an API result](labs/api-contract/README.md) |
+| 3 | [Distinguish I/O overlap from parallel CPU execution](labs/bounded-executor/runtime.md) |
+| 4 | [Fetch a bounded batch while preserving order and partial results](labs/fan-out/README.md) |
 | 5 | [Bounded blocking queue with shutdown](problems/42-bounded-blocking-queue/README.md) |
-| 6 | [Bounded executor · four workers, eight queued tasks](labs/bounded-executor/README.md) |
+| 6 | [Bound accepted work and make executor shutdown predictable](labs/bounded-executor/README.md) |
 
 ## Explore failures and changed requirements
 
@@ -41,7 +51,7 @@ Each project explains its application, names the deliverable, links the supplied
 
 ## Reference guides
 
-- [Backend — five projects](projects.md)
+- [Choose a backend project: tracing, deadlines, fetching, contracts or jobs](projects.md)
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 

@@ -1,10 +1,18 @@
-# May we ship a tagger that passes every regression?
+# Evaluate tag suggestions without hiding rare failures or outage cost
 
 [Curriculum](../../../../README.md) · [Build AI features with evidence and controlled actions](../../README.md)
 
+## Application and assignment
+
+A reading-list feature proposes tags for article titles. Users can still tag manually. The team has a candidate implementation, known regression cases, and a judge that scores its answers. High overall agreement can conceal a judge that misses every rare serious failure.
+
+Use the deterministic tagger and provider fixtures to decide what the evidence supports. Calculate failure recall, inspect permission boundaries, and follow the cost and time budget during an outage. This exercise evaluates control flow and scoring logic. It does not establish the quality of a hosted language model.
+
+## Contract and starting evidence
+
 > “Our reading-list tagger passes twenty regression cases. Its judge agrees with humans 99% of the time. Yesterday we fixed a tenant-isolation defect; today the model provider is slow. Decide what evidence permits a release, and keep the manual tagging feature useful during failure.”
 
-Constructed optional AI-product practice, not a general senior requirement or a reported interview prompt. Start with [testing](../../../../02-applications/04-testing/testing-strategy.md) and [AI systems](../../evaluation-and-budgets.md). Attempt the decision before reading [the assessor](assessor.md).
+Constructed optional AI-product practice, not a general senior requirement or a reported interview prompt. Start with [testing](../../../../02-applications/04-testing/testing-strategy.md) and [Evaluate an AI feature and enforce task-level limits](../../evaluation-and-budgets.md). Attempt the decision before reading [the assessor](assessor.md).
 
 | Contract | Input | Required result |
 |---|---|---|

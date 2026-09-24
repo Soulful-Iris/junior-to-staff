@@ -1,6 +1,14 @@
-# Revoke a link that is already warm
+# Enforce revocation even when a CDN already has the content
 
 [Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md)
+
+## Application and assignment
+
+Ana shares a private shift schedule using a link token. A CDN stores the response bytes after the first request. Ana then revokes the link. If only the origin checks access, a later cache hit can return those bytes without visiting the origin at all.
+
+Choose an immediate or explicitly bounded revocation policy, then trace the same warmed token through the local delivery model. Your design must also distinguish another tenant’s token and an unavailable authorization service. Revocation controls future delivery decisions, not copies already downloaded.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Ana shares a private schedule with token A.
 Its first GET warms a CDN. Ana revokes the token one second later. Define what

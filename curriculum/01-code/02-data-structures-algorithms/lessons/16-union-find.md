@@ -1,5 +1,7 @@
 # Union-find: track components as links arrive
 
+Four computers begin disconnected. New cables arrive one at a time, and after each cable you need to answer whether two computers can communicate through any chain of cables. You do not need the route itself. The structure below remembers connected groups efficiently as links are added.
+
 Union-find, also called a disjoint-set structure, answers whether two vertices belong to the same connected component. Each vertex points through `parent` links to a representative. `union` merges components; `find` returns the current representative.
 
 ![Two components becoming one when a connecting edge arrives](../../../../assets/foundations/connectivity.svg)

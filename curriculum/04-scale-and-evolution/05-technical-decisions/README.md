@@ -2,6 +2,16 @@
 
 Make options, ownership, adoption, and cross-team decisions explicit.
 
+<section class="chapter-context" markdown="1">
+
+## Make decisions another engineer can use
+
+Several teams interpret the same amount field in different units. One person is required for every deploy. A migration has no owner for retiring the old path. These problems require decisions and adoption work beyond another local code change.
+
+Write a decision record with options and consequences, find the actual delivery bottleneck, and define a strategy through observable rules. Your output should let another team act without needing you to repeat the explanation.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,10 +24,10 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Scope and leverage](scope-and-leverage.md) |
-| 2 | [Writing that decides](design-documents.md) |
-| 3 | [Technical strategy](technical-strategy.md) |
-| 4 | [Making other engineers faster](engineering-effectiveness.md) |
+| 1 | [Choose the scope that removes repeated engineering work](scope-and-leverage.md) |
+| 2 | [Write a design document that supports a decision](design-documents.md) |
+| 3 | [Turn recurring constraints into a usable technical strategy](technical-strategy.md) |
+| 4 | [Find delivery bottlenecks and reduce dependency on one engineer](engineering-effectiveness.md) |
 
 ## Explore failures and changed requirements
 

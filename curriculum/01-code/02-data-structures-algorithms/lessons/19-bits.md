@@ -1,5 +1,7 @@
 # Bit operations: represent independent flags
 
+A small local format stores three independent flags: read, write and execute. A single integer can carry all three, but each bit must have a declared meaning. Follow the numeric and binary forms together before using masks in a larger algorithm.
+
 An integer's binary digits can represent independent on/off states. A **mask** selects the bits an operation cares about. This is useful for flags, compact subsets, and some counting techniques; clarity still matters more than a clever-looking expression.
 
 ![Read, write, and execute flags tested with a bit mask](../../../../assets/foundations/bits.svg)
@@ -25,3 +27,16 @@ print(permissions == READ)         # True
 For n flags, `0 .. (1 << n) - 1` enumerates 2ⁿ subsets. The representation is compact, but enumeration is still exponential. Python integers have arbitrary precision; fixed-width reasoning such as overflow and unsigned shifts does not transfer unchanged from other languages.
 
 **Check:** READ|WRITE is binary `011`; removing WRITE leaves `001`; testing EXECUTE yields zero. If zero is a valid stored value, avoid treating it as “missing” through a truthiness check.
+
+## Translate the bit expression back into flags
+
+| Expression | Decimal | Binary | Meaning |
+|---|---:|---|---|
+| `READ` | 1 | `001` | Read enabled |
+| `WRITE` | 2 | `010` | Write enabled |
+| READ combined with WRITE | 3 | `011` | Both enabled |
+| `3 & READ` | 1 | `001` | Read is present |
+| `3 & EXECUTE` | 0 | `000` | Execute is absent |
+| `3 & ~WRITE` | 1 | `001` | Remove write, keep read |
+
+This is a representation exercise. Real authorization also needs identity, resource scope and an enforcement point. An integer called permissions does not supply those decisions.

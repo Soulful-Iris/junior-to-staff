@@ -20,14 +20,7 @@ This is a qualitative preparation map, **not** a measured difficulty ranking. �
 
 Each company page contains **eight coding drills and five design briefs**. They are a curated practice bank, not a list of “most-asked” questions: public reports cannot support a company-wide frequency claim. A worked mock then models clarifying questions, expected values, failures, a box diagram, and harder follow-ups. Use the left contents or simply **Next** to read them in sequence.
 
-```mermaid
-flowchart LR
- A["Read the brief"] --> B["Ask for constraints"]
- B --> C["Draw the first boxes"]
- C --> D["Name the failure"]
- D --> E["Change the design"]
- E --> F["Test the invariant"]
-```
+Choose one product domain, then one exercise. For a coding session, return the exact stated values and explain the invariant. For an architecture session, draw one user action from acceptance to its durable effect, then handle the changed requirement. The worked mock on each page demonstrates that progression. These are alternative practice sessions, not thirteen tasks to complete in one sitting.
 
 **Evidence policy.** Checked 22 September 2026. Official guidance can establish a published format, not your team's exact loop. Self-reports are dated anecdotes, not verified transcripts. Original drills are labeled as such. Ask your recruiter for role, round, allowed AI tools, language, design focus, and whether you may use a whiteboard; these details may change.
 

@@ -2,13 +2,23 @@
 
 Measure the bottleneck and defend an improvement with resource and cost evidence.
 
+<section class="chapter-context" markdown="1">
+
+## Measure the user’s delay and the cost of completed work
+
+Speeding up a 40 ms helper inside a 900 ms request cannot make the page four times faster. Similarly, halving CPU use may leave a fixed-capacity bill unchanged. You will separate elapsed time, resource use, and billed units.
+
+Identify a measured bottleneck, make one relevant change, and compare equivalent workloads. Use the deployment-headroom case to account for capacity temporarily removed during a rollout. Keep teaching numbers, local measurements, and cloud invoices clearly labeled.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
 
 [Process, search and store data at scale](../01-data-at-scale/README.md)
 
-Before measuring, know which layer can possibly be the cost: the memory / disk / network ladder in [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) separates the thousand-fold steps from the rounding errors.
+Before measuring, know which layer can possibly be the cost: the memory / disk / network ladder in [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md) separates the thousand-fold steps from the rounding errors.
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -16,8 +26,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Performance and cost](measurement-and-cost.md) |
-| 2 | [A correct deployment can still cause an outage](cases/deployment-headroom.md) |
+| 1 | [Find the bottleneck and measure cost per useful operation](measurement-and-cost.md) |
+| 2 | [Reserve capacity for rollout, zone loss and backlog recovery](cases/deployment-headroom.md) |
 | 3 | [Reject excess API work before queues grow without bound](problems/overload-shedding.md) |
 
 ## Explore failures and changed requirements

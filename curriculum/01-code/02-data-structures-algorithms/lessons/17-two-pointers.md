@@ -1,5 +1,7 @@
 # Two pointers: discard work with a reason
 
+You have sorted prices and want to know whether two different items total a budget. Trying every pair repeats work. Start at the cheapest and most expensive remaining prices, then justify which end you can discard after each comparison. The ordering assumption is part of the algorithm, not a cosmetic detail.
+
 Two pointers track boundaries or positions while traversing a sequence. The important part is the proof that moving one pointer cannot skip an answer. Sorting often supplies that proof; without order, the same movement may be invalid.
 
 ![Two pointers narrowing a sorted sequence toward a target sum](../../../../assets/foundations/pointers.svg)
@@ -34,3 +36,15 @@ It visits at most n pointer positions: O(n) time and O(1) extra space. Sorting a
 | Sliding window | Current contiguous range | Its validity can be updated as boundaries move |
 
 For `[3]`, `left < right` is false, so one position cannot count twice. For unsorted `[3,1,4]`, do not assume the same sum comparisons justify pointer movement. State the precondition before using the technique.
+
+## Explain every discarded pair
+
+For `[1, 3, 4, 8]` and target 7:
+
+| Left value | Right value | Sum | Why movement is safe |
+|---:|---:|---:|---|
+| 1 | 8 | 9 | Even the smallest remaining partner makes 8 too large. Discard 8 |
+| 1 | 4 | 5 | Even the largest remaining partner makes 1 too small. Discard 1 |
+| 3 | 4 | 7 | Found two distinct positions |
+
+If the input is unsorted, those statements are no longer justified. Sorting first may be acceptable, but retaining original positions or preserving input order becomes an additional responsibility.

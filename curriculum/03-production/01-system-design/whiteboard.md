@@ -1,6 +1,12 @@
-# Draw the system, then break it
+# Draw a bookmark request, then change its failure boundary
 
 [Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
+
+## The application you are drawing
+
+A member saves a documentation URL and later opens the shared reading list. The URL is the durable record. A remote title lookup is optional background work. The following four sketches progressively change that application: first persistence, then more reads, then queued work, then a slow dependency.
+
+For each sketch, draw one success and the named failure. Label the actual request or record carried by each arrow. A database “commit” below means saving a transaction, not a Git commit. Your deliverable is an annotated diagram and the resulting user response. Use the [local reading-list starter](../../../examples/reading-list-starter/README.md) if you want to observe the initial HTTP behavior. The later sketches are proposed extensions, not services it already runs.
 
 Draw from memory. Use **boxes for responsibilities**, **cylinders for durable state**, and **labeled arrows for data movement**. Start with the smallest design that meets the requirement. AWS names come after the mechanism.
 

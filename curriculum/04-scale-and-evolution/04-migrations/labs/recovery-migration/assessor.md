@@ -1,4 +1,6 @@
-# Assessor: recovery is part of the design
+# Review recovery, migration and ownership under changed assumptions
+
+Open after the [recovery lab](README.md), [live-copy extension](migration.md), or [regional authority exercise](regions.md). Ask which stored fact is authoritative after each interruption. Use the changed assumptions below to distinguish a memorized mechanism from an explanation that still holds when its dependency changes.
 
 Give the brief first and hold these constructed follow-ups back. Score each
 dimension 0 absent, 1 explained, 2 independently demonstrated by an injected

@@ -1,283 +1,85 @@
-# Testing
+# Choose checks that reveal the behavior a change can break
 
-[Curriculum](../../README.md) · [Find defects and evaluate engineering evidence](README.md)
+An account page lets Ada change the email address she uses to sign in. The update returns success, but her next login fails. The update handler and login handler disagree about how the address is stored or compared. A check that only inspects the update's success message would miss the broken journey.
 
-> Project connection · feeds **P1 (it works)** and everything after it
+This lesson teaches how to choose evidence for a particular behavior. You will define an expected result, choose which real boundaries the check needs to cross, and explain what a passing result does and does not establish. The testing exercises are sample projects to study, not a requirement to add gates to every repository.
 
-## At the whiteboard
+## Define the behavior before selecting the tool
 
-> “Changing an email works in the UI, but the same customer can no longer log
-> in. The email-update test is green. What behavior did the test fail to protect,
-> and which boundary would your next test cross?”
+For this constructed product, email comparison is case-insensitive under a documented normalization policy. A new address must be confirmed before replacing the login address. Those are application choices, not universal rules to infer from an email string.
 
-Tests are experiments with predictions. The important question is which wrong
-behavior would make each experiment fail.
-
-| Given | Expected observation |
+| Starting state and action | Expected observation |
 |---|---|
-| Account uses `Ada@Example.com` | Defined case-normalization policy applies consistently |
-| User confirms change to `ada@new.example` | The new address can authenticate |
-| Update succeeds but login reads a different representation | Integration test fails |
-| A known-broken normalizer is installed | At least one contract test turns red |
+| Ada requests a new address | Existing login continues working until confirmation |
+| Ada confirms the new address | New address can authenticate under the chosen comparison policy |
+| Another account already owns the normalized address | Change is rejected without damaging either account |
+| Confirmation expires | Existing identity remains usable |
 
-**Ask first:** is email comparison case-sensitive in this product, and is an
-unconfirmed address allowed to replace the login identity? Agree before coding.
+The expected result is an **oracle**: the criterion used to judge what happened. If it comes only from copying the implementation, it may repeat the same misunderstanding.
 
-```mermaid
-flowchart TD
-  Update[Update handler] --> Mock[Mock store]
-  Mock --> Green[Isolated test passes]
-  Login[Login handler] --> Real[(Real stored identity)]
-  Update -. untested contract .-> Real
-  Real --> Failure[Customer cannot sign in]
-```
-
-## Reason through the test boundary
-
-1. Write the user journey and policy first. A test that only checks the handler's
-   returned message does not prove the account is usable.
-2. Use a unit test for normalization rules, a real-store integration test for
-   the shared representation, and one end-to-end journey for the visible flow.
-3. Control unrelated nondeterminism such as mail delivery; keep the database
-   boundary real when database behavior is the claim under test.
-4. Inject the inconsistent normalizer. Observe the expected failure before
-   accepting the repaired suite.
+For example, `assert result == result` always agrees with itself. It supplies no evidence that Ada can log in. A useful check asks the login boundary to authenticate after the confirmed update and compares the result with the contract above.
 
-**Follow-up:** “The provider renamed `email` to `address`. Both teams' unit tests
-pass. What additional contract would detect the mismatch?”
+## Choose the smallest boundary that can reveal the failure
 
-```mermaid
-flowchart TD
-  Schema[Reviewed shared contract] --> Provider[Provider response check]
-  Schema --> Consumer[Consumer expectation check]
-  Provider --> Integration[Real boundary fixture]
-  Consumer --> Integration
-  Integration --> Journey[Update then sign in]
-```
+| Check | What runs | What it can reveal | What it does not establish |
+|---|---|---|---|
+| Unit | A normalization function with explicit inputs | Inconsistent handling of case or invalid values | Whether the real database stores the result correctly |
+| Integration | Update and login logic using a real disposable database | Mismatched stored/query representations and constraints | Whether browser focus and messages are usable |
+| Contract | One service's wire messages against agreed consumer expectations | Renamed fields, changed units or unsupported status behavior | Every runtime property of the full deployment |
+| End-to-end | The visible update/confirm/login journey | Whether the assembled user flow works in that environment | Every input, device, dependency failure or future release |
 
-The shared contract must not be copied into two tests that can drift separately.
-Ask an AI for tests against the agreed examples, then show which planted defect
-each test catches.
+![Different checking boundaries trade isolation and execution cost against the parts of the running system they exercise.](../../../assets/diagrams/test-tradeoff.svg)
 
-## The one-liner
+No fixed ratio of check types solves every system. Start from the consequence of being wrong and the boundary that owns it. A tiny pure function may need no browser. A database transaction claim needs evidence from the database behavior being claimed.
 
-Tests are how you find out that a change broke something, without a person
-clicking through the app. They are not about proving the code is right. They are
-about making breakage **loud** instead of silent, and the whole craft is in
-deciding which breakage you care about.
+## Work through the email regression
 
-## The failure it prevents
+A useful reproduction has three phases:
 
-You ask for a small change: "when someone updates their email, send a
-confirmation." It works. You ship it.
+1. Create an account with a known login address and confirm it can sign in.
+2. Execute the real address-change and confirmation operations.
+3. Sign in using the new address and inspect the stored identity if it fails.
 
-Three weeks later a customer cannot log in. The email-update path also writes to
-the `users` table, and the new code writes the email in lowercase while login
-compares it case-sensitively. Nothing errored. Nothing logged. The bug was
-introduced by a change that had nothing to do with login, and it was found by a
-human being locked out of their account.
+Keep external mail delivery controlled so it does not introduce unrelated waiting. Preserve the actual database and normalization path when those are the suspected cause. A **fake** is a substitute dependency with controlled behavior. A **mock** commonly records or supplies expected interactions. Neither substitutes for the real integration when its behavior is the claim.
 
-A test suite is not there to tell you the email feature works. It is there so
-that the *login* test goes red when you touch the email feature.
+Suppose the update stores a normalized lowercase value, while login still compares against an unnormalized input. Record both values and the query predicate. A repair should use the agreed policy consistently. Do not merely change the expected result to accept failed login.
 
-That is the actual job: **tests are a tripwire on the code you were not
-thinking about.**
+**Evidence to hand over:** the starting account, the operation sequence, the old failure, the repaired result and the boundary exercised. Keep secrets and real personal addresses out of the example.
 
-## The mental model
+## Use a known defect to check sensitivity
 
-Three things are worth holding.
+A **negative control** deliberately introduces a known wrong behavior in an isolated exercise. Restoring the inconsistent normalizer should make the relevant login check fail. That establishes sensitivity to this particular defect.
 
-**1. A test is an experiment with a prediction.** You put the system in a known
-state, do one thing, and assert what should now be true. If you cannot say in
-advance what would make it fail, you have not written a test, you have written a
-script that runs.
+A passing first run can still be useful when its expectation is independently justified. Conversely, seeing one deliberate failure does not prove that every other defect will be caught. Some source changes are equivalent under the supported contract and should not produce a failure.
 
-**2. Tests trade speed for realism.** The closer a test is to the real system,
-the more real boundaries it can exercise, usually with more setup and runtime.
-Flakiness is not an unavoidable feature: control clocks, data and ordering.
+| Observation | Appropriate conclusion |
+|---|---|
+| Known normalization defect is detected | This case catches that defect |
+| Repaired implementation passes the same case | This case supports the repair |
+| Equivalent refactor remains passing | Expected if the supported behavior is unchanged |
+| Twenty selected mutations are caught | Those twenty sampled changes were detected |
+| A dependency was replaced with a fake | Claims stop at the controlled boundary unless separately exercised |
 
-![Tests trade speed for truth: unit tests are fast and are a model of the system; end-to-end tests are slow and are the system itself](../../../assets/diagrams/test-tradeoff.svg)
+Do not secretly plant defects in a real teammate's work. Keep deliberate faults labeled and disposable.
 
-You want most of your tests at the top and a few at the bottom. The exact ratio
-is argued about endlessly and does not matter much; what matters is that you
-have **at least one test that exercises the real thing end to end**, because
-everything above it is a model of the system rather than the system.
+## Control time and ordering when they cause the defect
 
-**3. The thing you are really testing is the change, not the code.** Before a
-test is worth keeping, ask: what edit would make this go red? If the honest
-answer is unclear, inspect its assertion and supported input domain before
-keeping or deleting it. A narrow boundary test may catch just one important bug.
+A **flaky** check changes outcome under supposedly equivalent conditions. Shared state, uncontrolled time, network dependencies and races are possible causes. Retrying until green can hide the evidence rather than repair the cause.
 
+For a browser race, pause response A, complete response B, then release A. That forces the ordering the contract must handle. A long sleep only makes the race more or less likely. For timeout logic, an injected clock can make time progression explicit. Use the real clock separately when measuring actual elapsed performance.
 
+The [search-race lab](../03-frontend/labs/search-race/README.md) and [bookmark editor](../03-frontend/labs/bookmark-editor/README.md) show the user-visible state that ordering must preserve. The [flake investigation project](projects/03-the-flake-hunter.md) develops diagnosis and quarantine policy.
 
-## What good looks like
+## Keep failure reports useful
 
-- Each test names the behaviour, not the function: `rejects_login_when_password_expired`, not `test_login_2`.
-- A failing test tells you what broke without opening the file.
-- Tests do not depend on each other or on the order they run in.
-- The suite runs on every change, automatically, and nobody has to remember to run it.
-- There is at least one test that would catch the bug you shipped last month.
-- Test data is built in the test, not loaded from a fixture nobody understands.
+A report should distinguish assertion failure, timeout, crash, skipped execution and unavailable infrastructure. “Not run” is not a pass. Preserve the input and enough state to reproduce the result.
 
-Done badly, you see:
-
-- A suite that is green and a product that is broken.
-- Tests that merely copy implementation assumptions rather than the contract.
-  Writing a test after implementation is fine when its expected result is independent.
-- A mocked database, so the test passes and the real query has a typo in it.
-- One enormous test that sets up half the app and asserts twelve things, so when
-  it fails you learn nothing.
-- Tests that were skipped months ago and nobody noticed, because a skip and a
-  pass look identical in the summary line.
+Use names describing the behavior, such as preserving a newer draft after an earlier save. An assertion should show the relevant expected and observed values. Avoid forcing one giant scenario to diagnose every subsystem at once, but keep the full journey where integration is the risk.
 
-## Ask Claude for this
+If a check is temporarily removed from a blocking decision, record the coverage gap, owner and expiry. The choice of automated gates belongs to the application's operating policy. It should be proportionate to the actual risk and workflow.
 
-**Request 1 — the suite for a feature you just had built**
-
-```
-Here is the change you just made. Write tests for it.
+## Practice with an unfamiliar implementation
 
-Before writing anything, list the ways this code could be wrong: wrong
-output, wrong state left behind, wrong behaviour on a second call, wrong
-behaviour when the input is empty / duplicated / very large.
-
-Then write one test per item on that list. For each test, add a comment
-saying what edit to the source would make this test fail.
+For a small starting example, use the [quantity investigation](labs/quantity-debug/README.md): zero is valid input, omission means no change, and null needs an explicit policy. For a larger exercise, use the [transaction importer](labs/importer/README.md), which includes multiple modules and real persistence boundaries.
 
-Do not mock the database. Use a real one with a throwaway schema.
-```
-
-*Why it is asked that way:* the first instruction makes the model enumerate
-failure modes before it is attached to a solution, which is the part it is good
-at and the part people skip. The comment requirement is the important one — it
-forces each test to name the edit it defends against, and a test that cannot name
-one is visibly worthless on the page.
-
-*What you should get back:* a list of failure modes, then tests that map onto
-them one to one. If you get five tests that all check the happy path with
-different numbers, the list was skipped.
-
-Prefer observable behavior, but match the assertion to the contract:
-
-| Test | Defect it can expose | Boundary it does not cover |
-|---|---|---|
-| Provider called once for one accepted charge | Accidental duplicate invocation | Real provider settlement |
-| Row exists after a real SQL transaction | Query typo or wrong persistence | External side effects |
-| `x + 0` becomes `x` for integer inputs | Equivalent mutant: survival is expected | No changed behavior to detect |
-
-A mock call-count assertion is useful when invocation count is itself the promise.
-It is brittle when it only encodes an incidental implementation detail.
-
-**Request 2 — proving the suite can actually fail**
-
-```
-Pick the three most important tests in this file. For each one, introduce a
-small, realistic bug into the source that it should catch. Run the suite and
-show me the output. Then revert.
-
-If any of the three still passes with the bug in place, tell me that
-plainly and explain why.
-```
-
-*Why:* a known, non-equivalent defect is a useful negative control. Inject it in
-a disposable copy and confirm the intended assertion—not an unrelated crash—fails.
-
-*What you should get back:* results and an explanation of any survivor. Was the
-mutation applied and executed? Did it change supported behavior, or is it
-equivalent? Only then decide whether an assertion or input case is missing.
-
-**Request 3 — the test for the bug you just hit**
-
-```
-This bug reached a user: <describe what happened>.
-
-First write the test that reproduces it and watch it fail. Show me the
-failure output. Only then fix the code.
-```
-
-*Why:* a red reproduction followed by a green repair is strong regression
-evidence. Test chronology alone is not the criterion: the expected result must
-come from the contract, and the test must exercise the relevant boundary.
-
-## How you would know it is wrong
-
-The checks for this topic, each one capable of going red:
-
-1. **Break it on purpose.** Change a `>` to a `>=`, delete a line, invert a
-   boolean in a disposable copy. A behavior-changing mutation in the tested
-   domain should fail; investigate equivalent and unexecuted mutants separately.
-2. **Read the summary line properly.** `21 passed, 10 errors` is not green. A
-   skipped test and a passing test look the same at a glance and mean opposite
-   things. Count them.
-3. **Check what a "green" run actually ran.** If ten tests silently skip because
-   a fixture file is missing on this machine, the number at the bottom is a lie
-   about a smaller suite.
-4. **Look for the test that cannot fail.** A threshold set below the floor
-   ("assert improvement > 0.5dB" when the process alone produces 0.79) will pass
-   forever and read as rigour.
-5. **Run the tests somewhere other than your machine.** A suite that only passes
-   where it was written is telling you about your laptop.
-
-> The rule under all five: **before believing a green result, say what it would
-> have looked like if the thing were broken.** If the answer is "the same", it
-> proved nothing.
-
-## Your slice of the project
-
-On **P1**, add:
-
-- One end-to-end test that creates a record, reads it back, and deletes it,
-  against a real database.
-- Three unit tests over the piece of logic with the most branches.
-- One test that reproduces a bug you actually hit while building, written
-  *after* you hit it and *before* you fixed it.
-- Proof that the suite can fail: a commit message or note recording which bug you
-  planted and which test caught it.
-
-**Acceptance criteria you can check yourself:**
-
-- `git stash` your fix for the reproduced bug and the suite goes red.
-- The suite runs from a clean clone with one command, on a machine that is not
-  the one you built it on.
-- No test takes longer than a second unless it is deliberately the slow one.
-
-## Words you now own
-
-- **unit test** — checks one piece of logic in isolation, no database, no network.
-- **integration test** — checks your code against a real dependency, usually a database.
-- **end-to-end test** — drives the whole system the way a user would.
-- **fixture** — prepared data or state a test starts from.
-- **mock / stub** — a controlled dependency substitute; useful for caller behavior, not proof of the real dependency's semantics.
-- **flaky test** — passes and fails without the code changing. Treat as broken; a suite people do not trust is a suite nobody reads.
-- **coverage** — the share of lines the tests execute. Says what ran, never whether it was checked.
-- **mutation testing** — deliberately introducing bugs to see whether the suite notices. The honest version of coverage.
-- **regression test** — a test written to make sure a specific bug never comes back.
-- **test double** — the family name for mocks, stubs, fakes and spies.
-
----
-
-**Not covered here:** performance testing, load testing and chaos testing are
-senior-tier and live in [Reliability](../../03-production/05-reliability/failure-budgets.md),
-because they measure the system under conditions rather than the code under
-change. Property-based testing is genuinely useful and deliberately left out of
-the application foundations; it is easier to appreciate once you have felt an example-based
-suite miss something.
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
-
-## Draw it from memory · Choose the boundary your test proves
-
-```mermaid
-flowchart TD
-  Behavior["Risky behavior"] --> Pure["Unit: pure invariant"]
-  Behavior --> Store["Integration: real store constraints"]
-  Behavior --> Journey["End-to-end: user journey"]
-  Pure --> Fast["Fast precise failure"]
-  Store --> Races["Concurrency and commit behavior"]
-  Journey --> Wiring["Auth, routing, rendering"]
-  Fast --> Evidence["Evidence for this change"]
-  Races --> Evidence
-  Wiring --> Evidence
-```
-
-**Redraw challenge:** Which test would fail if authorization were removed? A happy-path unit test is not enough.
+Before opening a reference answer, state the user contract and predict the normal, empty, invalid and interrupted outcomes that matter. Run or inspect the relevant path, locate the cause and make a coherent repair. Then explain what remains unexamined. The goal is evidence that another engineer can evaluate, not a large count of passing checks.

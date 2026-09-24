@@ -1,6 +1,14 @@
-# An expired key, ten instances, and a finite database
+# Bound cache misses across instances and preserve fresh reads
 
 [Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md)
+
+## Application and assignment
+
+A shared reading-list page is cached to avoid repeating its database query. When the entry expires, many readers can request the same missing value. Ana can also save a new bookmark while a read replica still contains the previous version of the list.
+
+Use the supplied local models to distinguish shared loading within a process, fleet-wide admission, and read freshness. Predict origin calls and returned versions before reading the implementation. No Redis instance or replica cluster is started by this lab.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Ana opens a group page just as its cache entry
 expires. Two hundred requests arrive together on ten API instances. Preserve the

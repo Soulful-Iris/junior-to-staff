@@ -2,6 +2,20 @@
 
 Preserve user intent across browser, API, and persisted state.
 
+<section class="chapter-context" markdown="1">
+
+## Preserve the user’s next edit while the network catches up
+
+Ana saves a bookmark title, then immediately keeps typing. The first response must confirm the submitted title without overwriting her newer draft. The same distinction between user intent and arriving data matters for search, loading, errors, focus, and navigation.
+
+Open the supplied bookmark editor to see a real browser talking to an HTTP API and SQLite. Inspect its visible states, then work through the response ordering and version boundaries. The editor begins with seeded records and supports editing. Adding new bookmarks is a separate feature.
+
+![The running bookmark editor keeps the confirmed title separate from a newer unsaved draft](../../../assets/ui-lessons/bookmark-confirmed-draft.png)
+
+The confirmed title and editable draft are deliberately different. The browser preserves the newer typing after the earlier save completes.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,7 +28,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Frontend](browser-state.md) |
+| 1 | [Keep browser drafts, saved data and search results consistent](browser-state.md) |
 | 2 | [Search race · the latest user intent wins](labs/search-race/README.md) |
 | 3 | [Full stack · one user action across every boundary](full-stack-practice.md) |
 | 4 | [Bookmark editor · preserve the user's next edit](labs/bookmark-editor/README.md) |

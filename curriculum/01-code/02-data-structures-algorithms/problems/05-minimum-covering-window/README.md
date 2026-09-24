@@ -50,8 +50,8 @@ leave any existing state unchanged unless the contract says otherwise.
 | Representative | `"ABAAC"`, required `"AAC"` | `(2, 5)` for `"AAC"` | Required multiplicities drive validity. |
 | Empty requirement | any text, required `""` | `(0, 0)` | The empty need is already satisfied. |
 | Impossible multiplicity | `"ab"`, required `"aa"` | `None` | Presence without enough copies is insufficient. |
-| Surplus | `"AAABC"`, required `"AC"` | shortest window containing one A and one C | Extra required characters must not inflate unmet demand. |
-| Tie | two equal-length valid windows | the one with the smallest start | State the deterministic result before coding. |
+| Surplus | `"AAABC"`, required `"AC"` | `(2,5)` for `"ABC"` | Extra required characters must not inflate unmet demand. |
+| Tie | `"ABXAB"`, required `"AB"` | `(0,2)` for the first `"AB"` | State the deterministic result before coding. |
 | Invalid | either argument is not a string | `ValueError` | Validation precedes scanning. |
 
 For each case, show which branch or state change produces that result.

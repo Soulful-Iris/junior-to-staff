@@ -1,6 +1,12 @@
-# Why the patterns work
+# Explain algorithm invariants and the changes that invalidate them
 
 [Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
+
+## Compare the state, not just the code
+
+These notes are for the second pass after a coding attempt. If two implementations look different, ask what each remembers and why that information is enough. For two-sum, both may remember earlier values. For a window, both must keep a boundary that never moves backward. Those invariants explain correctness better than matching lines.
+
+Choose your attempted problem below, trace its smallest counterexample, and identify one changed requirement that needs different state. The shared helpers and standalone problem bundles sometimes have different return contracts, as the [reference table](reference.md) explains.
 
 Use these notes after attempting the [problem set](practice-sequence.md). The complete implementations are in [algorithms.py](algorithms.py); compare your invariant with the code before comparing line by line.
 
@@ -10,7 +16,7 @@ For two-sum, each index asks whether an earlier element completes its target. Lo
 
 ## Binary search
 
-Keep a half-open interval `[lo, hi)` containing the possible insertion point. If `nums[mid] < target`, every index through mid is too small, so `lo=mid+1`. Otherwise the first qualifying value can still be mid, so `hi=mid`. Each iteration shrinks the interval; termination at `lo==hi` yields the first index whose value is at least target, or n if none. Sorting an unsorted input first adds O(n log n) work and may lose original positions.
+Keep uninspected elements in the half-open interval `[lo, hi)`. The answer boundary remains in the inclusive range `[lo, hi]`, so it can equal `len(nums)`. If `nums[mid] < target`, every index through mid is too small, so `lo=mid+1`. Otherwise the first qualifying value can still be mid, so `hi=mid`. Each iteration shrinks the interval; termination at `lo==hi` yields the first index whose value is at least target, or n if none. Sorting an unsorted input first adds O(n log n) work and may lose original positions.
 
 ## Interval merging
 

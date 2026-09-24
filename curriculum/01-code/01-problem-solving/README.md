@@ -2,6 +2,16 @@
 
 Clarify a requirement, make a bounded change, and verify the result.
 
+<section class="chapter-context" markdown="1">
+
+## Start with a change small enough to explain
+
+A customer sets a quantity to zero, but the application restores the old value. You will turn that symptom into a precise contract, inspect a proposed change, and explain what evidence supports the repair. AI can draft code, but it cannot decide the product’s missing rules for you.
+
+Begin with the change loop, then use the zero-quantity exercise. You finish with a reviewable patch, a concrete input/output example, and a record of assumptions. No cloud account is needed.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,10 +24,10 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [The change loop](change-loop.md) |
-| 2 | [Working with an AI that writes the code](working-with-ai.md) |
-| 3 | [Practice an AI-assisted change](ai-assisted-practice.md) |
-| 4 | [The constants you estimate with](estimation-constants.md) |
+| 1 | [Make code changes reviewable and recoverable](change-loop.md) |
+| 2 | [Specify and verify an AI-generated change](working-with-ai.md) |
+| 3 | [Repair a quantity update that loses zero](ai-assisted-practice.md) |
+| 4 | [Estimate request rates, storage, latency and availability](estimation-constants.md) |
 
 ## Explore failures and changed requirements
 
@@ -42,8 +52,8 @@ Each project explains its application, names the deliverable, links the supplied
 
 ## Reference guides
 
-- [Working with an AI that writes the code — five projects](ai-projects.md)
-- [The change loop — five projects](change-projects.md)
+- [Practice specification, AI review and independent evidence](ai-projects.md)
+- [Practice reviewable changes and integration decisions](change-projects.md)
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 

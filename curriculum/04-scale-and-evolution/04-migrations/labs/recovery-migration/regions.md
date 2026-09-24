@@ -1,6 +1,14 @@
-# Move a hot tenant, then lose a region
+# Move write authority between shards and account for regional data loss
 
 [Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
+
+## Application and assignment
+
+One tenant consumes most of a shard’s capacity, so you want to move its records to another shard. Some clients still remember the old destination. Later, a regional failure removes the latest acknowledged write before another region has received it. These are two different ownership and durability problems.
+
+Use the local route-epoch and replication models to explain stale-client rejection and possible lost writes. Deliver a transition plan with a catch-up boundary, authority change, and explicit recovery promise. No real DNS, shard, or region is moved by this exercise.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Tenant A causes 80% of load on shard 1.
 Move it to shard 2 while stale clients keep old routes. Then region 1 fails

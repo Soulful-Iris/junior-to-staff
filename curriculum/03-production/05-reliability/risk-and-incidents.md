@@ -1,10 +1,28 @@
-# Risk and incidents
+# Mitigate an incident, verify recovery and complete the follow-up
 
 [Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## The incident you are responding to
+
+A document-processing service accepts uploads and returns a job ID. Workers later extract searchable text. A successful upload response therefore does not mean the document is searchable yet. After a new worker version is released, customers report documents stuck on “Processing”.
+
+The following observations are hypothetical incident evidence:
+
+```text
+10:00  worker version B begins taking jobs
+10:03  arrivals: 1,000 jobs/min    completions: 600 jobs/min
+10:04  failed attempts: 8%        previous baseline: 0.2%
+10:05  oldest unfinished job age: 4 min and rising
+```
+
+At that difference, ten minutes adds about 4,000 unfinished jobs before accounting for retries and drops. An API health check can remain green throughout. Restoring worker throughput and draining old work are both part of recovery.
+
+Your task is to write the first mitigation decision, the observation that would confirm it helped, and a recovery plan that leaves capacity for new arrivals. Use the [incident exercise](labs/reliability/incident.md) for a contained scenario. You do not need to interrupt a real service to practice these decisions.
+
+## Decide what reduces harm with the evidence available
+
 
 > “After a rollout, error rate rises from 0.2% to 8% and the queue grows by
 > 400 jobs each minute. You have incomplete logs. What do you do in the first
@@ -57,14 +75,14 @@ Lead depth includes communication, competing risks, ownership, and evidence that
 the follow-up changed behavior. Avoid a single-person hero narrative in your
 project defense; explain your decisions and the team's contributions accurately.
 
-## The one-liner
+## The principle behind the design
 
 Incidents are not a failure of engineering. They are the normal operating
 condition of any system with people and change in it. What separates teams is
 not how rarely things break — it is what happens in the first hour, and whether
 anything is different a month later.
 
-## The failure it prevents
+## Follow the failure through the system
 
 The same outage, twice.
 
@@ -82,19 +100,17 @@ that is handled well and learned from privately.** One engineer understands
 exactly what happened and why. Nothing changes in the code, the alerting or the
 runbook, because it is all in their head and they were not asked for more.
 
-## The mental model
+## Mechanisms and their limits
 
 An incident has four moments, and the gaps between them are where all the
 information is.
 
-![An incident timeline: it broke, we noticed, we mitigated, we fixed it. The gap between breaking and noticing is usually the largest and the least examined](../../../assets/diagrams/incident-timeline.svg)
+![An incident timeline: it broke, we noticed, we mitigated, we fixed it. Measure detection, mitigation and repair separately](../../../assets/diagrams/incident-timeline.svg)
 
-**It broke → we noticed** is detection time, it is usually the biggest gap, and
-it is the only one you can shrink by doing work in advance. If a customer told
-you, that number is the whole finding and the rest of the postmortem is detail.
+**It broke → we noticed** is detection time. Measure it separately from mitigation and repair. Better alerts can reduce detection delay, while rehearsed recovery and compatible rollbacks can shorten later phases too.
 
 **We noticed → we mitigated** is where the discipline goes. The rule that people
-find hardest: **mitigate before you diagnose.** Roll back, fail over, shed load,
+find hardest: **prioritize reducing harm while gathering enough evidence to choose a safe action.** Roll back, fail over, shed load,
 turn the feature off. Understanding why can happen afterwards, in daylight, with
 the site up. The instinct to find the root cause first is engineering curiosity
 arriving at exactly the wrong moment.
@@ -104,7 +120,7 @@ get forgotten, because the pressure is off.
 
 ### Roles, when it is bigger than one person
 
-Three jobs, and one person cannot do two of them at once:
+Three responsibilities to assign. A small incident may combine roles, but make interruptions and decision ownership explicit:
 
 - somebody **runs** the incident and decides what happens next
 - somebody **communicates** outward, so the person investigating is not also answering "is it fixed yet?"
@@ -154,7 +170,7 @@ Done badly:
 - The reliability conversation re-run from scratch every quarter with no agreed number in it.
 - Nobody ever practises. The first time the failover is used is the day it is needed.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — the timeline, before any theory**
 
@@ -215,10 +231,9 @@ difference between them is that somebody decided.
 5. **Check whether your error-budget policy has ever been invoked.** A policy that has never bound anything is a document, not a policy.
 6. **Ask who would run it if it happened right now**, and whether they know that.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
-Something will go wrong during **P5**. It always does, and that is why the
-project is a migration rather than a feature.
+During the live-data migration project, use a real issue or the supplied failure fixture to practice the response. Do not invent an incident outcome if the migration completed cleanly.
 
 - Write the postmortem. Timeline first, with the broke/knew gap explicit.
 - Contributing factors, plural, none of them a person.
@@ -232,10 +247,10 @@ project is a migration rather than a feature.
 - The action item is done, and there is a commit or a config change to point at.
 - You can say honestly whether your kill criteria were observable, including if the answer is no.
 
-## Words you now own
+## Terms used in this lesson
 
-- **detection time** — from broke to somebody knowing. Usually the largest gap, and the one you can shrink in advance.
-- **mitigation** — making it stop hurting. Comes before diagnosis, always.
+- **detection time** — from broke to somebody knowing. Measure it instead of assuming it dominates.
+- **mitigation** — reducing current harm. Choose an action using the evidence available and watch whether it helps.
 - **incident commander** — the person who decides what happens next, and not the person with their hands in the system.
 - **blameless** — a method for getting a true timeline, not a courtesy.
 - **contributing factor** — one of several things that had to be true. The honest replacement for "root cause".
@@ -247,7 +262,7 @@ project is a migration rather than a feature.
 ---
 
 **Not covered here:** the mechanics of SLOs, burn-rate alerting and load
-shedding are covered in [Reliability](failure-budgets.md).
+shedding are covered in [Set an error budget and bound retries during overload](failure-budgets.md).
 This section is about what a staff engineer does with them: the hour it is
 happening, and the week afterwards when everyone has stopped caring.
 

@@ -1,5 +1,14 @@
 # Observe Inc. · senior backend / product engineering
 
+## Your worked rehearsal: join late telemetry and show whether results are complete
+
+An engineer opens a trace and expects to see related log events. Those events can arrive late, be repeated, or share a trace ID with data from another tenant. A join result therefore needs both an access boundary and an explicit completeness policy.
+
+Implement the event-time join for the stated ten-second window, then explain bounded lateness, overload, and deletion of derived results. The model is an original practice service. It is not a description of Observe’s internal implementation.
+
+**Starting point:** these drills are build briefs. Implement in a local file or draw the requested architecture. The worked answer is an explanation, not a supplied end-to-end application. Choose one drill per session, then change one requirement after the baseline works.
+
+
 Observe describes a [product](https://www.observeinc.com/) that correlates logs, metrics, and traces with context, ingestion, and investigation workflows. We did **not** find a reliable, recent senior SWE candidate report giving a stable interview loop. **Everything below is an original simulation grounded in the public product domain; none is a claimed Observe interview question.** Ask the recruiter for the actual round structure.
 
 ## The room · the answer must survive noisy data
@@ -10,7 +19,7 @@ Observe describes a [product](https://www.observeinc.com/) that correlates logs,
 
 ![Animated late log event joining a trace within a watermark, then an expired event routed to a side stream](../assets/companies/observe-join.svg)
 
-## Coding bench · eight original drills
+## Choose a coding exercise · eight original drills
 
 | Drill and exact ask | Example to settle before coding | Senior stretch |
 | --- | --- | --- |
@@ -23,7 +32,7 @@ Observe describes a [product](https://www.observeinc.com/) that correlates logs,
 | 07 · Dedupe at-least-once telemetry | `event-id=7` twice → one aggregate increment | Expiring keys and late replays |
 | 08 · Alert state machine with 2/3 bad windows | `bad,good,bad` → firing | Recovery hysteresis and missing data |
 
-## Design board · five original prompts
+## Choose an architecture exercise · five original prompts
 
 | Prompt | Initial requirement | Change the requirement |
 | --- | --- | --- |
@@ -33,7 +42,7 @@ Observe describes a [product](https://www.observeinc.com/) that correlates logs,
 | Multi-tenant investigation | Query one team's telemetry | Cost guardrails and fine-grained field access |
 | Retention and archive | Keep hot data for 7 days | Legal deletion and cold replay |
 
-## Niche mock · correlation with a closing window
+## Worked session · correlation with a closing window
 
 **Interviewer:** “A trace span and a log line can arrive in either order. Join them by tenant and trace ID if their event times are within 10 seconds. How will a user know the result is complete?”
 
@@ -75,6 +84,25 @@ flowchart TD
 ```
 
 **Follow-up 1 (senior):** “A bad deploy increases events 50×.” Bound state per tenant, partition by tenant/trace, signal partial results, shed or spool according to loss contract, and measure watermark lag. **Follow-up 2 (staff):** “A customer deletes a trace while cold storage and derived joins retain it.” Trace lineage across raw, derived, index, cache, and archive; specify deletion propagation, audits, tenant-specific encryption or retention, and an observable completion SLO.
+
+### Worked extension: make late reconciliation and deletion explicit
+
+A watermark is a progress estimate under an assumed lateness policy. It does not make late events impossible. Route events arriving after finalization to a visible late-data path. If reconciliation can revise a result, publish a new version and define whether the UI shows provisional, finalized, or revised evidence.
+
+```mermaid
+flowchart TD
+  Events["Tenant-scoped raw events"] --> Window["Bounded event-time join"]
+  Window --> Facts["Versioned joined facts"]
+  Window --> Late["Late-event queue"]
+  Late --> Reconcile["Bounded reconciliation"]
+  Reconcile --> Facts
+  Delete["Authorized deletion request"] --> Lineage["Raw, derived and index lineage"]
+  Lineage --> Events
+  Lineage --> Facts
+  Facts --> Query["Freshness and completeness in results"]
+```
+
+When deleting a trace, include derived pair IDs, indexes, cached query results, and retained archives in the deletion plan. Mark completion only when the declared scope is satisfied. A raw-event deletion alone does not remove an already materialized join. During a 50× burst, enforce a tenant state budget and report partial evidence according to the loss policy instead of silently returning incomplete results as complete.
 
 <details><summary>Debrief · what a strong answer contains</summary>
 

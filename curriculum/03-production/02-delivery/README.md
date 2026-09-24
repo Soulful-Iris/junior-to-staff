@@ -2,6 +2,16 @@
 
 Build once, verify compatibility, and release a change with stop conditions.
 
+<section class="chapter-context" markdown="1">
+
+## Keep mixed versions compatible while releasing a change
+
+An old server writes `email`, while a new server expects `contact_email`. They share a database during rollout. Returning to the old application artifact does not undo rows already changed by the new version.
+
+Plan expansion, compatible readers and writers, backfill, exposure, and retirement. Use the configuration case to study a rollout that is syntactically valid but unusable. You finish with a sequence and recovery boundary, not just a successful deployment command.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,8 +24,8 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Delivery](delivery-pipeline.md) |
-| 2 | [Configuration is executable behavior](cases/configuration-rollout.md) |
+| 1 | [Deploy compatible versions and control feature exposure](delivery-pipeline.md) |
+| 2 | [Roll out routing configuration without activating unusable backends](cases/configuration-rollout.md) |
 | 3 | [Release invoice changes with stable cohorts and rollback](problems/feature-rollout.md) |
 
 ## Explore failures and changed requirements

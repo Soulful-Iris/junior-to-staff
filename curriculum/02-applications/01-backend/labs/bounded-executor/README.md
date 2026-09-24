@@ -1,6 +1,14 @@
-# Bounded executor · four workers, eight queued tasks
+# Bound accepted work and make executor shutdown predictable
 
 [Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+
+## Application and assignment
+
+A reporting API runs database jobs using four available connections. A burst of submissions can arrive while all four are occupied. Starting a new thread for every request only moves the waiting into more threads. You need a bounded set of active workers and an explicit limit on accepted waiting work.
+
+Implement the executor contract below, using the supplied implementation as a later reference. Decide what a blocked submitter, a queued task, and a running task each observe during shutdown. This is an in-process exercise. Accepted work does not survive a process crash unless you add durable storage.
+
+## Contract and starting evidence
 
 > “A report service accepts bursts faster than its four database connections can
 > work. Today every request starts a thread. Build an executor with four workers

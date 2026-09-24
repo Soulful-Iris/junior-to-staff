@@ -1,6 +1,14 @@
-# Lab 3 · a job may be delivered twice; its result is stored once
+# Process duplicate SQS jobs with one conditional DynamoDB result
 
 [Curriculum](../../../../../README.md) · [Provision and operate application infrastructure on AWS](../../../README.md)
+
+## Application and assignment
+
+A producer submits a small computation and receives its result later. For operation `demo-1`, the numbers `[1,2,3]` should produce 6. Queue delivery can repeat after the result is stored, so the worker needs to recognize the same logical operation rather than create a new effect.
+
+Inspect the supplied worker and SAM template, trace the duplicate locally, then optionally deploy the stack and send the same message twice. The entire protected effect is one result item. Adding email or payment would require a different protocol, developed in the linked recovery extension.
+
+## Starting contract
 
 Build a queue worker whose *entire effect* is one conditional DynamoDB result item. Then demonstrate where that guarantee ends. No email, payment, or external side effect is hidden behind the word “idempotent.”
 

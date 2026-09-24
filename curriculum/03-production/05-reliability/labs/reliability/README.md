@@ -1,6 +1,14 @@
-# Reliability: count users, attempts, and work separately
+# Calculate error budgets, retry amplification and recovery capacity
 
 [Curriculum](../../../../README.md) · [Set reliability objectives and recover from failures](../../README.md)
+
+## Application and assignment
+
+A service counts successful user requests, but its dependencies count every attempt, including retries. During an outage those numbers diverge. A retry can add load without completing another user action, and a restored dependency can still face a large backlog.
+
+Calculate the examples before consulting the supplied arithmetic model. Your output is a set of denominators, attempt counts, and bounded recovery decisions. This is a local policy model with synthetic values, not a cloud load benchmark.
+
+## Contract and starting evidence
 
 > “Our API has twenty worker slots. A dependency slows from 200 ms to two seconds. A dashboard says availability is acceptable, but users cannot finish requests. Show whether that conclusion follows from the counters; then contain the overload without pretending capacity is unlimited.”
 

@@ -1,17 +1,43 @@
-# System design
+# Design a service from its contract, workload and failure limits
 
 [Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
 
-> Project connection · feeds **P3 (it holds under load)**
+> Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
 
-## At the whiteboard
+## The service you are deciding how to build
+
+A research group shares links to technical articles. A member saves a URL, and other members open the group’s newest bookmarks. Saving a bookmark must preserve its owner and URL even if looking up the article title fails. A title is display text such as “PostgreSQL indexing guide”. It is optional enrichment, not the saved URL itself.
+
+You are preparing a design for a larger version of that application. The exercise supplies hypothetical peak traffic of 1,000 list reads and 20 saves per second. These are design inputs, not measurements of the local starter. Your deliverable is a request path, a data model, and a short decision record explaining capacity and failure behavior. You do not need to provision AWS to complete the first design.
+
+### Read one interaction before drawing the system
+
+```http
+POST /bookmarks
+Content-Type: application/json
+
+{"url":"https://docs.example.org/indexing"}
+```
+
+A successful save returns an identifier. A later list read must include that bookmark according to the freshness contract. The [local reading-list starter](../../../examples/reading-list-starter/README.md) supplies a working HTTP/SQLite version with demonstration identities. Its route contract is the starting example. Authentication, production hosting, and the scaling components you choose below are additional implementation work.
+
+| Decision to make | Example assumption to examine |
+|---|---|
+| Who may read? | Members share a list, while only an owner edits their bookmark |
+| When must a save become visible? | The writer sees it immediately, other members within two seconds |
+| What must survive a restart? | Accepted bookmark rows, not disposable cached copies |
+| What happens during overload? | Explicit bounded refusal instead of an ever-growing wait |
+
+At 20 saves/s for a **one-hour peak**, 72,000 rows arrive. At an assumed 1 KB per row, that is about 72 MB of raw rows before indexes and replication. Do not multiply that peak by every second of a year unless the workload actually sustains it. Use the [estimation reference](../../01-code/01-problem-solving/estimation-constants.md) to keep units and assumptions visible.
+
+## Work through the initial design
+
 
 > “Design a bookmark service. We have 1,000 reads/s and 20 writes/s at peak,
 > 100,000 users, and a two-second freshness target for shared lists. Start with
 > the smallest design you can defend. What information would change it?”
 
-These are constructed workload inputs. A read lists one owner's most recent
-20 bookmarks; a write must never modify another owner's data. Ask about item
+These are constructed workload inputs. For this design exercise, the list endpoint filters the shared list to one owner’s most recent 20 bookmarks. That owner filter is an extension to the starter’s shared-list route. A write must never modify another owner’s data. Ask about item
 size, retention, burst length, latency percentiles, and whether the freshness
 target permits stale data after a write. State assumptions before naming AWS.
 
@@ -58,14 +84,14 @@ Senior depth is a coherent baseline that survives this change. Lead depth adds
 owners, rollout measurements, cost attribution, and a policy when one tenant
 consumes the shared budget. Practice drawing before opening the examples below.
 
-## The one-liner
+## The principle behind the design
 
 System design is not drawing boxes. It is the process of working out what must
 be true, discovering which shapes can satisfy that, and then choosing one **and
 being able to say what it costs**. The diagram is a byproduct. The reasoning is
 the thing, and it is the part that gets thrown away.
 
-## The failure it prevents
+## Follow the failure through the system
 
 Most architectures are not chosen. They accrete.
 
@@ -84,7 +110,7 @@ that cannot make a small change without three deploys and a meeting.
 The question that would have prevented both is the same one: **what would have
 to be true for this to be the right shape, and is it true here?**
 
-## The mental model
+## Mechanisms and their limits
 
 Design runs in one direction. Constraints first, shape second, and the shape is
 mostly implied by the constraints once you have written them down honestly.
@@ -115,22 +141,6 @@ fix trades a resource limit for a new failure class.** Replicas buy read
 capacity and charge you staleness. Caches buy latency and charge you
 invalidation. Queues buy burst tolerance and charge you an invisible backlog.
 
-### What changed, and why this section matters more than it used to
-
-When writing code was the expensive part, a mediocre design was survivable
-because nobody had time to build the wrong thing very fast. That has inverted.
-Generation is cheap now, which makes **design judgment the scarce resource** —
-and precise specification has come back into fashion for exactly that reason.
-
-The measured side of it is uncomfortable: telemetry from teams with heavy AI
-adoption shows substantially larger pull requests, sharply higher review times,
-and a meaningful share of changes merging without review. You can now build the
-wrong architecture much faster than you can review it.
-
-*(Checked 2026-09-21; see [docs/research/senior-craft-2026.md](../../../docs/research/senior-craft-2026.md) for sources and caveats.)*
-
-
-
 ## What good looks like
 
 - The constraints are written down with numbers, before any shape is proposed.
@@ -149,7 +159,7 @@ Done badly:
 - Splitting a system to solve an organisational problem, without saying so.
 - A shape copied from a company with a thousand engineers and a different problem.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — constraints before shapes**
 
@@ -222,7 +232,7 @@ one it imagined.
 6. **Look for the organisational reason.** If a split exists to let two teams avoid each other, that is a legitimate reason — but it should be written down as that, not disguised as a performance argument.
 7. **Come back in six months** and compare what actually broke against what you predicted. This is the only calibration available and almost nobody collects it.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 Before starting **P3**, write one page:
 
@@ -238,7 +248,7 @@ Before starting **P3**, write one page:
 - The cost sentence is specific. "Slightly more complex" is not a cost.
 - You can name the observation that would make you switch.
 
-## Words you now own
+## Terms used in this lesson
 
 - **constraint** — something that must be true, stated checkably. Not an adjective.
 - **coupling** — the degree to which one thing's failure or change forces another's.
@@ -255,7 +265,7 @@ Before starting **P3**, write one page:
 **Not covered here:** the interview ritual. Whiteboard system design as practised
 in hiring is a related but different skill, optimised for performance under time
 pressure, and this guide is not about that. The concrete techniques — caching,
-queues, sharding, consistency — are [Data at scale](../../04-scale-and-evolution/01-data-at-scale/scaling-data.md);
+queues, sharding, consistency — are [Protect shared storage with bounded cache loads and consistent reads](../../04-scale-and-evolution/01-data-at-scale/scaling-data.md);
 this section is the thinking that decides which of them you need.
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)

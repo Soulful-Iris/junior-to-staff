@@ -1,5 +1,7 @@
 # Cost: count the work and the memory
 
+A report sums four transaction amounts. Another report compares every transaction with every other one. Both finish quickly with four rows, but their work grows differently when the file contains a million rows. You will count operations and retained values before using notation such as O(n). The goal is to explain growth, not predict seconds from a formula alone.
+
 Before choosing a structure, ask what grows when the input doubles. Let `n` be the number of items. **Time complexity** describes how the work grows; **extra space** describes memory allocated in addition to the input. Neither is a stopwatch reading.
 
 ![Growth in work when an input doubles](../../../../assets/foundations/cost.svg)
@@ -38,5 +40,15 @@ Strings, slices, sorting, and recursive calls hide work too. Copying a length-k 
 ## Check your understanding
 
 If a scan stores every distinct value, its time can be O(n) and its extra space O(n). If a recursive search reaches depth n, its stack can consume O(n) even when it allocates no explicit collection. Explain both bounds before calling a solution efficient.
+
+## Compare a scan with a pair search
+
+| Input size | One visit per item | Distinct unordered pairs |
+|---:|---:|---:|
+| 4 | 4 | 6 |
+| 8 | 8 | 28 |
+| 1,000 | 1,000 | 499,500 |
+
+The pair count is `n * (n - 1) / 2`. Doubling a small input does not make the exact count precisely four times larger, but quadratic growth approaches that ratio as n grows. Now suppose the pair search stops at its first match. Its best run may finish immediately while its worst no-match run still examines every pair. State which case you are describing.
 
 Sources: [Python data structures](https://docs.python.org/3/tutorial/datastructures.html) · [Algorithm analysis and fundamental structures](https://algs4.cs.princeton.edu/10fundamentals/)

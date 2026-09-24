@@ -305,28 +305,35 @@ def overview(b, sequence, base):
 <h1>Build the judgment.<br><em>Then write the code.</em></h1>
 <p class="hero-lede">Understand the problem. Make the trade-offs. Build something that holds up.<br class="desktop-only"> One guided journey from your first correct solution to systems you can defend.</p>
 <div class="hero-actions"><a class="primary-button" data-start href="{href(base,sequence[1])}">Start learning <span aria-hidden="true">↗</span></a><span>One sequence. Deeper questions at every step.</span></div>
-<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>49</strong><span>projects &amp; briefs</span></div></div></header>
-<section class="home-mechanism"><div class="section-label">01 / THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
-<section class="journey-section"><div class="section-label">02 / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">0{i}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for i,(name,desc,detail) in enumerate([
+<div class="hero-stats"><div><strong>{sum(p['kind'] == 'subject' for p in sequence)}</strong><span>engineering chapters</span></div><div><strong>42</strong><span>coding problems</span></div><div><strong>90</strong><span>build &amp; design briefs</span></div></div></header>
+<section class="home-mechanism"><div class="section-label">THE WAY YOU’LL LEARN</div><div class="section-heading"><h2>See the system.<br>Understand the consequences.</h2><p>Follow requests through boxes and boundaries. Predict what breaks, change the design, and see why the fix works.</p></div><figure class="featured-diagram"><figcaption><span class="diagram-label">INSIDE A REQUEST</span><span>Trace it before you build it</span></figcaption><img src="{base}assets/diagrams/request-lifecycle.svg" data-motion="{base}assets/diagrams/request-lifecycle.svg" data-still="{base}assets/resting/diagrams/request-lifecycle.svg" alt="An animated request moving through client, API, service, and database boundaries"><div class="diagram-caption">The diagrams belong to the explanation. You’ll meet them exactly where the concept needs them.</div></figure></section>
+<section class="journey-section"><div class="section-label">PARTS A–D / THE JOURNEY</div><h2>From correct code<br>to decisions that last.</h2><div class="journey-grid">{''.join(f'<div class="journey-card"><span class="journey-number">{chr(64+i)}</span><div><h3>{E(name)}</h3><p>{E(desc)}</p><span class="journey-meta">{detail}</span></div></div>' for i,(name,desc,detail) in enumerate([
 ('Write correct code','Clarify a problem. Work with AI deliberately. Choose a data structure and defend its invariant.','Problem solving · Algorithms'),
 ('Build a complete application','Follow state from a browser to an API and database. Test behavior and enforce ownership.','Backend · Data · Frontend · Testing · Security'),
 ('Design, ship, and operate','Design under constraints. Release safely, observe the system, and recover when it fails.','System design · CI/CD · AWS · Reliability'),
 ('Scale and evolve','Handle more load, evaluate AI, migrate live systems, and make decisions across teams.','Scale · Performance · AI systems · Technical decisions')],1))}</div></section>
-<section class="learning-contract"><div class="section-label">03 / EVERY LESSON HAS A JOB</div><h2>Start with a problem.<br>Leave with a reason.</h2><ol><li><span>01</span><div><h3>Understand the situation</h3><p>A concrete brief, examples, expected behavior, and the boundary of the problem.</p></div></li><li><span>02</span><div><h3>Trace it. Build it. Check it.</h3><p>Visual explanations, a baseline, implementation details, and tests in the same reading flow.</p></div></li><li><span>03</span><div><h3>Change the requirement</h3><p>Follow-ups deepen the same problem into senior and staff-level reasoning.</p></div></li></ol><p class="quiet-note">Use Next to follow the sequence. The contents on the left are always available when you want to revisit a concept. Reference answers remain closed until you choose to inspect them.</p></section>'''
+<section class="learning-contract"><div class="section-label">EVERY LESSON HAS A JOB</div><h2>Start with a problem.<br>Leave with a reason.</h2><ol><li><span>01</span><div><h3>Understand the situation</h3><p>A concrete brief, examples, expected behavior, and the boundary of the problem.</p></div></li><li><span>02</span><div><h3>Trace it. Build it. Check it.</h3><p>Visual explanations, a baseline, implementation details, and observable outcomes in the same reading flow.</p></div></li><li><span>03</span><div><h3>Change the requirement</h3><p>Follow-ups deepen the same problem into senior and staff-level reasoning.</p></div></li></ol><p class="quiet-note">Use Next to follow the sequence. The contents on the left are always available when you want to revisit a concept. Reference answers remain closed until you choose to inspect them.</p></section>'''
 
 
-def intro(b, page, sequence, base):
+def intro(b, page, sequence, base, authored):
     if page['kind']=='group':
         children=[p for p in sequence if p['kind']=='subject' and p['group']==page['group']]
         description=b.GROUPS[page['group']][2]
     else:
         children=[p for p in sequence if p.get('chapter')==page.get('chapter') and p.get('sub')]
         description=page.get('blurb') or page['summary']
+    context_soup = BeautifulSoup(authored, 'html.parser')
+    context = context_soup.select_one('.chapter-context')
+    context_html = str(context) if context else ''
+    page['headings'] = [
+        {'id': h['id'], 'title': h.get_text(' ', strip=True), 'level': int(h.name[1])}
+        for h in (context.find_all(['h2', 'h3']) if context else []) if h.get('id')
+    ]
     rows=[]
     for child in children:
         number = f'CH {child["chapter"]:02}' if page['kind']=='group' else f'{child["chapter"]}.{child["sub"]:02}'
         rows.append(f'<li><span class="outline-index">{number}</span><div><h2><a href="{E(href(base,child))}">{E(child["title"])}</a></h2><p>{E(child.get("blurb") or child.get("section") or "Worked explanation and practice")}</p></div></li>')
-    return (f'<h1>{E(page["title"])}</h1><p class="chapter-lede">{E(description)}</p>'
+    return (f'<h1>{E(page["title"])}</h1><p class="chapter-lede">{E(description)}</p>'+context_html+
             '<div class="chapter-contract"><span class="section-label">CHOOSE YOUR NEXT LESSON</span>'
             '<p>Parts group related chapters. Each lesson has a chapter.lesson address, such as 4.07. '
             'Open a title below, or use Next to follow the reading sequence. Within a lesson, On this page lists its sections.</p></div>'
@@ -358,7 +365,7 @@ def shell(b, page, body, pages, sequence, base):
         sticky_nav = f'<nav class="sticky-sequence" aria-label="Sticky lesson sequence">{sticky_previous}{sticky_next}</nav>'
     top_note = '<div class="reader-meta"><span>'+meta+'</span><span>'+('READ · BUILD · REASON' if is_home else E(b.KINDS.get(page['kind'],('Lesson',''))[1] or 'GUIDED READING'))+'</span></div>'
     if is_home: body=overview(b,sequence,base)
-    elif page['kind'] in ('group','subject'): body=intro(b,page,sequence,base)
+    elif page['kind'] in ('group','subject'): body=intro(b,page,sequence,base,body)
     current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':len(sequence)},ensure_ascii=True).replace('<','\\u003c')
     mobile_location = (f'<span class="mobile-location"><span class="mobile-page-title" title="{E(page["title"])}">'
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'

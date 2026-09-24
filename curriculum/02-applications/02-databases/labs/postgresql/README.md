@@ -1,6 +1,14 @@
-# Two buyers, one unit, and a transaction that is not enough
+# Prevent overselling and write skew with the right transaction boundary
 
 [Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
+
+## Application and assignment
+
+A store has one unit left. Ana and Ben both press Reserve. The application must create one reservation and leave stock at zero. Seeing `stock=0` afterward is not enough, because two reservations could have been accepted for that one unit.
+
+Use two database sessions to make the conflicting operations happen in a known order. Begin with the stock row, then handle the on-call rule spanning two rows. The supplied SQL and runner use a real local PostgreSQL database. They are separate from the reading-list starter’s SQLite database.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Ana and Ben each reserve the last unit. Both
 read `available=1` before either writes. Show the exact SQL and expected rows.

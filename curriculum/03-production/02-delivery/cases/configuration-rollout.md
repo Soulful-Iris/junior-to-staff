@@ -1,6 +1,14 @@
-# Configuration is executable behavior
+# Roll out routing configuration without activating unusable backends
 
 [Curriculum](../../../README.md) · [Deploy changes and control feature exposure](../README.md)
+
+## Application and assignment
+
+A gateway sends incoming API requests to backend servers listed in a configuration document. A routing cohort is a group of gateways that receives the same configuration version. The document can be valid JSON and still contain no usable destination, such as `{"version":8,"backends":[]}`.
+
+Design a local activation boundary that keeps ordinary routing on a known usable version while a replacement is evaluated. Then handle an access revocation, where retaining old permission decisions can be unacceptable. The reported incidents provide context. The twenty-cohort workload and AWS exercise are separate teaching designs.
+
+## Starting contract
 
 > “Twenty routing cohorts accept configuration from one publisher. A syntactically valid update gives one cohort no reachable backends. Keep ordinary requests working, limit the rollout's exposure, and show how an emergency access revocation changes the fallback policy.”
 

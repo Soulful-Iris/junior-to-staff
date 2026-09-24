@@ -2,6 +2,16 @@
 
 Learn the structures and algorithms before using them in a coding interview.
 
+<section class="chapter-context" markdown="1">
+
+## Learn what each structure remembers
+
+A set remembers which IDs have appeared. A queue remembers which task comes next. A heap keeps the next priority available without sorting everything again. This chapter makes those differences visible with small inputs and state traces before asking you to solve a full problem.
+
+Read the structures in order, trace each operation by hand, and name the invariant that remains true. You are learning to choose a tool and account for time and memory. The next chapter combines those tools into complete solutions.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## What this chapter gives you

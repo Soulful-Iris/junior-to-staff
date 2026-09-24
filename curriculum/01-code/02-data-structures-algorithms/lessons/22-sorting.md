@@ -1,5 +1,7 @@
 # Sorting: pay once to expose order
 
+A list of incident records must be displayed by severity while retaining arrival order among equal severities. Sorting can expose the order you need, but it can also change positions and tie behavior. Run the example and distinguish a sorted copy from a mutation of the caller's list.
+
 Sorting arranges values by an explicit key. It can make duplicates adjacent, expose interval order, enable binary search, or let two pointers discard candidates. Account for its cost and decide whether the caller's input may change.
 
 ![Sorting copies records into key order while keeping equal keys stable](../../../../assets/foundations/sorting.svg)

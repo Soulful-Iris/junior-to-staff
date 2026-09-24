@@ -1,6 +1,14 @@
-# Retries spend the capacity needed for recovery
+# Bound retry load and reconcile a lost payment response
 
 [Curriculum](../../../README.md) · [Set reliability objectives and recover from failures](../README.md)
+
+## Application and assignment
+
+A checkout request passes through an edge, an application service, and a provider client. Each layer can repeat a failed call. The customer performed one action, while the dependency may receive many attempts. A timeout after payment also leaves an uncertain outcome: the charge may already exist.
+
+Calculate the attempt tree, choose the retry owner and fleet budget, then draw the payment’s pending, uncertain, and confirmed states. Use the linked local arithmetic fixtures for counts. A fake provider cannot establish a real payment provider’s idempotency or retention contract.
+
+## Starting contract
 
 > “A click calls three services. Each owner configured three attempts because transient failures seemed harmless. Under dependency overload, 100 clicks create far more work. Bound total attempts and elapsed time; then handle a timeout after a payment has already committed.”
 

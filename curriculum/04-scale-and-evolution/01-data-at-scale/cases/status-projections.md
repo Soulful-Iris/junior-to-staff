@@ -1,6 +1,14 @@
-# Completed work can have a stale status view
+# Keep job status current without repeating completed work
 
 [Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
+
+## Application and assignment
+
+A document export runs in the background. The worker writes the finished file, then an event updates a separate status view read by the browser. That view is a projection: a copy organized for display, not the authority that performed the export. A delayed event can leave “Running” on screen after the file is ready.
+
+Design durable result publication and versioned status updates. Follow the concrete event sequence, calculate lag and catch-up, then resolve a cancellation racing completion. This page is a build brief. You create the projector and freshness field using the linked mechanisms, rather than running a supplied export application.
+
+## Starting contract
 
 > “A user sees ‘running’ although their job finished. Retrying creates duplicate work, and replay occasionally changes ‘completed’ back to ‘running’. Preserve job identity and monotonic status while showing honest freshness; then handle cancellation racing completion.”
 

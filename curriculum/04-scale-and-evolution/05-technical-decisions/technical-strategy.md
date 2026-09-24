@@ -1,10 +1,20 @@
-# Technical strategy
+# Turn recurring constraints into a usable technical strategy
+
+Five teams deploy five different kinds of services. Operations supports five release paths, but four services have similar HTTP workloads and one runs long batch jobs. The organization wants less duplicated maintenance without forcing the batch service into an unsuitable runtime.
+
+You will derive a supported default, define the exception boundary, and choose an adoption sequence. The result should help a sixth team make a concrete decision rather than merely announce a preferred technology.
 
 [Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## Write a rule the next team can use
+
+An example policy is: “Stateless HTTP services that fit the documented request duration, networking and runtime requirements use the supported deployment path. Long-running jobs use the separately owned worker path. A new requirement outside either contract gets a measured design review.”
+
+The missing detail matters. Define those duration and networking requirements from the actual platform, rather than leaving “ordinary service” to interpretation. Bring one HTTP request and one twenty-minute batch job to the review. Show where each runs, who supports it and how it is recovered. A roadmap then schedules the work needed to make that policy true.
+
+## Reason through the changed situation
 
 > “Five teams repeatedly choose different solutions for the same service needs.
 > Operations now maintains five deployment paths. Should we standardize? Show
@@ -115,7 +125,7 @@ ambitious or unsurprising; excitement and boredom are not correctness tests.
 trigger* states when to reconsider. A roadmap schedules work; it does not by
 itself explain why that work addresses the constraint.
 
-[Writing that decides](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
+[Write a design document that supports a decision](design-documents.md) · [Engineering effectiveness](engineering-effectiveness.md)
 
 ## Draw it from memory · Make strategy a constraint on real decisions
 

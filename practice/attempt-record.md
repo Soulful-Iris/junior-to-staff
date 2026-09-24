@@ -1,4 +1,6 @@
-# Independent attempt record
+# Record an attempt with observations and a next practice task
+
+After a practice session, record what happened while it is still fresh. For example, write “the second delivery changed the total from 2 to 4” instead of “weak on idempotency.” Link the code or drawing, the input that exposed the problem, and the next attempt. Copy the form below for each session.
 
 Use one record per occasion; keep the assessor's raw observations, not only a total.
 The [rubric](README.md) defines the curriculum gate and its limits.

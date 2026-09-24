@@ -1,6 +1,14 @@
-# Runtime boundaries · which work can overlap?
+# Distinguish I/O overlap from parallel CPU execution
 
 [Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+
+## Application and assignment
+
+A browser search box waits for its event handler while another operation parses a large file. Starting more promises does not give the same event-loop thread more CPU cores. Waiting for a remote response is different: other callbacks may run while that I/O is pending.
+
+Draw the timing of four CPU tasks and four waiting tasks using the teaching durations below. This is a reasoning prerequisite, not an application to deploy. Carry your prediction into the linked executor or browser exercise and identify exactly where execution can yield.
+
+## Contract and starting evidence
 
 > “Search feels frozen when one request parses a large file. Another team suggests
 > raising `Promise.all` concurrency from four to forty. Explain which resource is

@@ -1,4 +1,6 @@
-# Assessor key: incident desk
+# Review the incident timeline, alert windows and remaining backlog
+
+Use after the [incident-desk exercise](incident.md). The request-error alert and background queue describe different user effects. Check the arithmetic first, then ask whether the chosen mitigation improves useful completions without overwhelming the recovering dependency.
 
 Keep separate from the candidate brief. This key describes constructed inputs; no credit depends on naming a real provider incident.
 

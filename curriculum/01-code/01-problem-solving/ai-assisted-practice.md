@@ -1,6 +1,16 @@
-# Practice an AI-assisted change
+# Repair a quantity update that loses zero
+
+An inventory API accepts partial updates to a product. A missing quantity means keep the stored number, but an explicit zero means no stock remains. The supplied small example in the linked lab uses a truthiness fallback and therefore loses zero.
+
+This is a focused review exercise. You will write the input/output contract, explain the failing expression, propose the smallest repair and demonstrate the real runtime inputs. You are not being asked to build a complete inventory service.
 
 [Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
+
+## Your starting input and finish line
+
+Start from `current = 7` and send `{"quantity": 0}`. The broken expression returns 7. The repaired boundary must return 0, retain 7 when the field is omitted, and reject the invalid cases you explicitly choose. Keep invalid input from changing stored state.
+
+Use the [quantity lab and its four-line starting function](../../02-applications/04-testing/labs/quantity-debug/README.md). Read the code first. Ask an assistant to explain the distinction between a missing property, null and zero, then compare that explanation with the language behavior. Hand over the patch and a small transcript of the agreed cases, including any outcome that remains unsupported.
 
 ## Your first engineering conversation
 

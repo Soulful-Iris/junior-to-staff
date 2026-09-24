@@ -1,6 +1,14 @@
-# Bounded fan-out · preserve order under partial failure
+# Fetch a bounded batch while preserving order and partial results
 
 [Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
+
+## Application and assignment
+
+An account dashboard shows a row for each requested account. Its API returns details at different speeds, and one account lookup can fail. The screen still needs each result beside the correct account, including an error for the failed row.
+
+Implement the bounded asynchronous mapper described below. Inputs and output slots keep their original order, while up to K calls run concurrently. The reference is supplied for comparison after your attempt. This controls simultaneous calls in one runtime, not requests per second across a fleet.
+
+## Contract and starting evidence
 
 > “A dashboard loads details for 20 accounts. Starting every request overloads the
 > service. Run at most three calls at once, keep input order, and display an error

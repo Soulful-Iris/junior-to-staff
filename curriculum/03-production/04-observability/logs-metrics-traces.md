@@ -1,10 +1,29 @@
-# Observability
+# Use logs, metrics and traces to explain one slow request
 
 [Curriculum](../../README.md) · [Trace requests and diagnose production symptoms](README.md)
 
-> Project connection · feeds **P2 (it survives)**
+> Project connection · feeds [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 
-## At the whiteboard
+## What the user did and what support needs to find
+
+Ana clicks Save in a shared reading list. The browser waits 1.2 seconds before displaying the new bookmark. Ben saves another link at nearly the same time and gets a quick response. Support needs to find Ana’s operation among all the requests handled during that minute, then identify where her time went.
+
+The application has three useful forms of evidence. A **metric** counts many operations, such as saves per second. A **trace** records related timed steps within an operation. A **structured log** records an event with named fields that can be searched. None automatically includes the others.
+
+### Start with an event you can read
+
+This is an illustrative log shape to implement, not output already emitted by the starter:
+
+```json
+{"event":"bookmark.saved","request_id":"req-ana-17","bookmark_id":42,"duration_ms":1200,"outcome":"created","service_version":"b17"}
+```
+
+Support can search `request_id=req-ana-17` without searching for Ana’s raw URL, which may contain a private token. The request identifier should come from a trusted boundary or be validated there. The response must expose the identifier support asks the user to provide.
+
+Your task is to choose and connect enough evidence to explain a slow save. Start with [Trace requests through a bookmark API](../../02-applications/01-backend/projects/01-the-request-you-can-trace-end-to-end.md), which explains the local implementation and its AWS mapping. The broader lesson below adds population metrics, collection, sampling, and their costs.
+
+## Separate the request’s elapsed time into useful spans
+
 
 > “A customer's save takes 1.2 seconds, while the overall dashboard is green.
 > You cannot reproduce it locally. What must already be recorded to locate the
@@ -62,7 +81,7 @@ Explain sampling loss, cardinality cost, and retention before declaring the
 system observable. A lead also decides which team owns a broken telemetry link
 and how useful evidence remains available during an incident.
 
-## The one-liner
+## The principle behind the design
 
 Monitoring answers the questions you thought of in advance: is it up, is it
 slow, is the disk full. Observability is answering the question you did not
@@ -70,7 +89,7 @@ think of — at 3am, from evidence the system already recorded, without shipping
 new code first. The skill is choosing what to record, and at what cost, so one
 failing request can be explained after the fact.
 
-## The failure it prevents
+## Follow the failure through the system
 
 A user writes in: "saving has failed for me all week." Every dashboard is
 green. The error-rate chart shows 0.4%, which is normal, because it is an
@@ -92,7 +111,7 @@ attributes. Ten minutes, no ssh.
 
 Dashboards answer questions someone asked in advance. Users generate new ones.
 
-## The mental model
+## Mechanisms and their limits
 
 ### Known questions and new ones
 
@@ -142,8 +161,7 @@ if only 63 combinations occur in the active window, observe 63, not 400.
 
 ![Potential series combinations: 4 methods × 20 routes × 5 status classes × 10,000 customers = 4,000,000. Actual active combinations must be measured](../../../assets/diagrams/cardinality-explosion.svg)
 
-Storage — and most vendor bills — scale with active series, not traffic, which
-is how one deploy adding one label doubles a bill overnight. Metric labels are
+Metric storage cost depends on active series, sample frequency, retention, and the backend’s billing model. Adding a label can multiply series even when traffic is unchanged. Metric labels are
 for **bounded** dimensions you group by: method, route, status class. Anything
 unbounded — user ID, request ID, raw URL — must not become an unbounded metric
 dimension. Where diagnosis justifies it, use permitted pseudonymous identifiers
@@ -160,23 +178,17 @@ labels on a metrics backend is an invoice.
 
 ### Sampling, and the part nobody teaches
 
-You cannot keep every trace at volume. **Head sampling** decides at the start:
+At some volumes and retention targets, keeping every trace exceeds the available budget. **Head sampling** decides at the start:
 cheap, stateless, blind — the errors have not happened yet. **Tail sampling**
-decides once the trace is complete: keep all errors, everything over the
-latency target, 1% of the rest. The policy you want, with two consequences —
-the second quietly ruins dashboards:
+decides once the trace is complete: attempt to keep traces containing errors, those over the latency target, and a sample of the rest. Late spans, buffering limits, and collection failures can still lose evidence. This example policy has two consequences:
 
 1. Tail sampling is **stateful**: the decision needs the whole trace, so every
    span with the same trace id must reach the same collector instance or traces
-   fragment. OpenTelemetry's guidance (checked 2026-09-21) is two layers — a
+   fragment. A common topology uses two layers — a
    stateless layer load-balancing **by trace id**, then a layer buffering
    complete traces and applying the policy. The policy without the routing
    layer looks fine until there is a second collector.
-2. **Compute span metrics before the sampling decision.** Tail sampling keeps
-   all errors and a sliver of successes; rates derived from the survivors
-   inherit that bias — error rate reads far above truth, request rate low,
-   latency slow. Derive rate, error and duration from the full span stream in
-   the first layer; drop only the traces.
+2. **Keep request metrics independent of biased trace retention.** A tail policy that favors errors changes the proportions in the retained traces. Error rate, throughput and latency derived only from those survivors can misrepresent the service. Record request counters and duration histograms independently, or compute span metrics before trace sampling from an otherwise complete span stream. If SDK head sampling already discarded spans, moving a span-metrics processor before tail sampling cannot recover those missing observations.
 
 ### Where to point it
 
@@ -214,7 +226,7 @@ Done badly:
 - Alerts on causes (CPU high) rather than symptoms (users waiting): the pager
   fires for what nobody feels and sleeps through what everybody does.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — instrument a service, with the cardinality conversation forced**
 
@@ -284,7 +296,7 @@ the routing layer.
    minutes is a pass. If the answer came from anywhere but your instruments,
    they failed, whatever the dashboards say.
 2. **Count your active time series.** If nobody knows the number, look it up —
-   every backend exposes it. Add one label to one metric, predict the new
+   use the backend’s available series inventory or an estimate with its limits stated. Add one label to one metric, predict the new
    count, check. Unable to predict means you do not control the bill; off by
    10x means the label was not bounded.
 3. **Follow causality across the queue.** Test a single message, a batch from
@@ -300,7 +312,7 @@ the routing layer.
    or log streams. If you cannot, that is not a budget, it is a leak with a
    monthly statement.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
 3am" half of that project's question.
@@ -329,7 +341,7 @@ On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
 - You can state your active series count, and predict what adding `tag` as a
   label to the request metric would do to it.
 
-## Words you now own
+## Terms used in this lesson
 
 - **observability** — enough recorded detail to answer questions you did not anticipate.
 - **time series** — one stored stream per combination of metric name and label values.
@@ -349,9 +361,8 @@ On **P2**, the reading list from P1 gets instrumented — the "can you fix it at
 
 **Not covered here:** what to do when telemetry says something is wrong — SLOs,
 error budgets, alerting, on-call — belongs to reliability; this section is
-about being able to see. Continuous profiling is real but young. Front-end and
-real-user monitoring have their own tooling. Audit logs are a security
-artifact, not an observability signal.
+about being able to see. Continuous profiling is a separate measurement technique. Front-end and
+real-user monitoring have their own tooling. Audit records have additional integrity, access, and retention requirements. Diagnostic logging alone may not meet that contract.
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
 

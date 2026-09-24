@@ -1,4 +1,6 @@
-# Candidate · private export service
+# Design a private asynchronous export service
+
+A customer wants a downloadable file containing their own saved bookmarks. Building the file can take longer than one HTTP request may wait. Design how the service accepts the request, exposes progress, and later authorizes the download. The session is a design assignment, not a supplied export application.
 
 > “Customers export their private bookmark libraries as downloadable files. Today a
 > request stays open until the file is ready and times out after 30 seconds. Design

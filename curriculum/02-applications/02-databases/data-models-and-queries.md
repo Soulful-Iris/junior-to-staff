@@ -1,339 +1,125 @@
-# Data and databases
+# Model shared data and enforce changes with database constraints
 
-[Curriculum](../../README.md) · [Model data and enforce transactional rules](README.md)
+Alice and Bob use the same reading list. Both can see bookmark 7, but each has separate reading progress. Alice marking it read should not remove it from Bob's unread list. A single `is_read` field on the shared bookmark would represent the wrong fact.
 
-> Project connection · feeds **P1 (it works)**
+You will model that fact, retrieve it with a query, and protect changes that arrive concurrently. Then you will inspect an index's effect on the query. Start with the meaning of a row before choosing database products or optimizing a screen.
 
-> **Constructed candidate brief:** “Ana and Ben share a reading list. Ana marks
-> article 7 read; Ben must still see it unread. Model that fact, then show how
-> two concurrent requests preserve it. What would you clarify before writing SQL?”
+## Give each fact a key
 
-| Input | Expected result | Boundary |
+A key identifies the fact that one row represents. A bookmark ID identifies a shared item. Reading progress needs both a member and an item.
+
+| Table | One row means | Key |
 |---|---|---|
-| Ana reads article 7 twice | One `(Ana, 7)` read-mark | A database unique constraint rejects duplicates |
-| Ben lists unread articles | Article 7 remains unread | Missing per-person history cannot be invented |
-| List 20 newest items for owner 2 | At most 20 rows ordered by time and ID | Performance must be measured with realistic selectivity |
+| `bookmarks` | This shared bookmark has this URL and title | Bookmark ID |
+| `reading_state` | This member has this reading status for this bookmark | Member ID plus bookmark ID |
+| `membership` | This member belongs to this group | Member ID plus group ID |
 
-Start by naming the fact, writing its key, and trying an illegal write. Then
-measure one query, inspect its plan, and change the index only if the evidence
-supports it. The [PostgreSQL lab](labs/postgresql/README.md)
-provides schema, seed data, racing sessions, and a separate assessor guide.
+The [local reading-list API](../../../examples/reading-list-starter/README.md) implements bookmarks and per-member reading state. The membership table above illustrates an extension to real groups, not another table already supplied by that starter.
 
-## The one-liner
+After Alice marks bookmark 7 read, the state can be:
 
-Code can be rewritten any afternoon. Data has to be carried, live and intact,
-through every rewrite — which makes the schema the one decision in a young
-system that is hard to take back. A fact you never recorded cannot be
-recovered at any price.
+| Member | Bookmark | Is read? |
+|---|---:|---|
+| Alice | 7 | True |
+| Bob | 7 | False |
 
-## The failure it prevents
+If no reading-state row exists, define whether that means unread. Missing data needs a declared meaning. Do not infer a person's past reading history from a shared flag that never recorded who acted.
 
-You build the reading list. The screen shows one checkbox per item, so the
-schema gets a `read` boolean on `items`. It demos perfectly.
+## Use constraints to protect the model
 
-Two weeks later the group is five people. Ana marks an article read and it
-vanishes from everyone's unread view, because "read" was stored on the item
-when it was always a fact about a person *and* an item. The code fix is an
-afternoon: a new table, one row per person per item.
+This is an illustrative relational schema for the reading-state relationship. Adapt names and identity types to your application:
 
-Then the real cost arrives. The new table should hold history — who had read
-what before tonight — and that was never written down. There is nothing to
-backfill from. Nothing crashed, every test stayed green, and a piece of the
-past is gone.
-
-Code bugs cost time. Schema bugs cost data, and they are committed on the
-quietest day, when someone models the checkbox instead of the fact.
-
-## The mental model
-
-**1. Data outlives code, so model the thing, not the screen.** A schema is a
-set of claims about the world: *one row here means one person read one item.*
-Screens change weekly; the claims are enforced on every row ever written. The
-test: say what one row of each table asserts. If the sentence describes a page
-rather than a thing, the screen is leaking in.
-
-**2. Normalisation, in plain words: store each fact once.** If a team's name
-lives in forty rows, a rename is forty updates, and a crash after twelve leaves
-a database that disagrees with itself. Normalising gives each fact one home and
-points at it from everywhere else. Denormalising — a deliberate copy, like a
-cached count — is sometimes right when a *measured* read is too slow, but
-keeping the copies true becomes your job. Do it late, on evidence.
-
-**3. A join is a lookup you can reason about.** A foreign key is a value naming
-a row in another table. A join says: for each row here, find the rows there
-whose key matches. The whole cost lives in *find* — check every row (a scan) or
-seek in something kept sorted (an index). Any join yields to two questions: how
-many rows survive the filters on each side, and how are the matches found.
-
-**4. Keys — and where their order matters.** A natural key is a real-world
-value (an email); a surrogate key is generated and meaningless. Natural keys
-break when the world changes — people change emails — so a surrogate can keep
-references stable while a separate unique constraint protects the real value.
-In PostgreSQL, a primary key normally has a B-tree index separate from the
-**heap**, the pages containing row versions. Ordered identifiers can concentrate
-inserts in recent **index** pages; random identifiers spread index access. The
-cache, workload, and page occupancy determine the measured cost. Neither choice
-keeps heap rows sorted by primary key. `CLUSTER` explicitly reorders a heap once;
-later writes do not maintain that ordering. A newest-items query still needs an
-index matching its owner filter and time ordering.
-
-**5. An index is a purchase, and the planner holds the receipt.**
-
-| Index family | Useful access pattern | Does not imply |
-|---|---|---|
-| B-tree | Equality, ranges, matching key order | Every query avoids a sort |
-| Hash | Equality | Range or ordered traversal |
-| GIN | Membership/full-text terms | Arbitrary `ORDER BY` without sorting |
-| GiST | Operator-class-dependent search, such as spatial predicates | One universal ordering |
-| BRIN | Summaries of physically correlated row ranges | Exact row matches without rechecks |
-
-![One read uses a single sorted index to reach its row in a few page reads; one insert must also write the table and every index on it](../../../assets/diagrams/index-cost.svg)
-
-For the **B-tree index in this example**, think of ordered keys pointing to
-row locations—not a universal definition of every index.
-Reads matching its shape can get faster; inserts maintain the table and its
-applicable indexes, and the copies take disk. An update creates a new row
-version, but PostgreSQL's heap-only tuple (HOT) optimization can avoid new
-ordinary index entries when indexed columns are unchanged and the old page
-has enough room; summarizing indexes have additional rules. Whether an index is used
-is not your call either — the planner decides, from statistics about your
-actual data, and can rightly decide differently at a thousand rows than a
-million. Query-speed arguments are settled by `EXPLAIN`, because intuition does
-not execute queries and the planner does.
-
-**6. "Atomic" means both writes or neither.** The classic bug: debit one
-account, crash, never credit the other. No error anywhere — the money is gone,
-because two writes that only make sense together happened separately. A
-transaction is the database's promise that if the process dies between them,
-the world looks as if nothing started. A migration is the same problem
-stretched over days, old code still running while the shape changes: add first,
-then backfill, then switch, only then remove. Never a destructive change in one
-step — there is no moment when nothing is reading.
-
-**7. Where juniors reliably lose data: NULL, time zones, money.** NULL means
-three things — unknown, not applicable, not yet — and where nobody wrote down
-which, sums, joins and comparisons quietly skip rows: default to NOT NULL,
-comment every exception. A timestamp without a time zone is a time nowhere:
-store instants in UTC (PostgreSQL's `timestamptz` stores the instant), keeping
-a zone only where wall-clock time *is* the fact, like a calendar event. Binary
-floats cannot represent 0.10 exactly, so money in a `float` drifts by rounding
-until an audit finds it: store integer minor units or a decimal type.
-
-
-
-## What good looks like
-
-- You can say what one row asserts, for every table, in one sentence.
-- Every relationship is a foreign key the database enforces, not a convention
-  the application remembers.
-- Columns are NOT NULL by default; every exception has a written meaning.
-- Each fact lives in one place; every deliberate copy names what keeps it true.
-- Timestamps are UTC instants; money is integer minor units or a decimal type.
-- Each index has a measured purpose. Each migration states its compatibility,
-  rollback window, and restore or forward-fix plan; reversibility is not assumed.
-
-Done badly, you see:
-
-- Tables named after screens.
-- `read` and `deleted` booleans where the fact belonged to a pair, or needed a
-  *when* (`deleted_at`).
-- NULL everywhere, meaning something different in every column.
-- No foreign keys "for flexibility", and rows pointing at rows that no longer
-  exist.
-- Prices in `float`, off by a cent somewhere nobody can find.
-- A migration that adds the new column and drops the old in one deploy — a
-  minute of errors while old code runs against the new schema.
-
-## Ask Claude for this
-
-(The design ask — model before code — already lives on P1's page. These two
-judge what comes back.)
-
-**Request 1 — reviewing a schema a model proposed**
-
-```
-Here is the schema you proposed. Review it as data, not as code.
-
-For each table: what real-world change would force an ALTER? Which facts
-are stored in more than one place? Which query the product must answer
-at 100,000 rows has no index shaped for it?
-
-Check specifically: every money column's type, every timestamp's time
-zone, every nullable column's meaning, every uniqueness that is assumed
-but not declared, and any primary key whose randomness scatters inserts
-across the index.
-
-Finish with the one change that is cheapest now and most expensive in
-six months.
+```sql
+CREATE TABLE reading_state (
+    member_id TEXT NOT NULL,
+    bookmark_id INTEGER NOT NULL REFERENCES bookmarks(id),
+    is_read BOOLEAN NOT NULL,
+    PRIMARY KEY (member_id, bookmark_id)
+);
 ```
 
-*Why:* models default to the same schema weaknesses — nullable
-everything, floats for money, naive timestamps, undeclared uniqueness, flags
-where a pair table or an `_at` timestamp belongs, tables shaped after your
-prompt rather than the domain. The checklist points the review at those; a bare
-"review this schema" returns compliments and an index suggestion.
+The composite primary key prevents two rows describing the same member/bookmark pair. The foreign key requires the referenced bookmark to exist under the chosen database configuration. Membership and operation authorization still need enforcement. A foreign key does not decide whether Bob is allowed to act as Alice.
 
-*What you should get back:* findings that cite specific columns, at least one
-undeclared uniqueness (there is almost always one), and a closing ranked by
-reversibility.
+**Normalization** gives a fact one authoritative representation. Store a group's name on the group row rather than copying it into every bookmark. A deliberately copied count or search view is **denormalized** data. It can be useful, but it needs an update and repair rule.
 
-*Push back on:* a review that finds nothing. Plant a `price float` column and
-run it again; if the review misses the plant, it is not measuring anything.
+## Read shared items with the current member's status
 
-**Request 2 — the migration that cannot be one step**
+A left join keeps bookmarks even when the member has no status row:
 
-```
-The live system stores read as a boolean on items. It must become
-per-person. Old code keeps running while this changes.
-
-Plan the migration as separate deploys. For each step: what the old code
-sees, what the new code sees, and what happens if the process dies
-halfway through it. Never create something and remove its predecessor in
-the same step.
-
-End by telling me what the new table cannot be backfilled with, and what
-we should record about that.
+```sql
+SELECT b.id, b.title, COALESCE(r.is_read, FALSE) AS is_read
+FROM bookmarks AS b
+LEFT JOIN reading_state AS r
+  ON r.bookmark_id = b.id
+ AND r.member_id = :authenticated_member
+ORDER BY b.created_at DESC, b.id DESC
+LIMIT 20;
 ```
 
-*Why:* "old code keeps running" is the constraint that kills one-step
-migrations, and the dies-halfway question forces each step to be safe alone.
+This teaching query omits group filtering to focus on the join. A multi-group application must also restrict bookmarks to verified membership. The placeholder is a bound driver parameter derived from trusted identity.
 
-*What you should get back:* three to five steps — add, backfill, switch, then
-remove — and a plain admission that per-person history from before the change
-does not exist.
+Putting the member filter inside the join condition preserves bookmarks with no matching status. Moving it carelessly into a `WHERE` clause can remove those rows and change the query's meaning. `COALESCE` applies the declared missing-row policy here. It should not hide an unavailable database or an unknown business value.
 
-*Push back on:* a backfill that invents facts. Marking each item read by
-whoever added it looks plausible and is fiction; the honest version records
-the assumption.
+The `(created_at, id)` order uses ID to break timestamp ties. A cursor must retain both values to continue deterministically. It also needs a documented policy for concurrent edits and deletions.
 
-## How you would know it is wrong
+## An index serves a particular access pattern
 
-1. **Run `EXPLAIN (ANALYZE, BUFFERS)` on your main query.** Compare estimated
-   versus actual rows, heap/index pages, sort work, and time. A sequential scan
-   may correctly beat scattered heap lookups for a broad filter or a tiny table.
-   Large estimate errors invite checking statistics, skew, correlated columns,
-   and parameters; stale statistics are one cause, not the only one.
-2. **Insert 100,000 rows and time the same query.** In PostgreSQL,
-   `generate_series` makes seeding a one-liner. Everything is fast at 200 rows;
-   hold result size and selectivity explicit. An indexed query may still grow
-   with the number of returned rows, heap reads, cache misses, or sorting.
-3. **Kill the process mid-transaction.** Put a sleep between two writes that
-   only make sense together, `kill -9` in the gap, restart, count. If half the
-   change is visible, those writes were never in one transaction — and now you
-   have seen the check go red.
-4. **Test the promised recovery path on a copy.** Compare keys, values and
-   invariants, not just counts. Dropping a populated column then adding it back
-   can preserve row counts while losing every value. A down migration restores
-   schema only unless data recovery is separately demonstrated. For an
-   irreversible step, rehearse restore or forward repair and state the window.
-5. **Attempt the illegal writes from `psql`, not the app.** An item with no
-   owner; a duplicate of something you believe unique; NULL into a mandatory
-   column. The refusal must come from the database — the migration script, the
-   console and next year's rewrite do not run application code.
+Suppose the real query is “list one owner's newest twenty bookmarks.” A candidate index is `(owner_id, created_at, id)` in an ordering appropriate to that query. Its value depends on filters, data distribution and the database's plan.
 
-> The standing rule: before believing a green result, say what broken would
-> have looked like. A constraint you have never seen refuse anything has passed
-> a test that cannot fail.
+![A matching index narrows a read, while maintaining indexes adds work and storage to writes.](../../../assets/diagrams/index-cost.svg)
 
-## Your slice of the project
+| Query characteristic | What to inspect |
+|---|---|
+| One owner out of many | How many rows survive the owner predicate |
+| Newest twenty rows | Whether the index supplies useful ordering and early stopping |
+| Many rows share a timestamp | Stable ID tie-breaker |
+| Frequent updates | Added write and storage cost of the proposed index |
 
-On **P1**, add:
+An index is not a guarantee that every query becomes fast. In PostgreSQL, a B-tree stores ordered keys separately from heap row versions. Choosing ordered IDs does not keep all heap rows physically sorted forever. Other index families serve different operators and access patterns.
 
-- The schema as your first migration files: users, items, and your answers to
-  P1's tag and read-state decisions — every relationship an enforced
-  foreign key, every column NOT NULL unless a comment says what NULL means.
-- A seed script that inserts 100,000 items, so your numbers mean something.
-- The `EXPLAIN ANALYZE` output of the group-list query at that size, saved with
-  two sentences: what the planner chose, and why that is fine — or the index
-  you added.
-- One additive migration after seeding: a `fetched_at` column with a defined
-  backfill and tested old/new-reader compatibility. Unknown historical fetch
-  times stay unknown; do not invent them. Test values after the recovery path.
+Use the [PostgreSQL lab](labs/postgresql/README.md) for schema, sample data and actual query plans. Compare estimated and observed row counts, scans, sorting and buffer activity under representative data. A tiny table may reasonably use a sequential scan.
 
-**Acceptance criteria you can check yourself:**
+## Atomic changes and concurrent decisions are different concerns
 
-- From `psql`, the database refuses: an item with no owner, a duplicate
-  read-mark for the same person and item, a NULL URL.
-- "Who has read this item" and "what has this person read" are each one query,
-  with no schema change between them.
-- Plans and timings at small, large, and skewed cardinalities are written down;
-  explain rows visited and returned, rather than requiring a fixed speed ratio.
-- Deleting a user is a decision — cascade or refuse — proven by a test
-  (see [Testing](../04-testing/testing-strategy.md)).
+A transaction can store related changes together or roll them back together. The transaction's isolation and write rules determine what concurrent callers may observe and change.
 
-## Words you now own
+Two buyers both see one remaining unit. If both independently decide it is available and then write zero, each may think it succeeded. A conditional decrement makes the availability decision part of the write:
 
-- **schema** — the shape of your data and the rules between its parts.
-- **primary key** — the value that names a row, forever.
-- **foreign key** — another row's key, enforced by the database.
-- **surrogate key** — a generated id with no real-world meaning.
-- **normalisation** — each fact stored once, referenced everywhere else.
-- **denormalisation** — a deliberate copy; keeping it true is your job.
-- **index** — a sorted copy bought with write time and disk.
-- **query planner** — picks how to run a query from statistics, not intent.
-- **EXPLAIN** — the plan; with ANALYZE, what actually happened.
-- **transaction** — writes that succeed together or leave no trace.
-- **migration** — a versioned change to schema and the data under it.
-- **backfill** — filling values for rows older than the column.
-
----
-
-**Not covered here:** ORMs, deliberately — learn to read tables and plans
-first, so you can read what an ORM later writes for you. Document and key-value
-stores and replication continue in [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
-Isolation and locking have a [PostgreSQL lab in this chapter](labs/postgresql/README.md);
-restore and recovery exercises continue in [Migrate live systems and verify recovery](../../04-scale-and-evolution/04-migrations/README.md).
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
-
-## Draw it from memory · Model ownership before adding indexes
-
-```mermaid
-erDiagram
-  USER ||--o{ MEMBERSHIP : joins
-  GROUP ||--o{ MEMBERSHIP : contains
-  GROUP ||--o{ BOOKMARK : owns
-  USER ||--o{ BOOKMARK : creates
-  BOOKMARK ||--o{ BOOKMARK_TAG : has
-  TAG ||--o{ BOOKMARK_TAG : labels
-  BOOKMARK {
-    uuid id PK
-    uuid group_id FK
-    uuid created_by FK
-    datetime created_at
-    int version
-  }
+```sql
+UPDATE stock
+SET available = available - 1
+WHERE product_id = :product_id
+  AND available > 0;
 ```
 
-**Redraw challenge:** Point to the foreign key that bounds a group-scoped read. Then name the index for its ordering.
+Check the affected-row count. One means this decrement succeeded. Zero means no unit was claimed by that operation. If order creation must succeed with the decrement, place both in the same appropriate transaction. For more complex invariants, use the required locking or isolation protocol and handle retries.
 
-![Model ownership before adding indexes: mechanism in motion](../../../assets/learning/index-seek.svg)
+| Concurrent action | Expected observation |
+|---|---|
+| Buyer A claims the final unit | One affected stock row |
+| Buyer B also tries | Zero affected rows after A's committed claim |
+| A's order insertion fails in the same transaction | Its stock decrement is rolled back |
 
-[Static view](../../../assets/learning/index-seek-still.svg)
+The [two-session worksheet](labs/postgresql/schedules.md) makes the interleaving observable. Read the actual SQL and transaction boundaries rather than treating the word transaction as the entire proof.
 
-Predict the change before drawing: the baseline stores one global checkbox;
-the corrected model makes the person part of the key.
+## Make units, absence and time explicit
 
-```mermaid
-flowchart TD
-  Ana["Ana: mark read"] --> Item["Item 7: read=true"]
-  Item --> Ben["Ben: article incorrectly hidden"]
-```
+| Data | Representation decision |
+|---|---|
+| Money | Currency plus integer minor units or an appropriate decimal representation |
+| An instant | A timezone-aware instant, with display conversion at the edge |
+| A recurring local appointment | Local time and named timezone, plus daylight-saving policy |
+| Unknown or not-yet value | Nullable only with a defined meaning |
+| Stable object identity | An identifier that survives changes to display name or email |
 
-```mermaid
-flowchart TD
-  Write["Ana: mark article 7 read"] --> Pair["Read mark: unique person + item"]
-  Pair --> Heap["Heap: row versions"]
-  Index["B-tree: person + item"] -->|"row location"| Heap
-  Ben["Ben: owner-scoped unread query"] -->|"no Ben mark"| Visible["Article 7 visible"]
-```
+USD 1999 minor units means USD 19.99 under that currency convention. JPY 500 is a different unit, so adding the integers without a conversion policy is meaningless. Likewise, storing a UTC instant alone does not fully describe “9 a.m. every Monday in London.”
 
-**Senior follow-up:** preserve stock and a two-row on-call invariant under racing
-transactions in the lab. **Lead follow-up:** budget lock time and write overhead
-while adding an index. An assessor should ask for the failed schedule before the
-repair, the invariant after it, and an explanation of why a different planner
-choice can be correct.
+A natural key comes from the domain, such as an email address. A surrogate key is an assigned identity. Use a separate uniqueness constraint where a domain value must remain unique, while allowing the stable internal identity to survive a legitimate value change.
 
-Technical sources: [PostgreSQL 18 CLUSTER](https://www.postgresql.org/docs/18/sql-cluster.html)
-and [HOT](https://www.postgresql.org/docs/18/storage-hot.html). Live, undated
-technical documentation; accessed 2026-09-22, not recent interview evidence.
+## Change the model without inventing history
+
+If the old schema used a shared read flag, adding a per-member table cannot reconstruct which person actually read each item. State that gap and choose an explicit migration policy, such as unknown historical status or a documented reset. Do not silently assign the shared value to everyone.
+
+For a compatible schema change, add the new representation, copy recoverable data, keep live changes synchronized, reconcile and switch consumers before retiring the old path. The [migration lesson](../../04-scale-and-evolution/04-migrations/migration-method.md) follows newer writes and deletions arriving during the copy.
+
+Your first deliverable is small: two members, one bookmark, two independent reading states and a query that returns the correct view for each. Then inspect one measured query plan and demonstrate one concurrent invariant. Those examples establish what your schema and index are actually doing.

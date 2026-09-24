@@ -1,6 +1,14 @@
-# Incident desk: the page cleared, the queue did not
+# Diagnose stale work after the request-error alert clears
 
 [Curriculum](../../../../README.md) · [Set reliability objectives and recover from failures](../../README.md)
+
+## Application and assignment
+
+A status page reads a stored view of background work. Refresh jobs update that view asynchronously. The read API can recover and respond quickly while its displayed information remains old because refresh jobs are still waiting.
+
+Use the supplied CSV and sample logs to calculate alert decisions and remaining recovery work. Produce an incident note that separates observations from hypotheses. The task is interpreting incomplete evidence and choosing a bounded response, not guessing a hidden real-world incident.
+
+## Contract and starting evidence
 
 > “You are on call for a status API with an asynchronous refresh queue. At minute four the dependency recovers. The queue keeps growing. At minute six a paired-window page clears. Decide what to do next and what you can actually conclude about the cause.”
 

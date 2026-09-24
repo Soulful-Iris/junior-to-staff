@@ -1,6 +1,14 @@
-# Lab 2 · send bytes to storage without tying up the API
+# Upload private object bytes directly and finalize application metadata
 
 [Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
+
+## Application and assignment
+
+A user attaches a file to a record. The API can authorize the operation and choose an object key without relaying the entire file through its process. A presigned URL grants temporary permission to upload to that key. The application still needs to decide whether the resulting object is ready to expose.
+
+Run the supplied script to upload a tiny payload to a private disposable bucket and verify the bytes. Then design the owner-scoped upload session and conditional finalization described below. The script supplies the byte transfer, not a complete browser upload UI or metadata service.
+
+## Starting contract
 
 A metadata API can authorize an upload without proxying every byte. It returns a short-lived S3 capability for a specific object. The browser uploads directly and later asks the API to finalize the metadata.
 

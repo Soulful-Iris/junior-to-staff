@@ -1,6 +1,14 @@
-# A correct deployment can still cause an outage
+# Reserve capacity for rollout, zone loss and backlog recovery
 
 [Curriculum](../../../README.md) · [Measure capacity and control performance costs](../README.md)
+
+## Application and assignment
+
+An API uses ten running tasks to serve traffic. Replacing two tasks before their replacements become ready removes capacity even if the new code is correct. Waiting requests accumulate, and rollback must leave spare throughput to drain them.
+
+Calculate temporary capacity, waiting work, and downstream connection demand. Propose a rollout sequence, then extend it to zone loss and increased demand. This is a design/build exercise with hypothetical inputs. An ECS deployment and its measured task capacity are separate implementation work.
+
+## Starting contract
 
 > “Ten workers sustain 850 requests/s. A harmless deployment stops two before replacements are ready. Users see rising queue age even after rollback. Calculate a safe rollout, then survive a zone loss while demand grows thirty percent.”
 

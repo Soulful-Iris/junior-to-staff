@@ -2,6 +2,16 @@
 
 Enforce identity, ownership, and trust boundaries beyond the interface.
 
+<section class="chapter-context" markdown="1">
+
+## Enforce access where the protected action happens
+
+Hiding another user’s Edit button does not stop a direct HTTP request. A saved URL can also cause the server to connect somewhere the user could not reach directly. Follow both the person’s permission and the service’s network privileges.
+
+Begin with ownership checks in a local API, then extend to tenant boundaries, private links, and outbound fetches. Keep demonstration identity headers separate from production authentication. State the protected resource and action before selecting an AWS permission.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,7 +24,7 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Security](trust-and-authorization.md) |
+| 1 | [Enforce who can act on each resource and what the server can reach](trust-and-authorization.md) |
 | 2 | [Enforce tenant access in APIs, caches and exports](problems/tenant-isolation.md) |
 | 3 | [Record permission changes with durable audit evidence](problems/audit-trail.md) |
 

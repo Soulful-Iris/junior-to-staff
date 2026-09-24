@@ -1,5 +1,7 @@
 # Greedy choices: prove the local step is safe
 
+A meeting room receives several requests and you want to accept as many non-overlapping meetings as possible. Choosing the earliest finishing meeting seems useful because it leaves time afterward. You will explain why that choice is safe for this objective, then see it fail when meetings have different values.
+
 A greedy algorithm makes one local choice and never revisits it. It works only when that choice can be part of an optimal answer. A familiar rule without a proof is a guess.
 
 ![Earliest finishing intervals leave room for more later intervals](../../../../assets/foundations/greedy.svg)

@@ -1,10 +1,31 @@
-# Shipping it
+# Build once and supply configuration safely at runtime
 
 [Curriculum](../../README.md) · [Provision and operate application infrastructure on AWS](README.md)
 
-> Project connection · feeds **P1 (it works)** and sets up **P2 (it survives)**
+> Project connection · feeds [Reading-list stage 1: build the reading-list application](../../../projects/reading-list/stages/01-it-works/README.md) and sets up [Reading-list stage 2: operate and recover the application](../../../projects/reading-list/stages/02-it-survives/README.md)
 
-## At the whiteboard
+## From a local application to a reproducible deployment
+
+A teammate can run your bookmark API today. Tomorrow another teammate must run the same version with a different database, without copying your shell history or personal credentials. The problem is identifying three separate inputs: application code, environment configuration, and access credentials.
+
+The [reading-list starter](../../../examples/reading-list-starter/README.md) already runs locally with Python and SQLite. Start there if you have no application. This lesson asks you to record what runs and how to reproduce it. An AWS container registry, database, and deployment service are a proposed next environment, not resources created by running that Python command.
+
+### Describe a deployment before automating it
+
+| Input | Example | May it vary between environments? |
+|---|---|---|
+| Built application | Container image digest `sha256:…` | Promote the same digest when checking the same release |
+| Non-secret setting | `PORT=8080`, request timeout | Yes, with validation and a documented meaning |
+| Database location | A local SQLite path or a hosted database address | Yes, but changing database technology also needs an application adapter |
+| Credential | Runtime role or database password | Yes, supplied through a scoped credential path |
+| Persistent data | Saved bookmark rows | It must outlive replacing an application process |
+
+A Git commit identifies source. An artifact digest identifies the built bytes. A database transaction commit makes a database change durable according to its configured storage guarantees. They are different uses of the word “commit”.
+
+Your output is a reproducible run/deploy procedure and a small configuration inventory. A second run should identify the same application version and preserve the intended data. The [AWS job pipeline lab](aws/labs/job-pipeline/README.md) is a separate supplied cloud implementation with its own setup and cleanup instructions.
+
+## Record the source, artifact and runtime inputs
+
 
 > “The app runs on one engineer's laptop. We need a teammate to deploy the same
 > version tomorrow without their shell history or private configuration. What
@@ -60,38 +81,23 @@ In AWS terms, a container registry, deployment service, and secret store can fil
 these roles. Choose their permissions and recovery behavior explicitly before
 asking an AI to produce deployment configuration.
 
-## The one-liner
+## The principle behind the design
 
 Shipping is making the thing exist somewhere other than your laptop, in a way
 anyone can repeat. Almost all of the difficulty is in three questions: what
 exactly did I deploy, where did its configuration come from, and who can read
 its secrets.
 
-## The failure it prevents
+## Follow the failure through the system
 
 The classic version is a deploy that works and nobody can reproduce. Somebody
 ran a command on a server eight months ago, a file got edited in place, and the
 running system no longer corresponds to anything in the repository. Nobody knows
 which commit is live. The person who knows is on holiday.
 
-The modern version is worse and quieter. In September 2025 a self-replicating
-worm known as Shai-Hulud spread through the npm registry, compromising **over
-500 packages**; CISA published an alert on **23 September 2025**. It scanned
-infected machines for credentials — GitHub tokens, AWS, Google Cloud and Azure
-keys — and published what it found to public repositories, while injecting a
-workflow that kept exfiltrating secrets on every push. A second wave in
-**November 2025** hit somewhere around 600 to 800 packages and more than 25,000
-GitHub repositories, and added destructive behaviour when it could not spread.
+A dependency installation can execute package scripts with the build process’s access. Keep production credentials out of untrusted build steps. If a credential is exposed, deleting the offending file does not revoke copies already taken. Rotation and investigation are separate recovery actions.
 
-*(Checked 2026-09-21 against CISA's alert and vendor write-ups. Details of the
-later variants were still being revised; treat exact counts as approximate.)*
-
-The lesson is not "npm is dangerous." It is that **`npm install` runs somebody
-else's code on your machine with your credentials**, and so does the equivalent
-in every other ecosystem. Removing the bad package afterwards does not end the
-compromise, because the credentials already left. You have to rotate them.
-
-## The mental model
+## Mechanisms and their limits
 
 Three rules, and everything else is detail.
 
@@ -118,7 +124,7 @@ is not automatically wrong, and injected config is not automatically tested.
 
 These tests exercise behavior without granting a test environment production access.
 
-**3. Secrets are not configuration.** Config can live in a file in the repo.
+**3. Separate secret values from ordinary configuration.** Non-secret defaults and schemas can live in a file in the repo.
 Secrets cannot, ever, not even briefly, not even in a private repo. They are
 injected at run time from somewhere that can revoke them, and the number that
 matters is not "is it encrypted" but **"how fast can I rotate it?"**
@@ -130,7 +136,7 @@ matters is not "is it encrypted" but **"how fast can I rotate it?"**
 - One documented command takes a clean clone to a running system.
 - You can say exactly which commit is running, from the outside, without asking anyone.
 - The same artefact runs in every environment; only the injected configuration differs.
-- Secrets arrive at run time and can be rotated without a code change.
+- Secrets arrive at run time and can be rotated through a documented reload or restart procedure without editing application source.
 - Dependencies are locked to exact versions and the lockfile is committed.
 - Installs in CI use the lockfile strictly, and lifecycle scripts are off unless a specific package needs them.
 - Rolling back is a thing you have actually done once, deliberately, rather than a thing you assume works.
@@ -144,7 +150,7 @@ Done badly:
 - Nobody has ever rolled back, so nobody knows whether it works.
 - A secret leaked and the response was to delete the file, not to rotate the key.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — make the path from clone to running explicit**
 
@@ -186,8 +192,7 @@ catches the common accident: a secret printed into a stack trace or a debug
 line, which is how credentials most often escape without anyone attacking
 anything.
 
-*What you should get back:* a table. Any row where rotation needs a deploy is a
-row to fix now rather than at 3am.
+*What you should get back:* a table. Record whether each credential is reloaded dynamically or requires a restart. A restart is a valid design when its interruption and propagation time meet the rotation requirement.
 
 **Request 3 — the dependency review nobody does**
 
@@ -224,7 +229,7 @@ full contract is genuinely small, tested and maintained; either choice has costs
 > script that exits 0 whether or not the new version is serving is not telling
 > you anything.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P1**, add:
 
@@ -237,22 +242,22 @@ On **P1**, add:
 **Acceptance criteria:**
 
 - A fresh clone in a new directory runs with one command and no undocumented steps.
-- `git log -p` over the whole history contains no secret. You checked, rather than assuming.
+- Review source and history for accidental secret exposure. If a credential was exposed, revoke or rotate it and investigate its use. A scan with no findings is useful evidence, not proof that no secret ever escaped.
 - You can name the commit that is running by asking the system, not by remembering.
 - You have rolled back at least once and written down what happened.
 
-## Words you now own
+## Terms used in this lesson
 
 - **artefact** — the built thing you deploy: an image, a bundle, a binary. Built once, promoted unchanged.
 - **environment** — a place the artefact runs (local, staging, production), distinguished only by injected configuration.
 - **configuration** — values that vary by environment and are not secret.
 - **secret** — a value that grants access. Injected at run time, rotatable, never in the repo.
 - **rotation** — replacing a secret with a new one. The only real response to exposure.
-- **lockfile** — the exact resolved versions of every dependency, committed, so two installs give identical software.
+- **lockfile** — the resolved dependency versions and integrity information. It constrains installation, but platform inputs and build scripts can still affect resulting bytes.
 - **lifecycle script** — code a package runs at install time. Convenient, and the main supply-chain execution path.
 - **supply chain** — everything you did not write but do run. Larger than you think.
 - **rollback** — returning to the previous known-good artefact. Only real once you have done it.
-- **immutable** — never changed after creation. The property that makes an artefact trustworthy.
+- **immutable** — never changed after creation. Immutability identifies stable bytes, while provenance and review establish why those bytes should be trusted.
 
 ---
 

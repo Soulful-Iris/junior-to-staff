@@ -1,4 +1,6 @@
-# Depth within the same problem
+# Choose harder constraints after a small system works
+
+Start with one concrete product: a team reading list where users save and edit documentation links. A first implementation needs a browser, an API and stored bookmarks. More demanding follow-ups introduce competing edits, overload, multiple teams and live migrations. Use this page to choose the next constraint you can explain and implement, rather than adding services to make a diagram look senior.
 
 These are assessment checkpoints for one curriculum. Foundation, operating constraints, and broader ownership are follow-ups within the same lesson; they are not separate reading paths. Use the [curriculum](../curriculum/README.md) for learning order. The preserved level expectations below are practice criteria, not company-wide hiring rules.
 

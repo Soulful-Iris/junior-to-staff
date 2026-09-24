@@ -2,6 +2,12 @@
 
 [Curriculum](../../../../README.md) · [Connect a usable interface to an API](../../README.md)
 
+The search box shows bookmarks returned by an API. Alice types `cat`, then changes it to `car` before the first request finishes. The server may complete those requests in either order. The screen should keep answering the current query, `car`.
+
+You will implement the small coordinator that decides which response may update the view. A generation is just a counter assigned to each new search. It is not the time when a network response arrives. Start by following the two requests in this animation, then use the table to define success and failure behavior.
+
+![Two browser searches finish in reverse order. Only the response matching the latest request generation may update the screen.](../../../../../assets/learning/browser-race.svg)
+
 > “Alice searches ‘cat’, then ‘car’. Cat finishes last and replaces the car results.
 > Some loaders ignore cancellation. Which response may change the screen?”
 

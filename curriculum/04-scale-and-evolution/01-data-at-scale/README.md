@@ -2,13 +2,23 @@
 
 Reason about caches, replication, partitioning, streams, and coordination scope.
 
+<section class="chapter-context" markdown="1">
+
+## Add capacity without losing the meaning of the data
+
+Two hundred readers miss the same cache entry. A replica has yesterday’s version. A single tenant overwhelms one partition while the fleet average remains low. Each case requires a different boundary and a different measurement.
+
+Start with the cache and consistency models, then study projections, partition skew, and the larger design briefs. State coordination scope, freshness, and write authority. Local examples demonstrate protocols, while AWS adapters and real capacity measurements remain explicit deployment work.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
 
 [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)
 
-Caching, replication and partitioning are answers to "this does not fit or does not keep up", which is an arithmetic finding first: see [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md).
+Caching, replication and partitioning are answers to "this does not fit or does not keep up", which is an arithmetic finding first: see [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md).
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -16,15 +26,15 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Data at scale](scaling-data.md) |
-| 2 | [Stateful coding: design an LRU cache](cache-order.md) |
+| 1 | [Protect shared storage with bounded cache loads and consistent reads](scaling-data.md) |
+| 2 | [Trace LRU eviction before implementing its linked order](cache-order.md) |
 | 3 | [Implement LRU without an ordered-map helper](problems/28-manual-lru-cache/README.md) |
 | 4 | [Expiring key-value store](problems/29-expiring-key-value-store/README.md) |
-| 5 | [An expired key, ten instances, and a finite database](labs/cache-consistency/README.md) |
-| 6 | [Revoke a link that is already warm](labs/cache-consistency/revocation.md) |
+| 5 | [Bound cache misses across instances and preserve fresh reads](labs/cache-consistency/README.md) |
+| 6 | [Enforce revocation even when a CDN already has the content](labs/cache-consistency/revocation.md) |
 | 7 | [Count event-time windows with late arrivals](problems/40-event-time-windows/README.md) |
-| 8 | [Completed work can have a stale status view](cases/status-projections.md) |
-| 9 | [A healthy average can hide an overloaded partition](cases/hot-partitions.md) |
+| 8 | [Keep job status current without repeating completed work](cases/status-projections.md) |
+| 9 | [Distribute a hot tenant while preserving event identity and ordering](cases/hot-partitions.md) |
 | 10 | [Synchronize files with resumable uploads and conflicts](problems/file-synchronization.md) |
 | 11 | [Search documents without leaking revoked content](problems/document-search.md) |
 | 12 | [Compute trending topics from duplicate and late events](problems/trending-counts.md) |

@@ -1,4 +1,6 @@
-# Candidate · bounded report executor
+# Implement bounded report execution and shutdown
+
+A reporting service accepts jobs that need a limited downstream resource. Four jobs may run and eight may wait. Callers need to know whether their submission was accepted, and what happens to accepted work when shutdown starts. Implement that in-process contract using the allowed threading primitives.
 
 > “The report service starts unlimited work during a burst. Limit it to four active
 > tasks and eight waiting tasks. Shutdown must wake blocked producers, and a task

@@ -1,10 +1,27 @@
-# Writing that decides
+# Write a design document that supports a decision
+
+A checkout team proposes replacing its relational store with a key-value database to make reads faster. The current system also reserves stock and records an order together. A reader needs to know whether the proposal preserves that rule, improves the actual workload and can be introduced within the available month.
+
+You will write the decision portion of the document: the problem, alternatives, evidence, chosen boundary and conditions for changing course. A list of services or API routes does not answer those questions by itself.
 
 [Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## Example of a decision a reader can act on
+
+| Decision field | Example entry for this constructed case |
+|---|---|
+| Problem | Product-page reads are slow at the measured peak workload |
+| Constraint | A successful checkout must not sell stock that was not reserved |
+| Options | Improve the current query, add a derived read view, or replace the primary store |
+| First action | Measure the indexed read and its write cost under representative data |
+| Current decision | Keep the transactional write authority while investigating a separate read path |
+| Reopen when | The measured read path still misses its target or the required write model changes |
+
+This is an example conclusion, not the answer every project should choose. A replacement can be justified by evidence. Your document should make it possible to see why that evidence outweighs migration and operating costs. Keep measurements labeled as observed or assumed, and name who owns the next action.
+
+## Reason through the changed situation
 
 > “A team proposes replacing a relational database with a key-value store.
 > The document lists benefits but never names a workload or alternative. What
@@ -118,7 +135,7 @@ decision; a document should preserve reasoning, not prohibit learning.
 **Words to keep:** *non-goal* is a scope boundary; *alternative* is a plausible
 competing choice; *approver* owns a decision; *kill criterion* stops expansion.
 
-[Technical strategy](technical-strategy.md) · [Migration method](../04-migrations/migration-method.md)
+[Turn recurring constraints into a usable technical strategy](technical-strategy.md) · [Migration method](../04-migrations/migration-method.md)
 
 ## Draw it from memory · Keep alternatives and reversal conditions visible
 

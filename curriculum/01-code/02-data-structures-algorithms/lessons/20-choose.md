@@ -1,5 +1,7 @@
 # Choose the structure from the repeated question
 
+A stream of record IDs arrives. One product wants to know whether an ID appeared before, another wants its count, and a third wants the largest three observations. The input looks similar but the repeated question changes. Use the table below to select the state, then explain what information your choice discards.
+
 You have now met the shared tools. Start practice by identifying the question the simple solution asks repeatedly. The state should answer that question cheaply and retain exactly the information the contract needs.
 
 ![Choose among remembering, ordering, exploring, and reusing](../../../../assets/foundations/selection.svg)

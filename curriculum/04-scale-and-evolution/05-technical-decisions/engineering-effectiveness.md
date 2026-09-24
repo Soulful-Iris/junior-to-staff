@@ -1,10 +1,25 @@
-# Making other engineers faster
+# Find delivery bottlenecks and reduce dependency on one engineer
+
+Every routine deployment waits for Maya because she knows which commands are safe and how to recover a failed release. Six otherwise ready changes sit in a queue. An unusual schema migration also needs her judgment, but it should not be confused with the routine cases.
+
+You will identify why work waits, choose a limited intervention and see whether another engineer can complete the task without private help. Faster output is useful only if the failure and support burden have not simply moved elsewhere.
 
 [Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## Trace elapsed time before choosing an intervention
+
+| Event in one constructed change | Time |
+|---|---|
+| Ready for review | Monday 09:00 |
+| Build starts and finishes | Monday 09:01–09:03 |
+| First substantive review | Tuesday 10:00 |
+| Revision completed | Tuesday 10:20 |
+
+The build took two minutes. The wait for review was about 25 elapsed hours. Those intervals overlap, so adding them as separate sequential costs would be misleading. For this change, speeding the build up by one minute cannot remove the dominant wait. Compare more changes before generalizing, including working-hour effects and the reason review could not begin.
+
+## Reason through the changed situation
 
 > “Every deployment waits for one engineer who understands the pipeline.
 > They work harder each month, yet delivery gets slower. What would you change,
@@ -122,7 +137,7 @@ Do not assume the bottleneck is human review.
 not mislabeled human-bound, and absent timing evidence produces “unknown.” Show
 whether adoption and outcomes changed, not only that a new tool exists.
 
-[Scope and leverage](scope-and-leverage.md) · [Testing strategy](../../02-applications/04-testing/testing-strategy.md)
+[Choose the scope that removes repeated engineering work](scope-and-leverage.md) · [Testing strategy](../../02-applications/04-testing/testing-strategy.md)
 
 ## Draw it from memory · Make the paved road observable
 

@@ -84,3 +84,7 @@ The estimation reference also needed a correction: 30,000 reads/s multiplied by 
 The reader approved the tracing lesson's introduction and assignment as the quality benchmark. New feedback: follow-ups need equally careful explanation, substantial architecture changes where requirements justify them, and actual revised diagrams when a section promises one. Reviewed all 90 briefs and expanded 133 worked scenarios. See [the per-page follow-up record](FOLLOW-UP-DESIGN-REVIEW.md).
 
 The next authorized work extends beyond projects: distinguish parts, chapters, lessons and in-page sections in the table of contents, then review every remaining lesson individually. UI lessons need visible interface examples. Select screenshots, diagrams, animations, code, API examples, logs and sizing only where they improve the particular explanation. Preserve automatic publication from main. Do not add tests or scheduled publishing checks.
+
+## Whole-course reading experience
+
+The later feedback extends the same quality standard beyond project introductions. [The lesson review](LESSON-QUALITY-REVIEW.md) records the individual disposition of 196 additional teaching and support pages, real UI screenshots, clearer chapter introductions, descriptive titles, and distinct part/chapter/lesson/section navigation. Publishing remains automatic from main. This documentation introduces no workflow, test or approval gate.

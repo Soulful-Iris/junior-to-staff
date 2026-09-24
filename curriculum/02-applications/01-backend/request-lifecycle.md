@@ -1,361 +1,111 @@
-# Backend
+# Follow an HTTP request from validation to durable state
 
-[Curriculum](../../README.md) · [Build HTTP APIs and reliable background work](README.md)
+Alice pastes a documentation URL into her team's reading list and presses Save. The browser sends a request to an API, a server interface that accepts operations such as creating or listing bookmarks. The API needs to identify Alice, validate the request, store the bookmark and return a result the browser can understand.
 
-> Project connection · feeds **P1 (it works)**
+The app also wants a display title from the linked page. That website can be slow or unavailable. Saving Alice's link and obtaining its title are different operations, with different failure consequences. This lesson follows the request and shows where to put authority, time limits and recovery state.
 
-## At the whiteboard
+## Start with one request and its result
 
-> “Our save-link API fetches the page title before replying. One destination
-> accepts connections but never answers. Soon nobody can save a link. Where
-> would you put time and capacity limits, and what would the API promise?”
+The [supplied reading-list API](../../../examples/reading-list-starter/README.md) runs locally with SQLite. This is an actual supported request after following that README's start command:
 
-A backend converts an untrusted request into an authorized state change. Every
-dependency wait consumes a budget; choosing no budget still creates behavior.
+```sh
+curl -i http://127.0.0.1:8080/bookmarks \
+  -H 'X-Demo-User: alice' \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
+```
 
-| Teaching workload | Expected behavior |
+The server returns **201 Created** with a saved bookmark ID, `title: null` and `title_status: "timeout"`. The title lookup is a local fixture. It does not contact that website. `X-Demo-User` selects a demonstration identity and is not production authentication.
+
+| Part of the call | Meaning |
 |---|---|
-| `POST /links` with a valid owned URL | Validate and durably record accepted work |
-| Title server takes `30 s`; API budget is `500 ms` | Do not hold the API open for `30 s` |
-| Same operation key repeated with same payload | Return the recorded operation result |
-| Same key with different URL | Reject the conflict; do not silently reuse it |
+| `POST /bookmarks` | Request creation of a bookmark |
+| JSON `url` | The link to store |
+| Response status 201 | A new bookmark record was created |
+| Bookmark ID | Identity of the stored item, reused on later operations |
+| Missing title | Optional enrichment did not produce a title |
 
-These are exercise requirements, not AWS limits. **Ask first:** must the title be
-ready before acceptance, or can it appear later?
+A successful HTTP read can return an object whose domain status is failed. For example, a proposed `GET /jobs/7` may successfully return `200 {"state":"failed"}`. That is different from claiming a failed create operation succeeded.
 
-```mermaid
-flowchart TD
-  Client[Client] --> API[API workers]
-  API --> Remote[Unbounded title fetch]
-  Remote --> Waiting[Workers occupied]
-  Waiting --> Other[Other saves cannot start]
+## Follow the boundaries in order
+
+![A request travels through the browser, router, identity checks, handler and database, then returns through the response path.](../../../assets/diagrams/request-lifecycle.svg)
+
+The browser resolves the hostname and establishes the required connection. Routing selects a handler. The application authenticates the caller, validates input, authorizes the specific operation and changes state. Frameworks arrange some of these steps differently, but every boundary still has a responsibility.
+
+**Authentication** establishes who is calling. **Authorization** decides whether that caller may act on this item. A caller-supplied `owner_id` is not evidence of ownership. An input validator can establish that a URL is a string without proving that it is safe for the server to fetch.
+
+A **database commit** makes a transaction's changes stored database state under the database's durability configuration. It is unrelated to a Git commit. A response sent after the database commit can still be lost on the network. “The client did not receive success” therefore does not mean “the record does not exist.”
+
+## Protect the state change at its actual owner
+
+Suppose two browser tabs read bookmark version 3 and edit it independently. Both should not silently overwrite each other. A proposed relational update has this shape:
+
+```sql
+UPDATE bookmarks
+SET note = :note, version = version + 1
+WHERE id = :id
+  AND owner = :authenticated_owner
+  AND version = :expected_version;
 ```
 
-## Reason through the boundary
+Parameters are supplied through the database driver, not string concatenation. The owner comes from trusted identity. Check how many rows changed. Zero rows means the operation did not satisfy the full condition, so apply the documented unavailable/conflict response policy.
 
-1. Decide whether acceptance means “stored” or “fully enriched.” Return a job
-   identifier only after the promised durable state exists.
-2. Validate URL and ownership before work. Restrict outbound destinations so a
-   public URL field cannot fetch internal services.
-3. Move optional enrichment behind a bounded queue and explicit worker deadline.
-   A queue absorbs a burst; it does not fix a permanent arrival-rate overload.
-4. Test a hanging destination, duplicate delivery, and a crash after saving the
-   result. Define what can repeat and what remains atomic.
-
-**Follow-up:** “Traffic doubles while title workers are stalled. Does the queue
-make us safe?” Draw admission and recovery; backlog growth still needs a bound.
-
-```mermaid
-flowchart TD
-  Client[Client] --> Admission[Validate and admit within budget]
-  Admission --> DB[(Operation record)]
-  DB --> Queue[Durable work queue]
-  Queue --> Workers[Bounded workers with deadlines]
-  Workers --> Remote[Allowed external pages]
-  Workers --> Result[(Versioned result)]
-  Queue --> Reject[Age and backlog policy]
-```
-
-AWS's SQS and Lambda are possible implementations of these boxes; the invariant
-and failure policy come first. Keep external fetching distinct from the narrower
-atomic-result guarantee in the queue lab.
-
-## The one-liner
-
-The backend is where a click becomes a row in a database — the code that takes
-requests from the outside world and decides what actually happens. Everything
-that arrives is a message from a stranger, and everything you promise must
-stay true when two strangers arrive at once. A frontend bug is wrong on one
-screen; a backend bug is wrong for everyone.
-
-## The failure it prevents
-
-You ship the reading list. Someone pastes a link to a server that accepts the
-connection and then never sends a byte — a half-crashed machine, a load
-balancer with nothing behind it.
-
-Your title-fetch code waits. How long? You never said, so you inherited your
-HTTP client's default. In Node's built-in `fetch` that is five minutes
-waiting for response headers (300 seconds; checked 2026-09-21). In Python's
-`requests` there is no default at all — the docs warn that without a timeout
-"your code may hang for minutes or more" (checked 2026-09-21).
-
-Each pasted link ties up one of your handful of worker processes. Nothing
-crashes and nothing logs, because nothing is wrong — everything is just
-waiting. A few links later, the sign-in page stops loading for everyone.
-
-One pasted URL, zero exceptions, whole site down. That is the cost of an
-unchosen timeout — one entry on this section's list: every place
-between the click and the row where a request can stop, and who finds out when
-it does.
-
-## The mental model
-
-A request is a message on a journey. The browser turns a name into an address
-(DNS), opens an encrypted connection (TLS), and sends a few hundred structured
-bytes across machines you do not own. At your process a router picks the code,
-the body is parsed and validated, auth decides who is asking, and your handler
-does the work — reading and writing the database, sometimes calling someone
-else's server. The response makes the same trip in reverse, to a browser
-that may no longer be waiting. The order of the middle steps varies by
-framework; the stops do not.
-
-![One request travels from browser through router, auth and handler to the database and back; numbered markers show the seven places it can stop, from the network to the reply itself](../../../assets/diagrams/request-lifecycle.svg)
-
-Three ideas survive framework churn.
-
-**Every hop is a place it can stop, and each stop needs an owner.** HTTP is
-the contract for saying so: 4xx reports client/request-side failure; 5xx reports
-server-side failure. A safe GET does not request a state-changing operation;
-incidental logging is allowed. PUT and DELETE are idempotent in their intended
-effect, not necessarily their response or logs. POST has no default idempotency
-guarantee and can also represent a complex query (RFC 9110;
-checked 2026-09-21), which matters because networks deliver things twice and
-users double-click. Failures come in three kinds: expected (a 4xx with a clear
-message), unexpected (a 5xx, logged loudly with stack trace and request id),
-and swallowed — caught, hidden, returned as success. The third costs the
-most; the 2025 OWASP Top 10 added "Mishandling of Exceptional Conditions" as a
-category of its own (checked 2026-09-21).
-
-**Your process is disposable; nothing true lives in it.** Restarted,
-duplicated, killed mid-request; truth lives in the database. Requests
-interleave, so "read a value, change it, write it back" is a bug waiting for
-company: both read 4, both write 5, one update vanishes without an error. A
-transaction commits a group atomically, but its isolation and write predicates
-must also protect the invariant. `BEGIN` alone does not stop both callers from
-reading 4 and assigning 5. Use `UPDATE count = count + 1`, a version-guarded
-update, a row lock around read/decide/write, or serializable isolation with
-whole-transaction retry. Identity comes from the environment:
-harmless defaults in committed config files; secrets handed to the process at
-start, as environment variables set by whatever launches it, or read from a
-secret store. Never the repo — a repo is designed to be copied
-everywhere.
-
-**Everything crossing the boundary is untrusted.** Body, headers, URL,
-cookies: attacker-controlled bytes until checked. The reading list makes this
-sharp because it fetches URLs users hand it. Your server sits somewhere
-privileged — inside a network, possibly next to a cloud metadata service — so
-a user who submits `http://localhost:5432/` is asking *your server* to make
-that request from *its* position. That is server-side request forgery (SSRF).
-OWASP gave it its own slot in 2021 and folded it into Broken Access Control in
-the 2025 revision (checked 2026-09-21); the reclassification is the lesson —
-you never decided what your fetcher was allowed to reach.
-
-
-
-## What good looks like
-
-- Status codes describe the HTTP operation: a rejected charge needs the documented
-  failure status; a successful GET may return a job whose domain state is failed.
-- Errors have one shape everywhere: machine-readable code, human message, a
-  request id that also appears in the logs.
-- Every outbound call has a timeout visible in the code, chosen on purpose.
-- GET requests no destructive effect; repeated PUT/DELETE preserve the intended
-  idempotent effect; duplicate POST behavior is defined explicitly.
-- Input is validated at the edge; handler logic starts after the shape is
-  proven.
-- Config comes from the environment; the repo holds an example file with
-  variable names and none of the values.
-- Read-modify-write paths name their enforcing predicate, row lock, or isolation level—not only a transaction wrapper.
-
-Done badly, you see:
-
-- A rejected `POST /charges` reported as a successful charge; this is different from `GET /jobs/42` returning `200 {"state":"failed"}`.
-- A catch block that logs nothing and returns something.
-- The database password in a committed config file, "to rotate later."
-- A fetcher that will happily request `http://169.254.169.254/`, where cloud
-  providers serve a machine's own credentials.
-- Code that works every time you click it and corrupts data under two
-  simultaneous clicks, which sequential tests never produce.
-
-## Ask Claude for this
-
-**Request 1 — the contract before the code**
-
-```
-I am building <feature: e.g. "add a URL to a shared reading list">.
-
-Before any code: list every endpoint as a table — method, path, what it
-does, the success status, and every failure it can return, each with its
-status code and a structured error code.
-
-Then tell me which failures on that list my frontend would never find out
-about if the endpoint returned 200 with an error message inside the body.
-```
-
-*Why it is asked that way:* the failure column is what juniors and models both
-skip, so it is demanded before a happy path exists to crowd it out. The second
-paragraph distinguishes a failed HTTP operation from a successful representation of failed background work.
-
-*What you should get back:* a boring table — nouns in the paths, methods as
-verbs, mostly 200, 201, 400, 401, 403, 404, 409. Boring is the win:
-everything already understands it.
-
-*Push back on:* failed operations disguised as success, destructive GET requests,
-or undocumented retry semantics. A logged GET is still safe; a documented POST
-query is valid when its semantics and caching trade-offs justify it.
-
-**Request 2 — hostile-input review of the fetcher**
-
-```
-Here is the code that fetches a user-submitted URL and reads the page
-title. Assume the URL was chosen by someone who wants to hurt this server.
-
-First list every way it can: where the request can hang, which internal
-addresses it could be pointed at, how large a response it might swallow,
-and what a redirect can do to any check you add.
-
-Then fix each item: a total timeout I name, a response size cap, an
-allowlist of URL schemes, and a block on private and internal addresses
-that still holds after redirects. For each fix, say what the user sees
-when it fires.
-```
-
-*Why:* "assume hostile" flips the model from helping the URL succeed to
-attacking it, and list-first means every fix maps to a named threat. The
-redirect clause names the classic bypass: validate, then obediently follow a
-redirect to the address you just blocked.
-
-*What you should get back:* timeout, size cap, scheme allowlist,
-private-address block — each tied to a user-visible outcome, not a silent one.
-
-*Push back on:* checking the hostname string but fetching whatever it resolves
-to; a timeout on connect but none on the body; "sanitising" a bad URL instead
-of refusing it.
-
-**Request 3 — prove the race, then fix it**
-
-```
-Find every place in this code that reads a value, changes it, and writes
-it back. For the most important one, write a test that runs two of those
-operations concurrently and demonstrates the lost update — I want to see
-it fail before any fix exists.
-
-Then choose the enforcing mechanism: an atomic relative update, a guarded update
-with an affected-row check, a row lock held through the write, or serializable
-isolation with bounded whole-transaction retry. State the isolation level and
-show the same controlled schedule preserving the invariant.
-```
-
-*Why:* the same discipline as [Testing](../04-testing/testing-strategy.md) — evidence the
-bug exists before you trust the fix. A failing reproduction strengthens the
-evidence; a separately justified invariant and real concurrent test also matter.
-
-*What you should get back:* one red run showing the lost update, then the same
-test green after the fix, in that order.
-
-*Push back on:* sleep-only ordering or a process-local lock presented as a
-multi-process guarantee. Use two independent database sessions; the
-[PostgreSQL lab](../02-databases/labs/postgresql/README.md) includes the naive
-transactional schedule, guarded stock decrement and serializable retry.
-
-| Two callers start at 4 | Final value / decision |
+| Request order | Result |
 |---|---|
-| Both `BEGIN`; both read 4; both assign 5 | 5: atomic transactions still lost an update |
-| Both `UPDATE counters SET value = value + 1` | 6: each update uses the protected current value |
-| Both guard `WHERE version = 7` | One row changes; the loser handles a conflict |
+| A updates expected version 3 | One row becomes version 4 |
+| B also updates expected version 3 | No row matches, so B retains its draft and resolves a conflict |
+| Bob names Alice's item | Owner condition prevents Bob's update |
 
-For stock: `UPDATE inventory SET available=available-1 WHERE id=:id AND available>0 RETURNING available`.
-Insert the reservation in that same transaction **only if a row returned**.
-The conditional decrement prevents negative stock; the transaction couples it
-to the reservation. SQL execution evidence belongs to the database lab, not this table.
+A transaction groups local changes, but `BEGIN` alone does not make every read-then-write algorithm safe. Use a conditional update, suitable locking or the required isolation protocol to protect the particular rule.
 
-## How you would know it is wrong
+## Put one deadline around the whole operation
 
-The checks for this topic, each one capable of going red:
+A timeout limits one wait. An end-to-end deadline limits all work for the request, including time already spent. Giving every downstream call a fresh full timeout can exceed the user's budget.
 
-1. **Kill the database mid-request.** Stop the database while a write is in
-   flight. You want a clean 5xx within seconds, no half-written rows, and
-   recovery without a restart when it returns. A 200, a hang, or a half-saved
-   item is red.
-2. **Point the fetcher at a URL that hangs.** Time it with a clock: the
-   request must give up within the seconds *you* chose. "It errored
-   eventually" is a fail — eventually was the default.
-3. **Send a malformed body.** Truncated JSON, wrong types, a ten-megabyte
-   string. You want a 400 in your structured shape. A 500 means untrusted
-   bytes reached code that assumed their shape; a stack trace in the response
-   publishes your internals.
-4. **Call the same endpoint twice.** Submit the same URL twice, fast. Whatever
-   you documented should happen. Two identical rows means you did not decide,
-   you discovered.
-5. **Ask the fetcher for something internal.** `http://localhost:5432/`, a
-   private-range address, `http://169.254.169.254/`. The refusal must come
-   before any connection opens — and survive a public URL that redirects
-   there.
-6. **Grep the repo for a secret you know, history included** (`git log -p`
-   piped through grep). One hit means it belongs to everyone who ever clones;
-   the fix is rotation, not deletion — history is the repo.
+![Dependency operations spend the parent's remaining time budget rather than each receiving an independent full deadline.](../../../assets/learning/deadline-budget.svg)
 
-> Underneath all six: **before believing a green result, say what it would
-> have looked like if the thing were broken.** A fetcher never pointed at a
-> hostile URL is not safe; it is untested.
+Use a constructed 500 ms request budget. If parsing and database work already consumed 120 ms, at most 380 ms remain for everything else. Reserve response overhead before starting optional work. A 400 ms title attempt no longer fits. Record a timeout or pending state according to the product contract.
 
-## Your slice of the project
+Parallel calls help only when their results are independent and capacity permits them. Two independent waits of 80 ms and 140 ms can overlap, but that does not prove an end-to-end p99 of 140 ms. Pool waiting, network variability and other work remain.
 
-On **P1**, this section is the add-a-URL flow done properly:
+## Move optional work to a durable job when the requirement changes
 
-- The endpoint table from Request 1, committed *before* the handlers exist,
-  failure column included.
-- The title fetcher with a total timeout you chose (write the number and the
-  reason next to it), a size cap, a scheme allowlist, and a private-address
-  block. A failed fetch still saves the item, failure visible on it.
-- One structured error shape — code, message, request id — used by every
-  handler; distinguish failed requests from successfully retrieved domain states.
-- Your one genuinely concurrent write (two people marking the same item read,
-  say) protected by a named atomic predicate, lock or isolation/retry protocol,
-  with Request 3's controlled two-session test as evidence.
-- Secrets via the environment: an example env file in the repo, the real one
-  ignored.
-
-**Acceptance criteria you can check yourself:**
-
-- Checks 1 through 5 each run once, with what you saw written down.
-- The hanging-URL check completes within your chosen timeout plus one second,
-  measured, not felt.
-- Grepping the full git history for your database password and session secret
-  returns nothing.
-- A fresh clone with only the example env file refuses to start, naming the
-  missing variable — not a stack trace.
-
-## Words you now own
-
-- **endpoint** — one method plus one path your server answers; the unit of API contract.
-- **status code** — the machine-readable verdict: 2xx worked, 4xx the sender's problem, 5xx yours.
-- **idempotent** — safe to repeat; the second identical call changes nothing more.
-- **structured error** — a failure with a machine-readable code and a request id, not just prose.
-- **timeout** — the longest you are willing to wait, chosen on purpose.
-- **transaction** — a group of database changes that happens entirely or not at all, never seen half-done.
-- **race condition** — two interleaved operations producing a result neither would alone; the lost update is the starter kind.
-- **environment variable** — configuration the process reads at start; how secrets reach code without living in it.
-- **SSRF** — server-side request forgery: tricking a server into making requests from its own privileged position.
-
----
-
-**Not covered here:** the database itself — modelling, indexes, migrations —
-has its own section; here it is where truth lives, nothing more.
-Authentication internals (passwords, sessions, tokens) likewise. Retries,
-queues, caching and rate limits are P3; deploying and observing this backend
-is P2. Nothing here is about speed — a backend first has to be right when
-things go wrong, which is most of what a backend is.
-
-[Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
-
-## Draw it from memory · Put authority on the server side
+The simple reference performs a bounded title fixture during the request. If the product requires titles to keep retrying after restarts, add durable background work deliberately:
 
 ```mermaid
 flowchart TD
-  Browser["Untrusted request"] --> Router["Router + input validation"]
-  Router --> Auth["Identity and object authorization"]
-  Auth --> Handler["Business invariant"]
-  Handler --> DB[("Database constraint / transaction")]
-  Handler --> Fetch["Outbound fetch: timeout + URL policy"]
-  Fetch --> External["Untrusted external server"]
-  DB --> Reply["Response after commit"]
-  Reply --> Browser
+ A["Authorized save request"] --> T["Bookmark and job intent transaction"]
+ T --> R["201 with pending title"]
+ T --> D["Outbox dispatcher"]
+ D --> Q["Bounded ready-work queue"]
+ Q --> W["Title worker with deadline"]
+ W -->|matching job and bookmark version| T
+ W --> F["Allowed external destination"]
 ```
 
-**Redraw challenge:** Mark the point where a committed write can lose its response. Explain the safe retry.
+An outbox stores the instruction to publish work alongside the bookmark. Sending a queue message is a separate operation, so duplicate publication remains possible. The worker needs a stable job identity and guarded completion. The [tracing project](projects/01-the-request-you-can-trace-end-to-end.md) explains the extension and shows its changed design.
 
-![Put authority on the server side: mechanism in motion](../../../assets/learning/conditional-result.svg)
+A queue absorbs a temporary gap between arrivals and completions. With 50 new jobs/s and 30 completed jobs/s, it grows by 20 jobs/s. Bound pending work, measure oldest job age and choose an admission policy. More queued work does not create processing capacity.
 
-[Static view](../../../assets/learning/conditional-result-still.svg)
+## Treat errors as part of the API contract
+
+A proposed error response might include `code`, a safe human message and a request ID. The request ID identifies one attempt through its diagnostic events. It is different from the bookmark ID or a stable operation key used across retries.
+
+| Failure | Application behavior to define |
+|---|---|
+| Invalid body | Reject before changing data |
+| Unauthenticated caller | Require a valid identity without exposing protected data |
+| Version conflict | Preserve current state and tell the client to resolve its draft |
+| Database unavailable | Report failure or uncertainty according to the actual commit evidence |
+| Optional title timeout | Keep the saved bookmark and expose the separate enrichment outcome |
+
+Do not catch every exception and return a fabricated success value. Also avoid leaking credentials, private URL queries or stack traces into user responses. Diagnostic records should make the failure explainable without copying sensitive request bodies.
+
+For user-supplied URLs, validate destinations and redirects and constrain network access. A syntax-valid URL can still target an internal service. The [restricted-fetch project](projects/03-the-fetch-that-cannot-be-aimed-inward.md) handles that separate boundary.
+
+## Run a useful first exercise
+
+Run the local API and compare a normal title result with `title_mode: "timeout"`. Query the saved list afterward to establish which state persisted. Then follow the [deadline project](projects/02-the-three-second-budget.md) or [request tracing project](projects/01-the-request-you-can-trace-end-to-end.md).
+
+Be able to explain the request, caller identity, stored record, time budget and returned result without naming an AWS service. For deployment, API Gateway or a load balancer can accept traffic, Lambda or a service runtime can run the handler, and a database owns durable state. Those products implement responsibilities. They do not decide the application's ownership or retry contract for you.

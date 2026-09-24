@@ -1,8 +1,14 @@
-# Candidate · save without erasing the next edit
+# Build a bookmark editor that preserves typing during a save
+
+Alice edits the title of an existing bookmark. A submitted title and the text she is currently typing can differ while a request is pending. Build or repair the browser/API/database path so the successful old response confirms only the submitted value and preserves her newer draft.
 
 > “Alice edits a private bookmark title. Save is slow and she continues typing.
 > The response overwrites her new text. Build or repair this vertical slice and show
 > the browser behavior, the HTTP contract and the actual stored row.”
+
+![Reference behavior: a confirmed saved title remains separate from the newer unsaved draft](../../assets/ui-lessons/bookmark-confirmed-draft.png)
+
+This screenshot shows the required distinction, not a mandatory visual design. Your implementation may use a different layout while preserving the same behavior.
 
 Constructed 90-minute product session. During an independent build use a blank local
 workspace with HTML/TypeScript, a local HTTP server and SQLite; do not inspect the

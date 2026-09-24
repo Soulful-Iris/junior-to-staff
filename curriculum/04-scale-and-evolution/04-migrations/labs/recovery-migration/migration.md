@@ -1,6 +1,14 @@
-# Move live rows without losing the writes between copies
+# Copy live rows while preserving new writes and deletions
 
 [Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
+
+## Application and assignment
+
+You are moving a tenant’s bookmarks to another store while members keep editing. A snapshot carries yesterday’s title, but a live update already contains today’s title. Applying the snapshot last must not erase the newer edit. A deletion needs the same protection against an old copy arriving later.
+
+Follow the supplied protocol model through partial writes, replay, and reader cutover. Record which store currently owns writes and what durable evidence lets the other catch up. This fixture models the migration protocol. Connecting a production change-data-capture system is additional implementation work.
+
+## Contract and starting evidence
 
 **Constructed candidate brief:** “Ana edits bookmark A while you move her tenant
 to a new store. A slow backfill still carries yesterday's title. Ben deletes a

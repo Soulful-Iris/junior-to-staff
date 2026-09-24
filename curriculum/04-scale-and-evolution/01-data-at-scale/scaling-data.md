@@ -1,8 +1,28 @@
-# Data at scale
+# Protect shared storage with bounded cache loads and consistent reads
 
 [Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
 
-> Project connection · feeds **P3 (it holds under load)**
+> Project connection · feeds [Reading-list stage 3: measure the application under load](../../../projects/reading-list/stages/03-under-load/README.md)
+
+## Why one popular page can delay unrelated users
+
+The reading-list app shows a group’s newest saved links. Its API normally reads that list from the database. A cache stores a copy for 60 seconds so repeated page opens can reuse it. That copy is disposable. The database remains authoritative for saved bookmarks and permissions.
+
+At 12:00 the cached group list expires just as 200 readers open it. If each request independently reloads the same list, one expiration produces 200 database queries. Sign-in can then wait for database connections even though sign-in does not use this cache.
+
+### Follow the two different correctness questions
+
+| Situation | Question your design must answer |
+|---|---|
+| Many readers miss the same key | How many reloads can run within one process and across the fleet? |
+| The cache is entirely unavailable | How much fallback database work can the system admit? |
+| Ana saves version 8 while a replica has version 7 | Which reads must show her own new write? |
+| A member loses access | Can an old cached result still be returned to them? |
+
+Your task is to solve these boundaries separately. The [cache and consistency lab](labs/cache-consistency/README.md) supplies local counterexamples and fixes. It does not deploy Redis or create database replicas. The production diagrams explain the additional coordination and storage adapters a cloud implementation needs.
+
+The workload below is hypothetical. A limit of 100 origin reads/s means requests reaching authoritative storage, not total browser requests. A cache hit can avoid such a read, but must still obey the access policy.
+
 
 > **Constructed candidate brief:** “Two hundred readers hit one expired group
 > page on ten API instances. The database has a 100 reads/s spare budget. Keep
@@ -46,14 +66,12 @@ is unavailable; choose a fail-closed or preallocated local-budget policy and
 prove the maximum possible fleet load. Copying the full fleet budget into every
 instance is not a safe fallback.
 
-## The one-liner
+## The principle behind the design
 
-Load does not kill systems by filling the disk. It kills them at the connection
-pool, in the shape of one query, under read pressure, and during the failover
-nobody rehearsed. Every fix buys headroom and bills a new failure class, so the
+Load can exhaust connections, disk, CPU, I/O, locks, or downstream capacity. This lesson follows a read-heavy workload whose database becomes saturated by cache misses. Every fix buys headroom and bills a new failure class, so the
 skill is knowing the price list and climbing in the cheap, reversible order.
 
-## The failure it prevents
+## Follow the failure through the system
 
 The reading list is humming: eighty thousand items, a few hundred users, the
 group page cached with a sixty-second TTL because someone measured the query at
@@ -63,8 +81,7 @@ Then a newsletter links to it. Traffic rises 40x and for fifty-nine seconds
 nothing happens: the page is one cache hit. Then the key expires. Two hundred
 requests miss at once, and each independently runs the 400ms query to
 repopulate it. The database gets two hundred copies of its most expensive
-query. Its hundred connection slots — the PostgreSQL default, which nobody
-chose — fill instantly. Now sign-in fails too, because sign-in needs a
+query. Its configured hundred connection slots fill, and later requests wait. Now sign-in fails too, because sign-in needs a
 connection too. The on-call restarts the app servers — dropping
 every warm key onto a cold database.
 
@@ -72,13 +89,12 @@ None of this was volume; eighty thousand rows is nothing. The cache — added as
 a performance fix — converted one slow query into a full outage, because a
 cache without stampede protection is exactly that machine.
 
-## The mental model
+## Mechanisms and their limits
 
 **What load hits first depends on the workload.** Measure arrival/service rates,
 bytes, CPU, I/O, lock wait, saturation and skew. Four useful questions for this
 read-heavy example are:
-*Connections*: a database connection is scarce and stateful — PostgreSQL's
-default ceiling is typically 100 (checked 2026-09-21) — and every feature
+*Connections*: a database connection is scarce and stateful — the example database is configured for 100 connections — and every feature
 competes for the same pool. The first purchase is rarely hardware: a pooler
 (PgBouncer, say) and a pool-full decision. *Query shape*:
 [the application foundations](../../02-applications/02-databases/data-models-and-queries.md) taught that a scan
@@ -128,8 +144,7 @@ steady-state service capacity.
 
 **Queues.** A queue buys two things: it absorbs bursts, and it decouples
 failure — the fetcher being down stops fetching, not adding. It bills three:
-ordering (only per-key order survives, and only arranged); delivery
-becomes **at-least-once**, because a consumer that crashes between the work and
+ordering (only per-key order survives, and only arranged); the chosen delivery contract may permit duplicates, as **at-least-once** delivery does, because a consumer that crashes between the work and
 the acknowledgement gets the message again; and the backlog is invisible until
 you instrument it — the product looks healthy while work quietly ages.
 
@@ -184,11 +199,11 @@ Done badly, you see:
   the database finds out.
 - A replica "for performance" while every read still hits the primary — or
   reads on replicas and nobody has heard of lag.
-- "Exactly-once delivery" written in a design document.
+- An exactly-once claim without naming its transaction boundary, failure model, and external effects.
 - A backlog discovered over ssh, during the incident.
 - Sharding proposed in the first design review, before anyone read a plan.
 
-## Ask Claude for this
+## Use an assistant to investigate specific questions
 
 **Request 1 — find the saturating resource before touching anything**
 
@@ -297,7 +312,7 @@ Each of these can go red, cheaply:
 > have looked like. A stampede test that never actually expires the key under
 > concurrency passes forever and proves nothing.
 
-## Your slice of the project
+## Apply this lesson to the reading-list application
 
 On **P3**, the reading list meets load on purpose:
 
@@ -319,13 +334,12 @@ On **P3**, the reading list meets load on purpose:
   comes from a graph, not a guess.
 - Drop the consumer's unique constraint on a copy and the deliver-twice test
   goes red.
-- Shard appears nowhere in the record, and you can say what number would have
-  to be true first.
+- Partitioning is justified by a measured constraint if chosen. Otherwise state the observation that would make you reconsider it.
 
-## Words you now own
+## Terms used in this lesson
 
 - **connection pool** — the fixed set of connections the whole product shares;
-  the first thing load exhausts.
+  its size and acquisition waits are one possible bottleneck.
 - **cache stampede** — every reader missing at once when a hot key expires,
   recomputing in parallel; also thundering herd.
 - **single-flight** — one request recomputes an expired value; the rest wait or
@@ -354,7 +368,7 @@ same rows); choosing a non-relational engine when the data stops being
 row-shaped; search and analytics; and distributed transactions beyond the
 outbox — sagas sit with the migration work. Timeouts, retries, load
 shedding and backups you have actually restored live in
-[Reliability](../../03-production/05-reliability/failure-budgets.md).
+[Set an error budget and bound retries during overload](../../03-production/05-reliability/failure-budgets.md).
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
 

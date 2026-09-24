@@ -1,4 +1,6 @@
-# Bookmark slice validation
+# Bookmark editor: recorded implementation evidence
+
+This is a dated evidence record for the [runnable bookmark editor](README.md), not the lesson instructions. Start with that page to see the interface, run the app and follow the save/typing scenario.
 
 Recorded 2026-09-22. Python 3.12.14, SQLite 3.53.1, Node 24.19.0.
 

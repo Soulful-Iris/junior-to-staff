@@ -1,5 +1,7 @@
 # Arrays and strings: keep order and boundaries
 
+A page shows the first ten bookmarks from an ordered list. You need to choose a range without skipping the tenth item, and decide whether editing that range should change the original list. Work through the slice example below, then distinguish a contiguous range from a selection that skips positions.
+
 A sequence keeps values in order. Python's `list` is a resizable array: an index locates an item directly. A string is an immutable sequence of Unicode code points. These are the inputs many interview algorithms traverse.
 
 ![Indices and a half-open slice across an array](../../../../assets/foundations/sequences.svg)
@@ -33,5 +35,16 @@ Build many string fragments in a list and join once when appropriate; repeated c
 For `[1, 3, 2, 4]`, `[3, 2]` is a **contiguous subarray**. `[1, 2, 4]` is a **subsequence** that preserves order while skipping positions. `{1, 2, 3, 4}` is a set that forgets positions. Choosing the wrong one can make a fast solution answer the wrong question.
 
 **Boundary check:** `[]` has no valid index; `[8]` has index 0; `values[len(values)]` is outside the list. Use half-open ranges consistently when returning start/end positions.
+
+## A shallow copy can still share nested data
+
+```python
+rows = [["A"], ["B"]]
+copy = rows[:]
+copy[0].append("edited")
+print(rows)  # [['A', 'edited'], ['B']]
+```
+
+The outer list was copied, but its entries still point to the same inner lists. Replacing `copy[0]` would change only the copied outer list. Mutating the shared inner list changes what both outer lists observe. Draw two outer containers pointing to the same first row before deciding whether your application needs a deeper copy.
 
 Source: [Python data structures](https://docs.python.org/3/tutorial/datastructures.html)

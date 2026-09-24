@@ -2,6 +2,16 @@
 
 Reproduce a defect, build a check that catches it, and assess a proposed repair.
 
+<section class="chapter-context" markdown="1">
+
+## Find evidence that distinguishes a repair from a passing result
+
+A quantity update reports success while losing zero. A transaction importer returns healthy HTTP responses while storing the wrong cents or skipping a page after restart. You will use the required behavior to decide what evidence can reveal those defects.
+
+Start with the small quantity bug, then investigate the supplied multi-module importer and review three proposed patches. The learning exercises discuss checks for application behavior. They do not change this guide’s automatic publishing workflow.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,10 +24,10 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Testing](testing-strategy.md) |
-| 2 | [Quantity investigation · zero is intentional](labs/quantity-debug/README.md) |
-| 3 | [Transaction importer · diagnose another team's package](labs/importer/README.md) |
-| 4 | [Three PRs before the finance release](labs/importer/review/README.md) |
+| 1 | [Choose checks that reveal the behavior a change can break](testing-strategy.md) |
+| 2 | [Preserve zero when applying a quantity update](labs/quantity-debug/README.md) |
+| 3 | [Repair decimal amounts and restart recovery in a transaction importer](labs/importer/README.md) |
+| 4 | [Review three importer patches against data and retry contracts](labs/importer/review/README.md) |
 
 ## Explore failures and changed requirements
 
@@ -37,7 +47,7 @@ Each project explains its application, names the deliverable, links the supplied
 
 ## Reference guides
 
-- [Testing — five projects](projects.md)
+- [Choose an evidence exercise: defects, contracts, load or user journeys](projects.md)
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 

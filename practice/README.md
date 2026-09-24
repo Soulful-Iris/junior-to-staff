@@ -1,8 +1,8 @@
 # Practice · turn understanding into visible evidence
 
-> “You have read the worked example. Today you receive an unfamiliar contract,
-> a small codebase and a requirement change. Show what you can implement and defend
-> without seeing the solution. Which uncertainty will you resolve first?”
+You have worked through a lesson and want to find out what you can now do independently. Choose one session below. Each has a concrete product task, files you may inspect, and a separate answer pack with changed requirements. For example, the coding session asks you to consume inventory events without counting a repeated delivery twice. The full-stack session asks you to keep a newer draft visible while an earlier save completes.
+
+**Your next action:** open one candidate brief, read its contract and allowed materials, and make your own attempt. If another person is assessing you, give them the matching assessor pack. If you are working alone, keep that pack closed until your first attempt, then use its schedules to find a gap. Record the observation and a specific next task in the [attempt record](attempt-record.md).
 
 All assessment prompts here are **constructed**, without company attribution. Training
 timeboxes are not claims about employer round lengths. Keep reference checks separate

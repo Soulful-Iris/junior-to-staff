@@ -1,4 +1,6 @@
-# Candidate · complete the transaction importer
+# Repair a transaction importer and explain each correction
+
+A finance package downloads pages of transaction records, converts decimal amounts to integer cents, and stores a restart cursor. You inherit a deliberately broken starter. Your assignment is to make narrow repairs supported by observed behavior while preserving identity and progress across restart.
 
 > “You inherit a partner importer. The test command fails before the first request,
 > and finance reports missing cents and skipped work after restart. Make one narrow

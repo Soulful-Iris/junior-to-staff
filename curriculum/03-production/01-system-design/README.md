@@ -2,6 +2,16 @@
 
 Turn requirements and workload estimates into an explainable architecture.
 
+<section class="chapter-context" markdown="1">
+
+## Turn a product requirement into a defensible service design
+
+A design begins with an action such as saving a link, reserving a seat, or accepting an upload. It then needs rules for ownership, duplicates, freshness, failure, and capacity. A queue or cache belongs only where it helps meet those rules.
+
+Use the design method and mechanism reference first. Each brief supplies a scenario, workload assumptions, a local starting point, and a proposed AWS mapping. Build or explain the baseline before changing scale, availability, or ordering in its follow-ups.
+
+</section>
+
 **Artifact types:** the short architecture pages below are **design briefs**, not completed applications. They supply a contract, diagrams and questions to work through. A **worked design** explains a particular solution; an **executable reference** links to source and a test command; a **deployment lab** supplies setup and cleanup steps. None of these labels alone means a live cloud deployment was verified.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
@@ -10,7 +20,7 @@ Turn requirements and workload estimates into an explainable architecture.
 
 [Enforce identity, ownership and tenant boundaries](../../02-applications/05-security/README.md)
 
-Start each project with its application background and assignment. Run its local example, then use the workload to size the implementation: [The constants you estimate with](../../01-code/01-problem-solving/estimation-constants.md) is the per-second, latency and availability arithmetic these designs assume.
+Start each project with its application background and assignment. Run its local example, then use the workload to size the implementation: [Estimate request rates, storage, latency and availability](../../01-code/01-problem-solving/estimation-constants.md) is the per-second, latency and availability arithmetic these designs assume.
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
@@ -18,9 +28,9 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [System design](design-method.md) |
-| 2 | [Draw the system, then break it](whiteboard.md) |
-| 3 | [Architecture · understand the mechanism before naming a service](mechanism-reference.md) |
+| 1 | [Design a service from its contract, workload and failure limits](design-method.md) |
+| 2 | [Draw a bookmark request, then change its failure boundary](whiteboard.md) |
+| 3 | [Choose architecture mechanisms from the boundary they enforce](mechanism-reference.md) |
 | 4 | [Build a private bookmark API with ownership and version checks](problems/bookmark-service.md) |
 | 5 | [Enforce API quotas across concurrent gateways](problems/api-quota.md) |
 | 6 | [Reserve concert seats with expiring holds](problems/ticket-inventory.md) |

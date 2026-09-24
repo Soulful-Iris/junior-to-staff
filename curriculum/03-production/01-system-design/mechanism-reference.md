@@ -1,8 +1,14 @@
-# Architecture · understand the mechanism before naming a service
+# Choose architecture mechanisms from the boundary they enforce
 
 [Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
 
 [Practice drawing the architecture](whiteboard.md) · [Motion gallery](../../../assets/learning/README.md)
+
+## Use this as a mechanism reference
+
+A bookmark save can cross an API, a database, a queue, and a worker. At each boundary, a different question arises: who may write, what is durable, how long work may wait, and what a retry may repeat. This page connects those questions to small examples and runnable exercises.
+
+You do not need to build all twelve mechanisms in one application. Choose the section that addresses your current requirement, trace its example, and follow its linked implementation. For instance, a duplicate queue delivery leads to the idempotency section. A delayed replica read leads to consistency. An AWS service name is a deployment choice after that behavior is clear.
 
 For every component ask: what data enters, what state changes, what waits, who can access it, and what happens if the response disappears? Use the worked designs after you can answer these questions.
 

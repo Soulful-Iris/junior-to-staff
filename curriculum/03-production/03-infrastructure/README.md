@@ -2,6 +2,16 @@
 
 Map a mechanism to explicit infrastructure, permissions, and operational limits.
 
+<section class="chapter-context" markdown="1">
+
+## Connect code, credentials and resources deliberately
+
+Running a local Python process does not create an AWS API, queue, or database. A deployment needs an application artifact, its configuration, resource definitions, and a runtime identity with the right permissions. Each has a separate owner and failure mode.
+
+Begin with reproducible local execution and the service mapping. The conditional-write and upload labs provide commands. The queue lab supplies an AWS SAM template and worker. Each cloud exercise states setup, expected evidence, and cleanup.
+
+</section>
+
 [Curriculum](../../README.md) · [About this part](../README.md)
 
 ## Prerequisites
@@ -14,11 +24,11 @@ Testing and ownership checks are part of each implementation. The dedicated test
 
 | Step | Existing lesson or exercise |
 |---|---|
-| 1 | [Shipping it](configuration-and-environments.md) |
+| 1 | [Build once and supply configuration safely at runtime](configuration-and-environments.md) |
 | 2 | [AWS · translate a mechanism into infrastructure](aws/README.md) |
-| 3 | [Lab 1 · create once, then compare intent](aws/lab-1-data.md) |
-| 4 | [Lab 2 · send bytes to storage without tying up the API](aws/lab-2-upload.md) |
-| 5 | [Lab 3 · a job may be delivered twice; its result is stored once](aws/labs/job-pipeline/README.md) |
+| 3 | [Use DynamoDB conditions to reject duplicate creates and stale edits](aws/lab-1-data.md) |
+| 4 | [Upload private object bytes directly and finalize application metadata](aws/lab-2-upload.md) |
+| 5 | [Process duplicate SQS jobs with one conditional DynamoDB result](aws/labs/job-pipeline/README.md) |
 
 ## Explore failures and changed requirements
 

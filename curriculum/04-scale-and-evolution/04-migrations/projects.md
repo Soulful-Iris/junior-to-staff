@@ -1,6 +1,12 @@
-# Migrations — five focused exercises
+# Practice compatibility, shadow reads, adoption and retirement
 
 [Migration method](migration-method.md) · [Migrate tags across data, clients and workers](projects/the-migration-you-actually-finish.md)
+
+## The migration these exercises support
+
+A bookmark API is moving from free-text tags to stable tag IDs. Existing clients still send names, background jobs may run old code, and stored records must keep their meaning. A migration is therefore a sequence of compatible states, not only a script that copies rows.
+
+Use [the complete tag migration project](projects/the-migration-you-actually-finish.md) as the application context. These five focused exercises develop consumer compatibility, effect-free comparison, adoption tooling, remaining-use evidence, and retirement. The linked local recovery model supplies version and deletion fixtures. You add the application-specific migration and adapters.
 
 These are build assignments, not five supplied applications. Work in a disposable
 fixture before a live pilot. Duration depends on the system; “one afternoon” is

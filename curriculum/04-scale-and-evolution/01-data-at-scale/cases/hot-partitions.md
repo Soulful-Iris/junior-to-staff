@@ -1,6 +1,14 @@
-# A healthy average can hide an overloaded partition
+# Distribute a hot tenant while preserving event identity and ordering
 
 [Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
+
+## Application and assignment
+
+A telemetry service stores events by tenant. One tenant sends 250 write units per second to a partition able to serve 100. Other partitions are idle, but their spare capacity cannot help unless the access pattern and routing allow that tenant’s work to spread.
+
+Begin with independent events and design stable routing plus bounded reads. Then change the requirement to a strictly ordered tenant stream. The four partitions and 100-unit capacities below are a mathematical model, not DynamoDB physical-partition guarantees.
+
+## Starting contract
 
 > “One tenant sends 250 writes/s to a four-partition service with a nominal 400/s total capacity. Their queue grows while fleet utilization looks healthy. Spread independent events without losing retries during a routing change; then preserve strict tenant ordering.”
 

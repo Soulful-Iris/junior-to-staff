@@ -1,5 +1,7 @@
 # Weighted paths: expand the cheapest candidate
 
+A delivery route goes directly from A to B at cost 10, or from A to C to B at costs 1 and 1. The two-hop route is cheaper. You will follow the candidate costs in a heap and see why visiting the fewest edges would answer the wrong question.
+
 BFS minimizes the number of equal-cost edges. When edges have different costs, the route with fewer edges may cost more. For **nonnegative** weights, Dijkstra's algorithm expands the cheapest known candidate using a min-heap.
 
 ![A direct route costing ten versus a two-edge route costing two](../../../../assets/foundations/weighted-paths.svg)
@@ -40,3 +42,14 @@ With this lazy duplicate-entry heap, there can be O(E) queued candidates: O((V+E
 | Directed acyclic graph | Process a topological order | Requires acyclicity; O(V+E) relaxation |
 
 An unreachable node has no finite distance. A negative cycle reachable from the source can make some shortest distances undefined. Those are contract outcomes, not a large made-up number.
+
+## Watch the cheaper route replace the estimate
+
+| Removed candidate | New information | Pending candidates afterward |
+|---|---|---|
+| A at cost 0 | B can cost 10, C can cost 1 | C:1, B:10 |
+| C at cost 1 | B improves to cost 2 | B:2, B:10 |
+| B at cost 2 | Its best route is now processed | B:10 |
+| B at cost 10 | Stored best is 2, so this entry is stale | none |
+
+The table presents pending candidates in cost order for readability. A heap's internal array is not fully sorted. The authoritative best-cost map is what makes retaining an obsolete heap entry safe.

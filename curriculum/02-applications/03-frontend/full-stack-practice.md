@@ -2,6 +2,12 @@
 
 [Curriculum](../../README.md) · [Connect a usable interface to an API](README.md)
 
+A bookmark title travels through three places: the text field where Alice edits it, the API that accepts the save, and the database that stores the confirmed version. While the save is travelling, Alice can type more. This lesson connects those three places so a delayed response does not erase her newer text.
+
+![The supplied bookmark editor preserves a newer draft after an earlier title has been saved.](../../../assets/ui-lessons/bookmark-confirmed-draft.png)
+
+In the screenshot, the server has version 2 of the shorter title. The input still contains the longer draft. Follow the runnable editor below to inspect its HTTP request, conditional database write and guarded browser update. Your task is to explain and reproduce that behavior, then handle the conflict case where another writer changes the record first.
+
 > “A save looks successful but erases the user's next edit. Follow that action through
 > the browser, API and database, then prove the repair under a delayed response.”
 

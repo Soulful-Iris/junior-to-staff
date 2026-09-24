@@ -1,10 +1,26 @@
-# Migrations
+# Migrate live data while preserving writes, deletions and recovery
+
+A reading-list service stores tags as strings and is moving to stable tag IDs. Users keep editing and deleting bookmarks while a background process copies old rows. The new store can receive a live edit before the older copied row arrives.
+
+You will define which store owns writes during each phase, how copied and live changes are ordered, and what permits the final switch. A backfill is the bulk copy of existing data. It does not include all changes that happen after the copy begins.
 
 [Curriculum](../../README.md) · [Migrate live systems and verify recovery](README.md)
 
-> Project connection · feeds **P5 (it changes safely)**
+> Project connection · feeds [Reading-list stage 5: evolve the running application](../../../projects/reading-list/stages/05-it-changes/README.md)
 
-## At the whiteboard
+## Follow one bookmark through an out-of-order copy
+
+| Arrival at the target | Version | Correct target state |
+|---|---:|---|
+| Live edit changes tags | 2 | Store v2 |
+| Live deletion arrives | 3 | Retain a deletion marker at v3 |
+| Delayed snapshot row arrives | 1 | Ignore v1 and remain deleted at v3 |
+
+The deletion marker is a **tombstone**. It records that the absence is newer than the copied value. Deleting the target row without retaining that fact would let the delayed copy recreate it. Your apply operation must compare versions atomically. A final row-count match cannot detect two different identities with the same total count.
+
+The [migration lab](labs/recovery-migration/migration.md) supplies the local fixture. Use it to observe copy, live update, deletion and stale replay before designing a cloud cutover.
+
+## Reason through the changed situation
 
 > “We are replacing an event store while reads and writes continue. The old
 > write succeeds and the new write times out. What do we return, which copy is

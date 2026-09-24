@@ -1,5 +1,7 @@
 # Tries: share prefixes without losing whole words
 
+A search box should suggest car and card after someone types car, but it should not claim that ca is a stored word merely because those letters begin several words. You will store shared prefixes and a separate marker for complete words, then trace the difference between exact lookup and autocomplete.
+
 A trie stores a character on each edge. Words with a common prefix share the same path. Reaching the prefix path answers whether that prefix exists; a separate terminal marker answers whether it is a complete word.
 
 ![The words car, card, and cat sharing a prefix path](../../../../assets/foundations/tries.svg)
