@@ -394,13 +394,24 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .window-story code{padding:1px 4px;border:1px solid #ced8c8;border-radius:3px;background:#f7faf4;font:700 10px/1 var(--mono)}
 .window-animation-grid{display:grid;grid-template-columns:minmax(0,1fr) 168px;gap:18px;align-items:stretch}
 .window-track-column{align-self:center;min-width:0}
-.window-scan-track{position:relative;margin:30px 2px 25px}
+.window-scan-track{position:relative;margin:30px 2px 10px}
 .window-scan-track .letter-row{position:relative;z-index:1}
 .window-scan-track .letter-row b.target-letter{border-color:#b9cab3;background:#edf2e9;color:var(--accent)}
 .window-frame{position:absolute;z-index:2;top:-7px;bottom:-7px;left:69.23%;width:30.77%;border:2px solid var(--accent);border-radius:7px;background:rgba(134,164,114,.13);box-shadow:0 0 0 3px rgba(134,164,114,.07);pointer-events:none}
+.index-rail{position:relative;height:43px;margin:0 2px 7px}
+.index-pointer{position:absolute;left:3.845%;display:grid;place-items:center;width:19px;height:19px;transform:translateX(-50%)}
+.index-pointer::before{position:absolute;bottom:16px;content:"↑";font:700 10px/1 var(--sans)}
+.index-pointer b{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;font:800 10px/1 var(--mono)}
+.pointer-i{top:0;color:var(--accent)}
+.pointer-i b{border:1px solid #9db797;background:#e7eee3;color:var(--accent)}
+.pointer-j{top:22px;color:#82691e}
+.pointer-j b{border:1px solid #d6c17e;background:#faf3d9;color:#765e19}
 .edge-legend{display:flex;flex-wrap:wrap;justify-content:space-between;gap:7px 12px;color:var(--muted);font:550 8px/1.35 var(--sans)}
-.edge-legend span:first-child{color:var(--accent);font-weight:700}
+.edge-legend .edge-window{color:var(--accent);font-weight:700}
 .edge-legend i{display:inline-block;width:13px;height:8px;margin-right:5px;border:2px solid var(--accent);border-radius:2px;vertical-align:-1px}
+.edge-legend b{display:inline-grid;place-items:center;width:15px;height:15px;margin-right:4px;border-radius:50%;font:800 8px/1 var(--mono)}
+.edge-i b{background:#e7eee3;color:var(--accent)}
+.edge-j b{background:#faf3d9;color:#765e19}
 .counter-demo{align-self:stretch;min-height:210px;padding:13px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper)}
 .counter-demo header{display:flex;align-items:flex-start;flex-direction:column;gap:2px;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .counter-demo header span{color:var(--accent);font:750 9px/1.3 var(--sans);letter-spacing:.9px}
@@ -409,7 +420,7 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .counter-head span:first-child{text-align:left}
 .counter-states{display:grid}
 .counter-state{grid-area:1/1;align-self:start;opacity:0}
-.counter-state.count-six{opacity:1}
+.counter-state.count-ten{opacity:1}
 .counter-state>div{display:grid;grid-template-columns:1fr 38px 58px;gap:4px;align-items:center;margin-bottom:5px}
 .counter-state>div>*{display:grid;place-items:center;min-height:24px;font-style:normal}
 .counter-state>div b{justify-content:start;color:var(--ink);font:750 10px/1 var(--mono)}
@@ -419,14 +430,26 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .counter-state>div.extra strong{border-color:#d9c898;background:#faf5e6;color:#82691e}
 .counter-state>p{margin:10px 0 0;padding:8px 5px 0;border-top:1px solid var(--line);color:#985245;font:700 9px/1.35 var(--sans);text-align:center}
 .counter-state>p.complete{color:var(--accent)}
-.sample-panel.sample-animate .window-frame{animation:windowScan 21s cubic-bezier(.55,.06,.25,1) infinite}
-.sample-panel.sample-animate .story-one,.sample-panel.sample-animate .count-one{animation:stageOne 21s ease infinite}
-.sample-panel.sample-animate .story-two,.sample-panel.sample-animate .count-two{animation:stageTwo 21s ease infinite}
-.sample-panel.sample-animate .story-three,.sample-panel.sample-animate .count-three{animation:stageThree 21s ease infinite}
-.sample-panel.sample-animate .story-four,.sample-panel.sample-animate .count-four{animation:stageFour 21s ease infinite}
-.sample-panel.sample-animate .story-five,.sample-panel.sample-animate .count-five{animation:stageFive 21s ease infinite}
-.sample-panel.sample-animate .story-six,.sample-panel.sample-animate .count-six{animation:stageSix 21s ease infinite}
-.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(n+10){animation:windowWinner 21s ease infinite}
+.sample-panel.sample-animate .window-frame{animation:windowScan 32s ease-in-out infinite}
+.sample-panel.sample-animate .pointer-i{animation:pointerI 32s ease-in-out infinite}
+.sample-panel.sample-animate .pointer-j{animation:pointerJ 32s ease-in-out infinite}
+.sample-panel.sample-animate .story-one{animation:stageOne 32s ease infinite}
+.sample-panel.sample-animate .story-two{animation:stageTwo 32s ease infinite}
+.sample-panel.sample-animate .story-three{animation:stageThree 32s ease infinite}
+.sample-panel.sample-animate .story-four{animation:stageFour 32s ease infinite}
+.sample-panel.sample-animate .story-five{animation:stageFive 32s ease infinite}
+.sample-panel.sample-animate .story-six{animation:stageSix 32s ease infinite}
+.sample-panel.sample-animate .count-one{animation:countOne 32s ease infinite}
+.sample-panel.sample-animate .count-two{animation:countTwo 32s ease infinite}
+.sample-panel.sample-animate .count-three{animation:countThree 32s ease infinite}
+.sample-panel.sample-animate .count-four{animation:countFour 32s ease infinite}
+.sample-panel.sample-animate .count-five{animation:countFive 32s ease infinite}
+.sample-panel.sample-animate .count-six{animation:countSix 32s ease infinite}
+.sample-panel.sample-animate .count-seven{animation:countSeven 32s ease infinite}
+.sample-panel.sample-animate .count-eight{animation:countEight 32s ease infinite}
+.sample-panel.sample-animate .count-nine{animation:countNine 32s ease infinite}
+.sample-panel.sample-animate .count-ten{animation:countTen 32s ease infinite}
+.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(10),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(11),.sample-panel.sample-animate .window-scan-track .letter-row b:nth-child(13){animation:windowWinner 32s ease infinite}
 
 /* Architecture animation: events arrive in causal order. */
 .payment-route{position:relative;overflow:hidden}
@@ -457,21 +480,49 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 .sample-panel.sample-animate .aws-database strong{animation:awsFailoverLabel 13.2s ease infinite}
 
 @keyframes windowScan{
-  0%,12%{left:0;width:30.77%;opacity:1}
-  15%,27%{left:0;width:46.15%;opacity:1}
-  30%,42%{left:7.69%;width:38.46%;opacity:1}
-  45%,57%{left:7.69%;width:76.92%;opacity:1}
-  60%,72%{left:46.15%;width:53.85%;opacity:1}
-  75%,80%{left:69.23%;width:30.77%;opacity:1}
-  92%,100%{left:0;width:30.77%;opacity:1}
+  0%{left:0;width:7.69%;opacity:1}
+  3%{left:0;width:15.38%}
+  6%{left:0;width:23.08%}
+  9%{left:0;width:30.77%}
+  12%{left:0;width:38.46%}
+  15%,25%{left:0;width:46.15%}
+  32%{left:7.69%;width:38.46%}
+  35%{left:7.69%;width:46.15%}
+  38%{left:7.69%;width:53.85%}
+  41%{left:7.69%;width:61.54%}
+  44%{left:7.69%;width:69.23%}
+  48%{left:7.69%;width:76.92%}
+  50.4%{left:15.38%;width:69.23%}
+  52.8%{left:23.08%;width:61.54%}
+  55.2%{left:30.77%;width:53.85%}
+  57.6%{left:38.46%;width:46.15%}
+  60%{left:46.15%;width:38.46%}
+  64%{left:46.15%;width:46.15%}
+  67%,70%{left:46.15%;width:53.85%}
+  72.7%{left:53.85%;width:46.15%}
+  75.4%{left:61.54%;width:38.46%}
+  78%,82%{left:69.23%;width:30.77%}
+  95%,100%{left:0;width:7.69%;opacity:1}
 }
-@keyframes stageOne{0%,12%{opacity:1;transform:none}15%,80%{opacity:0;transform:translateY(-4px)}84%,100%{opacity:1;transform:none}}
-@keyframes stageTwo{0%,12%{opacity:0;transform:translateY(4px)}15%,27%{opacity:1;transform:none}30%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageThree{0%,27%{opacity:0;transform:translateY(4px)}30%,42%{opacity:1;transform:none}45%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageFour{0%,42%{opacity:0;transform:translateY(4px)}45%,57%{opacity:1;transform:none}60%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageFive{0%,57%{opacity:0;transform:translateY(4px)}60%,72%{opacity:1;transform:none}75%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes stageSix{0%,72%{opacity:0;transform:translateY(4px)}75%,80%{opacity:1;transform:none}84%,100%{opacity:0;transform:translateY(-4px)}}
-@keyframes windowWinner{0%,72%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}76%{transform:scale(1.1)}78%,80%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}88%,100%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}}
+@keyframes pointerI{0%,25%{left:3.845%}32%,48%{left:11.535%}50.4%{left:19.225%}52.8%{left:26.915%}55.2%{left:34.605%}57.6%{left:42.295%}60%,70%{left:49.985%}72.7%{left:57.675%}75.4%{left:65.365%}78%,82%{left:73.055%}95%,100%{left:3.845%}}
+@keyframes pointerJ{0%{left:3.845%}3%{left:11.535%}6%{left:19.225%}9%{left:26.915%}12%{left:34.605%}15%,32%{left:42.295%}35%{left:49.985%}38%{left:57.675%}41%{left:65.365%}44%{left:73.055%}48%,60%{left:80.745%}64%{left:88.435%}67%,82%{left:96.155%}95%,100%{left:3.845%}}
+@keyframes stageOne{0%,18%{opacity:1;transform:none}21%,82%{opacity:0;transform:translateY(-4px)}86%,100%{opacity:1;transform:none}}
+@keyframes stageTwo{0%,18%{opacity:0;transform:translateY(4px)}21%,25%{opacity:1;transform:none}28%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageThree{0%,25%{opacity:0;transform:translateY(4px)}28%,32%{opacity:1;transform:none}35%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageFour{0%,32%{opacity:0;transform:translateY(4px)}35%,48%{opacity:1;transform:none}51%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageFive{0%,48%{opacity:0;transform:translateY(4px)}51%,70%{opacity:1;transform:none}73%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes stageSix{0%,70%{opacity:0;transform:translateY(4px)}73%,82%{opacity:1;transform:none}86%,100%{opacity:0;transform:translateY(-4px)}}
+@keyframes countOne{0%,8%{opacity:1}10%,82%{opacity:0}86%,100%{opacity:1}}
+@keyframes countTwo{0%,8%{opacity:0}10%,14%{opacity:1}16%,100%{opacity:0}}
+@keyframes countThree{0%,14%{opacity:0}16%,25%{opacity:1}28%,100%{opacity:0}}
+@keyframes countFour{0%,30%{opacity:0}32%,43%{opacity:1}45%,100%{opacity:0}}
+@keyframes countFive{0%,43%{opacity:0}45%,47%{opacity:1}49%,100%{opacity:0}}
+@keyframes countSix{0%,47%{opacity:0}49%,54%{opacity:1}56%,100%{opacity:0}}
+@keyframes countSeven{0%,54%{opacity:0}56%,59%{opacity:1}61%,100%{opacity:0}}
+@keyframes countEight{0%,59%{opacity:0}61%,66%{opacity:1}68%,100%{opacity:0}}
+@keyframes countNine{0%,66%{opacity:0}68%,77%{opacity:1}79%,100%{opacity:0}}
+@keyframes countTen{0%,77%{opacity:0}79%,82%{opacity:1}86%,100%{opacity:0}}
+@keyframes windowWinner{0%,75%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}78%,82%{border-color:var(--accent);background:var(--accent);color:#fff;transform:scale(1)}86%,100%{border-color:#b9cab3;background:#edf2e9;color:var(--accent);transform:scale(1)}}
 @keyframes paymentFirstSequence{0%{opacity:0;transform:translateY(10px)}8%,100%{opacity:1;transform:none}}
 @keyframes paymentPacketFirst{0%,8%{left:13%;opacity:0}13%{opacity:1}27%{left:76%;opacity:1}31%,100%{left:86%;opacity:0}}
 @keyframes paymentPacketRetry{0%,51%{left:13%;opacity:0}56%{opacity:1}67%{left:62%;opacity:1}71%,100%{left:68%;opacity:0}}
@@ -493,17 +544,19 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
 @media(prefers-reduced-motion:reduce){
   .sample-panel.sample-animate *{animation:none!important}
   .window-frame{left:69.23%;width:30.77%;opacity:1}
+  .pointer-i{left:73.055%}
+  .pointer-j{left:96.155%}
   .window-story section{opacity:0!important}
   .window-story .story-six{opacity:1!important}
-  .window-scan-track .letter-row b:nth-child(n+10){border-color:var(--accent);background:var(--accent);color:#fff}
+  .window-scan-track .letter-row b:nth-child(10),.window-scan-track .letter-row b:nth-child(11),.window-scan-track .letter-row b:nth-child(13){border-color:var(--accent);background:var(--accent);color:#fff}
   .counter-state{opacity:0!important}
-  .counter-state.count-six{opacity:1!important}
+  .counter-state.count-ten{opacity:1!important}
   .payment-packet,.aws-entry-packet,.zone-packet,.database-packet{display:none}
 }
 
 @media(max-width:760px){
   .window-story{min-height:72px}
-  .window-scan-track{margin:28px 0 22px}
+  .window-scan-track{margin:28px 0 10px}
   .window-animation-grid{grid-template-columns:1fr}
   .counter-demo{width:100%;max-width:240px;min-height:205px;margin:0 auto}
 }
