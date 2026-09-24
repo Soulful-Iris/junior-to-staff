@@ -1,5 +1,86 @@
 # File synchronization
 
+## What you are building
+
+> Build shared-folder synchronization for a small design team. Ana edits a file offline while Ben edits the same base version. Uploads may stop halfway, and a deleted file must not reappear when an old laptop reconnects.
+
+**Working contract:** Upload immutable content, then conditionally publish a metadata version against the client’s base version. Conflicts preserve both users’ bytes for resolution. Deletions are versioned tombstones until supported offline clients can no longer replay older state.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100,000 daily users × 10 MB uploaded/day | About 1 TB/day of new upload traffic before deduplication and replicas. |
+| 4 MiB chunk size assumption | A 100 MiB file has 25 chunks; resume transfers by missing chunk hash. |
+| Thirty-day offline support assumption | Tombstone/change-log retention must cover that horizon or require a full resynchronization. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/file_synchronization.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/file_synchronization.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| chunks | content_hash,size,object_key | Immutable bytes with verified checksum. |
+| file_versions | folder,file_id,version,manifest,deleted | Authoritative metadata and conflict boundary. |
+| change_cursor | folder,sequence | Ordered metadata changes for reconnect replay. |
+
+## AWS implementation
+
+![File synchronization: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/file-synchronization.svg)
+
+S3 holds immutable bytes; DynamoDB decides which manifest is current. That split allows interrupted uploads and conflicting edits without exposing partial files or overwriting the winner’s bytes.
+
+## Build it in this order
+
+### 1. Upload content independently
+
+Split files into bounded chunks, hash them and resume only missing chunks. Verify size/checksum before accepting a chunk. Uploading content does not make it visible; orphan chunks can exist safely until metadata references them.
+
+### 2. Publish metadata conditionally
+
+Commit a file manifest only if the expected base version still matches. On conflict, preserve the losing local file and return current metadata. For binary documents, an explicit conflict copy is safer than pretending to merge arbitrary bytes.
+
+### 3. Replay changes and deletions
+
+Return bounded change pages after a folder cursor. Include rename and deletion tombstones with stable file identity; path strings alone are ambiguous under concurrent renames. Reject stale metadata publication after a deletion generation.
+
+### 4. Collect storage safely
+
+Trace committed manifests and active uploads before deleting unreferenced chunks. Wait beyond the upload/retry window and respect shared references. Authorize current folder membership before metadata reads or chunk downloads.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| S3 | Private objects, scoped upload/download authorization and checksum validation; no user-controlled unrestricted key access. |
+| Metadata | Conditional version writes and durable cursor ordering; retention tied to offline support. |
+| Cleanup | Separate role with narrowly scoped deletion rights; require reference checks and a safe age threshold. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Ana publishes; Ben keeps a conflict; the old laptop cannot overwrite a later deletion. |
+| Stop after half the chunks | Resume only missing chunks; the old visible file stays intact. |
+| Remove a folder member | New metadata reads and download authorizations are denied. |
+
+## The next design decision
+
+Add cross-folder moves with different permissions. Define the atomic metadata boundary and ensure old download authorization does not silently grant access under the destination’s policy.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 [Curriculum](../../../README.md) · [Data at scale](../README.md)
 
 All prompts here are constructed practice, without company attribution.
@@ -82,3 +163,5 @@ recovery.
 
 
 [Design route](../../../../indexes/system-designs.md) · [Practice rubric](../../../../practice/README.md)
+
+</details>

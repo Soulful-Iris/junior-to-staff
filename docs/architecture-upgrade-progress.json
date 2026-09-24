@@ -148,5 +148,59 @@
     "starter": "examples/architecture-starts/api_gateway_platform.py",
     "diagram": "assets/architecture-guides/api-gateway-platform.svg",
     "batch": "media-execution-gateway"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/event-ingestion.md",
+    "starter": "examples/architecture-starts/event_ingestion.py",
+    "diagram": "assets/architecture-guides/event-ingestion.svg",
+    "batch": "streaming-cache"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/ad-click-aggregator.md",
+    "starter": "examples/architecture-starts/ad_click_aggregator.py",
+    "diagram": "assets/architecture-guides/ad-click-aggregator.svg",
+    "batch": "streaming-cache"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/trending-counts.md",
+    "starter": "examples/architecture-starts/trending_counts.py",
+    "diagram": "assets/architecture-guides/trending-counts.svg",
+    "batch": "streaming-cache"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-cache.md",
+    "starter": "examples/architecture-starts/distributed_cache.py",
+    "diagram": "assets/architecture-guides/distributed-cache.svg",
+    "batch": "streaming-cache"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-key-value-store.md",
+    "starter": "examples/architecture-starts/distributed_key_value_store.py",
+    "diagram": "assets/architecture-guides/distributed-key-value-store.svg",
+    "batch": "storage-search-crawl"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/document-search.md",
+    "starter": "examples/architecture-starts/document_search.py",
+    "diagram": "assets/architecture-guides/document-search.svg",
+    "batch": "storage-search-crawl"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/typeahead-search.md",
+    "starter": "examples/architecture-starts/typeahead_search.py",
+    "diagram": "assets/architecture-guides/typeahead-search.svg",
+    "batch": "storage-search-crawl"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md",
+    "starter": "examples/architecture-starts/file_synchronization.py",
+    "diagram": "assets/architecture-guides/file-synchronization.svg",
+    "batch": "storage-search-crawl"
+  },
+  {
+    "path": "curriculum/04-scale-and-evolution/01-data-at-scale/problems/web-crawler.md",
+    "starter": "examples/architecture-starts/web_crawler.py",
+    "diagram": "assets/architecture-guides/web-crawler.svg",
+    "batch": "storage-search-crawl"
   }
 ]

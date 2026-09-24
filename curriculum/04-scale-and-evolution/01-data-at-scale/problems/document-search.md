@@ -1,5 +1,86 @@
 # Document search: results must follow permissions
 
+## What you are building
+
+> Build search for a company document portal. Editors update content continuously, employees search across teams, and access to a sensitive document is revoked while its search hit remains indexed. Search snippets must obey current permissions.
+
+**Working contract:** GET /search returns at most 20 authorized hits with document IDs and source versions. Index freshness target is two minutes. The index is a projection; current authorization is checked before content or snippets are returned.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 30 million documents; 15,000 updates/minute | 250 source changes/s average, plus reindexing and deletes. |
+| 3,000 queries/s × 20 returned hits | At least 60,000 hit-level authorization decisions/s before overfetch; batch and cache policy carefully. |
+| Two-minute freshness | Track source-to-index lag and expose stale results; revocation cannot wait for that freshness window. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/document_search.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/document_search.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| documents | tenant,id,version,content_pointer | Source content and deletion state. |
+| index_documents | tenant,id,source_version,tokens | Searchable projection with versioned updates. |
+| authorization | subject,resource,policy_revision | Current decision before snippets/content leave the API. |
+
+## AWS implementation
+
+![Document search: results must follow permissions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/document-search.svg)
+
+OpenSearch ranks searchable candidates. The document/ACL authority decides whether the caller can see their content. An index filter alone cannot satisfy immediate revocation when indexing is asynchronous.
+
+## Build it in this order
+
+### 1. Index one versioned document
+
+Extract bounded text, normalize fields and send an upsert carrying the source version. Apply deletes as versioned tombstones. An old indexing task must not overwrite newer content or recreate a deleted document.
+
+### 2. Build a constrained query API
+
+Limit query length, filters, page size and execution timeout. Return a stable pagination token tied to the chosen search snapshot where supported. Keep expensive wildcard and unbounded aggregation features out of the initial public contract.
+
+### 3. Authorize candidates before snippets
+
+Apply tenant filters in the query as defense in depth, then verify current object access before fetching or returning snippets. Do not return a restricted title or highlight and only check permission when the user clicks. Bound overfetch and allow short pages when many candidates are denied.
+
+### 4. Reindex without mixing generations
+
+Build a new index from a consistent source boundary and capture subsequent changes. Compare source-version coverage, swap the read alias, and retain a rollback window. Measure indexing lag separately from query latency and relevance quality.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| OpenSearch | Choose shard/replica layout from indexed bytes and query measurements; use a separate generation for reindexing. |
+| Index workers | Bound document size and extraction time; quarantine malformed files without blocking the queue. |
+| Authorization | Cache policy only within an explicit revocation bound; keep private responses out of shared caches. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The highest-scoring private document produces no title or snippet. |
+| Deliver a stale indexing update | The newer source version remains indexed. |
+| Reindex while edits continue | The new generation catches up before the alias moves. |
+
+## The next design decision
+
+Add semantic retrieval. Keep the same authorization boundary for vector candidates and source chunks; embeddings are not a substitute for tenant isolation or revocation.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “Employees search internal documents. A newly edited policy must become searchable within two minutes. Alice loses access to a document at noon; she must not see it at 12:01 even if the index or cache is stale. Design ingestion, search, and permission revocation.”
 
 Assume 30 million documents, 15,000 updates/minute, and 3,000 search requests/s. Return title, snippet, and source link for the top 20. Choose whether the two-minute freshness target includes failures and define how you observe it.
@@ -51,3 +132,5 @@ Read the smaller label under each service first: it names the architectural job.
 **AWS translation:** S3/RDS/DynamoDB for source data per access pattern, event stream for changes, OpenSearch for text/vector candidates, and a separate authoritative permission decision. Technology choice does not replace read-time access checks.
 
 **Evidence:** [Meta engineering, April 2026](https://engineering.fb.com/2026/04/21/ml-applications/modernizing-the-facebook-groups-search-to-unlock-the-power-of-community-knowledge/) describes hybrid retrieval and evaluation. This exercise's permission contract and numbers are invented; it does not claim to reproduce Meta's implementation.
+
+</details>

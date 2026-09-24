@@ -31,3 +31,12 @@ Run a program from the repository root with `python3 examples/architecture-start
 | [Video streaming: keep playback smooth at the edge](../../curriculum/03-production/01-system-design/problems/video-streaming-platform.md) | [video_streaming_platform.py](video_streaming_platform.py) |
 | [Online judge: untrusted code gets a small box](../../curriculum/03-production/01-system-design/problems/online-judge.md) | [online_judge.py](online_judge.py) |
 | [API gateway: route safely across many teams](../../curriculum/03-production/01-system-design/problems/api-gateway-platform.md) | [api_gateway_platform.py](api_gateway_platform.py) |
+| [Event ingestion: change a schema without losing yesterday](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/event-ingestion.md) | [event_ingestion.py](event_ingestion.py) |
+| [Ad click aggregator: count late events once](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/ad-click-aggregator.md) | [ad_click_aggregator.py](ad_click_aggregator.py) |
+| [Trending counts: the spike that breaks one partition](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/trending-counts.md) | [trending_counts.py](trending_counts.py) |
+| [Distributed cache: recover when one shard leaves](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-cache.md) | [distributed_cache.py](distributed_cache.py) |
+| [Key-value store: acknowledge only what survives](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-key-value-store.md) | [distributed_key_value_store.py](distributed_key_value_store.py) |
+| [Document search: results must follow permissions](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/document-search.md) | [document_search.py](document_search.py) |
+| [Typeahead: useful suggestions before the next keystroke](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/typeahead-search.md) | [typeahead_search.py](typeahead_search.py) |
+| [File synchronization](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md) | [file_synchronization.py](file_synchronization.py) |
+| [Web crawler: be fast without attacking one site](../../curriculum/04-scale-and-evolution/01-data-at-scale/problems/web-crawler.md) | [web_crawler.py](web_crawler.py) |

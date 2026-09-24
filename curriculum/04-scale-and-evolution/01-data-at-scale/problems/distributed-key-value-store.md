@@ -1,5 +1,86 @@
 # Key-value store: acknowledge only what survives
 
+## What you are building
+
+> Build a small replicated key-value store to understand the durability boundary behind a managed database. A leader acknowledges a write, crashes, and later returns with stale state. The replacement leader must not lose acknowledged data or accept writes from the old term.
+
+**Working contract:** PUT /keys/{key} accepts a request identity and optional expected version. GET exposes a chosen consistency mode. The first milestone is one durable local log; the replicated milestone uses a specified consensus protocol with durable terms and a committed-log rule.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Two million operations/s target; 300 nodes | About 6,667 operations/s/node average before replication and skew; the local starter makes no throughput claim. |
+| Three replicas per partition | A majority is two, but quorum arithmetic alone does not define leader election, log recovery or linearizable reads. |
+| 99.99% availability objective | Roughly 4.32 minutes unavailable in a 30-day month; define which failed/slow requests count. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/distributed_key_value_store.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/distributed_key_value_store.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| log_entries | partition,index,term,request_id,command | Durable ordered commands before state application. |
+| replica_state | current_term,voted_for,commit_index | Persisted protocol state with explicit recovery rules. |
+| key_state | key,value,version | Materialized committed log; snapshots include last applied index. |
+
+## AWS implementation
+
+![Key-value store: acknowledge only what survives: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/distributed-key-value-store.svg)
+
+This project intentionally uses EC2/EBS because building the storage mechanism is the assignment. DynamoDB is the practical alternative when the goal is to use a durable key-value service rather than implement one.
+
+## Build it in this order
+
+### 1. Make one node recoverable
+
+Append length/checksummed records, flush according to the acknowledgement policy and replay committed records on restart. Handle a truncated final record explicitly. Add snapshots with a last included index, and retain log segments until snapshot durability is established.
+
+### 2. Specify replication before adding nodes
+
+Use a documented Raft implementation or implement its full term, election, log-matching and commitment rules as the learning objective. A leader sends ordered entries, followers durably record them, and success waits for the required committed majority. Never treat two arbitrary copies as proof of the protocol.
+
+### 3. Define read and retry semantics
+
+Deduplicate client operations at the replicated state-machine boundary. Linearizable reads require proof of current leadership and applied commit position; follower reads may be stale and must be labeled as such. Conditional writes compare the committed key version.
+
+### 4. Partition and rebalance deliberately
+
+Route keys to versioned partition ownership. Move snapshots plus log tails, then transfer authority under a fenced configuration change. Measure the hottest partition and replication cost before deriving node count from average operations.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Replica placement | Put a partition’s replicas in distinct AZs and state which correlated failures the design tolerates. |
+| Storage | Benchmark durable flush latency and recovery time; local process success is not proof of replicated durability. |
+| Membership | Use the consensus implementation’s safe reconfiguration mechanism; do not replace a majority simultaneously. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The value is recovered from the flushed local log. |
+| Kill the replicated leader after acknowledgement | The new leader retains every acknowledged command under the chosen protocol. |
+| Resume the old leader | Its stale term cannot commit writes. |
+
+## The next design decision
+
+Add multi-region replicas. Quantify the write-latency cost of cross-region quorum and state the availability behavior under partition. Do not promise both independent regional writes and single-copy semantics without a protocol that actually provides them.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “Design a durable distributed `put/get/delete` store. Reads should see a caller’s successful write. Nodes fail, values range from small settings to multi-gigabyte objects, and the system must scale horizontally.”
 
 This is a **commonly listed system-design interview prompt** with a concrete practice contract. Assume 2 million operations/s, 99.99% monthly availability and keys partitioned across 300 storage nodes. Clarify service guarantees and a first version before filling the board with services.
@@ -46,3 +127,5 @@ Service choice follows the contract: the box label gives the generic job, while 
 **Evidence and origin:** The current community interview-question catalog lists a distributed key-value store prompt at LinkedIn, Databricks, Geico and Microsoft; individual report dates are not listed. The entry does not show the interview date and is not a verified company rubric. The prompt contract, workload, outcomes, diagrams and solution here are original practice material. Treat company tags as reported sightings, not a prediction of your interview loop.
 
 **Interview report listing:** [Open the community question entry](https://www.hellointerview.com/community/questions/key-value-store/cm8gcrkz800b7epmpcj06fkwk).
+
+</details>

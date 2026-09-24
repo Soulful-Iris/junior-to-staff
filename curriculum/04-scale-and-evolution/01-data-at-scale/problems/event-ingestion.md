@@ -1,5 +1,86 @@
 # Event ingestion: change a schema without losing yesterday
 
+## What you are building
+
+> Build telemetry ingestion for connected devices. Producers retry after timeouts, one firmware version emits malformed events, and analysts need to replay seven days of input after fixing a transformation. Accepted events must be recoverable even when one record cannot be processed.
+
+**Working contract:** POST /events accepts a versioned envelope and stable producer/event identity. A success means durable acceptance under the stated storage policy. Invalid schemas are rejected or quarantined with a reason; they must not block unrelated partitions forever.
+
+## Workload and the decisions it changes
+
+These are constructed exercise assumptions. The large workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100,000 events/s burst; 1 KiB/event assumption | About 100 MiB/s and 8.85 TB/day decimal if sustained; peak duration changes the bill. |
+| Seven-day replay retention | Roughly 62 TB raw at that sustained rate, before compression/replication. |
+| Processing target: 30 seconds behind | Track oldest event age and partition lag, not just consumer process health. |
+
+## Start with one working boundary
+
+Run from the repository root with Python 3.12+:
+
+```bash
+python3 examples/architecture-starts/event_ingestion.py
+```
+
+[Open the starting code](../../../../examples/architecture-starts/event_ingestion.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+
+| Record / module | Key or interface | Responsibility |
+|---|---|---|
+| envelope | producer_id,event_id,schema_version,event_time | Stable identity and interpretation contract. |
+| raw_objects | partition,time_range,checksum | Durable original bytes and replay manifest. |
+| consumer_checkpoint | consumer,partition,offset | Progress coupled to durable output or replay-safe application. |
+
+## AWS implementation
+
+![Event ingestion: change a schema without losing yesterday: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/event-ingestion.svg)
+
+Kinesis provides a transport and retention window; replay-safe outputs and checkpoints are still application responsibilities. S3 retains the input needed to rebuild a new processing generation.
+
+## Build it in this order
+
+### 1. Define durable acceptance
+
+Validate envelope size and required identity before writing. Document whether success means the stream accepted the event or the archive contains it. If the producer retries, preserve its event ID; an HTTP request ID generated anew on every attempt cannot deduplicate the logical event.
+
+### 2. Archive replayable input
+
+Write original records into immutable objects with schema/version metadata and a manifest of partition ranges. Keep invalid-but-accepted records in a restricted quarantine with a reason. Preserve enough evidence to distinguish absent input from failed processing.
+
+### 3. Couple output and progress
+
+Process a bounded batch, commit output idempotently, then advance the checkpoint. A crash after output but before checkpoint causes replay, so the sink must reject duplicate event identities or apply deterministic versioned updates. Do not skip a poison record silently.
+
+### 4. Replay into a new generation
+
+Run corrected transformations into separate output tables/prefixes, compare counts and representative records, then move a versioned read pointer. Keep the original consumer checkpoint unchanged so replay cannot accidentally rewind live processing.
+
+## Infrastructure configuration
+
+| Resource or boundary | Initial configuration and reason |
+|---|---|
+| Stream capacity | Calculate from both records/s and bytes/s, review current account limits and hot partition keys. |
+| Archive retention | Seven-day exercise retention with lifecycle rules; restrict raw data and quarantine readers. |
+| Consumer limits | Bound batch bytes and execution time; alarms identify stalled partitions rather than averaging them away. |
+
+Use one disposable AWS environment for the cloud exercise. Put the named resources in `infra/template.yaml` or your existing IaC tool, pass resource IDs through configuration, and scope each runtime role to its own tables, buckets and queues. The diagram is a design to implement; it is not a claim that these resources have been deployed. Record the commands you used to deploy and remove the exercise resources.
+
+## Observe the result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | e1 is applied once; unsupported e2 is quarantined. |
+| Crash after writing a batch | Replay leaves one logical output per identity. |
+| Replay seven-day input | New output generation can be inspected before switching readers. |
+
+## The next design decision
+
+Change an event field from cents to decimal currency. Introduce an explicit schema version and conversion rule; identical field names do not make historical data semantically compatible.
+
+<details>
+<summary>Additional design cases, alternatives and original source notes</summary>
+
 > **Interviewer:** “Ten thousand devices send readings. New firmware adds a temperature unit, while old devices keep sending the old shape for months. A dashboard needs recent totals, but analysts need a replayable source. Design the ingestion path.”
 
 **Your contract.** Assume 100,000 events/s during bursts, seven-day stream retention for the exercise, and an immutable long-term raw store. Say whether clients have clocks you trust; the answer changes event-time semantics. This is an original practice prompt.
@@ -38,3 +119,5 @@ On-demand Kinesis scaling does not automatically isolate a single hot partition 
 **Practice artifact:** Draw raw vs derived stores; walk the four inputs; define an envelope and one compatibility test. State the exact partition key and its hot-key risk.
 
 **Source boundary:** Original scenario inspired by [Meta's May 2026 ingestion migration account](https://engineering.fb.com/2026/05/12/data-infrastructure/migrating-data-ingestion-systems-at-meta-scale/), not a reported interview prompt. [Kinesis sizing documentation](https://docs.aws.amazon.com/streams/latest/dev/how-do-i-size-a-stream.html) supplies a current service constraint.
+
+</details>
