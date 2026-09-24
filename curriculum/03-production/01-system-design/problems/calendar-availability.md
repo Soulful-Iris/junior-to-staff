@@ -1,30 +1,53 @@
-# Calendar: reserve time without hiding conflicts
+# Reserve rooms and handle recurring local times
 
-## What you are building
+## Application background
 
-> Build room booking for a company with offices in London and New York. Two organizers select the last available room for overlapping meetings. A weekly 09:00 meeting must stay at 09:00 local time when daylight-saving time changes.
+Employees search for a free meeting room and reserve a time interval. Rooms cannot host overlapping reservations; recurring meetings use the organizer's local time zone.
 
-**Working contract:** POST /rooms/{id}/bookings accepts an interval and request ID; conflicting room occupancy returns 409. GET /availability is advisory. The booking transaction decides whether the interval is still available.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Availability and reservation operations with atomic overlap protection, plus an explicit daylight-saving policy for recurring bookings.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 100 million calendars; 3 million active/day | 3% daily activity; partitioning every request by calendar avoids global scans. |
-| 100 bookings/s exercise peak; 60-day availability view | Expand bounded recurrence horizons; do not materialize an infinite series. |
-| Intervals are [start,end) | A 10:00–11:00 booking and an 11:00–12:00 booking do not overlap. |
+Build room booking for a company with offices in London and New York. Two organizers select the last available room for overlapping meetings. A weekly 09:00 meeting must stay at 09:00 local time when daylight-saving time changes.
 
-## Start with one working boundary
+**Required behavior:** POST /rooms/{id}/bookings accepts an interval and request ID; conflicting room occupancy returns 409. GET /availability is advisory. The booking transaction decides whether the interval is still available.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/calendar_availability.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/calendar_availability.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/calendar_availability.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/calendar_availability.py). You can also [read or download the source here](../../../../examples/architecture-starts/calendar_availability.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+(600, 660) 201 reserved
+(630, 690) 409 room occupied
+(660, 720) 201 reserved
+Minutes from midnight: [(600, 660), (660, 720)]
+```
+
+### Set up your implementation workspace
+
+Create `work/calendar-availability/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/calendar_availability.py
 | series | series_id,local_time,IANA_zone,rule,revision | Recurrence intent plus exception dates. |
 | booking_operations | organizer,request_id,payload_hash | Exact retries reuse one booking. |
 
-## AWS implementation
-
-![Calendar: reserve time without hiding conflicts: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/calendar-availability.svg)
-
-A relational occupancy constraint fits interval exclusion directly. DynamoDB conditional puts alone do not prevent arbitrary overlapping intervals without an additional serialized room-calendar design.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Implement one room first
 
@@ -56,7 +73,46 @@ Cache availability briefly with an as-of timestamp. On submit, recheck through t
 
 Change only the explicitly chosen occurrence or future series segment. Use stable occurrence IDs and transactionally update occupancy; notify attendees asynchronously from an outbox. A failed email must not roll back an already reserved room.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The overlap at 10:30 conflicts; the back-to-back 11:00 booking succeeds. |
+| Submit two overlapping reservations concurrently | One commits and the other returns a conflict from the authoritative write. |
+| Cross a daylight-saving transition | The recurring event follows the published local-time policy. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 million calendars; 3 million active/day | 3% daily activity; partitioning every request by calendar avoids global scans. |
+| 100 bookings/s exercise peak; 60-day availability view | Expand bounded recurrence horizons; do not materialize an infinite series. |
+| Intervals are [start,end) | A 10:00–11:00 booking and an 11:00–12:00 booking do not overlap. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Reserve rooms and handle recurring local times: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/calendar-availability.svg)
+
+A relational occupancy constraint fits interval exclusion directly. DynamoDB conditional puts alone do not prevent arbitrary overlapping intervals without an additional serialized room-calendar design.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: booking API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: booking application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: occupancy authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: notification queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: notification worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local notification delivery fixture | Amazon SES: email transport | Implement email submission and provider outcome tracking with verified sender configuration and scoped credentials. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The overlap at 10:30 conflicts; the back-to-back 11:00 booking succeeds. |
-| Submit two overlapping reservations concurrently | One commits and the other returns a conflict from the authoritative write. |
-| Cross a daylight-saving transition | The recurring event follows the published local-time policy. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add a meeting requiring three rooms atomically. Compare a database transaction spanning all room constraints with independent reservations and compensation. Explain what the organizer sees if only two rooms can be acquired.
 

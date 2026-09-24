@@ -1,6 +1,6 @@
 # The constants you estimate with
 
-[Curriculum](../../README.md) · [Problem solving and AI-assisted engineering](README.md)
+[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
 > Project connection · feeds **P3 (it holds under load)**
 
@@ -105,14 +105,14 @@ two minutes, out loud, in front of someone.
 Any time a problem hands you a population and asks for a structure. In this
 curriculum that means:
 
-- [System design](../../03-production/01-system-design/README.md) — every
+- [Design services from requirements to failure behavior](../../03-production/01-system-design/README.md) — every
   problem in the chapter opens with a workload you must size before you can
   choose a mechanism.
-- [Reliability and incident response](../../03-production/05-reliability/README.md)
+- [Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)
   — the nines table is what turns an availability target into an error budget.
-- [Performance and cost](../../04-scale-and-evolution/02-performance-cost/README.md)
+- [Measure capacity and control performance costs](../../04-scale-and-evolution/02-performance-cost/README.md)
   — the latency ladder tells you which layer is worth measuring first.
-- [Data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) —
+- [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md) —
   caching, replication and partitioning are all answers to "this does not fit or
   does not keep up", which is an arithmetic finding.
 

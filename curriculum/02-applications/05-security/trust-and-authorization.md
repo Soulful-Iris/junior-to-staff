@@ -1,6 +1,6 @@
 # Security
 
-[Curriculum](../../README.md) · [Security](README.md)
+[Curriculum](../../README.md) · [Enforce identity, ownership and tenant boundaries](README.md)
 
 > Project connection · feeds **P2 (it survives)**
 

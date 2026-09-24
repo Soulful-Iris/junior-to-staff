@@ -1,30 +1,52 @@
-# 2. The strategy you found rather than invented
+# Write a data-platform policy from concrete decisions
 
-## What you are building
+## Application background
 
-> Write a data-platform decision policy from five concrete team decisions. Billing, inventory and permissions require transactions; event processing requires replay; analytics needs an independent reporting workload. The goal is to shorten the next decision without pretending one datastore fits all five.
+An engineering organization chooses storage for transactional products, event pipelines and analytics. A useful policy explains which workload properties drive a choice and when an exception is warranted.
 
-**Working contract:** The memo cites the constructed decision records, states the shared constraint, proposes a default and names evidence-based exceptions. It includes operating ownership and a review trigger when relevant capabilities or requirements change.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A short decision policy traced to five concrete cases, including a new case where the policy produces a useful recommendation.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Five decisions: three transactional, one replay, one reporting | The majority supports a transactional default, not a universal ban on other storage. |
-| Three teams maintaining separate stacks assumption | Include on-call, backup, expertise and migration effort in the comparison. |
-| Six-month capability review trigger | A product or service change can invalidate the old deciding constraint; review is an explicit decision, not an installed recurring task. |
+Write a data-platform decision policy from five concrete team decisions. Billing, inventory and permissions require transactions; event processing requires replay; analytics needs an independent reporting workload. The goal is to shorten the next decision without pretending one datastore fits all five.
 
-## Start with one working boundary
+**Required behavior:** The memo cites the constructed decision records, states the shared constraint, proposes a default and names evidence-based exceptions. It includes operating ownership and a review trigger when relevant capabilities or requirements change.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/the_strategy_you_found_rather_than_invented.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/the_strategy_you_found_rather_than_invented.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/the_strategy_you_found_rather_than_invented.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_strategy_you_found_rather_than_invented.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_strategy_you_found_rather_than_invented.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Constructed evidence: [('D1', 'transactions'), ('D2', 'transactions'), ('D3', 'transactions'), ('D4', 'replay'), ('D5', 'reporting')]
+Shared requirements: {'transactions': 3, 'replay': 1, 'reporting': 1}
+Default: transactional store; exceptions: independently replayable events and isolated analytics.
+```
+
+### Set up your implementation workspace
+
+Create `work/the-strategy-you-found-rather-than-invented/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/the_strategy_you_found_rather_than_invented
 | policy_memo | default,exceptions,consequences,revisit_trigger | Half-page usable guidance for the next team. |
 | exception_case | unmet_requirement,measured_gap,alternative | A concrete counterexample to the default. |
 
-## AWS implementation
-
-![2. The strategy you found rather than invented: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-strategy-you-found-rather-than-invented.svg)
-
-The diagram shows one concrete composition that preserves the three different workload needs. It is evidence for the policy discussion, not a claim that every team should deploy the whole stack.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Write the five source decisions
 
@@ -56,7 +72,45 @@ For D4, retain an event log/archive with replay identity and retention. For D5, 
 
 Give teams a short decision path: required guarantee, existing default fit, measured gap, smallest exception and owner. Revisit when a named workload or service capability changes. Avoid universal slogans that erase the concrete replay and reporting counterexamples.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The five records remain visible and the exceptions survive the summary. |
+| Propose always one database | D4 and D5 provide specific counterexamples to examine. |
+| Change a relevant managed-service capability | Reopen the deciding constraint rather than defending an obsolete technology rule. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Five decisions: three transactional, one replay, one reporting | The majority supports a transactional default, not a universal ban on other storage. |
+| Three teams maintaining separate stacks assumption | Include on-call, backup, expertise and migration effort in the comparison. |
+| Six-month capability review trigger | A product or service change can invalidate the old deciding constraint; review is an explicit decision, not an installed recurring task. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Write a data-platform policy from concrete decisions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-strategy-you-found-rather-than-invented.svg)
+
+The diagram shows one concrete composition that preserves the three different workload needs. It is evidence for the policy discussion, not a claim that every team should deploy the whole stack.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: transactional default | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local event sequence or input stream | Amazon Kinesis: replayable event transport | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
+| Local file, object fixture or exported payload | Amazon S3: retained event/data archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local investigation/report query | Amazon Athena: isolated reporting queries | Define an archive schema and catalog, query the exported data and constrain query access and cost. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: operational evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +122,15 @@ For this decision project, provision resources only if a bounded implementation 
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The five records remain visible and the exceptions survive the summary. |
-| Propose always one database | D4 and D5 provide specific counterexamples to examine. |
-| Change a relevant managed-service capability | Reopen the deciding constraint rather than defending an obsolete technology rule. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 A team requests a new datastore for developer preference alone. Ask for the unmet guarantee or measured operating improvement, then compare it against the additional ownership burden without treating novelty as either sufficient or forbidden.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · A new workload breaks the default
 

@@ -1,30 +1,50 @@
-# Document search: results must follow permissions
+# Search documents without leaking revoked content
 
-## What you are building
+## Application background
 
-> Build search for a company document portal. Editors update content continuously, employees search across teams, and access to a sensitive document is revoked while its search hit remains indexed. Search snippets must obey current permissions.
+Employees search a company document portal. A search index holds derived text and snippets; the document's current access policy remains authoritative.
 
-**Working contract:** GET /search returns at most 20 authorized hits with document IDs and source versions. Index freshness target is two minutes. The index is a projection; current authorization is checked before content or snippets are returned.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An indexing/update pipeline and a search response path that rechecks access before returning titles, snippets or cached content.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 30 million documents; 15,000 updates/minute | 250 source changes/s average, plus reindexing and deletes. |
-| 3,000 queries/s × 20 returned hits | At least 60,000 hit-level authorization decisions/s before overfetch; batch and cache policy carefully. |
-| Two-minute freshness | Track source-to-index lag and expose stale results; revocation cannot wait for that freshness window. |
+Build search for a company document portal. Editors update content continuously, employees search across teams, and access to a sensitive document is revoked while its search hit remains indexed. Search snippets must obey current permissions.
 
-## Start with one working boundary
+**Required behavior:** GET /search returns at most 20 authorized hits with document IDs and source versions. Index freshness target is two minutes. The index is a projection; current authorization is checked before content or snippets are returned.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/document_search.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/document_search.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/document_search.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/document_search.py). You can also [read or download the source here](../../../../examples/architecture-starts/document_search.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+[{'id': 'public', 'snippet': 'Engineering handbook'}]
+```
+
+### Set up your implementation workspace
+
+Create `work/document-search/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +52,7 @@ python3 examples/architecture-starts/document_search.py
 | index_documents | tenant,id,source_version,tokens | Searchable projection with versioned updates. |
 | authorization | subject,resource,policy_revision | Current decision before snippets/content leave the API. |
 
-## AWS implementation
-
-![Document search: results must follow permissions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/document-search.svg)
-
-OpenSearch ranks searchable candidates. The document/ACL authority decides whether the caller can see their content. An index filter alone cannot satisfy immediate revocation when indexing is asynchronous.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Index one versioned document
 
@@ -56,7 +70,46 @@ Apply tenant filters in the query as defense in depth, then verify current objec
 
 Build a new index from a consistent source boundary and capture subsequent changes. Compare source-version coverage, swap the read alias, and retain a rollback window. Measure indexing lag separately from query latency and relevance quality.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The highest-scoring private document produces no title or snippet. |
+| Deliver a stale indexing update | The newer source version remains indexed. |
+| Reindex while edits continue | The new generation catches up before the alias moves. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 30 million documents; 15,000 updates/minute | 250 source changes/s average, plus reindexing and deletes. |
+| 3,000 queries/s × 20 returned hits | At least 60,000 hit-level authorization decisions/s before overfetch; batch and cache policy carefully. |
+| Two-minute freshness | Track source-to-index lag and expose stale results; revocation cannot wait for that freshness window. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Search documents without leaking revoked content: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/document-search.svg)
+
+OpenSearch ranks searchable candidates. The document/ACL authority decides whether the caller can see their content. An index filter alone cannot satisfy immediate revocation when indexing is asynchronous.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: search HTTP entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Application or worker process | Amazon ECS: search application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local derived search records | Amazon OpenSearch Service: search projection | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: document and ACL authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local file, object fixture or exported payload | Amazon S3: source document storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local pending-work collection | Amazon SQS: indexing work queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +121,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The highest-scoring private document produces no title or snippet. |
-| Deliver a stale indexing update | The newer source version remains indexed. |
-| Reindex while edits continue | The new generation catches up before the alias moves. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add semantic retrieval. Keep the same authorization boundary for vector candidates and source chunks; embeddings are not a substitute for tenant isolation or revocation.
 

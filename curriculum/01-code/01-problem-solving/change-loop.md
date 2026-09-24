@@ -1,6 +1,6 @@
 # The change loop
 
-[Curriculum](../../README.md) · [Problem solving and AI-assisted engineering](README.md)
+[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
 > Project connection · feeds **P1 (it works)**
 
@@ -94,7 +94,7 @@ Approve, request changes, or ask a specific question, with evidence.
 
 ## Your slice of the project
 
-Start [P1](../../../projects/reading-list/stages/01-it-works/README.md) with a
+Start [Stage 1: Build the shared reading-list application](../../../projects/reading-list/stages/01-it-works/README.md) with a
 repository, `.gitignore`, a lockfile decision and a short scope note. Build a
 runnable sign-up/sign-in slice in a few coherent commits. Keep secrets out of
 history. Review it through a pull request, even when working alone.

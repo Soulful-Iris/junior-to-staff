@@ -1,13 +1,36 @@
-# 4. The review you automate away
+# Automate deterministic review rules and retain human judgment
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A reading-list team spends review time on formatting and imports while subtle ownership changes can slip through. Different kinds of review evidence deserve different tools.
 
-> Your reviewers spend half their comments on formatting and still miss ownership bugs. Sort the last 20 comments and automate only rules with a defensible oracle. What must remain a human decision?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Classify review comments, automate repeatable mechanical rules and show which behavior decisions still require a reviewer.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Collect twenty comments from your own changes, or produce a clearly labeled exercise set while reviewing the starter. Categorize each as a mechanical rule or a contextual behavior/design decision.
+
+2. Configure a formatter or linter in the disposable exercise workspace for rules with an objective result. Record the comments those rules remove and any false positives.
+
+3. Review a change that removes the owner condition from the note-update operation. Show why style feedback alone cannot approve the change and identify the behavior evidence the human reviewer needs.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | The AI review gives a style verdict and silently approves a missing owner check. | Its contract is violated; human behavioral review remains required. |
 | Scope | Five subsequent PRs form a small local experiment, not a universal productivity study. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Label 20 actual review comments as deterministic or judgment calls. A formatter/linter should replace the 12 formatting/import comments; a human must still own the naming/behavior decisions. **Show:** before/after review queues and a diff that quietly removes the owner check: the AI's pleasant style feedback must never count as approval.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** A corpus of real review comments — project 2 supplies plenty — sorted into what a machine could have said and what needed a person. Then the machine layer: a formatter that rewrites, a linter and import order that enforce, an AI first pass constrained by contract. Then the count, re-run on your next five PRs.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The repository is already large | Turning on a formatter touches 500 files. How do reviewers retain a useful history? Predict which boundary must change before opening the design. | Land one behavior-preserving mechanical change and a separate enforcement change. Existing tests should remain unmodified. Record formatter version and exclude unrelated fixes so blame and rollback remain interpretable. |
-| Lead · The AI endpoint is unavailable | The model is down during an urgent security patch. Should the patch wait? State what evidence would make you reject your first design. | Choose and document an advisory fail-open policy with a human reviewer for this exercise. Deterministic gates still run. Record the skipped AI pass, then compare later findings; its absence must not silently become a behavioral approval. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -106,13 +104,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Catch the seeded behavioral bug after removing style noise. **Additional lead scope:** Assign rule ownership and a measurable exception-removal process. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up with your review comments sorted into machine work and judgment,
 and the machine pile at zero on your next five pull requests.*
@@ -231,3 +229,6 @@ noise, and almost nothing worth keeping lives in between.
 ---
 
 [Back to the ordered project index](../../change-projects.md)
+
+
+</details>

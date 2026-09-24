@@ -1,13 +1,36 @@
-# 4. The review harness
+# Collect evidence about changed behavior and affected callers
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A reading-list API and its export job can share a parameter parser. Changing that parser may affect both features even when a commit message describes a small interface change.
 
-> A generated PR changes a shared parser while claiming only a UI label update. Reviewers trust the message and miss a caller. Build an evidence collector that helps them locate accidental behavior changes. What can static search establish?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../working-with-ai.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Build a review-evidence command that reads a diff, names affected callers and reports uncertainty rather than inventing coverage.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. In your work directory create a small `parseLimit` function with API-list and export callers, or select equivalent real code. Keep a before revision and a revision changing how limit zero is handled. These example names are fixtures you create, not supplied files.
+
+2. Write a command that accepts those two revisions, collects the diff and searches direct call sites and existing checks. Include file locations and report `NONE` when no relevant existing check is found.
+
+3. Add a dynamically registered caller that static name search misses. Manually compare the report with actual calls and record the tool's limits; a generated review summary is evidence for a reviewer, not approval.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | A caller is registered dynamically and absent from simple text search. | Mark search limits and inspect runtime registration; do not claim complete call-graph coverage. |
 | Scope | Ten recorded diffs; collector supplies evidence, never an approval verdict. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Hand the harness a diff that changes `parseLimit`. Its report should name both callers—API list and export—show the existing `test_limit_zero` for the first, and say `NONE` for the second. **Show:** the actual diff, generated report, and a manually checked missing dynamically registered caller. The tool's honest uncertainty is part of the deliverable.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** A written procedure plus a small script that collects evidence and answers three questions of any diff: what behaviour changed, what could have changed accidentally, which existing test would catch the accident. Run it on ten real diffs from your history and tally how often the third answer is "none".
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Prove a named test | The tool says testlimitzero catches an inverted condition. How do you verify that statement? Predict which boundary must change before opening the design. | Introduce that condition on an isolated branch and run the named test. Capture the failure and restore the tree; a passing mutant disproves the coverage claim. |
-| Lead · The change crosses a service | The parser determines an outbound payload used by an independently deployed consumer. What evidence is missing? State what evidence would make you reject your first design. | Add the consumer contract and a provider negative fixture. Local references cannot enumerate deployed clients; identify a contract owner and document unknown consumers. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -104,13 +102,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Reproduce one real coverage gap and disprove one mistaken protection claim. **Additional lead scope:** Assign cross-service contract ownership and characterize collector blind spots. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up with a repeatable interrogation for any diff, and one number from
 ten real ones: how often nothing would have caught an accidental change.*
@@ -215,3 +213,6 @@ percentage has.
 ---
 
 [Back to the ordered project index](../../ai-projects.md)
+
+
+</details>

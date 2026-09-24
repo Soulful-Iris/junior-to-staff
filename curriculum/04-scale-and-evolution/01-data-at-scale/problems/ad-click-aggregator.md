@@ -1,30 +1,52 @@
-# Ad click aggregator: count late events once
+# Aggregate click events with late arrivals and reconciliation
 
-## What you are building
+## Application background
 
-> Build campaign click reporting for an advertising platform. Events arrive late or twice, a popular campaign dominates one partition, and finance needs a separate reconciled basis for billing. Advertisers want a dashboard within thirty seconds.
+An advertising dashboard counts clicks by campaign and time window. Those near-real-time counts help operators, while finance needs a separately reconciled record for billing.
 
-**Working contract:** Aggregate by campaign and event-time window with a documented duplicate window and late-arrival policy. Dashboard values are provisional until finalized. Reporting counts are not automatically a charge ledger.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A deduplicating event-time aggregator with bounded lateness, hot-key handling and a clear provisional-versus-reconciled output contract.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Five billion clicks/day | About 57,870 events/s average; burst and largest-campaign rate need separate estimates. |
-| Thirty-second dashboard freshness | Budget transport, aggregation and serving delay; late input can still revise an older window. |
-| Two-year reporting history | Store compact window aggregates; raw-event retention and billing evidence have separate policies. |
+Build campaign click reporting for an advertising platform. Events arrive late or twice, a popular campaign dominates one partition, and finance needs a separate reconciled basis for billing. Advertisers want a dashboard within thirty seconds.
 
-## Start with one working boundary
+**Required behavior:** Aggregate by campaign and event-time window with a documented duplicate window and late-arrival policy. Dashboard values are provisional until finalized. Reporting counts are not automatically a charge ledger.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/ad_click_aggregator.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/ad_click_aggregator.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/ad_click_aggregator.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/ad_click_aggregator.py). You can also [read or download the source here](../../../../examples/architecture-starts/ad_click_aggregator.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+e1 duplicate
+e3 too late: reconciliation path
+Provisional counts: {('c7', 60): 1, ('c7', 0): 1}
+```
+
+### Set up your implementation workspace
+
+Create `work/ad-click-aggregator/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/ad_click_aggregator.py
 | window_state | campaign,window_start,shard | Deduplication and partial event-time counts. |
 | reports | campaign,window,revision,finalized | Versioned aggregates served to advertisers. |
 
-## AWS implementation
-
-![Ad click aggregator: count late events once: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/ad-click-aggregator.svg)
-
-The stream processor owns provisional event-time state, the serving table owns a particular published revision, and the archive supports rebuilding. Those are distinct guarantees from a billing ledger.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Ingest a stable click envelope
 
@@ -56,7 +72,46 @@ Split one campaign into deterministic partial counters and merge them for servin
 
 Preserve the evidence needed for invalid-traffic filtering, attribution corrections and financial reconciliation. A fast dashboard may undercount during lag; do not convert an approximate or revisable count directly into irreversible charges.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Duplicate e1 is ignored, e2 updates an older window, and e3 goes to late reconciliation. |
+| Pause a partition | The freshness indicator reveals lag rather than presenting the count as complete. |
+| Replay a corrected attribution rule | Publish a new report version and explain the change. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Five billion clicks/day | About 57,870 events/s average; burst and largest-campaign rate need separate estimates. |
+| Thirty-second dashboard freshness | Budget transport, aggregation and serving delay; late input can still revise an older window. |
+| Two-year reporting history | Store compact window aggregates; raw-event retention and billing evidence have separate policies. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Aggregate click events with late arrivals and reconciliation: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/ad-click-aggregator.svg)
+
+The stream processor owns provisional event-time state, the serving table owns a particular published revision, and the archive supports rebuilding. Those are distinct guarantees from a billing ledger.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local event sequence or input stream | Amazon Kinesis: click event transport | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
+| Local window/aggregation loop | Managed Service for Apache Flink: window aggregation | Implement stream processing with state, checkpoints, event-time handling and a declared late-event policy. |
+| Local file, object fixture or exported payload | Amazon S3: raw click archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: serving aggregates | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Application or worker process | Amazon ECS: reporting API | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: data freshness metrics | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Duplicate e1 is ignored, e2 updates an older window, and e3 goes to late reconciliation. |
-| Pause a partition | The freshness indicator reveals lag rather than presenting the count as complete. |
-| Replay a corrected attribution rule | Publish a new report version and explain the change. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 An advertiser disputes yesterday’s invoice after fraud filtering changes. Define immutable invoice evidence, correction entries and the relationship between a revisable dashboard and a finalized financial document.
 

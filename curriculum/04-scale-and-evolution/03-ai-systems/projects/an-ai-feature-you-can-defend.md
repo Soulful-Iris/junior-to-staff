@@ -1,30 +1,50 @@
-# 5. An AI feature you can defend
+# Decide whether an AI feature improves a reading list
 
-## What you are building
+## Application background
 
-> Assess whether an AI summary feature improves a reading-list product enough to keep. A judge agrees with humans on 99 of 100 examples, but the only human-identified failure is also marked pass. Build an evidence-based decision against a useful non-AI baseline.
+A reading-list product can offer machine-generated summaries beside manually saved notes. Product owners need evidence that the extra feature helps users enough to justify errors, cost and latency.
 
-**Working contract:** Compare user-relevant quality, abstention, latency and cost on a stated case mix. Calibrate failure detection separately from overall agreement. Model output and retrieved content never authorize tools or bypass current data permissions.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A comparison against a useful non-AI baseline, a human-reviewed failure analysis and a keep/change/remove decision with explicit limits.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 99 human passes and one human failure; judge always passes | Agreement is 99%, but failure recall is 0/1 = 0%. |
-| Two-second baseline; five-second AI target assumption | Measure whether added latency buys useful outcomes for the intended task. |
-| 100 reviewed cases | A small constructed sample supports scoped conclusions, not a universal reliability claim. |
+Assess whether an AI summary feature improves a reading-list product enough to keep. A judge agrees with humans on 99 of 100 examples, but the only human-identified failure is also marked pass. Build an evidence-based decision against a useful non-AI baseline.
 
-## Start with one working boundary
+**Required behavior:** Compare user-relevant quality, abstention, latency and cost on a stated case mix. Calibrate failure detection separately from overall agreement. Model output and retrieved content never authorize tools or bypass current data permissions.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/an_ai_feature_you_can_defend.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/an_ai_feature_you_can_defend.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/an_ai_feature_you_can_defend.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/an_ai_feature_you_can_defend.py). You can also [read or download the source here](../../../../examples/architecture-starts/an_ai_feature_you_can_defend.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'agreement': 0.99, 'failure_recall': 0.0}
+```
+
+### Set up your implementation workspace
+
+Create `work/an-ai-feature-you-can-defend/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +52,7 @@ python3 examples/architecture-starts/an_ai_feature_you_can_defend.py
 | run_manifest | baseline_or_model,versions,latency,tokens | Comparable execution evidence. |
 | decision_record | useful_gain,failures,operating_cost,next_action | Keep, change, narrow or remove the feature. |
 
-## AWS implementation
-
-![5. An AI feature you can defend: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/an-ai-feature-you-can-defend.svg)
-
-The cloud services run and observe the feature. The engineering decision comes from comparable task evidence and calibrated failure detection, not the presence of a model endpoint.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Build the non-AI baseline
 
@@ -56,7 +70,46 @@ Produce a confusion table against reviewed outcomes and inspect failure recall. 
 
 State where the feature is useful, where it abstains or falls back, and the operating budget. Keep permission and tool boundaries in deterministic application code. If the baseline is better for the actual task, narrow or remove generation rather than hiding the comparison.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | 99% agreement coexists with zero failure recall. |
+| Ask for unsupported information | The feature abstains or returns source search. |
+| Place a tool instruction in source content | No action authority is granted by that text. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 99 human passes and one human failure; judge always passes | Agreement is 99%, but failure recall is 0/1 = 0%. |
+| Two-second baseline; five-second AI target assumption | Measure whether added latency buys useful outcomes for the intended task. |
+| 100 reviewed cases | A small constructed sample supports scoped conclusions, not a universal reliability claim. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Decide whether an AI feature improves a reading list: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/an-ai-feature-you-can-defend.svg)
+
+The cloud services run and observe the feature. The engineering decision comes from comparable task evidence and calibrated failure detection, not the presence of a model endpoint.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: feature entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: baseline and AI coordinator | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Deterministic model response fixture | Amazon Bedrock: optional generation | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
+| Local file, object fixture or exported payload | Amazon S3: reviewed case evidence | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: decision/run ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: operating measurements | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +121,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | 99% agreement coexists with zero failure recall. |
-| Ask for unsupported information | The feature abstains or returns source search. |
-| Place a tool instruction in source content | No action authority is granted by that text. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Usage shifts to a new language or customer group. Revisit the case mix and outcome slices before reusing the original quality claim unchanged.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · A regression is fixed
 

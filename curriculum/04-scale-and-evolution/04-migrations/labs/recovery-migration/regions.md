@@ -1,6 +1,6 @@
 # Move a hot tenant, then lose a region
 
-[Curriculum](../../../../README.md) · [Migrations and recovery](../../README.md)
+[Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
 
 **Constructed candidate brief:** “Tenant A causes 80% of load on shard 1.
 Move it to shard 2 while stale clients keep old routes. Then region 1 fails

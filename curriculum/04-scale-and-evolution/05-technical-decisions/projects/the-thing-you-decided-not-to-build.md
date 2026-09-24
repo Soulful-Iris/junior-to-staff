@@ -1,30 +1,51 @@
-# 5. The thing you decided not to build
+# Compare a small export script with a custom platform
 
-## What you are building
+## Application background
 
-> Decide whether to build a custom export scheduler for a team currently producing two exports a month. The proposed platform takes six engineer-weeks plus a day each month to maintain. A three-day script may satisfy the actual need, but the decision must include comparable behavior and operating cost.
+A team needs occasional data exports. A dedicated scheduling platform and a small script are alternative ways to meet the same user need, with different ongoing ownership costs.
 
-**Working contract:** Produce a concrete build/buy/simplify/defer decision with assumptions, required behaviors, ownership and a trigger for reconsideration. A decision not to build still includes a usable smaller solution and evidence that it meets today’s need.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A build/buy/simplify decision comparing equivalent behavior, implementation effort, operations and explicit triggers for reconsideration.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Custom: six five-day engineer-weeks + one day/month | Forty-two engineer-days over a year under these assumptions. |
-| Script: three days + 0.25 day/month maintenance assumption | Six engineer-days/year; include this explicit maintenance assumption in the comparison. |
-| Two exports/month | Twenty-four annual exports; current demand does not by itself justify a general scheduling platform. |
+Decide whether to build a custom export scheduler for a team currently producing two exports a month. The proposed platform takes six engineer-weeks plus a day each month to maintain. A three-day script may satisfy the actual need, but the decision must include comparable behavior and operating cost.
 
-## Start with one working boundary
+**Required behavior:** Produce a concrete build/buy/simplify/defer decision with assumptions, required behaviors, ownership and a trigger for reconsideration. A decision not to build still includes a usable smaller solution and evidence that it meets today’s need.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/the_thing_you_decided_not_to_build.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/the_thing_you_decided_not_to_build.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/the_thing_you_decided_not_to_build.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_thing_you_decided_not_to_build.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_thing_you_decided_not_to_build.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'custom_engineer_days_year': 42, 'script_engineer_days_year': 6.0, 'exports_year': 24}
+Decision candidate: use the bounded script; revisit if demand or guarantees change.
+```
+
+### Set up your implementation workspace
+
+Create `work/the-thing-you-decided-not-to-build/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/the_thing_you_decided_not_to_build.py
 | option_estimate | build_days,maintenance_days,service_cost,uncertainty | Comparable horizon and explicit unknowns. |
 | decision | choice,owner,small_solution,revisit_trigger | Actionable result with a reversible next step. |
 
-## AWS implementation
-
-![5. The thing you decided not to build: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-thing-you-decided-not-to-build.svg)
-
-The optional AWS path is deliberately smaller than a custom scheduling platform. Scheduling can be added when demand requires it; no periodic export or monitor is created by this curriculum update.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Observe the actual export task
 
@@ -56,7 +71,45 @@ Put script, managed service and custom system against the same permissions, audi
 
 Choose the small solution if it meets current needs, name its owner and document how to run/repair it. Revisit if three teams need daily audited exports, required guarantees change or measured operator cost crosses the stated threshold. A competitor feature alone is not evidence of your customers’ demand.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The constructed annual estimates are 42 engineer-days versus 6. |
+| Run the small export twice with one identity | The operator gets one logical artifact/result. |
+| Change demand to daily audited exports for three teams | Revisit the old decision against the new requirements. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Custom: six five-day engineer-weeks + one day/month | Forty-two engineer-days over a year under these assumptions. |
+| Script: three days + 0.25 day/month maintenance assumption | Six engineer-days/year; include this explicit maintenance assumption in the comparison. |
+| Two exports/month | Twenty-four annual exports; current demand does not by itself justify a general scheduling platform. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Compare a small export script with a custom platform: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-thing-you-decided-not-to-build.svg)
+
+The optional AWS path is deliberately smaller than a custom scheduling platform. Scheduling can be added when demand requires it; no periodic export or monitor is created by the supplied local example.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local manual decision or recovery function | Operator command: explicit export invocation | Implement an authenticated, scoped operational command with a recorded target, preconditions and visible result. |
+| Python operation or worker function | AWS Lambda: optional small export worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local file, object fixture or exported payload | Amazon S3: private export artifact | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: run evidence | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Manual invocation or local schedule input | Amazon EventBridge Scheduler: optional future scheduling | Create schedules targeting the dispatcher and preserve occurrence identity across retries and overlapping invocation. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +121,15 @@ For this decision project, provision resources only if a bounded implementation 
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The constructed annual estimates are 42 engineer-days versus 6. |
-| Run the small export twice with one identity | The operator gets one logical artifact/result. |
-| Change demand to daily audited exports for three teams | Revisit the old decision against the new requirements. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 The script becomes business-critical while its author is unavailable. Treat ownership, documentation and recovery as part of the small solution; small code does not mean zero operating responsibility.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · Demand changes
 

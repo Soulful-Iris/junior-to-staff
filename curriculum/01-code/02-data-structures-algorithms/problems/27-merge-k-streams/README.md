@@ -1,6 +1,6 @@
 # Merge k sorted streams
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “We export records from several partitions. Each partition produces ascending
 > integer keys, and the export needs one ascending stream. The files are too large

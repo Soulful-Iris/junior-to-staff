@@ -1,30 +1,52 @@
-# Typeahead: useful suggestions before the next keystroke
+# Build typeahead with stale-response protection
 
-## What you are building
+## Application background
 
-> Build product-name suggestions for a storefront. The browser sends requests as a user types “iphone,” responses return out of order, and the prefix “iph” becomes extremely hot during a launch. Keep results fast and prevent an older response from replacing a newer query.
+A storefront suggests product names while a shopper types. Every keystroke may start a request, and an earlier request can finish after a later one.
 
-**Working contract:** GET /suggest requires at least three normalized characters and returns five suggestions from a named index version. Target p99 is 150 ms. The browser displays only the response matching its latest query generation.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A prefix lookup interface, browser query sequencing and a bounded cache strategy for popular prefixes.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 80,000 queries/s peak | Cache hot normalized prefixes and measure the largest prefix, not just average QPS. |
-| Minimum three characters | Use iph as a hot-prefix example; requests for a are outside this API contract. |
-| Five results/query | Precomputed bounded suggestion lists avoid scanning the entire catalog on each keystroke. |
+Build product-name suggestions for a storefront. The browser sends requests as a user types “iphone,” responses return out of order, and the prefix “iph” becomes extremely hot during a launch. Keep results fast and prevent an older response from replacing a newer query.
 
-## Start with one working boundary
+**Required behavior:** GET /suggest requires at least three normalized characters and returns five suggestions from a named index version. Target p99 is 150 ms. The browser displays only the response matching its latest query generation.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/typeahead_search.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/typeahead_search.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/typeahead_search.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/typeahead_search.py). You can also [read or download the source here](../../../../examples/architecture-starts/typeahead_search.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+display ['iphone']
+ignore stale ['ipad']
+Suggestions: ['iphone', 'iphone case', 'iphone charger']
+```
+
+### Set up your implementation workspace
+
+Create `work/typeahead-search/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/typeahead_search.py
 | catalog_source | item_id,name,eligibility,version | Source for index generation and exclusions. |
 | client_query | generation,normalized_text | Suppresses stale asynchronous responses. |
 
-## AWS implementation
-
-![Typeahead: useful suggestions before the next keystroke: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/typeahead-search.svg)
-
-An immutable precomputed index makes the query path small and predictable. OpenSearch completion suggesters are an alternative when the catalog/query requirements fit; compare operational cost and rebuild behavior.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Define normalization and eligibility
 
@@ -56,7 +72,46 @@ Debounce input, cancel requests where possible and attach an increasing generati
 
 Cache by normalized prefix, locale and index version. Bound query time and return an empty or recent eligible result under the documented fallback. Record server latency separately from browser debounce and network delay.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The iph response displays; the older ipa response is ignored. |
+| Request a two-character prefix | The API returns the documented empty/validation result. |
+| Fail a new index download | The prior complete generation continues serving. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 80,000 queries/s peak | Cache hot normalized prefixes and measure the largest prefix, not just average QPS. |
+| Minimum three characters | Use iph as a hot-prefix example; requests for a are outside this API contract. |
+| Five results/query | Precomputed bounded suggestion lists avoid scanning the entire catalog on each keystroke. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build typeahead with stale-response protection: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/typeahead-search.svg)
+
+An immutable precomputed index makes the query path small and predictable. OpenSearch completion suggesters are an alternative when the catalog/query requirements fit; compare operational cost and rebuild behavior.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local static/media delivery path | Amazon CloudFront: static search UI delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: suggestion API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: suggestion handler | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local cache, counter or coordination state | Amazon ElastiCache: hot-prefix cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
+| Local file, object fixture or exported payload | Amazon S3: immutable index artifacts | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Application or worker process | Amazon ECS: index build workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The iph response displays; the older ipa response is ignored. |
-| Request a two-character prefix | The API returns the documented empty/validation result. |
-| Fail a new index download | The prior complete generation continues serving. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Personalize ranking while preserving a hot-prefix cache. Separate a globally eligible candidate set from a small per-user rerank, and define how private history is isolated.
 

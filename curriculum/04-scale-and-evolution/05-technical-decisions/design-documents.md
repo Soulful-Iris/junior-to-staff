@@ -1,6 +1,6 @@
 # Writing that decides
 
-[Curriculum](../../README.md) · [Technical decisions and engineering effectiveness](README.md)
+[Curriculum](../../README.md) · [Make technical decisions and improve team workflows](README.md)
 
 > Project connection · feeds **P5 (it changes safely)**
 

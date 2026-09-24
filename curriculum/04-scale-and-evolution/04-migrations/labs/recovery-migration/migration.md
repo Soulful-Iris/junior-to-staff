@@ -1,6 +1,6 @@
 # Move live rows without losing the writes between copies
 
-[Curriculum](../../../../README.md) · [Migrations and recovery](../../README.md)
+[Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
 
 **Constructed candidate brief:** “Ana edits bookmark A while you move her tenant
 to a new store. A slow backfill still carries yesterday's title. Ben deletes a

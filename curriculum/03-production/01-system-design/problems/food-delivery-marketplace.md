@@ -1,30 +1,50 @@
-# Food delivery: quote the right nearby options
+# Build restaurant discovery and authoritative checkout
 
-## What you are building
+## Application background
 
-> Build restaurant discovery and order placement for a delivery marketplace. A customer sees a meal at £12.50, but the restaurant changes its price or sells out before checkout. Search should stay responsive without making stale catalog data the authority for an order.
+Customers browse restaurant menus and place meal orders. Search displays a convenient copy of the menu; the restaurant's current price and inventory decide whether checkout can accept an order.
 
-**Working contract:** GET /restaurants searches nearby open restaurants. POST /orders submits item IDs, displayed price version and request identity. The order service revalidates availability and returns either a committed priced order or an explicit change requiring customer acceptance.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A browse/search model and a checkout operation that revalidates menu version, price and availability before committing the order.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 200,000 restaurants; two million concurrent shoppers | Popular restaurants and geographic cells are hot spots even when total capacity is sufficient. |
-| Catalog freshness target: 30 seconds | Search may be stale; price and stock are checked again at the order boundary. |
-| 100 items/restaurant assumption | 20 million menu records before option combinations and search-index overhead. |
+Build restaurant discovery and order placement for a delivery marketplace. A customer sees a meal at £12.50, but the restaurant changes its price or sells out before checkout. Search should stay responsive without making stale catalog data the authority for an order.
 
-## Start with one working boundary
+**Required behavior:** GET /restaurants searches nearby open restaurants. POST /orders submits item IDs, displayed price version and request identity. The order service revalidates availability and returns either a committed priced order or an explicit change requiring customer acceptance.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/food_delivery_marketplace.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/food_delivery_marketplace.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/food_delivery_marketplace.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/food_delivery_marketplace.py). You can also [read or download the source here](../../../../examples/architecture-starts/food_delivery_marketplace.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'status': 409, 'new_price': 1400, 'needs_acceptance': True}
+```
+
+### Set up your implementation workspace
+
+Create `work/food-delivery-marketplace/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +52,7 @@ python3 examples/architecture-starts/food_delivery_marketplace.py
 | search_documents | restaurant,location,menu_revision | Discovery projection with freshness metadata. |
 | orders | customer,request_id,priced_items,state | Immutable accepted price snapshot and fulfillment state. |
 
-## AWS implementation
-
-![Food delivery: quote the right nearby options: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/food-delivery-marketplace.svg)
-
-OpenSearch finds candidates; Aurora decides what is being purchased. A location service provides geography and routing, not inventory ownership or a restaurant’s ability to fulfill an order.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Build discovery as a projection
 
@@ -56,7 +70,46 @@ Record created, restaurant_accepted, preparing, assigned, delivered or cancelled
 
 Use location/routing services for candidate travel estimates. When search indexing lags, show stale discovery honestly and keep authoritative checkout available where possible. Bound restaurant-level order intake so a viral promotion cannot create impossible kitchen demand.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The old £12.50 cart receives a £14.00 change requiring acceptance. |
+| Remove an item while search is stale | Checkout rejects the unavailable item. |
+| Retry a committed order | The original order returns without another charge. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 200,000 restaurants; two million concurrent shoppers | Popular restaurants and geographic cells are hot spots even when total capacity is sufficient. |
+| Catalog freshness target: 30 seconds | Search may be stale; price and stock are checked again at the order boundary. |
+| 100 items/restaurant assumption | 20 million menu records before option combinations and search-index overhead. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build restaurant discovery and authoritative checkout: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/food-delivery-marketplace.svg)
+
+OpenSearch finds candidates; Aurora decides what is being purchased. A location service provides geography and routing, not inventory ownership or a restaurant’s ability to fulfill an order.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local static/media delivery path | Amazon CloudFront: shopper application delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Application or worker process | Amazon ECS: marketplace API | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local derived search records | Amazon OpenSearch Service: discovery index | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: order and menu authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local coordinates or nearby candidate calculation | Amazon Location Service: geographic routing | Implement geospatial query/update adapters and a freshness rule; assignment authority stays in the reservation state. |
+| Local pending-work collection | Amazon SQS: fulfillment events | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +121,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The old £12.50 cart receives a £14.00 change requiring acceptance. |
-| Remove an item while search is stale | Checkout rejects the unavailable item. |
-| Retry a committed order | The original order returns without another charge. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add restaurant-specific promotions and substitutions. Define which changes require renewed customer consent and which can be applied within the accepted quote; preserve the exact accepted policy version.
 

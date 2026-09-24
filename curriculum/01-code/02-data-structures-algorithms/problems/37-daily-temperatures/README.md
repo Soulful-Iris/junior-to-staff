@@ -1,6 +1,6 @@
 # Days until a warmer temperature
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A weather dashboard shows how many days each observation waits until a strictly
 > warmer observation. The current implementation scans the entire future for

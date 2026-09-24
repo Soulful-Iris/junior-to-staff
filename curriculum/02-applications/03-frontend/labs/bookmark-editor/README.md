@@ -1,6 +1,6 @@
 # Bookmark editor · preserve the user's next edit
 
-[Curriculum](../../../../README.md) · [Frontend and full-stack integration](../../README.md)
+[Curriculum](../../../../README.md) · [Connect a usable interface to an API](../../README.md)
 
 > “Alice saves title A, then types B before the response arrives. Our current editor
 > replaces B with A and says ‘Saved.’ Repair that promise across the browser, HTTP

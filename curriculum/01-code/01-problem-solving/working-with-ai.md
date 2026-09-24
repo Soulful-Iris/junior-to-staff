@@ -1,6 +1,6 @@
 # Working with an AI that writes the code
 
-[Curriculum](../../README.md) · [Problem solving and AI-assisted engineering](README.md)
+[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
 > Project connection · feeds **every project in this guide**
 

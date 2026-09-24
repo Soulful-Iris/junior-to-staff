@@ -1,6 +1,6 @@
 # Parse and evaluate a policy expression
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “An admin tool stores small policies such as `role == "admin" OR active == TRUE
 > AND tier == 2`. Evaluate them against a record. Parentheses must work, AND must

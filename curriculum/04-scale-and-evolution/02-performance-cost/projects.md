@@ -1,6 +1,6 @@
 # 14 · Performance and cost — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Measure capacity and control performance costs](README.md) first
 
 Five projects that produce numbers instead of opinions: where the time actually
 goes, four measurements around one change, the tail your load test was hiding
@@ -231,7 +231,7 @@ The caveat worth knowing: CloudWatch percentiles are computed per period from
 the raw values it has, and for custom metrics published as pre-aggregated
 statistic sets it cannot compute percentiles at all. So if you want p99 on your
 own metric, publish raw values or use **EMF** — which is
-[10 · Observability](../../03-production/04-observability/README.md)'s point arriving here as a concrete
+[Trace requests and diagnose production symptoms](../../03-production/04-observability/README.md)'s point arriving here as a concrete
 constraint.
 
 For the change itself, the most AWS-specific version of this project is
@@ -585,7 +585,7 @@ Third, the ones that are genuinely trades, and the axis each trades on: a
 cheaper storage class trades retrieval latency; a smaller instance trades
 headroom; Spot capacity trades interruption tolerance; a commitment trades
 flexibility for a discount. Name the axis, as in
-[08 · System design](../../03-production/01-system-design/README.md), and the decision becomes sayable.
+[Design services from requirements to failure behavior](../../03-production/01-system-design/README.md), and the decision becomes sayable.
 
 Fourth, and this is where people get it wrong in a way that hurts later:
 **a commitment is a bet on your own architecture.** A one-year commitment made

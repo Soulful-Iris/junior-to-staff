@@ -1,6 +1,6 @@
 # Completed work can have a stale status view
 
-[Curriculum](../../../README.md) · [Data at scale](../README.md)
+[Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
 
 > “A user sees ‘running’ although their job finished. Retrying creates duplicate work, and replay occasionally changes ‘completed’ back to ‘running’. Preserve job identity and monotonic status while showing honest freshness; then handle cancellation racing completion.”
 

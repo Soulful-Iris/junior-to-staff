@@ -1,30 +1,50 @@
-# 4. The flood
+# Build ingestion with bounded backlog and explicit rejection
 
-## What you are building
+## Application background
 
-> Build bounded ingestion for a small event-processing application. A ten-second burst sends 100 events/s, workers complete only 20/s, and the in-memory waiting budget is 300 events. Producers need an explicit answer about accepted versus rejected work.
+An event application accepts producer messages and processes them with slower workers. Acceptance is a promise about retained work; a full waiting area requires a clear rejection or upstream slowdown.
 
-**Working contract:** Accepted means durably owned work under a finite backlog policy. Keep event identity across retries, expose queue age, and reject excess before pretending it was accepted. A restart cannot lose previously acknowledged work.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An admission/worker loop with a finite waiting budget and a timeline of accepted, rejected, pending and completed events.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 100 arrivals/s × ten seconds | 1,000 offered events. |
-| 20 completions/s × ten seconds | At most 200 completed during the burst. |
-| 300 waiting slots | With that bounded queue, the exercise ends with 200 completed, 300 queued and 500 rejected. |
+Build bounded ingestion for a small event-processing application. A ten-second burst sends 100 events/s, workers complete only 20/s, and the in-memory waiting budget is 300 events. Producers need an explicit answer about accepted versus rejected work.
 
-## Start with one working boundary
+**Required behavior:** Accepted means durably owned work under a finite backlog policy. Keep event identity across retries, expose queue age, and reject excess before pretending it was accepted. A restart cannot lose previously acknowledged work.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/the_flood.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/the_flood.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/the_flood.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_flood.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_flood.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'offered': 1000, 'completed': 200, 'queued': 300, 'rejected': 500}
+```
+
+### Set up your implementation workspace
+
+Create `work/the-flood/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +52,7 @@ python3 examples/architecture-starts/the_flood.py
 | work_queue | event_id,enqueued_at,attempt | Delivery and measurable waiting. |
 | checkpoint | partition,last_applied | Replay-safe output progress. |
 
-## AWS implementation
-
-![4. The flood: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-flood.svg)
-
-SQS can retain work, but the application must decide how much waiting it promises. The acceptance ledger makes overload and restart behavior observable to producers.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Make acceptance explicit
 
@@ -56,7 +70,46 @@ Store output identity/version before advancing progress or acknowledging deliver
 
 Stop arrivals, measure drain and reconcile offered = completed + queued + rejected under the exercise’s accounting model. Then restart a worker mid-batch and show that accepted identities remain traceable. Preserve late/failed outcomes rather than deleting them to improve throughput figures.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The four totals are 1,000 offered, 200 completed, 300 queued and 500 rejected. |
+| Restart a worker after output commit | Replay recognizes the existing effect. |
+| Stop arrivals | The remaining 300 jobs drain at the measured useful rate. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 arrivals/s × ten seconds | 1,000 offered events. |
+| 20 completions/s × ten seconds | At most 200 completed during the burst. |
+| 300 waiting slots | With that bounded queue, the exercise ends with 200 completed, 300 queued and 500 rejected. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build ingestion with bounded backlog and explicit rejection: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-flood.svg)
+
+SQS can retain work, but the application must decide how much waiting it promises. The acceptance ledger makes overload and restart behavior observable to producers.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: event submission API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: bounded admission | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: accepted-work authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: worker delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: event processors | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: flow accounting | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +121,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The four totals are 1,000 offered, 200 completed, 300 queued and 500 rejected. |
-| Restart a worker after output commit | Replay recognizes the existing effect. |
-| Stop arrivals | The remaining 300 jobs drain at the measured useful rate. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 An event costs ten times the average. Move from count-only admission toward estimated work units while retaining a hard memory/byte bound for the queue.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · A worker pauses past visibility
 

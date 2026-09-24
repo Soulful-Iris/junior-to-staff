@@ -119,7 +119,7 @@ results are available in the response and should be logged alongside the
 output — otherwise you cannot tell a retrieval failure from a reasoning
 failure, which is the split the third prompt asks for.
 
-For the tracing itself, treat this as [10 · Observability](../../../curriculum/03-production/04-observability/README.md)
+For the tracing itself, treat this as [Trace requests and diagnose production symptoms](../../../curriculum/03-production/04-observability/README.md)
 work: OpenTelemetry spans around the retrieval call, the model call and any
 tool calls, with the trace id on every log line, so "show me everything that
 happened for this one answer" is one search. The GenAI semantic conventions in
@@ -182,7 +182,7 @@ forever while the feature silently breaks for a whole category of input. A
 pass/fail with a written rule is a decision, and decisions can be wrong in a
 way you notice.
 
-Second, and this is the same rule as [06 · Testing](../../../curriculum/02-applications/04-testing/README.md)
+Second, and this is the same rule as [Find defects and evaluate engineering evidence](../../../curriculum/02-applications/04-testing/README.md)
 pointed at a model: **a suite that passes 100% is not challenging the system.**
 If every case passes, you wrote the eval after the feature and asserted what it
 currently does. Demanding cases that fail today is what forces the suite to
@@ -672,7 +672,7 @@ per *task*, which CloudWatch cannot know. Emit that yourself: a task id on every
 invocation, tokens accumulated into a single structured log line or an **EMF**
 metric at task completion. That is the instrumentation this project is really
 about, and it is the same lesson as
-[14 · Performance and cost](../../../curriculum/04-scale-and-evolution/02-performance-cost/README.md)'s unit cost.
+[Measure capacity and control performance costs](../../../curriculum/04-scale-and-evolution/02-performance-cost/README.md)'s unit cost.
 
 **Prompt caching** on Bedrock gives you a substantial discount on the cached
 prefix, and the constraint that shapes your prompt design is that the cache is
@@ -699,7 +699,7 @@ failures. **Provisioned Throughput** is the answer when you need guaranteed
 capacity and is a commitment, so it belongs in the same conversation as Savings
 Plans. And throttling is a real operational mode, not an edge case — so the
 retry policy around model calls needs jitter and a bound, which is
-[09 · Reliability](../../../curriculum/03-production/05-reliability/README.md) arriving here.
+[Set reliability objectives and recover from failures](../../../curriculum/03-production/05-reliability/README.md) arriving here.
 
 For TTFT, stream the response — Lambda response streaming or a streaming
 endpoint on your service — and record the timestamp of the first byte

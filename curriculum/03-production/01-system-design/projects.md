@@ -1,6 +1,6 @@
 # 08 · System design — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Design services from requirements to failure behavior](README.md) first
 
 Five projects that produce the artefacts a design decision is actually made
 from: measured constraints, two shapes with their bills, a failure table, a
@@ -26,7 +26,7 @@ You will not be reciting a pattern; you will be describing something you did.
 
 **Build**
 
-Take something you already run — the [Act 1](../../../projects/reading-list/stages/01-it-works/README.md)
+Take something you already run — the [Stage 1: Build the shared reading-list application](../../../projects/reading-list/stages/01-it-works/README.md)
 system, a side project, a service at work — and write its constraints as
 checkable statements. Then go and measure the ones that are measurable, and
 mark the rest as guesses in a way you cannot later forget.
@@ -380,7 +380,7 @@ instead of with the word "failover".
 
 The table is in the repository and gets updated when the design changes.
 Timeouts are set deliberately at every layer and the numbers descend as you go
-inward — see [09 · Reliability](../05-reliability/README.md). Half-finished state has a
+inward — see [Set reliability objectives and recover from failures](../05-reliability/README.md). Half-finished state has a
 cleanup path that somebody has run. And at least two rows have been verified
 by causing the failure rather than by reasoning about it.
 
@@ -502,7 +502,7 @@ For seeing it happen: **CloudWatch** `TargetResponseTime` and
 `RejectedConnectionCount` on the ALB, `ThrottledRequests` on DynamoDB,
 `ApproximateAgeOfOldestMessage` on SQS — that last one being the early
 warning that your consumers have fallen behind, which is covered properly in
-[09 · Reliability](../05-reliability/README.md).
+[Set reliability objectives and recover from failures](../05-reliability/README.md).
 
 For the relief levers: **ElastiCache** in front of a read-heavy database, or
 **DAX** if you are on DynamoDB; **CloudFront** in front of anything cacheable,

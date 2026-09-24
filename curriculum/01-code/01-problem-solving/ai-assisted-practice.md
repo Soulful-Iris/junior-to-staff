@@ -1,6 +1,6 @@
 # Practice an AI-assisted change
 
-[Curriculum](../../README.md) · [Problem solving and AI-assisted engineering](README.md)
+[Curriculum](../../README.md) · [Specify, implement and review changes with AI](README.md)
 
 ## Your first engineering conversation
 

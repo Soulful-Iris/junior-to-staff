@@ -1,6 +1,6 @@
 # Heaps: keep the next best candidate
 
-[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
+[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
 
 > “A stream is too large to sort after every update. Keep its three largest observations. What does the smallest retained value tell you about a new arrival?”
 

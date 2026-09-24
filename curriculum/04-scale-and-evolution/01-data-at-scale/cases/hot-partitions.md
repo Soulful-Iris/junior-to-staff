@@ -1,6 +1,6 @@
 # A healthy average can hide an overloaded partition
 
-[Curriculum](../../../README.md) · [Data at scale](../README.md)
+[Curriculum](../../../README.md) · [Process, search and store data at scale](../README.md)
 
 > “One tenant sends 250 writes/s to a four-partition service with a nominal 400/s total capacity. Their queue grows while fleet utilization looks healthy. Spread independent events without losing retries during a routing change; then preserve strict tenant ordering.”
 

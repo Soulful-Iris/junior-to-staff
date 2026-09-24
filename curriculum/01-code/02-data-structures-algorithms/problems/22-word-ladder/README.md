@@ -1,6 +1,6 @@
 # Word ladder
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A word-game editor changes one letter per move. Each intermediate word must be
 > in our dictionary. Players need the fewest moves between two words, including

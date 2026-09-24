@@ -1,6 +1,6 @@
 # May we ship a tagger that passes every regression?
 
-[Curriculum](../../../../README.md) · [AI systems](../../README.md)
+[Curriculum](../../../../README.md) · [Build AI features with evidence and controlled actions](../../README.md)
 
 > “Our reading-list tagger passes twenty regression cases. Its judge agrees with humans 99% of the time. Yesterday we fixed a tenant-isolation defect; today the model provider is slow. Decide what evidence permits a release, and keep the manual tagging feature useful during failure.”
 

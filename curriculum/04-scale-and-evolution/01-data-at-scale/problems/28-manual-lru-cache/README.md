@@ -1,6 +1,6 @@
 # Implement LRU without an ordered-map helper
 
-[Curriculum](../../../../README.md) · [Data at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A preview service caches a fixed number of decoded objects. A successful read
 > or overwrite makes that key most recently used. When a new key overflows capacity,

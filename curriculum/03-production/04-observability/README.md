@@ -1,35 +1,35 @@
-# Observability
+# Trace requests and diagnose production symptoms
 
 Use logs, metrics, and traces to answer a concrete system question.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
 
-## Before this chapter
+## Prerequisites
 
-[Infrastructure as code and AWS](../03-infrastructure/README.md)
+[Provision and operate application infrastructure on AWS](../03-infrastructure/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
-## Learn in this order
+## Concepts and worked examples
 
 | Step | Existing lesson or exercise |
 |---|---|
 | 1 | [Observability](logs-metrics-traces.md) |
-| 2 | [Slow request: the healthy average hid a timeout](problems/slow-request.md) |
-| 3 | [Metrics platform: query the right time window](problems/metrics-platform.md) |
+| 2 | [Find database-pool waiting in slow API requests](problems/slow-request.md) |
+| 3 | [Ingest and query metrics with bounded cardinality](problems/metrics-platform.md) |
 
-## Go deeper on the same problem
+## Explore failures and changed requirements
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Reliability and incident response](../05-reliability/README.md).
+Related prerequisites for deeper follow-ups: [Set reliability objectives and recover from failures](../05-reliability/README.md).
 
-## Apply the concept
+## Build a project
 
-Each link opens one existing project brief with its own context, diagrams, AI prompts, AWS choices and follow-ups.
+Each project explains its application, names the deliverable, links the supplied code and gives ordered implementation steps. Run the local example first; use the AWS mapping after the local behavior works.
 
-- [Debuggable at three in the morning](projects/debuggable-at-three-in-the-morning.md)
+- [Diagnose a reading-list incident from existing telemetry](projects/debuggable-at-three-in-the-morning.md)
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Reliability and incident response](../05-reliability/README.md).
+Next chapter: [Set reliability objectives and recover from failures](../05-reliability/README.md).

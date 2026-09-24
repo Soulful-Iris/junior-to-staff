@@ -1,30 +1,54 @@
-# Overload: protect the requests that can finish
+# Reject excess API work before queues grow without bound
 
-## What you are building
+## Application background
 
-> Protect a subscription API during a traffic surge. Forty thousand requests/s arrive but the healthy service can finish only twenty thousand. Paid writes, interactive reads and bulk exports have different consequences when rejected; the queue must not consume all memory.
+A subscription API serves interactive reads, paid writes and bulk exports using finite worker capacity. Admission decides which requests may start and what rejected callers should do.
 
-**Working contract:** Admission is bounded by class and dependency capacity. Accepted work has a finite deadline. Rejected work returns a clear retryable or non-retryable outcome before expensive side effects begin.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A bounded admission controller with class-specific limits, rejection responses and a recovery trace under excess demand.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 40,000 arrivals/s; 20,000 completions/s | Backlog grows 20,000/s; a 100,000-request queue fills in five seconds. |
-| 12,000 paid writes/s plus 8,000 reads/s desired allocation | At full healthy capacity those consume the entire budget; bulk work needs a separate or deferred share. |
-| Database capacity halves to 10,000/s | The original paid-write promise no longer fits; define explicit priority and rejection within that class. |
+Protect a subscription API during a traffic surge. Forty thousand requests/s arrive but the healthy service can finish only twenty thousand. Paid writes, interactive reads and bulk exports have different consequences when rejected; the queue must not consume all memory.
 
-## Start with one working boundary
+**Required behavior:** Admission is bounded by class and dependency capacity. Accepted work has a finite deadline. Rejected work returns a clear retryable or non-retryable outcome before expensive side effects begin.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/overload_shedding.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/overload_shedding.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/overload_shedding.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/overload_shedding.py). You can also [read or download the source here](../../../../examples/architecture-starts/overload_shedding.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+1 completed 20000 queued 20000 rejected 0
+2 completed 20000 queued 40000 rejected 0
+3 completed 20000 queued 60000 rejected 0
+4 completed 20000 queued 80000 rejected 0
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/overload-shedding/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +56,7 @@ python3 examples/architecture-starts/overload_shedding.py
 | queue_state | class,depth,oldest_age | Bounded waiting and expiry. |
 | outcomes | admitted,completed,rejected,expired | Honest accounting of work under pressure. |
 
-## AWS implementation
-
-![Overload: protect the requests that can finish: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/overload-shedding.svg)
-
-Admission protects the scarce dependency. SQS is suitable for explicitly deferred work, but it cannot turn an unbounded interactive wait into a successful user experience.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Locate the constrained dependency
 
@@ -56,7 +74,46 @@ Cap queue length and maximum age, expire work that cannot finish before its dead
 
 Reduce concurrency when the dependency degrades and ramp it back gradually after recovery. Keep hysteresis between shedding and reopening. Report completed useful work and class-specific rejection, not merely a lower response latency caused by rejecting everything.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The queue reaches 100,000 at five seconds, then rejects excess arrivals. |
+| Halve database capacity | Admission shrinks and exposes the chosen within-class priorities. |
+| Restore the database | Traffic ramps up without replaying the whole backlog at once. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 40,000 arrivals/s; 20,000 completions/s | Backlog grows 20,000/s; a 100,000-request queue fills in five seconds. |
+| 12,000 paid writes/s plus 8,000 reads/s desired allocation | At full healthy capacity those consume the entire budget; bulk work needs a separate or deferred share. |
+| Database capacity halves to 10,000/s | The original paid-write promise no longer fits; define explicit priority and rejection within that class. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Reject excess API work before queues grow without bound: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/overload-shedding.svg)
+
+Admission protects the scarce dependency. SQS is suitable for explicitly deferred work, but it cannot turn an unbounded interactive wait into a successful user experience.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP listener | Application Load Balancer: traffic entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
+| Application or worker process | Amazon ECS: admission and request service | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: constrained dependency | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: deferred bulk work | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: bulk workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: overload evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +125,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The queue reaches 100,000 at five seconds, then rejects excess arrivals. |
-| Halve database capacity | Admission shrinks and exposes the chosen within-class priorities. |
-| Restore the database | Traffic ramps up without replaying the whole backlog at once. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Product labels every route critical. Use dependency consumption and user consequences to produce an allocation that fits actual capacity; a label cannot reserve resources that do not exist.
 

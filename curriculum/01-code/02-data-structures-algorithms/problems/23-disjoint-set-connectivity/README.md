@@ -1,6 +1,6 @@
 # Connectivity under added links
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A network simulator adds undirected links between numbered machines. After each
 > addition, users ask whether two machines belong to the same connected component.

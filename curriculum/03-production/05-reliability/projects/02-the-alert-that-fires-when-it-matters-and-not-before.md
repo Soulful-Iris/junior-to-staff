@@ -1,30 +1,54 @@
-# 2. The alert that fires when it matters and not before
+# Implement burn-rate alert and incident state rules
 
-## What you are building
+## Application background
 
-> Build alert logic for the save SLO. A page should require both short and long windows to burn too fast, but the incident owner wants the incident to remain open until both recover and someone acknowledges it. These are two different state rules.
+A reading-list team watches its save reliability objective. Alert conditions determine when to open an incident; recovery and acknowledgement rules determine when that incident can close.
 
-**Working contract:** The current composite alarm is short_breach AND long_breach. The incident record is a separate latch with its own closure rule. Missing data has an explicit outcome and never silently becomes healthy.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A two-window burn-rate decision and separate incident lifecycle, demonstrated with a sequence of degraded and recovered windows.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 99.9% objective; 0.9% observed failure rate | Burn rate is 0.009 / 0.001 = 9× sustainable consumption. |
-| States F/F, T/F, T/T, F/T | AND alarm outputs F, F, T, F; either false operand clears the composite. |
-| Short five-minute and long one-hour teaching windows | Choose thresholds from response goals and traffic; these are exercise settings, not universal paging defaults. |
+Build alert logic for the save SLO. A page should require both short and long windows to burn too fast, but the incident owner wants the incident to remain open until both recover and someone acknowledges it. These are two different state rules.
 
-## Start with one working boundary
+**Required behavior:** The current composite alarm is short_breach AND long_breach. The incident record is a separate latch with its own closure rule. Missing data has an explicit outcome and never silently becomes healthy.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py). You can also [read or download the source here](../../../../examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and_not_before.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'short': False, 'long': False, 'alarm': False, 'incident_open': False}
+{'short': True, 'long': False, 'alarm': False, 'incident_open': False}
+{'short': True, 'long': True, 'alarm': True, 'incident_open': True}
+{'short': False, 'long': True, 'alarm': False, 'incident_open': True}
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/02-the-alert-that-fires-when-it-matters-and-not-before/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +56,7 @@ python3 examples/architecture-starts/02_the_alert_that_fires_when_it_matters_and
 | composite_alarm | short_breach,long_breach,state | Current Boolean condition. |
 | incident | opened_at,acknowledged,recovery_evidence,state | Human-owned lifecycle independent of alarm clearing. |
 
-## AWS implementation
-
-![2. The alert that fires when it matters and not before: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-the-alert-that-fires-when-it-matters-and-not-before.svg)
-
-The composite expresses current metric truth; the incident store expresses the team’s response lifecycle. Separating them prevents confusing an alarm recovery with completed incident work.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Calculate burn from counts
 
@@ -56,7 +74,46 @@ Open an incident on qualifying breach, deduplicate repeated notifications and re
 
 A 9× slow burn may deserve owned work even if it misses the fast-page threshold. Add a lower-severity policy and separate missing-telemetry signal. Demonstrate the notification timeline manually; do not install recurring checks in this repository.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The alarm clears at F/T while the incident remains open until acknowledged full recovery. |
+| Stop counters | Missing telemetry is distinct from no errors. |
+| Hold a sustained 0.9% failure rate | The lower-severity policy records 9× burn rather than ignoring it. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 99.9% objective; 0.9% observed failure rate | Burn rate is 0.009 / 0.001 = 9× sustainable consumption. |
+| States F/F, T/F, T/T, F/T | AND alarm outputs F, F, T, F; either false operand clears the composite. |
+| Short five-minute and long one-hour teaching windows | Choose thresholds from response goals and traffic; these are exercise settings, not universal paging defaults. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Implement burn-rate alert and incident state rules: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-the-alert-that-fires-when-it-matters-and-not-before.svg)
+
+The composite expresses current metric truth; the incident store expresses the team’s response lifecycle. Separating them prevents confusing an alarm recovery with completed incident work.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: request counters and burn windows | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Local boolean alert conditions | CloudWatch composite alarm: current breach condition | Translate measured window conditions into alarm expressions; keep incident acknowledgement and closure as explicit state. |
+| Local event dispatch | Amazon EventBridge: alarm transition routing | Define event rules/targets and delivery failure handling; persist logical event/run identity in the application. |
+| Python operation or worker function | AWS Lambda: incident state application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: incident lifecycle store | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local notification output | Amazon SNS: optional notification channel | Wire the alert topic and destination, define ownership and observe failed delivery. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +125,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The alarm clears at F/T while the incident remains open until acknowledged full recovery. |
-| Stop counters | Missing telemetry is distinct from no errors. |
-| Hold a sustained 0.9% failure rate | The lower-severity policy records 9× burn rather than ignoring it. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 An acknowledgement arrives before metrics recover. Keep it recorded, but do not close until the separately defined recovery condition becomes true.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · Operations wants a hold
 

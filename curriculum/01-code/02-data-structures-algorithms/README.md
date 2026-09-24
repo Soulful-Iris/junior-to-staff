@@ -1,4 +1,4 @@
-# Data structures and algorithms
+# Choose data structures and reason about algorithms
 
 Learn the structures and algorithms before using them in a coding interview.
 
@@ -10,7 +10,7 @@ A map, a queue, or a heap solves a particular kind of repeated work. Learn each 
 
 Start after **Problem solving and AI-assisted engineering**. Read the five sections in order; the next chapter puts these tools to work in complete coding problems.
 
-## Learn in this order
+## Concepts and worked examples
 
 | Section | Subsections, in learning order | What you will be able to do |
 |---|---|---|
@@ -26,4 +26,4 @@ Given a small example, draw the state after each operation. Name the assumption 
 
 You can revisit a folded refresher inside each coding problem. The main reading flow will assume these foundations rather than introduce the same structure repeatedly.
 
-Next chapter: [Coding practice: solve, explain, extend](../03-coding-practice/README.md).
+Next chapter: [Solve coding problems and explain trade-offs](../03-coding-practice/README.md).

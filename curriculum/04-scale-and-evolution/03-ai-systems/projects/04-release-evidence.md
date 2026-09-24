@@ -1,30 +1,52 @@
-# Release evidence: evaluate a candidate, promote it, and roll back
+# Track AI evaluation evidence and serving versions
 
-## What you are building
+## Application background
 
-> Build a release-evidence record for an AI answer feature. A candidate prompt improves common questions but regresses a rare permission case. Later the model, prompt and live traffic configuration diverge, so the team needs to know exactly which candidate was evaluated and which is serving.
+An AI answer feature changes when its model, prompt, retrieval data or configuration changes. Release owners need to connect the evaluated candidate to the exact version serving users.
 
-**Working contract:** Bind each result to dataset, rubric, model, prompt and application versions. Separate per-case outcomes from release decisions. Promotion and rollback select immutable candidate identities; this lesson does not add a gate to the guide’s website deployment.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Extend the supplied release workflow with candidate identity, slice-level comparison and an inspectable promotion/rollback record.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 200 reviewed cases assumption; ten critical boundary cases | Report critical-slice outcomes separately from overall average quality. |
-| One failed permission case out of 200 | 99.5% aggregate success can conceal an unacceptable authorization regression. |
-| Three independently changing versions: model, prompt, app | Record all three plus retrieval/configuration versions in serving evidence. |
+Build a release-evidence record for an AI answer feature. A candidate prompt improves common questions but regresses a rare permission case. Later the model, prompt and live traffic configuration diverge, so the team needs to know exactly which candidate was evaluated and which is serving.
 
-## Start with one working boundary
+**Required behavior:** Bind each result to dataset, rubric, model, prompt and application versions. Separate per-case outcomes from release decisions. Promotion and rollback select immutable candidate identities; this lesson does not add a gate to the guide’s website deployment.
 
-Run the existing complete local reference workflow from the repository root:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/ai-systems/demo.py evaluation
 ```
 
-The reference uses local fixtures to make the workflow inspectable. The implementation walkthrough and source notes are retained below. Add real model/provider adapters only after the local state transitions and evidence are clear.
+**Supplied code:** [AI workflow implementation](https://github.com/Soulful-Iris/junior-to-staff/tree/main/examples/ai-systems), starting at [demo.py](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/ai-systems/demo.py). These are local workflows with fixture providers and temporary storage. They do not include the user interface or connect to the AWS services in the diagram.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+[
+  {
+    "request": {
+      "action": "evaluation.run",
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/04-release-evidence/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ The reference uses local fixtures to make the workflow inspectable. The implemen
 | case_result | candidate,case_id,outcome,evidence | Reproducible per-case evidence and slice membership. |
 | serving_pointer | environment,candidate_manifest | What actually receives traffic and the prior known version. |
 
-## AWS implementation
-
-![Release evidence: evaluate a candidate, promote it, and roll back: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/04-release-evidence.svg)
-
-The release ledger connects evidence to a specific candidate. AppConfig can distribute the selected manifest, while live request records reveal whether the application actually used it.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Run the existing release cycle
 
@@ -56,7 +72,46 @@ Hash or version prompts, model configuration, retrieval corpus and case/rubric d
 
 Emit actual served manifest identity and fallback mode. Promote or roll back the pointer deliberately, then inspect a real request’s recorded versions. If data/tool compatibility changed, document the forward-repair boundary rather than claiming a pointer switch reverses every effect.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the existing evaluation demo | Inspect candidate selection and rollback identities. |
+| Change a prompt after evaluation | It becomes a different candidate with no inherited result claim. |
+| Serve an unexpected model version | Live evidence exposes the mismatch. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 200 reviewed cases assumption; ten critical boundary cases | Report critical-slice outcomes separately from overall average quality. |
+| One failed permission case out of 200 | 99.5% aggregate success can conceal an unacceptable authorization regression. |
+| Three independently changing versions: model, prompt, app | Record all three plus retrieval/configuration versions in serving evidence. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Track AI evaluation evidence and serving versions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/04-release-evidence.svg)
+
+The release ledger connects evidence to a specific candidate. AppConfig can distribute the selected manifest, while live request records reveal whether the application actually used it.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local file, object fixture or exported payload | Amazon S3: candidate and case artifacts | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Application or worker process | Amazon ECS: bounded evaluation runner | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Deterministic model response fixture | Amazon Bedrock: candidate model adapter | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: result and release ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local versioned configuration | AWS AppConfig: serving candidate pointer | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: live version evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the existing evaluation demo | Inspect candidate selection and rollback identities. |
-| Change a prompt after evaluation | It becomes a different candidate with no inherited result claim. |
-| Serve an unexpected model version | Live evidence exposes the mismatch. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Your automated judge approves every answer. Measure failure detection on a reviewed failure set before trusting its aggregate agreement; high agreement on mostly good cases can coexist with zero failure recall.
 

@@ -1,6 +1,6 @@
 # Revoke a link that is already warm
 
-[Curriculum](../../../../README.md) · [Data at scale](../../README.md)
+[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md)
 
 **Constructed candidate brief:** “Ana shares a private schedule with token A.
 Its first GET warms a CDN. Ana revokes the token one second later. Define what

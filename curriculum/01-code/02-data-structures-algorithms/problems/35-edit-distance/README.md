@@ -1,6 +1,6 @@
 # Edit distance
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A text tool compares a source string with a target. One operation inserts,
 > deletes, or replaces one character, each costing one. Return the minimum number

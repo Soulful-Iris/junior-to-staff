@@ -1,30 +1,52 @@
-# 4. Shedding the right thing
+# Prioritize API work within a fixed capacity budget
 
-## What you are building
+## Application background
 
-> Add overload admission to a reading-list API. Interactive saves matter more than bulk exports, but total capacity is only 100 equal-cost requests/s. Later, critical traffic alone reaches 120/s, so priority cannot make every request succeed.
+A reading-list service shares workers between interactive saves and bulk exports. Under overload, rejecting some work protects useful capacity, but priority cannot create more capacity.
 
-**Working contract:** Keep resource usage bounded and allocate capacity by trusted work class. Admit only work that can fit a finite deadline. Rejection is explicit and measured, including when critical demand exceeds physical capacity.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A class-aware admission policy with finite queues and explicit rejection when even critical traffic exceeds the budget.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 80 critical + 50 bulk requests/s; capacity 100/s | Admit all 80 critical and at most 20 bulk; reject at least 30 bulk/s. |
-| 120 critical requests/s; capacity 100/s | At least 20 critical/s must be rejected or wait within a stated finite budget. |
-| One export costs 100 saves | Request-count fairness is misleading; budget the constrained resource cost. |
+Add overload admission to a reading-list API. Interactive saves matter more than bulk exports, but total capacity is only 100 equal-cost requests/s. Later, critical traffic alone reaches 120/s, so priority cannot make every request succeed.
 
-## Start with one working boundary
+**Required behavior:** Keep resource usage bounded and allocate capacity by trusted work class. Admit only work that can fit a finite deadline. Rejection is explicit and measured, including when critical demand exceeds physical capacity.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/04_shedding_the_right_thing.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/04_shedding_the_right_thing.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/04_shedding_the_right_thing.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/04_shedding_the_right_thing.py). You can also [read or download the source here](../../../../examples/architecture-starts/04_shedding_the_right_thing.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'critical_admitted': 80, 'bulk_admitted': 20, 'critical_rejected': 0, 'bulk_rejected': 30}
+{'critical_admitted': 100, 'bulk_admitted': 0, 'critical_rejected': 20, 'bulk_rejected': 0}
+100 save-units can fund 1 export or 100 saves
+```
+
+### Set up your implementation workspace
+
+Create `work/04-shedding-the-right-thing/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/04_shedding_the_right_thing.py
 | admission_state | active,queued,deadline,budget | Bounded resource allocation. |
 | outcome | class,admitted,rejected,expired,completed | User-visible accounting and fairness evidence. |
 
-## AWS implementation
-
-![4. Shedding the right thing: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/04-shedding-the-right-thing.svg)
-
-The constrained database determines useful capacity. Separate bulk delivery allows deferral, while early admission protects interactive work without pretending priority creates resources.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Place admission before expensive work
 
@@ -56,7 +72,46 @@ Measure database/CPU work per operation and choose approximate cost units. Bound
 
 Expire waiting work that missed its useful deadline and ramp bulk admission after critical queues recover. Show class-specific useful completions and rejection, so a fast rejection response is not mistaken for improved successful latency.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The first case rejects 30 bulk/s; the second rejects 20 critical/s. |
+| Make exports 100 times more expensive | Weighted admission reduces their share appropriately. |
+| Remove overload | Bulk traffic returns gradually after critical waiting clears. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 80 critical + 50 bulk requests/s; capacity 100/s | Admit all 80 critical and at most 20 bulk; reject at least 30 bulk/s. |
+| 120 critical requests/s; capacity 100/s | At least 20 critical/s must be rejected or wait within a stated finite budget. |
+| One export costs 100 saves | Request-count fairness is misleading; budget the constrained resource cost. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Prioritize API work within a fixed capacity budget: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/04-shedding-the-right-thing.svg)
+
+The constrained database determines useful capacity. Separate bulk delivery allows deferral, while early admission protects interactive work without pretending priority creates resources.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP listener | Application Load Balancer: request entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
+| Application or worker process | Amazon ECS: admission application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: constrained dependency | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: deferred bulk queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: export workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: overload dashboard | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +123,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The first case rejects 30 bulk/s; the second rejects 20 critical/s. |
-| Make exports 100 times more expensive | Weighted admission reduces their share appropriately. |
-| Remove overload | Bulk traffic returns gradually after critical waiting clears. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 An accepted bulk job represents a paid obligation. Distinguish admission rejection from cancellation of already accepted work, and preserve status/refund or rescheduling semantics.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · Critical traffic exceeds capacity
 

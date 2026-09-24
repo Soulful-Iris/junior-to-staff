@@ -1,30 +1,51 @@
-# Personalized ranking: low latency and evidence of quality
+# Serve recommendations with safe fallback ranking
 
-## What you are building
+## Application background
 
-> Build product recommendations for a storefront. The ranking model scores 200 candidates, but a feature service sometimes stalls for 170 ms. Restricted or out-of-stock items must remain excluded even when the service falls back to a popular-items list.
+A storefront builds a list of candidate products and ranks them for a shopper. Features and models may be unavailable, but stock and access restrictions apply to every displayed result.
 
-**Working contract:** Return eligible ranked items within a 250 ms p95 budget. Personalized scoring is optional under deadline pressure; authorization and availability filtering are mandatory for every path, including cached fallback.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A deadline-bounded ranking operation with a deterministic fallback and eligibility checks shared by the model and fallback paths.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 40,000 requests/s × 200 candidates | Eight million candidate scores/s before feature retrieval and batching. |
-| 250 ms p95 response budget | Example: 30 ms candidates, 50 ms features, 80 ms inference, 20 ms eligibility, 30 ms transport, 40 ms reserve. |
-| Feature freshness target: two seconds | Store observation time and define which stale features may be omitted versus which require rejection. |
+Build product recommendations for a storefront. The ranking model scores 200 candidates, but a feature service sometimes stalls for 170 ms. Restricted or out-of-stock items must remain excluded even when the service falls back to a popular-items list.
 
-## Start with one working boundary
+**Required behavior:** Return eligible ranked items within a 250 ms p95 budget. Personalized scoring is optional under deadline pressure; authorization and availability filtering are mandatory for every path, including cached fallback.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/personalized_ranking.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/personalized_ranking.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/personalized_ranking.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/personalized_ranking.py). You can also [read or download the source here](../../../../examples/architecture-starts/personalized_ranking.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Mode: fallback remaining budget: 80
+Returned: ['b', 'c']
+```
+
+### Set up your implementation workspace
+
+Create `work/personalized-ranking/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/personalized_ranking.py
 | feature_vector | entity,feature_version,observed_at | Typed features with freshness evidence. |
 | ranking_run | model_version,feature_version,fallback_reason | Reproducible scoring mode and deadline outcome. |
 
-## AWS implementation
-
-![Personalized ranking: low latency and evidence of quality: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/personalized-ranking.svg)
-
-The inference endpoint ranks candidates; the application owns deadlines and eligibility. Keeping a useful baseline makes feature/inference outages an explicit product behavior instead of a hidden timeout.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Build an eligible baseline
 
@@ -56,7 +71,46 @@ Pass remaining time to feature retrieval and inference. If the feature path cons
 
 Compare engagement or task success with guardrails for eligibility, latency and cohort effects. Record actual served model/feature versions and fallback frequency. Offline ranking quality alone cannot reveal how often production users receive the fallback.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | A 170 ms feature delay triggers fallback, and ineligible item a is still excluded. |
+| Serve stale features | The chosen feature policy is applied and recorded. |
+| Roll back the model | The feature schema remains compatible with the restored model. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 40,000 requests/s × 200 candidates | Eight million candidate scores/s before feature retrieval and batching. |
+| 250 ms p95 response budget | Example: 30 ms candidates, 50 ms features, 80 ms inference, 20 ms eligibility, 30 ms transport, 40 ms reserve. |
+| Feature freshness target: two seconds | Store observation time and define which stale features may be omitted versus which require rejection. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Serve recommendations with safe fallback ranking: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/personalized-ranking.svg)
+
+The inference endpoint ranks candidates; the application owns deadlines and eligibility. Keeping a useful baseline makes feature/inference outages an explicit product behavior instead of a hidden timeout.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP listener | Application Load Balancer: ranking request entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
+| Application or worker process | Amazon ECS: recommendation service | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local cache, counter or coordination state | Amazon ElastiCache: fresh feature cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
+| Local ranking/model fixture | Amazon SageMaker AI: model inference endpoint | Deploy a versioned inference endpoint and implement bounded calls, eligibility filtering and fallback behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: eligibility authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local event sequence or input stream | Amazon Kinesis: served-outcome events | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +122,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | A 170 ms feature delay triggers fallback, and ineligible item a is still excluded. |
-| Serve stale features | The chosen feature policy is applied and recorded. |
-| Roll back the model | The feature schema remains compatible with the restored model. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Run 10,000 model variants. Estimate artifact, feature and observation cardinality, then choose whether all variants deserve live infrastructure or whether most can be evaluated offline first.
 

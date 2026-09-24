@@ -1,6 +1,6 @@
 # Minimum coins with a witness
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A kiosk dispenses a requested integer amount using available denominations.
 > Each denomination has unlimited supply. Minimize the number of coins and show

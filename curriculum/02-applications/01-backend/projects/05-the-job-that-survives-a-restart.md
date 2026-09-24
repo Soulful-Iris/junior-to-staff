@@ -1,30 +1,70 @@
-# 5. The job that survives a restart
+# Move title lookup into restartable background jobs
 
-## What you are building
+## Application background
 
-> Move title fetching out of a bookmark request into a durable background job. The worker can die after fetching a title, two workers can overlap after a lease expires, and an old worker must not replace a newer result when it resumes.
+Saving a bookmark should return promptly even when fetching its title is slow. A separate worker enriches the record later, and users can see whether that work is pending, complete or needs attention.
 
-**Working contract:** Creating a bookmark commits a stable title job and dispatch intent. Jobs expose accepted, running, succeeded and failed states. A result is published only by the current ownership epoch; queue acknowledgement follows the durable outcome.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Commit job intent with the saved URL, then implement claim, retry and fenced completion in a separate worker process.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 100 saves/minute; two-second mean fetch | About 3.3 occupied worker slots at steady state; start with a small bounded pool. |
-| Thirty-second lease | Renew only while the same epoch owns the job; a paused worker can lose ownership before it notices. |
-| Five delivery attempts | Exhaustion becomes a visible failed/repair state, not an endlessly hidden queue retry. |
+Move title fetching out of a bookmark request into a durable background job. The worker can die after fetching a title, two workers can overlap after a lease expires, and an old worker must not replace a newer result when it resumes.
 
-## Start with one working boundary
+**Required behavior:** Creating a bookmark commits a stable title job and dispatch intent. Jobs expose accepted, running, succeeded and failed states. A result is published only by the current ownership epoch; queue acknowledgement follows the durable outcome.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/05_the_job_that_survives_a_restart.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/05_the_job_that_survives_a_restart.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/05_the_job_that_survives_a_restart.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/05_the_job_that_survives_a_restart.py). You can also [read or download the source here](../../../../examples/architecture-starts/05_the_job_that_survives_a_restart.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+saved
+stale worker rejected
+{'epoch': 2, 'state': 'succeeded', 'title': 'Current title'}
+```
+
+### Run the application you will extend
+
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+
+For a first run, start this in **terminal 1** from the repository root:
+
+```bash
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+In **terminal 2**, save one bookmark with a controlled title timeout:
+
+```bash
+curl -i http://127.0.0.1:8080/bookmarks \
+  -H 'X-Demo-User: alice' -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
+```
+
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+
+Work in your own branch or copy `examples/reading-list-starter/` to `work/05-the-job-that-survives-a-restart/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +72,7 @@ python3 examples/architecture-starts/05_the_job_that_survives_a_restart.py
 | attempts | job_id,epoch,started,outcome | Separate retries under one job. |
 | bookmark_title | bookmark_id,title,title_version | Updated conditionally by the winning job/source version. |
 
-## AWS implementation
-
-![5. The job that survives a restart: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-job-that-survives-a-restart.svg)
-
-The queue wakes workers; the job record owns lifecycle and publication. Keeping those roles separate makes duplicate delivery and restarts understandable.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Create a durable job transaction
 
@@ -56,7 +90,46 @@ Recheck bookmark source version and worker epoch before writing the title and su
 
 Show oldest accepted job, attempt count, last error and next retry. After bounded attempts, move to failed/DLQ and allow an authorized replay retaining logical identity. A replay is evidence, not deletion of the previous failure history.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Epoch 2 wins; epoch 1 cannot replace the title. |
+| Restart after result commit but before acknowledgement | Redelivery observes succeeded and finishes without another result. |
+| Delete the bookmark while work waits | The worker records cancellation and does not recreate it. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 saves/minute; two-second mean fetch | About 3.3 occupied worker slots at steady state; start with a small bounded pool. |
+| Thirty-second lease | Renew only while the same epoch owns the job; a paused worker can lose ownership before it notices. |
+| Five delivery attempts | Exhaustion becomes a visible failed/repair state, not an endlessly hidden queue retry. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Move title lookup into restartable background jobs: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-job-that-survives-a-restart.svg)
+
+The queue wakes workers; the job record owns lifecycle and publication. Keeping those roles separate makes duplicate delivery and restarts understandable.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: bookmark API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: bookmark application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: job and result authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: title job queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: title worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: job operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +141,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Epoch 2 wins; epoch 1 cannot replace the title. |
-| Restart after result commit but before acknowledgement | Redelivery observes succeeded and finishes without another result. |
-| Delete the bookmark while work waits | The worker records cancellation and does not recreate it. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Let users edit the URL while an old fetch runs. Add a source URL version to the job and reject results for an earlier source even if the worker still owns its lease.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · A expires during work
 

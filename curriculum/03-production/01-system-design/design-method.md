@@ -1,6 +1,6 @@
 # System design
 
-[Curriculum](../../README.md) · [System design](README.md)
+[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
 
 > Project connection · feeds **P3 (it holds under load)**
 

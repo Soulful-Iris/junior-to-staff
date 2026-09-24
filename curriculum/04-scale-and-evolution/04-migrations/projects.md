@@ -1,6 +1,6 @@
 # Migrations — five focused exercises
 
-[Migration method](migration-method.md) · [Complete build brief](projects/the-migration-you-actually-finish.md)
+[Migration method](migration-method.md) · [Migrate tags across data, clients and workers](projects/the-migration-you-actually-finish.md)
 
 These are build assignments, not five supplied applications. Work in a disposable
 fixture before a live pilot. Duration depends on the system; “one afternoon” is

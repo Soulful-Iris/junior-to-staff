@@ -1,6 +1,6 @@
 # A worker resumes after somebody else finished
 
-[Curriculum](../../../../README.md) · [Migrations and recovery](../../README.md)
+[Curriculum](../../../../README.md) · [Migrate live systems and verify recovery](../../README.md)
 
 **Constructed candidate brief:** “Worker A fetches an old page title and pauses.
 Its five-second lease expires; B takes the job and stores the new title. A

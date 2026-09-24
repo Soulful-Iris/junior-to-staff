@@ -1,6 +1,6 @@
 # Link-watcher local reference
 
-Start with the [guided project](../../curriculum/02-applications/01-backend/projects/a-link-rot-watcher.md).
+Start with the [Build a link monitor with durable history and change alerts](../../curriculum/02-applications/01-backend/projects/a-link-rot-watcher.md).
 This directory supplies the first two checkpoints: a durable state machine and a
 controlled HTTP check. The guide specifies the scheduler, distributed workers,
 notification delivery, and monitoring that you add next.

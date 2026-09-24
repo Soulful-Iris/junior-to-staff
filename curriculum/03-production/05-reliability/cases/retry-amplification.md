@@ -1,6 +1,6 @@
 # Retries spend the capacity needed for recovery
 
-[Curriculum](../../../README.md) · [Reliability and incident response](../README.md)
+[Curriculum](../../../README.md) · [Set reliability objectives and recover from failures](../README.md)
 
 > “A click calls three services. Each owner configured three attempts because transient failures seemed harmless. Under dependency overload, 100 clicks create far more work. Bound total attempts and elapsed time; then handle a timeout after a payment has already committed.”
 

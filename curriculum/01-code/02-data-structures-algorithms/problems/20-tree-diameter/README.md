@@ -1,6 +1,6 @@
 # Tree diameter: return one branch, combine two locally
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [tree levels](../17-tree-level-order/README.md) and [postorder return state](../19-lowest-common-ancestor/README.md).
 

@@ -1,30 +1,54 @@
-# Ticket inventory: one seat, two buyers
+# Reserve concert seats with expiring holds
 
-## What you are building
+## Application background
 
-> Build ticket reservations for a 30,000-seat concert. At noon, 60,000 purchase attempts/s arrive for twenty seconds. Seat A-17 is shown as available to many browsers; exactly one active hold may own it.
+Ticket buyers choose seats, hold them briefly and pay before the hold expires. Browsers may show the same available seat, but only its current hold owner can confirm it.
 
-**Working contract:** POST /holds accepts event, seat IDs and request identity. A hold expires after five minutes. Checkout converts a live hold to sold under the same owner; cached availability never authorizes the sale.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Atomic seat holds, expiry and confirmation operations, with a competing-buyers walkthrough and an expired-payment decision.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 60,000 attempts/s × 20 seconds | 1.2 million attempts compete for 30,000 seats; most attempts cannot succeed. |
-| Five-minute hold lifetime | Expiration is a checked timestamp, not the time a cleanup worker happens to run. |
-| Four-seat cart limit | Decide whether all four seats are held atomically; this exercise requires all or none. |
+Build ticket reservations for a 30,000-seat concert. At noon, 60,000 purchase attempts/s arrive for twenty seconds. Seat A-17 is shown as available to many browsers; exactly one active hold may own it.
 
-## Start with one working boundary
+**Required behavior:** POST /holds accepts event, seat IDs and request identity. A hold expires after five minutes. Checkout converts a live hold to sold under the same owner; cached availability never authorizes the sale.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/ticket_inventory.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/ticket_inventory.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/ticket_inventory.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/ticket_inventory.py). You can also [read or download the source here](../../../../examples/architecture-starts/ticket_inventory.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Ana held
+Ben 409 unavailable
+Ben after expiry held
+Late Ana 409 hold invalid
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/ticket-inventory/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +56,7 @@ python3 examples/architecture-starts/ticket_inventory.py
 | holds | owner,request_id,seat_ids,version | One cart intent and its current lifecycle. |
 | payments | hold_id,provider_key,outcome | Unknown provider outcome requires reconciliation. |
 
-## AWS implementation
-
-![Ticket inventory: one seat, two buyers: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/ticket-inventory.svg)
-
-The database decides seat ownership. CloudFront makes the storefront cheap to serve but cannot make a stale seat map authoritative. SQS handles repair after independent payment and inventory commits.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Model the seat transition
 
@@ -56,7 +74,46 @@ Put a waiting room or bounded admission token ahead of expensive writes. A token
 
 Payment timeout means unknown. Record the provider key before the call. If a late payment succeeds after the hold was lost, move to an explicit refund or reacquisition workflow; do not mark an already sold seat as available.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Ben cannot take Ana’s live hold; after expiry Ana cannot sell Ben’s newly held seat. |
+| Lose a reservation response and retry | The original hold ID returns. |
+| Pause expiry cleanup | Expired holds still fail checkout because the write checks expires_at. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 60,000 attempts/s × 20 seconds | 1.2 million attempts compete for 30,000 seats; most attempts cannot succeed. |
+| Five-minute hold lifetime | Expiration is a checked timestamp, not the time a cleanup worker happens to run. |
+| Four-seat cart limit | Decide whether all four seats are held atomically; this exercise requires all or none. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Reserve concert seats with expiring holds: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/ticket-inventory.svg)
+
+The database decides seat ownership. CloudFront makes the storefront cheap to serve but cannot make a stale seat map authoritative. SQS handles repair after independent payment and inventory commits.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local static/media delivery path | Amazon CloudFront: static storefront delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reservation entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: hold and checkout service | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: inventory authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: repair queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: reconciliation worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +125,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Ben cannot take Ana’s live hold; after expiry Ana cannot sell Ben’s newly held seat. |
-| Lose a reservation response and retry | The original hold ID returns. |
-| Pause expiry cleanup | Expired holds still fail checkout because the write checks expires_at. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Let users reserve any four adjacent seats. The search result is a suggestion; the selected set still needs one atomic claim. Quantify retries near sellout and choose when to stop searching rather than spin indefinitely.
 

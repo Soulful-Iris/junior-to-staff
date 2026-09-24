@@ -1,6 +1,6 @@
 # Reliability: count users, attempts, and work separately
 
-[Curriculum](../../../../README.md) · [Reliability and incident response](../../README.md)
+[Curriculum](../../../../README.md) · [Set reliability objectives and recover from failures](../../README.md)
 
 > “Our API has twenty worker slots. A dependency slows from 200 ms to two seconds. A dashboard says availability is acceptable, but users cannot finish requests. Show whether that conclusion follows from the counters; then contain the overload without pretending capacity is unlimited.”
 

@@ -1,30 +1,51 @@
-# 3. The incident you caused on purpose
+# Rehearse detection, rollback and service recovery
 
-## What you are building
+## Application background
 
-> Run one controlled incident exercise in a disposable staging service. A valid JSON configuration routes every title job to an unavailable host. Record when users are affected, when the responder detects it, when rollback happens and when useful work actually recovers.
+A reading-list service has an API, title jobs and runtime configuration. A bad title-provider setting can break jobs even when the deployment and configuration syntax look valid.
 
-**Working contract:** The drill has a named owner, bounded scope, observable stop condition and independently available rollback path. It produces a factual timeline and one completed repair. No recurring fault injection or production action is installed.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** One bounded staging incident record covering impact, detection, mitigation, verified recovery and the follow-up change.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Inject 10:00:00; first impact 10:00:05; alert 10:01:00 | Detection after first impact is 55 seconds. |
-| Rollback 10:02:00; backlog clear 10:03:30 | Mitigation after alert is 60 seconds; recovery after first impact is 205 seconds. |
-| Maximum five-minute exercise window assumption | Stop earlier if the scoped impact or emergency-access condition is violated. |
+Run one controlled incident exercise in a disposable staging service. A valid JSON configuration routes every title job to an unavailable host. Record when users are affected, when the responder detects it, when rollback happens and when useful work actually recovers.
 
-## Start with one working boundary
+**Required behavior:** The drill has a named owner, bounded scope, observable stop condition and independently available rollback path. It produces a factual timeline and one completed repair. No recurring fault injection or production action is installed.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/the_incident_you_caused_on_purpose.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/the_incident_you_caused_on_purpose.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/the_incident_you_caused_on_purpose.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/the_incident_you_caused_on_purpose.py). You can also [read or download the source here](../../../../examples/architecture-starts/the_incident_you_caused_on_purpose.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'detection_after_impact_s': 55, 'mitigation_after_alert_s': 60, 'recovery_after_impact_s': 205}
+Rollback is a milestone; backlog clear establishes recovery.
+```
+
+### Set up your implementation workspace
+
+Create `work/the-incident-you-caused-on-purpose/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/the_incident_you_caused_on_purpose.py
 | timeline_event | monotonic_elapsed,wall_time,evidence_ref | Observed milestones, not reconstructed guesses. |
 | repair_record | cause,change,owner,observed_result | One implemented improvement with evidence. |
 
-## AWS implementation
-
-![3. The incident you caused on purpose: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-incident-you-caused-on-purpose.svg)
-
-The exercise separates injection, detection, mitigation and recovery. A control plane that shares the failure can block rollback, so the recovery path needs its own availability assumptions.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Prepare a bounded staging drill
 
@@ -56,7 +71,46 @@ Restore the prior valid configuration through the independent path. Confirm the 
 
 Fix the discovered weakness: semantic configuration validation, independent rollback credentials, bounded retries or clearer evidence. Re-run only the relevant bounded scenario to see whether the repair changes the measured outcome. Keep the factual timeline and remaining limits.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Detection is 55 s, mitigation after alert 60 s and full recovery 205 s. |
+| Make the normal dashboard unavailable | The independent stop/restore path remains usable. |
+| Improve only alert delivery | Report faster detection, while backlog recovery may remain unchanged. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Inject 10:00:00; first impact 10:00:05; alert 10:01:00 | Detection after first impact is 55 seconds. |
+| Rollback 10:02:00; backlog clear 10:03:30 | Mitigation after alert is 60 seconds; recovery after first impact is 205 seconds. |
+| Maximum five-minute exercise window assumption | Stop earlier if the scoped impact or emergency-access condition is violated. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Rehearse detection, rollback and service recovery: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/the-incident-you-caused-on-purpose.svg)
+
+The exercise separates injection, detection, mitigation and recovery. A control plane that shares the failure can block rollback, so the recovery path needs its own availability assumptions.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local versioned configuration | AWS AppConfig: staging configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
+| Application or worker process | Amazon ECS: scoped title workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: staging backlog | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: incident evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Manual operational commands | AWS Systems Manager: independent recovery access | Package scoped run procedures and record execution results; validate the recovery procedure against actual stored state. |
+| Local file, object fixture or exported payload | Amazon S3: drill record | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +122,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Detection is 55 s, mitigation after alert 60 s and full recovery 205 s. |
-| Make the normal dashboard unavailable | The independent stop/restore path remains usable. |
-| Improve only alert delivery | Report faster detection, while backlog recovery may remain unchanged. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 The drill exposes a repair that cannot be completed immediately. Name the temporary operating limit and owner, and preserve the evidence rather than declaring the exercise successful solely because the service eventually recovered.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · The normal control plane fails
 

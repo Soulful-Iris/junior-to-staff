@@ -1,6 +1,6 @@
 # AWS · translate a mechanism into infrastructure
 
-[Curriculum](../../../README.md) · [Infrastructure as code and AWS](../README.md)
+[Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
 
 AWS is the implementation platform for this path. It is not a claim that all interviewers expect AWS product names. Explain the vendor-neutral requirement, then choose a service and show its operational consequences.
 

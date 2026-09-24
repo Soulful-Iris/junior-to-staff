@@ -25,23 +25,23 @@ whole round on high-level architecture when implementation was requested.
 
 ## 1 · Bookmark service
 
-[Bookmark service candidate page](../curriculum/03-production/01-system-design/problems/bookmark-service.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
+[Build a private bookmark API with ownership and version checks](../curriculum/03-production/01-system-design/problems/bookmark-service.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
 
 ## 2 · Notification platform
 
-[Notification platform candidate page](../curriculum/03-production/01-system-design/problems/notification-platform.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
+[Deliver notifications with preferences and priority](../curriculum/03-production/01-system-design/problems/notification-platform.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
 
 ## 3 · File synchronization
 
-[File synchronization candidate page](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
+[Synchronize files with resumable uploads and conflicts](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/file-synchronization.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
 
 ## 4 · Multi-tenant migration
 
-[Multi-tenant migration candidate page](../curriculum/04-scale-and-evolution/04-migrations/problems/multi-tenant-migration.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
+[Migrate tenant data with a resumable backfill](../curriculum/04-scale-and-evolution/04-migrations/problems/multi-tenant-migration.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
 
 ## 5 · AI support assistant
 
-[Support assistant candidate page](../curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
+[Draft support replies without granting tool authority](../curriculum/04-scale-and-evolution/03-ai-systems/problems/support-assistant.md) — opening contract, baseline, worked approach, changing assumptions, and assessment.
 
 ## Explain alternatives sympathetically
 
@@ -57,63 +57,63 @@ practice assumptions, not company production measurements.
 
 ### Security
 
-- [Audit trail: who changed this permission?](../curriculum/02-applications/05-security/problems/audit-trail.md)
-- [Tenant isolation: an ID in the URL is not authority](../curriculum/02-applications/05-security/problems/tenant-isolation.md)
+- [Record permission changes with durable audit evidence](../curriculum/02-applications/05-security/problems/audit-trail.md)
+- [Enforce tenant access in APIs, caches and exports](../curriculum/02-applications/05-security/problems/tenant-isolation.md)
 
 ### System design
 
-- [API gateway: route safely across many teams](../curriculum/03-production/01-system-design/problems/api-gateway-platform.md)
-- [API quota: which request spends the last token?](../curriculum/03-production/01-system-design/problems/api-quota.md)
-- [Calendar: reserve time without hiding conflicts](../curriculum/03-production/01-system-design/problems/calendar-availability.md)
-- [Checkout: paid twice, ordered once?](../curriculum/03-production/01-system-design/problems/checkout-payment.md)
-- [Collaborative editor: two people edit the same sentence](../curriculum/03-production/01-system-design/problems/collaborative-editor.md)
-- [Food delivery: quote the right nearby options](../curriculum/03-production/01-system-design/problems/food-delivery-marketplace.md)
-- [News aggregator: freshness without a write storm](../curriculum/03-production/01-system-design/problems/news-aggregator.md)
-- [Online judge: untrusted code gets a small box](../curriculum/03-production/01-system-design/problems/online-judge.md)
-- [Realtime chat: reconnect without losing the conversation](../curriculum/03-production/01-system-design/problems/realtime-chat.md)
-- [Ride sharing: one driver, one accepted ride](../curriculum/03-production/01-system-design/problems/rideshare-dispatch.md)
-- [Social feed: a popular author changes the shape](../curriculum/03-production/01-system-design/problems/social-feed.md)
-- [Ticket inventory: one seat, two buyers](../curriculum/03-production/01-system-design/problems/ticket-inventory.md)
-- [URL shortener: who owns the code?](../curriculum/03-production/01-system-design/problems/url-shortener.md)
-- [Video processing: accept once, publish when ready](../curriculum/03-production/01-system-design/problems/video-processing.md)
-- [Video streaming: keep playback smooth at the edge](../curriculum/03-production/01-system-design/problems/video-streaming-platform.md)
-- [Webhook delivery: a timeout is not a rejection](../curriculum/03-production/01-system-design/problems/webhook-delivery.md)
+- [Build versioned API routing and admission policies](../curriculum/03-production/01-system-design/problems/api-gateway-platform.md)
+- [Enforce API quotas across concurrent gateways](../curriculum/03-production/01-system-design/problems/api-quota.md)
+- [Reserve rooms and handle recurring local times](../curriculum/03-production/01-system-design/problems/calendar-availability.md)
+- [Build checkout that recovers from uncertain payments](../curriculum/03-production/01-system-design/problems/checkout-payment.md)
+- [Build a versioned shared document editor](../curriculum/03-production/01-system-design/problems/collaborative-editor.md)
+- [Build restaurant discovery and authoritative checkout](../curriculum/03-production/01-system-design/problems/food-delivery-marketplace.md)
+- [Collect news feeds with freshness and deduplication](../curriculum/03-production/01-system-design/problems/news-aggregator.md)
+- [Run programming submissions inside isolated workers](../curriculum/03-production/01-system-design/problems/online-judge.md)
+- [Build chat with durable messages and reconnect recovery](../curriculum/03-production/01-system-design/problems/realtime-chat.md)
+- [Assign drivers safely with expiring offers](../curriculum/03-production/01-system-design/problems/rideshare-dispatch.md)
+- [Build a following feed with current access checks](../curriculum/03-production/01-system-design/problems/social-feed.md)
+- [Reserve concert seats with expiring holds](../curriculum/03-production/01-system-design/problems/ticket-inventory.md)
+- [Build short links with unique aliases and safe redirects](../curriculum/03-production/01-system-design/problems/url-shortener.md)
+- [Process uploads and publish complete video renditions](../curriculum/03-production/01-system-design/problems/video-processing.md)
+- [Build resumable uploads and authorized video playback](../curriculum/03-production/01-system-design/problems/video-streaming-platform.md)
+- [Deliver signed webhooks with retries and replay](../curriculum/03-production/01-system-design/problems/webhook-delivery.md)
 
 ### CI/CD and progressive delivery
 
-- [Feature rollout: the switch that failed after 100%](../curriculum/03-production/02-delivery/problems/feature-rollout.md)
+- [Release invoice changes with stable cohorts and rollback](../curriculum/03-production/02-delivery/problems/feature-rollout.md)
 
 ### Observability
 
-- [Metrics platform: query the right time window](../curriculum/03-production/04-observability/problems/metrics-platform.md)
-- [Slow request: the healthy average hid a timeout](../curriculum/03-production/04-observability/problems/slow-request.md)
+- [Ingest and query metrics with bounded cardinality](../curriculum/03-production/04-observability/problems/metrics-platform.md)
+- [Find database-pool waiting in slow API requests](../curriculum/03-production/04-observability/problems/slow-request.md)
 
 ### Reliability and incident response
 
-- [Durable jobs: the queue drained, the work did not](../curriculum/03-production/05-reliability/problems/durable-jobs.md)
-- [Job scheduler: fire once on time, recover after a crash](../curriculum/03-production/05-reliability/problems/job-scheduler.md)
+- [Build restartable CSV export jobs](../curriculum/03-production/05-reliability/problems/durable-jobs.md)
+- [Schedule reports without duplicate logical runs](../curriculum/03-production/05-reliability/problems/job-scheduler.md)
 
 ### Data at scale
 
-- [Ad click aggregator: count late events once](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/ad-click-aggregator.md)
-- [Distributed cache: recover when one shard leaves](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-cache.md)
-- [Key-value store: acknowledge only what survives](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-key-value-store.md)
-- [Document search: results must follow permissions](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/document-search.md)
-- [Event ingestion: change a schema without losing yesterday](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/event-ingestion.md)
-- [Trending counts: the spike that breaks one partition](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/trending-counts.md)
-- [Typeahead: useful suggestions before the next keystroke](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/typeahead-search.md)
-- [Web crawler: be fast without attacking one site](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/web-crawler.md)
+- [Aggregate click events with late arrivals and reconciliation](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/ad-click-aggregator.md)
+- [Protect a database with versioned cache fills](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-cache.md)
+- [Implement replicated writes and fenced leadership](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/distributed-key-value-store.md)
+- [Search documents without leaking revoked content](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/document-search.md)
+- [Ingest events with durable acceptance and replay](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/event-ingestion.md)
+- [Compute trending topics from duplicate and late events](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/trending-counts.md)
+- [Build typeahead with stale-response protection](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/typeahead-search.md)
+- [Build a durable crawler with per-host limits](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/web-crawler.md)
 
 ### Performance and cost
 
-- [Overload: protect the requests that can finish](../curriculum/04-scale-and-evolution/02-performance-cost/problems/overload-shedding.md)
+- [Reject excess API work before queues grow without bound](../curriculum/04-scale-and-evolution/02-performance-cost/problems/overload-shedding.md)
 
 ### AI systems
 
-- [Knowledge assistant: the citation that lost access](../curriculum/04-scale-and-evolution/03-ai-systems/problems/knowledge-assistant.md)
-- [Personalized ranking: low latency and evidence of quality](../curriculum/04-scale-and-evolution/03-ai-systems/problems/personalized-ranking.md)
+- [Build a document assistant with current permissions](../curriculum/04-scale-and-evolution/03-ai-systems/problems/knowledge-assistant.md)
+- [Serve recommendations with safe fallback ranking](../curriculum/04-scale-and-evolution/03-ai-systems/problems/personalized-ranking.md)
 
 ### Migrations and recovery
 
-- [Data erasure: one request, nine copies](../curriculum/04-scale-and-evolution/04-migrations/problems/erasure-workflow.md)
-- [Regional failover: which acknowledged write survives?](../curriculum/04-scale-and-evolution/04-migrations/problems/regional-failover.md)
+- [Erase account data across stores and in-flight work](../curriculum/04-scale-and-evolution/04-migrations/problems/erasure-workflow.md)
+- [Design and rehearse regional write failover](../curriculum/04-scale-and-evolution/04-migrations/problems/regional-failover.md)

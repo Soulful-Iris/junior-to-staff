@@ -109,7 +109,7 @@ pull-through cache**, all of which remove network time rather than compute
 time.
 
 There is a real cost-versus-speed decision here that connects to
-[14 · Performance and cost](../../../curriculum/04-scale-and-evolution/02-performance-cost/README.md): a larger
+[Measure capacity and control performance costs](../../../curriculum/04-scale-and-evolution/02-performance-cost/README.md): a larger
 CodeBuild compute type or reserved capacity costs more per minute and finishes
 sooner, and whether that is worth it depends on how many engineer-minutes are
 spent waiting. That is a unit-cost calculation you can actually do, and it is
@@ -319,7 +319,7 @@ second review it deserves and the risky part gets the attention it needs.
 Third, the constraint that makes the sequence usable: **each step leaves the
 system working.** That is what allows the reviewer to reason about one step at
 a time and what allows you to stop halfway. It is the same expand/contract
-instinct from [12 · Delivery](../../../curriculum/03-production/02-delivery/README.md), applied to review
+instinct from [Deploy changes and control feature exposure](../../../curriculum/03-production/02-delivery/README.md), applied to review
 rather than to deployment.
 
 Fourth, and this is the part that is genuinely your judgment rather than a
@@ -509,7 +509,7 @@ The fixes are mostly boring and permanent: put the permission set on a group
 with more than one person in it, make the approval on a deploy environment a
 team rather than a name, and make sure the break-glass role can be assumed by
 somebody other than you (with an alarm on its use, per
-[11 · Security](../../../curriculum/02-applications/05-security/README.md)).
+[Enforce identity, ownership and tenant boundaries](../../../curriculum/02-applications/05-security/README.md)).
 
 The knowledge category has an AWS answer too: an **SSM Automation document** is
 a runbook that executes, which converts "only Iris knows the sequence" into "run
@@ -654,7 +654,7 @@ and is cheap, and it converts "do not touch that" into "go and try it".
 One measurement worth taking while you are here: ask the new joiner to follow
 your setup instructions exactly and note every place they diverge. That is the
 same test as
-[08 · System design](../../../curriculum/03-production/01-system-design/README.md)'s runbook check — the person
+[Design services from requirements to failure behavior](../../../curriculum/03-production/01-system-design/README.md)'s runbook check — the person
 following it finds what the person who wrote it cannot see.
 
 **What productionising it means**

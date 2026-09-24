@@ -1,6 +1,6 @@
 # Search race · the latest user intent wins
 
-[Curriculum](../../../../README.md) · [Frontend and full-stack integration](../../README.md)
+[Curriculum](../../../../README.md) · [Connect a usable interface to an API](../../README.md)
 
 > “Alice searches ‘cat’, then ‘car’. Cat finishes last and replaces the car results.
 > Some loaders ignore cancellation. Which response may change the screen?”

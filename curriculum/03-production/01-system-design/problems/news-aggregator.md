@@ -1,30 +1,52 @@
-# News aggregator: freshness without a write storm
+# Collect news feeds with freshness and deduplication
 
-## What you are building
+## Application background
 
-> Build a news reader that polls publisher feeds and groups duplicate stories. Editors expect responsive feeds to appear within a minute, but some publishers throttle requests or stop updating. Readers need to see when a source was last checked successfully.
+A news reader polls publisher feeds, stores articles and groups repeated coverage of the same story. Readers need both article results and an honest indication of source freshness.
 
-**Working contract:** Ingest RSS/Atom updates, retain source attribution and publish normalized stories with stable IDs. Freshness is measured per reachable source; a publisher outage must not be presented as an empty successful feed.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A per-source polling schedule, duplicate grouping and a feed response showing the last successful source check.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 50,000 feeds; one poll/minute baseline | About 833 requests/s before retries; coordinate by host as well as feed. |
-| 20 million daily readers | Reader traffic belongs behind a cacheable read model, separate from outbound polling capacity. |
-| Average feed response 50 KiB assumption | About 41 MiB/s if every poll returns full content; conditional requests can materially reduce transfer. |
+Build a news reader that polls publisher feeds and groups duplicate stories. Editors expect responsive feeds to appear within a minute, but some publishers throttle requests or stop updating. Readers need to see when a source was last checked successfully.
 
-## Start with one working boundary
+**Required behavior:** Ingest RSS/Atom updates, retain source attribution and publish normalized stories with stable IDs. Freshness is measured per reachable source; a publisher outage must not be presented as an empty successful feed.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/news_aggregator.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/news_aggregator.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/news_aggregator.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/news_aggregator.py). You can also [read or download the source here](../../../../examples/architecture-starts/news_aggregator.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+upserted ('publisher-a', '42')
+upserted ('publisher-a', '42')
+304 response: retain existing articles {('publisher-a', '42'): {'url': 'https://example.invalid/story', 'title': 'Corrected title'}}
+```
+
+### Set up your implementation workspace
+
+Create `work/news-aggregator/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/news_aggregator.py
 | articles | source_id,source_item_id,canonical_url,revision | Provenance-preserving normalized records. |
 | clusters | cluster_id,article_ids,merge_version | Reversible grouping; not destructive deduplication. |
 
-## AWS implementation
-
-![News aggregator: freshness without a write storm: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/news-aggregator.svg)
-
-Polling and reader delivery have different scaling patterns. Conditional requests save transfer, while source/item identity preserves corrections without manufacturing duplicate stories.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Poll one source correctly
 
@@ -56,7 +72,46 @@ Keep publisher item IDs, observed canonical URLs, published/updated times and re
 
 Index published stories and serve bounded pages with cache headers. Show source freshness and partial ingestion status in the editor view. A feed disappearing should trigger a source incident, not mass deletion of historical articles.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | A corrected title replaces one source item; 304 retains the existing record. |
+| Return 429 from one publisher | That host backs off while unrelated hosts continue. |
+| Merge two stories incorrectly | Editors can split the cluster without losing either source article. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 50,000 feeds; one poll/minute baseline | About 833 requests/s before retries; coordinate by host as well as feed. |
+| 20 million daily readers | Reader traffic belongs behind a cacheable read model, separate from outbound polling capacity. |
+| Average feed response 50 KiB assumption | About 41 MiB/s if every poll returns full content; conditional requests can materially reduce transfer. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Collect news feeds with freshness and deduplication: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/news-aggregator.svg)
+
+Polling and reader delivery have different scaling patterns. Conditional requests save transfer, while source/item identity preserves corrections without manufacturing duplicate stories.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local event dispatch | Amazon EventBridge: polling wake-up schedule | Define event rules/targets and delivery failure handling; persist logical event/run identity in the application. |
+| Application or worker process | Amazon ECS: feed fetch workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: source and article state | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local file, object fixture or exported payload | Amazon S3: original feed snapshots | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local derived search records | Amazon OpenSearch Service: story read index | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
+| Local static/media delivery path | Amazon CloudFront: public read delivery | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | A corrected title replaces one source item; 304 retains the existing record. |
-| Return 429 from one publisher | That host backs off while unrelated hosts continue. |
-| Merge two stories incorrectly | Editors can split the cluster without losing either source article. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add multilingual story grouping. Preserve original language and attribution, and evaluate false merges separately from missed duplicates; similarity is a candidate signal, not identity.
 

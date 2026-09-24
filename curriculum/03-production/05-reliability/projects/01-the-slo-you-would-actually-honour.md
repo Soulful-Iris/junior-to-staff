@@ -1,30 +1,52 @@
-# 1. The SLO you would actually honour
+# Define and calculate a user-facing save SLO
 
-## What you are building
+## Application background
 
-> Define a bookmark-save reliability objective with product and operations. Product asks for 99.9% successful eligible saves over thirty days. One failed minute contains a large traffic spike, so counting bad minutes gives a different answer from counting failed user requests.
+Users care whether a bookmark save succeeds within its promised boundary. A service-level objective measures those eligible user operations over a declared window, rather than averaging machine uptime.
 
-**Working contract:** Write the eligibility rule, success definition, measurement point and reporting window. The request-based SLO uses summed good and total requests, including declared timeout/server-failure outcomes. Missing telemetry and zero traffic are explicit states.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A written save-success definition and a request-weighted SLO/error-budget calculation with explicit exclusions and missing-data treatment.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 1,000,000 eligible requests; 10,000 failures | 99% observed success, not 99.9%. |
-| 99.9% objective | Error budget is 1,000 failures; 10,000 failures consume ten times that budget. |
-| Quiet interval 1/10 failures; busy interval 0/990 | Overall failure rate is 1/1,000 = 0.1%, not the mean of interval percentages. |
+Define a bookmark-save reliability objective with product and operations. Product asks for 99.9% successful eligible saves over thirty days. One failed minute contains a large traffic spike, so counting bad minutes gives a different answer from counting failed user requests.
 
-## Start with one working boundary
+**Required behavior:** Write the eligibility rule, success definition, measurement point and reporting window. The request-based SLO uses summed good and total requests, including declared timeout/server-failure outcomes. Missing telemetry and zero traffic are explicit states.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/01_the_slo_you_would_actually_honour.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/01_the_slo_you_would_actually_honour.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/01_the_slo_you_would_actually_honour.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/01_the_slo_you_would_actually_honour.py). You can also [read or download the source here](../../../../examples/architecture-starts/01_the_slo_you_would_actually_honour.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'success': 0.99, 'allowed_failures': 1000.0, 'budget_used': 10.0}
+{'success': 0.999, 'allowed_failures': 1.0, 'budget_used': 1.0}
+{'state': 'no eligible traffic'}
+```
+
+### Set up your implementation workspace
+
+Create `work/01-the-slo-you-would-actually-honour/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/01_the_slo_you_would_actually_honour.py
 | slo_window | start,end,good,total,missing_coverage | Aggregated evidence and coverage. |
 | budget_policy | objective,owner,response_actions | What the team changes when reliability degrades. |
 
-## AWS implementation
-
-![1. The SLO you would actually honour: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-the-slo-you-would-actually-honour.svg)
-
-The database commit helps define durable success, while the request outcome determines what the user experienced. A CloudWatch ratio is only meaningful after those semantics are agreed.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Choose the user operation
 
@@ -54,9 +70,47 @@ Sum counts across instances and intervals before dividing. Handle counter resets
 
 ### 4. Agree on an actionable response
 
-Name owners for reliability work, risky feature exposure and dependency remediation when the budget is exhausted. Keep the SLO as an operating decision for the application; this curriculum update does not add a publishing gate.
+Name owners for reliability work, risky feature exposure and dependency remediation when the budget is exhausted. Keep the SLO as an operating decision for the application; the supplied local example does not add a publishing gate.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | One million requests and 10,000 failures show 99% success and 10× budget use. |
+| Use unequal traffic intervals | Sum counts before calculating the ratio. |
+| Observe zero traffic | Display no eligible traffic rather than 100% success. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 1,000,000 eligible requests; 10,000 failures | 99% observed success, not 99.9%. |
+| 99.9% objective | Error budget is 1,000 failures; 10,000 failures consume ten times that budget. |
+| Quiet interval 1/10 failures; busy interval 0/990 | Overall failure rate is 1/1,000 = 0.1%, not the mean of interval percentages. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Define and calculate a user-facing save SLO: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-the-slo-you-would-actually-honour.svg)
+
+The database commit helps define durable success, while the request outcome determines what the user experienced. A CloudWatch ratio is only meaningful after those semantics are agreed.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: user operation entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: save application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: bookmark authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: SLI counters and windows | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Local file, object fixture or exported payload | Amazon S3: SLO decision record | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +122,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | One million requests and 10,000 failures show 99% success and 10× budget use. |
-| Use unequal traffic intervals | Sum counts before calculating the ratio. |
-| Observe zero traffic | Display no eligible traffic rather than 100% success. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Product instead wants 99.9% of one-minute windows to be usable. Define usable per window and the low-traffic rule; that is a different SLO with a different denominator.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · Traffic is uneven
 

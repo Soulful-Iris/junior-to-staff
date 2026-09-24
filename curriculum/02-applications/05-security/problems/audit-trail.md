@@ -1,30 +1,51 @@
-# Audit trail: who changed this permission?
+# Record permission changes with durable audit evidence
 
-## What you are building
+## Application background
 
-> You maintain access control for a reporting product. A customer says that a confidential report became public at 14:03. Build the permission-change endpoint and an investigation view that can identify the actor, the exact change, and any missing export to the retained archive.
+A reporting application lets administrators change who can see a report. Investigators need a timeline of who changed access, what changed and whether the archive received the event.
 
-**Working contract:** PATCH /reports/{id}/permissions commits the permission version and its audit intent together. GET /audit accepts a tenant-scoped resource ID and shows archive completeness separately from search freshness.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A permission-change operation that commits its audit record atomically, plus an investigation view and resumable archive export.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 2,000 changes/s peak; 1 KiB envelope | About 2 MiB/s before storage overhead. If sustained all day, roughly 177 GB/day decimal; do not extrapolate a peak into a retention bill without a duty cycle. |
-| Seven-year exercise retention | Separate retained evidence from a short-lived search index; the real retention policy is a product/legal decision. |
-| Archive lag objective: 60 seconds | At peak a one-minute relay outage leaves 120,000 events to reconcile. |
+You maintain access control for a reporting product. A customer says that a confidential report became public at 14:03. Build the permission-change endpoint and an investigation view that can identify the actor, the exact change, and any missing export to the retained archive.
 
-## Start with one working boundary
+**Required behavior:** PATCH /reports/{id}/permissions commits the permission version and its audit intent together. GET /audit accepts a tenant-scoped resource ID and shows archive completeness separately from search freshness.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/audit_trail.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/audit_trail.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/audit_trail.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/audit_trail.py). You can also [read or download the source here](../../../../examples/architecture-starts/audit_trail.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+After simulated crash before export: [('report-7', 2, 'team')]
+Still available to relay: [('report-7:2', '{"actor": "ana", "before": "private", "after": "team"}')]
+```
+
+### Set up your implementation workspace
+
+Create `work/audit-trail/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/audit_trail.py
 | audit_outbox | event_id,resource_version,actor,change | Immutable event identity and verified actor; written in the permission transaction. |
 | archive_receipts | event_id,object_key,object_version,checksum | Tracks durable export evidence, not just a successful queue send. |
 
-## AWS implementation
-
-![Audit trail: who changed this permission?: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/audit-trail.svg)
-
-Aurora establishes which change happened. S3 Object Lock protects the retained object versions after export. Athena reads the archive without making a mutable search index the sole evidence source.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Implement the permission transaction
 
@@ -56,7 +71,46 @@ Query by tenant, report and time range. Show event sequence, actor and before/af
 
 The application may append archive objects but cannot overwrite evidence or shorten retention. Give investigation roles read-only access by scope; record evidence access separately. Practice recreating the search projection from retained records.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The permission is version 2 and its unexported audit event remains available. |
+| Stop the relay for one minute | Permission commits remain auditable in the outbox; archive lag becomes visible. |
+| Remove the search projection | An authorized investigator can still reconstruct changes from retained evidence. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 2,000 changes/s peak; 1 KiB envelope | About 2 MiB/s before storage overhead. If sustained all day, roughly 177 GB/day decimal; do not extrapolate a peak into a retention bill without a duty cycle. |
+| Seven-year exercise retention | Separate retained evidence from a short-lived search index; the real retention policy is a product/legal decision. |
+| Archive lag objective: 60 seconds | At peak a one-minute relay outage leaves 120,000 events to reconcile. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Record permission changes with durable audit evidence: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/audit-trail.svg)
+
+Aurora establishes which change happened. S3 Object Lock protects the retained object versions after export. Athena reads the archive without making a mutable search index the sole evidence source.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: permission API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: permission application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: transactional evidence source | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Python operation or worker function | AWS Lambda: archive relay | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local retained audit export | Amazon S3 Object Lock: retained evidence archive | Write immutable export objects and define retention/access policy; document what prevents alteration and how exports reconcile. |
+| Local investigation/report query | Amazon Athena: investigation query engine | Define an archive schema and catalog, query the exported data and constrain query access and cost. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The permission is version 2 and its unexported audit event remains available. |
-| Stop the relay for one minute | Permission commits remain auditable in the outbox; archive lag becomes visible. |
-| Remove the search projection | An authorized investigator can still reconstruct changes from retained evidence. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Design recovery when the database is restored to yesterday but the archive contains today’s events. Identify the latest proven resource version before permitting new changes. An append-only bucket cannot repair an application that reuses old event identities.
 

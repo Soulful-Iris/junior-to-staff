@@ -1,6 +1,6 @@
 # Binary search boundary: find the first true position
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [ordered data](../../lessons/04-order.md) and [half-open bounds](../04-longest-unique-window/README.md).
 

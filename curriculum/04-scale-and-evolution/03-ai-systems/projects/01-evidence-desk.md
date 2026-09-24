@@ -1,30 +1,52 @@
-# Evidence desk: a document assistant with citations and revocation
+# Build evidence-backed answers with permission rechecks
 
-## What you are building
+## Application background
 
-> Build an evidence desk for an internal operations team. Ana can read the expense policy but not the acquisition folder. She asks a question, the system retrieves relevant excerpts, and one source is revoked before the answer is returned. Deliver an answer with usable evidence or a clear abstention.
+An internal operations team asks policy questions. The answer application retrieves source excerpts that the current employee may read, then returns citations or says it lacks usable evidence.
 
-**Working contract:** Current authorization applies before reading source text and again before returning an answer. Citations identify real document versions and ranges. Retrieved instructions cannot expand tool or document access.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Extend the supplied assistant workflow with an evidence interface and explicit handling of revocation between retrieval and response.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 2,000 employees; 100,000 documents assumption | Start with a small fixture corpus, then estimate index size from actual chunk count and embedding representation. |
-| 20 questions/s peak; four-second response target | Bound retrieval and inference concurrency; report which stage consumes the budget. |
-| Three evidence chunks per answer initial bound | Small context makes citation mapping and contradictory-source review tractable. |
+Build an evidence desk for an internal operations team. Ana can read the expense policy but not the acquisition folder. She asks a question, the system retrieves relevant excerpts, and one source is revoked before the answer is returned. Deliver an answer with usable evidence or a clear abstention.
 
-## Start with one working boundary
+**Required behavior:** Current authorization applies before reading source text and again before returning an answer. Citations identify real document versions and ranges. Retrieved instructions cannot expand tool or document access.
 
-Run the existing complete local reference workflow from the repository root:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/ai-systems/demo.py assistant
 ```
 
-The reference uses local fixtures to make the workflow inspectable. The implementation walkthrough and source notes are retained below. Add real model/provider adapters only after the local state transitions and evidence are clear.
+**Supplied code:** [AI workflow implementation](https://github.com/Soulful-Iris/junior-to-staff/tree/main/examples/ai-systems), starting at [demo.py](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/ai-systems/demo.py). These are local workflows with fixture providers and temporary storage. They do not include the user interface or connect to the AWS services in the diagram.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+[
+  {
+    "request": {
+      "action": "document.put",
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/01-evidence-desk/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ The reference uses local fixtures to make the workflow inspectable. The implemen
 | answer_run | run_id,subject,query,source_refs | Traceable retrieval and response decision. |
 | citation | source_version,range,claim | A support reference that can be inspected. |
 
-## AWS implementation
-
-![Evidence desk: a document assistant with citations and revocation: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-evidence-desk.svg)
-
-This cloud mapping preserves the local reference’s evidence and authorization boundaries. The model is one adapter inside the workflow, not the component that decides what Ana may read.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Run the reference and inspect evidence
 
@@ -56,7 +72,46 @@ Generate only from the selected evidence set, keep prompt/model/index versions, 
 
 Show citations and source dates, abstain when evidence is absent or contradictory, and retain redacted diagnostic evidence. Compare the generated workflow with the search-only baseline on the same supported/unsupported questions.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the existing assistant demo | Inspect source references and the explicit revocation/abstention behavior in its output. |
+| Remove all supporting evidence | Return abstention or authorized search results rather than an invented citation. |
+| Change ACL during generation | Restricted evidence does not appear in the returned answer. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 2,000 employees; 100,000 documents assumption | Start with a small fixture corpus, then estimate index size from actual chunk count and embedding representation. |
+| 20 questions/s peak; four-second response target | Bound retrieval and inference concurrency; report which stage consumes the budget. |
+| Three evidence chunks per answer initial bound | Small context makes citation mapping and contradictory-source review tractable. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build evidence-backed answers with permission rechecks: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/01-evidence-desk.svg)
+
+This cloud mapping preserves the local reference’s evidence and authorization boundaries. The model is one adapter inside the workflow, not the component that decides what Ana may read.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: question API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: evidence orchestration | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local derived search records | Amazon OpenSearch Service: excerpt index | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
+| Deterministic model response fixture | Amazon Bedrock: answer generation | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: policy and run metadata | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local file, object fixture or exported payload | Amazon S3: source documents | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the existing assistant demo | Inspect source references and the explicit revocation/abstention behavior in its output. |
-| Remove all supporting evidence | Return abstention or authorized search results rather than an invented citation. |
-| Change ACL during generation | Restricted evidence does not appear in the returned answer. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add a document revision that contradicts an older policy. Decide which version is authoritative and show the conflict explicitly instead of asking the model to choose without a policy.
 

@@ -1,30 +1,53 @@
-# Multi-tenant migration
+# Migrate tenant data with a resumable backfill
 
-## What you are building
+## Application background
 
-> Move a 10 TB multi-tenant service from its old database to a new schema without asking 12-week-old mobile clients to upgrade. A security deadline is four weeks away. Build a resumable per-tenant backfill and a controlled write-authority handoff.
+A SaaS application stores each customer's records in an old schema. A replacement schema must serve the same API while tenants move individually and older clients remain supported.
 
-**Working contract:** Each tenant has a recorded migration state and one write authority. Backfill, updates and deletions carry monotonically comparable source versions. Reads never resurrect an older row after a newer deletion.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A per-tenant migration ledger, resumable copy command, reconciliation report and controlled switch of the authoritative writer.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 10 TB at 100 MB/s effective copy | 10,000,000 MB / 100 = 100,000 s ≈ 27.8 hours ideal; retries, indexes and live changes extend this. |
-| Security deadline: four weeks | A full client replacement cannot fit a 12-week compatibility window; add an adapter or narrow the deadline scope. |
-| Live writes: 1,000/s assumption | A one-hour CDC pause adds 3.6 million changes; copy throughput alone does not prove catch-up. |
+Move a 10 TB multi-tenant service from its old database to a new schema without asking 12-week-old mobile clients to upgrade. A security deadline is four weeks away. Build a resumable per-tenant backfill and a controlled write-authority handoff.
 
-## Start with one working boundary
+**Required behavior:** Each tenant has a recorded migration state and one write authority. Backfill, updates and deletions carry monotonically comparable source versions. Reads never resurrect an older row after a newer deletion.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/multi_tenant_migration.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/multi_tenant_migration.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/multi_tenant_migration.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/multi_tenant_migration.py). You can also [read or download the source here](../../../../examples/architecture-starts/multi_tenant_migration.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+5 applied
+6 applied
+4 ignored stale/duplicate
+Target: {'acme:7': {'version': 6, 'value': None}} visible: None
+```
+
+### Set up your implementation workspace
+
+Create `work/multi-tenant-migration/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/multi_tenant_migration.py
 | target_records | tenant,id,source_version,deleted | Conditional apply prevents stale backfill and update replay. |
 | reconciliation | tenant,range,count,canonical_hash | Evidence that copied data agrees at a defined watermark. |
 
-## AWS implementation
-
-![Multi-tenant migration: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/multi-tenant-migration.svg)
-
-DMS can move rows and changes, but application compatibility, semantic transformations and write fencing remain your responsibility. The design uses per-tenant cutover so one problematic customer does not force a global switch.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Make old and new contracts coexist
 
@@ -56,7 +73,46 @@ Compare canonical records or range hashes at an aligned source watermark. Accoun
 
 Drain or fence old writers, apply the final change watermark, then advance the tenant’s writer epoch and routing state. A DNS change alone is not a write fence. Before new-format writes, document whether rollback is still possible or requires reverse transformation.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Version 6 deletion remains after late version 4 backfill. |
+| Restart halfway through a range | The same range replays without duplicate logical rows. |
+| Send an old-client write after cutover | The compatibility adapter accepts the supported contract; the fenced old database rejects direct writes. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 10 TB at 100 MB/s effective copy | 10,000,000 MB / 100 = 100,000 s ≈ 27.8 hours ideal; retries, indexes and live changes extend this. |
+| Security deadline: four weeks | A full client replacement cannot fit a 12-week compatibility window; add an adapter or narrow the deadline scope. |
+| Live writes: 1,000/s assumption | A one-hour CDC pause adds 3.6 million changes; copy throughput alone does not prove catch-up. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Migrate tenant data with a resumable backfill: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/multi-tenant-migration.svg)
+
+DMS can move rows and changes, but application compatibility, semantic transformations and write fencing remain your responsibility. The design uses per-tenant cutover so one problematic customer does not force a global switch.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: existing write authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local snapshot/change-copy input | AWS DMS: change transport | Configure source/target replication and observe copy positions; implement application cutover and reconciliation separately. |
+| Application or worker process | Amazon ECS: versioned apply workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: target authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local versioned configuration | AWS AppConfig: tenant routing configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: migration operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,22 +125,17 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Version 6 deletion remains after late version 4 backfill. |
-| Restart halfway through a range | The same range replays without duplicate logical rows. |
-| Send an old-client write after cutover | The compatibility adapter accepts the supported contract; the fenced old database rejects direct writes. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 The target accepts data the old schema cannot represent. Mark that first write as an explicit rollback boundary. Design a forward repair path and explain why flipping traffic back would lose meaning even if every server is healthy.
 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [Migrations and recovery](../README.md)
+[Curriculum](../../../README.md) · [Migrate live systems and verify recovery](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

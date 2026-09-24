@@ -1,6 +1,6 @@
 # 07 · Shipping it — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [Provision and operate application infrastructure on AWS](README.md) first
 
 Five projects, rising. The section said shipping is three questions — what
 exactly did I deploy, where did its configuration come from, who can read its

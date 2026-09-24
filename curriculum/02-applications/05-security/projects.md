@@ -1,6 +1,6 @@
 # 11 · Security — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Enforce identity, ownership and tenant boundaries](README.md) first
 
 Five projects, and all five produce a check that can go red — which is the
 section's standing rule, because *"we have never had an authorisation

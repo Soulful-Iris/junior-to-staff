@@ -1,13 +1,36 @@
-# 5. The honest log
+# Record and revisit uncertain engineering decisions
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+When extending a reading-list service, an engineer may accept unfamiliar timeout, retry or default-value behavior. Later maintainers need the assumption and its evidence, not just a confident comment.
 
-> You accepted an unfamiliar retry helper because its tests passed. A week later, a duplicate write appears. Keep a record that lets another engineer reconstruct what you assumed and choose a repair. What would make an entry actionable?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../working-with-ai.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Create a dated decision log and revisit at least three entries with observed evidence and an explicit next action.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Create `DECISIONS.md` with date, decision, assumption, evidence, owner and revisit trigger. Record an actual choice while changing the local API.
+
+2. Add entries covering timeout behavior, an unverified duplicate-write claim and a numeric fallback that treats zero as missing. Run the relevant examples and attach the observed values or responses.
+
+3. Revisit each entry and classify it as supported, unresolved debt or wrong. For a wrong assumption, attach the correction and changed observation; assign an owner and next step to unresolved debt.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | Entry says only “accepted async stuff.” | Mark unusable and replace it with the concrete assumption and falsifying check. |
 | Scope | A judgment record; counts are descriptive and not an individual performance score. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Make three real decision records: one timeout you verified, one idempotency guarantee you have not verified, and one `quantity || old` fallback that breaks when quantity is zero. **Show:** a failing zero-value test and the corrected code next to the dated log entry. The artifact should let a stranger see what you trusted, why, and what would falsify it.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** The DECISIONS.md the section told you to start, run as a full loop: one line at every moment you accept something you do not fully understand, across a week of real P1 work — then a revisit that ends each entry as fine, debt or wrong, with an action attached. The deliverable is the three counts.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The author leaves | A different engineer inherits the debt entry. What needs to survive? Predict which boundary must change before opening the design. | Include affected commit, code location, contract, owner, and a runnable probe. The handoff succeeds when the new owner can execute the check without the original conversation. |
-| Lead · The assumption changes | The GET becomes a billable provider operation. Does the old “safe retry” verdict still apply? State what evidence would make you reject your first design. | Reopen the decision because its failure model changed. Require provider idempotency or an explicit uncertain-outcome/reconciliation state; a prior fine verdict is scoped to prior assumptions. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -105,13 +103,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Bring one independently replayed decision and its falsifying input. **Additional lead scope:** Define review cadence and protect uncertainty reporting from punitive metrics. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up with a week of recorded acceptances and three counts you cannot get
 any other way: how many were fine, how many were debt, how many were wrong.*
@@ -120,7 +118,7 @@ any other way: how many were fine, how many were debt, how many were wrong.*
 
 The `DECISIONS.md` the section told you to start, run as a full loop: one line
 at every moment you accept something you do not fully understand, across a week
-of real P1 work — then a revisit that ends each entry as *fine*, *debt* or
+of real Stage 1 reading-list work — then a revisit that ends each entry as *fine*, *debt* or
 *wrong*, with an action attached. The deliverable is the three counts.
 
 **The thought process**
@@ -219,3 +217,6 @@ now you were running on the feeling of it.
 ---
 
 [Back to the ordered project index](../../ai-projects.md)
+
+
+</details>

@@ -1,6 +1,6 @@
 # Lab 3 · a job may be delivered twice; its result is stored once
 
-[Curriculum](../../../../../README.md) · [Infrastructure as code and AWS](../../../README.md)
+[Curriculum](../../../../../README.md) · [Provision and operate application infrastructure on AWS](../../../README.md)
 
 Build a queue worker whose *entire effect* is one conditional DynamoDB result item. Then demonstrate where that guarantee ends. No email, payment, or external side effect is hidden behind the word “idempotent.”
 

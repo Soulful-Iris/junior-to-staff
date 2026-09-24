@@ -1,6 +1,6 @@
 # Frontend
 
-[Curriculum](../../README.md) · [Frontend and full-stack integration](README.md)
+[Curriculum](../../README.md) · [Connect a usable interface to an API](README.md)
 
 > Project connection · feeds **P1 (it works)**
 

@@ -1,30 +1,52 @@
-# Realtime chat: reconnect without losing the conversation
+# Build chat with durable messages and reconnect recovery
 
-## What you are building
+## Application background
 
-> Build team chat for field-support crews. A phone loses its connection after sending a message and retries on reconnect. Another member joins after messages were sent. The interface must distinguish saved, delivered and read, without showing a duplicate conversation entry.
+Field-support teams exchange messages in shared conversations. Phones reconnect after losing network access; users need to distinguish a saved message from one another person has actually received or read.
 
-**Working contract:** POST /conversations/{id}/messages uses a client_message_id. Acknowledged means the message is durably stored. Reconnect reads after a conversation cursor; delivered and read receipts describe particular devices or users.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A durable send operation with a client message ID, a reconnect cursor and separate delivery/read receipts.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Two million daily users; 30,000 messages/s peak | At 1 KiB/message that is about 30 MiB/s before indexes, replicas and attachments. |
-| Groups of 2–500 members | A 500-member conversation can turn one write into 499 delivery attempts; fan-out costs differ from stored message rate. |
-| One-year history | Estimate from average messages/day; attachments need a separate size and retention model. |
+Build team chat for field-support crews. A phone loses its connection after sending a message and retries on reconnect. Another member joins after messages were sent. The interface must distinguish saved, delivered and read, without showing a duplicate conversation entry.
 
-## Start with one working boundary
+**Required behavior:** POST /conversations/{id}/messages uses a client_message_id. Acknowledged means the message is durably stored. Reconnect reads after a conversation cursor; delivered and read receipts describe particular devices or users.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/realtime_chat.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/realtime_chat.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/realtime_chat.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/realtime_chat.py). You can also [read or download the source here](../../../../examples/architecture-starts/realtime_chat.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'sequence': 1, 'sender': 'ana', 'text': 'On my way'}
+{'sequence': 1, 'sender': 'ana', 'text': 'On my way'}
+Reconnect after sequence 0: [{'sequence': 1, 'sender': 'ana', 'text': 'On my way'}]
+```
+
+### Set up your implementation workspace
+
+Create `work/realtime-chat/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/realtime_chat.py
 | client_operations | sender,client_message_id,payload_hash | Retry identity; changed text under the same ID conflicts. |
 | member_cursors | conversation,member,delivered_seq,read_seq | Monotonic receipt positions; membership gates history. |
 
-## AWS implementation
-
-![Realtime chat: reconnect without losing the conversation: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/realtime-chat.svg)
-
-WebSockets carry live updates but are not the history authority. DynamoDB fits conversation-keyed access; PostgreSQL is a practical smaller baseline if sequence assignment and membership transactions dominate.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Store before acknowledging
 
@@ -56,7 +72,46 @@ Show saved once the server commit is known, delivered after a device acknowledge
 
 Check current membership before history reads and attachment downloads, and define access to messages from before joining. On removal, stop new push delivery and reject reads even if cached conversation metadata is old.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Two sends with one client ID produce one stored message and the same sequence. |
+| Disconnect after server commit | Reconnect replay includes the message; retry does not duplicate it. |
+| Remove a member with a warm history cache | New reads and attachment access are denied. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Two million daily users; 30,000 messages/s peak | At 1 KiB/message that is about 30 MiB/s before indexes, replicas and attachments. |
+| Groups of 2–500 members | A 500-member conversation can turn one write into 499 delivery attempts; fan-out costs differ from stored message rate. |
+| One-year history | Estimate from average messages/day; attachments need a separate size and retention model. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build chat with durable messages and reconnect recovery: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/realtime-chat.svg)
+
+WebSockets carry live updates but are not the history authority. DynamoDB fits conversation-keyed access; PostgreSQL is a practical smaller baseline if sequence assignment and membership transactions dominate.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: WebSocket connections | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Application or worker process | Amazon ECS: conversation application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: message and cursor store | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local event sequence or input stream | Amazon Kinesis: committed delivery events | Implement producer/consumer adapters, partition keys, durable acceptance and checkpoint/replay behavior. |
+| Application or worker process | Amazon ECS: push delivery workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local file, object fixture or exported payload | Amazon S3: private attachments | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Two sends with one client ID produce one stored message and the same sequence. |
-| Disconnect after server commit | Reconnect replay includes the message; retry does not duplicate it. |
-| Remove a member with a warm history cache | New reads and attachment access are denied. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add cross-region conversations. State which region orders a conversation and what happens during its outage. Global delivery does not imply independent regions can allocate the same conversation sequence safely.
 

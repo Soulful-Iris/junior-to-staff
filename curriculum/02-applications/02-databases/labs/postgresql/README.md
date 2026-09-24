@@ -1,6 +1,6 @@
 # Two buyers, one unit, and a transaction that is not enough
 
-[Curriculum](../../../../README.md) · [Databases and transactions](../../README.md)
+[Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
 
 **Constructed candidate brief:** “Ana and Ben each reserve the last unit. Both
 read `available=1` before either writes. Show the exact SQL and expected rows.

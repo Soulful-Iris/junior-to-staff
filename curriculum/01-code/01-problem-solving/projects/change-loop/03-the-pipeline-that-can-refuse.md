@@ -1,13 +1,36 @@
-# 3. The pipeline that can refuse
+# Demonstrate CI enforcement in a disposable repository
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A project can display successful automation while an important ownership rule is never checked. This exercise studies repository policy using a disposable application, not this guide's publishing workflow.
 
-> Your reading-list repository shows a green CI badge, yet a cross-user edit reached main. Build a gate that actually blocks this harm. What exactly does “green” prove, and who can bypass it?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** In a separate exercise repository, demonstrate the difference between a failing job and a merge rule that actually requires that job.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Copy the starter into a repository you own specifically for this exercise. Identify four harms and the job responsible for each: invalid build, formatting, inert secret fixture and unauthorized edits.
+
+2. Configure the exercise jobs and required statuses in that disposable repository. Create a separate deliberately invalid change for each harm and observe both the job result and whether the merge is refused. Never use a real secret as a fixture.
+
+3. Record workflow revision, checked commit, required-status configuration and any bypass. Keep the bad changes unmerged. Do not alter this curriculum repository's automatic publication from main.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | A failed ownership job is advisory rather than required. | The exercise fails even though the job is red: merging remains possible. |
 | Scope | Test repository and inert secret fixtures; never plant a real credential. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Name four required jobs—build/test, format/lint, secret scan, owner isolation. Make four disposable branches, each with one intentional violation. **Show:** the matching red job and blocked merge for each branch, then restore the original branch. A red *advisory* ownership job does not meet this project.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** Four checks on P1 as separate named jobs — build-and-test, format-and-lint, secret scan, and the invariant that nobody can touch someone else's items — made required by branch protection. Plus the red catalogue: one deliberately bad PR per check, refused by that check, kept closed as evidence.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · An administrator can bypass | An emergency change uses an authorized bypass. How will reviewers know the gate was skipped? Predict which boundary must change before opening the design. | Record actor, commit, reason, and follow-up validation. The bypass remains an explicit operating decision; pretending it cannot happen prevents measuring it. Replay with a deliberately failed check in a sandbox repository. |
-| Lead · A workflow changes its own gate | An untrusted PR edits the workflow and asks for AWS credentials. Where is the trust boundary? State what evidence would make you reject your first design. | Keep untrusted code execution separate from privileged deployment. Pin OIDC trust to the intended repository and execution context; do not expose a deploy role to arbitrary fork code. A green check is evidence about one commit and one workflow, not permission to execute it with secrets. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -106,20 +104,20 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Show both refusal and merge enforcement for every named harm. **Additional lead scope:** Define emergency authority, audit review, and credential boundaries. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up unable to merge into main until four named checks pass, with one
 closed PR per check proving each can actually go red.*
 
 **Build**
 
-Four checks on P1 as separate named jobs — build-and-test, format-and-lint,
+Four checks on Stage 1 reading-list as separate named jobs — build-and-test, format-and-lint,
 secret scan, and the invariant that nobody can touch someone else's items —
 made required by branch protection. Plus the red catalogue: one deliberately
 bad PR per check, refused by that check, kept closed as evidence.
@@ -231,3 +229,6 @@ where red is reachable — you now hold four reds that prove yours is.
 ---
 
 [Back to the ordered project index](../../change-projects.md)
+
+
+</details>

@@ -1,6 +1,6 @@
 # Lab 1 · create once, then compare intent
 
-[Curriculum](../../../README.md) · [Infrastructure as code and AWS](../README.md)
+[Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
 
 A “check then insert” sequence has a race: two callers can both observe absence. A conditional write evaluates absence at the storage boundary.
 

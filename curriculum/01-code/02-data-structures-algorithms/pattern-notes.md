@@ -1,6 +1,6 @@
 # Why the patterns work
 
-[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
+[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
 
 Use these notes after attempting the [problem set](practice-sequence.md). The complete implementations are in [algorithms.py](algorithms.py); compare your invariant with the code before comparing line by line.
 

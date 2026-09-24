@@ -1,6 +1,6 @@
 # Minimum covering window: track unmet demand
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [longest unique window](../04-longest-unique-window/README.md) and [anagram counts](../02-valid-anagram/README.md).
 

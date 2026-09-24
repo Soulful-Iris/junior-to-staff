@@ -1,6 +1,6 @@
 # Backend
 
-[Curriculum](../../README.md) · [Backend and APIs](README.md)
+[Curriculum](../../README.md) · [Build HTTP APIs and reliable background work](README.md)
 
 > Project connection · feeds **P1 (it works)**
 

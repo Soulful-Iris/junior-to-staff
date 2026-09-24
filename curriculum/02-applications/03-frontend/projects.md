@@ -1,6 +1,6 @@
 # 03 · Frontend — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [Connect a usable interface to an API](README.md) first
 
 Five projects, rising: one screen, then the whole app's state, then the whole
 flow under law, then speed on hardware you do not own, then hostile input. Each

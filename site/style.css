@@ -103,3 +103,7 @@
 .lesson-body details.concept-refresher{background:#fafbf7;border-style:dashed;margin:25px 0}
 @media(max-width:760px){.lesson-body .task-brief{padding:20px 18px}.lesson-body .task-brief blockquote p{font-size:21px}.example-pair{grid-template-columns:minmax(0,1fr)}.example-value+.example-value{border-left:0;border-top:1px solid #e0e6d9}.example-value{padding:15px 17px}.lesson-body .example-title,.lesson-body .example-reason{padding-left:17px;padding-right:17px}}
 @media print{.example-card,.task-brief{break-inside:avoid;box-shadow:none}}
+
+/* Source paths stay readable on narrow screens without widening the lesson. */
+main p,main li{overflow-wrap:anywhere}
+main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}

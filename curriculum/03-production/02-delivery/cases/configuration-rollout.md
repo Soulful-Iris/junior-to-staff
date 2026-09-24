@@ -1,6 +1,6 @@
 # Configuration is executable behavior
 
-[Curriculum](../../../README.md) · [CI/CD and progressive delivery](../README.md)
+[Curriculum](../../../README.md) · [Deploy changes and control feature exposure](../README.md)
 
 > “Twenty routing cohorts accept configuration from one publisher. A syntactically valid update gives one cohort no reachable backends. Keep ordinary requests working, limit the rollout's exposure, and show how an emergency access revocation changes the fallback policy.”
 

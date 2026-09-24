@@ -1,6 +1,6 @@
 # A valid HTTP 200 with an invalid body
 
-[Curriculum](../../../../README.md) · [Backend and APIs](../../README.md)
+[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
 
 **Constructed candidate brief:** “Our quote API accepts quantity 2 and should
 return integer `total_cents: 200`. The provider changes its response to string

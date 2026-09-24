@@ -1,13 +1,36 @@
-# 1. The spec that survives a stranger
+# Specify tag behavior for independent implementers
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A reading list needs tags so members can organize saved links. A tag update takes a bookmark ID and tag strings; callers must agree whether whitespace and case change tag identity.
 
-> Two engineers independently implement tags from your brief. One accepts ` AI ` and `ai` as distinct tags; the other merges them. Give both engineers a contract that settles this without prescribing their source code. What behavior must be pinned?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../working-with-ai.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Write a feature specification that fixes normalization, duplicates, ownership and errors, then compare two implementations of that same specification.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Run the supplied reading-list API. It has no tag endpoint yet: define the proposed method, path, request body and response in `SPEC.md` before asking anyone to implement it.
+
+2. Write examples for `" AI "`, `"ai"`, an empty value and an unauthorized member. Pin atomic validation and the maximum tag length; leave internal file layout open.
+
+3. Give the identical document to two fresh implementers or AI sessions. Run the same requests against both implementations and record each behavioral disagreement in `COMPARISON.md`. Revise the sentence responsible for each disagreement.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | User B sends a tag update to A’s item 7. | 404 with no row changed; matching happy paths cannot establish ownership safety. |
 | Scope | Closed normalization rule for this exercise; choose maximum length explicitly. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Write one page specifying tag normalization, duplicate behavior, ownership, and the error response. Give two fresh implementers only that page, not your earlier chat history. For item 7, the inputs `" AI "`, `"ai"`, `""` should yield one stored `ai`, then a 400 without state change. **Show:** both implementations' test output and the exact point their interpretations differed. A stranger's ability to reproduce the behavior is the product.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** One specification for one small, real feature — tagging from P1 is the right size. Hand the identical document to two fresh sessions with no other context, let each build it, and compare what comes back. The spec is the deliverable; the two builds are its test.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A third implementation | A third engineer uses a different framework. What do you compare? Predict which boundary must change before opening the design. | Run the same black-box probes against each implementation. Compare status, data, and side effects; ignore file layout and variable names. |
-| Lead · The product rule changes | Users now need case-preserving display with case-insensitive uniqueness. Which field changes? State what evidence would make you reject your first design. | Separate normalized identity from display text. Define whether the first or latest spelling wins; retain a migration example for the existing ai value. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -109,13 +107,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Supply a behavioral disagreement and the exact sentence that resolves it. **Additional lead scope:** Own spec versions and compatibility between released clients. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 ![A vague ask fans out into five different plausible systems; the same ask rewritten as a precise specification produces nearly the same system twice. Every place two builds differ is a sentence missing from the spec.](../../../../../assets/diagrams/spec-fidelity.svg)
 
@@ -124,7 +122,7 @@ system, and a diff showing exactly where it leaked.*
 
 **Build**
 
-One specification for one small, real feature — tagging from P1 is the right
+One specification for one small, real feature — tagging from Stage 1 reading-list is the right
 size. Hand the identical document to two fresh sessions with no other context,
 let each build it, and compare what comes back. The spec is the deliverable; the
 two builds are its test.
@@ -224,3 +222,6 @@ the distance between two strangers.
 ---
 
 [Back to the ordered project index](../../ai-projects.md)
+
+
+</details>

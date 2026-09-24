@@ -1,6 +1,6 @@
 # 20 · Risk and incidents — five projects
 
-> Staff tier · each one an afternoon · read [the section](README.md) first
+> Staff tier · each one an afternoon · read [Set reliability objectives and recover from failures](README.md) first
 
 Five projects, and the first four all end in a number: your detection time, the
 longest uninterrupted stretch your investigator got, the count of "should" in
@@ -37,7 +37,7 @@ Second, the single most important fact this project surfaces: **if a customer
 told you, that number is the whole finding** and the rest of the postmortem is
 detail. Being told by a user is not a small operational gap — it means your
 instruments cannot see the thing your users experience, which is
-[10 · Observability](../04-observability/README.md)'s entire argument
+[Trace requests and diagnose production symptoms](../04-observability/README.md)'s entire argument
 arriving as a specific failure.
 
 Third, why the two timestamps have to be separated deliberately: **a narrative
@@ -118,7 +118,7 @@ than being discovered by a two-hour investigation.
 
 For the detection improvement, the shapes worth knowing: a **composite alarm**
 so a page requires two signals to agree (see
-[09 · Reliability](README.md)), **CloudWatch anomaly
+[Set reliability objectives and recover from failures](README.md)), **CloudWatch anomaly
 detection** for metrics with a daily shape where a static threshold does not
 work, and — the setting people miss — **treat missing data as breaching** on at
 least your critical alarm, because a component that stopped emitting looks
@@ -242,7 +242,7 @@ connectivity loss.
 
 The highest-value single drill remains an **RDS failover** triggered on
 purpose — `reboot-db-instance --force-failover` or `failover-db-cluster` — for
-the reasons in [13 · Data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md): you
+the reasons in [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md): you
 learn your real failover time, that your pool does not reconnect the way you
 assumed, and that something caches DNS past its TTL.
 
@@ -375,7 +375,7 @@ that coincided with the break. **AWS Config**'s configuration timeline shows a
 resource's exact state before and after, which settles "was it always
 configured that way" without argument. **CloudWatch Logs Insights** over the
 window gives you the application's own account, and if you followed
-[10 · Observability](../04-observability/README.md) you can pivot from a
+[Trace requests and diagnose production symptoms](../04-observability/README.md) you can pivot from a
 trace id to everything one request did.
 
 **Systems Manager Incident Manager** produces a post-incident analysis with the
@@ -636,7 +636,7 @@ rather not.
 objective, and it tracks attainment and the remaining error budget, with
 burn-rate alarms. That is the lowest-effort path from "we have an SLO" to "the
 budget is a number on a dashboard everybody can see". If you built the SLI by
-hand in [09 · Reliability](README.md), the budget is
+hand in [Set reliability objectives and recover from failures](README.md), the budget is
 metric math over your good and total counters, and the same dashboard applies.
 
 Put the budget remaining on the dashboard people already look at — not a
@@ -681,7 +681,7 @@ better.
 - Find out whether the people it binds were in the room when it was written. Announced policies get renegotiated at first contact.
 - Decide whether provider outages count. Not deciding means arguing about it during one.
 
-[Curriculum](../../README.md) · [Reliability and incident response](README.md)
+[Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
 
 Read [the section](failure-budgets.md) first. Work in this order; each project isolates one skill. Each link opens one complete build brief with a concrete contract, a baseline, two changed requirements, and the original staged AI prompts.
 
@@ -689,20 +689,20 @@ These are five project briefs, not five supplied applications. All prompts are c
 
 ### 1. The SLO you would actually honour
 
-[The SLO you would actually honour](projects/01-the-slo-you-would-actually-honour.md) — Keep the error-budget unit aligned with the SLI denominator.
+[Define and calculate a user-facing save SLO](projects/01-the-slo-you-would-actually-honour.md) — Keep the error-budget unit aligned with the SLI denominator.
 
 ### 2. The alert that fires when it matters and not before
 
-[The alert that fires when it matters and not before](projects/02-the-alert-that-fires-when-it-matters-and-not-before.md) — Specify the Boolean alert state separately from recovery policy.
+[Implement burn-rate alert and incident state rules](projects/02-the-alert-that-fires-when-it-matters-and-not-before.md) — Specify the Boolean alert state separately from recovery policy.
 
 ### 3. The retry storm you build on purpose
 
-[The retry storm you build on purpose](projects/03-the-retry-storm-you-build-on-purpose.md) — Count actual attempts and protect the effect boundary.
+[Bound retries across browser, API and SDK layers](projects/03-the-retry-storm-you-build-on-purpose.md) — Count actual attempts and protect the effect boundary.
 
 ### 4. Shedding the right thing
 
-[Shedding the right thing](projects/04-shedding-the-right-thing.md) — Prioritize finite capacity without promising impossible service.
+[Prioritize API work within a fixed capacity budget](projects/04-shedding-the-right-thing.md) — Prioritize finite capacity without promising impossible service.
 
 ### 5. The failure that will not recover
 
-[The failure that will not recover](projects/05-the-failure-that-will-not-recover.md) — Find and break the loop that prevents recovery.
+[Recover a service trapped in expired work and retries](projects/05-the-failure-that-will-not-recover.md) — Find and break the loop that prevents recovery.

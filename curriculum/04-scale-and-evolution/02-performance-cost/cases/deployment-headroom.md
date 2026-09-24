@@ -1,6 +1,6 @@
 # A correct deployment can still cause an outage
 
-[Curriculum](../../../README.md) · [Performance and cost](../README.md)
+[Curriculum](../../../README.md) · [Measure capacity and control performance costs](../README.md)
 
 > “Ten workers sustain 850 requests/s. A harmless deployment stops two before replacements are ready. Users see rising queue age even after rollback. Calculate a safe rollout, then survive a zone loss while demand grows thirty percent.”
 

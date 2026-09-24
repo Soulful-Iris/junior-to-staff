@@ -1,6 +1,6 @@
 # Architecture · understand the mechanism before naming a service
 
-[Curriculum](../../README.md) · [System design](README.md)
+[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
 
 [Practice drawing the architecture](whiteboard.md) · [Motion gallery](../../../assets/learning/README.md)
 

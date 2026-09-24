@@ -148,7 +148,9 @@ def compose(b, page, have, by_dest):
         if href.startswith('#'):
             a['class'] = ['context-link']; continue
         if target is None:
-            a['target'] = '_blank'; a['rel'] = 'noopener noreferrer'; a['class'] = ['source-link']; continue
+            a['target'] = '_blank'; a['rel'] = 'noopener noreferrer'
+            a['class'] = ['project-source'] if href.startswith('https://github.com/Soulful-Iris/junior-to-staff') else ['source-link']
+            continue
         disk = b.OUT / target
         suffix = disk.suffix
         label = a.get_text(' ', strip=True)
@@ -168,12 +170,14 @@ def compose(b, page, have, by_dest):
             if block.name == 'td': block = block.find_parent('table').parent
             if not a.find_parent('details'):
                 enclosure = soup.new_tag('details', attrs={'class': 'inline-reference'})
-                summary = soup.new_tag('summary'); summary.string = 'Inspect source · ' + disk.name
+                summary = soup.new_tag('summary'); summary.string = 'Read the supplied code · ' + disk.name
                 enclosure.extend([summary, panel]); panel = enclosure
             anchor = code_tail.get(id(block), block)
             anchor.insert_after(panel)
             code_tail[id(block)] = panel
-            a.replace_with(soup.new_string(label + ' (included below)'))
+            a['download'] = disk.name
+            a['class'] = ['code-download']
+            a.string = label + ' (download file; source below)'
         elif suffix == '.svg':
             # Static alternatives are inline controls beside their animation.
             if '-still' in disk.stem or 'static' in label.lower():
@@ -188,7 +192,7 @@ def compose(b, page, have, by_dest):
             target_page = by_dest.get(target) or by_dest.get(target.rstrip('/') + '/index.html')
             if not target_page and disk.is_dir():
                 a['href'] = 'https://github.com/Soulful-Iris/junior-to-staff/tree/main/' + target
-                a['class'] = ['source-link']
+                a['class'] = ['project-source']
             elif target_page or disk.is_file():
                 a['class'] = ['context-link']
             else:
@@ -407,10 +411,10 @@ def build(b):
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)
-    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies','examples/ai-systems','examples/link-watcher','examples/architecture-starts'):
+    for folder in ('curriculum','projects','practice','docs','scripts','indexes','companies','examples/ai-systems','examples/link-watcher','examples/architecture-starts','examples/reading-list-starter'):
         for f in (b.ROOT/folder).rglob('*'):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
-            if folder in {'examples/ai-systems', 'examples/link-watcher', 'examples/architecture-starts'} and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
+            if folder in {'examples/ai-systems', 'examples/link-watcher', 'examples/architecture-starts', 'examples/reading-list-starter'} and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
             rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)
     resources = sorted(p.relative_to(b.OUT).as_posix() for p in b.OUT.rglob('*.html'))
     by_dest={b.dest_for(p['src']):p for p in pages}

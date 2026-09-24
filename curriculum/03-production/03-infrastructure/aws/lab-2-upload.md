@@ -1,6 +1,6 @@
 # Lab 2 · send bytes to storage without tying up the API
 
-[Curriculum](../../../README.md) · [Infrastructure as code and AWS](../README.md)
+[Curriculum](../../../README.md) · [Provision and operate application infrastructure on AWS](../README.md)
 
 A metadata API can authorize an upload without proxying every byte. It returns a short-lived S3 capability for a specific object. The browser uploads directly and later asks the API to finalize the metadata.
 

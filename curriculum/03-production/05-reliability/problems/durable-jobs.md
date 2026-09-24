@@ -1,30 +1,52 @@
-# Durable jobs: the queue drained, the work did not
+# Build restartable CSV export jobs
 
-## What you are building
+## Application background
 
-> Build CSV exports for a billing dashboard. The API must return a status URL quickly, and a worker must finish the export after an API or worker restart. Two workers may process the same message; only the current owner may publish the download pointer.
+A billing dashboard lets users request a CSV of their invoices. The API returns a job ID immediately; a worker creates the file and a status endpoint eventually exposes the download.
 
-**Working contract:** POST /exports with a tenant-scoped request ID returns 202 plus a stable job URL after durable acceptance. GET /exports/{id} returns accepted, running, succeeded, failed or cancelled. A download is available only through a committed result pointer.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A durable job record, worker claim/renewal logic and a status/download interface that refuses output from an expired worker.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 500 exports/min; 20 seconds mean service | 500 / 60 × 20 ≈ 167 busy worker slots at steady state, before spare capacity. |
-| 50 worker slots | Capacity is 150/min; backlog grows 350/min under the stated ordinary load. |
-| 40,000 requests in one minute | Admission must reject or defer beyond an explicit backlog budget; an unbounded queue is not extra processing capacity. |
+Build CSV exports for a billing dashboard. The API must return a status URL quickly, and a worker must finish the export after an API or worker restart. Two workers may process the same message; only the current owner may publish the download pointer.
 
-## Start with one working boundary
+**Required behavior:** POST /exports with a tenant-scoped request ID returns 202 plus a stable job URL after durable acceptance. GET /exports/{id} returns accepted, running, succeeded, failed or cancelled. A download is available only through a committed result pointer.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/durable_jobs.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/durable_jobs.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/durable_jobs.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/durable_jobs.py). You can also [read or download the source here](../../../../examples/architecture-starts/durable_jobs.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+published
+stale publication rejected
+Visible result: job7/5/result new worker bytes
+```
+
+### Set up your implementation workspace
+
+Create `work/durable-jobs/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/durable_jobs.py
 | attempt_objects | job_id/epoch/checksum | Immutable bytes; uploading is not publishing. |
 | result_pointer | job_id → object_key,checksum,size | Updated only by the current ownership epoch. |
 
-## AWS implementation
-
-![Durable jobs: the queue drained, the work did not: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/durable-jobs.svg)
-
-SQS can redeliver, so DynamoDB owns job state and the publication condition. ECS accommodates longer exports; short bounded jobs could run in Lambda. S3 stores complete bytes, while the conditional result pointer decides which bytes users receive.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Accept durably
 
@@ -56,7 +72,46 @@ Upload to an attempt-specific object key. Conditionally write succeeded and the 
 
 Reject new work with Retry-After once admitted backlog exceeds the product’s wait budget. Add cancellation and tenant fairness. Garbage-collect unreferenced attempt objects only after active leases and retry windows; authorize current access when issuing a download.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Epoch 5 publishes; the late epoch 4 attempt is rejected. |
+| Kill the worker after upload | A retry may produce an orphan object, but users see one committed result. |
+| Limit the pool to 50 workers | At 500 arrivals/min the oldest-job age grows; admission eventually closes at the declared bound. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 500 exports/min; 20 seconds mean service | 500 / 60 × 20 ≈ 167 busy worker slots at steady state, before spare capacity. |
+| 50 worker slots | Capacity is 150/min; backlog grows 350/min under the stated ordinary load. |
+| 40,000 requests in one minute | Admission must reject or defer beyond an explicit backlog budget; an unbounded queue is not extra processing capacity. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build restartable CSV export jobs: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/durable-jobs.svg)
+
+SQS can redeliver, so DynamoDB owns job state and the publication condition. ECS accommodates longer exports; short bounded jobs could run in Lambda. S3 stores complete bytes, while the conditional result pointer decides which bytes users receive.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: export request API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: job admission service | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: job state authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: delivery queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: export workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local file, object fixture or exported payload | Amazon S3: immutable export output | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Epoch 5 publishes; the late epoch 4 attempt is rejected. |
-| Kill the worker after upload | A retry may produce an orphan object, but users see one committed result. |
-| Limit the pool to 50 workers | At 500 arrivals/min the oldest-job age grows; admission eventually closes at the declared bound. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add data erasure while an export is running. Define how the worker discovers cancellation, how the current pointer is revoked, and how object cleanup is proven without assuming that queue cancellation stops an already running process.
 

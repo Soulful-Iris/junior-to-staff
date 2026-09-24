@@ -1,6 +1,6 @@
 # Delivery
 
-[Curriculum](../../README.md) · [CI/CD and progressive delivery](README.md)
+[Curriculum](../../README.md) · [Deploy changes and control feature exposure](README.md)
 
 > Project connection · feeds **P2 (it survives)**
 

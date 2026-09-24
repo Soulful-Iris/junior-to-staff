@@ -1,13 +1,36 @@
-# 2. The change small enough to judge
+# Split a tagging feature into runnable changes
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A reading-list feature can touch schema, validation, API and browser code. Reviewers need to understand each change, while users must still have a runnable application between releases.
 
-> Your team must add tags to a reading list. A 40-file change mixes a rename, a database column, validation, and UI wiring. Make the work reviewable while leaving every landed stage runnable. Which dependency determines your first cut?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Implement one tagging feature as both a large change and an ordered series of small changes with identical final behavior.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Start from your reading-list application, including a UI if you have completed Stage 1. If you only have the supplied API, build the small save/list UI first or explicitly limit this exercise to API layers.
+
+2. Write the dependency order for rename, nullable schema, validation, API response and UI use. Implement the feature on one branch, then reconstruct it as separately runnable changes on a second branch.
+
+3. Run the application after each layer and record what is usable. Compare final trees and behavior; explain the failure when a caller expects the new API before it exists.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | The UI stage lands before the response includes tags. | A contract check rejects that stage; a smaller diff is not automatically a safe diff. |
 | Scope | One feature; compare identical behavior and preserve reviewer blinding. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Take one tagging feature and implement the same finished behavior as one large change and as five green layers: rename, nullable schema, validation, API, UI. **Show:** a successful check at every layer and a final-tree diff proving both versions agree. Force the UI ahead of the API once; capture the contract failure before fixing the order.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** One real P1 feature — tagging is the right size: a rename, a migration, behaviour, UI — built twice from one plan: as a single PR, and as a stack of five layers, each green and runnable alone. Two bugs planted blind in both at the same spots. Review both forms, timed; open the sealed answers last.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The work stops halfway | Funding disappears after the schema stage. Can that stage remain deployed for a month? Predict which boundary must change before opening the design. | Use an additive nullable field or a safe default while existing readers remain compatible. Defer deleting or requiring the field. Verify both the old reader and old writer against the new schema. |
-| Lead · A lower stage changes | Review changes the validation API after the UI branch already exists. Which checks become stale? State what evidence would make you reject your first design. | Rebase dependent layers and rerun their integration checks against the revised base. Reuse artifacts only when their input commit is unchanged; do not transfer a green result across a new dependency graph. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -108,13 +106,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Demonstrate checkout-and-run at every stage and a blind defect review. **Additional lead scope:** Budget review dependencies and define who maintains abandoned stages. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 ![The same week of work shipped two ways. As one 38-file commit, a production failure implicates all 38 cells and a cursor sweeps the whole row, searching. As five small changes run one at a time, the same fault implicates only Thursday's seven files; the other four changes stay proven good and the revert is one small commit.](../../../../../assets/diagrams/batch-size.svg)
 
@@ -123,7 +121,7 @@ as a stack of five, and numbers for what review actually caught in each.*
 
 **Build**
 
-One real P1 feature — tagging is the right size: a rename, a migration,
+One real Stage 1 reading-list feature — tagging is the right size: a rename, a migration,
 behaviour, UI — built twice from one plan: as a single PR, and as a stack of
 five layers, each green and runnable alone. Two bugs planted blind in both at
 the same spots. Review both forms, timed; open the sealed answers last.
@@ -225,3 +223,6 @@ for that instead of a line from a book.
 ---
 
 [Back to the ordered project index](../../change-projects.md)
+
+
+</details>

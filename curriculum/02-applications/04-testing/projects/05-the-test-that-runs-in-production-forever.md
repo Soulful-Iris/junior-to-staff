@@ -1,30 +1,52 @@
-# 5. The test that runs in production, forever
+# Design and run a synthetic reading-list journey
 
-## What you are building
+## Application background
 
-> Design a synthetic user journey for a reading-list service: sign in as a dedicated probe account, create a marker link, read it and remove it. The exercise begins with a single manual run; no recurring monitor is installed in this repository.
+A reading-list product can appear healthy at its process endpoint while users cannot save or retrieve a link. A synthetic journey acts as a dedicated user and observes that complete path.
 
-**Working contract:** A run succeeds only when every required step succeeds. Dependent steps skipped after failure are reported as skipped. Cleanup is attempted independently, and missing runs are distinct from successful runs.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** One manual create/read/cleanup journey and an operating plan for any future scheduled deployment, including ownership, isolation and cleanup.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| One-minute interval in the proposed deployed design | 1,440 runs/day and at least 4,320 create/read/delete operations before authentication and absence checks. |
-| Three missing intervals | A separate heartbeat policy detects a stopped runner; no result is not a healthy result. |
-| Dedicated synthetic namespace | Probe data must not appear in real users’ lists, analytics or billing. |
+Design a synthetic user journey for a reading-list service: sign in as a dedicated probe account, create a marker link, read it and remove it. The exercise begins with a single manual run; no recurring monitor is installed in this repository.
 
-## Start with one working boundary
+**Required behavior:** A run succeeds only when every required step succeeds. Dependent steps skipped after failure are reported as skipped. Cleanup is attempted independently, and missing runs are distinct from successful runs.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/05_the_test_that_runs_in_production_forever.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/05_the_test_that_runs_in_production_forever.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/05_the_test_that_runs_in_production_forever.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/05_the_test_that_runs_in_production_forever.py). You can also [read or download the source here](../../../../examples/architecture-starts/05_the_test_that_runs_in_production_forever.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Journey successful: False
+Step evidence: {'create': 'failed', 'read': 'skipped', 'delete': 'cleanup_attempted', 'verify_absent': 'unknown'}
+Runner stale: True
+```
+
+### Set up your implementation workspace
+
+Create `work/05-the-test-that-runs-in-production-forever/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/05_the_test_that_runs_in_production_forever
 | synthetic_resource | run_id,owner,created_at | Cleanup identity and expiry fallback. |
 | heartbeat | runner,last_started,last_completed | Scheduler health independent of application outcome. |
 
-## AWS implementation
-
-![5. The test that runs in production, forever: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-test-that-runs-in-production-forever.svg)
-
-The journey measures the user path; heartbeat evidence measures whether the journey ran. The proposed scheduler is part of the lesson architecture, not a change to this website’s publishing behavior.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Build one manual journey
 
@@ -56,7 +72,46 @@ A create failure means read is skipped, not passed. Emit the run result and hear
 
 A probe inside the application VPC does not exercise public DNS and routing. Use a second location when that distinction matters, and retain location-specific evidence. A single-location failure is a useful signal, not automatic proof of a global outage.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Failed create plus skipped read is not success; an absent runner becomes stale. |
+| Fail the read after creation | Cleanup still attempts deletion and records its own outcome. |
+| Stop the optional runner | The freshness signal detects absence independently of application errors. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| One-minute interval in the proposed deployed design | 1,440 runs/day and at least 4,320 create/read/delete operations before authentication and absence checks. |
+| Three missing intervals | A separate heartbeat policy detects a stopped runner; no result is not a healthy result. |
+| Dedicated synthetic namespace | Probe data must not appear in real users’ lists, analytics or billing. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Design and run a synthetic reading-list journey: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-test-that-runs-in-production-forever.svg)
+
+The journey measures the user path; heartbeat evidence measures whether the journey ran. The proposed scheduler is part of the lesson architecture, not a change to this website’s publishing behavior.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Manual invocation or local schedule input | Amazon EventBridge Scheduler: optional journey schedule | Create schedules targeting the dispatcher and preserve occurrence identity across retries and overlapping invocation. |
+| Python operation or worker function | AWS Lambda: bounded journey runner | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: public application path | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: run and cleanup records | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: journey operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Local provider configuration placeholder | AWS Secrets Manager: probe credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +123,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Failed create plus skipped read is not success; an absent runner becomes stale. |
-| Fail the read after creation | Cleanup still attempts deletion and records its own outcome. |
-| Stop the optional runner | The freshness signal detects absence independently of application errors. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 A probe passes while real users fail because its account has special permissions. Compare its identity, data size and routing with the user population and remove privileges that bypass the behavior being measured.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · The scheduler stops
 

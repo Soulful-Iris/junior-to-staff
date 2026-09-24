@@ -1,30 +1,53 @@
-# Webhook delivery: a timeout is not a rejection
+# Deliver signed webhooks with retries and replay
 
-## What you are building
+## Application background
 
-> Build outbound webhooks for a commerce API. A customer endpoint returns 500 for an hour, another is healthy, and a third accepts an event but drops the response. Operators need to replay a specific event without creating a new business event.
+A commerce API tells customer systems when an order changes by sending an HTTP request to their registered endpoint. Each customer endpoint can fail independently.
 
-**Working contract:** Each committed source event creates one logical delivery per subscription. Attempts may repeat for 48 hours. Receivers use stable event IDs to deduplicate; senders sign the exact body and expose delivery history.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A per-destination delivery ledger, signed requests, bounded retry scheduling and an operator replay command retaining the original event ID.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 50,000 subscriptions; 8,000 source events/s | Delivery rate equals events times matching subscriptions; measure fan-out instead of assuming 8,000 HTTP calls/s. |
-| 48-hour retry window | Backlog storage depends on failure rate and payload size; cap per-endpoint outstanding work. |
-| Ten-second HTTP deadline; 1,000 concurrent calls | At ten-second service time capacity is only 100 attempts/s, so deadlines and concurrency materially change throughput. |
+Build outbound webhooks for a commerce API. A customer endpoint returns 500 for an hour, another is healthy, and a third accepts an event but drops the response. Operators need to replay a specific event without creating a new business event.
 
-## Start with one working boundary
+**Required behavior:** Each committed source event creates one logical delivery per subscription. Attempts may repeat for 48 hours. Receivers use stable event IDs to deduplicate; senders sign the exact body and expose delivery history.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/webhook_delivery.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/webhook_delivery.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/webhook_delivery.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/webhook_delivery.py). You can also [read or download the source here](../../../../examples/architecture-starts/webhook_delivery.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Signed bytes: {"id":"evt-7","type":"order.paid"}
+Signature: 5320fc164aa4700b4eca86de5a39d45cd8da9562e3daea0cf13bf0f92883e55c
+attempt 1 apply event
+attempt 2 already handled
+```
+
+### Set up your implementation workspace
+
+Create `work/webhook-delivery/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/webhook_delivery.py
 | deliveries | subscription_id,event_id,state,next_attempt | One logical delivery with bounded retry horizon. |
 | attempts | delivery_id,attempt_no,status,latency | Individual network outcomes; never overwrite history. |
 
-## AWS implementation
-
-![Webhook delivery: a timeout is not a rejection: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/webhook-delivery.svg)
-
-SQS transports work; the ledger owns retry eligibility and evidence. Per-endpoint limits are application behavior and do not appear automatically because the queue scales.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Commit source and dispatch intent
 
@@ -56,7 +73,46 @@ Limit concurrency per endpoint and tenant. Apply bounded exponential backoff wit
 
 Return event and attempt history to authorized customers. A 2xx means the endpoint accepted the request, not that its business logic ran exactly once. Manual replay uses the same event identity and is recorded as another attempt.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Both attempts carry one event identity; the receiver applies it once. |
+| Make one endpoint return 500 | Other endpoints continue; failed attempts back off and eventually expire. |
+| Redirect to a private address | The worker records a destination-policy rejection before opening the connection. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 50,000 subscriptions; 8,000 source events/s | Delivery rate equals events times matching subscriptions; measure fan-out instead of assuming 8,000 HTTP calls/s. |
+| 48-hour retry window | Backlog storage depends on failure rate and payload size; cap per-endpoint outstanding work. |
+| Ten-second HTTP deadline; 1,000 concurrent calls | At ten-second service time capacity is only 100 attempts/s, so deadlines and concurrency materially change throughput. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Deliver signed webhooks with retries and replay: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/webhook-delivery.svg)
+
+SQS transports work; the ledger owns retry eligibility and evidence. Per-endpoint limits are application behavior and do not appear automatically because the queue scales.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: source and outbox authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Application or worker process | Amazon ECS: outbox and subscription relay | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: delivery work queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: outbound HTTP workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: delivery attempt ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local provider configuration placeholder | AWS Secrets Manager: subscription signing secrets | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Both attempts carry one event identity; the receiver applies it once. |
-| Make one endpoint return 500 | Other endpoints continue; failed attempts back off and eventually expire. |
-| Redirect to a private address | The worker records a destination-policy rejection before opening the connection. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Allow customers to rotate a secret while attempts wait. Decide whether you sign with the current secret or an event-bound version, publish the overlap contract, and show how receivers verify a replay.
 

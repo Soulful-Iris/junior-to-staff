@@ -1,6 +1,6 @@
 # 12 · Delivery — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Deploy changes and control feature exposure](README.md) first
 
 Five projects that turn deploying from an event into a habit, and all five are
 built on the section's standing rule: **before believing a green result, say
@@ -188,7 +188,7 @@ common shape — one broad token because it was easier — means every job inher
 the privilege of the most privileged one.
 
 Fifth, and this is the one that actually reduces blast radius: **replace the
-static cloud key with OIDC.** This is [11 · Security](../../02-applications/05-security/README.md)'s
+static cloud key with OIDC.** This is [Enforce identity, ownership and tenant boundaries](../../02-applications/05-security/README.md)'s
 project 3 arriving from the delivery side, and the reason it belongs in both
 sections is that it is simultaneously the biggest security win and the thing
 that makes deploys simpler.
@@ -605,7 +605,7 @@ some — a DNS record made by hand, a certificate validated once, a secret
 created in the console, a quota raised by a support ticket, an IAM role
 somebody added during an incident. Each one is a line in the repository that
 does not exist, and each one is a reason the recovery you planned in
-[08 · System design](../01-system-design/README.md) would have taken longer than you
+[Design services from requirements to failure behavior](../01-system-design/README.md) would have taken longer than you
 said.
 
 Third, **drift is the ongoing version of the same problem.** Someone fixes
@@ -683,7 +683,7 @@ For the drift half specifically: **CloudFormation drift detection** answers the
 question directly for stacks, and **AWS Config** answers it continuously for
 resources, with rules that tell you when a setting you closed has been reopened
 — which is the failure mode of every control you fix once. Pairing Config rules
-with the second-path list from [11 · Security](../../02-applications/05-security/README.md) is the durable
+with the second-path list from [Enforce identity, ownership and tenant boundaries](../../02-applications/05-security/README.md) is the durable
 version of that project.
 
 The things that reliably do not come back automatically, so check for them
@@ -723,5 +723,5 @@ assumptions were wrong.
 - Destroy and recreate. If you cannot bring yourself to do it in a scratch environment, that reluctance is the finding.
 - Count the manual steps. Each one is a line in the repository that does not exist.
 - Run a plan against live. Non-empty means reality was edited by hand and one of those lines is somebody's 2am fix.
-- Time the rebuild and compare it to the RTO you wrote in [08 · System design](../01-system-design/README.md). They are usually not the same number.
+- Time the rebuild and compare it to the RTO you wrote in [Design services from requirements to failure behavior](../01-system-design/README.md). They are usually not the same number.
 - Check where the state file lives and who can write it. If the answer is "a laptop", you have a single point of failure with no backup.

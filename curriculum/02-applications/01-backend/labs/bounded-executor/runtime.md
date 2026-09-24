@@ -1,6 +1,6 @@
 # Runtime boundaries · which work can overlap?
 
-[Curriculum](../../../../README.md) · [Backend and APIs](../../README.md)
+[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
 
 > “Search feels frozen when one request parses a large file. Another team suggests
 > raising `Promise.all` concurrency from four to forty. Explain which resource is

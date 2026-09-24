@@ -1,6 +1,6 @@
 # Lowest common ancestor: return presence as well as a candidate
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [tree identity and depth](../17-tree-level-order/README.md) and [recursive return meaning](../18-validate-bst/README.md).
 

@@ -1,6 +1,6 @@
 # 05 · Data and databases — five projects
 
-> Junior tier · each one an afternoon · read [the section](README.md) first
+> Junior tier · each one an afternoon · read [Model data and enforce transactional rules](README.md) first
 
 Five projects, rising. Each one ends with an artefact you did not have before:
 a written defence, a rehearsal log, two query plans, a race that can no longer

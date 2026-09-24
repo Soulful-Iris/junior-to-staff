@@ -1,6 +1,6 @@
 # Coding interviews · start here
 
-[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
+[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
 
 > “I will give you a concrete input and a required output. Explain the contract,
 > show a simple correct approach, then improve it and respond when a constraint

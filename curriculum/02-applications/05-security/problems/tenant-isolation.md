@@ -1,30 +1,52 @@
-# Tenant isolation: an ID in the URL is not authority
+# Enforce tenant access in APIs, caches and exports
 
-## What you are building
+## Application background
 
-> Build a shared report-export service for 4,000 customer organizations. An administrator at Acme guesses a report ID owned by Birch. Later an Acme user loses access while their cached report and queued export still exist. Make every access path enforce the current tenant boundary.
+Several customer organizations share one reporting application. A report belongs to one organization; its API response, cached copy and exported file must follow that organization's current membership rules.
 
-**Working contract:** Every request has one verified tenant context. GET /reports/{id}, export creation and export download must authorize the resource under that context. Do not trust an X-Tenant-ID header independently of membership.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Tenant-scoped reads and exports, with a revocation walkthrough across live requests, cached results and queued work.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 4,000 organizations; 250 reports each | One million reports. A guessed global report ID is not proof of membership. |
-| 2,000 reads/s peak; 200 export jobs/min | Apply tenant scope to synchronous reads, caches, queue payloads and output downloads. |
-| One tenant sends 1,000 jobs/min | Set per-tenant admission and worker shares before a shared queue becomes a noisy-neighbor outage. |
+Build a shared report-export service for 4,000 customer organizations. An administrator at Acme guesses a report ID owned by Birch. Later an Acme user loses access while their cached report and queued export still exist. Make every access path enforce the current tenant boundary.
 
-## Start with one working boundary
+**Required behavior:** Every request has one verified tenant context. GET /reports/{id}, export creation and export download must authorize the resource under that context. Do not trust an X-Tenant-ID header independently of membership.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/tenant_isolation.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/tenant_isolation.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/tenant_isolation.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/tenant_isolation.py). You can also [read or download the source here](../../../../examples/architecture-starts/tenant_isolation.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+404 scoped resource
+Acme revenue
+403 membership revoked
+```
+
+### Set up your implementation workspace
+
+Create `work/tenant-isolation/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/tenant_isolation.py
 | reports | (tenant,report_id) | Tenant scope is part of every key and query. |
 | export_jobs | tenant,requester,report_id,policy_revision | Workers reauthorize before reading; downloads reauthorize before issuing access. |
 
-## AWS implementation
-
-![Tenant isolation: an ID in the URL is not authority: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/tenant-isolation.svg)
-
-A shared database can be safe when tenant scope is enforced consistently. Dedicated databases trade cost and operating complexity for a stronger isolation boundary; choose that for requirements that application-level scoping cannot satisfy.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Create trusted request context
 
@@ -56,7 +72,46 @@ Keep exports private. Reauthorize each new download request. A presigned URL rem
 
 Add per-tenant admitted-job counters and a fair scheduler. Show Acme over its limit while Birch continues making progress. Partition metrics by bounded tier or top offenders instead of creating millions of uncontrolled labels.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Acme cannot read Birch’s report, and revoked Ana cannot receive her warm cached report. |
+| Enqueue a job then revoke access | The worker records denied/cancelled and produces no downloadable export. |
+| Mix tenant ID and object ID in a request | No cross-tenant result or existence disclosure outside the chosen 404 policy. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 4,000 organizations; 250 reports each | One million reports. A guessed global report ID is not proof of membership. |
+| 2,000 reads/s peak; 200 export jobs/min | Apply tenant scope to synchronous reads, caches, queue payloads and output downloads. |
+| One tenant sends 1,000 jobs/min | Set per-tenant admission and worker shares before a shared queue becomes a noisy-neighbor outage. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Enforce tenant access in APIs, caches and exports: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/tenant-isolation.svg)
+
+A shared database can be safe when tenant scope is enforced consistently. Dedicated databases trade cost and operating complexity for a stronger isolation boundary; choose that for requirements that application-level scoping cannot satisfy.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: scoped report application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: tenant-scoped records | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local pending-work collection | Amazon SQS: export queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: export worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local file, object fixture or exported payload | Amazon S3: private export objects | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Acme cannot read Birch’s report, and revoked Ana cannot receive her warm cached report. |
-| Enqueue a job then revoke access | The worker records denied/cancelled and produces no downloadable export. |
-| Mix tenant ID and object ID in a request | No cross-tenant result or existence disclosure outside the chosen 404 policy. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Offer dedicated storage to a regulated customer without forking the entire application. Define tenant placement metadata, connection routing, restore scope and the migration boundary between shared and dedicated storage.
 

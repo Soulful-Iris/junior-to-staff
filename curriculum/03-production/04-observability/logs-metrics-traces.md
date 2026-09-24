@@ -1,6 +1,6 @@
 # Observability
 
-[Curriculum](../../README.md) · [Observability](README.md)
+[Curriculum](../../README.md) · [Trace requests and diagnose production symptoms](README.md)
 
 > Project connection · feeds **P2 (it survives)**
 

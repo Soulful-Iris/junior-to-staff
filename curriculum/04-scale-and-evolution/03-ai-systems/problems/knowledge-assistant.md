@@ -1,30 +1,51 @@
-# Knowledge assistant: the citation that lost access
+# Build a document assistant with current permissions
 
-## What you are building
+## Application background
 
-> Build an internal handbook assistant for a 2,000-person company. Employees ask policy questions across documents with different access rules. A document can be revoked while a generated answer is being prepared, and a retrieved page can contain instructions trying to redirect the assistant.
+Employees ask questions about internal handbooks. The application retrieves permitted excerpts and uses them as evidence for an answer; missing evidence should produce an abstention.
 
-**Working contract:** Answer only from currently authorized source material, cite exact document/version evidence, and abstain when evidence is insufficient. Retrieved text is data, not permission to call tools or alter system behavior.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A retrieval-to-answer flow with current access checks, source references and an abstention path when evidence is missing or revoked.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Four-second response target | Example budget: 700 ms retrieval, 2,500 ms generation, 200 ms final checks, 300 ms transport and 300 ms reserve. |
-| 100,000 documents × eight chunks assumption | 800,000 chunk records before embeddings and index overhead. |
-| 20 requests/s peak | At three seconds mean active time, about 60 concurrent requests; bound model and retrieval concurrency separately. |
+Build an internal handbook assistant for a 2,000-person company. Employees ask policy questions across documents with different access rules. A document can be revoked while a generated answer is being prepared, and a retrieved page can contain instructions trying to redirect the assistant.
 
-## Start with one working boundary
+**Required behavior:** Answer only from currently authorized source material, cite exact document/version evidence, and abstain when evidence is insufficient. Retrieved text is data, not permission to call tools or alter system behavior.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/knowledge_assistant.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/knowledge_assistant.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/knowledge_assistant.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/knowledge_assistant.py). You can also [read or download the source here](../../../../examples/architecture-starts/knowledge_assistant.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Authorized evidence: [('d1', 'Expenses require a receipt.')]
+Final response: withheld: access changed
+```
+
+### Set up your implementation workspace
+
+Create `work/knowledge-assistant/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/knowledge_assistant.py
 | answer_run | subject,query,source_versions,model,prompt | Reproducible answer context without unrestricted sensitive logging. |
 | citations | answer_span,document_version,quoted_range | Support references that can be opened by the current caller. |
 
-## AWS implementation
-
-![Knowledge assistant: the citation that lost access: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/knowledge-assistant.svg)
-
-Bedrock generates language; the application decides which documents the caller may use. OpenSearch provides candidates, while current policy and source version checks enforce the evidence boundary.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Ship authorized search first
 
@@ -56,7 +71,46 @@ Track the policy revision used during retrieval and revalidate access to cited s
 
 Use supported, unsupported, conflicting-source and revoked-source questions. Compare useful answers and justified abstentions against the search-only baseline. Retain redacted failure examples and identify whether the fault was retrieval, authorization, generation or citation mapping.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The private document is excluded; revocation during preparation withholds the answer. |
+| Ask a question absent from sources | The assistant abstains and offers authorized source search. |
+| Put tool instructions in a document | No tool action is authorized by the retrieved text. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Four-second response target | Example budget: 700 ms retrieval, 2,500 ms generation, 200 ms final checks, 300 ms transport and 300 ms reserve. |
+| 100,000 documents × eight chunks assumption | 800,000 chunk records before embeddings and index overhead. |
+| 20 requests/s peak | At three seconds mean active time, about 60 concurrent requests; bound model and retrieval concurrency separately. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build a document assistant with current permissions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/knowledge-assistant.svg)
+
+Bedrock generates language; the application decides which documents the caller may use. OpenSearch provides candidates, while current policy and source version checks enforce the evidence boundary.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated question entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: answer orchestration | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local derived search records | Amazon OpenSearch Service: chunk retrieval index | Implement indexing, updates/deletions and queries; recheck current authorization before returning sensitive results. |
+| Deterministic model response fixture | Amazon Bedrock: model inference | Implement model invocation with deadlines, input boundaries and validated output; preserve the same permission and action rules. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: document policy metadata | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local file, object fixture or exported payload | Amazon S3: private document storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +122,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The private document is excluded; revocation during preparation withholds the answer. |
-| Ask a question absent from sources | The assistant abstains and offers authorized source search. |
-| Put tool instructions in a document | No tool action is authorized by the retrieved text. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Allow answers using multiple document versions during an ongoing policy update. Decide whether mixed-version evidence is acceptable and how conflicts are surfaced rather than silently resolved by the model.
 

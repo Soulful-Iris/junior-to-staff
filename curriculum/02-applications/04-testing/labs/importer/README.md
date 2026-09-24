@@ -1,6 +1,6 @@
 # Transaction importer · diagnose another team's package
 
-[Curriculum](../../../../README.md) · [Testing, debugging, and code review](../../README.md)
+[Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
 
 > “Finance imports USD transactions from a partner. Yesterday's reconciliation lost
 > 29 cents and a restart skipped a page. The partner says its API is healthy.

@@ -1,30 +1,54 @@
-# Feature rollout: the switch that failed after 100%
+# Release invoice changes with stable cohorts and rollback
 
-## What you are building
+## Application background
 
-> Roll out a new invoice-calculation path to a subscription product. The web path looks healthy at 5% exposure, but a daily renewal worker will not execute until midnight. Users must remain in a stable cohort and operators need an immediate way to restore the old compatible behavior.
+A subscription product calculates invoices in web requests and scheduled renewals. Deploying new code and selecting which customers use it are separate controls.
 
-**Working contract:** Evaluate a versioned flag against a stable subject identity. Exposure is deterministic for a given flag salt and subject. Turning the flag off restores the supported old path; it cannot undo irreversible writes already made by the new path.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A deterministic cohort function, a versioned rollout configuration and a rollback walkthrough covering both interactive and delayed work.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 100,000 eligible accounts; 5% initial exposure | About 5,000 accounts, with random variation; hash cohorts are not an exact-count allocation. |
-| Daily renewal job | A ten-minute observation window cannot reveal a defect in a path that runs once per day. |
-| One-minute configuration freshness bound | Record applied version and age; define the fallback when refresh is stale. |
+Roll out a new invoice-calculation path to a subscription product. The web path looks healthy at 5% exposure, but a daily renewal worker will not execute until midnight. Users must remain in a stable cohort and operators need an immediate way to restore the old compatible behavior.
 
-## Start with one working boundary
+**Required behavior:** Evaluate a versioned flag against a stable subject identity. Exposure is deterministic for a given flag salt and subject. Turning the flag off restores the supported old path; it cannot undo irreversible writes already made by the new path.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/feature_rollout.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/feature_rollout.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/feature_rollout.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/feature_rollout.py). You can also [read or download the source here](../../../../examples/architecture-starts/feature_rollout.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+user-4 5% True 25% True repeat True
+user-11 5% True 25% True repeat True
+user-5 5% False 25% True repeat False
+user-9 5% False 25% True repeat False
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/feature-rollout/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +56,7 @@ python3 examples/architecture-starts/feature_rollout.py
 | exposure_event | subject,flag_version,variant,path | Evidence of which behavior actually ran. |
 | release_record | code_version,config_version,data_compatibility | Rollback boundary and owner. |
 
-## AWS implementation
-
-![Feature rollout: the switch that failed after 100%: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/feature-rollout.svg)
-
-AppConfig distributes the policy; application code evaluates exposure and preserves compatible behavior. A flag cannot reverse an external charge or repair incompatible stored data.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Keep both paths compatible
 
@@ -56,7 +74,46 @@ Compare errors, latency and business outcomes for equivalent exposed/control coh
 
 Turn the flag off and confirm the old path processes records written during exposure. Reconcile external effects that cannot be undone. After adoption, remove dead code and retire the flag under a named owner/date so configurations do not accumulate indefinitely.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Assignment repeats consistently, a larger rollout retains prior exposure, and 0% disables everyone. |
+| Disable after a new-path write | The old path can still read/process the record or the documented repair is required. |
+| Observe only daytime traffic | The rollout remains unproven for the midnight renewal path. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100,000 eligible accounts; 5% initial exposure | About 5,000 accounts, with random variation; hash cohorts are not an exact-count allocation. |
+| Daily renewal job | A ten-minute observation window cannot reveal a defect in a path that runs once per day. |
+| One-minute configuration freshness bound | Record applied version and age; define the fallback when refresh is stale. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Release invoice changes with stable cohorts and rollback: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/feature-rollout.svg)
+
+AppConfig distributes the policy; application code evaluates exposure and preserves compatible behavior. A flag cannot reverse an external charge or repair incompatible stored data.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local versioned configuration | AWS AppConfig: rollout configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
+| Application or worker process | Amazon ECS: web application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Application or worker process | Amazon ECS: renewal worker | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: compatible business data | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: exposure and outcome evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Python operation or worker function | AWS Lambda: rollout controller | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +125,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Assignment repeats consistently, a larger rollout retains prior exposure, and 0% disables everyone. |
-| Disable after a new-path write | The old path can still read/process the record or the documented repair is required. |
-| Observe only daytime traffic | The rollout remains unproven for the midnight renewal path. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Let product change the hash salt mid-rollout. Explain cohort churn and experiment contamination, then make salt changes an explicit new experiment rather than a harmless configuration edit.
 

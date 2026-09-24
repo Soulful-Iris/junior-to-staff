@@ -1,6 +1,6 @@
 # Migrations
 
-[Curriculum](../../README.md) · [Migrations and recovery](README.md)
+[Curriculum](../../README.md) · [Migrate live systems and verify recovery](README.md)
 
 > Project connection · feeds **P5 (it changes safely)**
 
@@ -140,7 +140,7 @@ intentionally irreversible step needs a tested restore or forward-fix policy.
 
 [Database foundations](../../02-applications/02-databases/data-models-and-queries.md) ·
 [Recovery lab](labs/recovery-migration/README.md) ·
-[Technical decisions](../05-technical-decisions/README.md)
+[Make technical decisions and improve team workflows](../05-technical-decisions/README.md)
 
 ## Draw it from memory · Draw coexistence before drawing cutover
 

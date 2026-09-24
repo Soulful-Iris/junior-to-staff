@@ -1,6 +1,6 @@
 # Full stack · one user action across every boundary
 
-[Curriculum](../../README.md) · [Frontend and full-stack integration](README.md)
+[Curriculum](../../README.md) · [Connect a usable interface to an API](README.md)
 
 > “A save looks successful but erases the user's next edit. Follow that action through
 > the browser, API and database, then prove the repair under a delayed response.”

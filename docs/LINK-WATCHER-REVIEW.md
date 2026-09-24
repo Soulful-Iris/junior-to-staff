@@ -44,3 +44,7 @@ Bruno first asked to improve only the link-rot watcher and review it before a wi
 - Publication feedback: pushes to main must automatically appear on the website.
   Remove manual directory-migration requirements and optional verification gates
   from the publishing path; do not confuse GitHub checks with deployment status.
+
+## Follow-up: application context and assignment clarity
+
+The next feedback was that code discovery, the local-to-AWS connection, learning titles and the actual assignment remained unclear. The [project clarity review](PROJECT-CLARITY-REVIEW.md) records the expanded 90-page scope, reordered reading flow and simulated junior/senior walkthrough. The link watcher now participates in the orientation/title improvements while retaining its engineering checkpoints. A new runnable reading-list API gives the backend exercises an actual application to modify. No tests, recurring checks or deployment gates were added.

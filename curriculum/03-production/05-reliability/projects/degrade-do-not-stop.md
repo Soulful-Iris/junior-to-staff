@@ -1,30 +1,68 @@
-# 1. Degrade, do not stop
+# Keep bookmark saves usable when title lookup fails
 
-## What you are building
+## Application background
 
-> Keep a reading list usable when its title provider takes eight seconds. Users still need saved URLs within a 500 ms interactive budget. Cached titles may help, but another account’s content or an over-age value is never an acceptable fallback.
+A reading list stores URLs independently of the optional titles shown beside them. Users should retain the core save/read capability while enrichment is slow or unavailable.
 
-**Working contract:** Core list reads come from authorized local records. Optional titles can be pending or bounded-stale under an explicit policy. Every fallback preserves current authorization, and recovery probes use bounded concurrency.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A deadline-bounded enrichment path with authorized, age-bounded fallback and visible degraded status.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Eight-second provider time; 500 ms list deadline | The list cannot synchronously wait for the provider and still meet the contract. |
-| One-hour cached-title freshness allowance assumption | Show stale/pending state; the value’s age is checked before fallback. |
-| 1,000 simultaneous readers after recovery | Half-open probes need a small shared budget, not one probe per waiting request. |
+Keep a reading list usable when its title provider takes eight seconds. Users still need saved URLs within a 500 ms interactive budget. Cached titles may help, but another account’s content or an over-age value is never an acceptable fallback.
 
-## Start with one working boundary
+**Required behavior:** Core list reads come from authorized local records. Optional titles can be pending or bounded-stale under an explicit policy. Every fallback preserves current authorization, and recovery probes use bounded concurrency.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/degrade_do_not_stop.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/degrade_do_not_stop.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/degrade_do_not_stop.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/degrade_do_not_stop.py). You can also [read or download the source here](../../../../examples/architecture-starts/degrade_do_not_stop.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Provider unavailable; return local list: [{'url': 'https://example.invalid/a', 'title': 'Old title', 'title_status': 'stale'}]
+```
+
+### Run the application you will extend
+
+The [reading-list API setup guide](../../../../examples/reading-list-starter/README.md) gives you a real local HTTP server, SQLite database, save/list/edit requests and controlled title success/timeout behavior. Start it in one terminal and send the documented `curl` requests from another. Read that setup before following the implementation steps below. The demo above isolates this lesson's mechanism; the server is where you integrate it.
+
+For a first run, start this in **terminal 1** from the repository root:
+
+```bash
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+In **terminal 2**, save one bookmark with a controlled title timeout:
+
+```bash
+curl -i http://127.0.0.1:8080/bookmarks \
+  -H 'X-Demo-User: alice' -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/docs","title_mode":"timeout"}'
+```
+
+Expect **201 Created**, a bookmark `id` and `title_status: "timeout"`. The URL is persisted despite the title failure. This is the supplied baseline; the assignment adds the behavior described above. The lookup is a fixture, so no external website is contacted. For members Bob or Ben in a scenario, use the starter's second demo identity `bob`; Alice or Ana corresponds to `alice`.
+
+Work in your own branch or copy `examples/reading-list-starter/` to `work/degrade-do-not-stop/`. `app.py` exists in that directory; add the modules named below there as you separate HTTP, storage and background work. The server has demo membership, not production authentication.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +70,7 @@ python3 examples/architecture-starts/degrade_do_not_stop.py
 | provider_health | state,failures,next_probe,probe_budget | Closed/open/half-open behavior. |
 | list_response | link,display_title,title_status | Explicit useful degraded result. |
 
-## AWS implementation
-
-![1. Degrade, do not stop: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/degrade-do-not-stop.svg)
-
-The queue isolates optional enrichment from core reads. The user-facing contract remains useful because the local record is sufficient to open the saved link.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Separate core and optional work
 
@@ -56,7 +88,46 @@ Use a short provider deadline, bounded queue and circuit state to stop repeated 
 
 Show saved URL and stale/pending label without alarming the user with internal stack traces. Record fallback rate, age and core latency for operators. If critical demand itself exceeds capacity, apply explicit admission rather than pretending optional-work removal solves every overload.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Ana receives her link with stale title state; Ben’s cached content is excluded. |
+| Make the provider take eight seconds | Core reads stay within their measured local budget. |
+| Restore the provider | Only the bounded probe share runs before full traffic resumes. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Eight-second provider time; 500 ms list deadline | The list cannot synchronously wait for the provider and still meet the contract. |
+| One-hour cached-title freshness allowance assumption | Show stale/pending state; the value’s age is checked before fallback. |
+| 1,000 simultaneous readers after recovery | Half-open probes need a small shared budget, not one probe per waiting request. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Keep bookmark saves usable when title lookup fails: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/degrade-do-not-stop.svg)
+
+The queue isolates optional enrichment from core reads. The user-facing contract remains useful because the local record is sufficient to open the saved link.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local static/media delivery path | Amazon CloudFront: reading-list UI | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: list API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: core list application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: saved-link authority | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: deferred title refresh | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: provider fetch workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +139,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Ana receives her link with stale title state; Ben’s cached content is excluded. |
-| Make the provider take eight seconds | Core reads stay within their measured local budget. |
-| Restore the provider | Only the bounded probe share runs before full traffic resumes. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add an optional AI summary. Give it its own latency/cost budget and source-version identity; a failed summary must not remove access to the saved article.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · The provider recovers
 

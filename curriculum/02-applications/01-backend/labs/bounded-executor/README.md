@@ -1,6 +1,6 @@
 # Bounded executor · four workers, eight queued tasks
 
-[Curriculum](../../../../README.md) · [Backend and APIs](../../README.md)
+[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
 
 > “A report service accepts bursts faster than its four database connections can
 > work. Today every request starts a thread. Build an executor with four workers

@@ -1,6 +1,6 @@
 # Stateful coding: design an LRU cache
 
-[Curriculum](../../README.md) · [Data at scale](README.md)
+[Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
 
 > “Capacity is two entries: put a, put b, get a, then put c. Which key must disappear, and what must remain constant-time?”
 

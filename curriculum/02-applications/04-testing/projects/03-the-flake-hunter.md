@@ -1,30 +1,51 @@
-# 3. The flake hunter
+# Reproduce and remove order-dependent failures
 
-## What you are building
+## Application background
 
-> Diagnose an intermittent failure in a shared-store exercise. A case that expects an empty store passes alone but fails after another case creates an item. Rerunning until green hides the dependency rather than explaining it.
+A bookmark application uses a shared store during development checks. One case leaves data behind and a later case incorrectly assumes the store is empty.
 
-**Working contract:** Produce a minimal deterministic reproduction and a causal explanation. Distinguish shared state, timing, external dependency and resource collision. A retry is evidence of variability, not proof of repair.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A minimal order-dependent reproduction, a demonstrated isolation fix and a short cause-and-effect report.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Two orderings: create→expect-empty and expect-empty→create | The same inputs produce different outcomes only when state leaks between cases. |
-| Twenty parallel runs share one filename assumption | A resource collision can remain invisible in every sequential ordering. |
-| One fixed seed and recorded order | Reproduction must retain both; a seed alone may not capture external scheduling. |
+Diagnose an intermittent failure in a shared-store exercise. A case that expects an empty store passes alone but fails after another case creates an item. Rerunning until green hides the dependency rather than explaining it.
 
-## Start with one working boundary
+**Required behavior:** Produce a minimal deterministic reproduction and a causal explanation. Distinguish shared state, timing, external dependency and resource collision. A retry is evidence of variability, not proof of repair.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/03_the_flake_hunter.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/03_the_flake_hunter.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/03_the_flake_hunter.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/03_the_flake_hunter.py). You can also [read or download the source here](../../../../examples/architecture-starts/03_the_flake_hunter.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+isolated False ['created', 'unexpected leftover'] ['empty', 'created']
+isolated True ['created', 'empty'] ['empty', 'created']
+```
+
+### Set up your implementation workspace
+
+Create `work/03-the-flake-hunter/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/03_the_flake_hunter.py
 | fixture_lifecycle | allocate,reset,cleanup | Explicit ownership of state, files, ports and clocks. |
 | incident_note | symptom,cause,repair,evidence | Explains why the variability disappeared. |
 
-## AWS implementation
-
-![3. The flake hunter: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-the-flake-hunter.svg)
-
-Cloud isolation can help reproduce resource collisions, but the first diagnosis is local and deterministic. Infrastructure cannot compensate for a fixture that silently shares mutable state.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Reduce the failure
 
@@ -56,7 +71,44 @@ When only parallel execution fails, use a barrier to overlap the relevant operat
 
 Compare the minimal reproduction before and after isolation. Keep an owner and expiry for any temporary quarantine and state the evidence gap. Do not turn a flaky rerun loop into a requirement for publishing this website.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Shared state makes one order fail; fresh stores make both independent. |
+| Reuse one file in parallel | The forced overlap exposes the collision. |
+| Remove arbitrary sleeps | The repaired ownership still explains the result. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Two orderings: create→expect-empty and expect-empty→create | The same inputs produce different outcomes only when state leaks between cases. |
+| Twenty parallel runs share one filename assumption | A resource collision can remain invisible in every sequential ordering. |
+| One fixed seed and recorded order | Reproduction must retain both; a seed alone may not capture external scheduling. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Reproduce and remove order-dependent failures: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-the-flake-hunter.svg)
+
+Cloud isolation can help reproduce resource collisions, but the first diagnosis is local and deterministic. Infrastructure cannot compensate for a fixture that silently shares mutable state.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local file, object fixture or exported payload | Amazon S3: reproduction evidence | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Application or worker process | Amazon ECS: isolated reproduction tasks | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: disposable state fixture | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local diagnostic events | Amazon CloudWatch Logs: execution timeline | Emit structured JSON from the deployed runtime and configure log delivery, retention and query permissions. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +120,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Shared state makes one order fail; fresh stores make both independent. |
-| Reuse one file in parallel | The forced overlap exposes the collision. |
-| Remove arbitrary sleeps | The repaired ownership still explains the result. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 The failure depends on a third-party API. Replace it with a controlled response timeline for diagnosis, then document which live integration behavior remains outside that local reproduction.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · Parallel execution fails
 

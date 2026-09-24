@@ -124,7 +124,7 @@ limit you discover the week you need it is an incident.
 
 Add **Compute Optimizer** and **Trusted Advisor** for the right-sizing and
 waste picture, and **CloudWatch** trends for the capacity picture from
-[08 · System design](../../../curriculum/03-production/01-system-design/README.md)'s project 4. Between them you can
+[Design services from requirements to failure behavior](../../../curriculum/03-production/01-system-design/README.md)'s project 4. Between them you can
 usually attach a number to all three of your problems in an afternoon, which is
 the difference between a document people act on and one they nod at.
 
@@ -246,7 +246,7 @@ only person who knows.
 
 For the what-it-costs-to-fix half, be specific about the AWS-shaped costs that
 get forgotten — a migration's dual-running period where you pay for both
-(see [19 · Migrations](../../../curriculum/04-scale-and-evolution/04-migrations/README.md)), a quota increase with a lead time,
+(see [Migrate live systems and verify recovery](../../../curriculum/04-scale-and-evolution/04-migrations/README.md)), a quota increase with a lead time,
 a reserved commitment you would be breaking. Those are the items that turn an
 estimate from optimistic to credible, and including one you are not required to
 include is how a document earns trust.

@@ -1,30 +1,51 @@
-# Checkout: paid twice, ordered once?
+# Build checkout that recovers from uncertain payments
 
-## What you are building
+## Application background
 
-> Build checkout for a small online retailer. Customers reserve stock, pay through an external provider and receive an order confirmation. During an incident, a provider charges the card but its response is lost. Support needs to distinguish an unpaid order from an unknown payment and repair it without charging twice.
+An online shop turns a basket into an order by reserving inventory and requesting a payment. The payment provider runs outside the shop's database, so an order and a charge can temporarily disagree.
 
-**Working contract:** POST /checkouts requires a stable request ID and cart fingerprint. GET /checkouts/{id} exposes pending, payment_unknown, paid, confirmed or refund_required. Timeout must never be translated into definitely_not_charged.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An order state machine, durable payment intent, and a reconciliation command that resolves a lost provider response without a second charge.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 200 checkout requests/s peak | At a two-second mean provider response, about 400 calls are in flight; connection pools and provider quotas need an explicit ceiling. |
-| 10% of provider responses time out | At peak, 20 unknown outcomes/s need reconciliation; unknown is a stored state, not an error message discarded from logs. |
-| Inventory hold: 10 minutes | A late successful payment may arrive after stock is released; reserve, finalize or refund through explicit compensating work. |
+Build checkout for a small online retailer. Customers reserve stock, pay through an external provider and receive an order confirmation. During an incident, a provider charges the card but its response is lost. Support needs to distinguish an unpaid order from an unknown payment and repair it without charging twice.
 
-## Start with one working boundary
+**Required behavior:** POST /checkouts requires a stable request ID and cart fingerprint. GET /checkouts/{id} exposes pending, payment_unknown, paid, confirmed or refund_required. Timeout must never be translated into definitely_not_charged.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/checkout_payment.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/checkout_payment.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/checkout_payment.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/checkout_payment.py). You can also [read or download the source here](../../../../examples/architecture-starts/checkout_payment.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+After timeout: {'id': 'order-7', 'state': 'payment_unknown'}
+After reconciliation: {'id': 'order-7', 'state': 'paid', 'charge_id': 'charge-91'} provider charge count: 1
+```
+
+### Set up your implementation workspace
+
+Create `work/checkout-payment/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/checkout_payment.py
 | payment_attempts | checkout_id,provider_key,charge_id,status | Owns the relationship to provider evidence. |
 | outbox | checkout_id,event_version | Confirmation and repair jobs committed with order state. |
 
-## AWS implementation
-
-![Checkout: paid twice, ordered once?: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/checkout-payment.svg)
-
-Aurora owns order truth; the provider owns charge truth. A queue coordinates retryable work across those authorities. Their independent commits are the reason for a durable unknown state and compensating actions.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Persist checkout before contacting payment
 
@@ -56,7 +71,46 @@ Implement `reconcile.py` to look up the attempt or safely repeat the same key un
 
 Commit paid evidence and order transition. If the inventory hold is gone, record `refund_required` or attempt an explicit new reservation according to product policy. Put confirmation/refund work in an outbox. A database rollback cannot undo a completed external charge.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Order becomes payment_unknown, then paid; the provider fixture contains one charge. |
+| Retry with a changed cart | 409 and no second payment attempt. |
+| Let stock expire before payment is confirmed | A visible repair/refund state, never an invented all-or-nothing rollback. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 200 checkout requests/s peak | At a two-second mean provider response, about 400 calls are in flight; connection pools and provider quotas need an explicit ceiling. |
+| 10% of provider responses time out | At peak, 20 unknown outcomes/s need reconciliation; unknown is a stored state, not an error message discarded from logs. |
+| Inventory hold: 10 minutes | A late successful payment may arrive after stock is released; reserve, finalize or refund through explicit compensating work. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build checkout that recovers from uncertain payments: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/checkout-payment.svg)
+
+Aurora owns order truth; the provider owns charge truth. A queue coordinates retryable work across those authorities. Their independent commits are the reason for a durable unknown state and compensating actions.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: checkout HTTP entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: checkout application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local records and transaction boundary | Amazon Aurora PostgreSQL: order and outbox authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Controlled payment response fixture | Payment provider: external charge authority | Implement provider calls and reconciliation under the provider actual idempotency contract; keep credentials outside the client. |
+| Local pending-work collection | Amazon SQS: reconciliation work queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: reconciliation worker | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Order becomes payment_unknown, then paid; the provider fixture contains one charge. |
-| Retry with a changed cart | 409 and no second payment attempt. |
-| Let stock expire before payment is confirmed | A visible repair/refund state, never an invented all-or-nothing rollback. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add two payment providers. Define which provider owns an attempt before failover: switching providers after a timeout can create two charges because their idempotency domains are independent. Route only new attempts automatically; reconcile ambiguous existing ones with their original provider.
 

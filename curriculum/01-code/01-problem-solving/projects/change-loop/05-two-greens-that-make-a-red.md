@@ -1,13 +1,36 @@
-# 5. Two greens that make a red
+# Check the combined behavior of independently valid changes
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+Two reading-list engineers change the same title-lookup interface from different branches. Git can merge their files without a text conflict while leaving a caller incompatible with the new signature.
 
-> PR A changes a function to require an options object; PR B adds a caller using the previous positional argument. Both are green and Git merges them cleanly. Prevent their combination from breaking main. Which tree did each check test?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Create two independently working branches whose combination fails, then demonstrate a process that evaluates the combined revision.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Use a disposable repository with a title helper and two callers. Record the original behavior and create branches A and B from the same revision.
+
+2. On A, change the helper to require an options object and update its current caller. On B, add another caller using the old signature. Run each branch and then a temporary combined revision; record the actual combined failure.
+
+3. Update the incompatible caller and rerun the combined application. If practicing merge-queue configuration, do so only in this disposable repository and record the exact candidate tree checked.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | CI reruns only the unchanged PR head after main moves. | The stale green result is not accepted as proof of the combined tree. |
 | Scope | A controlled semantic conflict with no textual conflict; a test must exercise the new caller. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Branch A changes `fetchTitle(url, ms)` to `fetchTitle(url, {timeoutMs})`; branch B adds a caller using the old signature in another file. Run A and B separately, then their temporary merge. **Show:** green A, green B, red combined contract test, and a required merge-queue check that rejects B until updated.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** PR A changes a function's contract. PR B, branched before A landed, adds a new call site written against the old contract, in a different file. No textual conflict; both green on their own base; together they break main. Then a merge queue — real or hand-rolled — catches the second one before main ever sees it.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · Main changes during CI | A third commit lands while the speculative check is running. May the old result be reused? Predict which boundary must change before opening the design. | Recompute the speculative tree and rerun checks affected by the new base. Compare tree or input hashes explicitly; a commit’s unchanged PR head says nothing about dependency changes on main. |
-| Lead · The suite is flaky | The correct integration test fails 10% of the time due to leaked fixture state. Does a retry establish correctness? State what evidence would make you reject your first design. | Reproduce fixture contamination and isolate state before trusting the queue. Track ejection reasons. A retry may gather diagnostic evidence but does not repair the oracle; the merge queue amplifies flaky gates into team-wide delay. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -106,13 +104,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Show four original outcomes and rejection of the exact combined tree. **Additional lead scope:** Balance throughput, check duration, bypass policy, and flake ownership. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up having built the failure merge queues exist for — two PRs, each
 green alone, red together — and the machinery that stops it reaching main.*
@@ -226,3 +224,6 @@ with your own hands.
 ---
 
 [Back to the ordered project index](../../change-projects.md)
+
+
+</details>

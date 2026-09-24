@@ -1,6 +1,6 @@
 # Incident desk: the page cleared, the queue did not
 
-[Curriculum](../../../../README.md) · [Reliability and incident response](../../README.md)
+[Curriculum](../../../../README.md) · [Set reliability objectives and recover from failures](../../README.md)
 
 > “You are on call for a status API with an asynchronous refresh queue. At minute four the dependency recovers. The queue keeps growing. At minute six a paired-window page clears. Decide what to do next and what you can actually conclude about the cause.”
 

@@ -1,6 +1,6 @@
 # Expiring key-value store
 
-[Curriculum](../../../../README.md) · [Data at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A single-process service caches temporary verification results. Each write has
 > a time to live. Reads must never return an expired result, including at the exact

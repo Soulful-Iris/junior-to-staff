@@ -1,6 +1,6 @@
 # Coding reference · contracts and complexity
 
-[Curriculum](../../README.md) · [Data structures and algorithms](README.md)
+[Curriculum](../../README.md) · [Choose data structures and reason about algorithms](README.md)
 
 A pattern is useful when you can explain its invariant and recognize when it stops applying. Recent reports support studying maps/prefix sums, windows, graphs, caches, and practical implementation. They do **not** establish a global frequency ranking. [Evidence](../../../docs/research/interview-evidence.md).
 

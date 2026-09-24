@@ -1,6 +1,6 @@
 # Bounded fan-out · preserve order under partial failure
 
-[Curriculum](../../../../README.md) · [Backend and APIs](../../README.md)
+[Curriculum](../../../../README.md) · [Build HTTP APIs and reliable background work](../../README.md)
 
 > “A dashboard loads details for 20 accounts. Starting every request overloads the
 > service. Run at most three calls at once, keep input order, and display an error

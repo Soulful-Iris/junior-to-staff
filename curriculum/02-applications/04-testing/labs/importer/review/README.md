@@ -1,6 +1,6 @@
 # Three PRs before the finance release
 
-[Curriculum](../../../../../README.md) · [Testing, debugging, and code review](../../../README.md)
+[Curriculum](../../../../../README.md) · [Find defects and evaluate engineering evidence](../../../README.md)
 
 > “Three teams want to merge changes before tonight's reconciliation. You have
 > 25 minutes. Which change blocks release, which needs a contract decision, and

@@ -1,30 +1,53 @@
-# Video streaming: keep playback smooth at the edge
+# Build resumable uploads and authorized video playback
 
-## What you are building
+## Application background
 
-> Build a video platform where creators upload large files and viewers start playback on phones and TVs. A popular new video attracts a regional traffic spike. Playback needs adaptive renditions, private-content authorization and an upload path that can resume after interruption.
+Creators upload videos; viewers request permission to play them and then download segments appropriate to their connection speed. Large media bytes and application metadata take different paths.
 
-**Working contract:** Uploads are resumable and bounded to 20 GB. Playback returns a manifest only for a ready, authorized video. The target is p95 startup under two seconds, measured on a defined device/network cohort rather than promised for every connection.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An upload session, processing/playback states and a private playback authorization path, with separate origin and delivery capacity estimates.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| Five million uploads/day | About 58 uploads/s average; at an assumed 500 MB mean that is 2.5 PB/day of source data before renditions. |
-| 100 million viewers; 20 GB maximum upload | Maximum file size is a request bound, not the average storage assumption. |
-| Two-second p95 playback start | Budget authorization, manifest fetch, first segment transfer and decoder startup independently. |
+Build a video platform where creators upload large files and viewers start playback on phones and TVs. A popular new video attracts a regional traffic spike. Playback needs adaptive renditions, private-content authorization and an upload path that can resume after interruption.
 
-## Start with one working boundary
+**Required behavior:** Uploads are resumable and bounded to 20 GB. Playback returns a manifest only for a ready, authorized video. The target is p95 startup under two seconds, measured on a defined device/network cohort rather than promised for every connection.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/video_streaming_platform.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/video_streaming_platform.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/video_streaming_platform.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/video_streaming_platform.py). You can also [read or download the source here](../../../../examples/architecture-starts/video_streaming_platform.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+Resume missing parts: [2]
+Upload complete: True
+ana manifest allowed
+ben 403
+```
+
+### Set up your implementation workspace
+
+Create `work/video-streaming-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/video_streaming_platform.py
 | video_catalog | video_id,owner,visibility,generation,state | Current publication and access authority. |
 | playback_sessions | viewer,video,generation,expires_at | Authorized access to a specific published rendition set. |
 
-## AWS implementation
-
-![Video streaming: keep playback smooth at the edge: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-streaming-platform.svg)
-
-The CDN carries repeated viewer bytes; the application handles identity, catalog state and publication. Keeping large transfers off API servers changes both capacity and failure behavior.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Complete one resumable upload
 
@@ -56,7 +73,46 @@ Check current visibility before issuing a short-lived playback authorization. Re
 
 Capture time to authorization, manifest, first segment and first rendered frame. Compare a cold CDN object with a warm one and a constrained client connection. Tune the first-rendition choice and caching using the measured bottleneck, not only server response latency.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Only part 2 needs resuming; only the authorized viewer receives manifest access. |
+| Interrupt a large upload | Resume missing parts without restarting completed transfer. |
+| Request a processing video | Status is visible; no incomplete manifest is issued. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| Five million uploads/day | About 58 uploads/s average; at an assumed 500 MB mean that is 2.5 PB/day of source data before renditions. |
+| 100 million viewers; 20 GB maximum upload | Maximum file size is a request bound, not the average storage assumption. |
+| Two-second p95 playback start | Budget authorization, manifest fetch, first segment transfer and decoder startup independently. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build resumable uploads and authorized video playback: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/video-streaming-platform.svg)
+
+The CDN carries repeated viewer bytes; the application handles identity, catalog state and publication. Keeping large transfers off API servers changes both capacity and failure behavior.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: upload and playback API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: video catalog application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local file, object fixture or exported payload | Amazon S3: source upload storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local rendition result fixture | AWS Elemental MediaConvert: adaptive transcoding | Submit identified conversion jobs, handle completion/failure events and publish only complete output sets. |
+| Local file, object fixture or exported payload | Amazon S3: playback segment origin | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local static/media delivery path | Amazon CloudFront: viewer delivery edge | Configure an origin, cache policy and private-content access; distinguish cached bytes from current authorization. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Only part 2 needs resuming; only the authorized viewer receives manifest access. |
-| Interrupt a large upload | Resume missing parts without restarting completed transfer. |
-| Request a processing video | Status is visible; no incomplete manifest is issued. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add live streaming. Revisit segment latency, encoder failure, rolling manifest updates and origin failover; the immutable completed-video assumptions no longer cover the entire path.
 

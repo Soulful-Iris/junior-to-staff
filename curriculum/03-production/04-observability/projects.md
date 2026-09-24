@@ -1,6 +1,6 @@
 # 10 · Observability — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Trace requests and diagnose production symptoms](README.md) first
 
 Five projects that end in evidence rather than dashboards: a trace that
 survives a queue, a stopwatch time for finding a failure you were not told

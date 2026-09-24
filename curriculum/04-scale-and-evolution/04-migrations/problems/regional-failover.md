@@ -1,30 +1,53 @@
-# Regional failover: which acknowledged write survives?
+# Design and rehearse regional write failover
 
-## What you are building
+## Application background
 
-> Build the failover procedure for a regional order service doing 3,000 writes/s. Product asks for recovery within 15 minutes and zero acknowledged-write loss. The proposed asynchronous replica cannot meet both claims during every regional outage; make the actual acknowledgement and promotion rules explicit.
+An order service accepts writes in one region and copies them to another. During an outage, promoting the copy may restore service while omitting writes it has not received.
 
-**Working contract:** Only one writer epoch may commit orders. A failover publishes a new epoch after the previous writer is fenced. Acknowledged means the durability policy has been met; promotion must report the last recoverable commit position.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A write-acknowledgement policy and executable failover rehearsal recording writer fencing, replica position, recovery time and acknowledged-write loss.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 3,000 writes/s; 20 seconds replica lag | As many as 60,000 recent writes may be absent from the replica; this is exposure, not a measured loss count. |
-| 15-minute recovery objective | Budget detection, fencing, promotion, validation and traffic movement; DNS time is only one part. |
-| RPO zero requested | Requires an acknowledgement boundary that survives the stated failure domain, or an honest renegotiation of the objective. |
+Build the failover procedure for a regional order service doing 3,000 writes/s. Product asks for recovery within 15 minutes and zero acknowledged-write loss. The proposed asynchronous replica cannot meet both claims during every regional outage; make the actual acknowledgement and promotion rules explicit.
 
-## Start with one working boundary
+**Required behavior:** Only one writer epoch may commit orders. A failover publishes a new epoch after the previous writer is fenced. Acknowledged means the durability policy has been met; promotion must report the last recoverable commit position.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/regional_failover.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/regional_failover.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/regional_failover.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/regional_failover.py). You can also [read or download the source here](../../../../examples/architecture-starts/regional_failover.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+committed
+fenced
+committed
+['order-1', 'order-2']
+```
+
+### Set up your implementation workspace
+
+Create `work/regional-failover/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/regional_failover.py
 | replication_checkpoint | source_commit,target_applied | States which committed prefix is recoverable. |
 | failover_run | decision,steps,evidence,timestamps | Auditable operations and measured recovery time. |
 
-## AWS implementation
-
-![Regional failover: which acknowledged write survives?: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/regional-failover.svg)
-
-AWS routing and database replication solve different parts of failover. The diagram deliberately separates them. If zero loss is mandatory, select and verify a synchronous cross-region durability design and accept its latency/availability tradeoff instead of relabeling an asynchronous replica.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Name the failure and durability boundary
 
@@ -56,7 +73,46 @@ Record detection evidence, who makes promotion decisions, how to stop writes, ch
 
 After the old region returns, keep it fenced. Compare acknowledged operation identities with recovered state before rebuilding it as a replica. Plan failback as another authority transfer; an automatic DNS preference must not recreate two writers.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Epoch 7 is rejected after epoch 8 becomes authoritative. |
+| Disconnect replication before a failover rehearsal | The operator sees the recoverable checkpoint and explicit loss exposure. |
+| Bring the old region back | It cannot commit until deliberately reconfigured under the current authority. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 3,000 writes/s; 20 seconds replica lag | As many as 60,000 recent writes may be absent from the replica; this is exposure, not a measured loss count. |
+| 15-minute recovery objective | Budget detection, fencing, promotion, validation and traffic movement; DNS time is only one part. |
+| RPO zero requested | Requires an acknowledgement boundary that survives the stated failure domain, or an honest renegotiation of the objective. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Design and rehearse regional write failover: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/regional-failover.svg)
+
+AWS routing and database replication solve different parts of failover. The diagram deliberately separates them. If zero loss is mandatory, select and verify a synchronous cross-region durability design and accept its latency/availability tradeoff instead of relabeling an asynchronous replica.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local endpoint selection | Amazon Route 53: traffic routing | Configure DNS routing and recovery controls; a routing change alone does not fence a previous writer. |
+| Local application process | Regional application: order request handling | Deploy the same identified artifact in each region with region-specific dependencies and a writer authority check. |
+| Current authoritative write store | Aurora primary Region: current database writer | Configure the primary data path, capture acknowledged positions and document the write durability boundary. |
+| Replica state in the failover exercise | Aurora secondary Region: replicated recovery target | Observe replication progress and define promotion criteria and reconciliation for unreplicated writes. |
+| Local recovery decision or operator action | Amazon Application Recovery Controller: recovery controls | Configure recovery controls and execute the documented fencing/promotion procedure; do not equate traffic routing with data recovery. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: recovery evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +125,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Epoch 7 is rejected after epoch 8 becomes authoritative. |
-| Disconnect replication before a failover rehearsal | The operator sees the recoverable checkpoint and explicit loss exposure. |
-| Bring the old region back | It cannot commit until deliberately reconfigured under the current authority. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Product rejects both any data loss and the latency cost of synchronous regional durability. Write a decision record with the failure cases and measurable options. No infrastructure diagram can make contradictory guarantees simultaneously true.
 

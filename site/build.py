@@ -163,13 +163,13 @@ def kind_for(rel: Path) -> str:
 
 
 
-# The chapter READMEs already state the pedagogy: "Learn in this order" is an
-# ordered table, "Apply the concept" an ordered list of project briefs. That
+# The chapter READMEs already state the pedagogy: "Concepts and worked examples" is an
+# ordered table, "Build a project" an ordered list of project briefs. That
 # order is the author's, it interleaves labs and problems deliberately, and it
 # is not the order a directory walk produces. Use it.
-NAV_SECTIONS = ("Learn in this order", "Apply the concept", "Supporting material")
-SEC_LABEL = {"Learn in this order": "Learn", "Apply the concept": "Apply",
-             "Supporting material": "Supporting material"}
+NAV_SECTIONS = ("Concepts and worked examples", "Build a project", "Reference guides")
+SEC_LABEL = {"Concepts and worked examples": "Concepts and examples", "Build a project": "Projects",
+             "Reference guides": "Reference guides"}
 MD_LINK = re.compile(r"\[([^\]]+)\]\(([^)#]+\.md)(?:#[^)]*)?\)")
 
 # Answer keys and repo meta are not lessons. They were in the reading sequence
@@ -304,7 +304,7 @@ def collect() -> list[dict]:
         add(f.relative_to(ROOT), kind="practice", group=None, subject=None,
             area="assessor")
 
-    for d in ("indexes", "practice", "projects", "docs", "scripts", "companies", "examples/link-watcher", "examples/architecture-starts"):
+    for d in ("indexes", "practice", "projects", "docs", "scripts", "companies", "examples/link-watcher", "examples/architecture-starts", "examples/reading-list-starter"):
         base = ROOT / d
         if not base.is_dir():
             continue
@@ -472,7 +472,7 @@ def style_markers(html: str) -> str:
 
 
 NAV_SECTION_RE = re.compile(
-    r"^## (?:Learn in this order|Apply the concept|Supporting material)\s*$.*?(?=^## |\Z)",
+    r"^## (?:Concepts and worked examples|Build a project|Reference guides)\s*$.*?(?=^## |\Z)",
     re.M | re.S)
 TRAILING_NAV = re.compile(r"^Next chapter: \[[^\]]+\]\([^)]+\)\.?\s*$", re.M)
 

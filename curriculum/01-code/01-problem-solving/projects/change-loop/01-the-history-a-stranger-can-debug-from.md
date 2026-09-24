@@ -1,13 +1,36 @@
-# 1. The history a stranger can debug from
+# Rewrite private commit history to explain a change
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A reading-list title lookup uses a timeout chosen during a failure investigation. Git history should preserve why that value changed so an on-call engineer can assess it later.
 
-> An on-call engineer finds `timeout_ms = 800` in your reading-list service. Three commits say only “wip.” Reorganize a private copy so a stranger can explain the value without changing any delivered code. What record would count as evidence?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../change-loop.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Produce two private histories with the same final code and compare how easily a new reader can explain a timeout decision.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Use a disposable copy of the starter and initialize a separate Git repository there. Make three small commits: change a timeout, rename a helper and document the observed timeout outcome. Save the original branch.
+
+2. Create a second private branch and reorganize commits and messages to separate the behavior change from the rename. Include the timing observation that motivated the value. Never rewrite a shared branch for this exercise.
+
+3. Compare the branch tips with `git diff original..revised`: there should be no content difference. Give a fresh reader the timeout line and ask them to locate its rationale in each history; record the lookup and missing evidence.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../change-loop.md). This page is a build brief; 
 | Boundary / failure | A rewrite accidentally restores timeout 300. | The tip comparison fails even if all rewritten commits look tidy. |
 | Scope | Private practice branches; no rewriting a branch other people use. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Use a disposable branch with three changes: timeout 300→800, a helper rename, and a timeout test. Rewrite their order/story while keeping the final code identical. **Show:** the original and rewritten commit graph, a zero diff between tips, and the commit that explains the timeout choice. A tidy history that changes behavior is a failure.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** Take a real week of your P1 history — the honest one with wip in it. On a copy, rewrite it into the sequence you would want at 3am: same final code, different story. Then the experiment: a reader with no context gets one line and one question — why is this here — against each version, timed.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A shared branch already exists | A teammate has based two commits on the old history. How do you run the drill safely? Predict which boundary must change before opening the design. | Keep the shared reference stable and create a separate rehearsal branch. Compare trees there; use improved messages only on future shared work. The expected outcome is zero forced updates to the teammate’s base. |
-| Lead · The explanation lives outside Git | The decision cites a benchmark file that will disappear. What must survive a year? State what evidence would make you reject your first design. | Attach the input, units, observed result, and a stable artifact identifier to the decision record. A narrative with a broken evidence link is not recoverable. Re-run the stranger exercise from an offline clone or exported bundle. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -106,20 +104,20 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Show the empty diff and one correct independently cited answer. **Additional lead scope:** Define retention and the owner of decision artifacts. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up with the same week of work told two ways, and a number: how long a
 stranger takes to find out why a line changed in each.*
 
 **Build**
 
-Take a real week of your P1 history — the honest one with `wip` in it. On a
+Take a real week of your Stage 1 reading-list history — the honest one with `wip` in it. On a
 copy, rewrite it into the sequence you would want at 3am: same final code,
 different story. Then the experiment: a reader with no context gets one line
 and one question — why is this here — against each version, timed.
@@ -221,3 +219,6 @@ a slogan.
 ---
 
 [Back to the ordered project index](../../change-projects.md)
+
+
+</details>

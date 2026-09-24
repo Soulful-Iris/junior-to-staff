@@ -1,6 +1,6 @@
 # Draw the system, then break it
 
-[Curriculum](../../README.md) · [System design](README.md)
+[Curriculum](../../README.md) · [Design services from requirements to failure behavior](README.md)
 
 Draw from memory. Use **boxes for responsibilities**, **cylinders for durable state**, and **labeled arrows for data movement**. Start with the smallest design that meets the requirement. AWS names come after the mechanism.
 

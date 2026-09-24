@@ -1,6 +1,6 @@
 # Largest rectangle in a histogram
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A capacity chart has adjacent bars of width one. Find the largest rectangular
 > area that fits entirely beneath the bars, spanning a contiguous range. A tall

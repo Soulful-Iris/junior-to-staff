@@ -1,30 +1,52 @@
-# Approval desk: a support agent that proposes before it acts
+# Require exact human approval before agent actions
 
-## What you are building
+## Application background
 
-> Build an approval desk for support credits. The assistant may propose a $5 credit for ticket T7, but only an authorized reviewer can approve it. If the amount changes to $50 or the approval expires, the old approval cannot authorize execution.
+Support staff use an assistant to propose customer credits. A proposal is a suggestion; a reviewer approves a specific amount and target before a restricted executor can contact the provider.
 
-**Working contract:** Proposal, approval and execution are separate durable states. Approval binds the exact target and canonical parameters. The executor rechecks permission, expiry and operation identity before performing an external effect.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Extend the supplied proposal/approval workflow with a reviewer interface, expiry and changed-parameter handling, and external-outcome reconciliation.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 500 proposed actions/day assumption | A small ledger can provide complete proposal/approval history; scale is not a reason to omit it. |
-| Ten-minute approval lifetime | Expiry is checked at execution, even if the queued action was approved earlier. |
-| 1% ambiguous provider responses | Five cases/day require reconciliation at the stated volume; unknown is a first-class outcome. |
+Build an approval desk for support credits. The assistant may propose a $5 credit for ticket T7, but only an authorized reviewer can approve it. If the amount changes to $50 or the approval expires, the old approval cannot authorize execution.
 
-## Start with one working boundary
+**Required behavior:** Proposal, approval and execution are separate durable states. Approval binds the exact target and canonical parameters. The executor rechecks permission, expiry and operation identity before performing an external effect.
 
-Run the existing complete local reference workflow from the repository root:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/ai-systems/demo.py agent
 ```
 
-The reference uses local fixtures to make the workflow inspectable. The implementation walkthrough and source notes are retained below. Add real model/provider adapters only after the local state transitions and evidence are clear.
+**Supplied code:** [AI workflow implementation](https://github.com/Soulful-Iris/junior-to-staff/tree/main/examples/ai-systems), starting at [demo.py](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/ai-systems/demo.py). These are local workflows with fixture providers and temporary storage. They do not include the user interface or connect to the AWS services in the diagram.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+[
+  {
+    "request": {
+      "action": "order.put",
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/02-approval-desk/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ The reference uses local fixtures to make the workflow inspectable. The implemen
 | approval | proposal_version,approver,expires_at | Bounded authorization, not general tool access. |
 | execution | operation_id,provider_key,outcome | One logical effect with retry/reconciliation evidence. |
 
-## AWS implementation
-
-![Approval desk: a support agent that proposes before it acts: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-approval-desk.svg)
-
-The durable approval ledger and restricted executor enforce authority. A queue moves approved work but does not make stale or changed proposals valid.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Run the proposal-to-execution reference
 
@@ -56,7 +72,46 @@ Give it only the approved action types and provider credentials. Revalidate curr
 
 Query or safely retry under the provider’s actual idempotency contract. Preserve attempt history and show pending repair to the operator. A model-generated explanation is not evidence that a credit happened.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the existing agent demo | Follow proposal, approval and execution evidence through the local workflow. |
+| Change amount after approval | Execution refuses the stale approval. |
+| Lose the provider response | The operation remains unknown until reconciled using the original identity. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 500 proposed actions/day assumption | A small ledger can provide complete proposal/approval history; scale is not a reason to omit it. |
+| Ten-minute approval lifetime | Expiry is checked at execution, even if the queued action was approved earlier. |
+| 1% ambiguous provider responses | Five cases/day require reconciliation at the stated volume; unknown is a first-class outcome. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Require exact human approval before agent actions: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/02-approval-desk.svg)
+
+The durable approval ledger and restricted executor enforce authority. A queue moves approved work but does not make stale or changed proposals valid.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: approval desk API | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: proposal application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: approval ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local pending-work collection | Amazon SQS: approved execution queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: action executor | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local provider configuration placeholder | AWS Secrets Manager: provider credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the existing agent demo | Follow proposal, approval and execution evidence through the local workflow. |
-| Change amount after approval | Execution refuses the stale approval. |
-| Lose the provider response | The operation remains unknown until reconciled using the original identity. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Approve a batch of credits. Bind approval to the complete item set and per-item limits, then report partial execution and repair without turning one approval into an unlimited batch capability.
 

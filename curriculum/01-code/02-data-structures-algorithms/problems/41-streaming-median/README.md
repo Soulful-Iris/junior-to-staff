@@ -1,6 +1,6 @@
 # Maintain an exact streaming median
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A monitoring process receives integer observations and asks for the median after
 > each arrival. Re-sorting all history is too expensive. Keep an exact answer,

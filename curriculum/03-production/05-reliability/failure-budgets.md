@@ -1,6 +1,6 @@
 # Reliability
 
-[Curriculum](../../README.md) · [Reliability and incident response](README.md)
+[Curriculum](../../README.md) · [Set reliability objectives and recover from failures](README.md)
 
 > Project connection · feeds **P3 (it holds under load)**
 

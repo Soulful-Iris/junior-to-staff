@@ -1,6 +1,6 @@
 # Top k observations in a stream
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “An operations screen receives integer latency samples indefinitely and displays
 > the largest k seen so far. Keeping every sample exhausts memory. Preserve exact

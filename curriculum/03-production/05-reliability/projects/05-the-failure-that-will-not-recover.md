@@ -1,30 +1,51 @@
-# 5. The failure that will not recover
+# Recover a service trapped in expired work and retries
 
-## What you are building
+## Application background
 
-> Diagnose a service that stays slow after its original traffic spike ends. Expired requests keep retrying and occupy slots needed for new work. The incident response must stop the sustaining loop and demonstrate enough spare capacity to drain useful backlog.
+A service can remain overloaded after incoming traffic returns to normal if expired requests and their retries keep occupying workers. Recovery requires changing that feedback loop.
 
-**Working contract:** Recovery requires arrivals below safe useful completion capacity. Separate stale disposable work from business obligations that still need reconciliation. Measure backlog age and net drain, not only whether the original fault disappeared.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A before/after backlog trace and recovery procedure that removes useless work and creates enough spare capacity to drain useful requests.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 600 useful queued jobs; 20 new jobs/s; 50 completions/s | Net drain is 30/s; ideal drain time is 20 seconds plus measured overhead. |
-| 60 retry arrivals/s; 50 completions/s | Backlog still grows 10/s after the initial spike ends. |
-| Cold cache: 1,000 reads/s; database capacity 100/s | Unbounded cache bypass preserves the outage by overloading the database. |
+Diagnose a service that stays slow after its original traffic spike ends. Expired requests keep retrying and occupy slots needed for new work. The incident response must stop the sustaining loop and demonstrate enough spare capacity to drain useful backlog.
 
-## Start with one working boundary
+**Required behavior:** Recovery requires arrivals below safe useful completion capacity. Separate stale disposable work from business obligations that still need reconciliation. Measure backlog age and net drain, not only whether the original fault disappeared.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/05_the_failure_that_will_not_recover.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/05_the_failure_that_will_not_recover.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/05_the_failure_that_will_not_recover.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/05_the_failure_that_will_not_recover.py). You can also [read or download the source here](../../../../examples/architecture-starts/05_the_failure_that_will_not_recover.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+{'backlog': 600, 'net_drain_per_s': 30, 'ideal_drain_s': 20.0}
+{'backlog': 600, 'net_drain_per_s': -10, 'ideal_drain_s': 'never at these rates'}
+```
+
+### Set up your implementation workspace
+
+Create `work/05-the-failure-that-will-not-recover/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +53,7 @@ python3 examples/architecture-starts/05_the_failure_that_will_not_recover.py
 | recovery_budget | arrivals,capacity,retry_share | Explicit net-drain calculation. |
 | incident_timeline | trigger,feedback_loop,mitigation,recovered | Evidence that the sustaining mechanism stopped. |
 
-## AWS implementation
-
-![5. The failure that will not recover: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-failure-that-will-not-recover.svg)
-
-Recovery is a capacity inequality plus correct work classification. Queue depth falling is useful evidence only if obligations are completed or explicitly resolved, rather than silently discarded.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Identify the sustaining loop
 
@@ -56,7 +71,46 @@ Reduce arrivals or optional work until safe completions exceed admitted useful a
 
 Warm caches through a bounded origin budget and gradually restore traffic. Keep recovery controls available independently of the failing path. Record the trigger and feedback loop separately so the permanent repair addresses both.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | The healthy recovery case drains in an ideal 20 seconds; the retry loop never drains at the stated rates. |
+| Turn off only the original spike | Retry-driven backlog still grows. |
+| Restore a cold cache | Origin load remains below the database budget. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 600 useful queued jobs; 20 new jobs/s; 50 completions/s | Net drain is 30/s; ideal drain time is 20 seconds plus measured overhead. |
+| 60 retry arrivals/s; 50 completions/s | Backlog still grows 10/s after the initial spike ends. |
+| Cold cache: 1,000 reads/s; database capacity 100/s | Unbounded cache bypass preserves the outage by overloading the database. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Recover a service trapped in expired work and retries: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/05-the-failure-that-will-not-recover.svg)
+
+Recovery is a capacity inequality plus correct work classification. Queue depth falling is useful evidence only if obligations are completed or explicitly resolved, rather than silently discarded.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Application or worker process | Amazon ECS: affected application | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local pending-work collection | Amazon SQS: useful work backlog | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Application or worker process | Amazon ECS: recovery workers | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: limiting dependency | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local cache, counter or coordination state | Amazon ElastiCache: recovering cache | Implement a Redis/Valkey adapter and atomic operations, expiry and unavailable-cache behavior; keep the durable authority separate. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: recovery evidence | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,20 +122,15 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | The healthy recovery case drains in an ideal 20 seconds; the retry loop never drains at the stated rates. |
-| Turn off only the original spike | Retry-driven backlog still grows. |
-| Restore a cold cache | Origin load remains below the database budget. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Job cost varies by 100×. Replace a simple job-count estimate with remaining work units and identify the oldest expensive obligation rather than predicting recovery from queue count alone.
 
 <details>
-<summary>Further constraints from the original project</summary>
+<summary>Additional design reasoning and requirement changes</summary>
 
 ## Follow-up 1 · The cache is cold
 

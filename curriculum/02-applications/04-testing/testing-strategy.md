@@ -1,6 +1,6 @@
 # Testing
 
-[Curriculum](../../README.md) · [Testing, debugging, and code review](README.md)
+[Curriculum](../../README.md) · [Find defects and evaluate engineering evidence](README.md)
 
 > Project connection · feeds **P1 (it works)** and everything after it
 

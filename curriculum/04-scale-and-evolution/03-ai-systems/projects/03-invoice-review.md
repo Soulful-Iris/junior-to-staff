@@ -1,30 +1,52 @@
-# Invoice review: extract, validate, retry, and reconcile
+# Route extracted invoices through validation and review
 
-## What you are building
+## Application background
 
-> Build invoice intake for a finance operations team. An uploaded invoice is extracted into structured fields, but totals can be inconsistent and a corrected source document may arrive under the same business invoice number. Route uncertain content to review without confusing it with a transient provider outage.
+A finance team receives invoice documents and turns them into structured accounting records. Extraction proposes fields; validation and a reviewer decide whether those fields can be accepted.
 
-**Working contract:** Preserve source identity/version, extractor version and validated candidate fields. Review-required is a content outcome; retryable failure is a transport/processing outcome. A corrected source gets a new version and cannot silently reuse an old accepted result.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** Extend the supplied extraction workflow with source-version tracking, a review interface and separate data-quality versus provider-failure outcomes.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 1,000 invoices/day; 2 MB mean source assumption | About 2 GB/day of originals before versions and retention. |
-| 5% content review rate | Fifty human reviews/day; measure that queue separately from infrastructure retries. |
-| Three bounded processing attempts | Exhaustion becomes visible repair work; repeated extraction cannot make invalid arithmetic valid. |
+Build invoice intake for a finance operations team. An uploaded invoice is extracted into structured fields, but totals can be inconsistent and a corrected source document may arrive under the same business invoice number. Route uncertain content to review without confusing it with a transient provider outage.
 
-## Start with one working boundary
+**Required behavior:** Preserve source identity/version, extractor version and validated candidate fields. Review-required is a content outcome; retryable failure is a transport/processing outcome. A corrected source gets a new version and cannot silently reuse an old accepted result.
 
-Run the existing complete local reference workflow from the repository root:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/ai-systems/demo.py extraction
 ```
 
-The reference uses local fixtures to make the workflow inspectable. The implementation walkthrough and source notes are retained below. Add real model/provider adapters only after the local state transitions and evidence are clear.
+**Supplied code:** [AI workflow implementation](https://github.com/Soulful-Iris/junior-to-staff/tree/main/examples/ai-systems), starting at [demo.py](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/ai-systems/demo.py). These are local workflows with fixture providers and temporary storage. They do not include the user interface or connect to the AWS services in the diagram.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+[
+  {
+    "request": {
+      "action": "invoice.extract",
+… (more output follows)
+```
+
+### Set up your implementation workspace
+
+Create `work/03-invoice-review/` in your checkout (or use a separate repository). Copy `examples/ai-systems/` there so you can change the workflow and its storage/provider boundaries together. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ The reference uses local fixtures to make the workflow inspectable. The implemen
 | extraction_run | source_version,extractor_version,attempt | Candidate fields and processing outcome. |
 | review_decision | revision,actor,confirmed_fields,reason | Human-approved data with provenance. |
 
-## AWS implementation
-
-![Invoice review: extract, validate, retry, and reconcile: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-invoice-review.svg)
-
-The extractor proposes fields; deterministic validation and human review decide whether those fields are usable. Separate source versions prevent a retry from hiding a corrected invoice.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Inspect the complete local workflow
 
@@ -56,7 +72,46 @@ Retry transient timeouts under a bounded budget. Route ambiguous content, missin
 
 A new source hash/version creates a new processing intent. Link it to the business invoice and prior review history, then require an explicit decision about superseding confirmed data. Reconciliation records explain which source version reached downstream accounting.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the existing extraction demo | Inspect distinct review, retry and reconciliation outcomes. |
+| Return valid JSON with inconsistent totals | The document goes to review rather than automatic acceptance. |
+| Upload corrected source bytes | A new source version is processed and linked to prior evidence. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 1,000 invoices/day; 2 MB mean source assumption | About 2 GB/day of originals before versions and retention. |
+| 5% content review rate | Fifty human reviews/day; measure that queue separately from infrastructure retries. |
+| Three bounded processing attempts | Exhaustion becomes visible repair work; repeated extraction cannot make invalid arithmetic valid. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Route extracted invoices through validation and review: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/03-invoice-review.svg)
+
+The extractor proposes fields; deterministic validation and human review decide whether those fields are usable. Separate source versions prevent a retry from hiding a corrected invoice.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local file, object fixture or exported payload | Amazon S3: invoice evidence storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+| Local pending-work collection | Amazon SQS: extraction queue | Publish committed job intent, consume messages and persist deduplication/ownership state; add visibility, retry and dead-letter handling. |
+| Python operation or worker function | AWS Lambda: extraction coordinator | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local extracted-field fixture | Amazon Textract: document extraction | Implement asynchronous or synchronous extraction adapters, retain source version and separate provider failures from invalid extracted data. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: workflow and review ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: reviewer interface API | Create routes and an integration; translate requests and responses and configure identity validation. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the existing extraction demo | Inspect distinct review, retry and reconciliation outcomes. |
-| Return valid JSON with inconsistent totals | The document goes to review rather than automatic acceptance. |
-| Upload corrected source bytes | A new source version is processed and linked to prior evidence. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 One invoice is split across several files. Define the complete source bundle identity and completion rule before extracting; a partial bundle must not be published as a final invoice.
 

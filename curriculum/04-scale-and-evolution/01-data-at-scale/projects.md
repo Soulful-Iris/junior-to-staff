@@ -1,6 +1,6 @@
 # 13 · Data at scale — five projects
 
-> Senior tier · each one an afternoon · read [the section](README.md) first
+> Senior tier · each one an afternoon · read [Process, search and store data at scale](README.md) first
 
 Five projects, and every one of them ends in a number that came from breaking
 something on purpose: the resource that saturated first, the query count during
@@ -558,7 +558,7 @@ than classic Multi-AZ, which is the middle option people do not know exists.
 
 Set a **CloudWatch alarm** on replica lag before you route any traffic, and
 know the two things that reliably spike it: a large backfill (see
-[12 · Delivery](../../03-production/02-delivery/README.md)) and a long-running query on the replica
+[Deploy changes and control feature exposure](../../03-production/02-delivery/README.md)) and a long-running query on the replica
 itself blocking replay.
 
 And the sharding rung, for completeness: PostgreSQL has no native sharding, and
@@ -701,7 +701,7 @@ keeps appearing in this section. DNS caching is the second: the endpoint's
 record has a short TTL and JVM and some runtimes cache it longer, so check your
 runtime's DNS cache setting explicitly. And the reconnect stampede is the
 third — jitter your reconnection backoff, which is the same lesson as
-[09 · Reliability](../../03-production/05-reliability/README.md)'s retry storm arriving from a different
+[Set reliability objectives and recover from failures](../../03-production/05-reliability/README.md)'s retry storm arriving from a different
 direction.
 
 For the lost-writes comparison, record acknowledgements somewhere that is not

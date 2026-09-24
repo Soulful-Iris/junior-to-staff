@@ -1,33 +1,30 @@
-# Build a link-rot watcher
+# Build a link monitor with durable history and change alerts
 
-[Curriculum](../../../README.md) · [Backend and APIs](../README.md) · [Project index](../../../../indexes/projects.md)
+[Curriculum](../../../README.md) · [Build HTTP APIs and reliable background work](../README.md) · [Project index](../../../../indexes/projects.md)
 
-## What you are building
+## Application background
 
-> Build a service that checks a team's saved documentation links every Monday,
-> records what it observed, and emails the owner when a link becomes unavailable
-> or recovers. Repeated failures must not create a new alert every week. If the
-> watcher itself stops running, the operations team must know.
+An engineering handbook contains links to vendor documentation and runbooks. Twelve teams own 500 links each. The handbook needs a weekly check that tells each owner when one of their links becomes unavailable or recovers. Sending the same failure email every week creates noise; a failed monitoring run can otherwise go unnoticed.
 
-**Scenario:** You maintain an internal engineering handbook. Twelve teams own
-500 external links each: API documentation, vendor setup guides, and reference
-articles. Engineers currently discover broken links while following a runbook.
-A weekly script exists, but it sends the same broken-link list repeatedly and
-nobody notices when it stops. Your replacement needs durable history, useful
-notifications, and a visible record of each scheduled run.
+## Your assignment
 
-**The first deliverable** is a local command-line application with a SQLite
-database. The supplied reference implements response classification, history,
-state changes, and pending notifications. You then add scheduled work,
-notification delivery, and run monitoring. **The second deliverable** is the AWS
-version shown below. The infrastructure foundation supplies queues, storage and
-one alarm; wiring the application into those services is part of the project.
+**Deliver:** A local command-line link monitor with durable observations and change notifications, followed by a scheduled AWS implementation. The first result is a repeatable URL history; the later result is a scheduled service with useful delivery and run monitoring.
 
-Start with Python 3.12+, basic HTTP status codes, and SQL transactions. No AWS
-account is needed for the local checkpoints. Use the
-[reference files](../../../../examples/link-watcher/README.md) beside this guide.
+The supplied Python/SQLite reference already implements response classification, observation history, state changes and pending notification records. You add scheduled work, notification delivery and run monitoring. The cloud foundation supplies queues, storage and one alarm; it does not deploy the application workers or wire them to those resources.
 
-## Requirements and sizing
+## Get the code and run the supplied reference
+
+Install Git and Python 3.12+. No AWS account or Python packages are needed locally. The complete source is in [examples/link-watcher on GitHub](https://github.com/Soulful-Iris/junior-to-staff/tree/main/examples/link-watcher), with [local run instructions](../../../../examples/link-watcher/README.md).
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/link-watcher/watcher.py --db /tmp/link-watcher-demo.sqlite3 demo
+```
+
+Look for four observations, two transitions and two pending notification entries; running the command again does not add duplicates. Continue with Checkpoint 1 below to inspect the persisted state. The command sends no email and creates no AWS resources.
+
+## Workload assumptions and capacity decisions
 
 These are **invented workload inputs for this exercise**, not measured traffic
 from a real company. Keep them in your design so the service choices have a reason.
@@ -48,7 +45,7 @@ at concurrency 20, even before retries. Report it as late; do not promise the
 normal completion target under that failure load. If 30 minutes becomes a hard
 requirement, revisit inventory distribution, deadlines and capacity together.
 
-## Decide what the observation means
+## Define observation states and notification rules
 
 The service can report what it saw. It cannot prove that a web page is permanently
 dead or that a successful response still contains the intended documentation.
@@ -360,13 +357,13 @@ before overhead. Price the actual region and usage when deploying. A continuousl
 running NAT gateway or container can dominate a small weekly workload; the diagram
 does not imply either is required.
 
-## What you are expected to hand over
+## Deliver the local and cloud implementations
 
 Bring the runnable local program, a short observed run, your AWS configuration,
 and the diagrams updated to match what you actually built. State which checkpoints
 are local-only and which you have exercised in your AWS account.
 
-### How the review conversation gets harder
+### Extend the failure and recovery requirements
 
 | Review gate | Action to demonstrate | Evidence to show |
 |---|---|---|

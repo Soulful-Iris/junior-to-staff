@@ -1,6 +1,6 @@
 # AI systems
 
-[Curriculum](../../README.md) · [AI systems](README.md)
+[Curriculum](../../README.md) · [Build AI features with evidence and controlled actions](README.md)
 
 > Project connection · feeds **P4 (it reasons, provably)**
 

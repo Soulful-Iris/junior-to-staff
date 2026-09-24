@@ -1,30 +1,52 @@
-# API gateway: route safely across many teams
+# Build versioned API routing and admission policies
 
-## What you are building
+## Application background
 
-> Build the shared API entry layer for 150 internal services. Teams need consistent authentication, coarse admission limits and routing, while each service still owns resource authorization. A malformed route configuration must not take every service offline.
+Internal service teams publish routes through one common HTTP entry point. The gateway handles shared identity and routing policy while each destination still decides access to its own resources.
 
-**Working contract:** The gateway verifies identity and routes using a versioned configuration snapshot. Backends authorize requested objects. The gateway adds at most 15 ms p99 overhead under the stated load and propagates a request deadline and trace context.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A validated route snapshot, atomic configuration activation and rollback, with a request trace showing gateway and service responsibilities.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 25,000 requests/s across 150 services | Mean per service is about 167/s, but hot routes must be sized separately. |
-| 15 ms p99 added overhead | Measure gateway time independently of backend latency and client network time. |
-| Configuration rollout to 100 instances assumption | Track applied version and rejection reason; a successful upload is not proof every instance activated it. |
+Build the shared API entry layer for 150 internal services. Teams need consistent authentication, coarse admission limits and routing, while each service still owns resource authorization. A malformed route configuration must not take every service offline.
 
-## Start with one working boundary
+**Required behavior:** The gateway verifies identity and routes using a versioned configuration snapshot. Backends authorize requested objects. The gateway adds at most 15 ms p99 overhead under the stated load and propagates a request deadline and trace context.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/api_gateway_platform.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/api_gateway_platform.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/api_gateway_platform.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/api_gateway_platform.py). You can also [read or download the source here](../../../../examples/architecture-starts/api_gateway_platform.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+rejected; keep version 1
+active version 3
+{'version': 3, 'routes': {'/orders': 'orders-v2'}}
+```
+
+### Set up your implementation workspace
+
+Create `work/api-gateway-platform/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/api_gateway_platform.py
 | request_context | subject,claims,deadline,trace_id | Trusted metadata passed through a protected backend boundary. |
 | config_status | instance_id,applied_version,error | Evidence of rollout convergence and failed adoption. |
 
-## AWS implementation
-
-![API gateway: route safely across many teams: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-gateway-platform.svg)
-
-This is a custom proxy platform behind an ALB. Managed API Gateway is an alternative when its routing, authentication and quota features fit; its control plane and deployment model are different from an AppConfig-driven proxy.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Implement one protected route
 
@@ -56,7 +72,46 @@ Validate routes, auth rules and timeout bounds before activation. A custom proxy
 
 Start with a subset of instances or routes, compare errors/latency, and restore the prior snapshot on an observed regression. Keep configuration change ownership and emergency access explicit without moving object authorization into a universal gateway rule.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Invalid configuration leaves version 1 active; valid version 3 activates atomically. |
+| Forge a subject header | The gateway discards it and the backend receives only verified context. |
+| Slow one upstream | Its bounded pool saturates without exhausting unrelated service routes. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 25,000 requests/s across 150 services | Mean per service is about 167/s, but hot routes must be sized separately. |
+| 15 ms p99 added overhead | Measure gateway time independently of backend latency and client network time. |
+| Configuration rollout to 100 instances assumption | Track applied version and rejection reason; a successful upload is not proof every instance activated it. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build versioned API routing and admission policies: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-gateway-platform.svg)
+
+This is a custom proxy platform behind an ALB. Managed API Gateway is an alternative when its routing, authentication and quota features fit; its control plane and deployment model are different from an AppConfig-driven proxy.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP listener | Application Load Balancer: regional entry routing | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
+| Application or worker process | Amazon ECS: custom gateway proxy | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local versioned configuration | AWS AppConfig: versioned proxy configuration | Publish validated configuration versions and consume them with bounded caching and rollback behavior. |
+| Application or worker process | Amazon ECS: backend service fleet | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: gateway operations | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Local provider configuration placeholder | AWS Secrets Manager: upstream credentials | Store provider credentials, scope runtime reads and implement rotation without writing secrets to logs. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +123,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Invalid configuration leaves version 1 active; valid version 3 activates atomically. |
-| Forge a subject header | The gateway discards it and the backend receives only verified context. |
-| Slow one upstream | Its bounded pool saturates without exhausting unrelated service routes. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Offer team-managed routing. Define ownership namespaces, validation and blast-radius limits so a team can change its service without editing a global configuration file that can disable unrelated routes.
 

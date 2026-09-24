@@ -1,6 +1,6 @@
 # Dependency order
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “Our build service receives named tasks and prerequisite relationships. It currently
 > executes the submitted order, sometimes packaging files before compilation finishes.

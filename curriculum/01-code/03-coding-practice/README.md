@@ -1,10 +1,10 @@
-# Coding practice: solve, explain, extend
+# Solve coding problems and explain trade-offs
 
 Turn a clear brief into a working solution, then handle changed requirements.
 
 The preceding **Data structures and algorithms** chapter teaches the shared tools once. Here the focus is the problem: what to return, what can go wrong, which state to keep, and how the design changes under a follow-up. A folded refresher is available when you need one.
 
-## Learn in this order
+## Concepts and worked examples
 
 1. **Scan and remember:** pairs, character counts, windows, prefix totals, and runs.
 2. **Order and boundaries:** intervals, capacity, binary search, and monotone predicates.
@@ -20,4 +20,4 @@ The contents panel gives every problem its own step. Stateful caches, expiry, ev
 
 Read the highlighted brief and examples first. Predict a boundary case. Implement a direct solution, then remove its repeated work. Check the reference only after an attempt. Follow-up questions change the same problem rather than restarting a separate level.
 
-[Foundations](../02-data-structures-algorithms/README.md) · [All coding problems](../../../indexes/coding.md)
+[Choose data structures and reason about algorithms](../02-data-structures-algorithms/README.md) · [All coding problems](../../../indexes/coding.md)

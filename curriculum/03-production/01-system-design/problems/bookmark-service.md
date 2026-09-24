@@ -1,30 +1,53 @@
-# Bookmark service
+# Build a private bookmark API with ownership and version checks
 
-## What you are building
+## Application background
 
-> Build a private bookmark service for a company learning portal. Ana saves a link on her phone and immediately opens it on her laptop. Ben must never see Ana’s private links, and two edits to the same version must produce a visible conflict.
+Employees save web links so they can open them from another device. Each bookmark belongs to one employee; saving returns an ID, listing returns that employee's bookmarks, and editing changes a specific version.
 
-**Working contract:** POST /bookmarks returns 201 and a version; GET /bookmarks returns only the authenticated owner’s rows; PATCH /bookmarks/{id} requires expected_version and returns 409 on conflict. Sharing is a later feature.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A create/list/edit API with persistent owner-scoped records and visible edit conflicts.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 10,000 users × 20 bookmarks | 200,000 rows; at 1 KiB per row, about 195 MiB before indexes and backups. |
-| 100 peak reads/s; 20 writes/s | Start with a single regional database. A cache is an additional consistency problem, not a prerequisite. |
-| Create/list p95 under 300 ms | Measure the complete request; reserve time for authentication, database work and response transfer. |
+Build a private bookmark service for a company learning portal. Ana saves a link on her phone and immediately opens it on her laptop. Ben must never see Ana’s private links, and two edits to the same version must produce a visible conflict.
 
-## Start with one working boundary
+**Required behavior:** POST /bookmarks returns 201 and a version; GET /bookmarks returns only the authenticated owner’s rows; PATCH /bookmarks/{id} requires expected_version and returns 409 on conflict. Sharing is a later feature.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/bookmark_service.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/bookmark_service.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/bookmark_service.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/bookmark_service.py). You can also [read or download the source here](../../../../examples/architecture-starts/bookmark_service.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+ben Unauthorized not found or version conflict
+ana Phone edit saved
+ana Laptop edit not found or version conflict
+Final: [('ana', 7, 'Phone edit', 4)]
+```
+
+### Set up your implementation workspace
+
+Create `work/bookmark-service/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/bookmark_service.py
 | operations | (owner_id, request_id), payload_hash | An exact retry returns the same result; changed payload under the same key conflicts. |
 | api.py / store.py | create, list_owned, edit_if_version | Derive owner from verified identity; enforce it in every database operation. |
 
-## AWS implementation
-
-![Bookmark service: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/bookmark-service.svg)
-
-DynamoDB is a good fit for owner-keyed lists and conditional edits. PostgreSQL remains a simpler choice when sharing and relational queries dominate. Cognito authenticates the caller; application code still decides who owns each record.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Create and list one private record
 
@@ -56,7 +73,44 @@ Commit the bookmark and operation result in one transaction. Compare a canonical
 
 Map owner to the DynamoDB partition and bookmark ID to the sort key. Use a conditional version update and strongly consistent reads for the immediate post-write list. Keep the local SQL and cloud code behind the same store interface. Add cursor pagination with a stable ordering before creating a large inventory.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Ben changes zero rows; Ana’s first edit succeeds; her second version-3 edit conflicts. |
+| Retry a committed create | One bookmark and the original response ID. |
+| Open the losing browser draft | The draft remains visible beside the current server version. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 10,000 users × 20 bookmarks | 200,000 rows; at 1 KiB per row, about 195 MiB before indexes and backups. |
+| 100 peak reads/s; 20 writes/s | Start with a single regional database. A cache is an additional consistency problem, not a prerequisite. |
+| Create/list p95 under 300 ms | Measure the complete request; reserve time for authentication, database work and response transfer. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Build a private bookmark API with ownership and version checks: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/bookmark-service.svg)
+
+DynamoDB is a good fit for owner-keyed lists and conditional edits. PostgreSQL remains a simpler choice when sharing and relational queries dominate. Cognito authenticates the caller; application code still decides who owns each record.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated HTTP entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: bookmark application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local fixture identity or caller supplied to the operation | Amazon Cognito: identity provider | Configure an identity provider and validate tokens; retain resource ownership checks in application code. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: private bookmark store | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,22 +123,17 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Ben changes zero rows; Ana’s first edit succeeds; her second version-3 edit conflicts. |
-| Retry a committed create | One bookmark and the original response ID. |
-| Open the losing browser draft | The draft remains visible beside the current server version. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Add revocable sharing only after private reads work. State the authorization decision point, recheck it on cache hits, and demonstrate that a revoked share token cannot authorize a new response. At ten times the read rate, measure query latency and hot owners before adding a cache.
 
 <details>
 <summary>Additional design cases, alternatives and original source notes</summary>
 
-[Curriculum](../../../README.md) · [System design](../README.md)
+[Curriculum](../../../README.md) · [Design services from requirements to failure behavior](../README.md)
 
 All prompts here are constructed practice, without company attribution.
 

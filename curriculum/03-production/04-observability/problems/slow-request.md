@@ -1,30 +1,53 @@
-# Slow request: the healthy average hid a timeout
+# Find database-pool waiting in slow API requests
 
-## What you are building
+## Application background
 
-> Diagnose an order API where most requests are fast but customers report intermittent two-second waits. The database query itself looks quick; four percent of requests wait for a connection before the query even begins.
+An order API reads records through a limited pool of database connections. A request may spend most of its time waiting for a free connection before a quick query begins.
 
-**Working contract:** Instrument the complete request with queue, connection acquisition, query and downstream spans. Use all eligible request outcomes for latency/error metrics; sampled traces explain examples and do not supply the request denominator.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** A phase-level latency trace and diagnosis report separating admission, connection wait, query and response time.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 8,000 requests/minute | About 133 requests/s average; bursts and concurrent occupancy matter for pool sizing. |
-| 4% wait for a database connection | p95 can look healthy while p99 is poor; inspect tail latency and pool-wait duration. |
-| Two-second end-to-end deadline | Every queue and downstream call consumes the same budget; independent two-second timeouts exceed it. |
+Diagnose an order API where most requests are fast but customers report intermittent two-second waits. The database query itself looks quick; four percent of requests wait for a connection before the query even begins.
 
-## Start with one working boundary
+**Required behavior:** Instrument the complete request with queue, connection acquisition, query and downstream spans. Use all eligible request outcomes for latency/error metrics; sampled traces explain examples and do not supply the request denominator.
 
-Run from the repository root with Python 3.12+:
+The primary deliverable is the report or operational procedure named above, backed by a reproducible local demonstration. Build the smallest supporting code needed to make that evidence visible.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/slow_request.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/slow_request.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/slow_request.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/slow_request.py). You can also [read or download the source here](../../../../examples/architecture-starts/slow_request.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+p50 80 ms
+p95 80 ms
+p99 1900 ms
+Slow request phases: {'pool_wait_ms': 1700, 'query_ms': 40, 'application_ms': 160} total 1900 ms
+```
+
+### Set up your implementation workspace
+
+Create `work/slow-request/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +55,7 @@ python3 examples/architecture-starts/slow_request.py
 | trace_spans | trace_id,parent_id,phase,duration | Causal timeline for selected requests. |
 | pool_state | active,idle,waiting,acquire_timeout | Evidence connecting latency to resource contention. |
 
-## AWS implementation
-
-![Slow request: the healthy average hid a timeout: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/slow-request.svg)
-
-The collector transports evidence; it does not decide what counts as a request. Instrumenting pool acquisition exposes waiting that a query-duration-only dashboard misses.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Reproduce one slow request locally
 
@@ -56,7 +73,46 @@ Inspect transaction duration, leaked connections and downstream concurrency. A l
 
 Repeat the same arrival pattern and report p50/p95/p99, pool wait, database active connections and completed throughput. Keep the slow trace as evidence of causality rather than presenting a dashboard screenshot without a workload description.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | p95 is 80 ms while p99 is 1,900 ms; most slow time is pool waiting. |
+| Hold a database connection | The acquisition span grows even if the eventual SQL is fast. |
+| Reduce leaked/long transactions | Tail latency improves without assuming an unlimited database pool. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 8,000 requests/minute | About 133 requests/s average; bursts and concurrent occupancy matter for pool sizing. |
+| 4% wait for a database connection | p95 can look healthy while p99 is poor; inspect tail latency and pool-wait duration. |
+| Two-second end-to-end deadline | Every queue and downstream call consumes the same budget; independent two-second timeouts exceed it. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Find database-pool waiting in slow API requests: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/slow-request.svg)
+
+The collector transports evidence; it does not decide what counts as a request. Instrumenting pool acquisition exposes waiting that a query-duration-only dashboard misses.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP listener | Application Load Balancer: request entry | Deploy a service behind a target group, configure health checks and bounded connection/request behavior. |
+| Application or worker process | Amazon ECS: instrumented order API | Build a container and task definition; supply configuration, task roles and graceful shutdown behavior. |
+| Local records and transaction boundary | Amazon RDS PostgreSQL: database authority | Write PostgreSQL schema/migrations and a database adapter; configure credentials, connection limits and recovery. |
+| Local timing and correlation events | AWS Distro for OpenTelemetry: trace collection | Instrument runtime spans and configure collection/export; propagate parent and request identity across boundaries. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: metrics and trace analysis | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+| Local file, object fixture or exported payload | Amazon S3: diagnostic evidence archive | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -68,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | p95 is 80 ms while p99 is 1,900 ms; most slow time is pool waiting. |
-| Hold a database connection | The acquisition span grows even if the eventual SQL is fast. |
-| Reduce leaked/long transactions | Tail latency improves without assuming an unlimited database pool. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Only one tenant produces the slow tail. Add bounded tenant-tier or targeted diagnostic analysis without turning every tenant and request ID into permanent metric labels.
 

@@ -1,30 +1,52 @@
-# Data erasure: one request, nine copies
+# Erase account data across stores and in-flight work
 
-## What you are building
+## Application background
 
-> Build account erasure for a document product with primary records, exports, search indexes and backups. A user deletes their account while an export is running and an old data import is queued. Stop new access immediately, then show which deletion steps finished and which are legitimately retained.
+A document product stores an account's documents, exports and searchable copies. Closing an account must immediately prevent use while background cleanup records what was removed or retained.
 
-**Working contract:** DELETE /account creates an erasure case and a durable deletion generation. New reads and writes are denied under that generation. GET /erasure/{case_id} exposes pending, completed and specifically retained categories without leaking erased content.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An erasure coordinator with durable per-store progress, a fence against new work, and a completion report that names retention exceptions.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 100 requests/day; 30-day exercise deadline | Up to 3,000 open cases if everything consumes the full window; size workflow metadata independently of data volume. |
-| Six data stores per account | Track six acknowledgements with evidence, not one optimistic deleted flag. |
-| Ten-minute export jobs | Cancellation must reach running work; removing only the queued message is insufficient. |
+Build account erasure for a document product with primary records, exports, search indexes and backups. A user deletes their account while an export is running and an old data import is queued. Stop new access immediately, then show which deletion steps finished and which are legitimately retained.
 
-## Start with one working boundary
+**Required behavior:** DELETE /account creates an erasure case and a durable deletion generation. New reads and writes are denied under that generation. GET /erasure/{case_id} exposes pending, completed and specifically retained categories without leaking erased content.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/erasure_workflow.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/erasure_workflow.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/erasure_workflow.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/erasure_workflow.py). You can also [read or download the source here](../../../../examples/architecture-starts/erasure_workflow.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+rejected by deletion generation
+Readable account: absent
+Deletion evidence: {'ana': 6}
+```
+
+### Set up your implementation workspace
+
+Create `work/erasure-workflow/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/erasure_workflow.py
 | erasure_steps | case_id,store,status,evidence_ref | One restartable task per affected store. |
 | retention_exceptions | case_id,category,reason,expiry | Explicit product-approved exceptions; no broad hidden exemption. |
 
-## AWS implementation
-
-![Data erasure: one request, nine copies: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/erasure-workflow.svg)
-
-Step Functions coordinates progress; it does not discover every copy automatically. A separate deletion ledger prevents old workers or backup restoration from reintroducing a deleted subject. Each store adapter must return evidence for its own boundary.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Deny access before cleanup
 
@@ -56,7 +72,46 @@ Document when immutable backups expire and the procedure that reapplies the dele
 
 Expose pending steps, age and named escalation owner. Reconcile storage inventories and running jobs against completed cases. Mark complete only when the configured policy is satisfied and any retained categories are disclosed through the authorized case view.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | A version-4 import is rejected by deletion generation 6. |
+| Stop one store adapter | The case remains pending with that store and age visible. |
+| Restore yesterday’s backup | Replay deletion generations before opening reads; the erased account stays unavailable. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 100 requests/day; 30-day exercise deadline | Up to 3,000 open cases if everything consumes the full window; size workflow metadata independently of data volume. |
+| Six data stores per account | Track six acknowledgements with evidence, not one optimistic deleted flag. |
+| Ten-minute export jobs | Cancellation must reach running work; removing only the queued message is insufficient. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Erase account data across stores and in-flight work: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/erasure-workflow.svg)
+
+Step Functions coordinates progress; it does not discover every copy automatically. A separate deletion ledger prevents old workers or backup restoration from reintroducing a deleted subject. Each store adapter must return evidence for its own boundary.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: erasure request entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: account deletion application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: deletion ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local workflow transitions | AWS Step Functions: erasure coordinator | Define workflow tasks and durable transition inputs; retries still need application-level idempotency and reconciliation. |
+| Python operation or worker function | AWS Lambda: store deletion adapters | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local file, object fixture or exported payload | Amazon S3: object and backup storage | Implement upload/download and metadata adapters, scoped access, object naming, retention and incomplete-upload cleanup. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +124,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | A version-4 import is rejected by deletion generation 6. |
-| Stop one store adapter | The case remains pending with that store and age visible. |
-| Restore yesterday’s backup | Replay deletion generations before opening reads; the erased account stays unavailable. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 A vendor says deletion is complete but cannot provide object-level evidence. Decide which assurance is sufficient for that processor, who accepts it and what the customer sees. Keep technical progress distinct from policy approval.
 

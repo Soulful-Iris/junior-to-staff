@@ -4,7 +4,7 @@
 
 Five projects, rising. Each isolates a different thing the change loop is
 for, and each ends with a number or a proof you did not have before. None adds
-a feature to [P1](../../../projects/reading-list/stages/01-it-works/README.md): the loop is machinery, and
+a feature to [Stage 1: Build the shared reading-list application](../../../projects/reading-list/stages/01-it-works/README.md): the loop is machinery, and
 you study machinery by running your own work through it and watching what it
 refuses.
 
@@ -494,7 +494,7 @@ private free for twelve months, checked 2026-09-22); everything else in
 The queue gets metrics — depth, time-in-queue, ejection rate — a queue nobody
 watches is a delay nobody can explain. Flakiness is now existential:
 one flaky test ejects innocent PRs and stalls every merge behind them; the
-quarantine rule from [testing](../../../curriculum/02-applications/04-testing/README.md) stops being optional.
+quarantine rule from [Find defects and evaluate engineering evidence](../../../curriculum/02-applications/04-testing/README.md) stops being optional.
 
 **The learning**
 

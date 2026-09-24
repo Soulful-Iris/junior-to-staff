@@ -1,16 +1,16 @@
-# Frontend and full-stack integration
+# Connect a usable interface to an API
 
 Preserve user intent across browser, API, and persisted state.
 
 [Curriculum](../../README.md) · [About this part](../README.md)
 
-## Before this chapter
+## Prerequisites
 
-[Databases and transactions](../02-databases/README.md)
+[Model data and enforce transactional rules](../02-databases/README.md)
 
 Testing and ownership checks are part of each implementation. The dedicated testing and security chapters deepen those checks; do not postpone them until those chapters.
 
-## Learn in this order
+## Concepts and worked examples
 
 | Step | Existing lesson or exercise |
 |---|---|
@@ -19,18 +19,18 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | 3 | [Full stack · one user action across every boundary](full-stack-practice.md) |
 | 4 | [Bookmark editor · preserve the user's next edit](labs/bookmark-editor/README.md) |
 
-## Go deeper on the same problem
+## Explore failures and changed requirements
 
 Read the brief and contract first. Attempt the baseline before opening its answer. Continue to the existing changed-requirement questions and redraw or retest the same system. Senior follow-ups emphasize failure behavior and operating constraints; staff/lead follow-ups add scope, compatibility and ownership where the supplied problem supports them. Later-topic dependencies are linked below; return after learning them.
 
-Related prerequisites for deeper follow-ups: [Backend and APIs](../01-backend/README.md) · [Databases and transactions](../02-databases/README.md) · [Security](../05-security/README.md).
+Related prerequisites for deeper follow-ups: [Build HTTP APIs and reliable background work](../01-backend/README.md) · [Model data and enforce transactional rules](../02-databases/README.md) · [Enforce identity, ownership and tenant boundaries](../05-security/README.md).
 
-## Apply the concept
+## Build a project
 
-Each link opens one existing project brief with its own context, diagrams, AI prompts, AWS choices and follow-ups.
+Each project explains its application, names the deliverable, links the supplied code and gives ordered implementation steps. Run the local example first; use the AWS mapping after the local behavior works.
 
-- [A shared reading list](projects/a-shared-reading-list.md)
+- [Build a shared reading-list UI with private reading state](projects/a-shared-reading-list.md)
 
 [Choose an independent assessment](../../../practice/README.md) · [Assessment depth](../../../practice/depth.md)
 
-Next chapter: [Testing, debugging, and code review](../04-testing/README.md).
+Next chapter: [Find defects and evaluate engineering evidence](../04-testing/README.md).

@@ -1,6 +1,6 @@
 # Meeting room capacity: count simultaneous demand
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 Constructed practice problem; no company attribution. Prerequisites: [interval endpoints](../09-merge-intervals/README.md).
 

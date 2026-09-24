@@ -1,6 +1,6 @@
 # An expired key, ten instances, and a finite database
 
-[Curriculum](../../../../README.md) · [Data at scale](../../README.md)
+[Curriculum](../../../../README.md) · [Process, search and store data at scale](../../README.md)
 
 **Constructed candidate brief:** “Ana opens a group page just as its cache entry
 expires. Two hundred requests arrive together on ten API instances. Preserve the

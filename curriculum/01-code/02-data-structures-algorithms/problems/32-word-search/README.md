@@ -1,6 +1,6 @@
 # Find a word without reusing a cell
 
-[Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
+[Curriculum](../../../../README.md) · [Choose data structures and reason about algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
 > “A puzzle board contains one character per cell. A word is present if a path of
 > horizontal or vertical neighboring cells spells it. A cell cannot appear twice

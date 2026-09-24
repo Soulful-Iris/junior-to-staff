@@ -1,6 +1,6 @@
 # Performance and cost
 
-[Curriculum](../../README.md) · [Performance and cost](README.md)
+[Curriculum](../../README.md) · [Measure capacity and control performance costs](README.md)
 
 > Project connection · feeds **P3 (it holds under load)**
 

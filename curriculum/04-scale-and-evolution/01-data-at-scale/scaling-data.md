@@ -1,6 +1,6 @@
 # Data at scale
 
-[Curriculum](../../README.md) · [Data at scale](README.md)
+[Curriculum](../../README.md) · [Process, search and store data at scale](README.md)
 
 > Project connection · feeds **P3 (it holds under load)**
 

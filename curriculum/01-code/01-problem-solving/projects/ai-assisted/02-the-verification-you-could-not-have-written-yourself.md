@@ -1,13 +1,36 @@
-# 2. The verification you could not have written yourself
+# Evaluate generated rate-limiter code with a simple reference
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+A sign-in endpoint limits repeated attempts by caller. An optimized limiter may look convincing while mishandling the exact time at which an old attempt expires.
 
-> A generated sign-in limiter claims five accepted attempts in any sixty-second window. You cannot yet implement its optimized data structure. How can you decide whether to trust it using only its public interface?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../working-with-ai.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Produce a trust report for a five-attempt sliding-window limiter using a simple independent reference and explicit time inputs.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Create `limiter.py` exposing `allow(subject, now_seconds)` and ask for the optimized implementation. Keep the clock an argument so no real waiting is needed.
+
+2. Write a straightforward list-based reference in a separate module. Retain only timestamps inside `(now - 60, now]` and admit at most five per subject.
+
+3. Compare the implementations for attempts at seconds 0, 1, 2, 3, 4, 59 and 60, plus separate subjects. Record disagreements and the assumptions you have not established, including concurrent/distributed access.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | An implementation expires timestamps strictly less than the boundary. | The 60-second probe fails; the fixture must distinguish `<` from `<=`. |
 | Scope | One key, monotonic clock, no distributed replicas in the baseline. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Build a deterministic fake-clock harness for a five-attempt, 60-second limit. After accepts at t=0–4, show an attempt at t=59 denied and t=60 accepted: the t=0 event has left the window `(now−60,now]`. **Show:** the event log with accepted/denied flags and a test that fails if expiration uses the wrong inequality. Explain what you asked AI to implement and which oracle you wrote yourself.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** Ask for something genuinely past your ability to produce — a sliding-window rate limiter for P1's sign-in is the classic; a URL canonicaliser works too. Then build the apparatus that would catch it being wrong: properties, a dumb reference implementation, adversarial inputs, a one-page trust argument.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · The clock moves backward | The wall clock jumps from 60 to 55. What should happen? Predict which boundary must change before opening the design. | Use a monotonic elapsed clock for local rate accounting or reject non-monotonic test input by contract. Do not silently let expired history reappear. Verify the chosen policy explicitly. |
-| Lead · Ten replicas | Ten API processes share one account limit. Does a process-local harness prove fleet safety? State what evidence would make you reject your first design. | No. Put atomic admission at shared authority or divide quotas with a documented weaker guarantee. Test simultaneous arrivals at the shared boundary and count accepted requests across all replicas. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -105,13 +103,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Explain the oracle independently and catch the boundary mutant. **Additional lead scope:** Specify fleet guarantees, clock assumptions, and limiter-outage behavior. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up trusting a piece of code you still could not write, for reasons you
 can say out loud.*
@@ -119,7 +117,7 @@ can say out loud.*
 **Build**
 
 Ask for something genuinely past your ability to produce — a sliding-window
-rate limiter for P1's sign-in is the classic; a URL canonicaliser works too.
+rate limiter for the Stage 1 reading list's sign-in is the classic; a URL canonicaliser works too.
 Then build the apparatus that would catch it being wrong: properties, a dumb
 reference implementation, adversarial inputs, a one-page trust argument.
 
@@ -212,3 +210,6 @@ comprehend — a dumb oracle, a readable generator, a harness seen to catch.
 ---
 
 [Back to the ordered project index](../../ai-projects.md)
+
+
+</details>

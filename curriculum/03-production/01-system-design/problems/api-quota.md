@@ -1,30 +1,52 @@
-# API quota: which request spends the last token?
+# Enforce API quotas across concurrent gateways
 
-## What you are building
+## Application background
 
-> Build partner API admission for 8,000 organizations. A free organization gets 100 admissions per fixed UTC minute; paid organizations also have a daily entitlement. Two gateway instances must not both spend the last available request.
+Partner organizations call a paid API through several gateway instances. Before forwarding each request, the gateway spends one unit of that organization's allowance or returns a rejection.
 
-**Working contract:** Admission returns allowed with remaining quota, or 429 with a bounded Retry-After. A successful admission spends quota even if downstream work fails. Scope counters by verified organization, policy version and period.
+This is a fictional engineering scenario. The workload figures later in the page are exercise assumptions, not measured production traffic.
 
-## Workload and the decisions it changes
+## Your assignment
 
-These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+**Deliver:** An admission operation backed by shared atomic quota state, plus a trace of concurrent requests competing for the final allowance.
 
-| Input or objective | Calculation / consequence |
-|---|---|
-| 20,000 peak attempts/s; 2,000/s from one organization | That tenant is a hot coordination key even if most attempts are rejected. |
-| 100 admissions per fixed UTC minute | A client can legally use 100 just before and 100 just after a boundary; this is not a rolling-window promise. |
-| 8,000 organizations × 2 active counters | About 16,000 minute/day counter records before policy versions and history; cardinality and contention are different concerns. |
+Build partner API admission for 8,000 organizations. A free organization gets 100 admissions per fixed UTC minute; paid organizations also have a daily entitlement. Two gateway instances must not both spend the last available request.
 
-## Start with one working boundary
+**Required behavior:** Admission returns allowed with remaining quota, or 429 with a bounded Retry-After. A successful admission spends quota even if downstream work fails. Scope counters by verified organization, policy version and period.
 
-Run from the repository root with Python 3.12+:
+The required first milestone is a working local implementation of the behavior above. The numbered implementation steps define the scope; the cloud architecture is a later extension, not something the starter has already provisioned.
+
+## Get the code and run the supplied example
+
+The code is in the public [junior-to-staff repository](https://github.com/Soulful-Iris/junior-to-staff). Install Git and Python 3.12+. No AWS account or Python packages are required for this first run. If you already have a checkout, use it and skip cloning.
 
 ```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
 python3 examples/architecture-starts/api_quota.py
 ```
 
-[Open the starting code](../../../../examples/architecture-starts/api_quota.py). This is a runnable demonstration of the critical state boundary. The API, UI, cloud adapters and operating behavior below are the application you build around it.
+**Supplied file:** [`examples/architecture-starts/api_quota.py`](https://github.com/Soulful-Iris/junior-to-staff/blob/main/examples/architecture-starts/api_quota.py). You can also [read or download the source here](../../../../examples/architecture-starts/api_quota.py).
+
+This program is a **mechanism demonstration**: it runs the small scenario in one process and prints the result. It is not an HTTP service, a complete application, or an AWS deployment. A successful run demonstrates this mechanism only; it does not establish the workload or failure guarantees of the application you will build.
+
+**Example output from the supplied run:**
+
+Generated IDs and timestamps may differ; compare the state transitions and outcomes.
+
+```text
+gateway-a allowed
+gateway-b 429 quota exhausted
+remaining: 0
+```
+
+### Set up your implementation workspace
+
+Create `work/api-quota/` in your checkout (or use a separate repository). Copy the supplied mechanism into that directory as `mechanism.py`, then extract its state transitions into functions you can call from your implementation. The record and module names below describe what you must implement; they are not a promise that files with those names already exist. Keep a `README.md` beside your implementation with its exact run commands and observed results.
+
+## Local components and state to implement
+
+This table names the records, interfaces or decision inputs for your deliverable. Unless a name is explicitly linked to supplied source above, it is something you create. Implement the local state transitions first, then connect the HTTP, storage or worker boundaries required by the steps.
 
 | Record / module | Key or interface | Responsibility |
 |---|---|---|
@@ -32,13 +54,7 @@ python3 examples/architecture-starts/api_quota.py
 | counters | (organization,policy,period) | Minute and daily admission are one atomic decision. |
 | admission.py | admit(org, request_id, now) | Defines request replay behavior and returns a reason for rejection. |
 
-## AWS implementation
-
-![API quota: which request spends the last token?: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-quota.svg)
-
-The database or atomic script arbitrates the last token. A gateway-local dictionary cannot coordinate another gateway. Use a durable conditional ledger for hard business entitlements; use an in-memory limiter when its failure/overshoot contract is acceptable.
-
-## Build it in this order
+## Implement the assignment
 
 ### 1. Make window semantics visible
 
@@ -56,7 +72,44 @@ Choose whether a retried API attempt spends again or uses an admission request I
 
 Run two client processes against one real shared authority. Observe accepted, rejected and authority latency separately. If a single key limits throughput, consider leased local allocations only after budgeting their possible overshoot and recovery behavior.
 
-## Infrastructure configuration
+## Demonstrate the completed local result
+
+| Action | Expected visible result |
+|---|---|
+| Run the starting program | Only gateway-a spends the remaining request; gateway-b sees 429. |
+| Exhaust the daily quota first | Minute quota is unchanged when the combined decision rejects. |
+| Disconnect admission authority | The API returns the declared unavailable result, not an unmetered success. |
+
+**Handoff:** In your implementation README, include the start command, one successful operation, the failure case above and the resulting stored state or decision. State which dependencies are simulated. Someone with a fresh checkout should be able to reproduce this without your chat history.
+
+## Workload assumptions and capacity decisions
+
+These are constructed exercise assumptions. The stated workload is a design target; the local demonstration does not establish that throughput. Use the [estimation constants](../../../01-code/01-problem-solving/estimation-constants.md) to check units before choosing capacity.
+
+| Input or objective | Calculation / consequence |
+|---|---|
+| 20,000 peak attempts/s; 2,000/s from one organization | That tenant is a hot coordination key even if most attempts are rejected. |
+| 100 admissions per fixed UTC minute | A client can legally use 100 just before and 100 just after a boundary; this is not a rolling-window promise. |
+| 8,000 organizations × 2 active counters | About 16,000 minute/day counter records before policy versions and history; cardinality and contention are different concerns. |
+
+## Map the local implementation to AWS
+
+**Deployment status: local only.** Running the supplied command creates no AWS resources and configures no cloud connections. The diagram is a proposed deployment of the completed application. Each box needs either a deployed runtime, a provisioned service or an explicitly external dependency.
+
+Read the diagram by following the arrows from the entry point: application code accepts the request or event, the state owner commits it, and any worker produces the later result. The table ties those roles to code and adapter work. Multiple boxes do not imply multiple Python files already exist.
+
+![Enforce API quotas across concurrent gateways: AWS services, their general roles, and the primary data flow](../../../../assets/architecture-guides/api-quota.svg)
+
+The database or atomic script arbitrates the last token. A gateway-local dictionary cannot coordinate another gateway. Use a durable conditional ledger for hard business entitlements; use an in-memory limiter when its failure/overshoot contract is acceptable.
+
+| Local responsibility | Cloud destination and role | Implementation still required |
+|---|---|---|
+| Local HTTP boundary or the endpoint you will add | Amazon API Gateway: authenticated API entry | Create routes and an integration; translate requests and responses and configure identity validation. |
+| Python operation or worker function | AWS Lambda: admission application | Write a Lambda event adapter, package its dependencies and give its role only the required resource actions. |
+| Local dictionary, SQLite records or state model | Amazon DynamoDB: durable quota ledger | Design partition/sort keys and write a storage adapter with conditional updates or transactions; Python state and SQL are not uploaded as a database. |
+| Local counters, timestamps and diagnostic output | Amazon CloudWatch: admission telemetry | Emit bounded metrics and logs, build the named operational view and configure retention and access. |
+
+### Provision resources, then connect the application
 
 | Resource or boundary | Initial configuration and reason |
 |---|---|
@@ -69,15 +122,10 @@ Use one disposable AWS environment for the cloud exercise. Put the named resourc
 
 For concrete provisioning commands, configuration wiring and cleanup, use the [AWS foundation guide](../../../../examples/architecture-starts/infra/README.md). It includes a deployable table/queue/object-storage foundation and explains which application and service adapters you still implement.
 
-## Observe the result
+A provisioned queue or table does not make the local program use it. Configure resource IDs in the deployed runtime, replace the local adapter, and replay the same successful and failing operation against that runtime. Record the deployed commit and observable result, then remove the disposable resources using your infrastructure tool.
 
-| Action | Expected visible result |
-|---|---|
-| Run the starting program | Only gateway-a spends the remaining request; gateway-b sees 429. |
-| Exhaust the daily quota first | Minute quota is unchanged when the combined decision rejects. |
-| Disconnect admission authority | The API returns the declared unavailable result, not an unmetered success. |
+## Extend the design after the baseline works
 
-## The next design decision
 
 Replace fixed windows with a rolling 60-second policy. Estimate the state needed for an exact timestamp log versus buckets, then state the approximation error if you choose buckets. A token bucket is a different burst contract, not merely a faster implementation of the same words.
 

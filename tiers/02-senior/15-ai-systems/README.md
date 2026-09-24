@@ -68,7 +68,7 @@ Only then automate the checks:
   meaningful share of pairwise verdicts, and a 2026 study found no frontier model
   uniformly reliable as a judge.
 - **A suite that passes 100% is not challenging the system.** That is the same
-  rule as [06 · Testing](../../../curriculum/02-applications/04-testing/README.md), pointed at a model.
+  rule as [Find defects and evaluate engineering evidence](../../../curriculum/02-applications/04-testing/README.md), pointed at a model.
 
 ### The security model is architectural, not a filter
 

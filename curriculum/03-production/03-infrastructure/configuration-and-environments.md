@@ -1,6 +1,6 @@
 # Shipping it
 
-[Curriculum](../../README.md) · [Infrastructure as code and AWS](README.md)
+[Curriculum](../../README.md) · [Provision and operate application infrastructure on AWS](README.md)
 
 > Project connection · feeds **P1 (it works)** and sets up **P2 (it survives)**
 
@@ -258,7 +258,7 @@ On **P1**, add:
 
 **Not covered here:** infrastructure as code, progressive delivery (canaries and
 feature flags), and deployment pipelines with real gates continue in
-[Delivery](../02-delivery/README.md) and the [AWS implementation index](../../../indexes/aws.md). This section is the minimum that makes P1 reproducible by
+[Deploy changes and control feature exposure](../02-delivery/README.md) and the [AWS implementation index](../../../indexes/aws.md). This section is the minimum that makes P1 reproducible by
 somebody who is not you.
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)

@@ -1,6 +1,6 @@
 # Stacks: keep unresolved work
 
-[Curriculum](../../../README.md) · [Data structures and algorithms](../README.md)
+[Curriculum](../../../README.md) · [Choose data structures and reason about algorithms](../README.md)
 
 > “For [73,74,71,75], return how long each day waits for a strictly warmer one.”
 

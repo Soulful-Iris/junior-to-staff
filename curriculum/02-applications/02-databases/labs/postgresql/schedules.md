@@ -1,6 +1,6 @@
 # Candidate worksheet: drive two independent sessions
 
-[Curriculum](../../../../README.md) · [Databases and transactions](../../README.md)
+[Curriculum](../../../../README.md) · [Model data and enforce transactional rules](../../README.md)
 
 Read the [problem contract and diagrams](README.md) first. This is a worksheet
 for that lab, not an additional problem. Open two terminals with

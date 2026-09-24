@@ -1,13 +1,36 @@
-# 3. The prompt library
+# Build reusable AI instructions and evaluate transfer
 
-[Curriculum](../../../../README.md) · [Problem solving and AI-assisted engineering](../../README.md) · [Project index](../../../../../indexes/projects.md)
+## Application background
 
-## The reviewer's brief
+Engineers repeatedly ask an assistant to change an application. A reusable instruction should preserve a useful constraint, such as cursor correctness, without carrying unrelated details from the previous task.
 
-> Your team copies a long debugging prompt into every task. Nobody can name which clause helps. Build a small reusable library and show that its constraints transfer to a different problem. How will you avoid grading on the task used to write it?
+## Your assignment
 
-This is a **constructed practice brief**, not an attributed company question.
-Prerequisites: [the section](../../working-with-ai.md). This page is a build brief; it does not ship a runnable application. The original build and prompt sequence below defines the implementation checkpoints.
+**Deliver:** Create five to ten reusable instruction entries with scope and observable checks, then evaluate them on a different task.
+
+This is a constructed development-workflow exercise. Your output is the artifact named above and the observed comparison, rather than a production platform.
+
+## Get the starting application and prepare your workspace
+
+The [repository](https://github.com/Soulful-Iris/junior-to-staff) includes a small reading-list HTTP API with SQLite storage. Follow the [setup and request walkthrough](../../../../../examples/reading-list-starter/README.md) to save a URL and read it back before changing anything. The API has no tag endpoint, browser UI or production authentication yet.
+
+```bash
+git clone https://github.com/Soulful-Iris/junior-to-staff.git
+cd junior-to-staff
+python3 examples/reading-list-starter/app.py --db /tmp/reading-list.sqlite3
+```
+
+Leave the server running while sending the documented requests in a second terminal. Use a separate working copy for the exercise. Any helper, specification, review command or Git branches named below are artifacts **you create**, not hidden supplied solutions.
+
+## Complete the exercise
+
+1. Collect three real development transcripts; if you have none, first use the local reading-list API for a tag change, a conflict response and a title-timeout explanation, saving each conversation.
+
+2. Create `PROMPTS.md` with a name, applicable situation, instruction and observable check for each entry. Distinguish a product requirement from a preference about style.
+
+3. Use a separate paginated-importer task: fetch pages by cursor, preserve each item once and stop at the terminal cursor. Record which entries transfer, require parameters or should be removed. Do not tune the library on this held-out task before the comparison.
+
+## Demonstrate the result
 
 | Case | Exact input or workload | Expected outcome |
 |---|---|---|
@@ -15,42 +38,17 @@ Prerequisites: [the section](../../working-with-ai.md). This page is a build bri
 | Boundary / failure | An entry says “do not mock the database” on a parser with no database. | Reject or narrow applicability; literal reuse is not successful transfer. |
 | Scope | A small local comparison; no causal productivity claim from one run. | Explain any additional assumption before implementing it. |
 
-## See the first reviewable result
+Keep the exact input, observed output and before/after artifact in your exercise README. Label constructed fixtures as fixtures. A fresh reader should be able to repeat the comparison without your conversation history.
 
-**First slice:** Extract five reusable constraints from three real transcripts. For each, write when it applies and the check that could prove a future AI answer wrong. Apply all five to a *held-out paginated importer*; an instruction about UI-only behavior must be discarded. **Show:** a before/after prompt and the holdout run with keep/parameterize/delete decisions, not a collection of slogans.
+## Deployment scope
 
-<!-- project-expectation:start -->
+This assignment concerns local development evidence and workflow. AWS deployment is not required and no cloud resources are supplied or created. CI-policy exercises belong in a disposable repository; they do not change this guide's publish-on-main behavior. For a later application deployment, the [starter's local-to-AWS mapping](../../../../../examples/reading-list-starter/README.md) explains the missing adapters.
 
-## What you are expected to hand over
+## Additional reasoning and harder requirements
 
-**The finished artifact:** Mine three or four of your own transcripts for the asks you keep retyping. Compress them into five to ten named entries — a constraint, when it applies, what to check after — then run the library on a task from a different area and count what needed editing.
+<details>
+<summary>Study the failure, follow-up requirements and implementation prompts</summary>
 
-Bring a runnable slice or decision artifact, its normal output, and a captured
-failure from the examples above. Include one check that turns red when the guarantee
-breaks, the state owner, and the first operational limit. For each follow-up,
-change the diagram **and** the evidence before claiming the design still works.
-
-### How the review conversation gets harder
-
-| Review gate | The interviewer changes | Expected response |
-|---|---|---|
-| Baseline | Run the small example from the cases above. | Demonstrate the observable outcome end to end and identify which boundary owns it. |
-| Failure | Reproduce the boundary/failure case above. | Show the failure before the fix, then prove the protected behavior without hiding the error. |
-| Senior · A model upgrade | The same prompts run on a new model version. What evidence expires? Predict which boundary must change before opening the design. | Re-run the saved task probes and track model/configuration versions. Earlier observations remain historical; they do not establish present behavior. |
-| Lead · Several teams adopt it | A payments team needs stronger review than a UI prototype. How does the library avoid unsafe blanket rules? State what evidence would make you reject your first design. | Give entries applicability conditions and owners. Reuse the verified stopping point while letting domain-specific correctness requirements remain explicit. |
-| Evidence | A reviewer asks, “How do you know?” | Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. |
-| Handoff | The author is unavailable and the environment is new. | Another engineer can run, observe, break, and recover the artifact from the repository evidence. |
-
-Before implementation, say the baseline invariant, the owner of each piece of
-state, and what the user sees when the named dependency or assumption fails. That
-five-minute explanation is part of the project: if it is vague, the build is not
-ready to begin.
-
-<!-- project-expectation:end -->
-
-Before looking at the guidance, state the invariant in one sentence and trace the example. In interview practice, implement or sketch independently, then reveal the reasoning. During AI-assisted practice, use the prompts below and verify each checkpoint before the next request.
-
-## Baseline and the failure to explain
 
 ```mermaid
 flowchart TD
@@ -107,13 +105,13 @@ flowchart TD
 
 </details>
 
-## Evidence to bring to review
+## Record the evidence and limitations
 
 Build in three stops: reproduce the small case and baseline failure; implement the protected boundary; then replay both changed requirements with captured outputs. Record commands, fixtures, and observed results in your implementation README. A diagram is a prediction until those checks run.
 
 **Senior expectation:** Name one transferred constraint and one failed transfer with evidence. **Additional lead scope:** Version and review shared constraints without turning anecdotes into policy. Completion demonstrates practice evidence; it does not establish interview readiness or multi-team delivery experience.
 
-## Build and prompt sequence
+## Detailed implementation and AI-assisted prompts
 
 *You end up with a page of named asks — constraints, not phrasings — and a
 measured answer to whether they hold on work they were not written for.*
@@ -215,3 +213,6 @@ stop collecting phrasings for good.
 ---
 
 [Back to the ordered project index](../../ai-projects.md)
+
+
+</details>

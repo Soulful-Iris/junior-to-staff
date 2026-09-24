@@ -1,6 +1,6 @@
 # Data and databases
 
-[Curriculum](../../README.md) · [Databases and transactions](README.md)
+[Curriculum](../../README.md) · [Model data and enforce transactional rules](README.md)
 
 > Project connection · feeds **P1 (it works)**
 
@@ -280,9 +280,9 @@ On **P1**, add:
 
 **Not covered here:** ORMs, deliberately — learn to read tables and plans
 first, so you can read what an ORM later writes for you. Document and key-value
-stores and replication continue in [Data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
+stores and replication continue in [Process, search and store data at scale](../../04-scale-and-evolution/01-data-at-scale/README.md).
 Isolation and locking have a [PostgreSQL lab in this chapter](labs/postgresql/README.md);
-restore and recovery exercises continue in [Migrations and recovery](../../04-scale-and-evolution/04-migrations/README.md).
+restore and recovery exercises continue in [Migrate live systems and verify recovery](../../04-scale-and-evolution/04-migrations/README.md).
 
 [Learning sequence](../../README.md) · [Independent practice](../../../practice/interview-guide.md)
 

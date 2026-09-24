@@ -1,6 +1,6 @@
 # Quantity investigation · zero is intentional
 
-[Curriculum](../../../../README.md) · [Testing, debugging, and code review](../../README.md)
+[Curriculum](../../../../README.md) · [Find defects and evaluate engineering evidence](../../README.md)
 
 > “A customer changes quantity from five to zero, presses Save, and sees five again.
 > The UI and API both say success. Reproduce this before changing the fallback.”

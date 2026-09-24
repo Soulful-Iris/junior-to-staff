@@ -77,7 +77,7 @@ def organize(pages):
                 p = by_src[source]
                 p.update(group=group['group'], subject=chapter['subject'], chapter=number,
                          gnum=group['gnum'], subject_title=chapter['title'], group_title=group['title'],
-                         section='Apply and assess', sub=0)
+                         section='Projects and practical assessment', sub=0)
                 children.append(p)
             for n, p in enumerate(children, 1):
                 p['sub'] = n
