@@ -78,6 +78,12 @@ stateDiagram-v2
 Throttled, uncertain and content-changed observations preserve the last known
 state. Thus `200 → 429 → 200` must not manufacture a recovery notification.
 
+| Case | Input / starting state | Expected result |
+|---|---|---|
+| A link fails and recovers | `200 → 404 → 404 → 200` for the same URL | Four observations, one broken transition, one recovery transition. |
+| The queue repeats a job | Deliver the same committed job ID again | No new observation, transition or notification intention. |
+| A website throttles checks | Reachable link returns `429`, then `200` | Record throttled, preserve reachable state, produce no false recovery email. |
+
 ## Checkpoint 1 — run the durable core
 
 From the repository root:
@@ -354,16 +360,22 @@ before overhead. Price the actual region and usage when deploying. A continuousl
 running NAT gateway or container can dominate a small weekly workload; the diagram
 does not imply either is required.
 
-## What to show when it works
+## What you are expected to hand over
 
-Bring a short recorded run, not a long design essay:
+Bring the runnable local program, a short observed run, your AWS configuration,
+and the diagrams updated to match what you actually built. State which checkpoints
+are local-only and which you have exercised in your AWS account.
 
-1. The same URL returns `200 → 404 → 404 → 200`: four observations and two pending notifications.
-2. Replaying a committed job or restarting the process adds no duplicate transition.
-3. A timeout, 429 and missing content marker produce different recorded outcomes.
-4. In your AWS implementation, replay a job after its result commit and show it is acknowledged without another transition.
-5. Send several same-host jobs and show their HTTP intervals do not overlap; a different host can still make progress.
-6. Pause weekly dispatch and show the independent monitor reports the missed run. Restore it and explain how incomplete work resumes.
+### How the review conversation gets harder
+
+| Review gate | Action to demonstrate | Evidence to show |
+|---|---|---|
+| State changes | Return `200 → 404 → 404 → 200` for the same URL. | Four observations and two pending notifications. |
+| Restart and replay | Restart the process and redeliver a committed job. | The stored transition IDs and counts remain unchanged. |
+| Ambiguous responses | Return a timeout, 429, and a page missing its marker. | Distinct outcomes; no false recovery notification. |
+| Cloud recovery | Redeliver a job after its DynamoDB commit but before queue acknowledgment. | The worker finds the committed result and acknowledges without another transition. |
+| Host coordination | Queue multiple URLs on one host and another URL on a different host. | Same-host HTTP intervals do not overlap; the other host still progresses. |
+| Missed schedule | Pause weekly dispatch, then restore it. | Independent late-run alarm, followed by a documented resume of incomplete work. |
 
 **First extension:** require two failing observations before alerting; show the
 new state machine and the resulting detection delay. **Second extension:** scale
