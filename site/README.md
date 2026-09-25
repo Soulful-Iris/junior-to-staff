@@ -56,6 +56,10 @@ The mobile contents drawer supports Escape, focus containment and return to its 
 
 See [redesign verification](REDESIGN.md) for the completed checks and their limits.
 
+## Private track
+
+Pages in the `crowdstrike` group, the rail section that lists them, and their card on the overview are published sealed. `lock.py` derives a key from the password (`J2S_TRACK_PASSWORD`, default `hello123`) with PBKDF2-SHA256, authenticates every blob with HMAC-SHA256, and encrypts with a PBKDF2 keystream; `app.js` reverses this in the browser and keeps the derived key in the `j2s_track` cookie, so one unlock covers the whole site on that device. Public pages are redacted of every block that names or links the track; `search.json`, `course.json`, `content-inventory.json`, and the copied index registries omit it. The validator decrypts each sealed page and checks it like any other lesson, then fails the build if a public page still names the track. What stays visible: the URL paths of sealed pages and the unlisted diagram and code files under them, which nothing public links to. The repository itself is the other copy of the content.
+
 ## Release assets
 
 Generated pages use `reader-css.<content-hash>.css` and `reader-js.<content-hash>.js` with integrity attributes. The matching stylesheet is also embedded in each page, so stale or unavailable external CSS cannot strip the reading layout. Font URLs in this embedded copy are rooted at `SITE_BASE`. The build writes `reader-assets.json`; the acceptance check verifies it against every generated content page. The mobile browser suite includes stale-stylesheet and missing-stylesheet regressions.

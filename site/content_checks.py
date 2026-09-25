@@ -1,10 +1,12 @@
 """Compare required source content with published lessons, not a minimum count."""
 from collections import Counter
 import hashlib
+import re
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 from bs4 import BeautifulSoup
 import markdown
+import lock
 
 
 def source_references(root, pages):
@@ -37,7 +39,17 @@ def validate(out, manifest):
         raise ValueError(f'Page inventory mismatch: missing={expected-actual}, extra={actual-expected}')
     gallery = BeautifulSoup((out/'gallery/index.html').read_text(), 'html.parser')
     for source, item in pages.items():
-        article = BeautifulSoup((out/item['output']).read_text(), 'html.parser').select_one('article.lesson-body')
+        document = BeautifulSoup((out/item['output']).read_text(), 'html.parser')
+        if item.get('locked'):
+            # Sealed pages are checked as the reader will see them after unlocking.
+            sealed = document.select_one('.track-lock[data-lock="page"] .track-lock-blob')
+            visible = re.sub(r'<script[^>]*(?:class="track-lock-blob"|id="page-state")[^>]*>[^<]*</script>', '', str(document))
+            if sealed is None or lock.mentions(visible):
+                raise ValueError(f'Locked page leaks or lacks its sealed body: {source}')
+            document = BeautifulSoup(lock.open_blob(sealed.string), 'html.parser')
+        elif lock.mentions(re.sub(r'<script[^>]*class="track-lock-blob"[^>]*>[^<]*</script>', '', str(document))):
+            raise ValueError(f'Public page names the locked track: {source}')
+        article = document.select_one('article.lesson-body')
         if article is None:
             raise ValueError(f'Missing article: {source}')
         visual = gallery if item['presentation'] == 'generated-overview' else article

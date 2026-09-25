@@ -13,6 +13,7 @@ from urllib.parse import urlsplit, unquote
 from bs4 import BeautifulSoup
 import course
 import content_checks
+import lock
 
 E = html.escape
 CODE_SUFFIXES = {'.py', '.ts', '.js', '.mjs', '.cjs', '.json', '.yaml', '.yml', '.sql', '.csv', '.txt', '.diff', '.sh'}
@@ -302,26 +303,29 @@ def toc(pages, sequence, current, base):
             result.append('</ol>')
         result.append('</div></details>')
     # The CrowdStrike track: its own area under the studio, with T-numbering.
+    # Published sealed: the plain HTML carries a blurred placeholder and ciphertext.
     track_group = next((p for p in sequence if p['kind']=='group' and p['group']=='crowdstrike'), None)
     if track_group:
-        result.append('</section><section class="toc-area track-area part-7"><div class="toc-part-heading"><span class="part-label">ITS OWN LEAGUE</span><span class="part-title">CrowdStrike track</span></div>')
-        result.append(link(track_group, 'Start here · the track', 'part-intro'))
+        track = ['<div class="toc-part-heading"><span class="part-label">ITS OWN LEAGUE</span><span class="part-title">CrowdStrike track</span></div>']
+        track.append(link(track_group, 'Start here · the track', 'part-intro'))
         for chapter in [p for p in sequence if p['kind']=='subject' and p['group']=='crowdstrike']:
             active = current.get('chapter') == chapter['chapter']
-            result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span class="chapter-number"><small>T</small> {chapter["track_no"]}</span><span class="chapter-title">{E(chapter["title"])}</span><span class="chevron" aria-hidden="true">›</span></summary><div class="toc-lessons">')
-            result.append(link(chapter, 'Chapter introduction'))
+            track.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span class="chapter-number"><small>T</small> {chapter["track_no"]}</span><span class="chapter-title">{E(chapter["title"])}</span><span class="chevron" aria-hidden="true">›</span></summary><div class="toc-lessons">')
+            track.append(link(chapter, 'Chapter introduction'))
             last = None
             for step in [p for p in sequence if p.get('chapter')==chapter['chapter'] and p.get('sub')]:
                 section = step.get('section', 'Learn')
                 if section != last:
-                    result.append(f'<div class="toc-section">{E(section)}</div>'); last=section
-                result.append(link(step, lesson=True))
+                    track.append(f'<div class="toc-section">{E(section)}</div>'); last=section
+                track.append(link(step, lesson=True))
                 if current['src']==step['src'] and step.get('headings'):
-                    result.append('<div class="toc-page-label">ON THIS PAGE</div><ol class="toc-headings">')
+                    track.append('<div class="toc-page-label">ON THIS PAGE</div><ol class="toc-headings">')
                     for h in step['headings']:
-                        result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
-                    result.append('</ol>')
-            result.append('</div></details>')
+                        track.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
+                    track.append('</ol>')
+            track.append('</div></details>')
+        result.append('</section><section class="toc-area track-area part-7">')
+        result.append(lock.widget(lock.seal_cached(''.join(track)), 'replace', lock.RAIL_VEIL, 'lock-rail'))
     result.append('</section></div><div class="rail-footer"><span class="status-dot"></span>YOUR PLACE IS SAVED ON THIS DEVICE<button id="reset-progress">Reset progress</button></div>')
     return ''.join(result)
 
@@ -342,6 +346,10 @@ def overview(b, sequence, base):
         ('E', 'evolution', 'System evolution and leadership', 'Migrate live systems and make decisions other teams can execute.', 'Migrations · Technical leadership'),
     ]
     group_pages = {p['group']: p for p in sequence if p['kind'] == 'group'}
+    cs_card = lock.widget(lock.seal_cached(
+        f'<a href="{href(base,cs_part)}"><span>CROWDSTRIKE TRACK</span><strong>Senior cloud backend loop</strong>'
+        '<small>Preparation, reported coding problems, and the architecture they publish.</small></a>'),
+        'replace', lock.CARD_VEIL, 'lock-card')
     journey = ''.join(
         f'<a class="journey-card" href="{href(base,group_pages[group])}"><span class="journey-number">{label}</span>'
         f'<div><h3>{E(name)} <span aria-hidden="true">&#8599;</span></h3><p>{E(desc)}</p><span class="journey-meta">{E(detail)}</span></div></a>'
@@ -370,7 +378,7 @@ def overview(b, sequence, base):
 <footer class="sample-panel-footer"><a href="{href(base,aws_preview)}">Explore AWS infrastructure <span aria-hidden="true">&#8599;</span></a><button data-sample-next="algorithm">Back to algorithm <span aria-hidden="true">&#8634;</span></button></footer></article>
 </div></div></section>
 <section class="journey-section"><div class="section-label">THE CORE JOURNEY</div><h2>Choose a part,<br>or follow the full path.</h2><div class="journey-grid">{journey}</div></section>
-<section class="optional-paths" aria-label="Optional learning paths"><a href="{href(base,ai_part)}"><span>OPTIONAL SPECIALIZATION</span><strong>AI systems</strong><small>Evaluation, budgets, permissions, and controlled actions.</small></a><a href="{href(base,interview)}"><span>OPTIONAL STUDIO</span><strong>Company interview practice</strong><small>Rehearse coding and design conversations under interview pressure.</small></a><a href="{href(base,cs_part)}"><span>CROWDSTRIKE TRACK</span><strong>Senior cloud backend loop</strong><small>Preparation, reported coding problems, and the architecture they publish.</small></a></section>
+<section class="optional-paths" aria-label="Optional learning paths"><a href="{href(base,ai_part)}"><span>OPTIONAL SPECIALIZATION</span><strong>AI systems</strong><small>Evaluation, budgets, permissions, and controlled actions.</small></a><a href="{href(base,interview)}"><span>OPTIONAL STUDIO</span><strong>Company interview practice</strong><small>Rehearse coding and design conversations under interview pressure.</small></a>{cs_card}</section>
 <section class="home-finish"><div><span class="section-label">READY WHEN YOU ARE</span><h2>Start at the beginning.<br>Or browse for what you need.</h2></div><div><a class="primary-button" data-start href="{href(base,start)}">Start with Part A <span aria-hidden="true">&#8599;</span></a><button class="browse-button" data-open-contents aria-controls="sidebar" aria-expanded="false">Browse the curriculum</button><p data-resume-label>Progress stays on this device.</p></div></section>'''
 
 
@@ -407,8 +415,14 @@ def shell(b, page, body, pages, sequence, base):
     prev=sequence[position-1] if position is not None and position>0 else None
     nxt=sequence[position+1] if position is not None and position+1<len(sequence) else None
     is_home=page['kind']=='home'
-    subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'{part_label(page)} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
-    if page.get('group') == 'crowdstrike':
+    is_locked_shell=page['kind']=='locked'
+    # Public pages count only the public sequence; the track ends it, sealed.
+    if nxt is not None and lock.is_locked(nxt) and not lock.is_locked(page): nxt=None
+    total=len(sequence) if lock.is_locked(page) else len([p for p in sequence if not lock.is_locked(p)])
+    subtitle = 'Curriculum overview' if is_home else 'PRIVATE TRACK' if is_locked_shell else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'{part_label(page)} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
+    if is_locked_shell:
+        meta = 'LOCKED · PASSWORD REQUIRED'
+    elif page.get('group') == 'crowdstrike':
         meta = (f'LESSON T{page["track_no"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub')
                 else 'CROWDSTRIKE TRACK · ITS OWN LEAGUE' if page['kind']=='group'
                 else f'TRACK CHAPTER T{page["track_no"]}')
@@ -430,18 +444,29 @@ def shell(b, page, body, pages, sequence, base):
                        'Next <span aria-hidden="true">→</span></a>' if nxt else
                        '<button class="sticky-finish" data-finish aria-label="Mark final step complete">Finish ✓</button>')
         sticky_nav = f'<nav class="sticky-sequence" aria-label="Sticky lesson sequence">{sticky_previous}{sticky_next}</nav>'
-    top_note = '<div class="reader-meta"><span>'+meta+'</span><span>'+('READ · BUILD · REASON' if is_home else E(b.KINDS.get(page['kind'],('Lesson',''))[1] or 'GUIDED READING'))+'</span></div>'
+    top_note = '<div class="reader-meta"><span>'+meta+'</span><span>'+('READ · BUILD · REASON' if is_home else 'UNLOCK TO READ' if is_locked_shell else E(b.KINDS.get(page['kind'],('Lesson',''))[1] or 'GUIDED READING'))+'</span></div>'
     if is_home: body=overview(b,sequence,base)
     elif page['kind'] in ('group','subject'): body=intro(b,page,sequence,base,body)
-    current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':len(sequence)},ensure_ascii=True).replace('<','\\u003c')
+    current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':total,'private':lock.is_locked(page)},ensure_ascii=True).replace('<','\\u003c')
+    robots = '<meta name="robots" content="noindex,nofollow">' if is_locked_shell else ''
+    # Hide lock forms until the saved unlock has been tried, so an unlocked reader never sees them flash.
+    lock_check = '<script>if(/(?:^|;\\s*)j2s_track=/.test(document.cookie))document.documentElement.classList.add("lock-checking")</script>'
     mobile_location = (f'<span class="mobile-location"><span class="mobile-page-title" title="{E(page["title"])}">'
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'
                        f'<span class="mobile-page-position">{"Guided curriculum" if is_home else meta}</span></span>')
     browse_label = 'Browse curriculum' if is_home else 'Contents'
     motion_control = '' if is_home else '<button id="motion-toggle" aria-pressed="false">Animations on</button>'
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light">{robots}{lock_check}<link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
 <body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">{'Skip to overview' if is_home else 'Skip to lesson'}</a><div class="mobile-bar"><button id="open-contents" data-open-contents aria-expanded="false" aria-controls="sidebar">☰ <span>{browse_label}</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {len(sequence)-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
+
+
+def locked_shell(b, page, full_html, pages, sequence, base):
+    """The page as published: chrome, a blurred placeholder, and the sealed page."""
+    ghost = {'kind': 'locked', 'title': 'Private track', 'src': 'private-track', 'url': '/', 'position': None,
+             'summary': 'A private track on this site. A password opens it on this device.'}
+    body = lock.widget(lock.seal(full_html), 'page', lock.PAGE_VEIL, 'lock-page')
+    return shell(b, ghost, body, pages, sequence, base)
 
 
 def build(b):
@@ -503,37 +528,47 @@ def build(b):
         for f in (b.ROOT/folder).rglob('*'):
             if not f.is_file() or f.suffix=='.md' or {'node_modules','__pycache__'} & set(f.parts): continue
             if folder in {'examples/ai-systems', 'examples/link-watcher', 'examples/architecture-starts', 'examples/reading-list-starter'} and (f.suffix not in {'.py', '.json', '.txt'} or any(part.startswith('.') for part in f.relative_to(b.ROOT/folder).parts)): continue
-            rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True); shutil.copy(f,dest)
+            rel=f.relative_to(b.ROOT); dest=b.OUT/rel; dest.parent.mkdir(parents=True,exist_ok=True)
+            if folder=='indexes' and f.suffix=='.json': dest.write_text(lock.redact_json(f.read_text()))
+            else: shutil.copy(f,dest)
     resources = sorted(p.relative_to(b.OUT).as_posix() for p in b.OUT.rglob('*.html'))
     by_dest={b.dest_for(p['src']):p for p in pages}
-    bodies={p['src']:compose(b,p,have,by_dest) for p in pages}
+    bodies={p['src']:(compose(b,p,have,by_dest) if lock.is_locked(p) else lock.redact_html(compose(b,p,have,by_dest))) for p in pages}
+    public=[p for p in pages if not lock.is_locked(p)]
+    for p in public:
+        p['headings']=[h for h in (p.get('headings') or []) if not lock.mentions(h['id']+' '+h['title'])]
     # Preserve old URLs while all reading movement uses the one sequence.
     for p in pages:
         out=b.OUT/b.dest_for(p['src']);out.parent.mkdir(parents=True,exist_ok=True)
-        out.write_text(shell(b,p,bodies[p['src']],pages,sequence,base))
+        html=shell(b,p,bodies[p['src']],pages,sequence,base)
+        out.write_text(locked_shell(b,p,html,pages,sequence,base) if lock.is_locked(p) else html)
     # Old gallery bookmarks remain usable; every visual retains its lesson context.
     gallery=b.OUT/'gallery';gallery.mkdir(exist_ok=True)
     items=[]
-    for p in pages:
+    for p in public:
         s=BeautifulSoup(bodies[p['src']],'html.parser')
         for img in s.find_all('img'):
             src=local_target(b,p,img.get('src',''))
             if src:items.append(f'<figure><img loading="lazy" src="{base}{src}" alt="{E(img.get("alt",""))}"><figcaption>{E(p["title"])}</figcaption></figure>')
     gp={'src':'gallery/README.md','url':'/gallery/','kind':'index','title':'Visual reference','summary':'Every teaching visual, preserved in context.'}
     (gallery/'index.html').write_text(shell(b,gp,'<h1>Visual reference</h1><div class="visual-gallery">'+''.join(items)+'</div>',pages,sequence,base))
-    records=[{k:p.get(k) for k in ('src','title','url','kind','chapter','sub','section','position','headings','embedded')} for p in pages]
-    (b.OUT/'course.json').write_text(json.dumps({'sequence':[p['src'] for p in sequence],'pages':records},separators=(',',':')))
-    (b.OUT/'search.json').write_text(json.dumps([{'title':p['title'],'url':href(base,p),'chapter':p.get('subject_title','Reference'),'text':b.prose_of(p['text'])} for p in pages],separators=(',',':')))
+    records=[{k:p.get(k) for k in ('src','title','url','kind','chapter','sub','section','position','headings','embedded')} for p in public]
+    (b.OUT/'course.json').write_text(json.dumps({'sequence':[p['src'] for p in sequence if not lock.is_locked(p)],'pages':records},separators=(',',':')))
+    (b.OUT/'search.json').write_text(json.dumps([{'title':p['title'],'url':href(base,p),'chapter':p.get('subject_title','Reference'),'text':lock.redact_text(b.prose_of(p['text']))} for p in public],separators=(',',':')))
     inventory = {'schema': 1, 'renderer': b.renderer_inputs(), 'pages': {}, 'assets': {}, 'resource_html': resources}
     for p in pages:
         inventory['pages'][p['src']] = {
             'output': b.dest_for(p['src']), 'source_sha256': hashlib.sha256(p['text'].encode()).hexdigest(),
             'presentation': 'generated-overview' if p['src'] == 'README.md' or p['kind'] in ('group', 'subject') else 'authored-lesson',
             'mermaid': p['expected_mermaid'], 'source_images': p['source_images'],
-            'code_inclusions': p['expected_code'], 'references': source_refs[p['src']]}
+            'code_inclusions': p['expected_code'], 'references': source_refs[p['src']], 'locked': lock.is_locked(p)}
     for file in (b.OUT/'assets').rglob('*'):
         if file.is_file(): inventory['assets'][file.relative_to(b.OUT).as_posix()] = hashlib.sha256(file.read_bytes()).hexdigest()
-    (b.OUT/'content-inventory.json').write_text(json.dumps(inventory, indent=2) + '\n')
     content_checks.validate(b.OUT, inventory)
+    # The published inventory names nothing sealed; the full one was checked above.
+    published = dict(inventory, pages={k: dict(v, references=[r for r in v['references'] if not lock.mentions(json.dumps(r))])
+                                       for k, v in inventory['pages'].items() if not v['locked']},
+                     assets={k: v for k, v in inventory['assets'].items() if not lock.mentions(k)})
+    (b.OUT/'content-inventory.json').write_text(json.dumps(published, indent=2) + '\n')
     print(f'Built {len(pages)} pages, {len(sequence)-1} guided steps, {len(have)} diagrams; full TOC and inline code.')
     return 0

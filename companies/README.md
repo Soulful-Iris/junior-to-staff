@@ -18,7 +18,7 @@ This is a qualitative preparation map, **not** a measured difficulty ranking. �
 
 ## The exercise, not the rumor
 
-Each company page contains **eight coding drills and five design briefs**. A separate CrowdStrike track lives in the curriculum with its own preparation, coding, and architecture chapters. They are a curated practice bank, not a list of “most-asked” questions: public reports cannot support a company-wide frequency claim. A worked mock then models clarifying questions, expected values, failures, a box diagram, and harder follow-ups. Use the left contents or simply **Next** to read them in sequence.
+Each company page contains **eight coding drills and five design briefs**. They are a curated practice bank, not a list of “most-asked” questions: public reports cannot support a company-wide frequency claim. A worked mock then models clarifying questions, expected values, failures, a box diagram, and harder follow-ups. Use the left contents or simply **Next** to read them in sequence.
 
 Choose one product domain, then one exercise. For a coding session, return the exact stated values and explain the invariant. For an architecture session, draw one user action from acceptance to its durable effect, then handle the changed requirement. The worked mock on each page demonstrates that progression. These are alternative practice sessions, not thirteen tasks to complete in one sitting.
 

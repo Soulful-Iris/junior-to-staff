@@ -554,3 +554,42 @@ main :not(pre)>code{overflow-wrap:anywhere;white-space:normal}
   .window-animation-grid{grid-template-columns:1fr}
   .counter-demo{width:100%;max-width:240px;min-height:205px;margin:0 auto}
 }
+/* Private track lock: a blurred decoy behind a small unlock form; real content arrives only after the password. */
+.track-lock{position:relative;isolation:isolate;overflow:hidden}
+.track-lock-veil{filter:blur(6px);opacity:.75;pointer-events:none;user-select:none;-webkit-user-select:none}
+.track-lock-veil .veil-row{display:flex;align-items:center;gap:10px;padding:14px 4px;border-bottom:1px solid #eadfe1;font:600 14px/1.35 var(--sans)}
+.track-lock-veil .veil-row .chapter-title{flex:1}
+.track-lock-veil .part-intro{display:block}
+.track-lock-form{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px 14px;text-align:center;background:linear-gradient(180deg,#fdf8f800,#fdf8f8cc 28%,#fdf8f8cc 72%,#fdf8f800)}
+.track-lock-eyebrow{display:inline-flex;align-items:center;gap:6px;color:#8c1f2b;font:750 10px/1.3 var(--sans);letter-spacing:1.6px}
+.track-lock-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
+.track-lock-row label{flex:1 1 150px;max-width:260px}
+.track-lock-row input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d9bfc3;border-radius:8px;background:#fff;color:var(--ink);font:500 14px/1.2 var(--sans);letter-spacing:.5px;transition:border-color .15s,box-shadow .15s}
+.track-lock-row input:focus{outline:0;border-color:#8c1f2b;box-shadow:0 0 0 3px #8c1f2b22}
+.track-lock-row button{padding:10px 22px;border:0;border-radius:999px;background:#8c1f2b;color:#fff;font:700 13px/1.2 var(--sans);letter-spacing:.4px;cursor:pointer;box-shadow:0 8px 18px #8c1f2b33;transition:transform .15s,box-shadow .15s,background .15s}
+.track-lock-row button:hover{background:#75161f;transform:translateY(-1px);box-shadow:0 10px 22px #8c1f2b40}
+.track-lock-row button:focus-visible{outline:3px solid #8c1f2b55;outline-offset:2px}
+.track-lock-note{margin:0;max-width:300px;color:var(--muted);font:400 11.5px/1.5 var(--sans)}
+.track-lock.is-busy .track-lock-row button{opacity:.6;pointer-events:none}
+.track-lock.is-wrong .track-lock-row input{border-color:#b3202e;animation:lock-shake .35s}
+.track-lock.is-wrong .track-lock-note{color:#b3202e}
+@keyframes lock-shake{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@media(prefers-reduced-motion:reduce){.track-lock.is-wrong .track-lock-row input{animation:none}.track-lock-row button{transition:none}}
+html.lock-checking .track-lock{visibility:hidden}
+.lock-rail{margin-top:2px;min-height:250px;border-radius:8px}
+.lock-rail .track-lock-form{gap:8px;padding:14px 10px}
+.lock-rail .track-lock-row label{flex-basis:100%;max-width:none}
+.lock-rail .track-lock-row button{width:100%}
+.lock-page{min-height:62vh;border-radius:12px}
+.lock-page .track-lock-veil{padding-bottom:40px}
+.lock-page .track-lock-form{gap:14px;background:linear-gradient(180deg,#fdf8f800,#fdf8f8d9 22%,#fdf8f8d9 78%,#fdf8f800)}
+.lock-page .track-lock-eyebrow{font-size:11px}
+.lock-page .track-lock-row input{font-size:15px;padding:12px 14px}
+.lock-page .track-lock-row button{padding:12px 28px;font-size:14px}
+.optional-paths .lock-card{display:block;min-height:160px;border:1px solid #e3c9cc;border-radius:8px;background:#f7ecee}
+.lock-card .veil-card{display:flex;flex-direction:column;padding:24px;color:var(--ink)}
+.lock-card .veil-card span{color:#8c1f2b;font:750 10px/1.3 var(--sans);letter-spacing:1.15px}
+.lock-card .veil-card strong{margin-top:14px;font:700 17px/1.35 var(--sans)}
+.lock-card .veil-card small{margin-top:8px;color:var(--muted);font:400 13px/1.55 var(--sans)}
+.lock-card .track-lock-form{padding:14px}
+.lock-card .track-lock-note{display:none}
