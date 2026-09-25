@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" role="img" aria-labelledby="t d">
+<title id="t">Anatomy of the take-home document</title><desc id="d">A page layout of the six sections with their lengths: requirements and numbers, main path figure, data model, two deep dives, failure table, trade-offs and next steps.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="760" height="470" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">THE DOCUMENT / THREE TO FOUR PAGES, ONE FIGURE, ONE TABLE THEY READ TWICE</text>
+<rect x="24" y="46" width="470" height="404" rx="6" fill="#fff" stroke="#c9b6d2" stroke-width="1.6"/>
+<rect class="box" x="36" y="54" width="446" height="46" rx="7"/><text class="m" x="46" y="74">1. Requirements and numbers</text><text class="l" x="46" y="90">half a page</text><text class="s" x="124" y="90">· seven numbers with consequences</text>
+<rect class="box" x="36" y="108" width="446" height="58" rx="7"/><text class="m" x="46" y="128">2. API and main path</text><text class="l" x="46" y="144">one figure</text><text class="s" x="117" y="144">· six to eight boxes, one request drawn through</text>
+<rect class="box" x="36" y="174" width="446" height="46" rx="7"/><text class="m" x="46" y="194">3. Data model</text><text class="l" x="46" y="210">half a page</text><text class="s" x="124" y="210">· write shape, read shape, key, retention, category → product</text>
+<rect class="hot" x="36" y="228" width="446" height="76" rx="7"/><text class="m" x="46" y="248">4. Two deep dives</text><text class="l" x="46" y="264">one page</text><text class="s" x="105" y="264">· the property protected and the exact mechanism</text>
+<rect class="hot" x="36" y="312" width="446" height="52" rx="7"/><text class="m" x="46" y="332">5. Failure modes</text><text class="l" x="46" y="348">one table</text><text class="s" x="111" y="348">· failure, detection, containment, recovery, what the user sees</text>
+<rect class="box" x="36" y="372" width="446" height="46" rx="7"/><text class="m" x="46" y="392">6. Trade-offs, cost, next steps</text><text class="l" x="46" y="408">half a page</text><text class="s" x="124" y="408">· two you dislike, one cost line, what to measure first</text>
+<rect class="box" x="520" y="60" width="216" height="62" rx="9"/><text class="m" x="530" y="80">Read first</text><text class="l" x="530" y="96">sections 2 and 3: the boxes</text><text class="l" x="530" y="112">and why</text>
+<rect class="box" x="520" y="136" width="216" height="62" rx="9"/><text class="m" x="530" y="156">Read twice</text><text class="l" x="530" y="172">sections 1 and 5: numbers and</text><text class="l" x="530" y="188">failures</text>
+<rect class="box" x="520" y="212" width="216" height="62" rx="9"/><text class="m" x="530" y="232">Decides level</text><text class="l" x="530" y="248">section 6 and how you take</text><text class="l" x="530" y="264">pushback</text>
+<rect class="box" x="520" y="288" width="216" height="62" rx="9"/><text class="m" x="530" y="308">Appendix</text><text class="l" x="530" y="324">arithmetic, DDL, alternatives;</text><text class="l" x="530" y="340">rarely read</text>
+<text class="l" x="24" y="464">Everything the reviewers asked in the reports has a section to land in.</text>
+</svg>

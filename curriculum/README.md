@@ -57,6 +57,7 @@ One curriculum organized by engineering prerequisites. Start with coding, build 
 | T1 | [Preparation: the loop, the people, the plan](05-crowdstrike/01-preparation/README.md) | Know the loop round by round, what each interviewer is grading, and how to prepare in two weeks. |
 | T2 | [Coding problems in their shapes](05-crowdstrike/02-coding-problems/README.md) | Solve the reported problem shapes in Python, then extend each to a stream or to concurrent workers. |
 | T3 | [Architecture: their systems and their design cases](05-crowdstrike/03-architecture/README.md) | Design the systems they ask about at the scale they publish, and defend every box for ninety minutes. |
+| T4 | [The design take-home and the review](05-crowdstrike/04-take-home-and-review/README.md) | Write the document they grade, answer the forty follow-ups, rehearse the two-hour review, and drill it for a week. |
 
 ## Turn a lesson into an observable result
 

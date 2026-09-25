@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 978 290" role="img" aria-labelledby="t d">
+<title id="t">The take-home, from prompt to review</title><desc id="d">Ten steps on two rows from the prompt arriving to the review, with the failure table and the review highlighted.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="978" height="290" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">THE FORTY-EIGHT HOURS / NUMBERS BEFORE BOXES, FAILURES BEFORE POLISH</text>
+<rect class="box" x="24" y="60" width="168" height="48" rx="9"/><text class="m" x="34" y="80">Prompt arrives</text><text class="l" x="34" y="96">read it twice</text>
+<path class="ar" d="M192 84.0L210 84.0"/>
+<rect class="box" x="210" y="60" width="168" height="48" rx="9"/><text class="m" x="220" y="80">Numbers</text><text class="l" x="220" y="96">and your questions</text>
+<path class="ar" d="M378 84.0L396 84.0"/>
+<rect class="box" x="396" y="60" width="186" height="48" rx="9"/><text class="m" x="406" y="80">Draft</text><text class="l" x="406" y="96">requirements, path, stores</text>
+<path class="ar" d="M582 84.0L600 84.0"/>
+<rect class="box" x="600" y="60" width="168" height="48" rx="9"/><text class="m" x="610" y="80">Diagram</text><text class="l" x="610" y="96">one request through</text>
+<path class="ar" d="M768 84.0L786 84.0"/>
+<rect class="hot" x="786" y="60" width="168" height="48" rx="9"/><text class="m" x="796" y="80">Failure table</text><text class="l" x="796" y="96">before polish</text>
+<rect class="box" x="24" y="150" width="168" height="48" rx="9"/><text class="m" x="34" y="170">Sleep</text><text class="l" x="34" y="186">then cut</text>
+<path class="ar" d="M192 174.0L210 174.0"/>
+<rect class="box" x="210" y="150" width="168" height="48" rx="9"/><text class="m" x="220" y="170">Deep dives</text><text class="l" x="220" y="186">the two hardest parts</text>
+<path class="ar" d="M378 174.0L396 174.0"/>
+<rect class="box" x="396" y="150" width="168" height="48" rx="9"/><text class="m" x="406" y="170">Submit</text><text class="l" x="406" y="186">PDF + diagram image</text>
+<path class="ar" d="M564 174.0L582 174.0"/>
+<rect class="box" x="582" y="150" width="168" height="48" rx="9"/><text class="m" x="592" y="170">Rehearse</text><text class="l" x="592" y="186">ten-minute walkthrough</text>
+<path class="ar" d="M750 174.0L768 174.0"/>
+<rect class="hot" x="768" y="150" width="180" height="48" rx="9"/><text class="m" x="778" y="170">Review</text><text class="l" x="778" y="186">90–120 min, 2–3 engineers</text>
+<path class="ar dash" d="M870.0 108V129H108.0V148"/>
+<text class="l" x="24" y="232">Day 1: the top row. Day 2: the bottom row. A document with a failure table and no polish reads as senior;</text>
+<text class="l" x="24" y="252">a polished diagram with no failure table reads as junior. Reported formats give one to two days.</text>
+</svg>

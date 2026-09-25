@@ -137,6 +137,7 @@ CHAPTER_ORDER = {
         ("curriculum/05-crowdstrike/01-preparation", "Know the loop round by round, what each interviewer is grading, and how to prepare in two weeks."),
         ("curriculum/05-crowdstrike/02-coding-problems", "Solve the reported problem shapes in Python, then extend each to a stream or to concurrent workers."),
         ("curriculum/05-crowdstrike/03-architecture", "Design the systems they ask about at the scale they publish, and defend every box for ninety minutes."),
+        ("curriculum/05-crowdstrike/04-take-home-and-review", "Write the document they grade, then defend it for two hours: the follow-ups, the rehearsed review, and the drills."),
     ],
 }
 

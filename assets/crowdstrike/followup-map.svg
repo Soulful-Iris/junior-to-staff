@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" role="img" aria-labelledby="t d">
+<title id="t">The follow-up map</title><desc id="d">Eight follow-up themes arranged around the design, each with the property it probes.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="1000" height="330" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">FORTY FOLLOW-UPS / EIGHT THEMES, EACH PROBING ONE PROPERTY</text>
+<rect class="box" x="24" y="60" width="222" height="48" rx="9"/><text class="m" x="34" y="80">Arithmetic</text><text class="l" x="34" y="96">which number, redone</text>
+<path class="ar" style="display:none" d="M246 84.0L266 84.0"/>
+<rect class="box" x="266" y="60" width="222" height="48" rx="9"/><text class="m" x="276" y="80">Storage</text><text class="l" x="276" y="96">category, then product</text>
+<path class="ar" style="display:none" d="M488 84.0L508 84.0"/>
+<rect class="box" x="508" y="60" width="222" height="48" rx="9"/><text class="m" x="518" y="80">Contention</text><text class="l" x="518" y="96">the exact operation</text>
+<path class="ar" style="display:none" d="M730 84.0L750 84.0"/>
+<rect class="box" x="750" y="60" width="222" height="48" rx="9"/><text class="m" x="760" y="80">Delivery</text><text class="l" x="760" y="96">once-applied, per-key order</text>
+<rect class="box" x="24" y="230" width="222" height="48" rx="9"/><text class="m" x="34" y="250">Failure</text><text class="l" x="34" y="266">detect, contain, recover</text>
+<path class="ar" style="display:none" d="M246 254.0L266 254.0"/>
+<rect class="box" x="266" y="230" width="222" height="48" rx="9"/><text class="m" x="276" y="250">Tenancy &amp; security</text><text class="l" x="276" y="266">isolation, integrity, audit</text>
+<path class="ar" style="display:none" d="M488 254.0L508 254.0"/>
+<rect class="box" x="508" y="230" width="222" height="48" rx="9"/><text class="m" x="518" y="250">Cost &amp; operations</text><text class="l" x="518" y="266">the dominant line; what pages</text>
+<path class="ar" style="display:none" d="M730 254.0L750 254.0"/>
+<rect class="box" x="750" y="230" width="236" height="48" rx="9"/><text class="m" x="760" y="250">Change</text><text class="l" x="760" y="266">what breaks first; concede or hold</text>
+<rect class="hot" x="352" y="143" width="296" height="44" rx="9"/><text class="m" x="362" y="163">Your design</text><text class="l" x="362" y="179">the property first, then the mechanism</text>
+<path class="ar dash" d="M135.0 108L372 143"/>
+<path class="ar dash" d="M377.0 108L377.0 143"/>
+<path class="ar dash" d="M619.0 108L619.0 143"/>
+<path class="ar dash" d="M861.0 108L628 143"/>
+<path class="ar dash" d="M135.0 230L372 187"/>
+<path class="ar dash" d="M377.0 230L377.0 187"/>
+<path class="ar dash" d="M619.0 230L619.0 187"/>
+<path class="ar dash" d="M868.0 230L628 187"/>
+<text class="l" x="24" y="310">Answer shape, forty-five seconds: name the property, give the number or the mechanism, say what it costs, offer the alternative.</text>
+</svg>

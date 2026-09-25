@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" role="img" aria-labelledby="t d">
+<title id="t">The seven days before the review</title><desc id="d">Seven columns, one per day, each listing the drills for morning, afternoon, and evening.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="1000" height="300" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">SEVEN DAYS / DOCUMENT, WALKTHROUGH, ARITHMETIC, HOSTILE REVIEWER, CHANGED REQUIREMENTS, CONCEDE, REST</text>
+<rect class="box" x="24" y="60" width="130" height="118" rx="9"/><text class="m" x="34" y="80">Day 7</text><text class="l" x="34" y="100">Document: scanner</text><text class="l" x="34" y="122">Arithmetic</text><text class="l" x="34" y="144">Read T3 lesson 3</text>
+<rect class="box" x="162" y="60" width="130" height="118" rx="9"/><text class="m" x="172" y="80">Day 6</text><text class="l" x="172" y="100">Walkthrough ×2</text><text class="l" x="172" y="122">Changed reqs ×3</text><text class="l" x="172" y="144">Rest</text>
+<rect class="box" x="300" y="60" width="130" height="118" rx="9"/><text class="m" x="310" y="80">Day 5</text><text class="l" x="310" y="100">Document: events</text><text class="l" x="310" y="122">Hostile reviewer</text><text class="l" x="310" y="144">—</text>
+<rect class="box" x="438" y="60" width="130" height="118" rx="9"/><text class="m" x="448" y="80">Day 4</text><text class="l" x="448" y="100">Concede / hold</text><text class="l" x="448" y="122">Arithmetic</text><text class="l" x="448" y="144">Transcript run 1</text>
+<rect class="box" x="576" y="60" width="130" height="118" rx="9"/><text class="m" x="586" y="80">Day 3</text><text class="l" x="586" y="100">Document: telemetry</text><text class="l" x="586" y="122">Changed reqs ×3</text><text class="l" x="586" y="144">Transcript run 2</text>
+<rect class="box" x="714" y="60" width="130" height="118" rx="9"/><text class="m" x="724" y="80">Day 2</text><text class="l" x="724" y="100">Walkthrough: yours</text><text class="l" x="724" y="122">Hostile: yours</text><text class="l" x="724" y="144">Transcript run 3</text>
+<rect class="hot" x="852" y="60" width="130" height="118" rx="9"/><text class="m" x="862" y="80">Day 1</text><text class="l" x="862" y="100">Re-read once</text><text class="l" x="862" y="122">Walk</text><text class="l" x="862" y="144">Sleep</text>
+<text class="s" x="24" y="200">Rows: morning · afternoon · evening.</text>
+<text class="l" x="24" y="232">If the real prompt arrives mid-week, it becomes the document drill and every later drill runs on it.</text>
+<text class="l" x="24" y="252">Ready means sixteen of twenty on the rubric, twice, with a partner asking out of order.</text>
+</svg>

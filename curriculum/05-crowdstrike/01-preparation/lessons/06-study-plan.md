@@ -29,6 +29,8 @@ Your own systems first, because they answer the hiring manager and seed every st
 
 If the loop is sooner, keep days 1–6 and compress the rest: the string-templating and worker-pool bundles, the file-scanning case, and the five pages are the non-negotiables.
 
+The last seven days before a scheduled design review follow [T4's drill week](../../04-take-home-and-review/lessons/05-drills.md) instead of this table.
+
 ## Reading list, in order
 
 | Read | Take from it |

@@ -2,7 +2,7 @@
 
 Learn software engineering through one ordered curriculum. The lessons connect explanations to application behavior, worked examples and tasks you can carry out. Follow-ups add implementation constraints, operating decisions and broader ownership where they help the topic.
 
-**21 subject chapters · 56 coding bundles · 49 project entries · 50 design/architecture pages.**
+**22 subject chapters · 56 coding bundles · 49 project entries · 50 design/architecture pages.**
 
 ## Start here
 
@@ -16,7 +16,7 @@ Learn software engineering through one ordered curriculum. The lessons connect e
 | D | [Production operations](curriculum/03-production/README.md) | [AWS infrastructure](curriculum/03-production/03-infrastructure/README.md) · [Delivery and controlled rollouts](curriculum/03-production/02-delivery/README.md) · [Production observability](curriculum/03-production/04-observability/README.md) · [Reliability and incident recovery](curriculum/03-production/05-reliability/README.md) |
 | E | [System evolution and leadership](curriculum/04-scale-and-evolution/README.md) | [Live migrations](curriculum/04-scale-and-evolution/04-migrations/README.md) · [Technical decisions and engineering effectiveness](curriculum/04-scale-and-evolution/05-technical-decisions/README.md) |
 | Optional | [AI systems](curriculum/parts/ai-systems.md) | [AI evaluation and guardrails](curriculum/04-scale-and-evolution/03-ai-systems/README.md) |
-| Its own league | [CrowdStrike track](curriculum/05-crowdstrike/README.md) | [Preparation: the loop, the people, the plan](curriculum/05-crowdstrike/01-preparation/README.md) · [Coding problems in their shapes](curriculum/05-crowdstrike/02-coding-problems/README.md) · [Architecture: their systems and their design cases](curriculum/05-crowdstrike/03-architecture/README.md) |
+| Its own league | [CrowdStrike track](curriculum/05-crowdstrike/README.md) | [Preparation: the loop, the people, the plan](curriculum/05-crowdstrike/01-preparation/README.md) · [Coding problems in their shapes](curriculum/05-crowdstrike/02-coding-problems/README.md) · [Architecture: their systems and their design cases](curriculum/05-crowdstrike/03-architecture/README.md) · [The design take-home and the review](curriculum/05-crowdstrike/04-take-home-and-review/README.md) |
 | Optional | [Company interview studio](companies/README.md) | Senior SWE rehearsals for [OpenAI](companies/openai.md), [Reddit](companies/reddit.md), [Meta](companies/meta.md), [Databricks](companies/databricks.md), [Observe Inc.](companies/observe.md). Each has coding and design prompts, a worked mock, evidence labels, and visuals. |
 
 System design sits beside scale, capacity, performance, and cost. Production follows the lifecycle from infrastructure through delivery, observability, and recovery. Tests and authorization are practiced from the first examples and deepened in their dedicated chapters. AI systems is an optional specialization rather than a prerequisite for conventional software-engineering interviews.

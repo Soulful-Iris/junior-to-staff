@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1028 250" role="img" aria-labelledby="t d">
+<title id="t">The review as a loop</title><desc id="d">Walkthrough, then a loop of interruption, naming the property, answering with a number or mechanism, conceding or holding, and continuing, for two hours.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="1028" height="250" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">THE REVIEW / ONE WALKTHROUGH, THEN THE SAME LOOP FORTY TIMES</text>
+<rect class="box" x="24" y="70" width="186" height="48" rx="9"/><text class="m" x="34" y="90">Walkthrough</text><text class="l" x="34" y="106">ten minutes, numbers first</text>
+<path class="ar" d="M210 94.0L228 94.0"/>
+<rect class="box" x="228" y="70" width="176" height="48" rx="9"/><text class="m" x="238" y="90">Interruption</text><text class="l" x="238" y="106">&quot;why not X?&quot;</text>
+<path class="ar" d="M404 94.0L422 94.0"/>
+<rect class="hot" x="422" y="70" width="186" height="48" rx="9"/><text class="m" x="432" y="90">Name the property</text><text class="l" x="432" y="106">ordering, durability, cost</text>
+<path class="ar" d="M608 94.0L626 94.0"/>
+<rect class="box" x="626" y="70" width="180" height="48" rx="9"/><text class="m" x="636" y="90">Number or mechanism</text><text class="l" x="636" y="106">redo it with their number</text>
+<path class="ar" d="M806 94.0L824 94.0"/>
+<rect class="hot" x="824" y="70" width="180" height="48" rx="9"/><text class="m" x="834" y="90">Concede or hold</text><text class="l" x="834" y="106">name the trade either way</text>
+<path class="ar dash" d="M914.0 118V150H316.0V120"/>
+<text class="l" x="555.0" y="168">next follow-up, under ninety seconds</text>
+<text class="l" x="24" y="212">Reported words for the loop: "demonstrate design depth, incorporate feedback, maintain composure for 90 minutes" (Apr 2025);</text>
+<text class="l" x="24" y="232">"learn to concede on possibly better options or changing requirements you didn't anticipate" (Jan 2026 offer).</text>
+</svg>
