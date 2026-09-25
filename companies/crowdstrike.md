@@ -12,7 +12,7 @@ Work the case first. Then run the same reasoning on the company's actual shape: 
 
 **Who this page is for.** Senior Engineer / Sr. Software Engineer on a cloud backend or platform team (the "Cloud" reqs, not the Windows/macOS/Linux sensor teams, which add operating-system internals). The reference posting is Senior Engineer – Cloud, US Remote, req R30109, posted September 2026. Its requirements are quoted in the room section below.
 
-**Evidence policy.** Checked 25 September 2026. Candidate reports span 2019–2025 and are dated anecdotes, not transcripts; a Glassdoor login wall blocked the individual senior reports, so the Glassdoor material here is limited to its public summary statistics and search snippets. No question on this page is claimed to be "most asked"; the reported ones are labeled ◒ and everything else is ◇. Ask your recruiter for the round list, allowed AI tools, language, and whether design is a take-home.
+**Evidence policy.** Checked 25 September 2026; ledger pass the same day. Candidate reports span 2019–2025 and are dated anecdotes, not transcripts; a Glassdoor login wall blocked the individual senior reports, so the Glassdoor material here is limited to its public summary statistics and search snippets. No question on this page is claimed to be "most asked"; the reported ones are labeled ◒ and everything else is ◇. Ask your recruiter for the round list, allowed AI tools, language, and whether design is a take-home.
 
 ## The room · design is where the loop is decided
 
@@ -35,6 +35,7 @@ Reported shapes vary by team and year. The most common senior shape from 2021–
 | Live coding | 45–60 min | Senior engineer | 1–2 problems in a shared editor (LeetCode/HackerRank-like), language of your choice; medium, occasionally "low end of hard"; real-world framing; may be extended to streaming or concurrency | ◒ Blind 2023, 2025; ◒ Glassdoor snippets |
 | Design take-home | Prompt 1–2 days ahead; 4–8 h of work reported for coding take-homes | You | A document describing a system to design (VirusTotal-like file scanning is the repeated case); prepare a deck or diagrams | ◒ Blind 2019, 2022, 2023, 2025; ◒ LeetCode 2025; ◒ enginebogie 2025 |
 | Design review | 90 min (reports of ~2 h) | 2–3 engineers, sometimes with the HM | Defend the take-home; scale to "billions of requests and big files"; pros and cons of every choice; failure modes, concurrent uploads, users competing for the same resource; sometimes a second broad prompt (a site for millions of visitors) | ◒ Blind May 2020; ◒ Blind Oct 2022; ◒ Blind Aug 2025 |
+| Code review round | ~45 min, reported in two 2025–2026 senior loops | Engineer | Review example code aloud: what must change, what could, and how severe; then implement an in-memory cache and sketch its design | ◒ Hello Interview Jan 2026; ◒ Blind Aug 2025 |
 | Collaboration / behavioral panel | 45–60 min | Potential teammates, sometimes a peer manager | Remote-first async work, code review, cross-team dependencies, incidents, persuasion, mentoring; values | ◒ techprep, designgurus, techinterview |
 | Domain / cloud architecture round (senior) | 60 min, not always present | Engineer | Cloud and security architecture: telemetry, isolation, encryption at rest, audit logging | ◒ techprep, techinterview |
 | Hiring-manager wrap-up | 30 min, not always present | Hiring manager | "Recap the process and answer questions"; reported both before offers and before reassignment to another team | ◒ Blind Aug 2025 |
@@ -110,7 +111,7 @@ flowchart LR
 | Kth largest in an unsorted array; longest common subsequence; palindrome check; inorder traversal | scaleengineer profile | Heap or quickselect; DP; two pointers; iterative stack |
 | "Queries on handling race conditions" | Glassdoor snippet | Locking, atomic updates, idempotent writes |
 
-### Choose a coding exercise · twelve original drills in CrowdStrike's shapes ◇
+### Choose a coding exercise · twelve original drills in CrowdStrike's shapes ◇ `[Generated]`
 
 Choose one for 35–45 minutes. Each has a testable contract; the stretch column is what the interviewer will ask next.
 
@@ -129,7 +130,7 @@ Choose one for 35–45 minutes. Each has a testable contract; the stretch column
 | 11 · Shortest path: minimum time for a signal to reach all nodes | edges `1→2(1), 1→3(4), 2→3(1)` → 2 | Negative or missing nodes; streaming edge updates |
 | 12 · Interval merge: collapse overlapping `[start,end)` outage windows | `[0,5),[3,8),[10,12)` → two intervals | Sorted input arriving out of order; per-tenant windows |
 
-### Concurrency mini-bank · Go first, Python second ◇
+### Concurrency mini-bank · Go first, Python second ◇ `[Generated]`
 
 The posting names Go, Python, or Java "with concurrency patterns," and race conditions are a reported coding topic. Be able to write these from memory in Go and explain the Python equivalent.
 
@@ -202,7 +203,7 @@ Numbers before boxes; six to eight boxes, not twenty; one main path drawn and th
 
 </details>
 
-### Choose an architecture exercise · nine prompts in the company's own shape
+### Choose an architecture exercise · nine prompts in the company's own shape `[Reported]` where marked, otherwise `[Generated]`
 
 The first three are reported cases; the rest are original and built from the posting's language and the engineering blog.
 
@@ -217,6 +218,102 @@ The first three are reported cases; the rest are original and built from the pos
 | Endpoint management control plane (the R30109 team's words) | Track sensor versions, health, and policy per host; run commands | Millions of hosts reporting every 5 minutes; command fan-out with acknowledgement; stale hosts; multi-tenant RBAC | ◇ |
 | Searchable event store | Store weeks of events, query by host and time | Hot vs cold tiers, retention TTL, index size, a query that scans a year | ◇ |
 | Rate limiter and distributed queue | Standard building blocks | Redis down; clock skew; exactly-one consumer per partition | ◇ |
+
+## Every problem found, labeled · the ledger
+
+Every item below carries four labels so you can judge it yourself: **source type**, **last documented**, **role and place**, and **weight**. Source types: `[Reported]` a first-person candidate account; `[Aggregator]` a prep site that edits and summarizes reports (weaker; sites copy each other); `[Official]` the company; `[Generated]` written for this page in a reported shape. Weight: **core** = repeated across independent reports or recent on a senior cloud loop; **likely** = single recent report on a matching loop or a shape the company's guides agree on; **possible** = single or old report, or a different team; **low** = old, other role, or title-only.
+
+### Coding, live rounds
+
+| Problem | Source type | Last documented | Role · place | Seen | Weight |
+| --- | --- | --- | --- | --- | --- |
+| String templating: replace `{{db_host}}`-style placeholders from a dictionary; follow-up: apply the same to dictionary values; then "how would you handle large volumes, what mechanism for a worker pool, how would you assign work to workers" | [Reported] PracHub experience | Oct 2025 | Senior, Software Engineer – Cloud, US (needed US-Eastern overlap with a European team) | 2 (same problem on PracHub's design list as "worker pool for template jobs") | **core** — a Cloud senior loop, rejected on the worker-pool follow-up, not the string code |
+| Number of islands (DFS on a 2D grid) | [Reported] LeetCode Discuss; [Reported] enginebogie | Nov 2025 | Engineer III / Senior, London | 2 | **core** |
+| Implement an in-memory cache "like Redis," then a brief design of a Redis-like system (cache uses) | [Reported] Hello Interview success story | Jan 2026 | Senior SDE, US, offer | 1 | **core** — the most recent senior offer report |
+| FIFO / LRU cache: data structure, insert, lookup, eviction, pseudocode | [Reported] Blind (EM loop) | Aug 2025 | Engineering Manager loop | 1 (+ cache again above) | likely |
+| Time-based key-value store, then time-complexity discussion | [Reported] Blind comment | 2023 | Platform engineer loop | 1 | likely |
+| Custom queue with thread-safe operations, no races under concurrent access | [Aggregator] PracHub guide 2026 | 2026 listing, undated | SWE | 1 | likely |
+| Graph of network nodes: shortest path from a start node to all others | [Aggregator] PracHub guide; [Aggregator] TechPrep ("Network Delay Time") | 2025–2026 | SWE | 2 aggregators | likely |
+| Balanced brackets and parentheses | [Aggregator] PracHub guide 2026 | 2026 | SWE | 1 | likely |
+| Log stream processing with timestamped records, Python or Go | [Aggregator] PracHub guide; [Aggregator] designgurus ("group by machine, busiest, then endless stream with memory limit") | 2026 | SWE | 2 aggregators | likely |
+| Parse, fragment, and reassemble network packets from header and offset values | [Aggregator] PracHub guide 2026 | 2026 | SWE | 1 | possible |
+| Encode and decode strings | [Aggregator] TechPrep / Interview Query | 2025 | SWE | 1 | possible |
+| Is subsequence | [Aggregator] TechPrep; Glassdoor snippet | 2025 | SWE | 2 | possible |
+| Number of dice rolls with target sum; combinations of n dice with m faces | [Aggregator] TechPrep; Glassdoor snippet | 2025 | SWE | 2 | possible |
+| Primes up to N | Glassdoor snippet | undated | SWE | 1 | possible |
+| Kth largest; longest common subsequence; palindrome; inorder traversal | [Aggregator] scaleengineer profile | 2025 | Senior Engineer I profile page | 1 | possible |
+| "Queries on handling race conditions" | Glassdoor snippet | undated | SWE | 1 | likely (matches the thread-safe queue and worker-pool follow-ups) |
+| Access-control coding challenge (title only; body login-walled) | [Reported] 1point3acres | Oct 2024 | SWE, tech phone screen | 1 | possible |
+| Maximum-similarity string matching (title only) | [Reported] 1point3acres | Oct 2022 | New grad | 1 | low |
+| "Design an OOP concept" in a phone screen | [Reported] Taro | Mar 2020 | Senior SWE, Bengaluru | 1 | low |
+
+### Take-homes and design reviews
+
+| Problem | Source type | Last documented | Role · place | Seen | Weight |
+| --- | --- | --- | --- | --- | --- |
+| Design a VirusTotal-like file scanning platform (uploads, hashing, blob storage, sharding, scaling, async event-driven flow); requirements sent days ahead; defended live; Cassandra and consistent hashing discussed | [Reported] LeetCode Nov 2025; [Reported] enginebogie 2025; [Reported] interviewexperiences.in Nov 2025; [Reported] Blind Dublin; [Reported] Blind Aug 2023; [Reported] Blind Dec 2019; Glassdoor question title "Design the Virus Total application"; [Aggregator] PracHub "file upload and scanning report system" Jan 2026 | Jan 2026 | Senior / Engineer III, London, Dublin, US | 7+ | **core** — the one item on this page that is genuinely repeated |
+| Design a real-time event message system as a take-home with supplied requirements; then a two-hour review with two engineers; "security and availability are the two priorities" | [Reported] Hello Interview | Jan 2026 | Senior SDE, US, offer | 1 (+ "event system" shape in three aggregators) | **core** — most recent senior offer, and the shape of the R30109 team's work |
+| Design Redis (brief, after implementing the cache) | [Reported] Hello Interview | Jan 2026 | Senior SDE, US | 1 | likely |
+| Take-home case study, then a 90-minute session on scaling to "billions of requests and big files"; a second prompt: a website for millions of visitors | [Reported] Blind | May 2020 | SWE onsite | 1 | possible |
+| Design a scalable worker pool for template jobs | [Aggregator] PracHub | Oct 2025 | SWE | 1 (+ the live string-templating follow-up) | likely |
+| High-throughput logging service with real-time search indexing | [Aggregator] PracHub guide | 2026 | SWE | 1 | likely |
+| Threat-detection pipeline that handles backpressure without data loss | [Aggregator] PracHub guide; [Aggregator] techinterview; [Aggregator] designgurus | 2026 | SWE | 3 aggregators | likely |
+| Multi-tiered file parser extracting sub-file identifiers | [Aggregator] PracHub guide | 2026 | SWE | 1 | possible |
+| Idempotent API endpoint that returns one-time secrets | [Aggregator] PracHub guide | 2026 | SWE | 1 | likely (idempotency is asked in some form in most loops) |
+| Message-broker consumer that stays idempotent under at-least-once delivery | [Aggregator] PracHub guide | 2026 | SWE | 1 | likely — this is exactly the company's published consumer design |
+| Take-home: AWS Cognito misconfiguration scanner in Python/boto3 (MFA, password policy, auth flows, user enumeration), severity-rated report | [Reported] public GitHub repo | undated, repo titled "Crowdstrike take home assignment" | likely a cloud-security role | 1 | low for this loop; shows the "small tool + README + tests" take-home shape |
+| Take-home: Amazon SageMaker misconfiguration detector in Python/boto3, tested with Terraform-built bad resources | [Reported] public GitHub repo | undated | likely a cloud-security role | 1 | low for this loop; same shape |
+| Take-home in Java with test coverage, feedback received (body login-walled) | [Reported] 1point3acres | Jan 2024 | SDE | 1 | possible |
+| Take-home in Python (unfamiliar framework) plus a C++ task, then a code discussion | [Reported] Taro | Mar 2020 | Senior SWE, Bengaluru | 1 | low |
+
+### Code review round
+
+| Item | Source type | Last documented | Role · place | Seen | Weight |
+| --- | --- | --- | --- | --- | --- |
+| Review example code live: say what must change, what could change, and how severe each is; communicate clearly while reading | [Reported] Hello Interview; [Reported] Blind offer thread ("a unique code review and design presentation component") | Jan 2026 | Senior SDE, US | 2 | **core** — two independent 2025–2026 senior reports; most prep sites do not mention it |
+
+### Systems and cloud knowledge questions
+
+| Question | Source type | Last documented | Weight |
+| --- | --- | --- | --- |
+| Walk the path of a network API call from the application layer through kernel packet handling | [Aggregator] PracHub guide | 2026 | possible |
+| Goroutines compared with operating-system threads | [Aggregator] PracHub guide | 2026 | likely for a Go team |
+| Canary versus blue-green deployments with automated rollback | [Aggregator] PracHub guide | 2026 | **core** given the company's post-2024 posture |
+| Investigate an exposed S3 bucket using IAM, KMS, and audit logs | [Aggregator] PracHub guide | 2026 | possible |
+| "Be ready to explain how those AWS technologies work, cost and tradeoffs; don't rely on infinite scalability" | [Reported] CrowdStrike employees on Blind | 2024 | likely |
+
+### Hiring manager and behavioral, reported verbatim
+
+| Question | Source type | Last documented | Weight |
+| --- | --- | --- | --- |
+| Current work experience; microservices architecture; event-driven systems; scaling and error-handling scenarios | [Reported] LeetCode; [Reported] enginebogie | Nov 2025 | **core** |
+| "Tell me about what you do"; questions about your mistakes and what you learned | [Reported] Hello Interview | Jan 2026 | **core** |
+| Present a past project; repeated "why"; one conceptual technical question | [Reported] Blind (SAP, Amazon commenters) | Aug 2025 | **core** |
+| Describe a challenging situation where a project or initiative under your leadership wasn't going as planned and how you persevered | [Reported] Hello Interview | Jan 2026 | **core** |
+| Tell me about a time you asked for help early and avoided an outage | [Aggregator] Exponent | 2026 listing | likely |
+| Walk me through your decision-making during a major incident | [Aggregator] Exponent | 2026 listing | likely |
+| How did you convince leadership to prioritize a security initiative | [Aggregator] Exponent | 2026 listing | likely |
+| How do you approach problems you've never seen before | [Aggregator] Exponent | 2026 listing | likely |
+| A time you caught, escalated, or shipped a risky change; blast radius versus speed | [Aggregator] techinterview | 2026 | likely (post-2024) |
+| Why do you want to join after leaving your current company; how do you handle negative feedback from a manager; why the transition | [Aggregator] AmbitionBox HR list | May 2026 | possible |
+| Go proficiency and your most complex project (recruiter screen) | [Reported] PracHub experience | Oct 2025 | likely |
+| "Tell me about your current position" (and a screen that ended in minutes) | [Reported] Taro | Feb 2025 | possible — a warning about the recruiter screen, not a question to prep |
+
+### Process facts from this pass, labeled
+
+- `[Reported] Jan 2026, Senior, US, offer:` loop = take-home design → two-hour review with two engineers → code review round → in-memory cache implementation with a brief design → more coding → hiring manager. One month of prep; lateral Senior-to-Senior with about 15% more pay.
+- `[Reported] Oct 2025, Senior Cloud, US, rejected:` recruiter screen (Go, most complex project) → one online coding screen (string templating + worker-pool follow-up) → rejection in two days. The team wanted US-Eastern hours for a European team.
+- `[Reported] Nov 2025, London, ghosted:` hiring manager → coding (islands) → take-home VirusTotal → offered Engineer III consideration instead of Senior, then silence.
+- `[Aggregator] Taro, US senior SWE, 26 reports:` 0% reported pass rate, 58% negative experience. Self-selected: people post failures. Use it to expect a hard loop and slow communication, not as a pass probability.
+- `[Aggregator] AmbitionBox, India, 16 reports:` difficulty 80% moderate, duration 75% two to four weeks.
+- `[Aggregator] Glassdoor:` company-wide 696 questions and 663 reviews, 43% positive, difficulty 2.99; Senior SWE 29% positive, 2.8. Individual reports are behind a login.
+
+### Not reachable in this pass (so you know what exists)
+
+- **1point3acres:** 18 CrowdStrike software-engineer reports dated Feb 2022 to Jul 2026, including "SDE-III: system design and security" (Feb 2026), a full onsite (Jan 2026), an offer write-up (Oct 2025), a tech phone screen (Jul 2026), and an access-control coding screen (Oct 2024). Bodies require a login. If you have an account, read the 2025–2026 ones first.
+- **Glassdoor:** 15 Senior Software Engineer reports and 36 Software Engineer reports; bot-detection login wall on every individual page.
+- **LeetCode company tag:** 11 questions tagged CrowdStrike, Premium-locked; the free sample was not exposed.
+- **Blind:** two threads titled "senior engineer interviews at CrowdStrike, what to expect" and "CrowdStrike senior engineer interview" have been deleted.
 
 ## What the company has published about its own systems ◆
 
@@ -337,7 +434,7 @@ You do not need threat-research depth. You need to sound like someone who has pr
 
 **Official (◆).** [Senior Engineer – Cloud (US Remote), R30109](https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---Sunnyvale-CA/Senior-Engineer---Cloud--Sunnyvale--CA--US-Remote-_R30109) (posting, Sept 2026). Engineering blog: [Sharding Kafka](https://www.crowdstrike.com/en-us/blog/how-we-improved-scale-and-reliability-by-sharding-kafka/), [Fault-tolerant Kafka consumers in Go](https://www.crowdstrike.com/en-us/blog/improving-fault-tolerance-in-apache-kafka-best-practices/), [Monitoring streaming infrastructure](https://www.crowdstrike.com/en-us/blog/how-to-monitor-streaming-data-infrastructure-at-scale/), [LSM trees and Threat Graph](https://www.crowdstrike.com/en-us/blog/how-log-structured-merge-trees-enable-crowdstrike-to-process-trillions-of-events-per-day/), [Building a high-performance graph database](https://www.crowdstrike.com/en-us/blog/3-best-practices-for-building-high-performance-graph-database/), [Threat Graph DSL ingestion](https://www.crowdstrike.com/en-us/blog/how-crowdstrike-threat-graph-leverages-dsl-to-improve-data-ingestion-part-1/), [Big data, graph, and the cloud](https://www.crowdstrike.com/en-us/blog/big-data-graph-and-the-cloud-three-keys-to-stopping-todays-threats/), [gRPC between microservices](https://www.crowdstrike.com/en-us/blog/improving-performance-and-reliability-of-microservices-communication-with-grpc/), [Logging with Go](https://www.crowdstrike.com/en-us/blog/logging-with-go/), [Architecture of agentic defense](https://www.crowdstrike.com/en-us/blog/architecture-of-agentic-defense-inside-the-falcon-platform/), [Preliminary post-incident report, July 2024](https://www.crowdstrike.com/en-us/blog/falcon-content-update-preliminary-post-incident-report/), [Resilient by design](https://www.crowdstrike.com/en-us/blog/reflecting-on-building-resilience-by-design/), [Channel file analysis](https://www.crowdstrike.com/en-us/blog/tech-analysis-channel-file-may-contain-null-bytes/). Company pages: [Our people and values](https://www.crowdstrike.com/en-us/about-us/sustainability/social-mission/), [Gartner 2026 MQ announcement](https://ir.crowdstrike.com/news-releases/news-release-details/crowdstrike-named-leader-2026-gartnerr-magic-quadranttm-endpoint). Third-party: [Databricks on Falcon Data Replicator](https://www.databricks.com/blog/2021/05/20/building-a-cybersecurity-lakehouse-for-crowdstrike-falcon-events.html).
 
-**Candidate reports (◒).** [LeetCode, Nov 2025, London senior loop](https://leetcode.com/discuss/post/7349209/crowdstrike-interview-experience-by-anon-ltlw/); [enginebogie, 2025, SDE3 three rounds](https://enginebogie.com/interview/experience/crowdstrike-software-development-engineer-3/1092); Blind threads: [senior onsite prep, Apr 2025](https://www.teamblind.com/post/crowdstrike-onsite-fz2nqrxp), [HM wrap-up call, Aug 2025](https://www.teamblind.com/post/crowdstrike-hm-call-after-interview-loop-88odsywb), [feedback timeline, Oct 2025](https://www.teamblind.com/post/crowdstrike-interview-feedback-timeline-7tzrpug2), [full-stack HM round and take-home, Aug 2025](https://www.teamblind.com/post/crowdstrike-interview-bgj0l4js), [pair programming and take-home design, Mar 2025](https://www.teamblind.com/post/crowdstrike-interviews-axbquqdy), [system design prep, Amazon SDE2](https://www.teamblind.com/post/crowdstrike-system-design-prep-b3niqcox), [Sr SWE process, Aug 2023](https://www.teamblind.com/post/crowdstrike-sr-swe-interview-process-ctvediyn), [awful experience, Jun 2023](https://www.teamblind.com/post/crowdstrike-awful-interview-experience-nbeyxtyd), [Dublin senior, design VirusTotal](https://www.teamblind.com/post/crowdstrike-interview-eo6zzmv3), [onsite case study, May 2020](https://www.teamblind.com/post/crowdstrike-interview-qy5nkjnq), [onsite feedback, Dec 2021](https://www.teamblind.com/post/crowdstrike-onsite-jedrzykj), [SWE rounds after coding project, Nov 2021](https://www.teamblind.com/post/crowdstrike-interviews-xm6bak0j), [design presentation, Dec 2019](https://www.teamblind.com/post/crowdstrike-interview-mnxxp3ow), [EM coding round, Aug 2025](https://www.teamblind.com/post/crowdstrike-coding-interview-a838cwhe), [Senior SWE 1 offer, Aug 2025](https://www.teamblind.com/post/crowdstrike-senior-software-engineer-1-43njmfqz), [Engineer 3 to Senior](https://www.teamblind.com/post/crowdstrike-engineer-3-gt-senior-engineer-2bvaauht), [IC4 platform prep, May 2023](https://www.teamblind.com/post/have-an-interview-with-crowdstrike-6malhrz8), [sensor team senior, Sept 2024](https://www.teamblind.com/post/crowdstrike-interview-mvs3njho). Aggregators, which edit and summarize reports: [Glassdoor Software Engineer summary stats](https://www.glassdoor.com/Interview/CrowdStrike-Software-Engineer-Interview-Questions-EI_IE795976.0,11_KO12,29.htm), [Glassdoor Senior Software Engineer](https://www.glassdoor.com/Interview/CrowdStrike-Senior-Software-Engineer-Interview-Questions-EI_IE795976.0,11_KO12,36.htm) (login-walled; statistics via search snippets), [PracHub system design list](https://prachub.com/companies/crowdstrike/categories/system-design), [Exponent behavioral list](https://www.tryexponent.com/questions?company=crowdstrike), [TechPrep process](https://www.techprep.app/blog/crowdstrike-interview-process), [techinterview.org guide](https://www.techinterview.org/companies/crowdstrike-interview-guide/), [designgurus process](https://www.designgurus.io/answers/detail/what-is-crowdstrike-interview-process-reddit), [designgurus system design](https://www.designgurus.io/answers/detail/how-to-pass-crowdstrike-system-design-interview), [designgurus guide](https://www.designgurus.io/blog/crowdstrike-interview-guide), [scaleengineer Senior Engineer I profile](https://scaleengineer.com/interviews/crowdstrike/senior-engineer-i-software-engineer), [finalroundai](https://www.finalroundai.com/blog/crowdstrike-interview-process), [Built In culture page](https://builtin.com/company/crowdstrike/faq/culture-values).
+**Candidate reports (◒).** [Hello Interview, Jan 2026, senior offer with take-home event system, code review, and Redis-like cache](https://www.hellointerview.com/experience/stories/cmkr7mrep0ibh08adakas46g7); [PracHub, Oct 2025, Software Engineer – Cloud senior rejection with the string-templating problem](https://prachub.com/interview-experiences/crowdstrike-senior-software-engineer-interview-experience-a-string-templating-coding-round-then-a-rejection); [Taro, Feb 2025, US senior recruiter screen](https://www.jointaro.com/interviews/companies/crowdstrike/experiences/senior-software-engineer-united-states-february-1-2025-no-offer-negative-679fd2e4/); [Taro, Mar 2020, Bengaluru senior](https://www.jointaro.com/interviews/companies/crowdstrike/experiences/senior-software-engineer-bengaluru-march-24-2020-no-offer-negative-f3d3dc95/); [interviewexperiences.in, Nov 2025](https://interviewexperiences.in/experience/crowdstrike/crowdstrike-interview-experience); [GitHub: Cognito scanner take-home](https://github.com/darshalshah11/crowdstrike); [GitHub: SageMaker detector take-home](https://github.com/pparth1995/crowdStrike-take-home-assignment); [1point3acres CrowdStrike listing (login-walled bodies)](https://www.1point3acres.com/interview/company/Crowdstrike); [LeetCode, Nov 2025, London senior loop](https://leetcode.com/discuss/post/7349209/crowdstrike-interview-experience-by-anon-ltlw/); [enginebogie, 2025, SDE3 three rounds](https://enginebogie.com/interview/experience/crowdstrike-software-development-engineer-3/1092); Blind threads: [senior onsite prep, Apr 2025](https://www.teamblind.com/post/crowdstrike-onsite-fz2nqrxp), [HM wrap-up call, Aug 2025](https://www.teamblind.com/post/crowdstrike-hm-call-after-interview-loop-88odsywb), [feedback timeline, Oct 2025](https://www.teamblind.com/post/crowdstrike-interview-feedback-timeline-7tzrpug2), [full-stack HM round and take-home, Aug 2025](https://www.teamblind.com/post/crowdstrike-interview-bgj0l4js), [pair programming and take-home design, Mar 2025](https://www.teamblind.com/post/crowdstrike-interviews-axbquqdy), [system design prep, Amazon SDE2](https://www.teamblind.com/post/crowdstrike-system-design-prep-b3niqcox), [Sr SWE process, Aug 2023](https://www.teamblind.com/post/crowdstrike-sr-swe-interview-process-ctvediyn), [awful experience, Jun 2023](https://www.teamblind.com/post/crowdstrike-awful-interview-experience-nbeyxtyd), [Dublin senior, design VirusTotal](https://www.teamblind.com/post/crowdstrike-interview-eo6zzmv3), [onsite case study, May 2020](https://www.teamblind.com/post/crowdstrike-interview-qy5nkjnq), [onsite feedback, Dec 2021](https://www.teamblind.com/post/crowdstrike-onsite-jedrzykj), [SWE rounds after coding project, Nov 2021](https://www.teamblind.com/post/crowdstrike-interviews-xm6bak0j), [design presentation, Dec 2019](https://www.teamblind.com/post/crowdstrike-interview-mnxxp3ow), [EM coding round, Aug 2025](https://www.teamblind.com/post/crowdstrike-coding-interview-a838cwhe), [Senior SWE 1 offer, Aug 2025](https://www.teamblind.com/post/crowdstrike-senior-software-engineer-1-43njmfqz), [Engineer 3 to Senior](https://www.teamblind.com/post/crowdstrike-engineer-3-gt-senior-engineer-2bvaauht), [IC4 platform prep, May 2023](https://www.teamblind.com/post/have-an-interview-with-crowdstrike-6malhrz8), [sensor team senior, Sept 2024](https://www.teamblind.com/post/crowdstrike-interview-mvs3njho). Aggregators, which edit and summarize reports: [Glassdoor Software Engineer summary stats](https://www.glassdoor.com/Interview/CrowdStrike-Software-Engineer-Interview-Questions-EI_IE795976.0,11_KO12,29.htm), [Glassdoor Senior Software Engineer](https://www.glassdoor.com/Interview/CrowdStrike-Senior-Software-Engineer-Interview-Questions-EI_IE795976.0,11_KO12,36.htm) (login-walled; statistics via search snippets), [PracHub system design list](https://prachub.com/companies/crowdstrike/categories/system-design), [PracHub 2026 guide](https://prachub.com/interview-guide/crowdstrike-software-engineer-interview-questions-guide-2026), [AmbitionBox interviews](https://www.ambitionbox.com/interviews/crowdstrike-interview-questions), [Indeed company page](https://www.indeed.com/cmp/Crowdstrike), [Exponent behavioral list](https://www.tryexponent.com/questions?company=crowdstrike), [TechPrep process](https://www.techprep.app/blog/crowdstrike-interview-process), [techinterview.org guide](https://www.techinterview.org/companies/crowdstrike-interview-guide/), [designgurus process](https://www.designgurus.io/answers/detail/what-is-crowdstrike-interview-process-reddit), [designgurus system design](https://www.designgurus.io/answers/detail/how-to-pass-crowdstrike-system-design-interview), [designgurus guide](https://www.designgurus.io/blog/crowdstrike-interview-guide), [scaleengineer Senior Engineer I profile](https://scaleengineer.com/interviews/crowdstrike/senior-engineer-i-software-engineer), [finalroundai](https://www.finalroundai.com/blog/crowdstrike-interview-process), [Built In culture page](https://builtin.com/company/crowdstrike/faq/culture-values).
 
 **Limits.** Reports come from several countries, levels, and years; teams differ; a recruiter's word overrides this page. Aggregator sites recycle each other, so agreement between them is not independent confirmation. Interview Query's guide returned rate-limit errors during checking and is not cited. Nothing here is a leaked question bank; the reported items are what candidates chose to publish.
 
