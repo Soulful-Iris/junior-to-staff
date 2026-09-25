@@ -71,7 +71,7 @@
 .studio-pressure{font-size:10px;font-weight:600;color:#3b5145;margin-top:13px}
 .studio-confidence{font-size:9px;letter-spacing:.3px;color:#697c6f;margin-top:14px}
 .studio-card .card-arrow{display:block;margin-top:auto;padding-top:17px;color:var(--brand);font-size:11px;font-weight:650}
-.openai-card{--brand:#2b6555}.reddit-card{--brand:#d45e36}.meta-card{--brand:#4774c6}.db-card{--brand:#ae5b35}.observe-card{--brand:#217c81}
+.openai-card{--brand:#2b6555}.reddit-card{--brand:#d45e36}.meta-card{--brand:#4774c6}.db-card{--brand:#ae5b35}.observe-card{--brand:#217c81}.crowdstrike-card{--brand:#b3202e}
 @media(max-width:760px){.studio-grid{grid-template-columns:1fr;gap:12px}.studio-card{min-height:0;padding:18px}.studio-card strong{margin-top:15px}.studio-hero{padding:23px 20px;margin-top:16px}.studio-hero p{font-size:20px}.company-page .lesson-body>h1{font-size:36px}.company-page .figwrap img{min-width:560px}}
 @media(prefers-reduced-motion:reduce){.studio-card{transition:none}}
 

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 304" role="img" aria-labelledby="title desc">
+<title id="title">Telemetry ingestion: sensors, Kafka shards, Go worker pool, LSM store</title><desc id="desc">Sensors batch events to a gateway. Kafka shards absorb a burst. A Go worker pool commits offsets only after a batch succeeds; a failed event is redriven instead of blocking the partition. An append-only LSM store takes the writes.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:12px;fill:#6b5a72}.m{font:700 13px ui-monospace,monospace}.box{fill:#fff;stroke:#a88fb3;stroke-width:1.6}.lane{stroke:#c9b6d2;stroke-width:2;stroke-dasharray:5 5}.ev{animation:ev 5s linear infinite}.ev2{animation:ev 5s linear infinite;animation-delay:.6s}.ev3{animation:ev 5s linear infinite;animation-delay:1.2s}.bad{animation:bad 5s linear infinite;animation-delay:1.8s}.commit{animation:commit 5s ease-in-out infinite}@keyframes ev{0%{transform:translateX(0);opacity:0}8%{opacity:1}42%{transform:translateX(250px)}70%,100%{transform:translateX(520px);opacity:1}}@keyframes bad{0%,30%{transform:translateX(0);opacity:0}38%{opacity:1}55%{transform:translateX(250px) translateY(0)}72%,100%{transform:translateX(250px) translateY(78px);opacity:1}}@keyframes commit{0%,60%{fill:#fff}72%,90%{fill:#e6d9ec}100%{fill:#fff}}</style>
+<rect width="760" height="304" rx="16" fill="#f4eef6"/><text x="26" y="34" class="l" letter-spacing="2">INGEST / OFFSETS ADVANCE AFTER THE BATCH, NOT PER EVENT</text>
+<rect class="box" x="26" y="70" width="120" height="60" rx="10"/><text x="40" y="96" class="m">SENSORS</text><text x="40" y="116" class="l">batch + local buffer</text>
+<rect class="box" x="184" y="70" width="140" height="60" rx="10"/><text x="198" y="96" class="m">KAFKA SHARDS</text><text x="198" y="116" class="l">active / read-only</text>
+<rect class="box commit" x="362" y="70" width="170" height="60" rx="10"/><text x="376" y="96" class="m">GO WORKER POOL</text><text x="376" y="116" class="l">commit after batch</text>
+<rect class="box" x="580" y="70" width="154" height="60" rx="10"/><text x="594" y="96" class="m">LSM STORE</text><text x="594" y="116" class="l">append-only, TTL compaction</text>
+<rect class="box" x="362" y="170" width="170" height="52" rx="10" stroke-dasharray="4 4"/><text x="376" y="192" class="m">REDRIVE TOPIC</text><text x="376" y="211" class="l">3 runtime × 5 redrive, then DLQ</text>
+<path class="lane" d="M146 100H184M324 100H362M532 100H580"/>
+<g class="ev"><circle cx="158" cy="100" r="6" fill="#8b5fa8"/></g>
+<g class="ev2"><circle cx="158" cy="100" r="6" fill="#8b5fa8"/></g>
+<g class="ev3"><circle cx="158" cy="100" r="6" fill="#8b5fa8"/></g>
+<g class="bad"><circle cx="158" cy="100" r="6" fill="#d9534f"/></g>
+<text x="26" y="262" class="l">1 trillion events/day · 15M events/s on the largest cluster before sharding · keep 1/(N−1) headroom so one shard can drain into the rest</text>
+<text x="26" y="282" class="l">Consumer lag is the SLI. Malformed events are not failures, or throttling and shutdown cascade.</text>
+</svg>
