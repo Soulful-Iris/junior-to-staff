@@ -188,6 +188,23 @@ def redact_json(text: str) -> str:
     return json.dumps(clean(json.loads(text)), indent=2) + "\n"
 
 
+EVIDENCE = {
+    "Official": "Official: from CrowdStrike's own job posting or engineering blog.",
+    "Reported": "Reported: a candidate's dated, first-person account of their interview. An anecdote, not a transcript.",
+    "Aggregator": "Aggregator: from a question-collecting site that copies other sites. The weakest evidence here.",
+    "Generated": "Generated: written for this track in a reported shape. Not a confirmed question.",
+}
+
+
+def evidence_tags(fragment: str) -> str:
+    """Turn the bracketed evidence labels into tags that explain themselves on hover."""
+    def tag(m):
+        name = m.group(1)
+        return (f'<span class="evidence evidence-{name.lower()}" title="{EVIDENCE[name]}" '
+                f'tabindex="0" role="note">{name}</span>')
+    return re.sub(r'<code>\[(Official|Reported|Aggregator|Generated)\]</code>', tag, fragment)
+
+
 def mentions(text: str) -> bool:
     lowered = text.lower()
     return any(m in lowered for m in MARKERS)

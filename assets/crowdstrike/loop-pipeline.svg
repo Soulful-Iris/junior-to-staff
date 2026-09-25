@@ -1,26 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 190" role="img" aria-labelledby="t d">
-<title id="t">CrowdStrike senior loop pipeline</title><desc id="d">The rounds in order with the design review highlighted as the deciding round.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 290" role="img" aria-labelledby="t d">
+<title id="t">CrowdStrike senior loop pipeline</title><desc id="d">The rounds in order, on two rows, with the design review highlighted as the deciding round.</desc>
 <style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
 <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
-<rect width="1000" height="190" rx="16" fill="#f4eef6"/>
+<rect width="1000" height="290" rx="16" fill="#f4eef6"/>
 <text class="l" x="24" y="30" letter-spacing="2">THE LOOP / THE DESIGN REVIEW DECIDES IT</text>
-<rect class="box" x="24" y="70" width="92" height="48" rx="9"/><text class="m" x="34" y="90">Recruiter</text><text class="l" x="34" y="106">30 min</text>
-<path class="ar" d="M116 94L128 94"/>
-<rect class="box" x="130" y="70" width="92" height="48" rx="9"/><text class="m" x="140" y="90">Hiring mgr</text><text class="l" x="140" y="106">45–60</text>
-<path class="ar" d="M222 94L234 94"/>
-<rect class="box" x="236" y="70" width="92" height="48" rx="9"/><text class="m" x="246" y="90">Coding</text><text class="l" x="246" y="106">45–60</text>
-<path class="ar" d="M328 94L340 94"/>
-<rect class="box" x="342" y="70" width="92" height="48" rx="9"/><text class="m" x="352" y="90">Take-home</text><text class="l" x="352" y="106">1–2 days</text>
-<path class="ar" d="M434 94L446 94"/>
-<rect class="hot" x="448" y="70" width="92" height="48" rx="9"/><text class="m" x="458" y="90">Design review</text><text class="l" x="458" y="106">90–120</text>
-<path class="ar" d="M540 94L552 94"/>
-<rect class="box" x="554" y="70" width="92" height="48" rx="9"/><text class="m" x="564" y="90">Code review</text><text class="l" x="564" y="106">~45</text>
-<path class="ar" d="M646 94L658 94"/>
-<rect class="box" x="660" y="70" width="92" height="48" rx="9"/><text class="m" x="670" y="90">Panel</text><text class="l" x="670" y="106">45–60</text>
-<path class="ar" d="M752 94L764 94"/>
-<rect class="box" x="766" y="70" width="92" height="48" rx="9"/><text class="m" x="776" y="90">Wrap-up</text><text class="l" x="776" y="106">30</text>
-<path class="ar" d="M858 94L870 94"/>
-<rect class="box" x="872" y="70" width="92" height="48" rx="9"/><text class="m" x="882" y="90">Offer</text><text class="l" x="882" y="106">level</text>
-<text class="l" x="24" y="150">Reported shape 2021–2026. Some teams skip the take-home or the code review; the recruiter's list overrides this.</text>
-<text class="l" x="24" y="168">Level is set in the hiring-manager call; down-leveling happens at design; silence happens after the panel.</text>
+<rect class="box" x="24" y="60" width="176" height="48" rx="9"/><text class="m" x="34" y="80">Recruiter</text><text class="l" x="34" y="96">30 min</text>
+<path class="ar" d="M200 84.0L218 84.0"/>
+<rect class="box" x="218" y="60" width="176" height="48" rx="9"/><text class="m" x="228" y="80">Hiring mgr</text><text class="l" x="228" y="96">45–60</text>
+<path class="ar" d="M394 84.0L412 84.0"/>
+<rect class="box" x="412" y="60" width="176" height="48" rx="9"/><text class="m" x="422" y="80">Coding</text><text class="l" x="422" y="96">45–60</text>
+<path class="ar" d="M588 84.0L606 84.0"/>
+<rect class="box" x="606" y="60" width="176" height="48" rx="9"/><text class="m" x="616" y="80">Take-home</text><text class="l" x="616" y="96">1–2 days</text>
+<path class="ar" d="M782 84.0L800 84.0"/>
+<rect class="hot" x="800" y="60" width="176" height="48" rx="9"/><text class="m" x="810" y="80">Design review</text><text class="l" x="810" y="96">90–120</text>
+<rect class="box" x="24" y="150" width="176" height="48" rx="9"/><text class="m" x="34" y="170">Code review</text><text class="l" x="34" y="186">~45</text>
+<path class="ar" d="M200 174.0L218 174.0"/>
+<rect class="box" x="218" y="150" width="176" height="48" rx="9"/><text class="m" x="228" y="170">Panel</text><text class="l" x="228" y="186">45–60</text>
+<path class="ar" d="M394 174.0L412 174.0"/>
+<rect class="box" x="412" y="150" width="176" height="48" rx="9"/><text class="m" x="422" y="170">Wrap-up</text><text class="l" x="422" y="186">30</text>
+<path class="ar" d="M588 174.0L606 174.0"/>
+<rect class="box" x="606" y="150" width="176" height="48" rx="9"/><text class="m" x="616" y="170">Offer</text><text class="l" x="616" y="186">level</text>
+<path class="ar dash" d="M888.0 108V129H112.0V148"/>
+<text class="l" x="24" y="232">Reported shape 2021–2026. Some teams skip the take-home or the code review; the recruiter's list overrides this.</text>
+<text class="l" x="24" y="252">Level is set in the hiring-manager call; down-leveling happens at design; silence happens after the panel.</text>
 </svg>

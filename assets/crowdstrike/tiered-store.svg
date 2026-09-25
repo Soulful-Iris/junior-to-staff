@@ -5,13 +5,13 @@
 <rect width="700" height="240" rx="16" fill="#f4eef6"/>
 <text class="l" x="24" y="30" letter-spacing="2">TIERED EVENT STORE / ROUTE BY TIME RANGE</text>
 <rect class="box" x="24" y="60" width="140" height="48" rx="9"/><text class="m" x="34" y="80">Ingest</text><text class="l" x="34" y="96">consumers</text>
-<rect class="box" x="220" y="44" width="180" height="38" rx="9"/><text class="m" x="230" y="64">Hot LSM</text><text class="l" x="230" y="80">30 d · by key</text>
+<rect class="box" x="220" y="44" width="180" height="42" rx="9"/><text class="m" x="230" y="63">Hot LSM</text><text class="l" x="230" y="78">30 d · by key</text>
 <path class="ar" d="M164 84L220 63"/>
-<rect class="box" x="220" y="90" width="180" height="38" rx="9"/><text class="m" x="230" y="110">Search index</text><text class="l" x="230" y="126">7 d · time shards</text>
+<rect class="box" x="220" y="90" width="180" height="42" rx="9"/><text class="m" x="230" y="109">Search index</text><text class="l" x="230" y="124">7 d · time shards</text>
 <path class="ar" d="M164 84L220 109"/>
-<rect class="box" x="220" y="136" width="180" height="38" rx="9"/><text class="m" x="230" y="156">Cold columnar</text><text class="l" x="230" y="172">13 mo · blob</text>
+<rect class="box" x="220" y="136" width="180" height="42" rx="9"/><text class="m" x="230" y="155">Cold columnar</text><text class="l" x="230" y="170">13 mo · blob</text>
 <path class="ar" d="M164 84L220 155"/>
-<rect class="box" x="220" y="182" width="180" height="38" rx="9"/><text class="m" x="230" y="202">Rollups</text><text class="l" x="230" y="218">per day</text>
+<rect class="box" x="220" y="182" width="180" height="42" rx="9"/><text class="m" x="230" y="201">Rollups</text><text class="l" x="230" y="216">per day</text>
 <path class="ar" d="M164 84L220 201"/>
 <rect class="box" x="460" y="60" width="200" height="48" rx="9"/><text class="m" x="470" y="80">Query router</text><text class="l" x="470" y="96">tenant check · tier by range</text>
 <path class="ar dash" d="M460 84L400 63"/>

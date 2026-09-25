@@ -533,7 +533,7 @@ def build(b):
             else: shutil.copy(f,dest)
     resources = sorted(p.relative_to(b.OUT).as_posix() for p in b.OUT.rglob('*.html'))
     by_dest={b.dest_for(p['src']):p for p in pages}
-    bodies={p['src']:(compose(b,p,have,by_dest) if lock.is_locked(p) else lock.redact_html(compose(b,p,have,by_dest))) for p in pages}
+    bodies={p['src']:(lock.evidence_tags(compose(b,p,have,by_dest)) if lock.is_locked(p) else lock.redact_html(compose(b,p,have,by_dest))) for p in pages}
     public=[p for p in pages if not lock.is_locked(p)]
     for p in public:
         p['headings']=[h for h in (p.get('headings') or []) if not lock.mentions(h['id']+' '+h['title'])]

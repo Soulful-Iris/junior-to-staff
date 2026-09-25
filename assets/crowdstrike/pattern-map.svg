@@ -1,17 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 150" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 972 170" role="img" aria-labelledby="t d">
 <title id="t">Pattern map</title><desc id="d">Five pattern groups with the bundle numbers and the CrowdStrike component each runs in.</desc>
 <style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
 <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
-<rect width="980" height="150" rx="16" fill="#f4eef6"/>
+<rect width="972" height="170" rx="16" fill="#f4eef6"/>
 <text class="l" x="24" y="30" letter-spacing="2">PATTERNS / WHERE THEY RUN AT CROWDSTRIKE</text>
-<rect class="box" x="24" y="56" width="172" height="74" rx="9"/><text class="m" x="34" y="76">Hashing &amp; windows</text><text class="l" x="34" y="92">44 50 45 49</text>
-<text class="s" x="34" y="120">consumers, counters, limiters</text>
-<rect class="box" x="212" y="56" width="172" height="74" rx="9"/><text class="m" x="222" y="76">Ordered structures</text><text class="l" x="222" y="92">46 47 51</text>
-<text class="s" x="222" y="120">SSTables, Redis, compaction</text>
-<rect class="box" x="400" y="56" width="172" height="74" rx="9"/><text class="m" x="410" y="76">Graphs</text><text class="l" x="410" y="92">48 53 54</text>
-<text class="s" x="410" y="120">Threat Graph, pipelines, rollout order</text>
-<rect class="box" x="588" y="56" width="172" height="74" rx="9"/><text class="m" x="598" y="76">Framing &amp; intervals</text><text class="l" x="598" y="92">52 55 43</text>
-<text class="s" x="598" y="120">wire records, schedules, templating</text>
-<rect class="box" x="776" y="56" width="172" height="74" rx="9"/><text class="m" x="786" y="76">Concurrency</text><text class="l" x="786" y="92">56</text>
-<text class="s" x="786" y="120">Go worker pools, Kafka consumers</text>
+<rect class="box" x="24" y="56" width="172" height="92" rx="9"/><text class="m" x="34" y="76">Hashing &amp; windows</text><text class="l" x="34" y="92">44 50 45 49</text><text class="s" x="34" y="118">consumers, counters,</text><text class="s" x="34" y="134">limiters</text>
+<rect class="box" x="212" y="56" width="172" height="92" rx="9"/><text class="m" x="222" y="76">Ordered structures</text><text class="l" x="222" y="92">46 47 51</text><text class="s" x="222" y="118">SSTables, Redis,</text><text class="s" x="222" y="134">compaction</text>
+<rect class="box" x="400" y="56" width="172" height="92" rx="9"/><text class="m" x="410" y="76">Graphs</text><text class="l" x="410" y="92">48 53 54</text><text class="s" x="410" y="118">Threat Graph, pipelines,</text><text class="s" x="410" y="134">rollout order</text>
+<rect class="box" x="588" y="56" width="172" height="92" rx="9"/><text class="m" x="598" y="76">Framing &amp; intervals</text><text class="l" x="598" y="92">52 55 43</text><text class="s" x="598" y="118">wire records, schedules,</text><text class="s" x="598" y="134">templating</text>
+<rect class="box" x="776" y="56" width="172" height="92" rx="9"/><text class="m" x="786" y="76">Concurrency</text><text class="l" x="786" y="92">56</text><text class="s" x="786" y="118">Go worker pools,</text><text class="s" x="786" y="134">Kafka consumers</text>
 </svg>

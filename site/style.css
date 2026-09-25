@@ -593,3 +593,12 @@ html.lock-checking .track-lock{visibility:hidden}
 .lock-card .veil-card small{margin-top:8px;color:var(--muted);font:400 13px/1.55 var(--sans)}
 .lock-card .track-lock-form{padding:14px}
 .lock-card .track-lock-note{display:none}
+/* Evidence labels in the private track: Official, Reported, Aggregator, Generated. Hover or focus explains each. */
+.evidence{display:inline-block;padding:1px 8px 1px 7px;border:1px solid;border-radius:999px;font:700 10px/1.7 var(--sans);letter-spacing:.9px;text-transform:uppercase;vertical-align:2px;white-space:nowrap;cursor:help}
+.evidence::before{content:"";display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:currentColor;vertical-align:1px}
+.evidence-official{color:#1f5a3c;background:#e4f1e8;border-color:#bcdac6}
+.evidence-reported{color:#1f3f8c;background:#e6ecf8;border-color:#bccbee}
+.evidence-aggregator{color:#7a4b00;background:#f8efdc;border-color:#e6cf9c}
+.evidence-generated{color:#5a5560;background:#eeecf0;border-color:#d5d0d9}
+.evidence:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+td .evidence,th .evidence{vertical-align:1px}

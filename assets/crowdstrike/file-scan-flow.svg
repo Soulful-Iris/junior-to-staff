@@ -1,21 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 170" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1048 170" role="img" aria-labelledby="t d">
 <title id="t">File scanning flow</title><desc id="d">API, blob, ingest with hash claim, jobs, engines, results, report; the dedupe hit skips the scan.</desc>
 <style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
 <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
-<rect width="1000" height="170" rx="16" fill="#f4eef6"/>
+<rect width="1048" height="170" rx="16" fill="#f4eef6"/>
 <text class="l" x="24" y="30" letter-spacing="2">FILE SCANNING / ONE FILE THROUGH THE PLATFORM</text>
-<rect class="box" x="24" y="70" width="126" height="48" rx="9"/><text class="m" x="34" y="90">API</text><text class="l" x="34" y="106">scan_id + signed URL</text>
-<path class="ar" d="M150 94L162 94"/>
-<rect class="box" x="162" y="70" width="126" height="48" rx="9"/><text class="m" x="172" y="90">Blob</text><text class="l" x="172" y="106">content-addressed</text>
-<path class="ar" d="M288 94L300 94"/>
-<rect class="hot" x="300" y="70" width="126" height="48" rx="9"/><text class="m" x="310" y="90">Ingest</text><text class="l" x="310" y="106">hash · claim</text>
-<path class="ar" d="M426 94L438 94"/>
-<rect class="box" x="438" y="70" width="126" height="48" rx="9"/><text class="m" x="448" y="90">Jobs</text><text class="l" x="448" y="106">partition by hash</text>
-<path class="ar" d="M564 94L576 94"/>
-<rect class="box" x="576" y="70" width="126" height="48" rx="9"/><text class="m" x="586" y="90">Engines</text><text class="l" x="586" y="106">per-engine limits</text>
-<path class="ar" d="M702 94L714 94"/>
-<rect class="box" x="714" y="70" width="126" height="48" rx="9"/><text class="m" x="724" y="90">Results</text><text class="l" x="724" y="106">append-only</text>
-<path class="ar" d="M840 94L852 94"/>
-<rect class="box" x="852" y="70" width="126" height="48" rx="9"/><text class="m" x="862" y="90">Report</text><text class="l" x="862" y="106">poll / webhook</text>
+<rect class="box" x="24" y="70" width="148" height="48" rx="9"/><text class="m" x="34" y="90">API</text><text class="l" x="34" y="106">scan_id + signed URL</text>
+<path class="ar" d="M172 94.0L184 94.0"/>
+<rect class="box" x="184" y="70" width="130" height="48" rx="9"/><text class="m" x="194" y="90">Blob</text><text class="l" x="194" y="106">content-addressed</text>
+<path class="ar" d="M314 94.0L326 94.0"/>
+<rect class="hot" x="326" y="70" width="130" height="48" rx="9"/><text class="m" x="336" y="90">Ingest</text><text class="l" x="336" y="106">hash · claim</text>
+<path class="ar" d="M456 94.0L468 94.0"/>
+<rect class="box" x="468" y="70" width="130" height="48" rx="9"/><text class="m" x="478" y="90">Jobs</text><text class="l" x="478" y="106">partition by hash</text>
+<path class="ar" d="M598 94.0L610 94.0"/>
+<rect class="box" x="610" y="70" width="130" height="48" rx="9"/><text class="m" x="620" y="90">Engines</text><text class="l" x="620" y="106">per-engine limits</text>
+<path class="ar" d="M740 94.0L752 94.0"/>
+<rect class="box" x="752" y="70" width="130" height="48" rx="9"/><text class="m" x="762" y="90">Results</text><text class="l" x="762" y="106">append-only</text>
+<path class="ar" d="M882 94.0L894 94.0"/>
+<rect class="box" x="894" y="70" width="130" height="48" rx="9"/><text class="m" x="904" y="90">Report</text><text class="l" x="904" y="106">poll / webhook</text>
 <text class="l" x="24" y="150">Dedupe hit at Ingest skips Jobs and Engines. The concurrent-upload race is a conditional insert on the hash with a lease.</text>
 </svg>

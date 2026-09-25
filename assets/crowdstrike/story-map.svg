@@ -7,7 +7,7 @@
 <rect class="box" x="24" y="60" width="230" height="32" rx="9"/><text class="m" x="34" y="80">Migration you owned</text>
 <rect class="box" x="24" y="122" width="230" height="32" rx="9"/><text class="m" x="34" y="142">Cross-system root cause</text>
 <rect class="box" x="24" y="184" width="230" height="32" rx="9"/><text class="m" x="34" y="204">Orphaned flow taken over</text>
-<rect class="box" x="24" y="246" width="230" height="32" rx="9"/><text class="m" x="34" y="266">Platform designed from scratch</text>
+<rect class="box" x="24" y="246" width="240" height="32" rx="9"/><text class="m" x="34" y="266">Platform designed from scratch</text>
 <rect class="box" x="24" y="308" width="230" height="32" rx="9"/><text class="m" x="34" y="328">Cost or performance fix</text>
 <rect class="box" x="24" y="370" width="230" height="32" rx="9"/><text class="m" x="34" y="390">Slowed down for safety</text>
 <rect class="box" x="700" y="48" width="140" height="26" rx="9"/><text class="m" x="710" y="68">Incidents</text>
