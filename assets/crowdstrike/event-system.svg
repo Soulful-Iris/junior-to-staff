@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" role="img" aria-labelledby="t d">
+<title id="t">Event message system</title><desc id="d">Producers, gateway, router, shards, consumer groups with commit after batch, retry lanes, and cold segments for replay.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="960" height="240" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">EVENT SYSTEM / PER-KEY ORDER, AT-LEAST-ONCE, REPLAY</text>
+<rect class="box" x="24" y="60" width="130" height="48" rx="9"/><text class="m" x="34" y="80">Producers</text><text class="l" x="34" y="96">idempotency key</text>
+<path class="ar" d="M154 84L190 84"/>
+<rect class="box" x="190" y="60" width="150" height="48" rx="9"/><text class="m" x="200" y="80">Gateway</text><text class="l" x="200" y="96">ACL · quota</text>
+<path class="ar" d="M340 84L376 84"/>
+<rect class="box" x="376" y="60" width="150" height="48" rx="9"/><text class="m" x="386" y="80">Router</text><text class="l" x="386" y="96">hash(key) → partition</text>
+<path class="ar" d="M526 84L570 80"/>
+<rect class="box" x="570" y="58" width="120" height="44" rx="9"/><text class="m" x="580" y="78">shard 1</text><text class="l" x="580" y="94">replicated</text>
+<path class="ar" d="M526 84L570 136"/>
+<rect class="box" x="570" y="114" width="120" height="44" rx="9"/><text class="m" x="580" y="134">shard 2</text><text class="l" x="580" y="150">replicated</text>
+<path class="ar" d="M690 80L740 84"/>
+<rect class="box" x="740" y="60" width="190" height="48" rx="9"/><text class="m" x="750" y="80">Consumer group</text><text class="l" x="750" y="96">commit after batch</text>
+<rect class="box" x="740" y="140" width="190" height="40" rx="9"/><text class="m" x="750" y="160">retry → redrive → DLQ</text>
+<path class="ar dash" d="M835 108L835 140"/>
+<rect class="box" x="570" y="176" width="120" height="44" rx="9"/><text class="m" x="580" y="196">cold segments</text><text class="l" x="580" y="212">replay</text>
+</svg>

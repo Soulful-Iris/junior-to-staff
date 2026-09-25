@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img" aria-labelledby="t d">
+<title id="t">Worker pool</title><desc id="d">A producer feeds a bounded queue, N workers drain it, results are batched and progress committed after each batch.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="920" height="240" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">WORKER POOL / BOUNDED QUEUE, N WORKERS, COMMIT AFTER BATCH</text>
+<rect class="box" x="24" y="70" width="130" height="48" rx="9"/><text class="m" x="34" y="90">Producer</text><text class="l" x="34" y="106">streams jobs</text>
+<path class="ar" d="M154 94L190 94"/>
+<rect class="hot" x="190" y="70" width="150" height="48" rx="9"/><text class="m" x="200" y="90">Bounded queue</text><text class="l" x="200" y="106">blocks when full</text>
+<path class="ar" d="M340 94L390 72"/>
+<rect class="box" x="390" y="60" width="110" height="30" rx="9"/><text class="m" x="400" y="80">worker 1</text>
+<path class="ar" d="M340 94L390 108"/>
+<rect class="box" x="390" y="96" width="110" height="30" rx="9"/><text class="m" x="400" y="116">worker 2</text>
+<path class="ar" d="M340 94L390 144"/>
+<rect class="box" x="390" y="132" width="110" height="30" rx="9"/><text class="m" x="400" y="152">worker 3</text>
+<path class="ar" d="M500 75L550 94"/>
+<path class="ar" d="M500 111L550 94"/>
+<path class="ar" d="M500 147L550 94"/>
+<rect class="box" x="550" y="70" width="150" height="48" rx="9"/><text class="m" x="560" y="90">Results, batched</text><text class="l" x="560" y="106">idempotent by id</text>
+<path class="ar" d="M700 94L740 94"/>
+<rect class="box" x="740" y="70" width="150" height="48" rx="9"/><text class="m" x="750" y="90">Commit progress</text><text class="l" x="750" y="106">after the batch</text>
+<rect class="box" x="390" y="180" width="260" height="40" rx="9"/><text class="m" x="400" y="200">cancel: context / Event reaches every loop</text>
+<text class="l" x="24" y="160">Assign: round-robin for stateless work · hash by key for per-key order · work stealing for uneven cost</text>
+</svg>

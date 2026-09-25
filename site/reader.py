@@ -311,6 +311,7 @@ def overview(b, sequence, base):
     aws_preview = next(p for p in sequence if p['src'] == 'curriculum/03-production/03-infrastructure/README.md')
     interview = next(p for p in sequence if p['src'] == 'companies/README.md')
     ai_part = next(p for p in sequence if p['kind'] == 'group' and p['group'] == 'ai-specialization')
+    cs_part = next(p for p in sequence if p['kind'] == 'group' and p['group'] == 'crowdstrike')
     parts = [
         ('A', 'code', 'Coding and problem solving', 'Choose the state, solve the problem, and review AI-assisted changes.', 'Algorithms · Coding · Review'),
         ('B', 'applications', 'Production applications', 'Connect browser, API, database, tests, and access boundaries.', 'Backend · Data · Frontend · Security'),
@@ -347,7 +348,7 @@ def overview(b, sequence, base):
 <footer class="sample-panel-footer"><a href="{href(base,aws_preview)}">Explore AWS infrastructure <span aria-hidden="true">&#8599;</span></a><button data-sample-next="algorithm">Back to algorithm <span aria-hidden="true">&#8634;</span></button></footer></article>
 </div></div></section>
 <section class="journey-section"><div class="section-label">THE CORE JOURNEY</div><h2>Choose a part,<br>or follow the full path.</h2><div class="journey-grid">{journey}</div></section>
-<section class="optional-paths" aria-label="Optional learning paths"><a href="{href(base,ai_part)}"><span>OPTIONAL SPECIALIZATION</span><strong>AI systems</strong><small>Evaluation, budgets, permissions, and controlled actions.</small></a><a href="{href(base,interview)}"><span>OPTIONAL STUDIO</span><strong>Company interview practice</strong><small>Rehearse coding and design conversations under interview pressure.</small></a></section>
+<section class="optional-paths" aria-label="Optional learning paths"><a href="{href(base,ai_part)}"><span>OPTIONAL SPECIALIZATION</span><strong>AI systems</strong><small>Evaluation, budgets, permissions, and controlled actions.</small></a><a href="{href(base,interview)}"><span>OPTIONAL STUDIO</span><strong>Company interview practice</strong><small>Rehearse coding and design conversations under interview pressure.</small></a><a href="{href(base,cs_part)}"><span>CROWDSTRIKE TRACK</span><strong>Senior cloud backend loop</strong><small>Preparation, reported coding problems, and the architecture they publish.</small></a></section>
 <section class="home-finish"><div><span class="section-label">READY WHEN YOU ARE</span><h2>Start at the beginning.<br>Or browse for what you need.</h2></div><div><a class="primary-button" data-start href="{href(base,start)}">Start with Part A <span aria-hidden="true">&#8599;</span></a><button class="browse-button" data-open-contents aria-controls="sidebar" aria-expanded="false">Browse the curriculum</button><p data-resume-label>Progress stays on this device.</p></div></section>'''
 
 

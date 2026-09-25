@@ -2,8 +2,8 @@
 
 These are original practice prompts chosen to exercise the concepts. They are not a ranked list of current company questions. Reported question families and their evidence limits are in [research](../docs/research/interview-evidence.md).
 
-This catalog links **41 design and architecture practice pages**: five longer
-worked examples and 36 focused briefs, grouped below by prerequisite chapter.
+This catalog links **50 design and architecture practice pages**: five longer
+worked examples, 36 focused briefs, and nine CrowdStrike track cases, grouped below by prerequisite chapter.
 These are not 41 deployed applications. Some focus on diagnostic or operational
 reasoning rather than building an entire service. Runnable references are labeled
 separately and provide a source directory and test command.
@@ -117,3 +117,15 @@ practice assumptions, not company production measurements.
 
 - [Erase account data across stores and in-flight work](../curriculum/04-scale-and-evolution/04-migrations/problems/erasure-workflow.md)
 - [Design and rehearse regional write failover](../curriculum/04-scale-and-evolution/04-migrations/problems/regional-failover.md)
+
+### CrowdStrike track
+
+- [File-scanning platform: upload once, scan with many engines, one report](../curriculum/05-crowdstrike/03-architecture/problems/file-scanning-platform.md)
+- [Real-time event message system with per-key order and safe replay](../curriculum/05-crowdstrike/03-architecture/problems/event-message-system.md)
+- [Telemetry ingestion from millions of endpoints, with detections in seconds](../curriculum/05-crowdstrike/03-architecture/problems/telemetry-ingestion.md)
+- [Content rollout with rings, golden signals, and rollback in minutes](../curriculum/05-crowdstrike/03-architecture/problems/content-rollout-rings.md)
+- [Endpoint management control plane: inventory, policy, and commands for millions of hosts](../curriculum/05-crowdstrike/03-architecture/problems/endpoint-control-plane.md)
+- [Searchable event store with hot and cold tiers](../curriculum/05-crowdstrike/03-architecture/problems/searchable-event-store.md)
+- [Rate limiter and distributed queue as building blocks, with an idempotent endpoint](../curriculum/05-crowdstrike/03-architecture/problems/rate-limiter-and-queue.md)
+- [Design Redis, briefly](../curriculum/05-crowdstrike/03-architecture/problems/design-redis.md)
+- [Worker pool for template jobs at scale](../curriculum/05-crowdstrike/03-architecture/problems/worker-pool-template-jobs.md)

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 160" role="img" aria-labelledby="t d">
+<title id="t">Hiring manager why-chain</title><desc id="d">A system question fans into why questions about queues, delivery semantics, scale, and trade-offs.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="1000" height="160" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">HIRING MANAGER / ONE QUESTION, FOUR WHYS</text>
+<rect class="box" x="24" y="60" width="220" height="48" rx="9"/><text class="m" x="34" y="80">Walk me through your system</text><text class="l" x="34" y="96">what talks to what</text>
+<rect class="box" x="290" y="60" width="160" height="48" rx="9"/><text class="m" x="300" y="80">Why that queue?</text><text class="l" x="300" y="96">the property you needed</text>
+<path class="ar" d="M244 84L290 84"/>
+<rect class="box" x="465" y="60" width="160" height="48" rx="9"/><text class="m" x="475" y="80">Why not exactly-once?</text><text class="l" x="475" y="96">sink idempotency</text>
+<path class="ar" d="M450 84L465 84"/>
+<rect class="box" x="640" y="60" width="160" height="48" rx="9"/><text class="m" x="650" y="80">What broke at 10×?</text><text class="l" x="650" y="96">the number and the signal</text>
+<path class="ar" d="M625 84L640 84"/>
+<rect class="box" x="815" y="60" width="160" height="48" rx="9"/><text class="m" x="825" y="80">What would you change?</text><text class="l" x="825" y="96">a real trade-off</text>
+<path class="ar" d="M800 84L815 84"/>
+<text class="l" x="24" y="140">Prepare five one-page designs: boxes, data, failure, rollback, alternatives. Every why is an empty cell on the page.</text>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 870 440" role="img" aria-labelledby="t d">
+<title id="t">Story map</title><desc id="d">Six prepared stories cover twelve behavioral areas, each story mapped to two or three areas.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="870" height="440" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">SIX STORIES / TWELVE AREAS</text>
+<rect class="box" x="24" y="60" width="230" height="32" rx="9"/><text class="m" x="34" y="80">Migration you owned</text>
+<rect class="box" x="24" y="122" width="230" height="32" rx="9"/><text class="m" x="34" y="142">Cross-system root cause</text>
+<rect class="box" x="24" y="184" width="230" height="32" rx="9"/><text class="m" x="34" y="204">Orphaned flow taken over</text>
+<rect class="box" x="24" y="246" width="230" height="32" rx="9"/><text class="m" x="34" y="266">Platform designed from scratch</text>
+<rect class="box" x="24" y="308" width="230" height="32" rx="9"/><text class="m" x="34" y="328">Cost or performance fix</text>
+<rect class="box" x="24" y="370" width="230" height="32" rx="9"/><text class="m" x="34" y="390">Slowed down for safety</text>
+<rect class="box" x="700" y="48" width="140" height="26" rx="9"/><text class="m" x="710" y="68">Incidents</text>
+<rect class="box" x="700" y="80" width="140" height="26" rx="9"/><text class="m" x="710" y="100">Risk</text>
+<rect class="box" x="700" y="112" width="140" height="26" rx="9"/><text class="m" x="710" y="132">Leadership</text>
+<rect class="box" x="700" y="144" width="140" height="26" rx="9"/><text class="m" x="710" y="164">Persuasion</text>
+<rect class="box" x="700" y="176" width="140" height="26" rx="9"/><text class="m" x="710" y="196">Remote</text>
+<rect class="box" x="700" y="208" width="140" height="26" rx="9"/><text class="m" x="710" y="228">Problem solving</text>
+<rect class="box" x="700" y="240" width="140" height="26" rx="9"/><text class="m" x="710" y="260">Ownership</text>
+<rect class="box" x="700" y="272" width="140" height="26" rx="9"/><text class="m" x="710" y="292">Conflict</text>
+<rect class="box" x="700" y="304" width="140" height="26" rx="9"/><text class="m" x="710" y="324">Change</text>
+<rect class="box" x="700" y="336" width="140" height="26" rx="9"/><text class="m" x="710" y="356">Failure</text>
+<rect class="box" x="700" y="368" width="140" height="26" rx="9"/><text class="m" x="710" y="388">Customer</text>
+<rect class="box" x="700" y="400" width="140" height="26" rx="9"/><text class="m" x="710" y="420">Fit</text>
+<path class="ar" d="M254 76L700 61"/>
+<path class="ar" d="M254 76L700 93"/>
+<path class="ar" d="M254 76L700 125"/>
+<path class="ar" d="M254 138L700 221"/>
+<path class="ar" d="M254 138L700 157"/>
+<path class="ar" d="M254 138L700 253"/>
+<path class="ar" d="M254 200L700 253"/>
+<path class="ar" d="M254 200L700 317"/>
+<path class="ar" d="M254 262L700 125"/>
+<path class="ar" d="M254 262L700 157"/>
+<path class="ar" d="M254 324L700 381"/>
+<path class="ar" d="M254 324L700 221"/>
+<path class="ar" d="M254 386L700 93"/>
+<path class="ar" d="M254 386L700 349"/>
+</svg>

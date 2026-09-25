@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 790 190" role="img" aria-labelledby="t d">
+<title id="t">Redis sketch</title><desc id="d">Clients into a single-threaded event loop over in-memory structures with TTL, an append-only log and snapshots for persistence, and async replicas.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="790" height="190" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">REDIS / ONE COMMAND THREAD, LAZY EXPIRY, ASYNC REPLICAS</text>
+<rect class="box" x="24" y="60" width="120" height="48" rx="9"/><text class="m" x="34" y="80">Clients</text>
+<path class="ar" d="M144 84L180 84"/>
+<rect class="hot" x="180" y="60" width="190" height="48" rx="9"/><text class="m" x="190" y="80">Event loop</text><text class="l" x="190" y="96">one command thread</text>
+<path class="ar" d="M370 84L410 84"/>
+<rect class="box" x="410" y="60" width="170" height="48" rx="9"/><text class="m" x="420" y="80">Structures + TTL</text><text class="l" x="420" y="96">lazy + sampled expiry</text>
+<rect class="box" x="180" y="130" width="190" height="40" rx="9"/><text class="m" x="190" y="150">append-only log</text>
+<path class="ar dash" d="M275 108L275 130"/>
+<rect class="box" x="410" y="130" width="170" height="40" rx="9"/><text class="m" x="420" y="150">snapshot (fork)</text>
+<path class="ar dash" d="M495 108L495 130"/>
+<rect class="box" x="620" y="60" width="140" height="48" rx="9"/><text class="m" x="630" y="80">Async replicas</text><text class="l" x="630" y="96">failover</text>
+<path class="ar dash" d="M580 84L620 84"/>
+</svg>

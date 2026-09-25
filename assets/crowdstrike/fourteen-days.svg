@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 150" role="img" aria-labelledby="t d">
+<title id="t">Fourteen-day plan</title><desc id="d">Day grid with the five one-page systems first, one coding bundle and one design case per day, and rest before the loop.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="960" height="150" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">FOURTEEN DAYS / SYSTEMS FIRST, THEN ONE BUNDLE AND ONE CASE A DAY</text>
+<rect class="hot" x="24" y="56" width="58" height="44" rx="9"/><text class="m" x="34" y="76">D1</text>
+<text class="s" x="32" y="92">5 pages</text>
+<rect class="hot" x="90" y="56" width="58" height="44" rx="9"/><text class="m" x="100" y="76">D2</text>
+<text class="s" x="98" y="92">pages</text>
+<rect class="box" x="156" y="56" width="58" height="44" rx="9"/><text class="m" x="166" y="76">D3</text>
+<text class="s" x="164" y="92">Go</text>
+<rect class="box" x="222" y="56" width="58" height="44" rx="9"/><text class="m" x="232" y="76">D4</text>
+<text class="s" x="230" y="92">Go</text>
+<rect class="box" x="288" y="56" width="58" height="44" rx="9"/><text class="m" x="298" y="76">D5</text>
+<text class="s" x="296" y="92">scan</text>
+<rect class="box" x="354" y="56" width="58" height="44" rx="9"/><text class="m" x="364" y="76">D6</text>
+<text class="s" x="362" y="92">scan</text>
+<rect class="box" x="420" y="56" width="58" height="44" rx="9"/><text class="m" x="430" y="76">D7</text>
+<text class="s" x="428" y="92">rest</text>
+<rect class="box" x="486" y="56" width="58" height="44" rx="9"/><text class="m" x="496" y="76">D8</text>
+<text class="s" x="494" y="92">ingest</text>
+<rect class="box" x="552" y="56" width="58" height="44" rx="9"/><text class="m" x="562" y="76">D9</text>
+<text class="s" x="560" y="92">rings</text>
+<rect class="box" x="618" y="56" width="58" height="44" rx="9"/><text class="m" x="628" y="76">D10</text>
+<text class="s" x="626" y="92">plane</text>
+<rect class="box" x="684" y="56" width="58" height="44" rx="9"/><text class="m" x="694" y="76">D11</text>
+<text class="s" x="692" y="92">store</text>
+<rect class="box" x="750" y="56" width="58" height="44" rx="9"/><text class="m" x="760" y="76">D12</text>
+<text class="s" x="758" y="92">redis</text>
+<rect class="box" x="816" y="56" width="58" height="44" rx="9"/><text class="m" x="826" y="76">D13</text>
+<text class="s" x="824" y="92">pool</text>
+<rect class="hot" x="882" y="56" width="58" height="44" rx="9"/><text class="m" x="892" y="76">D14</text>
+<text class="s" x="890" y="92">re-read</text>
+<text class="l" x="24" y="130">Coding: bundles 43→56 in the plan's order.  Architecture: builds-it → blocks → review → nine cases.  Stories: two a day in week two.</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 240" role="img" aria-labelledby="t d">
+<title id="t">Tiered event store</title><desc id="d">Ingest fans out to a hot LSM store, a time-sharded search index, cold columnar files, and rollups; a router picks the tier by time range.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="700" height="240" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">TIERED EVENT STORE / ROUTE BY TIME RANGE</text>
+<rect class="box" x="24" y="60" width="140" height="48" rx="9"/><text class="m" x="34" y="80">Ingest</text><text class="l" x="34" y="96">consumers</text>
+<rect class="box" x="220" y="44" width="180" height="38" rx="9"/><text class="m" x="230" y="64">Hot LSM</text><text class="l" x="230" y="80">30 d · by key</text>
+<path class="ar" d="M164 84L220 63"/>
+<rect class="box" x="220" y="90" width="180" height="38" rx="9"/><text class="m" x="230" y="110">Search index</text><text class="l" x="230" y="126">7 d · time shards</text>
+<path class="ar" d="M164 84L220 109"/>
+<rect class="box" x="220" y="136" width="180" height="38" rx="9"/><text class="m" x="230" y="156">Cold columnar</text><text class="l" x="230" y="172">13 mo · blob</text>
+<path class="ar" d="M164 84L220 155"/>
+<rect class="box" x="220" y="182" width="180" height="38" rx="9"/><text class="m" x="230" y="202">Rollups</text><text class="l" x="230" y="218">per day</text>
+<path class="ar" d="M164 84L220 201"/>
+<rect class="box" x="460" y="60" width="200" height="48" rx="9"/><text class="m" x="470" y="80">Query router</text><text class="l" x="470" y="96">tenant check · tier by range</text>
+<path class="ar dash" d="M460 84L400 63"/>
+<path class="ar dash" d="M460 84L400 109"/>
+<path class="ar dash" d="M460 84L400 155"/>
+<path class="ar dash" d="M460 84L400 201"/>
+</svg>

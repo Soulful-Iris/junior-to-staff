@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 160" role="img" aria-labelledby="t d">
+<title id="t">Review timeline</title><desc id="d">The five moves of a ninety-minute design review laid on a timeline with failure modes highlighted.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="780" height="160" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">NINETY MINUTES / FIVE MOVES</text>
+<rect class="box" x="24" y="60" width="74" height="48" rx="9"/><text class="m" x="34" y="80">Numbers</text><text class="l" x="34" y="96">0–10</text>
+<rect class="box" x="104" y="60" width="114" height="48" rx="9"/><text class="m" x="114" y="80">Main path</text><text class="l" x="114" y="96">10–25</text>
+<rect class="box" x="224" y="60" width="154" height="48" rx="9"/><text class="m" x="234" y="80">Storage by category</text><text class="l" x="234" y="96">25–45</text>
+<rect class="hot" x="384" y="60" width="194" height="48" rx="9"/><text class="m" x="394" y="80">Failure modes</text><text class="l" x="394" y="96">45–70</text>
+<rect class="box" x="584" y="60" width="114" height="48" rx="9"/><text class="m" x="594" y="80">Trade-offs</text><text class="l" x="594" y="96">70–85</text>
+<rect class="box" x="704" y="60" width="54" height="48" rx="9"/><text class="m" x="714" y="80">Questions</text><text class="l" x="714" y="96">85–90</text>
+<text class="l" x="24" y="140">Interruptions land in moves 3 and 4. Answer with the property, the constraint, and an offer to switch.</text>
+</svg>

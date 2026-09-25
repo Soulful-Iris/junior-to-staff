@@ -79,6 +79,7 @@ GROUPS = {
     "operations": ("Production operations", "#9b6334", "Provision, deploy, observe, and recover a running application."),
     "evolution": ("System evolution and leadership", "#6f4a7d", "Migrate live systems and make technical decisions other teams can carry forward."),
     "ai-specialization": ("AI systems", "#735078", "Optional specialization in evaluation, budgets, permissions, and controlled model actions."),
+    "crowdstrike": ("CrowdStrike track", "#b3202e", "A senior cloud backend loop at CrowdStrike: the rounds, the reported problems, the architecture they publish, and worked drills for each."),
 }
 
 GROUP_INTROS = {
@@ -88,6 +89,7 @@ GROUP_INTROS = {
     "operations": "curriculum/03-production/README.md",
     "evolution": "curriculum/04-scale-and-evolution/README.md",
     "ai-specialization": "curriculum/parts/ai-systems.md",
+    "crowdstrike": "curriculum/05-crowdstrike/README.md",
 }
 
 GROUP_LABELS = {
@@ -97,6 +99,7 @@ GROUP_LABELS = {
     "operations": "PART D",
     "evolution": "PART E",
     "ai-specialization": "OPTIONAL SPECIALIZATION",
+    "crowdstrike": "CROWDSTRIKE TRACK",
 }
 
 CHAPTER_ORDER = {
@@ -129,6 +132,11 @@ CHAPTER_ORDER = {
     ],
     "ai-specialization": [
         ("curriculum/04-scale-and-evolution/03-ai-systems", "Evaluate AI features, protect permissions, and enforce task budgets."),
+    ],
+    "crowdstrike": [
+        ("curriculum/05-crowdstrike/01-preparation", "Know the loop round by round, what each interviewer is grading, and how to prepare in two weeks."),
+        ("curriculum/05-crowdstrike/02-coding-problems", "Solve the reported problem shapes in Python, then extend each to a stream or to concurrent workers."),
+        ("curriculum/05-crowdstrike/03-architecture", "Design the systems they ask about at the scale they publish, and defend every box for ninety minutes."),
     ],
 }
 

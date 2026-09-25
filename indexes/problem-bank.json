@@ -250,5 +250,89 @@
     "path": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/README.md",
     "directory": "curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue",
     "title": "Bounded blocking queue with shutdown"
+  },
+  {
+    "number": 43,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/43-string-templating/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/43-string-templating",
+    "title": "String templating, then a worker pool"
+  },
+  {
+    "number": 44,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/44-busiest-host/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/44-busiest-host",
+    "title": "Busiest host, then an endless stream"
+  },
+  {
+    "number": 45,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/45-telemetry-dedupe/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/45-telemetry-dedupe",
+    "title": "Telemetry dedupe in a time window"
+  },
+  {
+    "number": 46,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/46-time-based-kv/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/46-time-based-kv",
+    "title": "Time-based key-value store"
+  },
+  {
+    "number": 47,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/47-lru-cache-ttl/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/47-lru-cache-ttl",
+    "title": "LRU cache with TTL, like Redis"
+  },
+  {
+    "number": 48,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/48-number-of-islands/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/48-number-of-islands",
+    "title": "Number of islands on a large grid"
+  },
+  {
+    "number": 49,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/49-token-bucket/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/49-token-bucket",
+    "title": "Per-tenant token-bucket rate limiter"
+  },
+  {
+    "number": 50,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/50-log-parser/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/50-log-parser",
+    "title": "Log parser: errors per service per minute"
+  },
+  {
+    "number": 51,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/51-merge-k-streams/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/51-merge-k-streams",
+    "title": "Merge k sorted event streams"
+  },
+  {
+    "number": 52,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/52-length-prefix-codec/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/52-length-prefix-codec",
+    "title": "Length-prefix codec for framed records"
+  },
+  {
+    "number": 53,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/53-dependency-order/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/53-dependency-order",
+    "title": "Dependency order with cycle rejection"
+  },
+  {
+    "number": 54,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/54-network-delay/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/54-network-delay",
+    "title": "Network delay: shortest time to reach every node"
+  },
+  {
+    "number": 55,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/55-interval-merge/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/55-interval-merge",
+    "title": "Merge outage intervals"
+  },
+  {
+    "number": 56,
+    "path": "curriculum/05-crowdstrike/02-coding-problems/problems/56-worker-pool/README.md",
+    "directory": "curriculum/05-crowdstrike/02-coding-problems/problems/56-worker-pool",
+    "title": "Bounded worker pool with clean shutdown"
   }
 ]

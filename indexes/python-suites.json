@@ -181,6 +181,48 @@
     {
       "path": "practice/assessor/heldback_importer.py",
       "kind": "file"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/43-string-templating"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/44-busiest-host"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/45-telemetry-dedupe"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/46-time-based-kv"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/47-lru-cache-ttl"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/48-number-of-islands"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/49-token-bucket"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/50-log-parser"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/51-merge-k-streams"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/52-length-prefix-codec"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/53-dependency-order"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/54-network-delay"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/55-interval-merge"
+    },
+    {
+      "path": "curriculum/05-crowdstrike/02-coding-problems/problems/56-worker-pool"
     }
   ]
 }

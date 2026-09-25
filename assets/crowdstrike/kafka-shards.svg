@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 180" role="img" aria-labelledby="t d">
+<title id="t">Kafka shards</title><desc id="d">A single cluster at its published limit replaced by fungible shards with active, read-only, and inactive states and a headroom rule.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="980" height="180" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">KAFKA / ONE CLUSTER AT ITS LIMIT, THEN FUNGIBLE SHARDS</text>
+<rect class="hot" x="24" y="60" width="220" height="70" rx="9"/><text class="m" x="34" y="80">One cluster</text><text class="l" x="34" y="96">15M ev/s · 600+ brokers · 800+ partitions</text>
+<path class="ar" d="M244 95L290 95"/>
+<rect class="box" x="290" y="60" width="158" height="70" rx="9"/><text class="m" x="300" y="80">shard 1: active</text><text class="l" x="300" y="96">read + write</text>
+<rect class="box" x="460" y="60" width="158" height="70" rx="9"/><text class="m" x="470" y="80">shard 2: active</text><text class="l" x="470" y="96">read + write</text>
+<rect class="box" x="630" y="60" width="158" height="70" rx="9"/><text class="m" x="640" y="80">shard 3: read-only</text><text class="l" x="640" y="96">producers skip, consumers drain</text>
+<rect class="box" x="800" y="60" width="158" height="70" rx="9"/><text class="m" x="810" y="80">shard 4: inactive</text><text class="l" x="810" y="96">ignored</text>
+<text class="l" x="24" y="160">Identical topics on every shard; data on one shard is indistinguishable from another. Keep 1/(N−1) headroom: four shards → each ≤ 67%.</text>
+</svg>

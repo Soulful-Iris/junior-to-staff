@@ -1,6 +1,6 @@
 # Coding problems by concept
 
-All 42 existing problems have one home. Start with the linked primer, attempt the problem before opening its answer, and use its follow-ups to change the contract. The number is a stable problem identifier, not a seniority level.
+All 56 existing problems have one home. Start with the linked primer, attempt the problem before opening its answer, and use its follow-ups to change the contract. The number is a stable problem identifier, not a seniority level.
 
 [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) · [Timed assessment](../practice/coding-mock.md)
 
@@ -80,5 +80,24 @@ All 42 existing problems have one home. Start with the linked primer, attempt th
 | 40 | [Count event-time windows with late arrivals](../curriculum/04-scale-and-evolution/01-data-at-scale/problems/40-event-time-windows/README.md) | [Data systems at scale](../curriculum/04-scale-and-evolution/01-data-at-scale/README.md) |
 | 41 | [Maintain an exact streaming median](../curriculum/01-code/02-data-structures-algorithms/problems/41-streaming-median/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
 | 42 | [Bounded blocking queue with shutdown](../curriculum/02-applications/01-backend/problems/42-bounded-blocking-queue/README.md) | [APIs and background work](../curriculum/02-applications/01-backend/README.md) |
+
+## CrowdStrike track: reported shapes, extended to streams and workers
+
+| ID | Problem | Subject home |
+|---|---|---|
+| 43 | [String templating, then a worker pool](../curriculum/05-crowdstrike/02-coding-problems/problems/43-string-templating/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 44 | [Busiest host, then an endless stream](../curriculum/05-crowdstrike/02-coding-problems/problems/44-busiest-host/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 45 | [Telemetry dedupe in a time window](../curriculum/05-crowdstrike/02-coding-problems/problems/45-telemetry-dedupe/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 46 | [Time-based key-value store](../curriculum/05-crowdstrike/02-coding-problems/problems/46-time-based-kv/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 47 | [LRU cache with TTL, like Redis](../curriculum/05-crowdstrike/02-coding-problems/problems/47-lru-cache-ttl/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 48 | [Number of islands on a large grid](../curriculum/05-crowdstrike/02-coding-problems/problems/48-number-of-islands/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 49 | [Per-tenant token-bucket rate limiter](../curriculum/05-crowdstrike/02-coding-problems/problems/49-token-bucket/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 50 | [Log parser: errors per service per minute](../curriculum/05-crowdstrike/02-coding-problems/problems/50-log-parser/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 51 | [Merge k sorted event streams](../curriculum/05-crowdstrike/02-coding-problems/problems/51-merge-k-streams/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 52 | [Length-prefix codec for framed records](../curriculum/05-crowdstrike/02-coding-problems/problems/52-length-prefix-codec/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 53 | [Dependency order with cycle rejection](../curriculum/05-crowdstrike/02-coding-problems/problems/53-dependency-order/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 54 | [Network delay: shortest time to reach every node](../curriculum/05-crowdstrike/02-coding-problems/problems/54-network-delay/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 55 | [Merge outage intervals](../curriculum/05-crowdstrike/02-coding-problems/problems/55-interval-merge/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
+| 56 | [Bounded worker pool with clean shutdown](../curriculum/05-crowdstrike/02-coding-problems/problems/56-worker-pool/README.md) | [CrowdStrike coding problems](../curriculum/05-crowdstrike/02-coding-problems/README.md) |
 
 Run supplied Python references from the repository root with `python scripts/check_curriculum.py --coding-only`. For all local Python labs, use `python scripts/check_curriculum.py`. Browser and TypeScript checks remain separate.

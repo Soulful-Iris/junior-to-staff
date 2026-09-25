@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 830 200" role="img" aria-labelledby="t d">
+<title id="t">Ring rollout</title><desc id="d">Canary, ring 1, ring 2, GA with golden signals gating each advance and a halt path that reverts a ring.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="830" height="200" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">RINGS / GATED BY GOLDEN SIGNALS</text>
+<rect class="box" x="24" y="60" width="180" height="48" rx="9"/><text class="m" x="34" y="80">Canary</text><text class="l" x="34" y="96">0.1%</text>
+<path class="ar" d="M204 84L224 84"/>
+<rect class="box" x="224" y="60" width="180" height="48" rx="9"/><text class="m" x="234" y="80">Ring 1</text><text class="l" x="234" y="96">1%</text>
+<path class="ar" d="M404 84L424 84"/>
+<rect class="box" x="424" y="60" width="180" height="48" rx="9"/><text class="m" x="434" y="80">Ring 2</text><text class="l" x="434" y="96">10%</text>
+<path class="ar" d="M604 84L624 84"/>
+<rect class="box" x="624" y="60" width="180" height="48" rx="9"/><text class="m" x="634" y="80">GA</text><text class="l" x="634" y="96">pins + schedules</text>
+<rect class="box" x="24" y="130" width="380" height="44" rx="9"/><text class="m" x="34" y="150">Golden signals</text><text class="l" x="34" y="166">heartbeats · crashes · CPU · detections · false positives</text>
+<path class="ar dash" d="M114 130L114 108"/>
+<path class="ar dash" d="M214 130L314 108"/>
+<path class="ar dash" d="M314 130L514 108"/>
+<rect class="hot" x="430" y="130" width="374" height="44" rx="9"/><text class="m" x="440" y="150">Breach → halt, revert ring, page</text>
+</svg>

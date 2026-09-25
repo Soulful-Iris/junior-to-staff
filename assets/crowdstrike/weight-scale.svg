@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 160" role="img" aria-labelledby="t d">
+<title id="t">Weight scale</title><desc id="d">How question weights core, likely, possible, and low were assigned.</desc>
+<style>text{font-family:ui-sans-serif,system-ui,sans-serif;fill:#2a1f2e}.l{font-size:11px;fill:#6b5a72}.m{font:700 12px ui-monospace,monospace}.s{font-size:11px}.box{fill:#ffffff;stroke:#a88fb3;stroke-width:1.5}.hot{fill:#f5e6e7;stroke:#8c1f2b;stroke-width:2}.ar{stroke:#a88fb3;stroke-width:1.6;fill:none;marker-end:url(#a)}.dash{stroke-dasharray:4 4}</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a88fb3"/></marker></defs>
+<rect width="980" height="160" rx="16" fill="#f4eef6"/>
+<text class="l" x="24" y="30" letter-spacing="2">WEIGHT / HOW EACH QUESTION WAS SCORED</text>
+<rect class="hot" x="24" y="60" width="215" height="48" rx="9"/><text class="m" x="34" y="80">core</text><text class="l" x="34" y="96">repeated, or recent senior cloud</text>
+<rect class="box" x="259" y="60" width="215" height="48" rx="9"/><text class="m" x="269" y="80">likely</text><text class="l" x="269" y="96">one recent match, or guides agree</text>
+<rect class="box" x="494" y="60" width="215" height="48" rx="9"/><text class="m" x="504" y="80">possible</text><text class="l" x="504" y="96">single or old, other team</text>
+<rect class="box" x="729" y="60" width="215" height="48" rx="9"/><text class="m" x="739" y="80">low</text><text class="l" x="739" y="96">title only, other role</text>
+<text class="l" x="24" y="140">Raises: independent repeats, 2025–2026, senior, cloud team.   Lowers: aggregator-only, pre-2022, sensor/ML roles, title without body.</text>
+</svg>
