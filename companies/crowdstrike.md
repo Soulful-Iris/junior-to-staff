@@ -415,6 +415,8 @@ You do not need threat-research depth. You need to sound like someone who has pr
 
 ## A compressed preparation plan · ten to fourteen days
 
+The companion page, [Go refresher, algorithm bank, and design study](crowdstrike-prep.md), holds the Go material for a Python interviewer, the pattern-by-pattern algorithm bank mapped to their stack, the design building blocks, and a prioritized reading list.
+
 1. **Days 1–3, your own systems as designs.** Write five one-page designs of systems you have owned: boxes, data flow, where state lives, what failed, what you would change. These answer the hiring manager's "why" chain and seed every behavioral story.
 2. **Days 2–10, coding, one drill a day from the bank above,** in the language you will use, narrated aloud, with tests. Do the stretch version of at least four (streaming input, memory cap, concurrency). Write the worker pool and the rate limiter twice.
 3. **Days 3–8, the scanning platform take-home, end to end,** as if it were assigned: numbers, main path, stores by category, the concurrent-upload race, sharding, failure modes, cost. Then do it again for endpoint telemetry ingestion and for a content rollout with rings. Practice the ninety-minute defense with someone asking "why" after every box.
