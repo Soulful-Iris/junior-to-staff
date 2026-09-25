@@ -85,7 +85,7 @@ Ready tasks are independent by definition. Replace "emit" with "submit to a work
 
 ### Follow-up 2 (staff): a task fails
 
-Every descendant of the failed task is blocked, not failed: mark them `blocked` with the root cause, keep running everything else, and report both sets. Retry policy belongs to the task, not the scheduler; a retried task that has side effects must be idempotent, which is the same requirement as the consumer designs in CH 21.
+Every descendant of the failed task is blocked, not failed: mark them `blocked` with the root cause, keep running everything else, and report both sets. Retry policy belongs to the task, not the scheduler; a retried task that has side effects must be idempotent, which is the same requirement as the consumer designs in T3.
 
 ### Run and check
 

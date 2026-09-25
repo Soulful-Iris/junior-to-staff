@@ -43,6 +43,7 @@
 .company-area>.part-intro{margin-left:0;border:1px solid #d4e1d3;background:#eaf2e8;border-radius:6px;padding:12px 11px;font-weight:600}
 .company-area .toc-chapter{border-bottom:1px solid #e0e7df}
 .company-area .toc-chapter>summary{font-weight:600}
+.track-area{border-top:2px solid #e3c9cc;margin-top:28px;padding-top:26px}.track-area .toc-part-heading .part-label{color:#8c1f2b}.track-area>.part-intro{margin-left:0;border:1px solid #e6cfd2;background:#f7ecee;border-radius:6px;padding:12px 11px;font-weight:600}.track-area .toc-chapter{border-bottom:1px solid #eadfe1}.track-area .toc-chapter>summary{font-weight:600}
 .company-page{--forest:#31554a}
 .company-page .lesson-body{max-width:860px}
 .company-page .lesson-body>h1{font-size:clamp(36px,4vw,53px);letter-spacing:-1.5px;line-height:1.1;border-bottom:1px solid #d8e1dc;padding-bottom:27px}

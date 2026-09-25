@@ -14,7 +14,7 @@
 | Queues | `collections.deque` (O(1) both ends); `queue.Queue(maxsize=n)` for threads; `asyncio.Queue` for coroutines | [56](../problems/56-worker-pool/README.md) |
 | Threads | `threading.Thread`, `Lock`, `Event`, `Semaphore`; `concurrent.futures.ThreadPoolExecutor` | [56](../problems/56-worker-pool/README.md) |
 | Streams | generators: `for line in f`, `yield`; `itertools.islice`, `groupby`, `chain` | [44](../problems/44-busiest-host/README.md), [50](../problems/50-log-parser/README.md) |
-| Hashing | `hashlib.sha256()` fed in chunks with `.update()` | CH 21 |
+| Hashing | `hashlib.sha256()` fed in chunks with `.update()` | T3 |
 | Memoization | `functools.lru_cache` | recursion problems |
 | Graphs | `collections.deque` for BFS; explicit stack for DFS on big grids; `heapq` for Dijkstra | [48](../problems/48-number-of-islands/README.md), [54](../problems/54-network-delay/README.md) |
 | Time | `time.monotonic()` for limiters, never wall-clock | [49](../problems/49-token-bucket/README.md) |

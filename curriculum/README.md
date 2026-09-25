@@ -1,6 +1,6 @@
 # Find a chapter, lesson or practice exercise
 
-One curriculum organized by engineering prerequisites. Start with coding, build an application, design it for scale, operate it, then change it safely. Parts A–E are the core journey. The AI systems chapter is an optional specialization. CH 01–18 identify chapters across the core course; CH 19–21 are the CrowdStrike track. Lesson addresses such as 4.07 mean the seventh lesson in chapter 4. Inside a lesson, “On this page” lists section headings rather than another chapter number.
+One curriculum organized by engineering prerequisites. Start with coding, build an application, design it for scale, operate it, then change it safely. Parts A–E are the core journey. The AI systems chapter is an optional specialization. CH 01–18 identify chapters across the core course; T1–21 are the CrowdStrike track. Lesson addresses such as 4.07 mean the seventh lesson in chapter 4. Inside a lesson, “On this page” lists section headings rather than another chapter number.
 
 ## Part A · Coding and problem solving
 
@@ -50,13 +50,13 @@ One curriculum organized by engineering prerequisites. Start with coding, build 
 |---|---|---|
 | CH 18 | [AI evaluation and guardrails](04-scale-and-evolution/03-ai-systems/README.md) | Evaluate an AI feature, protect permissions, and enforce quality and task budgets. |
 
-## CrowdStrike track
+## CrowdStrike track · its own league, outside the core sequence
 
 | Index | Chapter | What you learn |
 |---|---|---|
-| CH 19 | [Preparation: the loop, the people, the plan](05-crowdstrike/01-preparation/README.md) | Know the loop round by round, what each interviewer is grading, and how to prepare in two weeks. |
-| CH 20 | [Coding problems in their shapes](05-crowdstrike/02-coding-problems/README.md) | Solve the reported problem shapes in Python, then extend each to a stream or to concurrent workers. |
-| CH 21 | [Architecture: their systems and their design cases](05-crowdstrike/03-architecture/README.md) | Design the systems they ask about at the scale they publish, and defend every box for ninety minutes. |
+| T1 | [Preparation: the loop, the people, the plan](05-crowdstrike/01-preparation/README.md) | Know the loop round by round, what each interviewer is grading, and how to prepare in two weeks. |
+| T2 | [Coding problems in their shapes](05-crowdstrike/02-coding-problems/README.md) | Solve the reported problem shapes in Python, then extend each to a stream or to concurrent workers. |
+| T3 | [Architecture: their systems and their design cases](05-crowdstrike/03-architecture/README.md) | Design the systems they ask about at the scale they publish, and defend every box for ninety minutes. |
 
 ## Turn a lesson into an observable result
 

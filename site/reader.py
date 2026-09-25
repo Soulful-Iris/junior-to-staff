@@ -247,14 +247,15 @@ def toc(pages, sequence, current, base):
         on = p['src'] == current['src']
         content = E(label or p['title'])
         if lesson:
+            index = f'T{p["track_no"]}.{p["sub"]:02}' if p.get('track_no') else f'{p["chapter"]}.{p["sub"]:02}'
             content = (f'<span class="lesson-index" aria-label="Chapter {p["chapter"]}, lesson {p["sub"]}">'
-                       f'{p["chapter"]}.{p["sub"]:02}</span><span class="lesson-title">{content}</span>')
+                       f'{index}</span><span class="lesson-title">{content}</span>')
             css += ' numbered-lesson'
         return f'<a class="toc-link {css}{" active" if on else ""}" href="{href(base,p)}" data-page="{E(p["src"])}" {"aria-current=\"page\"" if on else ""}>{content}</a>'
     result = [f'<a class="identity" href="{base}" aria-label="The Engineering Guide home"><span class="identity-mark" aria-hidden="true">e<span>∕</span></span><span>The Engineering Guide<small>LEARN. BUILD. REASON.</small></span></a>',
               '<div class="search-box"><span aria-hidden="true">⌕</span><label class="sr-only" for="contents-search">Search the curriculum</label><input id="contents-search" type="search" placeholder="Find a concept…" autocomplete="off"><kbd>/</kbd></div><div id="search-results" hidden aria-live="polite"></div>',
               '<div class="contents-label">TABLE OF CONTENTS <button id="collapse-contents" aria-label="Collapse all chapters">−</button></div><div id="contents-tree">', link(pages[0], 'Overview', 'overview')]
-    for group in [p for p in sequence if p['kind']=='group']:
+    for group in [p for p in sequence if p['kind']=='group' and p['group']!='crowdstrike']:
         result.append(f'<section class="toc-area part-{group["gnum"]}"><div class="toc-part-heading"><span class="part-label">{E(part_label(group))}</span><span class="part-title">{E(group["title"])}</span></div>')
         result.append(link(group, 'Part introduction', 'part-intro'))
         for chapter in [p for p in sequence if p['kind']=='subject' and p['group']==group['group']]:
@@ -300,6 +301,27 @@ def toc(pages, sequence, current, base):
                 result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
             result.append('</ol>')
         result.append('</div></details>')
+    # The CrowdStrike track: its own area under the studio, with T-numbering.
+    track_group = next((p for p in sequence if p['kind']=='group' and p['group']=='crowdstrike'), None)
+    if track_group:
+        result.append('</section><section class="toc-area track-area part-7"><div class="toc-part-heading"><span class="part-label">ITS OWN LEAGUE</span><span class="part-title">CrowdStrike track</span></div>')
+        result.append(link(track_group, 'Start here · the track', 'part-intro'))
+        for chapter in [p for p in sequence if p['kind']=='subject' and p['group']=='crowdstrike']:
+            active = current.get('chapter') == chapter['chapter']
+            result.append(f'<details class="toc-chapter" {"open" if active else ""}><summary><span class="chapter-number"><small>T</small> {chapter["track_no"]}</span><span class="chapter-title">{E(chapter["title"])}</span><span class="chevron" aria-hidden="true">›</span></summary><div class="toc-lessons">')
+            result.append(link(chapter, 'Chapter introduction'))
+            last = None
+            for step in [p for p in sequence if p.get('chapter')==chapter['chapter'] and p.get('sub')]:
+                section = step.get('section', 'Learn')
+                if section != last:
+                    result.append(f'<div class="toc-section">{E(section)}</div>'); last=section
+                result.append(link(step, lesson=True))
+                if current['src']==step['src'] and step.get('headings'):
+                    result.append('<div class="toc-page-label">ON THIS PAGE</div><ol class="toc-headings">')
+                    for h in step['headings']:
+                        result.append(f'<li class="depth-{h["level"]}"><a href="#{E(h["id"])}" data-heading="{E(h["id"])}">{E(h["title"])}</a></li>')
+                    result.append('</ol>')
+            result.append('</div></details>')
     result.append('</section></div><div class="rail-footer"><span class="status-dot"></span>YOUR PLACE IS SAVED ON THIS DEVICE<button id="reset-progress">Reset progress</button></div>')
     return ''.join(result)
 
@@ -368,7 +390,10 @@ def intro(b, page, sequence, base, authored):
     ]
     rows=[]
     for child in children:
-        number = f'CH {child["chapter"]:02}' if page['kind']=='group' else f'{child["chapter"]}.{child["sub"]:02}'
+        if child.get('track_no'):
+            number = f'T {child["track_no"]}' if page['kind']=='group' else f'T{child["track_no"]}.{child["sub"]:02}'
+        else:
+            number = f'CH {child["chapter"]:02}' if page['kind']=='group' else f'{child["chapter"]}.{child["sub"]:02}'
         rows.append(f'<li><span class="outline-index">{number}</span><div><h2><a href="{E(href(base,child))}">{E(child["title"])}</a></h2><p>{E(child.get("blurb") or child.get("section") or "Worked explanation and practice")}</p></div></li>')
     return (f'<h1>{E(page["title"])}</h1><p class="chapter-lede">{E(description)}</p>'+context_html+
             '<div class="chapter-contract"><span class="section-label">CHOOSE YOUR NEXT LESSON</span>'
@@ -383,7 +408,12 @@ def shell(b, page, body, pages, sequence, base):
     nxt=sequence[position+1] if position is not None and position+1<len(sequence) else None
     is_home=page['kind']=='home'
     subtitle = 'Curriculum overview' if is_home else ('COMPANY INTERVIEW STUDIO' if page['kind']=='company' else f'{part_label(page)} / {page.get("subject_title") or page.get("group_title")}' if page.get('group') else 'REFERENCE SHELF')
-    meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else part_label(page) if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
+    if page.get('group') == 'crowdstrike':
+        meta = (f'LESSON T{page["track_no"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub')
+                else 'CROWDSTRIKE TRACK · ITS OWN LEAGUE' if page['kind']=='group'
+                else f'TRACK CHAPTER T{page["track_no"]}')
+    else:
+        meta= 'THE ENGINEERING GUIDE' if is_home else ('SENIOR SWE · COMPANY REHEARSAL' if page['kind']=='company' else f'LESSON {page["chapter"]}.{page["sub"]:02} · {page["sub"]} OF {page["step_count"]} IN CHAPTER' if page.get('sub') else part_label(page) if page['kind']=='group' else f'CHAPTER {page["chapter"]:02}' if page.get('chapter') else 'SUPPORTING MATERIAL')
     nav=''
     if position is not None and not is_home:
         previous=(f'<a class="previous-step" href="{href(base,prev)}"><span>← PREVIOUS</span><strong>{E(prev["title"])}</strong></a>' if prev else '<span></span>')

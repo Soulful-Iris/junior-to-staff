@@ -20,8 +20,8 @@ The same handful serves both. The interview column is how it is asked; the job c
 | Interval merge and sweep | Merge outage windows | Maintenance windows; host-group update schedules | [55](../problems/55-interval-merge/README.md) |
 | LRU / LFU cache | Implement a cache like Redis | Redis in front of hash lookups and sessions | [47](../problems/47-lru-cache-ttl/README.md) |
 | Token bucket | Per-tenant `allow(t)` | Per-engine and per-tenant limits; gateway rate limiting | [49](../problems/49-token-bucket/README.md) |
-| Consistent hashing | "How would you shard?" | Kafka partitions by key; Cassandra ring; their sharded clusters | CH 21 |
-| Streaming hashes | Dedupe a 2 GB upload by SHA-256 | Content-addressed file analysis | CH 21 |
+| Consistent hashing | "How would you shard?" | Kafka partitions by key; Cassandra ring; their sharded clusters | T3 |
+| Streaming hashes | Dedupe a 2 GB upload by SHA-256 | Content-addressed file analysis | T3 |
 | Bloom filters | "Have we seen this hash?" in bounded memory | LSM read path skips SSTables with bloom filters | [45](../problems/45-telemetry-dedupe/README.md) follow-up |
 | Count-min sketch, HyperLogLog | Approximate counts over endless streams | Cardinality per tenant without a giant set | [44](../problems/44-busiest-host/README.md) follow-up |
 | Length-prefix framing | Encode and decode; packet reassembly | Record framing on the wire and on disk | [52](../problems/52-length-prefix-codec/README.md) |

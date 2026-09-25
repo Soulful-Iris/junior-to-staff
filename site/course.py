@@ -89,6 +89,18 @@ def organize(pages):
     # next/previous sequence. The reference shelf remains outside that path.
     sequence.extend(by_src[f'companies/{name}'] for name in
                     ('README.md', 'openai.md', 'reddit.md', 'meta.md', 'databricks.md', 'observe.md'))
+    # The CrowdStrike track is its own league: outside the core book and after
+    # the company studio, with track-local numbering (T1, T2, T3) rather than
+    # a continuation of CH 01–18.
+    track = [p for p in sequence if p.get('group') == 'crowdstrike']
+    sequence = [p for p in sequence if p.get('group') != 'crowdstrike'] + track
+    track_no = {}
+    for p in track:
+        if p['kind'] == 'subject':
+            track_no[p['chapter']] = len(track_no) + 1
+    for p in track:
+        if p.get('chapter') in track_no:
+            p['track_no'] = track_no[p['chapter']]
     assert len({p['src'] for p in sequence}) == len(sequence)
     for n, page in enumerate(sequence):
         page['position'] = n

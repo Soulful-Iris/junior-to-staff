@@ -10,7 +10,7 @@ Your own systems first, because they answer the hiring manager and seed every st
 
 ## The fourteen days
 
-| Day | Coding ([CH 20](../../02-coding-problems/README.md)) | Architecture ([CH 21](../../03-architecture/README.md)) | Preparation |
+| Day | Coding ([T2](../../02-coding-problems/README.md)) | Architecture ([T3](../../03-architecture/README.md)) | Preparation |
 |---|---|---|---|
 | 1 | — | — | Write your five one-page systems ([lesson 2](02-recruiter-and-hiring-manager.md)) |
 | 2 | [43 string templating](../../02-coding-problems/problems/43-string-templating/README.md) | [How CrowdStrike builds it](../../03-architecture/lessons/01-how-crowdstrike-builds-it.md) | Finish the five pages |
