@@ -96,9 +96,28 @@ for (const d of todo) {
       const { svg } = await window.mermaid.render(id, code);
       return svg;
     }, {code: d.code, id: `m${d.hash.slice(0, 10)}`});
+    // Mermaid puts node labels in a <foreignObject> as HTML, so a label
+    // written with a line break comes out as a bare <br>. That is correct
+    // HTML and invalid XML, and every consumer downstream parses this as
+    // XML: diagram_cache.valid_svg() calls ET.fromstring, fails on the
+    // mismatched tag, and reports the diagram as MISSING even though the
+    // file rendered fine and opens perfectly in a browser.
+    //
+    // Measured 2026-09-25: eight flowcharts in the curriculum, each 14-24 KB
+    // of valid-looking SVG, all rejected for this and all invisible until a
+    // separate parse error stopped masking them. Closing the void elements
+    // here fixes those eight and every diagram anyone writes afterwards,
+    // which is the point of doing it in the renderer rather than in eight
+    // markdown files.
+    // The (?=[\s/>]) is load bearing: without it the alternation matches the
+    // "br" inside <brother> and turns it into <brother/>. Caught by a unit
+    // test before this ran on anything real.
+    const xmlSafe = svg.replace(
+      /<(br|img|hr|input)(?=[\s/>])((?:[^>"']|"[^"]*"|'[^']*')*?)\s*\/?>/gi,
+      (_, tag, attrs) => `<${tag}${attrs}/>`);
     const output = join(outDir, `${d.hash}.svg`);
     const temporary = output + `.${process.pid}.tmp`;
-    writeFileSync(temporary, svg, 'utf8');
+    writeFileSync(temporary, xmlSafe, 'utf8');
     renameSync(temporary, output);
     ok++;
     if (ok % 50 === 0) console.log(`  ${ok}/${todo.length}`);

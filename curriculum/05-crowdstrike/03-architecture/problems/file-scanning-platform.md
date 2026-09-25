@@ -76,7 +76,7 @@ sequenceDiagram
  S-->>A: won
  S-->>B: lost: attach scan_id B to hash
  A->>A: enqueue scan job
- Note over A,S: if A dies, the lease expires and the next claimant re-runs; results are idempotent by (hash, engine, version)
+ Note over A,S: if A dies, the lease expires and the next claimant re-runs, and results are idempotent by (hash, engine, version)
 ```
 
 A conditional insert (compare-and-set) on the hash row is the whole mechanism. No fleet-wide lock. A double run after a lease expiry is waste, not corruption.
