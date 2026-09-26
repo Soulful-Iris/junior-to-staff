@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 362" width="760" height="362" role="img" aria-label="Ten users drawn across one day, each as a few short session blocks scattered over twenty-four hours. A vertical line marks a single instant at about midday, and it crosses exactly one of the ten sessions. That is the concurrency ratio: at any one moment only a small fraction of a day's users are inside the application. The arithmetic follows: a ceiling of five thousand two hundred and fifty concurrent users corresponds to roughly twenty-five to thirty thousand daily users at a five to ten percent concurrency ratio. The closing caption warns that the number to carry is 0.1 requests per second per user, because the concurrency headline is derived from a think-time model your own application probably does not share.">
+  <rect width="760" height="362" rx="10" fill="#faf9f7"/>
+
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">CONCURRENT IS NOT DAILY</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Ten users, one day each. The line is a single instant.</text>
+
+  <line x1="380" y1="74" x2="380" y2="248" stroke="#c2703d" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <text x="380" y="70" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="0.8">ONE INSTANT</text>
+
+  <g fill="#2f6f4e" opacity="0.32">
+    <rect x="80" y="84" width="40" height="8" rx="4"/><rect x="300" y="84" width="30" height="8" rx="4"/><rect x="520" y="84" width="50" height="8" rx="4"/>
+    <rect x="140" y="100" width="60" height="8" rx="4"/><rect x="430" y="100" width="40" height="8" rx="4"/>
+    <rect x="60" y="116" width="30" height="8" rx="4"/><rect x="250" y="116" width="45" height="8" rx="4"/><rect x="600" y="116" width="40" height="8" rx="4"/>
+    <rect x="200" y="132" width="50" height="8" rx="4"/><rect x="480" y="132" width="35" height="8" rx="4"/>
+    <rect x="100" y="148" width="35" height="8" rx="4"/>
+    <rect x="170" y="164" width="40" height="8" rx="4"/><rect x="540" y="164" width="45" height="8" rx="4"/>
+    <rect x="240" y="180" width="30" height="8" rx="4"/><rect x="450" y="180" width="50" height="8" rx="4"/><rect x="640" y="180" width="30" height="8" rx="4"/>
+    <rect x="90" y="196" width="45" height="8" rx="4"/><rect x="320" y="196" width="40" height="8" rx="4"/>
+    <rect x="400" y="212" width="40" height="8" rx="4"/><rect x="620" y="212" width="35" height="8" rx="4"/>
+    <rect x="130" y="228" width="50" height="8" rx="4"/><rect x="280" y="228" width="35" height="8" rx="4"/><rect x="560" y="228" width="40" height="8" rx="4"/>
+  </g>
+
+  <rect x="360" y="148" width="60" height="8" rx="4" fill="#c2703d"/>
+  <text x="432" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#c2703d">the one who is online right now</text>
+
+  <line x1="60" y1="252" x2="700" y2="252" stroke="#ded9d1" stroke-width="1.2"/>
+  <text x="60" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">00:00</text>
+  <text x="220" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">06:00</text>
+  <text x="380" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">12:00</text>
+  <text x="540" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">18:00</text>
+  <text x="700" y="266" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">24:00</text>
+
+  <line x1="32" y1="288" x2="728" y2="288" stroke="#ded9d1" stroke-width="1"/>
+
+  <text x="32" y="312" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">At any instant only a few percent of a day's users are inside the app.</text>
+  <text x="32" y="336" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="#2f6f4e">5,250 concurrent, at 5-10% concurrency, is roughly 25,000 to 30,000 daily users.</text>
+  <text x="32" y="356" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">Carry the 0.1 requests per second per user. The concurrency headline is derived from a think-time model yours may not share.</text>
+</svg>

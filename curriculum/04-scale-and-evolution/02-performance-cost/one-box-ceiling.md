@@ -20,9 +20,9 @@ Constructed brief over a measured public experiment. Prerequisites: [find the bo
 
 | Contract | Workload / expected outcome |
 |---|---:|
-| Machine | 1 shared vCPU, 2 GB RAM (1,967 MB usable), single region |
+| Machine | 1 shared vCPU at 2.0 GHz, 2 GB RAM (1,967 MB usable), 50 GB SSD, single region |
 | Stack | Nginx → Node (Express, TypeScript) → Postgres, one host, no containers |
-| Data | 50,000 users · 500,000 posts · 1,959,112 likes · 339 MB on disk |
+| Data | 50,000 users · 500,000 posts · 2,016,005 likes · 349 MB on disk |
 | Endpoints | feed, single post, like, create post |
 | Pass criteria, fixed first | p95 < 500 ms · p99 < 1 s · errors < 1% |
 | Excluded | This is one application shape on one provider. It is not a general "a server holds N users" constant |
@@ -65,6 +65,12 @@ load the feed  ->  read for 3-7 s  ->  open a post  ->  read for 3-8 s
 
 That loop takes roughly 20 seconds, so **one concurrent user offers about 0.1 requests per second**. That single derived number is the anchor for everything else, and it is the number to carry out of this lesson. "5,250 concurrent users" is a *consequence* of the think-time model; change the pauses and the headline changes with it while the server is untouched.
 
+![One user's twenty-second loop on a timeline, with a playhead crossing it: the requests are thin ticks and the reading pauses between them are wide bands carrying almost all of the time](../../../assets/learning/user-loop.svg)
+
+[Static diagram](../../../assets/learning/user-loop-still.svg)
+
+Watch which part of that timeline is wide. Two or three requests are instants; the reading is everything else. The arithmetic falls straight out of the picture: 2 to 3 requests in about 20 seconds is roughly a tenth of a request per second. And it is worth noticing that the model and the measurement disagree slightly — the model predicts about 100 req/s at 1,000 users and the run produced 83. That gap is the spread in the pauses, and a model that lands within twenty per cent of the measurement is doing its job.
+
 Two methodological details worth copying:
 
 - **The load generator ran on its own machine**, a 4 vCPU / 8 GB box under a millisecond away, and its own CPU peaked at 37%. Reporting that number is what makes the result admissible. A generator running near its own limit measures itself, and the failure is invisible because it looks exactly like the target slowing down.
@@ -94,21 +100,36 @@ Three things in that table are worth more than the ceiling itself.
 
 Predict before reading: memory, the database, or CPU?
 
+![Three resource gauges measured at the ceiling: memory a little under half full, Postgres query time a barely visible sliver, and CPU nearly full and marked saturated](../../../assets/diagrams/what-saturated.svg)
+
 | Resource | At the ceiling | Verdict |
 |---|---|---|
 | Memory | 863 MB of 1,967 MB | not close |
-| Postgres query time | sub-millisecond | not the bottleneck |
-| CPU | 77% → 80% at 2,500 → 91% at 3,000 | **saturated** |
+| Postgres query time | about 1 ms | not the bottleneck |
+| CPU | 39% at 1,000 → 80% at 2,500 → 91% at 3,000 | **saturated** |
 
-Neither of the two resources people reach for first was the constraint. The database was fast throughout: 339 MB of data on a box with room to cache it, and queries that never became the problem. Memory never came near its limit.
+Neither of the two resources people reach for first was the constraint. The database was fast throughout: 349 MB of data on a box with room to cache it, and queries that never became the problem. Memory never came near its limit.
 
-It was CPU, and the reason is the architecture rather than the code. Three services share one core, so the proxy, the application and the database are **competing for the same resource**. Per-process, the four consumers of that core split it roughly 38 / 30 / 6 / 6 percent. Co-tenancy is the whole story: on a single-core box, work you add anywhere is work you take from everywhere.
+It was CPU, and the reason is the architecture rather than the code. Three services share one core, so the proxy, the application and the database are **competing for the same resource**. At the ceiling the single core was divided like this:
+
+| Process | Share of one core |
+|---|---:|
+| Node application | 38% |
+| Postgres | 30% |
+| Nginx | 6% |
+| everything else | 6% |
+
+The two large shares are the application and the database, which on a normal deployment would be two machines that could not take capacity from each other. Here they can, and they do. Co-tenancy is the whole story: on a single-core box, work you add anywhere is work you take from everywhere. It also tells you where a fix has to land — trimming Nginx could recover at most six points, while removing database work recovers thirty.
 
 **Curriculum addition — the moving ceiling.** A "shared" vCPU on a basic droplet is not a guaranteed core. Time can be lost to other tenants on the same physical host, which means CPU percentage is measured against a denominator that moves. For a teaching experiment this is fine. For a capacity commitment, measure steal time alongside utilisation, or the same test on a quiet Tuesday and a busy one will disagree and neither run will explain why.
 
 ## Move the work, do not buy a bigger machine
 
 The reflex at a CPU ceiling is the upgrade ladder: $12 for one vCPU, $24 for two, $48 for four, $96 for eight. That ladder is real and it is the wrong first move, because the workload has a property nobody measured yet: **the feed is the same answer for nearly everybody, recomputed per request.**
+
+![The upgrade ladder with its three upgrade rungs struck through, beside the same twelve dollar machine gaining two cache changes and 2.1 times the users](../../../assets/diagrams/buy-or-move.svg)
+
+The two columns cost very different things over a year. The left one is a decision you keep paying for every month whether or not the traffic ever arrives. The right one is a day of work, paid once, and it leaves the bill where it was. That asymmetry is why the measurement comes first: until you know what saturated, the ladder is the only move you can see.
 
 ![Two nested bars showing that a one-second cache inside the application skips the database, and the same rule moved into the proxy skips the database and the application as well](../../../assets/diagrams/cache-hops.svg)
 
@@ -136,16 +157,20 @@ The fix is to send at a **fixed arrival rate** and measure latency from when the
 
 Two smaller limits, stated because a case that only lists its strengths is advertising:
 
-- The CPU split by process is approximate, and this lesson does not assert which process owns which share. The total and its trend are the evidence for the bottleneck; the breakdown is context.
+- The per-process CPU shares are a single reading at the ceiling, not an average over the run. They are enough to say where the work lives; they are not a profile.
 - The CDN hop in the diagram was not tested here. It is drawn because the rule continues along that path, not because a measurement supports that specific step.
 
 ## Reframe the number before anybody quotes it
 
 5,250 **concurrent** users is not 5,250 users.
 
-Concurrency is a measure of how many people are inside the app at the same instant. Plot one row per user over a day and only a small fraction are online at any moment. At a 5–10% concurrency ratio, a ceiling of 5,250 concurrent corresponds to roughly **25,000–30,000 daily users** — on one $12 server, with a distributed architecture crossed out beside it.
+Concurrency is a measure of how many people are inside the app at the same instant. Plot one row per user over a day and only a small fraction are online at any moment.
 
-Carry the 0.1 requests per second per user, not the 5,250. The per-user rate is the measured input; the concurrency figure is derived from it and from a think-time model that your application probably does not share.
+![Ten users drawn as sessions scattered across a day, with a vertical line at one instant crossing exactly one of them](../../../assets/diagrams/concurrent-vs-daily.svg)
+
+At a 5–10% concurrency ratio, a ceiling of 5,250 concurrent corresponds to roughly **25,000–30,000 daily users** — on one machine, at twelve dollars a month.
+
+Carry the 0.1 requests per second per user, not the 5,250. The per-user rate is the measured input; the concurrency figure is derived from it and from a think-time model that your application probably does not share. The safest way to use this lesson on your own system is to measure your own per-user rate and re-derive everything downstream of it.
 
 ## Failure drill and expectations
 

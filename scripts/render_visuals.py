@@ -516,6 +516,8 @@ HAND_AUTHORED_SPECS = [
      'predecessor costs meet at a cell; the frontier advances with two retained rows'),
     ('parser-precedence', 'Parse the whole input before short-circuit evaluation', 18,
      'source tokens build precedence structure before a boolean value traverses it'),
+    ('user-loop', 'One user is a loop, not a firehose', 12,
+     'a playhead crosses one user twenty-second loop; each request brightens as it is reached, and the reading bands between them carry almost all of the time'),
 ]
 
 def document(title,body,description):

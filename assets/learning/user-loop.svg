@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420" role="img" aria-labelledby="title desc"><title id="title">One user is a loop, not a firehose</title><desc id="desc">A single virtual user's twenty-second loop drawn on a timeline, with a playhead sweeping across it. Three requests are sent: load the feed at zero seconds, open a post at about five seconds, and a like at about eleven seconds which only happens on fifteen percent of loops. Each request brightens as the playhead reaches it. Between them are long reading pauses of three to seven and three to eight seconds, drawn as wide shaded bands, which occupy almost the whole loop. The requests are thin ticks and the reading is wide, so the drawing shows that think time dominates. Underneath, the arithmetic: about two to three requests in roughly twenty seconds gives about 0.1 requests per second per user, and one thousand such users were measured at 83 requests per second against a model estimate near 100. Motion timing is illustrative, not a production measurement. The loop restart is not a system event.</desc><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0 L7 3.5 L0 7" fill="#6d6459"/></marker></defs><style>text{font-family:ui-sans-serif,-apple-system,Segoe UI,Helvetica,Arial,sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.still{display:none}@media(prefers-reduced-motion:reduce){.moving{display:none}.still{display:inline}}@media print{.moving{display:none}.still{display:inline}}</style><rect width="760" height="420" rx="10" fill="#faf9f7"/>
+<text x="32" y="35" class="mono" font-size="16" fill="#6d6459" letter-spacing="1.4">ONE USER IS A LOOP, NOT A FIREHOSE</text>
+<text x="32" y="60" font-size="13" fill="#6d6459">The pauses are the model. Change them and the headline number changes while the server is untouched.</text>
+
+<g class="moving">
+  <rect x="60" y="112" width="160" height="46" rx="4" fill="#2f6f4e" opacity="0.10"/>
+  <rect x="220" y="112" width="192" height="46" rx="4" fill="#2f6f4e" opacity="0.10"/>
+  <rect x="412" y="112" width="288" height="46" rx="4" fill="#2f6f4e" opacity="0.07"/>
+  <text x="140" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading 3-7 s</text>
+  <text x="316" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading 3-8 s</text>
+  <text x="556" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading, then round again</text>
+
+  <line x1="60" y1="172" x2="700" y2="172" stroke="#ded9d1" stroke-width="2"/>
+
+  <rect x="58" y="158" width="4" height="28" rx="1" fill="#2f6f4e" opacity="1">
+    <animate attributeName="opacity" values="1;1;0.3;0.3;1" keyTimes="0;0.03;0.09;0.99;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="218" y="158" width="4" height="28" rx="1" fill="#2f6f4e" opacity="0.3">
+    <animate attributeName="opacity" values="0.3;0.3;1;0.3;0.3" keyTimes="0;0.24;0.27;0.33;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="410" y="158" width="4" height="28" rx="1" fill="#c2703d" opacity="0.3">
+    <animate attributeName="opacity" values="0.3;0.3;1;0.3;0.3" keyTimes="0;0.54;0.57;0.63;1" dur="12s" repeatCount="indefinite"/>
+  </rect>
+
+  <g opacity="0.9">
+    <line x1="0" y1="100" x2="0" y2="196" stroke="#c2703d" stroke-width="1.4" stroke-dasharray="3 3"/>
+    <circle cx="0" cy="172" r="5" fill="#c2703d"/>
+    <animateTransform attributeName="transform" type="translate" values="60,0;700,0" dur="12s" repeatCount="indefinite" calcMode="linear"/>
+  </g>
+
+  <text x="60" y="206" class="mono" font-size="9.5" fill="#2f6f4e" letter-spacing="0.6">LOAD FEED</text>
+  <text x="220" y="206" class="mono" font-size="9.5" fill="#2f6f4e" letter-spacing="0.6">OPEN POST</text>
+  <text x="412" y="206" class="mono" font-size="9.5" fill="#c2703d" letter-spacing="0.6">LIKE · 15% OF LOOPS</text>
+  <text x="412" y="220" class="mono" font-size="9.5" fill="#c2703d" letter-spacing="0.6">POST · 2%</text>
+
+  <text x="60" y="240" class="mono" font-size="9" fill="#8a857d">0 s</text>
+  <text x="220" y="240" class="mono" font-size="9" fill="#8a857d">5 s</text>
+  <text x="412" y="240" class="mono" font-size="9" fill="#8a857d">11 s</text>
+  <text x="700" y="240" text-anchor="end" class="mono" font-size="9" fill="#8a857d">20 s</text>
+</g>
+
+<g class="still">
+  <rect x="60" y="112" width="160" height="46" rx="4" fill="#2f6f4e" opacity="0.10"/>
+  <rect x="220" y="112" width="192" height="46" rx="4" fill="#2f6f4e" opacity="0.10"/>
+  <rect x="412" y="112" width="288" height="46" rx="4" fill="#2f6f4e" opacity="0.07"/>
+  <text x="140" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading 3-7 s</text>
+  <text x="316" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading 3-8 s</text>
+  <text x="556" y="140" text-anchor="middle" font-size="12" fill="#6d6459">reading, then round again</text>
+
+  <line x1="60" y1="172" x2="700" y2="172" stroke="#ded9d1" stroke-width="2"/>
+
+  <rect x="58" y="158" width="4" height="28" rx="1" fill="#2f6f4e"/>
+  <rect x="218" y="158" width="4" height="28" rx="1" fill="#2f6f4e"/>
+  <rect x="410" y="158" width="4" height="28" rx="1" fill="#c2703d"/>
+
+  <text x="60" y="206" class="mono" font-size="9.5" fill="#2f6f4e" letter-spacing="0.6">LOAD FEED</text>
+  <text x="220" y="206" class="mono" font-size="9.5" fill="#2f6f4e" letter-spacing="0.6">OPEN POST</text>
+  <text x="412" y="206" class="mono" font-size="9.5" fill="#c2703d" letter-spacing="0.6">LIKE · 15% OF LOOPS</text>
+  <text x="412" y="220" class="mono" font-size="9.5" fill="#c2703d" letter-spacing="0.6">POST · 2%</text>
+
+  <text x="60" y="240" class="mono" font-size="9" fill="#8a857d">0 s</text>
+  <text x="220" y="240" class="mono" font-size="9" fill="#8a857d">5 s</text>
+  <text x="412" y="240" class="mono" font-size="9" fill="#8a857d">11 s</text>
+  <text x="700" y="240" text-anchor="end" class="mono" font-size="9" fill="#8a857d">20 s</text>
+</g>
+
+<line x1="32" y1="268" x2="728" y2="268" stroke="#ded9d1" stroke-width="1"/>
+
+<text x="32" y="296" font-size="14" fill="#1f2b24">2 to 3 requests, in roughly 20 seconds of loop</text>
+<text x="32" y="322" font-size="14" fill="#1f2b24">Almost all of that time is a person reading, not a server working</text>
+<text x="32" y="350" font-size="16" fill="#2f6f4e">So one concurrent user offers about 0.1 requests per second</text>
+
+<rect x="32" y="366" width="696" height="34" rx="5" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+<text x="44" y="388" font-size="13" fill="#6d6459">Model says about 100 req/s at 1,000 users. Measured: 83. The gap is the spread in the pauses.</text>
+</svg>
