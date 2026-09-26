@@ -1,0 +1,37 @@
+{
+  "example": "b = Node(\"b\", Node(\"c\", Node(\"d\")), Node(\"e\", Node(\"f\")))\ntree_diameter(Node(\"a\", b))",
+  "start": [
+    "Draw `a` with a single child `b`, and give `b` two branches: `c` then `d` on the left, `e` then `f` on the right. The longest path runs from `d` up through `b` and down to `f`, four edges, and never touches `a`. Every path has one highest node, where it turns from going up to going down.",
+    "Postorder: finish both children before their parent. Each node hands its parent one number, its height (nodes on its longest downward branch, 0 for a missing child), and since a parent can extend only one branch, that is `1 + max(left, right)`. The longest path turning at the node has `left + right` edges: keep the best of those over every node, separately.",
+    {"text": "The tests use a 5,000-node chain, so use an explicit stack and put each node on it twice: once to push its children, and once, when their heights are known, to combine them. The shape:", "code": "def tree_diameter(root):\n    if root is None:\n        return 0\n    stack, seen, height = [(root, False)], set(), {}\n    best = 0\n    while stack:\n        node, children_done = stack.pop()\n        if not children_done:\n            ...  # ValueError: not a Node, or already in seen; then add it to seen\n            stack.append((node, True))\n            ...  # push each child that is not None as (child, False)\n            continue\n        ...  # the two children's heights, 0 for a missing child\n        ...  # store this node's height, and let best take the path that turns here\n    return best"}
+  ],
+  "tests": {
+    "test_units_and_deep_chain": [
+      "`None` and a single node both give `0`: the answer counts edges, not nodes. The README's tree gives `3`, from `d` or `e` up through `b` and `a` to `c`. Then a 5,000-node chain of `left` children must give `4999`, and a recursive walk stops at Python's recursion limit of about 1,000 calls long before that.",
+      "The last check hangs the longest path below the root: the root's only child has two branches of three nodes each, answer `6`. The root's own `left + right` is only `4`, so keep the best `left + right` over every node."
+    ],
+    "test_invalid_structure": [
+      "A node whose `left` is itself, a node whose two children are the same object, a node whose `right` is `42`, and `42` as the root must each raise `ValueError`. Check `isinstance(node, Node)` on every node you step onto, and keep a set of the nodes you have entered: meeting one twice means a loop or a shared child."
+    ],
+    "test_all_pairs_distance_oracle": [
+      "150 random trees of 1 to 29 nodes, checked against a breadth-first search from every node that keeps the farthest distance, so the path may start and end anywhere. An answer off by one or two usually mixes units: heights that count nodes, with a missing child at 0, give a path of exactly `left + right` edges."
+    ]
+  },
+  "errors": {
+    "RecursionError": [
+      "“Units and deep chain” builds a 5,000-node chain, and Python stops recursion at about 1,000 calls. Use an explicit stack and handle each node twice: once to push its children, once to combine their heights.",
+      "In “Invalid structure” it can mean a walk went round the node whose `left` is itself. Keep a set of the nodes you have entered and raise `ValueError` on a repeat."
+    ],
+    "AttributeError": [
+      "You read `.left` or `.right` on `42`, the right child and the root in “Invalid structure”. Check `isinstance(node, Node)` before reading a node's children, and raise `ValueError`."
+    ],
+    "KeyError": [
+      "Reading a child's height with `height[node.left]` fails when that child is missing, since `None` never got a height. A missing child has height `0`: read it with `.get(child, 0)`."
+    ]
+  },
+  "stopped": [
+    "A stack loop that never ends is going round the node whose `left` is itself, in “Invalid structure”. Keep a set of the nodes you have entered, and raise `ValueError` on a repeat before pushing its children.",
+    "If each node goes on the stack twice, the second push must be marked as done. A frame that pushes its children every time it comes off the stack refills the stack forever."
+  ],
+  "passing": "All passing. Time a chain of 100,000 nodes as your own input next to one of 50,000: it should take about twice as long, since each node is entered once and finished once. Then the README's first follow-up: what else must each node return so you can name the two end nodes of the longest path?"
+}

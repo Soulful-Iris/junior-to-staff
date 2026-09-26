@@ -1,0 +1,34 @@
+{
+  "example": "subarray_sum_count([1, -1, 0], 0)",
+  "start": [
+    "List by hand every range of `[1, -1, 0]` that sums to `0`: `[1, -1]`, `[1, -1, 0]` and `[0]`, three ranges that overlap. Then notice why a sliding window cannot find them: dropping a `-1` from the left makes the sum bigger, not smaller.",
+    "Keep a running total `prefix` and a dict counting how often each running total has occurred, starting at `{0: 1}` for the empty start before any value. A range ending here sums to `target` exactly when an earlier running total equals `prefix - target`, so add that count, then record `prefix`. In that order: recording first lets a range of length zero count when `target` is `0`.",
+    {"text": "The shape, with the two dict steps left to you:", "code": "def subarray_sum_count(nums, target):\n    ...  # ValueError unless nums is a list or tuple of int (not bool) and target is an int\n    seen = {0: 1}  # running total -> how many times it has occurred\n    prefix = count = 0\n    for x in nums:\n        prefix += x\n        ...  # add how many earlier running totals equal prefix - target\n        ...  # then record this running total\n    return count"}
+  ],
+  "tests": {
+    "test_boundaries": [
+      "`[1, -1, 0]` with `0` gives `3`, `[]` gives `0`, a hundred zeros give `5050`, every one of the 100 × 101 / 2 ranges, and `[10**100, -(10**100)]` gives `1`, with sums far past 64 bits. Then `[True]`, `[1.5]`, a target of `False`, and `nums=None` must each raise `ValueError`.",
+      "On the first line, `1` means the `{0: 1}` seed is missing, so ranges starting at index 0 are lost, and `6` means you recorded the current total before looking it up. A set in place of counts gives `2`. `True` and `False` pass `isinstance(x, int)`, so compare `type(x) is int`."
+    ],
+    "test_range_sum_oracle": [
+      "Every tuple of up to 5 values from `-1`, `0`, `1`, with every target from `-2` to `2`: 1,820 calls, against a brute force that sums every nonempty slice. `nums` is a tuple here, so a type check that accepts only lists raises `ValueError` on valid input.",
+      "If `test_boundaries` passes and this fails, check the sign of the lookup: it is `prefix - target`, not `target - prefix`. Every count `test_boundaries` checks uses target `0`, where that mistake can go unnoticed."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`nums=None` must raise `ValueError`. `'NoneType' object is not iterable` means a loop, or an `any(...)` over the elements, reached `None` before `nums` itself was checked: test that it is a list or tuple first."
+    ],
+    "KeyError": [
+      "`seen[prefix - target]` fails for a running total that has not occurred, and `seen[prefix] += 1` fails the first time a total appears. Read with `seen.get(key, 0)`, and write with `seen[prefix] = seen.get(prefix, 0) + 1`."
+    ],
+    "IndexError": [
+      "A double loop that reads `nums[j]` with `j` up to `len(nums)` runs one past the end: a range `[i, j)` ends at `j`, but its last value is `nums[j - 1]`. When you add `nums[j]`, loop `j` over `range(i, len(nums))`."
+    ]
+  },
+  "stopped": [
+    "If it stopped on a long input of your own, the double loop over every start and end is the cause: 20,000 values are about 200 million ranges. The dict of running totals counts them in one pass of 20,000 steps.",
+    "If the run stopped for output, printing the `seen` dict on every step is the cause: `test_range_sum_oracle` makes 1,820 calls. Print a number or two, or only for your own input."
+  ],
+  "passing": "All passing. As your own input, try `subarray_sum_count([0] * 20000, 0)`: the answer, 200,010,000, is counted in one pass without listing a single range. Then the README's first follow-up: count only ranges of length at most two, where old running totals have to expire."
+}

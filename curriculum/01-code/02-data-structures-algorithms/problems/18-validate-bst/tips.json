@@ -1,0 +1,38 @@
+{
+  "example": "root = Node(10, Node(5), Node(15, Node(6), Node(20)))\nvalidate_bst(root)",
+  "start": [
+    "Put your finger on `6` in `Node(10, Node(5), Node(15, Node(6), Node(20)))`. Its parent `15` is satisfied, since 6 is smaller and on the left. But `6` also sits in the right subtree of `10`, so it must be larger than 10: each node answers to every ancestor above it, not only to its parent.",
+    "Carry an allowed range down the tree: each node gets an exclusive `lower` and `upper`, with `None` for no bound. Stepping left, the node's value becomes the new `upper`; stepping right, it becomes the new `lower`; the other bound passes down unchanged. If every node is inside its range, every ancestor is satisfied.",
+    {"text": "Values must be real `int`s, and `True` is not one, so test `type(value) is int`. A bad node or link raises `ValueError` even after an order violation, so record `False` and keep walking. The shape, on an explicit stack because the tests use a 5,000-node chain:", "code": "def validate_bst(root):\n    if root is None:\n        return True\n    in_order, seen = True, set()\n    stack = [(root, None, None)]  # node, exclusive lower bound, exclusive upper bound\n    while stack:\n        node, low, high = stack.pop()\n        ...  # ValueError: not a Node, already seen, or type(node.value) is not int\n        seen.add(node)\n        ...  # in_order = False unless low < value < high, where a None bound is no bound\n        ...  # push each child that is not None, with the bounds narrowed by this value\n    return in_order"}
+  ],
+  "tests": {
+    "test_ancestor_bounds_and_empty": [
+      "`None` and `Node(2, Node(1), Node(3))` are valid. `Node(10, Node(5), Node(15, Node(6), Node(20)))` is not, since `6` is in 10's right subtree, and `Node(2, Node(2))` is not, since equal values break strict order. Comparing each node only with its own children accepts the `6` tree.",
+      "It also uses the values `-(10**100)` and `10**100`, far outside `sys.maxsize` or any 64-bit sentinel, so use `None` for a missing bound. And it ends with a 5,000-node chain of `right` children, past Python's recursion limit of about 1,000 calls: walk with an explicit stack."
+    ],
+    "test_structural_errors_even_after_order_failure": [
+      "Five inputs must each raise `ValueError`: `Node(True)`, a right child of `42`, a node whose `left` and `right` are the same object, a node whose `left` is itself, and `42` as the root. `isinstance(True, int)` is `True`, because `bool` is a subclass of `int`: test `type(value) is int`.",
+      "Three of them break the order as well: `4` sits left of `2`, the shared `Node(2)` sits left of `1`, and the self-loop puts `1` below itself. A walk that stops at the first violation, as `check(left) and check(right)` does, returns `False` before it reaches the `42` on the right. Record the violation and keep walking."
+    ],
+    "test_inorder_oracle": [
+      "400 random trees up to 5 levels deep with values from -10 to 10, compared with the inorder rule: reading left subtree, node, right subtree must give strictly increasing values. Many trees are `None`, which is valid, and most of the others are not BSTs.",
+      "Equal values fail on either side: `Node(2, right=Node(2))` is `False` too. “Ancestor bounds and empty” only has a duplicate on the left, so a check that rejects `value < lower` where it should reject `value <= lower` first fails here."
+    ]
+  },
+  "errors": {
+    "RecursionError": [
+      "“Ancestor bounds and empty” ends with a 5,000-node chain, and Python stops recursion at about 1,000 calls. Keep `(node, lower, upper)` frames on a list and loop until it is empty.",
+      "In “Structural errors even after order failure” it means a node came round again: a walk that keeps going after a violation, with no set of seen nodes, goes down the self-loop forever. Raise `ValueError` as soon as a node you have visited turns up again."
+    ],
+    "AttributeError": [
+      "You read `.value`, `.left` or `.right` on `42`, which “Structural errors even after order failure” uses as the root and as a right child. Check `isinstance(node, Node)` before reading anything from a node, and raise `ValueError`."
+    ],
+    "TypeError": [
+      "A comparison between an `int` and `None` raises this: a missing bound was compared instead of skipped. Test `lower is not None` before comparing with `lower`, and the same for `upper`."
+    ]
+  },
+  "stopped": [
+    "A stack loop that never ends is going round the self-loop in “Structural errors even after order failure”, a node whose `left` is itself. Keep a set of the nodes you have visited and raise `ValueError` when one comes back, without changing the link."
+  ],
+  "passing": "All passing. Try the README's first follow-up, duplicates allowed only in right subtrees: a right step then gives an inclusive lower bound and a left step still an exclusive upper one, so each bound must carry which kind it is. Or time a chain of 100,000 `right` children as your own input next to one of 50,000: it should take about twice as long."
+}

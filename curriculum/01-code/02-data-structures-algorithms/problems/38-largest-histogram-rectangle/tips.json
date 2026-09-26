@@ -1,0 +1,37 @@
+{
+  "example": "largest_rectangle([1, 2, 3, 4])",
+  "start": [
+    "Every rectangle is as tall as its shortest bar. So ask, for each bar, how far it could stretch left and right before meeting a shorter bar. In `[2, 1, 5, 6, 2, 3]` the `5` stretches over itself and the `6`, area 10; the `1` stretches across all six bars, area 6.",
+    "A stack of bars whose right edge is not known yet, heights increasing from bottom to top, each kept as `(start, height)`. A lower bar closes every taller bar on top, and each closed bar scores `height * (i - start)`. The lower bar then takes the start of the last bar it popped, because it can reach back that far. After the real bars, one of height 0 closes whatever is left.",
+    {"text": "The shape, with the scoring and the push left to you:", "code": "def largest_rectangle(heights):\n    heights = list(heights)   # a copy: tuples arrive, and the caller's list must not change\n    ...  # ValueError for a negative or non-int height\n    best, pending = 0, []     # pending: (start, height) pairs, heights increasing\n    for i, h in enumerate(heights + [0]):   # the final 0 closes everything\n        start = i\n        while pending and pending[-1][1] > h:\n            start, tall = pending.pop()\n            ...  # score the rectangle of height tall from start up to i\n        ...  # push (start, h)\n    return best"}
+  ],
+  "tests": {
+    "test_examples_plateau_and_flush": [
+      "Six cases: `[2, 1, 5, 6, 2, 3]` is 10, `[2, 2, 2]` is 6, `[1, 2, 3, 4]` is 6, `[4, 3, 2, 1]` is 6, `[2, 0, 2]` is 2, and `[]` is 0. Equal bars must join into one wide rectangle, and a zero splits the chart in two.",
+      "If `[1, 2, 3, 4]` or `[2, 2, 2]` comes out too small, bars still on the stack at the end were never scored: nothing shorter came along to close them. Run one extra bar of height 0 after the real ones."
+    ],
+    "test_exhaustive_interval_oracle": [
+      "Every histogram of up to six bars with heights 0, 1 or 2, compared with the best `min(heights[a:b]) * (b - a)` over all intervals. The inputs are tuples, so `heights.append(0)` or `heights + [0]` fails here: make a list first.",
+      "A wrong area here usually means a popped bar's width starts in the wrong place. Its rectangle reaches left past its own index, to just after the bar beneath it on the stack, or to 0 if the stack is empty. With `(start, height)` pairs, that is the start you carried back."
+    ],
+    "test_validation_and_no_mutation": [
+      "Calls it with `[1, 2]`, then checks the list is still `[1, 2]`: appending the closing `0` to the caller's list is exactly what this catches. Then `[-1]` and `[1.5]` must raise ValueError, so check every height is a nonnegative `int` first."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "`stack[-1]` on an empty stack, usually when working out the width after a pop: if the stack is now empty, the popped bar reaches all the way back to index 0. Test `if stack` before reading `stack[-1]`."
+    ],
+    "AttributeError": [
+      "`'tuple' object has no attribute 'append'`: the exhaustive test passes tuples. Walk `list(heights) + [0]` instead of appending to the input, which also leaves the caller's list unchanged."
+    ],
+    "TypeError": [
+      "`can only concatenate tuple (not \"list\") to tuple`: `heights + [0]` on a tuple from the exhaustive test. Convert first, with `list(heights) + [0]`."
+    ]
+  },
+  "stopped": [
+    "The inner `while` that closes taller bars must `pop()` on every turn. If it only reads the top to score an area, the top never changes, the comparison stays true, and the loop never ends.",
+    "In a version that walks with `while i < len(heights)`, `i` must advance exactly when a bar is pushed, and the other branch must pop. If one branch does neither, the same comparison repeats forever."
+  ],
+  "passing": "All passing. Try a staircase as your own input, `list(range(1, 20001))`: nothing closes until the final height-0 bar, which then pops all 20,000 bars at once, and the time still grows linearly. Then the follow-up: the largest rectangle of 1s in a binary matrix, one histogram per row."
+}

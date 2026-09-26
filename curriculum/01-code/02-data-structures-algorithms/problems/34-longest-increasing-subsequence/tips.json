@@ -1,0 +1,42 @@
+{
+  "example": "longest_increasing_subsequence([3, 5, 6, 2, 4])",
+  "start": [
+    "Among increasing runs of the same length, the one that ends on the smallest value is the most useful: any later value that extends another one extends it too. In `[10, 9, 2, 5, 3, 7, 101, 18]`, after reading `3` the length-2 run worth keeping is `2, 3`, not `2, 5`.",
+    "Keep `tails`, where `tails[k]` is the smallest value that ends any increasing run of length `k + 1` so far. It stays sorted, so `bisect_left(tails, x)` says where `x` goes: past the end it extends the longest run, anywhere else it lowers that tail, and an equal value replaces rather than extends, which keeps runs strict. `tails` is a summary, not an answer: for each input position also record the position of the value it extends, and walk those links back at the end.",
+    {
+      "text": "The shape, with the bookkeeping left to you. `ends` holds the input position of each tail, so a new value's predecessor is the position ending the run one shorter:",
+      "code": "import bisect\n\ndef longest_increasing_subsequence(values):\n    values = list(values)\n    ...  # ValueError unless every value is an int\n    tails, ends = [], []           # per run length: smallest end value, and its position\n    prev = [-1] * len(values)      # prev[i]: position before i in its run, -1 for none\n    for i, x in enumerate(values):\n        k = bisect.bisect_left(tails, x)\n        if k:\n            ...  # prev[i] is the position ending the best run of length k\n        if k == len(tails):\n            ...  # append x to tails and i to ends\n        else:\n            ...  # overwrite slot k of both with x and i\n    out, i = [], (ends[-1] if ends else -1)\n    while i != -1:\n        ...  # append values[i], then step to prev[i]\n    return out[::-1]"
+    }
+  ],
+  "tests": {
+    "test_example_duplicates_and_empty": [
+      "`[10, 9, 2, 5, 3, 7, 101, 18]` is compared with `==` against exactly `[2, 3, 7, 18]`, though `[2, 5, 7, 101]` is just as long. Also `[2, 2, 2]` must give `[2]` (strictly increasing), `[]` must give `[]`, and `[5, 4, 3, 2]` any single value.",
+      "The `tails` method with `bisect_left` and predecessor links returns `[2, 3, 7, 18]` as it is. A quadratic DP gets it by keeping the later of equally long predecessors (update on `>=`) and walking back from the last position with the maximum length; the usual first-found choices give `[2, 5, 7, 101]`."
+    ],
+    "test_exhaustive_subset_oracle": [
+      "60 seeded random lists of eight values from `-3` to `4`, so repeats are common. For each, your answer's length must equal the best found by trying every subset, it must be strictly increasing (no equal neighbours), and its values must appear in the input in that order.",
+      "A length that is too long usually means equal values were allowed to extend a run: `bisect_right`, or `<=` where `<` belongs. Values out of input order mean you returned `tails` itself, or rebuilt from the wrong links: walk the predecessor positions back from the end of the longest run."
+    ],
+    "test_tails_are_not_necessarily_a_subsequence": [
+      "`[3, 5, 6, 2, 4]` must return `[3, 5, 6]`. At the end `tails` is `[2, 4, 6]`, increasing and the right length but not a subsequence: `6` comes before `2` and `4` in the input. Rebuild the answer from predecessor positions instead of returning `tails`.",
+      "The same test calls it with `[1, None]` and expects ValueError. Check that every value is an `int` before comparing anything, or `bisect` raises TypeError comparing `None` with a number."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`[1, None]` got as far as a comparison: `bisect`, or `values[j] < values[i]`, cannot order `None` and an `int`. The contract wants ValueError, so check `isinstance(x, int)` for every value first."
+    ],
+    "IndexError": [
+      "Usually the empty input: reading `[-1]` of your tails or positions list fails when `values` is `[]`, because nothing was ever added. Return `[]` before the walk back when there is nothing to walk.",
+      "Or `ends[k - 1]` with `k = 0`: the first value has nothing before it, and on later values `ends[-1]` would quietly link to the wrong run. Record a predecessor only when `k > 0`."
+    ],
+    "ValueError": [
+      "If it comes from `max()`, the input was `[]`: `max()` of an empty sequence raises ValueError. “Example duplicates and empty” expects `[]` back for `[]`, so handle it before looking for the longest run."
+    ]
+  },
+  "stopped": [
+    "The loop that walks predecessor links back must stop on exactly the marker you stored for no predecessor. Storing `-1` but testing `is not None` never stops: Python reads `prev[-1]` as the last entry, so the walk cycles.",
+    "A hand-written binary search spins when one branch sets `lo = mid` instead of `lo = mid + 1`: once `hi == lo + 1`, `mid` is `lo` again. Use `bisect_left`, or make sure every branch shrinks the range."
+  ],
+  "passing": "All passing. Try a long input as your own, such as `longest_increasing_subsequence([(i * 7919) % 20000 for i in range(20000)])`: with `bisect` it finishes well under a second, where a quadratic DP would compare about 200 million pairs. Then try the follow-up, the longest non-decreasing subsequence: which search boundary changes?"
+}

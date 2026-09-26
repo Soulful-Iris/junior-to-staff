@@ -1,0 +1,38 @@
+{
+  "example": "d = Node(\"d\")\nb = Node(\"b\", d)\na = Node(\"a\", b, Node(\"c\"))\nlowest_common_ancestor(a, d, b)",
+  "start": [
+    "Picture folders: `a` holds `b` and `c`, and `b` holds `d`. For `d` and `b` the answer is `b`, since a folder counts as containing itself. For `d` and a node that is not in the tree the answer is `None`, even though you found `d`: finding one of them proves nothing about the other.",
+    "Work bottom up, children before parents: each subtree reports a mask of what it contains (1 for `p`, 2 for `q`, 3 for both, matched with `is`) and its answer, if it has one. A node combines its children's masks with its own matches using `|`, and the first node to reach 3 with no answer from below becomes the answer. A parent passes a lower answer up unchanged, and a root mask below 3 means `None`.",
+    {"text": "The tests walk a 5,000-node chain, so use an explicit stack and put each node on it twice: once to push its children, and once, after they are done, to combine their reports. The shape:", "code": "def lowest_common_ancestor(root, p, q):\n    ...  # ValueError unless p and q are both Node objects\n    if root is None:\n        return None\n    stack, seen, report = [(root, False)], set(), {}\n    while stack:\n        node, children_done = stack.pop()\n        if not children_done:\n            ...  # ValueError: not a Node, or already in seen; then add it to seen\n            stack.append((node, True))\n            ...  # push each child that is not None as (child, False)\n            continue\n        ...  # mask: both children's masks (0 for a missing child), plus 1 if node is p, 2 if node is q\n        ...  # answer: a child's answer if there is one, else node when the mask is 3\n        ...  # report[node] = (mask, answer)\n    ...  # the root's answer, or None unless its mask is 3"}
+  ],
+  "tests": {
+    "test_identity_presence_and_depth": [
+      "Every node holds `7`, so only `is` tells them apart. With `a` over `b` and `c`, and `d` under `b`: `(d, b)` gives `b`, `(d, c)` gives `a`, `(d, d)` gives `d`, and `(d, Node(7))` gives `None`, since that new node is not in the tree. Returning the first of `p` or `q` you meet answers `d` there.",
+      "An empty tree gives `None`. Then a 5,000-node chain of `right` children asks about `nodes[123]` and the last node, answer `nodes[123]`: a recursive walk stops at Python's recursion limit of about 1,000 calls long before the bottom."
+    ],
+    "test_invalid_structure_even_when_answer_seems_known": [
+      "Each root is queried with `p` as both nodes: a node with `p` as both children, a node with `p` on the left and `42` on the right, a node whose `right` is itself, and `42`. All four must raise `ValueError`, although `p` is found on the left in the first two. Check every node, not just until the answer is known, and keep a set of the nodes you have entered: one met twice is a shared child or a loop.",
+      "`lowest_common_ancestor(p, None, p)` must raise `ValueError` as well: check that `p` and `q` are both `Node` objects before walking."
+    ],
+    "test_root_path_oracle": [
+      "50 random trees of 1 to 24 nodes, all holding `7`, with 30 random `(p, q)` pairs each, drawn from the tree's nodes plus one node outside it. Some pairs are one node twice, some have one node above the other, and a pair with the outside node must give `None`. The expected answer is the last node shared by the two root-to-node paths."
+    ]
+  },
+  "errors": {
+    "RecursionError": [
+      "“Identity presence and depth” ends with a 5,000-node chain, and Python stops recursion at about 1,000 calls. Use an explicit stack and handle each node twice: first to push its children, then, once they are done, to combine their reports.",
+      "In “Invalid structure even when answer seems known” it can mean a walk went round the node whose `right` is itself. Keep a set of the nodes you have entered and raise `ValueError` on a repeat."
+    ],
+    "AttributeError": [
+      "You read `.left` or `.right` on `42`: “Invalid structure even when answer seems known” uses it as a right child and as the root. Check `isinstance(node, Node)` on every node you step onto, and raise `ValueError`."
+    ],
+    "KeyError": [
+      "A dict of subtree reports read with `report[node.left]` fails when that child is missing: `None` never got a report. Give a missing side a default, nothing found and no answer, with `.get`."
+    ]
+  },
+  "stopped": [
+    "A stack loop that never ends is going round the node whose `right` is itself, in “Invalid structure even when answer seems known”. Keep a set of the nodes you have entered, and raise `ValueError` on a repeat before pushing its children.",
+    "If each node goes on the stack twice, the second push must be marked as done. A frame that pushes its children every time it comes off the stack refills the stack forever."
+  ],
+  "passing": "All passing. Time a chain of 100,000 `right` children as your own input, with `p` near the top and `q` at the bottom. Then the README's second follow-up: if one unchanged tree must answer thousands of queries, what would you compute once so that each query costs less than a full walk?"
+}

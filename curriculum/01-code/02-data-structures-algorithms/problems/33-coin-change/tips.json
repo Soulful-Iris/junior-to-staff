@@ -1,0 +1,38 @@
+{
+  "example": "minimum_coins([1, 3, 4], 6)",
+  "start": [
+    "Ask what the last coin of the best answer for `6` could be: `1`, `3` or `4`. Whichever it is, the coins before it must pay `5`, `3` or `2` in as few coins as possible. Taking the biggest coin first gives `4 + 1 + 1`, three coins, while `3 + 3` needs two.",
+    "Dynamic programming over amounts. Let `best[a]` be the fewest coins that sum to exactly `a`: `best[0] = 0`, and every other cell starts at a sentinel meaning unreachable, such as `amount + 1`. Fill `a` upward, since `best[a]` only reads `best[a - c]` for smaller amounts. The list of coins needs one more table: `last[a]`, the coin that gave `a` its best count.",
+    {"text": "Rebuild the list at the end by walking back from `amount`, subtracting the recorded coin each time. The shape, with the table update and the walk left to you:", "code": "def minimum_coins(coins, amount):\n    ...  # ValueError for a coin that is not a positive int, or a bad amount\n    INF = amount + 1               # more coins than any real answer needs\n    best = [0] + [INF] * amount    # best[a]: fewest coins summing to a\n    last = [None] * (amount + 1)   # last[a]: the coin that achieved best[a]\n    for a in range(1, amount + 1):\n        for c in set(coins):\n            if c <= a:\n                ...  # if best[a - c] + 1 beats best[a], record both\n    if best[amount] == INF:\n        return -1, []\n    used, rest = [], amount\n    while rest:\n        ...  # append last[rest], then subtract it from rest\n    return best[amount], used"}
+  ],
+  "tests": {
+    "test_greedy_failure_and_witness": [
+      "Four exact comparisons: `([1, 3, 4], 6)` must give `(2, [3, 3])`, the case largest-coin-first gets wrong; `([2, 2], 3)` gives `(-1, [])`, with a repeated coin; `([], 0)` gives `(0, [])` and `([], 5)` gives `(-1, [])`. An empty coin list is valid input, not an error.",
+      "The result is compared with `==`, so its shape matters: a tuple of a count and a list. `[2, [3, 3]]` or `(2, (3, 3))` is not equal to `(2, [3, 3])`, and neither is `(-1, None)` or a count of `inf` for an impossible amount."
+    ],
+    "test_against_bfs_amount_oracle": [
+      "Every amount from 0 to 34 for coins `[1, 3, 4]`, `[2, 5]` and `[4, 6, 9]`, against a breadth-first search that finds the true fewest coins, or `-1`. When the count is not `-1`, your list must also have that many coins, sum to the amount, and use only given coins. Many amounts are unreachable (`1` and `3` with `[2, 5]`), and greedy fails on others: `12` is `6 + 6`, but taking `9` first leaves `3`.",
+      "If counts are wrong for small amounts, check that you skip coins larger than the amount: `best[a - c]` with `c > a` is a negative index, so Python quietly reads a cell from the end of the table, or raises IndexError when the table is shorter than the coin. If counts are right but lists are not, rebuild the list from the coins you recorded, walking back from `amount`."
+    ],
+    "test_invalid": [
+      "`minimum_coins([0], 1)`, `minimum_coins([-2], 3)` and `minimum_coins([1], -1)` must each raise ValueError. A zero or negative coin never brings the amount closer to `0`, so check every coin, and the amount, before building anything.",
+      "Without those checks a coin of `0` either returns `(-1, [])` quietly or recurses on the same amount forever, and `-2` makes `best[a - c]` point past the end of the table."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "Usually `best[a - c]` with a negative coin: in `test_invalid`, `c = -2` makes `a - c` larger than `a`, past the end of the table. Raise ValueError for coins that are not positive before filling. It can also be a table one cell short: amounts `0` to `amount` need `amount + 1` cells."
+    ],
+    "RecursionError": [
+      "A recursive `solve(amount - coin)` never reaches `0` when the coin is `0` or negative, as in `test_invalid`: it calls itself on the same or a larger amount until Python gives up. Validate the coins before the first recursive call."
+    ],
+    "ValueError": [
+      "A ValueError from a valid call is your own code. `min()` over an empty sequence raises it when no coin fits an amount, or when `coins` is `[]`, which two assertions use: give `min` a `default=`, or compare against a sentinel. Also check you are not rejecting `[]` or amount `0`: both are allowed."
+    ]
+  },
+  "stopped": [
+    "Plain recursion over `amount - coin` solves the same smaller amounts again and again: every amount up to 34 with coins `[1, 3, 4]` takes tens of millions of calls. Store each amount's answer the first time you compute it (a dict or `functools.lru_cache`), or fill a table from `0` upward.",
+    "If the loop that rebuilds the coin list never ends, `rest` is not shrinking: usually the amount was unreachable and `last[rest]` still holds a starting value of `0`. Return `(-1, [])` before rebuilding when `best[amount]` is still the sentinel."
+  ],
+  "passing": "All passing. Run `minimum_coins([7, 11, 13], 2000)` and then `20000` as your own inputs and compare time and memory: both grow with the amount itself, not with how many digits it has, which is the pseudopolynomial cost the lesson warns about. Then try the follow-up where each coin can be used at most once."
+}

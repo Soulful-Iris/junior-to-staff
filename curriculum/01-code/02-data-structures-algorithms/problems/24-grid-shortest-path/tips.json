@@ -1,0 +1,43 @@
+{
+  "example": "grid = [[0, 1, 0], [0, 1, 0], [0, 0, 0]]\nshortest_grid_path(grid, (0, 0), (0, 2))",
+  "start": [
+    "Label every open cell with the number of moves it takes to reach it from `start`: 0 for `start`, 1 for its open neighbours, 2 for theirs, spreading one ring at a time like water. The first ring that touches `goal` gives the shortest distance. To return the route and not just the distance, each cell also has to remember which cell reached it first.",
+    "That spreading is breadth-first search: a `deque` of cells, `popleft()` to take the oldest, and a `parent` dict from each discovered cell to the cell it was found from. Put a cell in `parent` when you append it, so it is queued once. Cells leave the queue in order of distance, so when `goal` comes out, following `parent` back to `start` gives a shortest route. Validate, and check both endpoints for walls, before searching.",
+    {"text": "The shape, with validation, the neighbour test and the walk back left to you. Return a list of `(row, col)` tuples from `start` to `goal`.", "code": "from collections import deque\n\ndef shortest_grid_path(grid, start, goal):\n    ...  # ValueError: empty or ragged grid, a cell not 0 or 1, an endpoint off the grid\n    start = tuple(start)\n    goal = tuple(goal)\n    if ...:  # start or goal is a wall\n        return []\n    height = len(grid)\n    width = len(grid[0])\n    parent = {start: None}\n    queue = deque([start])\n    while queue:\n        r, c = queue.popleft()\n        if (r, c) == goal:\n            ...  # walk parent from goal back to None, reverse, return the path\n        for nr, nc in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):\n            if ...:  # on the grid, open, and not in parent yet\n                parent[(nr, nc)] = (r, c)\n                queue.append((nr, nc))\n    return []"}
+  ],
+  "tests": {
+    "test_detour_and_no_mutation": [
+      "The grid is `[[0, 1, 0], [0, 1, 0], [0, 0, 0]]`, from `(0, 0)` to `(0, 2)`: the only route goes down, along the bottom and back up, and all 7 cells are compared exactly. Each cell must be a tuple: `[0, 0]` is not equal to `(0, 0)`, so a path of lists fails even when the route is right.",
+      "Then the grid must equal a copy taken before the call. Writing into `grid` to mark cells as visited changes the caller's map: keep visited cells in your own `parent` dict or set."
+    ],
+    "test_boundaries": [
+      "`[[0]]` from `(0, 0)` to itself must give `[(0, 0)]`: zero moves, but the path still holds the cell. `[[1]]` with the same endpoints must give `[]`, because the start is a wall, so check walls before any `start == goal` shortcut.",
+      "`[[0, 1, 0]]` from `(0, 0)` to `(0, 2)` must give `[]`: the wall cuts the only row, the queue empties without reaching `goal`, and the function must then return `[]`, not `None`."
+    ],
+    "test_open_grid_distance": [
+      "An open grid of 6 rows and 8 columns, from `(0, 0)` to `(5, 7)`. Any route is accepted if it has 12 moves (13 cells) and every step changes the row or the column by exactly one. Depth-first search finds a route, but usually a much longer one: take cells from the front of the queue with `popleft()`.",
+      "Off by one means an endpoint is missing: the path starts with `start` and ends with `goal`. A diagonal step, or two cells in a row that are not neighbours, fails the step check."
+    ],
+    "test_invalid": [
+      "Each case must raise `ValueError`: an empty grid `[]`, a ragged grid `[[0], [0, 0]]`, a cell holding `2`, and a start of `(-1, 0)`. The goal is `(0, 0)` every time, so a search on these either finishes quietly or crashes with some other error: validate first.",
+      "`(-1, 0)` is the one people miss: `grid[-1][0]` is valid Python and reads the last row, so nothing fails by itself. Check `0 <= row < len(grid)` and the same for the column. A cell holding `2` is truthy, so without an explicit check it quietly acts as a wall."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "`list index out of range` in the neighbour loop means `grid[nr][nc]` was read before the bounds check. Put `0 <= nr < len(grid) and 0 <= nc < len(grid[0])` first in the same `if`, so `and` stops before the lookup. The `>= 0` half matters: a negative index does not raise, it wraps to the far edge.",
+      "In `test_invalid` it comes from `grid[0]` on the empty grid `[]`. Check `not grid` first and raise `ValueError`."
+    ],
+    "TypeError": [
+      "`unhashable type: 'list'` means a cell went into a set or a dict key as a list like `[r, c]`. Use tuples, `(r, c)`, for everything you store in `parent` or a visited set, and in the path you return."
+    ],
+    "KeyError": [
+      "A `KeyError` while walking back means a cell in the chain is missing from `parent`, most often `start` itself. Store `start` with parent `None` before the loop, then walk from `goal` until you reach `None`."
+    ]
+  },
+  "stopped": [
+    "Stopped in the loop that walks back along `parent`: the chain goes round in a circle. A cell's parent was overwritten after it was first found, often `start` getting a parent when a neighbour looked back at it. Only give a parent to a cell that is not in `parent` yet.",
+    "Stopped in the search itself, usually on the open 6 by 8 grid: cells are queued again and again, because every cell re-queues the neighbour it came from unless you skip cells already found. Trying every route by backtracking and keeping the shortest never finishes there either. Queue each cell once."
+  ],
+  "passing": "All passing. Time a big open grid as your own input, `shortest_grid_path([[0] * 200 for _ in range(200)], (0, 0), (199, 199))`: time and memory should grow with the number of cells, 40,000 here, and no faster. Then the README's follow-up: what changes if diagonal moves are allowed, and may a diagonal cut past the corner of a wall?"
+}

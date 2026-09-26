@@ -1,0 +1,38 @@
+{
+  "example": "d = Node(\"d\")\na = Node(\"a\", Node(\"b\", right=d), Node(\"c\"))\ntree_level_order(a)",
+  "start": [
+    "Draw the README's tree: `a` on top, `b` and `c` below it, `d` under `b`. Read it row by row, left to right, like lines on a page. The catch is that you find `d` while you are still reading the `b, c` row, and it has to wait for the next one.",
+    "Breadth-first search with a queue, a `collections.deque` emptied with `popleft()`. Keep this true: when a level starts, the queue holds exactly that level, left to right. Count `len(queue)` before popping anything, pop exactly that many, and queue each node's `left` then `right`: they wait for the next level.",
+    {"text": "A set of the nodes you have queued is what turns a cycle or a shared child into a `ValueError` instead of an endless queue. The shape, with the children left to you:", "code": "from collections import deque\n\ndef tree_level_order(root):\n    if root is None:\n        return []\n    ...  # a root that is not a Node: ValueError\n    queue, queued, levels = deque([root]), {root}, []\n    while queue:\n        level = []\n        for _ in range(len(queue)):  # only the nodes already waiting\n            node = queue.popleft()\n            level.append(node.value)\n            ...  # left, then right: skip None, ValueError for a non-Node or a node already queued, queue the rest\n        levels.append(level)\n    return levels"}
+  ],
+  "tests": {
+    "test_examples_depth_and_identity": [
+      "The README's tree must give `[[\"a\"], [\"b\", \"c\"], [\"d\"]]`: if `d` lands in an earlier list, a level is also reading the children queued during it. Two different nodes both holding `\"x\"` must both appear, and `None` gives `[]`, not `[[]]`.",
+      "The last check is a 3,000-node chain of `right` children, one node per level. A recursive walk passes the small trees and stops here at Python's recursion limit of about 1,000 calls; a loop over a queue has no depth limit."
+    ],
+    "test_reject_graphs_and_malformed_links": [
+      "`42` as the root, `42` as a `left` child, and a node whose `left` and `right` are the same object must each raise `ValueError`. Check that the root and each child is a `Node`, and keep a set of the nodes already queued: a child found in it is shared.",
+      "Then a node whose `left` is itself must raise `ValueError`, and afterwards `root.left is root` must still hold. The same set of queued nodes catches the loop without changing any link."
+    ],
+    "test_dfs_depth_oracle": [
+      "200 random trees up to 6 levels deep, with values from 0 to 3 so repeats are everywhere, compared with a recursive walk that files each value under its depth, left child before right. Some trees are `None` and expect `[]`, and branches end at different depths: no level may be dropped, merged, or added empty at the end."
+    ]
+  },
+  "errors": {
+    "AttributeError": [
+      "You read `.value`, `.left` or `.right` on something that is not a `Node`: “Reject graphs and malformed links” passes `42` as the root and as a `left` child, and a `None` child that went into the queue fails the same way. Skip `None` children, and raise `ValueError` for anything else that is not a `Node`."
+    ],
+    "RecursionError": [
+      "“Examples depth and identity” ends with a 3,000-node chain, and Python stops recursion at about 1,000 calls. Level order needs no recursion: a `while` loop over a queue.",
+      "In “Reject graphs and malformed links” it means a walk went round the node whose `left` is itself. Record each node you queue, and raise `ValueError` when a child is already recorded."
+    ],
+    "RuntimeError": [
+      "`deque mutated during iteration`: a `for node in queue:` loop appended children to the deque it was reading. Take nodes off with `popleft()` instead, in a loop that runs as many times as the queue was long when the level started."
+    ]
+  },
+  "stopped": [
+    "A queue that never empties means some node keeps being queued again. In “Reject graphs and malformed links”, `root.left` is the root itself: without a record of the nodes already queued, it goes back in on every turn. Check each child against that set before appending it, and raise `ValueError` on a repeat.",
+    "If you collect each level's children in a second list, switch the loop over to that list at the end of every turn. Without that assignment the `while` loop reads the same level forever."
+  ],
+  "passing": {"text": "All passing. Time a wide tree as your own input, this complete tree of 65,535 nodes. If your queue is a list emptied with `pop(0)`, switch to `deque.popleft()` and time it again: every `pop(0)` shifts all the nodes still waiting behind it.", "code": "nodes = [Node(i) for i in range(65535)]\nfor i in range(32767):\n    nodes[i].left, nodes[i].right = nodes[2 * i + 1], nodes[2 * i + 2]\ntree_level_order(nodes[0])"}
+}

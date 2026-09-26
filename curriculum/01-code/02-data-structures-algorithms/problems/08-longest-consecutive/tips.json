@@ -1,0 +1,35 @@
+{
+  "example": "longest_consecutive([100, 4, 200, 1, 3, 2, 2])",
+  "start": [
+    "Forget the order the numbers arrive in and put them on a number line. `[100, 4, 200, 1, 3, 2, 2]` becomes the islands `1 2 3 4`, `100` and `200`, and the answer is the size of the biggest island. The second `2` lands on the same spot, so it adds nothing.",
+    "Put the values in a set, so each membership check is one lookup. Only a value whose predecessor, `v - 1`, is missing starts a run; from each start, count upward while the next value is present. Every value is then walked once in total, which keeps it linear, where walking from every value is quadratic on `[1, 2, ..., n]`.",
+    {"text": "The shape, with the start test and the walk left to you:", "code": "def longest_consecutive(nums):\n    ...  # ValueError unless nums is a list or tuple of int (not bool)\n    present = set(nums)\n    best = 0\n    for v in present:\n        if ...:  # v is not the start of a run\n            continue\n        length = 1\n        ...  # while the next value up is present, extend length\n        best = max(best, length)\n    return best"}
+  ],
+  "tests": {
+    "test_boundaries": [
+      "`[100, 4, 200, 1, 3, 2, 2]` gives `4`, `[-1, 1, 0]` gives `3` across zero, `[]` gives `0`, and 200 copies of `1` plus `1` to `199` give `199`: copies never lengthen a run. `[\"1\"]` must raise `ValueError`.",
+      "A sorting answer that updates `best` only when a run breaks never counts the last run, so `[-1, 1, 0]` comes out short. `5` on the first line means the second `2` counted; `3` means it broke the run. `[]` must return `0`: `max()` of no runs raises `ValueError`, and a count that starts at `1` returns `1`."
+    ],
+    "test_sorted_oracle": [
+      "Every tuple of up to 5 values from `-2` to `2`, 3,906 of them, against a count over `sorted(set(nums))`. `nums` is a tuple here: `nums.sort()` fails, and a type check that accepts only lists raises `ValueError` on valid input. `sorted(nums)` and `set(nums)` work for both.",
+      "If only this test fails, try a single value, `(2,)`, and values with no neighbours, `(-2, 0, 2)`: each is a run of length `1`, so the answer is `1`, not `0`. A `best` that only grows when two neighbours are found misses them."
+    ]
+  },
+  "errors": {
+    "ValueError": [
+      "A `ValueError` from `max()` means it was given no runs at all: that is `[]`, which must return `0`. If it is your own `ValueError` on valid input, your type check is too strict: `test_sorted_oracle` passes tuples."
+    ],
+    "AttributeError": [
+      "`'tuple' object has no attribute 'sort'`: `test_sorted_oracle` passes tuples, and sorting in place would change the caller's list anyway. `sorted(nums)` returns a new list; or skip sorting and use a set."
+    ],
+    "TypeError": [
+      "`[\"1\"]` must raise `ValueError`; without a type check, the walk computes `\"1\" - 1` and raises `TypeError` instead. Check that every element is exactly an `int`, not a `bool`, before building the set."
+    ]
+  },
+  "stopped": [
+    "The walk up a run must step to the next value on every turn: in `while end in present:`, something has to add one to `end`. If the value it tests never changes, the loop finds the same member forever.",
+    "If it stopped on a long input of your own, check that the walk starts only where `v - 1` is missing. Walking from every value is quadratic on one long run: 20,000 values in a row are about 200 million steps.",
+    "If the run stopped for output, a `print` inside the walk adds up fast: `test_boundaries` walks a run of 199 values, and `test_sorted_oracle` makes 3,906 calls. Printing the whole set there fills the allowance."
+  ],
+  "passing": "All passing. As your own input, try `longest_consecutive(list(range(20000, 0, -1)))`, one run of 20,000 in reverse order: each value is walked once, so it takes a fraction of a second. Then the README's second follow-up: report the longest run after every insertion, without rescanning."
+}

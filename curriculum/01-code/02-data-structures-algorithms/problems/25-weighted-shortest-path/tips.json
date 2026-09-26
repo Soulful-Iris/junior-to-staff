@@ -1,0 +1,48 @@
+{
+  "example": "graph = {\"A\": [(\"B\", 8), (\"C\", 1)], \"C\": [(\"B\", 2)], \"B\": []}\nweighted_shortest_path(graph, \"A\", \"B\")",
+  "start": [
+    "Work the README's graph by hand: `A → B` costs 8, `A → C` 1, `C → B` 2. You meet B first, at 8, but C is cheaper, and going on from C reaches B at 3. A cost is only safe to call final when it is the cheapest of everything still waiting: with no negative edges, nothing still waiting can lead back to it more cheaply.",
+    "That is Dijkstra's algorithm. Keep a min-heap (`heapq`) of `(cost, n, vertex)` entries, where `n` comes from a counter so ties never compare vertices, a `best` dict of the cheapest cost known, and a `parent` dict. Pop the cheapest entry and skip it if `best[vertex]` is already lower. Otherwise that cost is final: return if it is `target`, else push every neighbour whose cost strictly improves.",
+    {"text": "The shape, with validation, the stale check, the walk back and the relaxation left to you. `START` is a marker no vertex can equal, because a vertex may be `None`.", "code": "import heapq\nimport itertools\nimport math\n\ndef weighted_shortest_path(graph, source, target):\n    ...  # ValueError: missing vertex, or any weight in the graph that is a bool, negative, inf or nan\n    START = object()\n    best = {source: 0}\n    parent = {source: START}\n    tie = itertools.count()\n    heap = [(0, next(tie), source)]\n    while heap:\n        cost, _, u = heapq.heappop(heap)\n        if ...:  # stale: best[u] is already lower than cost\n            continue\n        if u == target:\n            ...  # walk parent back to START, reverse, return (cost, path)\n        for v, w in graph[u]:\n            ...  # if cost + w beats best.get(v, math.inf): update best and parent, push it\n    return math.inf, []"}
+  ],
+  "tests": {
+    "test_discovery_is_not_final": [
+      "`a → b` costs 8, `a → c` 1 and `c → b` 2, and the answer must be `(3, [\"a\", \"c\", \"b\"])`. Getting `(8, [\"a\", \"b\"])` means you stopped when `b` was first pushed, or used a plain queue: a vertex is finished when it comes off the heap.",
+      "The result must be a tuple, `(cost, path)`, with the path a list from `source` to `target`. `[3, [\"a\", \"c\", \"b\"]]` is a list, and a list is not equal to the tuple."
+    ],
+    "test_zero_cycle_ties_and_unreachable": [
+      "The graph is `{0: [(1, 0), (\"x\", 0)], 1: [(0, 0)], \"x\": [], 2: []}`: a zero-cost loop between 0 and 1, and vertices of mixed types. It expects `(0, [0, 1])` from 0 to 1, `(0, [0])` from 0 to itself, and `(math.inf, [])` for 2, which nothing reaches.",
+      "A `TypeError` here means two heap entries tied on cost and Python compared the vertices, `1` and `\"x\"`: put a counter between the cost and the vertex. For 0 to itself, check for the target when you pop, not only among the neighbours: the source is the first thing popped."
+    ],
+    "test_against_relaxation_oracle": [
+      "30 random graphs on vertices 0 to 5 with weights 0 to 5. From source 0, every vertex is tried as the target and checked against plain repeated relaxation: the cost must be the true minimum, or `math.inf` when unreachable. When you return a path, its edge weights must add up to that cost.",
+      "A `KeyError` raised inside this test means two neighbours in your path are not joined by an edge, usually because the path runs from target back to source: reverse it. A cost that is too high usually means a vertex was finished when it was pushed, not when it was popped."
+    ],
+    "test_invalid_even_in_disconnected_component": [
+      "Source and target are both `0`, so a search ends at once, yet vertex `1` has a self-loop weighing `-1`, `math.inf` or `math.nan`, and each must raise `ValueError`. Check every edge in the graph before you search, not only the edges the search reaches.",
+      "`math.nan < 0` and `math.inf < 0` are both `False`, so a sign check lets them through: also reject floats that fail `math.isfinite`. The last case, `{0: [(1, 2)]}`, has an edge to `1`, which is not a key of the graph: that is a `ValueError` too."
+    ],
+    "test_none_vertex_and_large_integer_cost": [
+      "The source is the vertex `None`, and the answer must be `(10 ** 400, [None, \"end\"])`. Getting `[\"end\"]` means `None` also stands for \"no parent\" in your walk back, so it stopped one step early: mark the source's parent with your own `object()` instead.",
+      "The weight `10 ** 400` is an integer too big for a float. `float(w)` and `math.isfinite(w)` raise `OverflowError` on it, so run the finiteness check only on floats, and keep integer sums as integers."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`'<' not supported between instances of 'str' and 'int'` comes from the heap: two entries had equal cost, so Python compared the vertices next. Make each entry `(cost, n, vertex)` with `n` from `itertools.count()`, so the comparison never reaches the vertex.",
+      "`cannot unpack non-iterable NoneType object` in a test means your function returned nothing, usually for an unreachable target. Return `(math.inf, [])` there."
+    ],
+    "OverflowError": [
+      "`int too large to convert to float` means a check turned the weight `10 ** 400` into a float, through `float(w)` or `math.isfinite(w)`. Only floats can be `inf` or `nan`, so check finiteness only when `isinstance(w, float)`."
+    ],
+    "KeyError": [
+      "Raised in your code: a lookup like `best[v]` or `graph[v]` for a vertex that is not a key yet. Use `best.get(v, math.inf)`, and reject neighbours missing from `graph` with `ValueError` before searching.",
+      "Raised inside the test, at `dict(graph[a])[b]`: your path is backwards, target first. Walk `parent` from the target, then reverse the list."
+    ]
+  },
+  "stopped": [
+    "Zero-weight edges are the usual cause: `0 → 1` and `1 → 0` both cost 0, and the random graphs have weights of 0 too. Pushing a neighbour when its new cost is less than or equal to its best lets two vertices re-push each other forever. Push only when the new cost is strictly lower.",
+    "Pushing every neighbour on every pop, with no `best` dict or visited set, never ends for the same reason: the zero-cost loop keeps refilling the heap. Keep `best`, and skip entries that come off the heap costing more than `best[vertex]`."
+  ],
+  "passing": "All passing. The tests never check the overflow rule: `weighted_shortest_path({\"a\": [(\"b\", 1e308)], \"b\": [(\"c\", 1e308)], \"c\": []}, \"a\", \"c\")` should raise `OverflowError`, because `1e308 + 1e308` is `inf` and `inf` means unreachable. Then time a chain of 100,000 vertices, built in the setup lines, from one end to the other."
+}

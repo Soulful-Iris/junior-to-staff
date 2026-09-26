@@ -1,0 +1,37 @@
+{
+  "example": "a1, a2, b1, b2 = Node(1), Node(3), Node(1), Node(2)\na1.next, b1.next = a2, b2\nmerge_sorted_lists(a1, b1)",
+  "start": [
+    "Keep a finger on the head of each chain: the smaller of the two values under your fingers is the next node of the answer, so take it and move that finger on, and on a tie the first chain's node goes first. When one finger runs off the end, the rest of the other chain is already in order.",
+    "Check before you touch anything: both chains made of `Node`s with `int` values (not `bool`), never going down, with no loop, and no node shared between them, which two chains do exactly when they end on the same last node. Then splice with a dummy node and a `tail` pointer: attach the chosen head after `tail`, move `tail` and that chain on, attach whatever is left at the end, and return the node after the dummy.",
+    {"text": "The shape, with the choice and the splices left to you:", "code": "def merge_sorted_lists(first, second):\n    ...  # every check first: nothing may change on invalid input\n    dummy = Node(0)\n    tail = dummy\n    while first and second:\n        if ...:  # which head goes next? a tie goes to first\n            ...  # attach first after tail, move first on\n        else:\n            ...  # the same for second\n        tail = tail.next\n    ...  # attach whichever chain is left\n    return dummy.next"}
+  ],
+  "tests": {
+    "test_stable_identity_oracle": [
+      "Every pair of sorted chains of 0 to 3 nodes with values 0 to 2, both empty included. Walking from your head must meet the original nodes in stable order, checked with `is`: for equal values, all of the first chain's nodes come before the second's. Taking the second chain's node on a tie, or building new nodes, fails here.",
+      "The walk must also reach `None` straight after the last node. Returning the dummy instead of the node after it, or not attaching the leftover part of the longer chain, both show up here."
+    ],
+    "test_rejection_precedes_mutation": [
+      "`a = 1 → t` and `b = 2 → t` share the node `t`. Merging them must raise `ValueError` and leave `a.next` and `b.next` still pointing at `t`; spliced anyway, they end with `t.next = t`. Two chains share a node exactly when they end on the same last node, so compare the ends before merging.",
+      "Then each bad second argument in turn: descending `2 → 1`, the value `True`, a link to `42`, the plain int `42`, and a node whose `next` is itself. Each must raise `ValueError` with `a.next` still `t` (and the self-loop left as it was), so check both chains completely before the first link changes."
+    ],
+    "test_deep_chain": [
+      "`merge_sorted_lists(None, head)` on a 10,000-node chain must return that same `head`: with one side empty, the answer is the other chain attached whole, not the dummy and not `None`. Anything recursive that follows the chain node by node, the merge or a check, goes 10,000 calls deep, and Python stops at about 1,000."
+    ]
+  },
+  "errors": {
+    "AttributeError": [
+      "`'NoneType' object has no attribute 'value'` usually means the merge loop runs while one chain is already empty, as with `while first or second`. Loop while both have nodes, then attach the rest. For `42`, or a link to `42`, check `isinstance(node, Node)` first: those must raise `ValueError`."
+    ],
+    "TypeError": [
+      "`'<' not supported between instances of 'Node' and 'Node'`: nodes have no order of their own, so `sorted()`, `min()` or a heap of bare nodes fails. Compare their `.value`, or sort with `key=`."
+    ],
+    "RecursionError": [
+      "The deep test passes a 10,000-node chain, and Python stops recursion at about 1,000 calls. A recursive merge, or a recursive check or walk to the last node, has to become a `while` loop."
+    ]
+  },
+  "stopped": [
+    "A check that walks each chain to its end never finishes on the node whose `next` is itself. Detect the loop as you walk: a set of nodes seen, or two pointers where one moves two steps and meets the other only if there is a loop.",
+    "If the merge loop never ends, the chosen chain is not moving on. After attaching `first` (or `second`) behind `tail`, advance that chain to its next node; otherwise the same node is compared and attached again, and ends up pointing at itself."
+  ],
+  "passing": {"text": "All passing. Merge two long chains as your own input and look at the peak memory: splicing reuses the nodes, so it should stay small. If it grows with the length, something holds every node; the loop check can be two pointers, and the shared-node check needs only each chain's last node.", "code": "a = b = None\nfor v in range(20000, 0, -1): a, b = Node(v, a), Node(v, b)\nmerge_sorted_lists(a, b)"}
+}

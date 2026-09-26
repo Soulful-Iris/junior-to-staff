@@ -1,0 +1,37 @@
+{
+  "example": "decode_ways(\"11106\")",
+  "start": [
+    "Think about the last letter of a decoding: it is the final digit alone (`1` to `9`) or the final two digits together (`10` to `26`). `226` ends with `6` after some decoding of `22`, or with `26` after some decoding of `2`. Zero is never a letter by itself, so it only survives inside `10` or `20`.",
+    "Dynamic programming over prefixes: `ways[i]` counts the decodings of the first `i` digits, with `ways[0] = 1` for the empty prefix, the one way to extend nothing. Add `ways[i - 1]` when digit `i` alone is `1` to `9`, and `ways[i - 2]` when the two digits ending there make `10` to `26`. The cases never overlap, so you add them. The empty input itself answers `0`: settle that before the table.",
+    {
+      "text": "Only the last two counts are ever read, so two variables would do, but the table is easier to check first. The shape, with the two tests left to you:",
+      "code": "def decode_ways(digits):\n    ...  # ValueError unless a str made only of the characters 0-9\n    if digits == \"\":\n        return 0\n    ways = [1] + [0] * len(digits)    # ways[i]: decodings of digits[:i]\n    for i in range(1, len(digits) + 1):\n        if ...:  # digits[i-1] alone is a letter, 1 to 9\n            ways[i] += ways[i - 1]\n        if i >= 2 and ...:  # digits[i-2:i] is a letter, 10 to 26\n            ways[i] += ways[i - 2]\n    return ways[-1]"
+    }
+  ],
+  "tests": {
+    "test_examples_zero_rules": [
+      "Ten exact counts: `''` 0, `'12'` 2, `'226'` 3, `'0'` 0, `'06'` 0, `'10'` 1, `'100'` 0, `'101'` 1, `'27'` 1, `'11106'` 2. The failure message ends with the string that went wrong.",
+      "The usual culprits: `''` giving 1, which is the table's empty-prefix count leaking out as the answer; `'06'` giving 1, because `int('06')` is 6 and passes a `<= 26` check, so a pair must be at least `10`; and `'27'` giving 2, because 27 is not a letter."
+    ],
+    "test_against_partition_oracle": [
+      "Every string of length 1 to 5 over the digits `0`, `1`, `2` and `6`, compared with a recursion that splits off one or two digits at a time and refuses tokens that start with `0` or exceed 26. Zeros turn up everywhere: `'00'`, `'60'`, `'1020'`, `'2600'`.",
+      "A zero can only be the second digit of `10` or `20`. If your count is too high on strings with zeros, you are letting `0` stand alone or letting pairs like `30` or `05` through; if it is too low, you may be dropping `10` and `20`, or treating `26` as too big."
+    ],
+    "test_large_exact_result_and_invalid": [
+      "`decode_ways('1' * 100)` must be more than `2 ** 63`: the exact count has 21 digits. Taking the count modulo anything fails, and plain recursion without remembered results never finishes on 100 digits.",
+      "`'1x'`, `'１２'` (full-width digits) and `' 1'` must each raise ValueError. `str.isdigit()`, `int()` and the regex `\\d` all accept full-width digits, and `int(' 1')` is 1, so test each character against `'0123456789'`."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "`decode_ways('')` is the first case in “Examples zero rules”: reading `digits[0]` before handling the empty string raises IndexError. Return 0 for `''` first."
+    ],
+    "ValueError": [
+      "A ValueError from a valid input comes from `int()` on a bad slice: `int('')` raises it, and at `i = 0` the window `digits[i - 1:i + 1]` is `digits[-1:1]`, which is `''` for any string longer than one digit. Only look at a pair once two digits exist. Also make sure `''` returns 0 instead of being rejected."
+    ]
+  },
+  "stopped": [
+    "“Large exact result and invalid” calls `decode_ways('1' * 100)`. Recursion that splits off one or two digits branches twice at almost every step, more than 10^20 calls here. Remember each position's count (a dict or `functools.lru_cache`), or loop forward keeping the last two counts."
+  ],
+  "passing": "All passing. Try `decode_ways('1' * 5000)` as your own input: the exact count has over a thousand digits, and Python's integers hold it without overflow. Then the follow-up: if `*` can stand for any digit 1 to 9, `'1*'` has 18 decodings and `'**'` has 96, so your two yes-or-no checks become counts."
+}

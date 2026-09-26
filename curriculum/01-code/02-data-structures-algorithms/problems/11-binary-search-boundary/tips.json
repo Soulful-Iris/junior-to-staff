@@ -1,0 +1,34 @@
+{
+  "example": "lower_bound([1, 3, 3, 8], 3)",
+  "start": [
+    "Write `nums[i] >= target` under each element: for `[1, 3, 3, 8]` and target 3 it reads `F T T T`. Because the list is sorted it flips from false to true at most once, and the answer is where it flips, or `len(nums)` if it never does: you are looking for that edge, not for a match.",
+    "Binary search on that edge, keeping everything before `lo` known smaller than `target` and everything from `hi` on known at least `target`: start with `lo = 0`, `hi = len(nums)`, stop when they meet, return `lo`. When `nums[mid]` is too small, `mid` is ruled out too; when it is big enough, `mid` might be the answer, so keep it inside. Before searching, raise `ValueError` unless `nums` is a sorted list or tuple of ints (bools excluded) and `target` is an int.",
+    {"text": "The shape, with the two moves left to you:", "code": "def lower_bound(nums, target):\n    ...  # ValueError checks: container, int values (not bool), sorted, int target\n    lo, hi = 0, len(nums)\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if nums[mid] < target:\n            lo = ...\n        else:\n            hi = ...\n    return lo"}
+  ],
+  "tests": {
+    "test_contract": [
+      "`[1, 3, 3, 8]` with targets 3, 4 and 9 must give 1, 3 and 4: the first of the two 3s, the place 4 would go, and `len(nums)` when every value is smaller. Returning as soon as `nums[mid] == target` can land on the second 3, and `-1` for a missing target answers a different question; `lower_bound([], 2)` is `0`.",
+      "Four calls must raise `ValueError`: the unsorted `[3, 1]`, `[True]`, `None`, and the float target `1.0`. `isinstance(True, int)` is true, so test `type(x) is int` for every value and for `target`, and check that no neighbour goes down, all before searching."
+    ],
+    "test_linear_boundary_oracle": [
+      "Every sorted tuple of up to 7 values from -2 to 2, `()` included, with every target from -3 to 3, compared with a linear scan. The inputs are tuples: `nums.sort()` fails on them, and `sorted(nums) == nums` is false for every tuple, since a list never equals a tuple, so a sortedness check written that way rejects valid input.",
+      "Target -3 is below every value and 3 above, so the answers are `0` and `len(nums)`, and a search that starts with `hi = len(nums) - 1` can never return the second. All-equal tuples such as `(0, 0, 0)` catch a search that stops at the first equal value it meets."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "`nums[mid]` with `mid == len(nums)`. `hi = len(nums)` points one past the last element and is never read, so the loop is `while lo < hi`; with `while lo <= hi`, `mid` can reach `len(nums)`."
+    ],
+    "ValueError": [
+      "Your own check fired on valid input. The oracle test passes tuples: `isinstance(nums, list)` rejects them, and so does comparing `sorted(nums)` with `nums`, because a list never equals a tuple. Accept `(list, tuple)`, and test sortedness by comparing neighbours, `nums[i] > nums[i + 1]`."
+    ],
+    "TypeError": [
+      "`object of type 'NoneType' has no len()`: `lower_bound(None, 2)` must raise `ValueError`. Check that `nums` is a list or tuple before calling `len` or indexing it."
+    ]
+  },
+  "stopped": [
+    "`lo = mid` stalls: once `hi == lo + 1`, `mid` equals `lo`, and when `nums[mid] < target` nothing changes. That `mid` is already ruled out, so move `lo = mid + 1`.",
+    "`while lo <= hi` with `hi = mid` stalls once `lo == hi`: `mid` is `lo` again and `hi = mid` changes nothing. With `hi` starting at `len(nums)`, loop `while lo < hi` and stop when they meet."
+  ],
+  "passing": "All passing. Try `lower_bound(list(range(100000)), 50000)` as your own input: nearly all of the time is the O(n) check that the list is sorted, while the search itself takes 17 steps. The README's follow-ups start from there: count a value's copies with two boundary searches, and validate once for many queries."
+}

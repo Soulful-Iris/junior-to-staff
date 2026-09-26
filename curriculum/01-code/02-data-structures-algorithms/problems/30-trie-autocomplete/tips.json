@@ -1,0 +1,41 @@
+{
+  "example": "t = Trie([\"cart\", \"cat\", \"car\", \"dog\", \"car\"])\nt.suggest(\"ca\")",
+  "start": [
+    "Write the words as paths from one root, one letter per step: `car` and `cart` share their first three steps, and `cat` branches off after `ca`. The node where `car` ends has a child, yet `car` is still a word, so every node needs its own mark saying a word ends here. The suggestions for a prefix are the marked nodes under the prefix's node, read in alphabetical order.",
+    "Give each node a `children` dict, letter to node, and a `terminal` flag. `add` walks the word, creating missing children, and sets `terminal` on the last node, so adding a word twice changes nothing. `suggest` walks the prefix, returning `[]` at the first missing letter, then walks depth-first below it: a node's own word before its children's, children in sorted order, stopping at `limit` words. Use a list as a stack: one test has a 2,000-letter word.",
+    {
+      "text": "The shape, with the checks, the steps and the walk's two key lines left to you:",
+      "code": "class Node:\n    def __init__(self):\n        self.children = {}  # letter -> Node\n        self.terminal = False  # a word ends here\n\nclass Trie:\n    def __init__(self, words=()):\n        ...  # ValueError for a bare string; any other iterable is read once\n        self.root = Node()\n        for w in words:\n            self.add(w)\n\n    def add(self, word):\n        ...  # ValueError unless word is a nonempty string of a to z\n        node = self.root\n        for ch in word:\n            ...  # step to the child for ch, creating it if missing\n        node.terminal = True\n\n    def suggest(self, prefix, limit=5):\n        ...  # ValueError unless limit is an int (not a bool) and limit >= 0\n        node = self.root\n        for ch in prefix:\n            ...  # return [] if ch is not a child, else step down\n        out = []\n        stack = [(node, prefix)]\n        while stack and len(out) < limit:\n            node, word = stack.pop()\n            ...  # emit word if node.terminal\n            ...  # push the children, largest letter first, so the smallest pops next\n        return out"
+    }
+  ],
+  "tests": {
+    "test_shared_prefix_and_terminal": [
+      "The trie is built from `['cart', 'cat', 'car', 'dog', 'car']`. `suggest('ca')` must be `['car', 'cart', 'cat']`: `car` is a word and also the start of `cart`, it comes first because a node's own word is emitted before anything below it, and `car`, added twice, appears once.",
+      "`suggest('car', 1)` is `['car']` and `suggest('ca', 2)` is `['car', 'cart']`, so stop at the limit. `suggest('z')` is `[]`: no word starts with `z`, which is an ordinary answer, not an error."
+    ],
+    "test_against_filter_sort_and_dynamic_add": [
+      "Nine words go in through `reversed(words)`, an iterator you can loop over once and cannot `len()` or index. Then each of the prefixes `''`, `'a'`, `'ab'`, `'b'`, `'ba'`, `'x'` with every limit from 0 to 11 is compared with filtering the words and sorting them. Last, `add('az')` must make `suggest('az')` give `['az']`.",
+      "The words arrive in reverse order, so a dict's insertion order has `z` before `b` before `a`: sort the children as you walk. A limit of `0` gives `[]`, and the empty prefix `''` means every word."
+    ],
+    "test_long_word_and_validation": [
+      "A single 2,000-letter word of `a`s must come back from `suggest('a')`. Recursing once per letter, in `add` or in the walk, goes past Python's recursion limit of about 1,000: use loops, and a list as the stack.",
+      "`Trie([''])`, `Trie(['Car'])` and `Trie(['a-b'])` must each raise `ValueError`: only nonempty words of lowercase `a` to `z` are allowed. `Trie().suggest('', -1)` must raise `ValueError` for the negative limit."
+    ]
+  },
+  "errors": {
+    "KeyError": [
+      "`suggest('z')` or `suggest('x')` looked up a letter that is not a child, and `node.children[ch]` raised. Check `ch in node.children` first and return `[]` when it is missing. If you use `.get(ch)` instead, check for `None` before stepping on."
+    ],
+    "RecursionError": [
+      "The 2,000-letter word means 2,000 levels, and Python stops recursion at about 1,000. Make `add` a `for` loop over the letters, and the walk a `while stack:` loop over a list of `(node, word)` pairs."
+    ],
+    "TypeError": [
+      "`object of type 'list_reverseiterator' has no len()`, or `is not subscriptable`: “Against filter sort and dynamic add” passes `reversed(words)`, not a list. Loop over `words` once with `for`. Looping over it twice fails differently: the second pass sees nothing.",
+      "`'NoneType' object is not subscriptable`, or `is not iterable`, usually means `.get(ch)` returned `None` for a missing prefix letter and the next step used it. Return `[]` as soon as a letter is missing."
+    ]
+  },
+  "stopped": [
+    "Stopped on output: a `print` inside `add` or the walk runs once per letter, and the 2,000-letter word prints thousands of lines of up to 2,000 characters each, past the page's output limit. Print only when the word is short, or use a breakpoint."
+  ],
+  "passing": "All passing, but the tests are too small to show whether `suggest` stops early. Build a big trie in the setup lines, say every 4-letter word over `abcdefghij` from `itertools.product` (10,000 words), and time `t.suggest('', 5)`: it should be about as fast as `t.suggest('abc', 5)`, because the walk stops after five words instead of visiting all 11,111 nodes."
+}

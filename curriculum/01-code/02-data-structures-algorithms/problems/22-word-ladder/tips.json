@@ -1,0 +1,38 @@
+{
+  "example": "words = [\"hot\", \"dot\", \"dog\", \"lot\", \"log\", \"cog\"]\nword_ladder(\"hit\", \"cog\", words)",
+  "start": [
+    "Think of each word as a place on a map, with a road to every dictionary word that differs from it in exactly one position: `hit` to `hot` changes only the middle letter. You want the route with the fewest roads, listed word by word with both ends included, so 4 moves is 5 words.",
+    "Breadth-first search from `start`, with a queue and a dict from each word reached to the word it was reached from. Generate neighbours instead of storing them: every position, every letter from `a` to `z`, kept only if the result is in the dictionary set. Record a word when you queue it, never later: the first time a word is reached is along a shortest route.",
+    {"text": "Validate before the shortcuts: bad lengths or characters raise `ValueError`, then equal endpoints give `[start]`, then an `end` missing from the dictionary gives `[]`. The shape:", "code": "import string\nfrom collections import deque\n\ndef word_ladder(start, end, words):\n    words = set(words)\n    ...  # ValueError: an empty start, unequal lengths, or a character outside a-z in any word\n    ...  # then the shortcuts: [start] when start == end, [] when end is not in words\n    came_from = {start: None}\n    queue = deque([start])\n    while queue:\n        word = queue.popleft()\n        for i in range(len(word)):\n            for letter in string.ascii_lowercase:\n                ...  # word with position i set to letter: skip it unless it is in words and not in came_from\n                ...  # record where it came from; if it is end, walk came_from back to start and return that path reversed\n    return []"}
+  ],
+  "tests": {
+    "test_shortest_and_valid": [
+      "`hit` to `cog` through `hot, dot, dog, lot, log, cog`: the path must have 5 words, start with `hit`, end with `cog`, use only dictionary words after the first, and change exactly one letter per step. Either route, through `dot, dog` or `lot, log`, passes.",
+      "The answer is the list of words, not a count: `len(path)` fails on `4` or `5`. A path built by following parents from `cog` comes out backwards, so reverse it. A depth-first search can find a longer route; only breadth-first order guarantees the fewest moves."
+    ],
+    "test_missing_and_unreachable": [
+      "Both calls must return `[]`, an empty list, not `None`. First `cog` is not in the dictionary `[\"hot\"]`; then it is, in `[\"hot\", \"cog\"]`, but `hot` and `cog` differ in two letters, so nothing connects them. When the queue runs dry, return `[]`."
+    ],
+    "test_identity_direct_duplicates": [
+      "`word_ladder(\"a\", \"a\", [])` must be `[\"a\"]`: equal endpoints are zero moves, even with an empty dictionary, so check `start == end` before checking that `end` is in the dictionary. Then `(\"a\", \"b\", [\"b\", \"b\"])` must be `[\"a\", \"b\"]`: a repeated word is still one word."
+    ],
+    "test_validation": [
+      "Four calls must raise `ValueError`: two empty endpoints, endpoints `\"a\"` and `\"bb\"` of different lengths, a dictionary word `\"C\"` that is not lowercase, and a dictionary word `\"zz\"` of the wrong length. Check every dictionary word, not only the endpoints.",
+      "A shortcut would answer each of them first: `\"\"` and `\"\"` are equal, so an early `[start]` fires, and in the other three the end is not in the dictionary, so an early `[]` fires. Validate first, then take the shortcuts."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`word[i] = letter` raises this, because strings cannot be changed in place. Build each neighbour from slices: the part before `i`, the new letter, and the part after `i`.",
+      "`len(path)` in “Shortest and valid” fails on a number: return the list of words on the path, both ends included, not the count of moves."
+    ],
+    "KeyError": [
+      "Following the parents back from `end` reached a word with no entry. Put `start` in the parent dict before the search, with `None` as its parent, and stop the walk when you reach it."
+    ]
+  },
+  "stopped": [
+    "A queue that never empties means words are queued again after they were reached. With `[\"hot\", \"cog\"]`, a loop that does not skip the letter already in place makes `hot` its own neighbour, and without a record of reached words it goes back in forever. Record each word when you queue it, and skip it after that.",
+    "If the search found `end` but the call does not return, check the walk back along the parents: it has to stop at `start`. If `start` is stored as its own parent, a walk that waits for `None` goes round forever."
+  ],
+  "passing": "All passing. Try the README's first follow-up, every shortest path instead of one: what must each word remember about its parents, and when is it safe to stop? Then time a big dictionary as your own input, every three-letter word from `aaa` to `zzz`, with `word_ladder(\"aaa\", \"zzz\", words)`."
+}

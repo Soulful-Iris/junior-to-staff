@@ -1,0 +1,35 @@
+{
+  "example": "daily_temperatures([70, 70, 71])",
+  "start": [
+    "Read the days left to right and keep the days still waiting for something warmer. When today is warmer than the most recent waiting day, that day's wait is settled: today's index minus its index. Today may settle several days in a row, and then it starts waiting itself.",
+    "A monotonic stack of indices: every day on it has not yet seen a strictly warmer day, so temperatures on it never rise from bottom to top. Today pops each index whose temperature is strictly lower, writes the wait for it, then pushes its own index. Equal temperatures stay. Each index is pushed and popped at most once, so the whole scan is linear.",
+    {"text": "The shape, with the comparison and the bookkeeping left to you:", "code": "def daily_temperatures(temperatures):\n    temps = list(temperatures)\n    ...  # ValueError if any value is not an int\n    waits = [0] * len(temps)\n    waiting = []   # indices of days with no warmer day yet\n    for today, t in enumerate(temps):\n        while waiting and ...:  # is the latest waiting day colder than t?\n            day = waiting.pop()\n            ...  # record how long that day waited\n        waiting.append(today)\n    return waits"}
+  ],
+  "tests": {
+    "test_example_and_equal": [
+      "`[73, 74, 75, 71, 69, 72, 76, 73]` must give `[1, 1, 4, 2, 1, 1, 0, 0]`: the 75 waits four days, because 72 is warmer than 71 but not than 75. `[5, 5, 5]` must give `[0, 0, 0]`, since warmer means strictly greater, and `[]` gives `[]`.",
+      "If `[5, 5, 5]` gives `[1, 1, 0]`, you pop on equal temperatures: only a strictly warmer day settles a wait. Days never settled keep `0`, not `-1` or `None`, and a wait is `today - day` with no `- 1`."
+    ],
+    "test_exhaustive_against_scan": [
+      "Every sequence of length 0 to 6 over `-1`, `0` and `1`, 1,093 in all, compared with a plain forward scan for the first strictly warmer day. Repeats, negatives and falling runs all appear, so a `<=` or a missed pop shows up here.",
+      "These inputs arrive as tuples, and the result is compared with a list. Build a new list for the answer rather than writing into `temperatures`, and return that list, not a tuple."
+    ],
+    "test_invalid_and_no_mutation": [
+      "`[3, 2, 1]` must give `[0, 0, 0]`, and the list must still be `[3, 2, 1]` afterwards, so do not write answers into it or pop from it. Then `[1, None]` must raise ValueError: check every value is an `int` before the scan starts."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "Comparing `None` with a number: `[1, None]` reached the stack comparison. Check each value with `isinstance(t, int)` and raise ValueError before scanning.",
+      "`'tuple' object does not support item assignment`: the exhaustive test passes tuples. Write the waits into a new list such as `[0] * len(temperatures)`, never into the input."
+    ],
+    "IndexError": [
+      "`stack[-1]` on an empty stack. Put the emptiness test first in the loop condition, `while stack and ...`, so the comparison only runs when there is a top to compare with."
+    ]
+  },
+  "stopped": [
+    "The inner `while` must pop the day it settles. If it only reads `stack[-1]` and records a wait, the top never changes, the same comparison stays true, and the loop never ends.",
+    "If you scan forward from each day with a `while` loop instead, the inner index must move on every turn, and the loop must also stop at the end of the list, since a day may never see a warmer one."
+  ],
+  "passing": "All passing. Try `list(range(20000, 0, -1)) + [20001]` as your own input: the stack holds 20,000 waiting days until the last one settles them all, and the time still grows linearly. Then the README's second follow-up: why does popping only when today is at least 5 degrees warmer break the stack?"
+}

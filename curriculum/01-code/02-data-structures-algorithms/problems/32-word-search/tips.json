@@ -1,0 +1,43 @@
+{
+  "example": "board = [list(\"ABCE\"), list(\"SFCS\"), list(\"ADEE\")]\nword_search(board, \"ABCB\")",
+  "start": [
+    "Trace `ABCB` on the board `ABCE / SFCS / ADEE` by hand: `A`, `B`, `C` go fine, but the only `B` next to that `C` is the one already on the path. So the moves allowed next depend on the path that got you here, and when a path fails, its cells must be free again for the next attempt.",
+    "That is backtracking. From each cell holding `word[0]`, extend the path one step at a time to a neighbour (up, down, left or right, on the board, not already on this path) holding the next letter, and step back when nothing fits. Keep a set of the current path's cells: add a cell when you step on it, remove it when you step back, and never change the board. The test with a 1,500-letter word needs an explicit stack instead of recursion.",
+    {"text": "The shape with an explicit stack: a frame is a cell plus the next direction to try, stepping back is a pop, and the stack's length is the number of letters matched.", "code": "def word_search(board, word):\n    ...  # ValueError: ragged board, a cell that is not a 1-character str, word not a str\n    if not word:\n        return True\n    if not board or not board[0]:\n        return False\n    height = len(board)\n    width = len(board[0])\n    steps = ((1, 0), (0, 1), (-1, 0), (0, -1))\n    for r in range(height):\n        for c in range(width):\n            if board[r][c] != word[0]:\n                continue\n            used = {(r, c)}\n            stack = [[r, c, 0]]  # row, col, next direction to try\n            while stack:\n                if len(stack) == len(word):\n                    return True\n                cr, cc, d = stack[-1]\n                if d == 4:\n                    ...  # all four tried: pop the frame and free its cell\n                    continue\n                ...  # move this frame on to direction d + 1\n                nr, nc = cr + steps[d][0], cc + steps[d][1]\n                if ...:  # on the board, not in used, holding word[len(stack)]\n                    ...  # use the cell and push its frame\n    return False"}
+  ],
+  "tests": {
+    "test_standard_and_restoration": [
+      "On `ABCE / SFCS / ADEE`: `ABCCED` is there (the path turns down at the second `C`), `SEE` is there, and `ABCB` is not, because the only `B` next to that `C` is already on the path. If `ABCB` comes back `True`, your path can step back onto a cell it already holds.",
+      "After each word the board must still equal a copy taken before. Writing a mark like `'#'` into a cell is only safe if every way out puts the letter back, the early `return True` included; a set of used cells avoids the problem."
+    ],
+    "test_backtrack_to_alternative": [
+      "`AAAAAB` on `AAA / ABA / AAA` must be `True`, but many runs of five `A`s end where no `B` is next to them. If you get `False`, cells stayed marked after a failed attempt: free a cell when the search steps back from it, so later attempts can use it.",
+      "`ABA` on the one-row board `AB` is `False`, since it would reuse the `A`, and `AD` on `AB / CD` is `False` because diagonal steps are not allowed: only up, down, left and right."
+    ],
+    "test_empty_and_deep": [
+      "The empty word is `True` even on the empty board `[]`, and `'A'` on `[]` is `False`. Reading `board[0]` before checking for an empty board raises `IndexError` here.",
+      "`'A' * 1500` on one row of 1,500 `'A'` cells must be `True`: the path is 1,500 cells long. A recursive search needs 1,500 nested calls, past Python's limit of about 1,000, so keep the path on an explicit stack."
+    ],
+    "test_invalid": [
+      "Each board must raise `ValueError` for the word `'A'`: the ragged `[['A'], ['B', 'C']]`, `[['AB']]` with a two-letter cell, and `[[1]]` with a number. None of them makes a search fail by itself, so check the shape and every cell first.",
+      "Check that a cell is a `str` before asking its `len()`: `len(1)` raises `TypeError`, and the test wants `ValueError`."
+    ]
+  },
+  "errors": {
+    "RecursionError": [
+      "The one-row board of 1,500 `'A'` cells needs a path of 1,500 cells, and Python stops recursion at about 1,000. Replace the recursion with a `while stack:` loop over frames `[row, col, next_direction]` and one set of used cells."
+    ],
+    "IndexError": [
+      "`list index out of range` usually comes from `board[0]` on the empty board `[]`, or from reading `board[nr][nc]` before checking `0 <= nr < len(board)` and `0 <= nc < len(board[0])`. A negative index does not raise, it wraps to the far edge, so check `>= 0` too.",
+      "It can also be `word[i]` one past the end: check whether the whole word is matched before reading the next letter."
+    ],
+    "TypeError": [
+      "`object of type 'int' has no len()` comes from the board `[[1]]` in `test_invalid`: check `isinstance(cell, str)` before `len(cell)`, and raise `ValueError`."
+    ]
+  },
+  "stopped": [
+    "In an explicit-stack search, each frame must move on to its next direction before it pushes a child. Otherwise, when that child is popped, the frame tries the same neighbour and pushes it again, forever. A frame that has tried all four directions must be popped, and its cell freed.",
+    "Stopped on output: a `print` inside the search runs once per step, and the 1,500-letter test prints thousands of lines, each holding the whole path, past the page's output limit. Print only for short words, or use a breakpoint."
+  ],
+  "passing": "All passing. Try a board with no answer and many near misses: `word_search([['A'] * 4 for _ in range(3)], 'A' * 11 + 'B')`, then 4 rows with `'A' * 15 + 'B'`. There is no `B`, yet the search walks every run of `A`s first, and the time multiplies as the board grows. Counting each letter before searching answers both at once."
+}

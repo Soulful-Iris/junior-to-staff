@@ -1,0 +1,43 @@
+{
+  "example": "list(merge_streams([[1, 4], [], [1, 3, 8]]))",
+  "start": [
+    "Lay the sources out like piles of cards, each sorted with its smallest card on top. The next value out must be one of the top cards, since everything under a top card is at least as big. So take the smallest top card, and turn over a new card only on the pile it came from, and only when someone asks for the next value.",
+    "Keep the tops in a min-heap of `(value, i)` pairs, where `i` is the source's position: it breaks ties between equal values and tells you which iterator to advance. Pop the smallest and `yield` it; when the caller asks again, read that source's next value, check it is an `int` no smaller than the one just yielded, and push it. A `yield` in `merge_streams` makes it a generator, so nothing is read before the first `next()`.",
+    {"text": "The shape, with the reads and checks left to you. Note where the second read happens: after the `yield`, not before it.", "code": "import heapq\n\ndef merge_streams(streams):\n    its = [iter(s) for s in streams]\n    heap = []\n    for i, it in enumerate(its):\n        ...  # read one head (skip an empty source), check it is an int, add (head, i)\n    heapq.heapify(heap)\n    while heap:\n        value, i = heapq.heappop(heap)\n        yield value\n        ...  # only now read the next value of its[i]: skip if exhausted, check it, push it"}
+  ],
+  "tests": {
+    "test_examples_empty_duplicates": [
+      "`[[1, 4], [], [1, 3, 8]]` must give `[1, 1, 3, 4, 8]`: the empty source has no head at all, and both 1s are kept, because merging does not remove repeats. `merge_streams([])`, with no sources, must give an empty iterator, not an error.",
+      "If this errors on the empty source, your code read its first value without handling the end: a source can be exhausted before it gives anything. Catch `StopIteration` around each read and leave that source out."
+    ],
+    "test_seeded_oracle": [
+      "30 random cases, each with up to 7 sources of up to 9 sorted values between -10 and 10, so empty sources, negatives and repeats are all common. The output must equal every value from every source, sorted together.",
+      "Values missing from the end usually mean the whole merge stopped when one source ran out. An exhausted source only leaves the heap; the others carry on until the heap is empty."
+    ],
+    "test_lazy_consumption": [
+      "Two generator sources count every value read from them. Straight after `merge_streams(...)` the counts must be `[0, 0]`, so nothing may be read before the first `next()`: a `yield` in the body of `merge_streams` does that. A function that reads the heads and then returns an iterator has already read one value from each.",
+      "After the first `next()`, which gives 1, each source has been read once, `[1, 1]`; after the second, which gives 2, it is `[2, 1]`. Reading source 0's next value before handing out its 1 makes the counts `[2, 1]` too early: read after the `yield`."
+    ],
+    "test_late_invalid_order": [
+      "`merge_streams([[1, 0]])` must hand out 1, then raise `ValueError` on the second `next()`, when 0 is read and found smaller than the 1 before it. If the first `next()` raises instead, you read the 0 before yielding the 1.",
+      "`list(merge_streams([[None]]))` must raise `ValueError` as well, so check the type of every value read, each source's first one included. Using `None` as the default in `next(it, None)` makes `[[None]]` look empty: catch `StopIteration`, or use a fresh `object()` as the default."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`'list' object is not an iterator` means `next()` was called on a list. Call `iter()` once on each source, keep those iterators, and call `next()` on them. The lazy test passes generators, so reading by index, `stream[pos]`, fails there too.",
+      "`'<' not supported between instances of 'list_iterator' and 'list_iterator'` means the heap compared iterators because two values tied. Store `(value, i)` with the source's position `i`, and look the iterator up by `i`."
+    ],
+    "RuntimeError": [
+      "`generator raised StopIteration` means `next()` hit the end of a source inside your generator, and Python turns that into a `RuntimeError`. The empty source `[]` does it on the very first read. Wrap each read in `try`/`except StopIteration` and leave that source out."
+    ],
+    "ValueError": [
+      "A `ValueError` from the test's first `next(result)` on `[[1, 0]]` means your code read and checked the 0 before handing out the 1. Yield first, then read the next value from the source you popped."
+    ]
+  },
+  "stopped": [
+    "`next(iter(streams[i]))` starts a fresh iterator each time, so for a list it returns the first value forever and the heap never empties. Call `iter()` once per source, before the loop, and keep using those iterators.",
+    "`list(...)` in the tests keeps asking until your generator stops. If you push the popped value back instead of the source's next value, the same number comes out forever: push only a newly read value, and nothing once the source is exhausted."
+  ],
+  "passing": "All passing. Check the memory claim as your own input: `sum(merge_streams([range(i, 100000, 100) for i in range(100)]))` merges 100 sources of 1,000 values each, and its peak memory should stay near 100 heads, not 100,000 values. Then the README's follow-up: if one source is slow to answer, what may you still emit?"
+}

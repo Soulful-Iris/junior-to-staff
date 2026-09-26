@@ -1,0 +1,34 @@
+{
+  "example": "edit_distance(\"ab\", \"ba\")",
+  "start": [
+    "Look only at the last characters. To turn `cat` into `cut`, the last step either deletes the final `t` of `cat`, inserts the final `t` of `cut`, or lines the two `t`s up: free when they match, one replacement when they do not. Each choice leaves a smaller pair of prefixes to solve.",
+    "Dynamic programming over prefixes: `d[i][j]` is the fewest operations that turn the first `i` characters of `source` into the first `j` of `target`. Row 0 is `0, 1, 2, ...` (insert everything) and column 0 the same (delete everything). Every other cell is the smallest of the cell above plus 1, the cell to the left plus 1, and the diagonal plus 0 or 1.",
+    {"text": "Build the full table first; keeping only two rows is an optimisation for later. The shape, with the recurrence left to you:", "code": "def edit_distance(source, target):\n    ...  # ValueError unless both are str\n    m, n = len(source), len(target)\n    d = [[0] * (n + 1) for _ in range(m + 1)]   # d[i][j]: source[:i] into target[:j]\n    for i in range(m + 1):\n        d[i][0] = i      # delete all i characters\n    for j in range(n + 1):\n        d[0][j] = j      # insert all j characters\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            d[i][j] = ...  # delete, insert, or match/replace source[i-1] with target[j-1]\n    return d[m][n]"}
+  ],
+  "tests": {
+    "test_operations_and_boundaries": [
+      "Six pairs, each checked in both directions: `kitten`/`sitting` is 3, `cat`/`cut` 1, two empty strings 0, `''`/`abc` 3, `same`/`same` 0, and `ab`/`ba` 2, because a swap is not one operation. Swapping the two arguments must never change the answer.",
+      "If `''` and `abc` give 0, your first row or column is wrong: turning `''` into `abc` takes 3 insertions, so row 0 must read `0, 1, 2, 3`, not zeros. If `ab`/`ba` gives 1, something is treating a swap as a single step."
+    ],
+    "test_against_recursive_oracle": [
+      "All 225 pairs of strings over `a` and `b` up to length 3, empty included, compared with a memoised recursion that tries delete, insert, and match-or-replace. A difference here means the recurrence itself is off, not an edge case.",
+      "Common slips: adding 1 on the diagonal even when the characters match, comparing `source[i]` with `target[j]` instead of `source[i - 1]` with `target[j - 1]`, or, with a single rolling row, overwriting a value you still need as the diagonal of the next cell."
+    ],
+    "test_unicode_codepoints_and_invalid": [
+      "`'é'` against `'e'` is 1, and `'é'` against `'e\\u0301'` (an `e` followed by a combining accent: two code points) is 2. Compare the strings exactly as given; `unicodedata.normalize` would make that second pair equal and give 0.",
+      "`edit_distance([], '')` must raise ValueError. Two empty sequences would otherwise give 0 without complaint, so check `isinstance(..., str)` on both arguments before anything else."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "The table has one more row and column than the strings have characters. Cell `(i, j)` compares `source[i - 1]` with `target[j - 1]`; using `source[i]` runs off the end when `i` reaches `len(source)`. The table itself needs `len(source) + 1` rows of `len(target) + 1` cells."
+    ],
+    "RecursionError": [
+      "A recursive version needs a floor: when either string is used up, the answer is the length of the other, all inserts or all deletes. Without that return, the calls go on past the empty string (or below index 0) until Python stops them."
+    ]
+  },
+  "stopped": [
+    "Plain recursion that tries delete, insert and replace at every step solves the same pair of prefixes many times over. The tests use short words, so this shows on your own longer inputs: two ten-character strings already take seconds, and each character added to both multiplies that by about five. Cache on `(i, j)`, or fill the table instead."
+  ],
+  "passing": "All passing. Try two longer strings as your own input, such as `edit_distance('ab' * 100, 'ba' * 100)`, and look at the peak memory: a full table holds about 40,000 cells, while two rows of 201 are enough for the distance. The README's follow-up asks what two rows lose: the edit script itself."
+}

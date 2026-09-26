@@ -1,0 +1,33 @@
+{
+  "example": "merge_intervals([(12, 14), (4, 5), (3, 10), (1, 3)])",
+  "start": [
+    "Draw the intervals on a number line. Taken in order of start, only the last block you have built can still grow: the next interval either reaches it, by overlapping or by starting exactly where it ends, or starts past its end and leaves a gap. `[1, 3)` and `[3, 6)` touch, and this contract merges them into `[1, 6)`.",
+    "Sort a copy by start, then make one pass that builds `result`, a list of `(start, end)` tuples that stays sorted with a real gap between neighbours. If the next start is at most the last end, set the last end to the larger of the two ends (the new end alone shrinks it when one interval sits inside another); otherwise append. Check every pair first, and raise `ValueError` for a bad one.",
+    {"text": "The shape, with the comparisons left to you. Sort with a `key` on the two numbers: one test mixes lists and tuples, and plain `sorted()` cannot compare a list with a tuple.", "code": "def merge_intervals(intervals):\n    ...  # ValueError: not a list/tuple, a pair that is not two ints (bool excluded), or start >= end\n    result = []\n    for start, end in sorted(intervals, key=...):\n        if result and ...:\n            result[-1] = ...  # a new tuple: tuples cannot be edited\n        else:\n            result.append((start, end))\n    return result"}
+  ],
+  "tests": {
+    "test_contract": [
+      "Five calls with answers: the unsorted `[(5, 7), (1, 3), (3, 6)]` gives `[(1, 7)]`, since touching `(1, 3)` and `(3, 6)` merge; `(2, 3)` inside `(1, 10)` must not shrink it; `[]` gives `[]`; and pairs given as lists still come back as tuples. A list never equals a tuple, so `[[1, 7]]` fails where `[(1, 7)]` is expected: build every output pair as a tuple.",
+      "`pairs = [[1, 2], [3, 4]]` must also still hold its two lists afterwards, so never convert or edit the caller's pairs. Then `[(2, 2)]`, `[(3, 1)]`, `[(1, True)]`, `[(1,)]` and `None` must each raise `ValueError`: check the container, that each pair has two items, `type(x) is int` for both ends, and `start < end`, all before merging."
+    ],
+    "test_discrete_coverage_oracle": [
+      "400 random lists of up to 14 intervals, starts from -8 to 7, compared by the integer points they cover. The output must also be sorted with a real gap between neighbours (`result[i][1] < result[i + 1][0]`), so touching intervals left apart fail here, and merging your own output a second time must change nothing.",
+      "Starts go below zero, so a sentinel such as `last_end = -1` for 'nothing yet' swallows a first interval that starts at or below it: start from an empty `result` instead. Covered points going missing usually means the last end was replaced by the new one rather than set to the larger of the two."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`'<' not supported between instances of 'tuple' and 'list'`: one test mixes `[5, 7]` with `(1, 3)`, and plain `sorted()` compares whole pairs, so sort with a `key` on the two numbers. `'NoneType' object is not iterable` means `merge_intervals(None)` reached the loop: check the container type first and raise `ValueError`.",
+      "`'tuple' object does not support item assignment`: the tests pass tuples, so the last merged pair cannot be changed in place. Replace `result[-1]` with a new tuple, or keep the open interval in two variables and append it when a gap appears."
+    ],
+    "IndexError": [
+      "Usually `intervals[0]` or `result[-1]` read before anything is there: `merge_intervals([])` must return `[]`. The malformed pair `(1,)` raises it too, from `pair[1]`: check that each pair has two items first, and raise `ValueError`."
+    ]
+  },
+  "stopped": [
+    "A `for` loop over the sorted pairs always ends. A `while i < len(pairs)` version ends only if `i` moves forward on the merge branch as well as on the append branch.",
+    "The repeat-until-nothing-merges approach never settles if it compares an interval with itself, since every interval overlaps itself, or keeps the two originals after adding their union. Skip `i == j` and remove what you merged, or sort once and make a single pass.",
+    "Appending to the list you are looping over (`for pair in result: result.append(...)`) grows it as fast as you walk it. Read from the sorted copy and write to a separate `result`."
+  ],
+  "passing": "All passing. Try `merge_intervals([(i, i + 2) for i in range(0, 40000, 2)])` as your own input: 20,000 touching pairs that collapse into `[(0, 40000)]`. Then try the README's first follow-up, keeping touching reservations apart: only one comparison changes, so which of these tests would then fail?"
+}

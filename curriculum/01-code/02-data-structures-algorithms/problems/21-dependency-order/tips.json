@@ -1,0 +1,41 @@
+{
+  "example": "tasks = [\"fetch\", \"parse\", \"save\", \"metrics\"]\nedges = [(\"fetch\", \"parse\"), (\"parse\", \"save\"), (\"fetch\", \"parse\")]\ndependency_order(tasks, edges)",
+  "start": [
+    "Lay the tasks out as cards, each marked with how many other cards must be finished first. Any card marked 0 can go next, and finishing it lowers the mark on every card waiting for it. `metrics` waits for nothing, so it is ready from the start and must still appear in the answer.",
+    "Kahn's algorithm. For each task keep the number of unique prerequisites not yet placed and the list of tasks waiting on it, plus a first-in, first-out queue of tasks at 0, seeded in `tasks` order. Placing a task lowers its dependents' counts and queues any that reach 0; tasks left over when the queue empties are blocked by a cycle, so raise `ValueError`.",
+    {"text": "Check the input as you go: a repeated task id, or a pair naming a task that is not in `tasks`, raises `ValueError`, and a pair seen before is skipped. The shape:", "code": "from collections import deque\n\ndef dependency_order(tasks, dependencies):\n    tasks = list(tasks)\n    ...  # ValueError if a task id appears twice\n    waiting_on = {t: [] for t in tasks}  # t -> the tasks that need t first\n    count = {t: 0 for t in tasks}  # t -> unique prerequisites not placed yet\n    pairs = set()\n    for pre, dep in dependencies:\n        ...  # ValueError if pre or dep is not a task; skip a pair already in pairs\n        ...  # otherwise remember the pair, add dep to waiting_on[pre], and one more to count[dep]\n    ready = deque(t for t in tasks if count[t] == 0)\n    order = []\n    while ready:\n        t = ready.popleft()\n        order.append(t)\n        ...  # each task in waiting_on[t]: one fewer to wait for; queue it when that reaches 0\n    ...  # tasks left out of order mean a cycle: ValueError\n    return order"}
+  ],
+  "tests": {
+    "test_order_and_isolated": [
+      "Tasks `fetch, parse, save, metrics` with `fetch → parse` and `parse → save`: every task must appear, each prerequisite before its dependent, and the order must be exactly `[\"fetch\", \"metrics\", \"parse\", \"save\"]`. `metrics` has no edges at all, so it must be ready from the start, next to `fetch`.",
+      "That exact order comes from a first-in, first-out queue seeded with the zero-count tasks in the order `tasks` lists them. Popping from the end of a list puts `metrics` first, and a depth-first sort puts it first or last."
+    ],
+    "test_duplicate_edge_and_empty": [
+      "`dependency_order([], [])` must be `[]`, and tasks `[1, 2]` with `(1, 2)` given twice must be `[1, 2]`. If task 2 counts two prerequisites but finishing 1 lowers its count once, 2 never becomes ready and you report a false cycle. Keep a set of the pairs you have seen and count each pair once."
+    ],
+    "test_invalid_and_cycles": [
+      "Four plans must raise `ValueError`: `(1, 1)`, where a task needs itself; `(1, 2)` and `(2, 1)` next to a free task `3`; an edge to task `2`, which is not in `tasks`; and the task list `[1, 1]`. Task `3` can run, but a plan with a cycle is still rejected: if your order is shorter than the task list when the queue empties, raise.",
+      "An edge to an unknown task usually surfaces as `KeyError` from one of your dicts, and a repeated task id gets merged by a dict or listed twice in the answer. Check for both before you use the ids as dict keys, and raise `ValueError` yourself."
+    ],
+    "test_long_chain": [
+      "2,000 tasks in one chain, `0 → 1 → ... → 1999`, passed as a `range` and a `zip`. A recursive depth-first sort goes 2,000 calls deep, past Python's limit of about 1,000; the queue loop does not recurse. A `zip` has no `len()` and can be read only once: make a list if you need it twice."
+    ]
+  },
+  "errors": {
+    "KeyError": [
+      "An edge names a task that is not in `tasks`: “Invalid and cycles” has `(1, 2)` with only task `1`. Check both ends of every pair against the tasks, and raise `ValueError` before you touch your dicts."
+    ],
+    "TypeError": [
+      "“Long chain” passes `tasks` as a `range` and `dependencies` as a `zip`: `len()` or indexing on the `zip` fails, and so does adding a list to the `range`. Turn both into lists first."
+    ],
+    "RecursionError": [
+      "A recursive depth-first sort goes one call deeper per task along a chain, and “Long chain” has 2,000, past Python's limit of about 1,000. Counting prerequisites with a queue needs no recursion.",
+      "On the cycle cases it means a depth-first walk has no mark for tasks still in progress, so `1 → 2 → 1` recurses forever. With counts and a queue this cannot happen: tasks on a cycle simply never reach 0."
+    ]
+  },
+  "stopped": [
+    "A loop that repeats until every task is placed never ends on a cycle: no task in `1 → 2 → 1` ever becomes ready, so it scans forever. Loop while the ready queue is not empty, then compare how many tasks you placed with how many there are.",
+    "Putting a task that is not ready yet back on the end of the queue to wait has the same effect: on a cycle those tasks circle forever. Queue a task only when its count reaches 0."
+  ],
+  "passing": "All passing. Time a chain of 20,000 tasks as your own input, `dependency_order(range(20000), zip(range(19999), range(1, 20000)))`, and look at the memory as well. Then the README's first follow-up: when a plan is rejected, which tasks were blocked, and how would you find one actual cycle among them?"
+}

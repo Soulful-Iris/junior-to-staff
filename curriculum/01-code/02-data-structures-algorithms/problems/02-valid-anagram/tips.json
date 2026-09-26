@@ -1,0 +1,34 @@
+{
+  "example": "valid_anagram(\"aab\", \"abb\")",
+  "start": [
+    "Picture each string as a bag of characters: the order is gone, but how many of each is kept. `\"aab\"` and `\"abb\"` hold the same two letters, so a set calls them equal, but one bag has two `a`s and the other two `b`s.",
+    "Count the characters of `first` into a dict, then walk `second` and use up one copy per character. Each count is what `first` still has to offer, so a character with nothing left means `False` at once. Compare the lengths before any of it: equal lengths and no shortfall mean every copy was used.",
+    {"text": "The shape, with the counting left to you:", "code": "def valid_anagram(first, second):\n    ...  # ValueError unless both are str\n    if len(first) != len(second):\n        return False\n    left = {}\n    for c in first:\n        ...  # one more copy of c\n    for c in second:\n        ...  # no copy of c left: return False; otherwise use one up\n    return True"}
+  ],
+  "tests": {
+    "test_exact_text": [
+      "Two empty strings are anagrams; `\"aab\"` and `\"aba\"` are, `\"aab\"` and `\"abb\"` are not. `\"A\"` and `\"a\"` differ, and `\"é\"` is not `\"e\\u0301\"`: one code point against two. `\"🙂 a\"` and `\"a🙂 \"` must match, so spaces and emoji count like letters. `valid_anagram(None, \"\")` must raise `ValueError`.",
+      "The usual failures: `set(first) == set(second)`, which calls `\"aab\"` and `\"abb\"` equal; `.lower()` or `unicodedata.normalize`, which the contract rules out; and no type check, so `None` reaches `len()` and raises `TypeError` instead of `ValueError`."
+    ],
+    "test_sorting_oracle": [
+      "Every word of up to 3 characters from `a`, `b` and `é`, 40 words, paired with each other: 1,600 calls, each compared with `sorted(first) == sorted(second)`. `assertEqual` compares with a real `bool`, so a path that ends without a `return` gives `None` and fails here, even though `assertFalse` accepted it before.",
+      "If only this test fails, look at pairs of different lengths. Using up copies of `second` against the counts of `first` only proves `second` fits inside `first`: without the length check, `(\"ab\", \"a\")` says `True`. Checking only the characters of `first` makes `(\"a\", \"ab\")` say `True`."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "A list of 26 counts indexed by `ord(c) - ord(\"a\")` covers only `a` to `z`. `\"A\"`, `\"é\"`, the space and `🙂` in these tests fall outside it: key a dict by the character itself."
+    ],
+    "TypeError": [
+      "`valid_anagram(None, \"\")` must raise `ValueError`. A `TypeError` such as `object of type 'NoneType' has no len()` means `None` reached `len`, `sorted` or a loop before any check. Test both arguments with `isinstance(..., str)` first."
+    ],
+    "KeyError": [
+      "`counts[c] -= 1` for a character that `first` never had raises `KeyError`, as the `\"a\"` of `valid_anagram(\"A\", \"a\")` does here. That character is a reason to return `False`: check for it, or read it with `.get(c, 0)`, before using one up."
+    ]
+  },
+  "stopped": [
+    "Strings never change in place: `first.replace(c, \"\")` returns a new string and leaves `first` as it was, so a `while first:` loop that counts on it to shrink never ends. Assign the result back, or count with a dict instead of cutting strings.",
+    "If it stopped on a long input of your own, look for a rescan per character: `first.count(c)` or `chars.remove(c)` inside a loop over the string walks it again every time, which is quadratic. One counting pass over each string is linear."
+  ],
+  "passing": "All passing. As your own input, try `valid_anagram(\"ab\" * 20000, \"ba\" * 20000)` and look at the memory: a dict of counts holds two entries, a few hundred bytes, while sorting both strings builds two lists of 40,000 characters. Then the README's follow-up: what changes if `\"é\"` and `\"e\\u0301\"` must count as equal?"
+}

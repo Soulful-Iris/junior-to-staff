@@ -1,0 +1,35 @@
+{
+  "example": "top = TopK(3)\nfor x in [4, 1, 7, 7, 2]:\n    top.add(x)\ntop.largest()",
+  "start": [
+    "You never need the whole stream, only the k largest so far, and the weakest of those decides everything: a new sample either beats it and takes its place, or can never matter again. Try k = 3 with `4, 1, 7, 7, 2` by hand, writing down after each arrival which three are kept and which of them is the weakest.",
+    "Keep the winners in a min-heap with `heapq`, so `heap[0]` is always the weakest one kept. Until the heap holds k values, push; after that, a value larger than `heap[0]` replaces it (`heapq.heapreplace`) and anything else is dropped. The heap then always holds the largest min(k, n) values seen, repeats included. `largest()` returns a sorted copy, largest first: the heap's own order is only partly sorted.",
+    {"text": "The shape, with the checks and the two decisions left to you:", "code": "import heapq\n\nclass TopK:\n    def __init__(self, k):\n        ...  # ValueError unless k is an int (not a bool) and k >= 0\n        self.k = k\n        self.heap = []  # at most k values; heap[0] is the weakest kept\n\n    def add(self, value):\n        ...  # ValueError unless value is an int (not a bool)\n        if self.k == 0:\n            return\n        if len(self.heap) < self.k:\n            ...  # room left: keep it\n        elif ...:  # it beats the weakest kept value\n            ...  # swap it in for heap[0]\n\n    def largest(self):\n        ...  # a new list, largest first"}
+  ],
+  "tests": {
+    "test_every_prefix_against_sort": [
+      "100 random values from -8 to 8, with many repeats, go one at a time into `TopK(0)`, `TopK(1)`, `TopK(4)` and `TopK(110)`. After every `add`, `largest()` must equal everything seen so far, sorted largest first and cut to k: always `[]` for k = 0, and every value seen for k = 110.",
+      "Right values in the wrong order means you returned the heap as it is. Answers that go wrong after a while usually mean `largest()` changed the heap: `self.heap.sort(reverse=True)` breaks the order `heap[0]` depends on, so sort a copy with `sorted()`."
+    ],
+    "test_duplicates_and_snapshot": [
+      "With k = 2 and the values `5, 5, 4`, the answer is `[5, 5]`: the two 5s are separate observations. A set keeps only one of them and fails here.",
+      "The test then calls `.clear()` on the list `largest()` returned and asks again. If the second answer is empty, you handed out your own heap: return a new list each time."
+    ],
+    "test_invalid": [
+      "`TopK(-1)` must raise `ValueError`, and so must `TopK(2).add(float('nan'))`. NaN is a float, and every `<` or `>` with it is `False`, so no comparison catches it, and `isinstance(value, (int, float))` lets it in: require an `int`."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "With `TopK(0)` the heap is always empty and `len(self.heap) < self.k` is `0 < 0`, which is `False`, so the code goes on to compare with `self.heap[0]`, which does not exist. Return straight away when k is 0.",
+      "`index out of range` from `heapq.heappop` means a loop popped more values than the heap holds. `TopK(110)` only ever sees 100 values, so popping `self.k` times runs out: pop until a copy is empty, or just sort."
+    ],
+    "AttributeError": [
+      "`'NoneType' object has no attribute 'clear'` means `largest()` returned `None`. `list.sort()` sorts in place and returns `None`; `sorted()` returns a new list."
+    ]
+  },
+  "stopped": [
+    "Look for a `while` loop over the heap whose body never makes it shorter. `heapq.heappushpop` and `heapq.heapreplace` both leave the size unchanged, so a loop like `while len(self.heap) > self.k:` has to call `heapq.heappop` to end.",
+    "In `largest()`, popping each value and pushing it back onto the same heap never empties it. Pop from a copy, `list(self.heap)`, or build the answer with `sorted()`, which leaves the heap alone."
+  ],
+  "passing": "All passing, but the tests cannot see how much you keep: storing every sample and sorting passes them too. In your own input, define `feed(n)` in the setup lines to add `n` values to one `TopK(5)` and return `largest()`, then compare the peak memory of `feed(100000)` with `feed(200000)`. Keeping at most k values, it should stay flat."
+}

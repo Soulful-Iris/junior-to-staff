@@ -1,0 +1,35 @@
+{
+  "example": "longest_unique_window(\"abba\")",
+  "start": [
+    "For each position, ask: what is the longest run with no repeat that ends exactly here? For `\"abba\"` those runs are `a`, `ab`, `b` and `ba`. The answer is the longest of them, and notice that each run starts at or after the start of the one before it.",
+    "Keep `left`, where the current run starts, and a dict from each character to the last index you saw it at. When `text[right]` was last seen at or after `left`, move `left` to one past that index; a copy from before `left` is outside the run and must not pull `left` back. Replace the best only when strictly longer, so ties keep the earliest start.",
+    {"text": "The shape, with the two decisions left to you:", "code": "def longest_unique_window(text):\n    ...  # ValueError unless text is a str\n    left, last, best = 0, {}, (0, 0)\n    for right, c in enumerate(text):\n        if c in last and ...:  # that earlier copy is inside the run\n            left = ...\n        last[c] = right\n        if ...:  # [left, right + 1) is strictly longer than best\n            best = (left, right + 1)\n    return best"}
+  ],
+  "tests": {
+    "test_boundaries": [
+      "`\"abba\"` must give `(0, 2)`, `\"\"` gives `(0, 0)`, `\"aaaa\"` gives `(0, 1)`, and `\"🙂é🙂x\"` gives `(1, 4)`: indices count code points and `end` is exclusive. `longest_unique_window([])` must raise `ValueError`; an empty list loops zero times, so without a type check it returns `(0, 0)`.",
+      "On `\"abba\"`, `(1, 4)` means the last `a` pulled `left` back to 1, though that earlier `a` is outside the run. `(2, 4)` means a tie replaced the first answer: replace only when strictly longer. `(0, 1)` means the end is inclusive; it should be one past the last character."
+    ],
+    "test_substring_oracle": [
+      "All 1,093 strings of up to 6 letters from `abc`, against a brute force over every slice `text[i:j]`: the longest with no repeated letter, and the smallest `i` among equals. The answer is the tuple `(start, end)` with `end` exclusive, so `text[start:end]` is the run itself.",
+      "The failure shows the two pairs but not the string. Run a few short strings as your own inputs, such as `\"abcb\"`, `\"abcab\"` and `\"cabcb\"`, and check each by hand: `text[start:end]` must have no repeat, and no longer slice may be free of repeats."
+    ]
+  },
+  "errors": {
+    "KeyError": [
+      "The usual causes: `last[c]` read before `c` has been seen, or `window.remove(...)` of a character that is not in the set. Read with `last.get(c, -1)` or check `c in last` first. In a set-based window, remove `text[left]` once for each step of `left`."
+    ],
+    "TypeError": [
+      "`unsupported operand type(s) for +: 'NoneType' and 'int'` comes from `last.get(c) + 1` for a character not seen yet: without a default, `.get` returns `None`. Give it `-1`: one past it is `0`, which can never move `left` forward."
+    ],
+    "IndexError": [
+      "A scan that grows a window with `while text[j] not in seen:` runs off the end when the rest of the string has no repeat, as in `\"abba\"` from index 2. Stop at `j < len(text)` as well."
+    ]
+  },
+  "stopped": [
+    "In a set-based window, the loop `while c in window:` ends only once the earlier copy of `c` has left the set. Each turn must remove `text[left]` and add one to `left`. Without `left += 1` it removes the same character again: a `KeyError` with `remove`, a loop that never ends with `discard`.",
+    "If it stopped on a long input of your own, check that nothing starts over from each position: rescanning from every start is quadratic when the text has many different characters. `left` and `right` should each only ever move forward.",
+    "If the run stopped for output, printing the `last` dict or the window on every step is the cause: `test_substring_oracle` runs 1,093 strings. Print two numbers, or only for your own input."
+  ],
+  "passing": "All passing. Try a text with many different characters as your own input: `t = \"\".join(map(chr, range(20000)))` on one line, then `longest_unique_window(t + t)` on the next. The answer is `(0, 20000)`. Starting over from every position would take hundreds of millions of steps; `left` and `right` moving only forward take 40,000."
+}

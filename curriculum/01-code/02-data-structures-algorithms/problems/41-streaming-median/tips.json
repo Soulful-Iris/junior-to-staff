@@ -1,0 +1,35 @@
+{
+  "example": "m = StreamingMedian()\nfor x in [5, 1, 9, 2]:\n    m.add(x)\nm.median()",
+  "start": [
+    "Picture the values so far, sorted and cut in half. The median depends only on the largest value in the lower half and the smallest in the upper half, so you need quick access to those two, not the full order.",
+    "Two heaps: `lower_half`, a max-heap made from `heapq` by storing negated values, and `upper_half`, a plain min-heap. After every `add`, keep every lower value at most every upper value, and keep `lower_half` the same size as `upper_half` or one larger. The tests read both lists and check exactly this, negation included.",
+    {"text": "The shape, with each step of `add` and `median` left to you:", "code": "import heapq\nimport fractions\n\nclass StreamingMedian:\n    def __init__(self):\n        self.lower_half = []   # negated values: -self.lower_half[0] is the lower maximum\n        self.upper_half = []   # plain values: self.upper_half[0] is the upper minimum\n\n    def add(self, value):\n        ...  # ValueError unless value is an int, before either heap changes\n        ...  # push onto the half it belongs to\n        ...  # if the sizes are out of balance, move one root across\n\n    def median(self):\n        ...  # ValueError if empty; odd count: the lower maximum; even: the two roots averaged exactly"}
+  ],
+  "tests": {
+    "test_every_prefix_and_invariants": [
+      "300 seeded random adds between -20 and 20. After each one, `median()` must equal the median of the sorted history, `len(lower_half) - len(upper_half)` must be 0 or 1, and `max(-x for x in lower_half)` must not exceed `min(upper_half)`. So the heaps need exactly these names, the lower one stores negated values, and it holds the extra value when the count is odd.",
+      "If only the size check fails, the extra value is sitting in `upper_half`: move it across so `lower_half` is the larger. If the order check fails, a value went into the wrong half and nothing moved back afterwards; compare each new value with the lower maximum to pick its side."
+    ],
+    "test_huge_integers_without_float_overflow": [
+      "Adds `10**400` and `10**400 + 1` and expects `Fraction(2 * 10**400 + 1, 2)`. `//` drops the half, and `/` or anything that passes through `float` overflows at this size. Build the result from the two integers with `Fraction(a + b, 2)`."
+    ],
+    "test_empty_and_invalid": [
+      "`median()` on a new stream must raise ValueError, not the IndexError that reading `lower_half[0]` gives. Then `add(float('nan'))` must raise ValueError, and `lower_half` must still be `[]` afterwards: check the type before pushing anything."
+    ]
+  },
+  "errors": {
+    "AttributeError": [
+      "The tests read `stream.lower_half` and `stream.upper_half` directly. Create both lists in `__init__` under exactly those names, even if you would rather call them something else."
+    ],
+    "OverflowError": [
+      "`(a + b) / 2`, `statistics.median` and `float()` all turn integers into floats, and `10**400` is far beyond a float's range. Keep integers: `Fraction(a + b, 2)` for an even count, `Fraction(x)` for an odd one."
+    ],
+    "IndexError": [
+      "Reading `lower_half[0]` or `upper_half[0]` while that heap is empty. `median()` on an empty stream has to raise ValueError itself, and in `add`, compare with the lower maximum only when `lower_half` is not empty."
+    ]
+  },
+  "stopped": [
+    "A rebalancing loop that runs until the two sizes are equal never ends after an odd number of adds: one root moves back and forth forever. Stop when `lower_half` is equal in size or exactly one larger; after a single `add`, one move is always enough."
+  ],
+  "passing": "All passing. The time shown covers only the last call, so to time many adds, define a helper in your input's setup that builds a `StreamingMedian`, adds 20,000 values and returns `median()`, then call it on the last line. Each add is O(log n), and memory grows with n because every value is kept. Then the follow-up: removing expired values."
+}

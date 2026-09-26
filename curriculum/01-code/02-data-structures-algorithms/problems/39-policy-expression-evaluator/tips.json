@@ -1,0 +1,48 @@
+{
+  "example": "record = {\"a\": True, \"b\": False, \"c\": False}\nevaluate(\"a == TRUE OR b == TRUE AND c == TRUE\", record)",
+  "start": [
+    "Treat it as three jobs, in order: cut the text into tokens (names, `==`, `!=`, strings, integers, `TRUE`, `FALSE`, `AND`, `OR`, brackets), check that the tokens form one complete policy, and only then read the record. Splitting on spaces or on the word `OR` breaks as soon as a quoted string contains either.",
+    "Recursive descent, one function per precedence level: an expression is AND-groups joined by `OR`, an AND-group is factors joined by `AND`, and a factor is a bracketed expression or `name ==/!= literal`. That order is what makes AND bind tighter. Parse everything into a tree and require the end of the tokens before evaluating, so a broken right branch raises even when the left side is already true.",
+    "Evaluate the finished tree with short circuits: for `OR`, look at the right side only when the left is false; for `AND`, only when it is true. A comparison is true only if the field is in the record and `type(actual) is type(literal)`; otherwise both `==` and `!=` are false, so `True == 1` and missing fields never grant access.",
+    {"text": "Tokens as `(kind, value, position)` tuples, ending with an `EOF` token, make every rule a check on `tokens[pos][0]`. The OR level, with the rest left to you:", "code": "def parse_or(tokens, pos, depth):\n    node, pos = parse_and(tokens, pos, depth)\n    while tokens[pos][0] == \"OR\":\n        right, pos = parse_and(tokens, pos + 1, depth)\n        node = (\"OR\", node, right)\n    return node, pos\n\ndef parse_and(tokens, pos, depth):\n    ...  # the same shape one level down: factors joined by AND\n\ndef parse_factor(tokens, pos, depth):\n    ...  # \"(\" parse_or at depth + 1 \")\" (ValueError past 100), or NAME ==/!= LITERAL"}
+  ],
+  "tests": {
+    "test_precedence_and_parentheses": [
+      "With `a` true and `b`, `c` false: `a == TRUE OR b == TRUE AND c == TRUE` must be `True`, because AND binds first; `(a == TRUE OR b == TRUE) AND c == TRUE` must be `False`; and `((a == TRUE))` must be `True`, so brackets nest.",
+      "If the first one comes out `False`, you are combining left to right as you read. OR has to wait for the whole AND-group on its right: parse AND-groups first, then join those with OR."
+    ],
+    "test_missing_types_and_strings": [
+      "A missing field makes both `==` and `!=` false, and so does a type mismatch: with `active` set to `True`, `active == 1` and `active != 1` are both `False`, although Python says `True == 1`. Check `type(actual) is type(expected)` before comparing values.",
+      "`name == \"A\\\"B\"` holds an escaped quote: decode string literals with JSON's rules (`json.loads` on the quoted text gives `A\"B`). `age == -2` needs negative integers, and `user.role` is one field name containing a dot, looked up as the key `'user.role'`."
+    ],
+    "test_malformed_input_is_not_hidden_by_short_circuit": [
+      "Thirteen broken policies, each of which must raise ValueError against `{'a': 1}`: the empty string, `a = 1`, `a ==`, a dangling `OR`, unbalanced brackets both ways, `a == 1 b == 2`, `a == 1 OR ???`, the bad escape `\"bad\\q\"`, `a == 01`, `f(a) == 1`, lowercase `and`, and an unterminated string. The failure names the one that got through.",
+      "`a == 1 OR ???` is the trap: the left side is already true, so an evaluator that stops early never reaches `???`. Lex and parse the whole text, and check that parsing ended at the end of the tokens, before evaluating anything. Integers follow JSON too: `01` is not a number."
+    ],
+    "test_short_circuit_skips_record_access": [
+      "The record is a custom `Mapping` whose `['danger']` raises. `a == 1 OR danger == 2` must return `True` and `a != 1 AND danger == 2` must return `False` without ever reading `danger`: skip the right side of OR when the left is true, and of AND when it is false.",
+      "On this class `'danger' in record` and `record.get('danger')` also read `record['danger']`, as does `dict(record)`, so never look fields up ahead of evaluation. Test the argument with `isinstance(record, collections.abc.Mapping)`: a `dict` check would reject this record."
+    ],
+    "test_resource_limits_and_long_chain": [
+      "Four checks: 700 copies of `a == 1` joined by OR must return `True`; 101 nested brackets must raise ValueError, since the limit is 100; `lex` on 1,100 comparisons, 4,399 tokens, must raise ValueError, since the limit is 4,096; and a list as the record must raise ValueError.",
+      "`lex` is called directly, so the token limit belongs in `lex`. On the long chain, recursing once per OR means 700 nested calls, and two calls per level pass Python's usual limit of 1,000: fold chains in a `while` loop and evaluate with your own stack."
+    ]
+  },
+  "errors": {
+    "IndexError": [
+      "Reading `tokens[pos]` past the end: the empty policy, `a ==` and `a == 1 OR` all run out of tokens partway through a rule. End the token list with an `EOF` token, and have each rule raise ValueError when the next token is the wrong kind."
+    ],
+    "KeyError": [
+      "`record[field]` for a field that is not there: `missing != \"admin\"` is evaluated against `{}`. Check `field in record` first; a missing field makes both `==` and `!=` false."
+    ],
+    "RecursionError": [
+      "A rule that calls itself before consuming a token, such as `expression := expression OR conjunction` written literally, recurses forever at the same position. Parse the first operand, then loop while the next token is `OR`.",
+      "Otherwise it is the 700-comparison OR chain: one or more nested Python calls per operator adds up past the limit. Fold chains in a loop and evaluate with an explicit stack; keep recursion for brackets, which stop at 100."
+    ]
+  },
+  "stopped": [
+    "A lexer loop never ends when a character matches none of its branches and nothing moves `pos` on: `a == 1 OR ???` in the malformed test does exactly that without a final branch that raises ValueError. A regex token that can match the empty string, such as `\\s*`, stalls the same way.",
+    "A `while` loop that joins operands with `OR` or `AND` repeats forever if an iteration consumes no tokens: step past the operator before parsing the next operand, and have the operand parser either consume a token or raise ValueError."
+  ],
+  "passing": "All passing. Time a policy near the token limit as your own input: `evaluate(' OR '.join(['a == 2'] * 1024), {'a': 1})` is 4,095 tokens with no true comparison, so every one is checked. Then the README's follow-up on NOT: why would negating today's rule that missing fields are false grant access to records without the field?"
+}

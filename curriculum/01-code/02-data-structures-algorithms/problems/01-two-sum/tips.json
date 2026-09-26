@@ -1,0 +1,34 @@
+{
+  "example": "two_sum([1, 1, 3], 4)",
+  "start": [
+    "Walk the list once, left to right. Standing at position `j`, the only value that can finish a pair is `target - nums[j]`, and it has to be one you already walked past. For `[2, 7, 11, 15]` and `9`: standing on `7`, you need a `2`, and you passed one at index 0.",
+    "Keep a dict from each value you have passed to the index where it first appeared. At `j`, look up the complement before you add `nums[j]`, so a lone `3` cannot pair with itself for `6`, and never replace an index already stored, so `[1, 1, 3]` with `4` gives `(0, 2)`. Returning at the first match gives the smallest `j`.",
+    {"text": "The shape, with the lookup and the bookkeeping left to you:", "code": "def two_sum(nums, target):\n    ...  # ValueError unless nums is a list or tuple of int (not bool) and target is an int\n    first_at = {}\n    for j, x in enumerate(nums):\n        ...  # the complement already in first_at: return (its index, j)\n        ...  # remember x at j, only if x is not in first_at yet\n    return None"}
+  ],
+  "tests": {
+    "test_contract": [
+      "`[3, 3, 2]` with `6` must give `(0, 1)`, `[1, 1, 3]` with `4` must give `(0, 2)`, `[3]` with `6` gives `None`, and `[-3, 8, 4]` with `5` gives `(0, 1)` and must be unchanged afterwards. Then `nums=None`, `[True]`, and a target of `2.0` must each raise `ValueError`.",
+      "`(1, 2)` for `[1, 1, 3]` means the dict kept the latest index of `1`, not the first. `(0, 0)` for `[3]` means you stored `3` before looking up its complement, so it paired with itself. `True` passes `isinstance(x, int)`, so compare `type(x) is int`. And return a tuple: `[0, 1]` does not equal `(0, 1)`."
+    ],
+    "test_exhaustive_pair_oracle": [
+      "Every tuple of up to 5 values from `-1`, `0`, `1`, with every target from `-2` to `2`: 1,820 calls, each checked against a brute force that picks the smallest `j` first, then the smallest `i`. `nums` is a tuple here, so a type check that accepts only lists raises `ValueError` on valid input.",
+      "A double loop with `i` outside and `j` inside finds the smallest `i` first. For `(0, 1, -1, 0)` with target `0` it returns `(0, 3)`, but `(1, 2)` ends sooner, so it is the answer. Put `j` in the outer loop, or use the dict."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`two_sum(None, 2)` must raise `ValueError`. `'NoneType' object is not iterable` means a loop reached `None` before any check: test that `nums` is a list or tuple first, before `enumerate`, `len`, or a check of its elements."
+    ],
+    "KeyError": [
+      "`seen[target - x]` fails whenever the complement has not appeared yet, which is most of the time. Ask `target - x in seen` first, and read the index only when it is there."
+    ],
+    "ValueError": [
+      "If it is your own `ValueError`, raised on valid input, your type check is too strict: `test_exhaustive_pair_oracle` passes tuples, which the contract allows as well as lists. What must be rejected is an element or a target whose type is not exactly `int`."
+    ]
+  },
+  "stopped": [
+    "The dict answer is one `for` loop, which always ends. A `while` loop never ends when some path through its body changes nothing: a `continue` that skips `j += 1`, or, with two pointers on a sorted copy, a match that is recorded without moving `left` or `right`.",
+    "If the run stopped for output, a `print` inside the loop is the cause: `test_exhaustive_pair_oracle` makes 1,820 calls. Print only for your own input, or set a breakpoint instead."
+  ],
+  "passing": "All passing. As your own input, try `two_sum(list(range(20000)), 39997)`: the only pair is the last two positions, `(19998, 19999)`, so the time shows whether each step is one dict lookup. A double loop is stopped by the time limit on it. Then the README's follow-up: return every pair, and see why one index per value is no longer enough."
+}

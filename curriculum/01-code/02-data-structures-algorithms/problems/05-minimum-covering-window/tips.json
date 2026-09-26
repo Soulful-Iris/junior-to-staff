@@ -1,0 +1,35 @@
+{
+  "example": "minimum_covering_window(\"ABAAC\", \"AAC\")",
+  "start": [
+    "Think of `required` as a debt: `\"AAC\"` owes two `A`s and one `C`. Each character that enters the window pays back one copy, if that character is still owed; a third `A` pays nothing, and that is allowed. The window covers once nothing is owed.",
+    "Grow the window one character at a time with `right`. Whenever nothing is owed, it covers: record it, then shrink it from `left`, recording as you go, until it stops covering. Keep a dict of copies still owed per character, where below zero means surplus, and a total `missing` of owed copies, so covering is `missing == 0` rather than a scan of the dict.",
+    {"text": "The shape, with the bookkeeping left to you:", "code": "def minimum_covering_window(text, required):\n    ...  # ValueError unless both are str; (0, 0) when required is empty\n    owed = {}\n    ...  # owed[c]: how many copies of c required asks for\n    missing, left, best = len(required), 0, None\n    for right, c in enumerate(text):\n        if c in owed:\n            ...  # pay one copy: missing drops only if c was still owed\n        while missing == 0:\n            ...  # record (left, right + 1) if best is None or it is strictly shorter\n            ...  # give text[left] back: missing rises if it is owed again\n            left += 1\n    return best"}
+  ],
+  "tests": {
+    "test_examples_and_ties": [
+      "`(\"ABAAC\", \"AAC\")` gives `(2, 5)`, `(\"abxba\", \"ab\")` gives `(0, 2)`, the first of two tied windows, `(\"ab\", \"aa\")` gives `None`, `(\"\", \"\")` gives `(0, 0)` and `(\"🙂x🙂é\", \"🙂é\")` gives `(2, 4)`. `(\"abc\", None)` must raise `ValueError`.",
+      "`(3, 5)` for `\"ABAAC\"` means `required` was treated as a set: it needs two `A`s. `(3, 5)` for `\"abxba\"` means an equal-length window replaced the first: replace only when strictly shorter. `None` as `required` slips past `if not required:` and `Counter(None)`, so test `isinstance(required, str)` first."
+    ],
+    "test_all_substrings_oracle": [
+      "Every text of up to 5 letters from `ab`, each with the requirements `\"\"`, `\"a\"`, `\"b\"`, `\"aa\"`, `\"ab\"` and `\"aab\"`, 378 calls, against a brute force over every slice: shortest first, then earliest. A requirement the text cannot meet, like `\"aab\"` in `\"ab\"`, gives `None`.",
+      "The first call is `(\"\", \"\")`, which must give `(0, 0)`: an empty requirement is met by the empty window, even in an empty text, so check `required` before `text`. Counts matter too: `(\"aba\", \"aa\")` needs both `a`s, so the answer is the whole text, `(0, 3)`."
+    ]
+  },
+  "errors": {
+    "KeyError": [
+      "`owed[c] -= 1` for a character that `required` never mentions, like the `\"B\"` in `(\"ABAAC\", \"AAC\")`. Only required characters have entries: check `c in owed` before touching a count, both when `right` takes a character in and when `left` gives one back."
+    ],
+    "TypeError": [
+      "`'NoneType' object is not subscriptable` comes from reading `best[1] - best[0]` while `best` is still `None`, at the first covering window. Test `best is None` first, in the same condition.",
+      "`object of type 'NoneType' has no len()` is `(\"abc\", None)` reaching `len(required)`. That call must raise `ValueError`: check both arguments with `isinstance(..., str)` before anything else."
+    ],
+    "ValueError": [
+      "A `ValueError` from `min()` means no slice covered `required`, as in `(\"ab\", \"aa\")`, so `min` was given nothing to choose from. That case must return `None`."
+    ]
+  },
+  "stopped": [
+    "The shrinking loop `while missing == 0:` ends only when giving back `text[left]` makes a copy owed again. `left` must move forward on every turn; if it does not, a character that is not required is looked at forever.",
+    "If it stopped on a long input of your own, look for work repeated per window: counting every slice from scratch is cubic, and growing a window again from every start is quadratic. The two-pointer scan moves `left` and `right` forward only, so each character enters once and leaves once."
+  ],
+  "passing": "All passing. As your own input, try `minimum_covering_window(\"ab\" * 10000 + \"c\", \"abc\")`: the answer is the last three characters, `(19998, 20001)`, and each character enters and leaves the window once, so the time stays small. Then the README's first follow-up: what breaks if `required` must appear in that order?"
+}

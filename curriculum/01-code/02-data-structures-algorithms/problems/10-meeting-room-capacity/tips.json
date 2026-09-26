@@ -1,0 +1,34 @@
+{
+  "example": "meeting_room_capacity([(0, 10), (5, 7), (7, 12)])",
+  "start": [
+    "Picture a counter of rooms in use, moving along the timeline: up one when a meeting starts, down one when a meeting ends, and the answer is the highest it ever reads. At time 7 in `[(0, 10), (5, 7), (7, 12)]` one meeting ends as another starts, and the counter must not read 3 there.",
+    "Turn each meeting into two events, `(start, +1)` and `(end, -1)`, sort them, and add up the deltas in order, keeping the largest running total: after each event it is the number of meetings in progress. At equal times the end must come first, since a room is free exactly when its meeting ends, and with `-1` against `+1` a plain sort already does that. Merging intervals cannot work here: `[(1, 2)] * 4` needs 4 rooms.",
+    {"text": "The shape, with the events and the counting left to you:", "code": "def meeting_room_capacity(intervals):\n    ...  # ValueError: not a list/tuple, a pair that is not two ints (bool excluded), or start >= end\n    events = []\n    for start, end in intervals:\n        ...  # one event where it starts, one where it ends\n    active = best = 0\n    for time, delta in sorted(events):\n        ...\n    return best"}
+  ],
+  "tests": {
+    "test_endpoints_and_multiplicity": [
+      "`[(0, 10), (5, 7), (7, 12)]` needs 2 rooms and `[(1, 2), (2, 3)]` needs 1: a meeting that ends at 7 frees its room for one that starts at 7, so at equal times handle ends before starts. `[(1, 2)] * 4` needs 4, because identical meetings each need a room, which merging or a set of intervals loses; `[]` needs 0.",
+      "`[(4, 4)]`, `[(4, 3)]`, `[(1, False)]`, `[\"ab\"]` and `None` must each raise `ValueError`. `\"ab\"` is the sneaky one: a two-letter string unpacks into `start, end = \"a\", \"b\"` and passes `start < end`. Check that each pair is a list or tuple of two ints, with `type(x) is int` so that `False` is refused too."
+    ],
+    "test_active_at_starts_oracle": [
+      "500 random batches of up to 19 meetings, starts from -5 to 9, compared with a slow count: at each meeting's start time, how many meetings have `start <= time < end`. It also checks that your function left the list exactly as it was, so sort a copy or a separate list of events, never `intervals.sort()`.",
+      "Off by one on some batches usually means a tie at a shared time. A heap of end times must free a room whose end is `<=` the next start; with two sorted lists of starts and ends, `start == end` must count as a room coming free, not as an overlap."
+    ]
+  },
+  "errors": {
+    "ValueError": [
+      "`max()` of an empty sequence raises ValueError, and `meeting_room_capacity([])` must return `0`. Give `max` a `default=0`, or keep a running best that starts at `0`."
+    ],
+    "TypeError": [
+      "`'NoneType' object is not iterable`: `meeting_room_capacity(None)` must raise `ValueError`, so check that `intervals` is a list or tuple before looping over it."
+    ],
+    "IndexError": [
+      "A heap read as `heap[0]` before anything was pushed, or `intervals[0]` on the empty list. Check that the heap is not empty before looking at its top, and return `0` for `[]` before any indexing."
+    ]
+  },
+  "stopped": [
+    "In a heap version, `while heap and heap[0] <= start:` has to `heappop` inside the loop. Reading the top without removing it checks the same room forever.",
+    "In a two-pointer version over sorted starts and ends, each branch must move its own index: a start moves `i`, an end moves `j`. A branch that changes the count but not its index sees the same pair on every turn."
+  ],
+  "passing": "All passing. Try `meeting_room_capacity([(i, i + 1000) for i in range(20000)])` as your own input: the answer is 1000, and sorting keeps it O(n log n) where counting at every start, the baseline, takes 400 million checks. Then the README's first follow-up: say which room each meeting gets, with a min-heap of `(end, room)`."
+}

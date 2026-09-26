@@ -1,0 +1,42 @@
+{
+  "example": "combinations([2, 3, 6, 7, 2], 7)",
+  "start": [
+    "Write every answer with its smallest blocks first: `[2, 2, 3]`, never `[2, 3, 2]` or `[3, 2, 2]`. If, after choosing a size, you only allow sizes at least as large, each combination can be built in exactly one order, so duplicates are never made and never need removing. Draw the choices for sizes `[2, 3, 6, 7]` and target 7 as a tree.",
+    "This is backtracking over the distinct sizes in sorted order. A state is the remaining total plus the index of the smallest size still allowed. Choosing `sizes[i]` appends it to `path` and carries on from the same `i`, since sizes can repeat; coming back pops it. At remaining 0, save a copy of `path`. A size bigger than the remainder ends that level, as every later size is bigger. The 1,500-deep test needs an explicit stack, not recursion.",
+    {"text": "The shape with an explicit stack. Leaving a frame means popping it and, unless it was the first frame, the last entry of `path`.", "code": "def combinations(candidates, target):\n    ...  # ValueError: target not an int >= 0, or any size not an int > 0\n    sizes = sorted(set(candidates))  # a new list: the caller's stays as it was\n    out, path = [], []\n    stack = [[0, target]]  # frames: [next index to try, remaining]\n    while stack:\n        i, left = stack[-1]\n        if left == 0:\n            ...  # save a copy of path, then leave this frame\n        elif i == len(sizes) or sizes[i] > left:\n            ...  # nothing more fits here: leave this frame\n        else:\n            ...  # move this frame on to i + 1, append sizes[i], push [i, left - sizes[i]]\n    return out"}
+  ],
+  "tests": {
+    "test_example_and_boundaries": [
+      "`combinations([2, 3, 6, 7, 2], 7)` must be `[[2, 2, 3], [7]]`: the input's two 2s are one size, and a size may be used more than once. If `[2, 2, 3]` shows up two or three times, remove duplicate sizes and only choose sizes at or after the last one chosen.",
+      "With no sizes at all, target 0 gives `[[]]`, one empty combination, and target 3 gives `[]`; `combinations([4, 6], 5)` gives `[]` too. An empty list of sizes is valid input, so do not call `min()` on it or reject it."
+    ],
+    "test_against_count_vector_oracle": [
+      "Sizes `[2, 3, 5]` and every target from 0 to 20, compared with a brute force over every count of each size. Each combination must be in nondecreasing order and the whole list sorted, so target 8 gives `[[2, 2, 2, 2], [2, 3, 3], [3, 5]]` and target 0 gives `[[]]`.",
+      "Trying sizes smallest first, never going back to a smaller one, produces exactly this order with no sorting afterwards. If the combinations come back as empty lists, you saved `path` itself, which is emptied later: save `path.copy()`."
+    ],
+    "test_long_path_and_no_mutation": [
+      "It calls `combinations([3, 1], 6)` and then checks the list is still `[3, 1]`. `candidates.sort()` sorts the caller's list in place; `sorted(set(candidates))` makes a new one.",
+      "`combinations([1], 1500)` must be `[[1] * 1500]`: a single answer, 1,500 choices deep. A recursive search needs 1,500 nested calls, past Python's limit of about 1,000, so keep the frames in a list instead."
+    ],
+    "test_invalid": [
+      "Each must raise `ValueError`: a size of `0`, a size of `-1`, a target of `-1`, and a size of `1.5`. Check them all before searching: a size of 0 or less never brings the remaining total down, so the search would never end.",
+      "`1.5` is the one a sign check misses: `1.5 + 1.5` is `3.0`, which equals 3, so without a type check you return `[[1.5, 1.5]]`. Require `isinstance(size, int)` for every size, and for the target."
+    ]
+  },
+  "errors": {
+    "RecursionError": [
+      "`combinations([1], 1500)` goes 1,500 choices deep, past Python's recursion limit of about 1,000. Keep a list of frames `[next_index, remaining]` and one shared `path`: push a frame when you choose a size, and pop it, with the last `path` entry, when it has nothing left to try. A size of `0` recursing forever raises this too."
+    ],
+    "ValueError": [
+      "A `ValueError` where the test expected an answer: `combinations([], 0)` and `combinations([], 3)` are valid. `min([])` raises `ValueError`, and so does a check like `target <= 0`, but target 0 is allowed and gives `[[]]`."
+    ],
+    "IndexError": [
+      "`pop from empty list` in an explicit-stack version: the first frame has no `path` entry of its own, so when it finishes, pop the frame but not `path`. `list index out of range` means `sizes[i]` was read before checking `i < len(sizes)`."
+    ]
+  },
+  "stopped": [
+    "A size of `0` never brings the remaining total down and `-1` makes it grow, so a loop-based search keeps choosing it and the path grows forever. `test_invalid` passes exactly these: raise `ValueError` before the search starts.",
+    "In an explicit-stack version, move the frame on to its next index before pushing a child frame. Otherwise, when the child finishes, the frame chooses the same size again, forever."
+  ],
+  "passing": "All passing. Try `combinations([1, 2, 3, 4, 5], 60)` as your own input, then target 90, and compare the times: there are 7,166 answers for 60, and the time follows the number of answers. Then the README's follow-up: allow each size only once, and predict what `combinations([2, 3, 6, 7, 2], 7)` gives before running it."
+}

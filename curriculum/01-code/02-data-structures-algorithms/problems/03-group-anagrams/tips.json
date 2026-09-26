@@ -1,0 +1,35 @@
+{
+  "example": "group_anagrams([\"tan\", \"eat\", \"nat\", \"tea\", \"eat\", \"\"])",
+  "start": [
+    "Instead of asking whether two words are anagrams, give every word a label that its anagrams share and no other word has. `\"eat\"`, `\"tea\"` and `\"ate\"` would carry one label, `\"tan\"` another. Grouping is then a lookup by label, not a comparison with every group so far.",
+    "Sorting a word's characters gives such a label: anagrams sort to the same characters, and nothing else does. Keep a dict from label to the list of words that had it, appending in input order. A dict keeps insertion order, so after the last word its groups already stand in order of first appearance.",
+    {"text": "The shape, with the label and the grouping left to you:", "code": "def group_anagrams(words):\n    ...  # ValueError unless words is a list or tuple of str\n    groups = {}\n    for w in words:\n        label = ...  # the same for every anagram of w, and usable as a dict key\n        ...          # add w to the group for label, creating the group the first time\n    return ...       # the groups, as a list of lists"}
+  ],
+  "tests": {
+    "test_contract": [
+      "`[\"eat\", \"tea\", \"tan\", \"eat\", \"ate\"]` must give `[[\"eat\", \"tea\", \"eat\", \"ate\"], [\"tan\"]]`: the repeated `\"eat\"` stays, and nothing is sorted. `[]` gives `[]`, `[\"\", \"\"]` gives `[[\"\", \"\"]]`, `\"é\"` and `\"e\\u0301\"` land in different groups, and `[\"ok\", 7]` must raise `ValueError`.",
+      "The answer is compared with a list of lists, and a `dict_values` view is not equal to one: wrap it in `list(...)`. Sorting the words in a group, or the groups, breaks the input order the contract promises, and skipping `\"\"` loses real entries."
+    ],
+    "test_pairwise_inventory_oracle": [
+      "200 random batches of up to 19 words, each 0 to 5 letters from `abc`, against groups built by comparing `Counter`s word by word, in order of first appearance. After your call it checks that `words` is unchanged, so do not sort, pop or remove from it.",
+      "If `test_contract` passes and this fails, your label is equal too often. `frozenset(w)` ignores counts and puts `\"ab\"` with `\"aab\"`; a sum of `ord` values puts `\"ac\"` with `\"bb\"`. Two labels must be equal exactly when the words are anagrams."
+    ]
+  },
+  "errors": {
+    "TypeError": [
+      "`unhashable type: 'list'` means the label is a list: `sorted(w)` returns one, and a list cannot be a dict key. Turn it into a tuple, or join it into a string.",
+      "`'int' object is not iterable` is `[\"ok\", 7]` reaching `sorted(7)`. The contract wants `ValueError` there: check that every element is a `str` before grouping anything."
+    ],
+    "KeyError": [
+      "`groups[label].append(w)` fails the first time a label appears, because no list is there yet. Create it first, with `if label not in groups:` or with `setdefault`."
+    ],
+    "IndexError": [
+      "A label of 26 counts indexed by `ord(c) - ord(\"a\")` works only for `a` to `z`. `test_contract` includes `\"é\"` and the combining accent `\"\\u0301\"`, far past index 25. Sorting the characters works for any code point."
+    ]
+  },
+  "stopped": [
+    "A `while remaining:` loop that takes each group out of a list must remove every word it grouped, the first one included. If the first word stays in `remaining`, the same group is found again forever. The dict answer is one `for` pass with no removing at all.",
+    "If the run stopped for output, printing the whole `groups` dict for every word is the usual cause: `test_pairwise_inventory_oracle` calls you 200 times. Print just the word and its label, or only for your own input."
+  ],
+  "passing": "All passing. As your own input, try `group_anagrams([str(n) for n in range(20000)])`: numbers with the same digits land together, like `\"12\"` and `\"21\"`. Then the README's first follow-up: if every word were lowercase `a` to `z`, a label of 26 counts would avoid sorting. What does it cost, and what would it break here?"
+}

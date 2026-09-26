@@ -1,0 +1,31 @@
+{
+  "example": "a, b, c = Node(\"a\"), Node(\"b\"), Node(\"c\")\na.next, b.next, c.next = b, c, b\ncycle_entry(a)",
+  "start": [
+    "Draw `a → b → c → b` and walk it with your finger. The answer is the first node the walk comes back to: `b`, the node itself, compared with `is`, never by its value.",
+    "A set of visited nodes finds it, but the rules ask for constant extra space. Walk two pointers from `head` instead: `slow` one step at a time, `fast` two. If `fast` runs off the end there is no loop. If they land on the same node there is one, but that meeting node is usually not the entry.",
+    {"text": "After they meet, put a third pointer at `head` and move it and `slow` one step at a time. They meet at the entry. The shape, with the moves left to you:", "code": "def cycle_entry(head):\n    slow = fast = head\n    while fast is not None and fast.next is not None:\n        ...  # slow one step, fast two\n        if slow is fast:\n            break\n    else:\n        return None\n    p = head\n    while p is not slow:\n        ...  # both one step\n    return p"}
+  ],
+  "tests": {
+    "test_every_small_prefix_and_cycle_length": [
+      "Every list up to 24 nodes, with the loop coming back at every position, and every node holding `7`. Anything that compares `.value` sees one node where there are many: compare nodes with `is`.",
+      "It also checks that no `next` link changed. Marking nodes as visited by rewriting `next` is not allowed: finding the loop must only read the list."
+    ],
+    "test_long_chain_and_invalid_links": [
+      "A 10,000-node list with no loop. A recursive walk hits Python's recursion limit long before the end, so walk it with a loop.",
+      "`cycle_entry(42)`, `cycle_entry(\"node\")`, and a node whose `next` is `42` must each raise `ValueError`. Check the type of `head`, and of every node you step onto."
+    ]
+  },
+  "errors": {
+    "AttributeError": [
+      "You read `.next` on something that is not a node, usually `None` at the end of the list. Check `fast is not None and fast.next is not None` before moving `fast` two steps."
+    ],
+    "RecursionError": [
+      "The tests walk a 10,000-node list, and Python stops recursion at about 1,000 calls. Turn the recursion into a `while` loop."
+    ]
+  },
+  "stopped": [
+    "A second loop that never ends almost always has one pointer standing still. Both `p` and `slow` have to move one step on every turn, or they never meet. Put a breakpoint inside the loop and watch which one stays put.",
+    "If the first loop never ends, `fast` is not moving two steps, or the loop only stops when `fast` is `None`, which never happens in a list with a loop. Stop as soon as `slow is fast`."
+  ],
+  "passing": "All passing. Build a long chain as your own input, say 100,000 nodes with the last one pointing back to the middle, and check the memory: it should not grow with the length. That is the constant space the rules asked for."
+}

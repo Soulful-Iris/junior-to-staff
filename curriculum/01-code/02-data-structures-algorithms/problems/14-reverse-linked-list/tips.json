@@ -1,0 +1,37 @@
+{
+  "example": "a, b, c = Node(\"a\"), Node(\"b\"), Node(\"c\")\na.next, b.next = b, c\nreverse_list(a)",
+  "start": [
+    "Draw `a → b → c → None` as two parts: the reversed part, empty at first, and the rest, starting at `a`. Each step moves the first node of the rest onto the front of the reversed part. The catch: once you change a node's `next`, the rest of the list is unreachable unless you kept a reference to it first.",
+    "Two passes. First check the whole chain without changing anything: every link a `Node` or `None`, and no loop (a set of nodes seen, or two pointers where one moves two steps and meets the other only if there is a loop), else `ValueError`. Then walk once with `previous`, the head of the reversed part starting at `None`, and `current`, rewiring one link per step, and return `previous`.",
+    {
+      "text": "The shape, with the checks and the moves left to you. A set works here because these nodes compare by identity:",
+      "code": "def reverse_list(head):\n    seen = set()\n    node = head\n    while node is not None:\n        ...  # ValueError if node is not a Node, or is already in seen\n        seen.add(node)\n        node = node.next\n    previous = None\n    current = head\n    while current is not None:\n        ...  # save current.next, point current back at previous, step both on\n    return previous"
+    }
+  ],
+  "tests": {
+    "test_identity_and_involution": [
+      "Lists of 0, 1, 2, 3 and 10,000 nodes, all holding `7`. Walking from your returned head must meet the original node objects in reverse order, checked with `is` (new nodes with the same values fail), and then reach `None`: the old head's `next` must become `None`, which happens by itself when `previous` starts as `None`.",
+      "It then reverses the result again and expects the original head back, with every original link restored. The 10,000-node list rules out recursion: Python stops at about 1,000 nested calls."
+    ],
+    "test_invalid_input_is_not_partially_mutated": [
+      "`a → b → c → b` loops back, so `reverse_list(a)` must raise `ValueError`, and afterwards `a.next`, `b.next` and `c.next` must still be `b`, `c` and `b`. Reversing as you go and raising when you notice the loop is too late: check the whole chain, then rewire.",
+      "Next `c.next = 42`: again `ValueError`, with `a.next` still `b` and `c.next` still `42`, so the check must reach the end before any link moves. Then the self-loop `a.next = a` and `reverse_list(\"bad\")` must each raise `ValueError` too."
+    ]
+  },
+  "errors": {
+    "AttributeError": [
+      "`.next` was read from something that is not a node: `None` past the end or as the empty list, the string in `reverse_list(\"bad\")`, or the `42` a test hangs off the last node. The last two must raise `ValueError`: check `isinstance(node, Node)` before reading `.next`."
+    ],
+    "RecursionError": [
+      "“Identity and involution” reverses a 10,000-node list, and Python stops recursion at about 1,000 calls. Write the reversal, and the check, as `while` loops."
+    ]
+  },
+  "stopped": [
+    "`a → b → c → b` has no end, so any walk that waits for `None` goes round forever: a check with no loop test, a copy of the list, or a reversal that never set the old head's `next` to `None`. Find the loop first, with a set of nodes seen or two pointers moving at different speeds.",
+    "If the reversal loop itself never ends, `current` is not moving: each turn must end with `current` set to the successor you saved before rewiring. Stepping to `current.next` after the rewrite goes backwards instead, and stops after one node."
+  ],
+  "passing": {
+    "text": "All passing. If your check keeps a set of seen nodes, run a long list as your own input and look at the peak memory: the set grows with the list. Two pointers, one moving one step and the other two, meet only if there is a loop and need no memory; swap them in and compare.",
+    "code": "head = None\nfor i in range(50000): head = Node(i, head)\nreverse_list(head)"
+  }
+}
