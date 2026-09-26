@@ -14,6 +14,10 @@ from bs4 import BeautifulSoup
 import course
 import content_checks
 import lock
+import subprocess
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent / 'codefield'))
+import starter as codefield_starter  # noqa: E402
 
 E = html.escape
 CODE_SUFFIXES = {'.py', '.ts', '.js', '.mjs', '.cjs', '.json', '.yaml', '.yml', '.sql', '.csv', '.txt', '.diff', '.sh'}
@@ -119,6 +123,52 @@ def frame_practice(soup, page):
                 refresher.append(node.extract())
                 node = following
             heading.decompose()
+
+
+def mount_codefield(b, soup, page, depth):
+    """Give a coding problem a field to write and run the answer in.
+
+    Only where the page has a "Write this:" block AND the problem ships its own
+    test_solution.py, and never on a sealed page. The static block stays in the
+    HTML, for phones and for readers without JavaScript; codefield.js hides it
+    when it mounts on a desktop. The starter is that same block, so the field
+    can never disagree with the question printed above it.
+    """
+    src = page['src']
+    if '/problems/' not in src or not src.endswith('README.md') or lock.is_locked(page):
+        return
+    tests = b.ROOT / Path(src).parent / 'test_solution.py'
+    if not tests.is_file() or not getattr(b, 'CODEFIELD', None):
+        return
+    start = codefield_starter.starter_for(page['text'])
+    label = next((p for p in soup.find_all('p') if p.get_text(' ', strip=True) == 'Write this:'), None)
+    pre = label.find_next_sibling('pre') if label else None
+    if not start or pre is None:
+        return
+    wrap = soup.new_tag('div', attrs={'class': 'codefield-wrap'})
+    static = soup.new_tag('div', attrs={'class': 'codefield-static'})
+    pre.insert_before(wrap)
+    static.append(pre.extract())
+    up = '../' * depth
+    mount = soup.new_tag('section', attrs={'class': 'codefield', 'hidden': '',
+                                           'data-worker': up + b.CODEFIELD['worker']['file'],
+                                           'data-harness': up + b.CODEFIELD['harness']['file']})
+    data = soup.new_tag('script', attrs={'type': 'application/json'})
+    data.string = json.dumps({'id': Path(src).parent.name, 'starter': start['code'],
+                              'given': start['given'], 'tests': tests.read_text()},
+                             ensure_ascii=True).replace('<', '\\u003c')
+    mount.append(data)
+    wrap.extend([static, mount])
+    page['codefield'] = True
+
+
+def build_codefield(b):
+    """Bundle the code field for this release (content-hashed, like reader-js)."""
+    r = subprocess.run(['node', str(b.ROOT / 'site/tools/build-codefield.mjs'), str(b.OUT)],
+                       capture_output=True, text=True, timeout=180)
+    if r.returncode != 0:
+        raise SystemExit('code field bundle failed:\n' + r.stderr[-3000:])
+    return json.loads(r.stdout)
 
 
 def compose(b, page, have, by_dest):
@@ -228,6 +278,7 @@ def compose(b, page, have, by_dest):
             li = soup.new_tag('li'); a = soup.new_tag('a', href=url, target='_blank', rel='noopener noreferrer'); a.string=label; li.append(a); ul.append(li)
         details.append(ul); soup.append(details)
     frame_practice(soup, page)
+    mount_codefield(b, soup, page, depth)
     headings = []
     for heading in soup.find_all(['h2', 'h3']):
         if heading.get('id'): headings.append({'id': heading['id'], 'title': heading.get_text(' ', strip=True), 'level': int(heading.name[1])})
@@ -456,9 +507,12 @@ def shell(b, page, body, pages, sequence, base):
                        f'<span class="mobile-page-position">{"Guided curriculum" if is_home else meta}</span></span>')
     browse_label = 'Browse curriculum' if is_home else 'Contents'
     motion_control = '' if is_home else '<button id="motion-toggle" aria-pressed="false">Animations on</button>'
+    cf = getattr(b, 'CODEFIELD', None)
+    codefield_js = (f'<script type="module" src="{base}{cf["js"]["file"]}" integrity="{cf["js"]["integrity"]}" '
+                    'crossorigin="anonymous"></script>') if cf and page.get('codefield') else ''
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light">{robots}{lock_check}<link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
 <body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">{'Skip to overview' if is_home else 'Skip to lesson'}</a><div class="mobile-bar"><button id="open-contents" data-open-contents aria-expanded="false" aria-controls="sidebar">☰ <span>{browse_label}</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script></body></html>'''
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script>{codefield_js}</body></html>'''
 
 
 def locked_shell(b, page, full_html, pages, sequence, base):
@@ -521,6 +575,7 @@ def build(b):
         b.READER_ASSETS[kind] = {'file': filename, 'sha256': digest.hex(),
                                 'integrity': 'sha256-' + base64.b64encode(digest).decode()}
     (b.OUT/'reader-assets.json').write_text(json.dumps(b.READER_ASSETS, indent=2))
+    b.CODEFIELD = build_codefield(b)
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)

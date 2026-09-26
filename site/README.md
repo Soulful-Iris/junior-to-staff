@@ -44,6 +44,21 @@ Progress is stored on the current device. Visiting a page saves a resume locatio
 
 Previous and Next remain pinned above each lesson on desktop and mobile, with the same destinations as the bottom controls. They are intentionally absent from the curriculum overview. The mobile header retains the current lesson title and chapter/step while scrolling. On the final lesson, either Finish control marks completion; both controls reflect the saved state when revisiting.
 
+## Code field on the coding problems
+
+On a desktop, each of the 38 data-structures problems with a "Write this:" block and its own `test_solution.py` gets a field to write and run the answer in. Phones and readers without JavaScript keep the static block, which stays in the HTML.
+
+- The reader's code runs on their own machine: Pyodide (CPython on WebAssembly, pinned in `site/codefield/worker.js`) in a Web Worker. Nothing executes on the server.
+- `site/codefield/harness.py` runs the problem's own unittest file and enforces every limit in Python: 3 seconds per run (loop turns and calls in the reader's code check the clock, so a stop names the loop it happened in), 64 KB of printed output (cut on a line boundary), 200 recorded breakpoint stops. The page's only limit is the backstop: a worker that does not answer is terminated and replaced.
+- In a browser worker, CPython frees a linked structure recursively on the JavaScript engine's stack, and a few thousand nodes are enough to break that Python for good. Seven problems build deeper than that on purpose. The harness installs a queue-based finalizer on the reader's classes so every free is one level deep. `site/tools/codefield-check.mjs` includes the case that fails without it.
+- The starter code is the page's own "Write this:" block (`site/codefield/starter.py`); `@dataclass` classes written out in full are the problem's data and are read-only in the editor.
+- `site/tools/build-codefield.mjs` bundles CodeMirror 6 and the field per release into content-hashed files under `assets/codefield/`.
+
+```bash
+python3.12 -m pytest site/codefield/test_harness.py          # harness, all 38 problems, under CPython
+CHROME_PATH=/path/to/chromium node site/tools/codefield-check.mjs   # the field in a real browser; downloads Pyodide
+```
+
 ## Visuals and accessibility
 
 Mermaid is rendered to SVG before publication and cached by source hash. Wide diagrams and tables scroll within the reading column. Readers can fit a diagram to the column or keep its natural size. Authored animation/still pairs are used where supplied. Older animations receive derived resting views that preserve their original boxes and labels; original assets are never overwritten. The motion preference is retained locally and respects the system's reduced-motion setting.

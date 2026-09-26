@@ -9,7 +9,8 @@ from pathlib import Path
 from urllib.parse import urlsplit, unquote
 
 ROOT = Path(__file__).resolve().parent / "out"
-IMMUTABLE = re.compile(r"(?:reader-(?:css|js)\.[0-9a-f]{16}\.(?:css|js)|assets/mermaid/[0-9a-f]{16,64}\.svg)")
+IMMUTABLE = re.compile(r"(?:reader-(?:css|js)\.[0-9a-f]{16}\.(?:css|js)|assets/mermaid/[0-9a-f]{16,64}\.svg"
+                       r"|assets/codefield/(?:codefield|worker)\.[0-9a-f]{16}\.js|assets/codefield/harness\.[0-9a-f]{16}\.py)")
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
