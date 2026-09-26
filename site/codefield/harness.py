@@ -378,13 +378,24 @@ class _Run:
         etype, value, tb = err
         user, _ = self._where(tb)
         line = user[-1].lineno if user else None
+        loop = None
+        # Name the loop the reader is going round, not the helper it happened
+        # to be inside when the clock fired: from the innermost frame outward,
+        # the first one that sits in a loop. (Found on the live page: a
+        # reference-style solution with a _next() helper reported "still
+        # inside _next, on line 8", which is true and points at the wrong code.)
+        if self.tree is not None:
+            for f in reversed(user):
+                found = _loop_around(self.tree, f.lineno)
+                if found:
+                    loop, line = found, f.lineno
+                    break
         stop = {"kind": "time" if etype is TimeLimit else "output",
                 "test": self.current["index"] if self.current else None,
-                "line": line, "loop": None, "function": None,
+                "line": line, "loop": loop, "function": None,
                 "seconds": round(time.monotonic() - self.started, 2),
                 "bytes": self.used_bytes}
         if line is not None and self.tree is not None:
-            stop["loop"] = _loop_around(self.tree, line)
             stop["function"] = _function_around(self.tree, line)
         return stop
 

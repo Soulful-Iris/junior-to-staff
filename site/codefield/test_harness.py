@@ -266,3 +266,17 @@ def test_the_deep_problems_still_pass_with_teardown(name):
     d = PROBLEMS / name
     r = harness.run((d / "solution.py").read_text(), _tests(d), seconds=20)
     assert r["status"] == "ok" and all(t["status"] == "pass" for t in r["tests"]), r
+
+
+def test_a_stop_inside_a_helper_names_the_loop_that_keeps_calling_it():
+    # The output cap makes the stop land INSIDE the helper every time (at its
+    # print). A clock-based version of this test passed with the old logic,
+    # because in CPython the clock check happened to land on the loop's own
+    # event, so it proved nothing; the live page had landed in the helper.
+    code = ("def _next(n):\n    print('step')\n    return n\n\n"
+            "def spin(x):\n    while x is not None:\n        x = _next(x)\n    return x\n")
+    tests = "import unittest\nfrom solution import spin\nclass T(unittest.TestCase):\n    def test_it(self):\n        spin(1)\n"
+    r = harness.run(code, tests, max_bytes=200)
+    s = r["stopped"]
+    assert s["kind"] == "output"
+    assert s["loop"] == [6, 7] and s["function"] == "spin", s
