@@ -7,6 +7,20 @@
 > results after every arrival while retaining at most k samples. Do repeated values
 > count separately, and what should happen before k arrivals?”
 
+**Write this:**
+
+```python
+class TopK:
+    def __init__(self, k):
+        ...
+
+    def add(self, value):
+        ...
+
+    def largest(self):
+        ...
+```
+
 Constructed practice question. Prerequisite: [heaps](../../lessons/06-heaps.md).
 A min-heap keeps its smallest member at the root. Its internal array is only
 partially ordered; reading that array is not the same as a sorted answer.

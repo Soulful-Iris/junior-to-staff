@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [binary sea
 
 > A warehouse must ship packages in their listed order within a fixed number of days. Each day loads the next consecutive packages up to one common capacity. Find the smallest integer capacity that works. Why can you test a proposed capacity greedily?
 
+**Write this:**
+
+```python
+def shipping_capacity(weights, days):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple of positive integer weights and positive integer `days`; bool excluded |

@@ -1,20 +1,42 @@
-# Cycle entry: relative motion and identity
+# Find where a linked list loops back on itself
 
 [Curriculum](../../../../README.md) · [Data structures and algorithms](../../README.md) · [All coding problems](../../../../../indexes/coding.md)
 
-Constructed practice problem; no company attribution. Prerequisites: [linked-list references](../14-reverse-linked-list/README.md).
+Constructed practice problem. Prerequisite: [linked-list references](../14-reverse-linked-list/README.md).
 
-## Candidate brief
+## The question
 
-> A corrupted linked queue may loop forever. Return the exact node where traversal from its head first enters a cycle, or None when it terminates. Use constant working space and do not modify the queue. Why is returning the first slow/fast meeting point insufficient?
+Walk a linked list from `head`. If the `next` pointers eventually lead back to a node you have already visited, return **that node** — the first one the walk re-enters. If the list simply ends, return `None`.
 
-| Contract | Decision |
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    next: "Node | None" = None
+
+def cycle_entry(head):
+    ...
+```
+
+**Examples**
+
+| Given | Return |
 |---|---|
-| Input | `Node` head or `None`; next links are `Node` or `None`; values opaque |
-| Output | Entry node by object identity, or `None` if acyclic |
-| Boundaries | Self-cycle returns its node; repeated values do not imply a cycle; no mutation |
-| Invalid input | Non-node head or malformed reachable next link raises `ValueError` |
-| Excluded | Concurrent link changes and detecting cycles by equal node values |
+| `a → b → None` | `None` |
+| `a → a` | `a` |
+| `a → b → c → b` | `b` |
+| `a → b → c → None`, all three holding `7` | `None` |
+
+**Rules**
+
+- **Constant extra space.** Keeping a set of nodes you have seen is the easy answer, and it is not this one.
+- **Do not modify the list.** Detection is observational.
+- **Compare by identity, not value.** Two nodes both holding `7` are still two nodes.
+- A `head` that is not a `Node`, or a reachable `next` that is neither a `Node` nor `None`, raises `ValueError`.
+
+Once it works, answer this: the two-pointer walk meets somewhere inside the loop, but that meeting point is usually *not* the entry. Why, and what do you do about it?
 
 ## The tool before the challenge
 

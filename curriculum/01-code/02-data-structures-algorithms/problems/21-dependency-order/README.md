@@ -7,6 +7,13 @@
 > Return an order that respects every prerequisite, or reject the plan. What must we
 > clarify before accepting a task graph?”
 
+**Write this:**
+
+```python
+def dependency_order(tasks, dependencies):
+    ...  # dependencies contains (prerequisite, dependent); cycles raise ValueError.
+```
+
 Constructed practice question; no company attribution. First solve independently.
 Prerequisite: [graph traversal](../../lessons/05-graphs.md). A directed edge `a → b`
 means **a must finish before b can start**. An incoming-edge count is called indegree.

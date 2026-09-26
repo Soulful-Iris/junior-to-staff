@@ -7,6 +7,20 @@
 > including the average of the middle pair when the count is even. What state
 > must grow even if a query only returns one number?”
 
+**Write this:**
+
+```python
+class StreamingMedian:
+    def __init__(self):
+        ...
+
+    def add(self, value):
+        ...
+
+    def median(self):
+        ...
+```
+
 Constructed practice question. Prerequisite: [heaps](../../lessons/06-heaps.md).
 The median divides ordered observations into lower and upper halves. A max-heap
 exposes the largest lower-half value; Python's min-heap can represent it by negation.

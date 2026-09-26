@@ -8,6 +8,19 @@ Constructed practice problem; no company attribution. Prerequisites: [node ident
 
 > A dependency inspector displays a binary tree one depth at a time, left child before right child. Return one list of values per depth. Equal labels may identify different nodes. How will you avoid mixing children discovered during a level into that same level?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    left: "Node | None" = None
+    right: "Node | None" = None
+
+def tree_level_order(root):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | `Node` root or `None`; each node has opaque value and left/right child references |

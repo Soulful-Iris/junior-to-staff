@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [maps](../0
 
 > A text inspection tool highlights the longest contiguous run with no repeated code point. Return positions so the interface can highlight the original string. When two runs are equally long, choose the leftmost. How would you trace “abba”?
 
+**Write this:**
+
+```python
+def longest_unique_window(text):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Python string, exact code points |

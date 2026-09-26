@@ -7,6 +7,13 @@
 > bar alone may lose to a wide lower rectangle. When can you know that a candidate
 > height cannot extend any farther right?”
 
+**Write this:**
+
+```python
+def largest_rectangle(heights):
+    ...
+```
+
 Constructed practice question. Prerequisite: [monotonic stacks](../../lessons/07-stack.md).
 For a chosen contiguous range, the rectangle height is limited by its shortest
 bar. A stack can retain heights whose right boundary has not yet been discovered.

@@ -7,6 +7,13 @@
 > subsequence, including the chosen values. Can you summarize partial solutions
 > without losing the ability to reconstruct a real sequence?”
 
+**Write this:**
+
+```python
+def longest_increasing_subsequence(values):
+    ...
+```
+
 Constructed practice question. Prerequisites: [binary search](../../lessons/04-order.md)
 and [DP state](../../lessons/08-dp.md). A subsequence preserves input order but need
 not be contiguous. Strict increase means equal consecutive chosen values are invalid.

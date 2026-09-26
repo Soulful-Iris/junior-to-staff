@@ -8,6 +8,18 @@ Constructed practice problem; no company attribution. Prerequisites: [reversing 
 
 > Two independently owned task queues are sorted by integer priority. Merge them into one sorted queue using the existing nodes. Preserve order inside each input, and prefer the first queue on equal priorities. What happens if the two inputs unexpectedly share a tail?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    next: "Node | None" = None
+
+def merge_sorted_lists(first, second):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Two acyclic, node-disjoint `Node` chains with nondecreasing integer values; bool excluded |

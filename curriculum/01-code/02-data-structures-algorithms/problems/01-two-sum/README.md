@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [map lookup
 
 > A reconciliation tool receives signed transaction amounts. Find two different positions whose amounts total a requested adjustment. Return the first pair found while scanning rightward. What should happen when amounts repeat or no pair exists?
 
+**Write this:**
+
+```python
+def two_sum(nums, target):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Integer list/tuple `nums`, integer `target`; booleans excluded |

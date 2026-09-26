@@ -6,6 +6,13 @@
 > can be expensive, so return minimum total cost and the route itself. All supplied
 > costs are nonnegative. When is a tentative route safe to call final?”
 
+**Write this:**
+
+```python
+def weighted_shortest_path(graph, source, target):
+    ...  # Return a cheapest path; raise OverflowError on an unrepresentable sum.
+```
+
 Constructed practice question. Prerequisites: [graphs](../../lessons/05-graphs.md)
 and [heaps](../../lessons/06-heaps.md). A min-heap retrieves the smallest tentative
 cost; **relaxing** an edge means replacing a known cost when that edge improves it.

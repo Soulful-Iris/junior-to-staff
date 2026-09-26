@@ -7,6 +7,16 @@
 > bind more tightly than OR, and missing fields must not accidentally grant access.
 > Reject malformed policy text even when its first branch would already be true.”
 
+**Write this:**
+
+```python
+def evaluate(expression, record):
+    ...
+
+def lex(expression):
+    ...
+```
+
 Constructed practice question. Prerequisites: [stack state](../../lessons/07-stack.md)
 and [recursive structure](../../lessons/09-search.md). A lexer converts characters
 to tokens. A parser assigns grammatical structure. An evaluator computes that

@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [longest un
 
 > A log inspector receives a text and a multiset of required marker characters. Highlight the shortest contiguous slice containing every requested copy, allowing extra characters. Explain how duplicate requirements change your state before coding.
 
+**Write this:**
+
+```python
+def minimum_covering_window(text, required):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Python strings `text` and `required`; exact code points |

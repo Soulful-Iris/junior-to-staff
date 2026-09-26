@@ -6,6 +6,13 @@
 > in our dictionary. Players need the fewest moves between two words, including
 > a path they can inspect. How would you distinguish impossible from zero moves?”
 
+**Write this:**
+
+```python
+def word_ladder(start, end, words):
+    ...  # Return endpoint-inclusive shortest path, or []; words are lowercase ASCII.
+```
+
 Constructed practice question. Prerequisite: [BFS](../../lessons/05-graphs.md).
 A graph may be **implicit**: its edges are generated from the current word rather
 than stored. Breadth-first search visits states by increasing number of moves.

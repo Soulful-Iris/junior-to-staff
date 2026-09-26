@@ -8,6 +8,19 @@ Constructed practice problem; no company attribution. Prerequisites: [tree level
 
 > A binary network tree needs the maximum number of edges on a simple path between any two nodes. The path may cross the root or stay entirely inside a subtree. What information can one child return that lets its parent evaluate paths crossing the parent?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    left: "Node | None" = None
+    right: "Node | None" = None
+
+def tree_diameter(root):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Binary `Node` tree root or `None`; values opaque and irrelevant to distance |

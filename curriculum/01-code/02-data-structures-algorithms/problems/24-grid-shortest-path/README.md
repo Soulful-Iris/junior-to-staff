@@ -7,6 +7,13 @@
 > route between two positions without changing the displayed map. What happens
 > if a position is blocked or no route exists?”
 
+**Write this:**
+
+```python
+def shortest_grid_path(grid, start, goal):
+    ...
+```
+
 Constructed practice question. Prerequisite: [BFS](../../lessons/05-graphs.md).
 A cell `(row,column)` is a graph vertex; legal adjacent moves are edges. The grid
 supplies neighbors implicitly, so no separate adjacency list is necessary.

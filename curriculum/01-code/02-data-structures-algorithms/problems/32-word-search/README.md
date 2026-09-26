@@ -7,6 +7,13 @@
 > in the same path. Return whether any path exists, and leave the board usable for
 > another query. Which visited state belongs to one attempt rather than all attempts?”
 
+**Write this:**
+
+```python
+def word_search(board, word):
+    ...
+```
+
 Constructed practice question. Prerequisite: [backtracking](../../lessons/09-search.md)
 and [grid modeling](../24-grid-shortest-path/README.md). Unlike ordinary reachability,
 the allowed next moves depend on which cells the current path already consumed.

@@ -7,6 +7,13 @@
 > of operations. Explain which prefixes your state describes before optimizing
 > its memory.”
 
+**Write this:**
+
+```python
+def edit_distance(source, target):
+    ...
+```
+
 Constructed practice question. Prerequisite: [DP](../../lessons/08-dp.md).
 Levenshtein distance counts these three operations; adjacent transposition is not
 a separate permitted operation. Python strings here are sequences of Unicode code

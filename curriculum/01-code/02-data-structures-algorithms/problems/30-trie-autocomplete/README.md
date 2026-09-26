@@ -7,6 +7,20 @@
 > at most k matching words in lexical order. A word may also be a prefix of another
 > word, so how will your structure remember both facts?”
 
+**Write this:**
+
+```python
+class Trie:
+    def __init__(self, words=()):
+        ...
+
+    def add(self, word):
+        ...
+
+    def suggest(self, prefix, limit=5):
+        ...
+```
+
 Constructed practice question. Prerequisite: [tries](../../lessons/15-tries.md) and [search](../../lessons/09-search.md).
 A trie stores one character per edge; the path from the root spells a prefix.
 A terminal marker records a complete word independently of whether children exist.

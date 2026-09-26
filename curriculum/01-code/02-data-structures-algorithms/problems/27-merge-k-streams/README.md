@@ -7,6 +7,13 @@
 > to concatenate in memory. Return a lazy iterator and pull only enough source
 > data to determine the next output.”
 
+**Write this:**
+
+```python
+def merge_streams(streams):
+    ...
+```
+
 Constructed practice question. Prerequisite: [heaps](../../lessons/06-heaps.md).
 An iterator yields one value on demand. Keeping one **head** from each nonempty
 source exposes the smallest value that source could contribute next.

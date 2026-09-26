@@ -6,6 +6,23 @@
 > addition, users ask whether two machines belong to the same connected component.
 > We do not need the route itself. Can you avoid searching the network each time?”
 
+**Write this:**
+
+```python
+class DisjointSet:
+    def __init__(self, n):
+        ...
+
+    def find(self, node):
+        ...
+
+    def union(self, a, b):
+        ...
+
+    def connected(self, a, b):
+        ...
+```
+
 Constructed practice question. Prerequisite: [graphs](../../lessons/05-graphs.md).
 A component is a maximal set of mutually reachable vertices. A **disjoint-set**
 structure stores a partition: every vertex belongs to exactly one component.

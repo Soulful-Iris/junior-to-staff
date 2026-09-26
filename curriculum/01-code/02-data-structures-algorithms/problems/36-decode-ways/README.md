@@ -7,6 +7,13 @@
 > Zero is never a standalone letter. What distinguishes `10`, `06`, and an empty
 > input before we start writing a recurrence?”
 
+**Write this:**
+
+```python
+def decode_ways(digits):
+    ...
+```
+
 Constructed practice question. Prerequisite: [DP](../../lessons/08-dp.md).
 A decoding partitions the digit string into valid one- or two-digit tokens. We
 count partitions; we do not need to construct the potentially numerous strings.

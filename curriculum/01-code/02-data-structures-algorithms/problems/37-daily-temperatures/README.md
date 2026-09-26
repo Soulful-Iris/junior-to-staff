@@ -7,6 +7,13 @@
 > every day. Return all waits in one pass if possible, with zero when no warmer
 > future day exists. Do equal temperatures resolve a waiting day?”
 
+**Write this:**
+
+```python
+def daily_temperatures(temperatures):
+    ...
+```
+
 Constructed practice question. Prerequisite: [monotonic stacks](../../lessons/07-stack.md).
 A monotonic stack keeps unresolved candidates in an order that allows a new value
 to settle several answers. Store indices because the answer is an index difference.

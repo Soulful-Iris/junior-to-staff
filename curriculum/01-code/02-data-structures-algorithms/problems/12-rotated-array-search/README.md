@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [binary sea
 
 > A device stores distinct sorted sequence numbers in a circular array, then exports them starting from an arbitrary position. Find a target in that exported order. How does the midpoint tell you which half still has ordinary sorted order?
 
+**Write this:**
+
+```python
+def rotated_search(nums, target):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple that is a rotation of strictly increasing integers, plus integer target |

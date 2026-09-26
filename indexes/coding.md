@@ -32,7 +32,7 @@ All 56 existing problems have one home. Start with the linked primer, attempt th
 | ID | Problem | Subject home |
 |---|---|---|
 | 14 | [Reverse a linked list: keep the unprocessed suffix reachable](../curriculum/01-code/02-data-structures-algorithms/problems/14-reverse-linked-list/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
-| 15 | [Cycle entry: relative motion and identity](../curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
+| 15 | [Find where a linked list loops back on itself](../curriculum/01-code/02-data-structures-algorithms/problems/15-linked-list-cycle-entry/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
 | 16 | [Merge sorted lists: splice only a safe frontier](../curriculum/01-code/02-data-structures-algorithms/problems/16-merge-sorted-lists/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
 | 17 | [Tree level order: keep the next frontier separate](../curriculum/01-code/02-data-structures-algorithms/problems/17-tree-level-order/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |
 | 18 | [Validate a BST: carry every ancestor constraint](../curriculum/01-code/02-data-structures-algorithms/problems/18-validate-bst/README.md) | [Data structures and algorithms](../curriculum/01-code/02-data-structures-algorithms/README.md) |

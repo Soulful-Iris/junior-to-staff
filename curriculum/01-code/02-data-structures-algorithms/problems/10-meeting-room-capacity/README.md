@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [interval e
 
 > An office scheduler needs the minimum number of interchangeable rooms for a batch of meetings. A room can be reused exactly when its previous meeting ends. Return capacity, not assignments. Why does merging busy intervals lose the quantity we need?
 
+**Write this:**
+
+```python
+def meeting_room_capacity(intervals):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple of integer `(start, end)` pairs with `start < end` |

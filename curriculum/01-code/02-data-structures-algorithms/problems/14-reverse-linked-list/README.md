@@ -8,6 +8,18 @@ Constructed practice problem; no company attribution. Prerequisites: [state inva
 
 > A singly linked work queue must be reversed in place. Each node has a value and a link to the next node. Return the new head using the same node objects, with every link reversed. How will you preserve access to the remaining queue before overwriting a link?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    next: "Node | None" = None
+
+def reverse_list(head):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | `Node` head or `None`; each next link is a `Node` or `None`; values are opaque |

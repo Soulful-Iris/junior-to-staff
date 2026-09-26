@@ -7,6 +7,13 @@
 > Produce inspectable answers without returning `[2,3,2]` again when `[2,2,3]`
 > already exists. What assumptions make the search terminate?”
 
+**Write this:**
+
+```python
+def combinations(candidates, target):
+    ...
+```
+
 Constructed practice question. Prerequisite: [backtracking](../../lessons/09-search.md).
 Backtracking extends a partial choice, explores its consequences, and restores
 the earlier state before trying a sibling choice. Canonical order avoids duplicate

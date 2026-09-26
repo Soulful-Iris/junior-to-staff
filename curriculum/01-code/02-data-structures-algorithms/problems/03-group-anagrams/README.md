@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [valid anag
 
 > The word-game service now receives a batch of words and must place words with identical character inventories together. Preserve duplicate entries and make output deterministic. How can you avoid checking every word against every previous word?
 
+**Write this:**
+
+```python
+def group_anagrams(words):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple of Python strings, exact Unicode code-point semantics |

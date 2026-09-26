@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 
 > A sorted price list may contain duplicates. Return the insertion position immediately before every price equal to a target, or before the next larger price when the target is absent. Define what you return beyond either end, then explain why each search update is safe.
 
+**Write this:**
+
+```python
+def lower_bound(nums, target):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Nondecreasing integer list/tuple and integer target; bool excluded |

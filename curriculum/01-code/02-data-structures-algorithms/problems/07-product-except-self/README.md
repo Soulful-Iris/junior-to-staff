@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [prefix sum
 
 > An analysis routine needs, at every position, the product of all other entries. Division is forbidden because zero is valid. Return a fresh list while using constant extra working storage beyond that output. What should one empty side contribute?
 
+**Write this:**
+
+```python
+def product_except_self(nums):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Integer list/tuple; booleans excluded; negatives and zeros allowed |

@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [two sum](.
 
 > A ledger contains signed daily adjustments. Count every nonempty contiguous date range whose total equals a target. Refunds create negative values, and zero-value days still count. Can a window that is too large always be repaired by removing its leftmost entry?
 
+**Write this:**
+
+```python
+def subarray_sum_count(nums, target):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple of integers and integer target; booleans excluded |

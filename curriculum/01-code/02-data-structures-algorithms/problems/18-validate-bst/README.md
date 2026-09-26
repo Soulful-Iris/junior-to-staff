@@ -8,6 +8,19 @@ Constructed practice problem; no company attribution. Prerequisites: [tree struc
 
 > A storage index exports a binary tree and claims it is a strict binary search tree. Every value in a left subtree must be smaller than its ancestor, and every value in a right subtree larger. Validate that claim. Is checking each node against only its immediate children enough?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    left: "Node | None" = None
+    right: "Node | None" = None
+
+def validate_bst(root):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Binary `Node` tree with integer values, bool excluded; `None` is empty |

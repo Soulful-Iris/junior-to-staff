@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [map/set me
 
 > An importer receives integer record numbers in arbitrary order, with duplicates. Report the length of the longest gap-free run of distinct numbers. Adjacent input positions do not matter. Can you avoid sorting without repeatedly walking the same run?
 
+**Write this:**
+
+```python
+def longest_consecutive(nums):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Integer list/tuple; booleans excluded |

@@ -8,6 +8,19 @@ Constructed practice problem; no company attribution. Prerequisites: [tree ident
 
 > A binary folder tree contains two selected folder objects. Return their deepest common containing folder, allowing a folder to contain itself. Either selection may have been removed from the tree. How will your traversal distinguish “found one folder” from “proved both exist”?
 
+**Write this:**
+
+```python
+@dataclass(eq=False)
+class Node:
+    value: object
+    left: "Node | None" = None
+    right: "Node | None" = None
+
+def lowest_common_ancestor(root, p, q):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Binary `Node` tree root or `None`, plus two `Node` references p and q; values opaque |

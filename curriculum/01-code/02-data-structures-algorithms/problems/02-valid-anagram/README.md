@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [two sum](.
 
 > A word-game service checks whether two submitted strings use exactly the same characters, including repetitions. Spaces and case currently matter. Implement the check and ask whether “character” means a Unicode code point or a user-visible letter.
 
+**Write this:**
+
+```python
+def valid_anagram(first, second):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | Two Python strings; compare Unicode code points exactly |

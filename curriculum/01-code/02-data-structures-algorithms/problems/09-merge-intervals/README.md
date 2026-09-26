@@ -8,6 +8,13 @@ Constructed practice problem; no company attribution. Prerequisites: [ordered da
 
 > A calendar service receives busy time intervals out of order. Return the same covered time as a sorted list of disjoint intervals, combining touching blocks as well as overlaps. Clarify whether endpoints are included before choosing your comparison.
 
+**Write this:**
+
+```python
+def merge_intervals(intervals):
+    ...
+```
+
 | Contract | Decision |
 |---|---|
 | Input | List/tuple of pairs of integer endpoints; every pair has `start < end` |

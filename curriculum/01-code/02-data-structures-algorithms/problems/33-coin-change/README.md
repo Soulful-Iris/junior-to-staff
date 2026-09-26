@@ -7,6 +7,13 @@
 > which coins achieve it; report impossible amounts explicitly. Can choosing the
 > largest fitting coin ever force a worse answer?”
 
+**Write this:**
+
+```python
+def minimum_coins(coins, amount):
+    ...
+```
+
 Constructed practice question. Prerequisite: [dynamic programming](../../lessons/08-dp.md).
 Dynamic programming stores answers to overlapping subproblems. Here the useful
 subproblem is the minimum coins needed for one smaller amount, not the coins already
