@@ -4,7 +4,8 @@
 // written under it by the board. Bruno, 2026-09-26: the AWS icons are "not
 // drawable ... they are not gonna be sketching computer images in an
 // interview", and a plain box "called a db" is not experience either. This is
-// the ground between.
+// the ground between, and the board's first look; AWS's own icons are the
+// second, one click away (board.js, "Two looks").
 //
 // Each glyph lives in the icon's 44 x 44 box. Strokes use currentColor; an
 // element with class "t" is the pale fill behind the strokes.

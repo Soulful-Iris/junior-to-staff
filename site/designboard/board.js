@@ -12,13 +12,27 @@ import { runChecks, CHECKS } from "./checks.js";
 import { simulate, CAPABILITIES, FAILS, zonal, multiAzOn } from "./sim.js";
 import { icon } from "./ui-icons.js";
 import { glyph, boxGlyph } from "./sketch.js";
+import ICON_FILE from "designboard:icons";
 import { CONSOLE_URL, ERRORS, keyProblem, keyStore, buildRequest, callDrawer, validateDrawing, diagramFromState, drawingToState, wantsCloud } from "./drawer.js";
 
 const INDEX = catalogIndex(CATALOG);
-// Parts are drawn as people sketch them at a whiteboard (sketch.js), with
-// AWS's name under each. AWS's own icons came first and were "not drawable"
-// (Bruno, 2026-09-26): nobody sketches them with a marker in an interview.
-// INK: one marker for every part, or each in the colour AWS gives its kind.
+// Two looks for the same parts, and the reader picks. DRAWN comes first: each
+// part as people sketch it at a whiteboard (sketch.js), with AWS's name under
+// it. AWS's own icons are one click away. Bruno, 2026-09-26: the icons are
+// "not drawable ... they are not gonna be sketching computer images in an
+// interview", and then, "having both options would be good ... the first
+// option should be the drawable one". The choice is remembered on this device
+// and every board on the page follows it at once.
+//
+// The icons are not in this file. They are data beside it (build-designboard
+// .mjs writes them, with their hash), fetched the first time a reader picks
+// them, and refused by the browser if a byte differs: a reader who never picks
+// them never downloads them.
+const LOOK_KEY = "j2s-designboard:look";
+let LOOK = (() => { try { return localStorage.getItem(LOOK_KEY) === "aws" ? "aws" : "drawn"; } catch { return "drawn"; } })();
+let ICONS = null, iconsLoading = null, lookNote = "";
+const iconsShown = () => LOOK === "aws" && !!ICONS;
+// INK: one marker for every drawn part, or each in the colour AWS gives its kind.
 const INK = false;
 const W0 = 860, H0 = 540, ICON = 44, HALF = ICON / 2;   // the canvas, unless a drawing needs more (state.canvas)
 const DESKTOP = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
@@ -38,6 +52,41 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const snap = (v) => Math.round(v / 4) * 4;
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+
+// An AWS icon is an image from a data URL: each keeps its own ids to itself,
+// and is exactly AWS's file. Only asked for once the icons have arrived.
+const URLS = new Map();
+const iconUrl = (file) => {
+  if (!URLS.has(file)) URLS.set(file, ICONS && ICONS[file] ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(ICONS[file]) : "");
+  return URLS.get(file);
+};
+// Where a box's name starts: after its icon in the AWS look, near the corner
+// when drawn (a zone has no icon in either).
+const boxInset = (d) => (iconsShown() && d.icon ? 30 : 8);
+
+function setLook(look) {
+  LOOK = look === "aws" ? "aws" : "drawn";
+  lookNote = "";
+  try { localStorage.setItem(LOOK_KEY, LOOK); } catch { /* private mode: it switches, and forgets */ }
+  if (LOOK === "aws" && !ICONS) loadIcons();
+  for (const b of BOARDS) b.relook();
+}
+// Until the icons arrive the parts stay drawn. If they cannot arrive (the
+// network, or a file that is not the one this board was built with), the
+// board goes back to drawn, remembers that, and says so once.
+function loadIcons() {
+  iconsLoading ||= fetch(new URL(ICON_FILE.file, import.meta.url), { integrity: ICON_FILE.integrity })
+    .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then((map) => { ICONS = map; URLS.clear(); for (const b of BOARDS) b.relook(); })
+    .catch(() => {
+      iconsLoading = null;
+      LOOK = "drawn";
+      try { localStorage.setItem(LOOK_KEY, LOOK); } catch { /* nothing to undo */ }
+      lookNote = "AWS's icons did not load, so the parts stay drawn. Try again in a moment.";
+      for (const b of BOARDS) b.relook();
+    });
+  return iconsLoading;
+}
 
 let measureCtx = null;
 function textWidth(s, font) {
@@ -170,6 +219,8 @@ class Board {
       <p class="db-brief">${md(x.brief)}</p>
       <div class="db-body">
         <aside class="db-rail" aria-label="Parts"><div class="db-rail-in">
+          <div class="db-look" role="group" aria-label="How the parts look"><button type="button" class="db-look-b" data-look="drawn" aria-pressed="true">Drawn</button><button type="button" class="db-look-b" data-look="aws" aria-pressed="false">AWS icons</button></div>
+          <p class="db-look-note" aria-live="polite" hidden></p>
           <label class="db-search">${icon("search", 14)}<span class="sr-only">Search parts</span><input type="search" placeholder="Search: alb, redis, kafka…" autocomplete="off" spellcheck="false"></label>
           <div class="db-parts"></div>
         </div></aside>
@@ -202,7 +253,7 @@ class Board {
       <div class="db-strip" aria-live="polite"><div class="db-strip-l"></div><div class="db-strip-r">${icon("corner-down-right", 13)}<span><b>A → B</b> means A sends a request or a message to B; the answer rides back on it.</span></div></div>
       <div class="db-tip" hidden aria-live="polite"></div>
       <div class="db-results"><div class="db-list" role="listbox" aria-label="Checks"></div><div class="db-detail"></div></div>
-      <div class="db-credit">Parts are drawn the way you would sketch them at a whiteboard; the names under them are AWS's. What an arrow carries is yours to write: it is shown, never graded.</div>
+      <div class="db-credit"></div>
     </section>`);
     this.mount.replaceChildren(this.root);
     this.root.dbBoard = this;             // for site/tools/designboard-check.mjs
@@ -210,7 +261,9 @@ class Board {
     this.svg = q(".db-svg"); this.stage = q(".db-stage"); this.layer = q(".db-layer");
     this.partsBox = q(".db-parts"); this.search = q(".db-search input");
     this.stripL = q(".db-strip-l"); this.tipBox = q(".db-tip"); this.list = q(".db-list"); this.detail = q(".db-detail");
+    this.renderLook();
     this.renderPalette("");
+    this.root.querySelectorAll(".db-look-b").forEach((b) => b.addEventListener("click", () => setLook(b.dataset.look)));
 
     q('[data-act="check"]').addEventListener("click", () => this.check());
     q('[data-act="reset"]').addEventListener("click", () => this.reset());
@@ -239,12 +292,29 @@ class Board {
     new ResizeObserver(() => this.layout()).observe(this.stage);
   }
 
+  // ---------------------------------------------------------------- look
+  // The switch shows the reader's choice; the credit line names what is on
+  // the board now (drawn, while AWS's icons are still on their way).
+  renderLook() {
+    for (const b of this.root.querySelectorAll(".db-look-b")) b.setAttribute("aria-pressed", String(b.dataset.look === LOOK));
+    const note = this.root.querySelector(".db-look-note");
+    note.textContent = lookNote; note.hidden = !lookNote;
+    this.root.querySelector(".db-credit").textContent = (iconsShown()
+      ? "Parts: AWS Architecture Icons, used under AWS's terms for architecture diagrams."
+      : "Parts are drawn the way you would sketch them at a whiteboard; the names under them are AWS's.")
+      + " What an arrow carries is yours to write: it is shown, never graded.";
+  }
+  relook() { this.renderLook(); this.renderPalette(this.search.value); this.render(); }
+
   // ---------------------------------------------------------------- palette
   renderPalette(query) {
     const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
     const hit = (p) => !words.length || words.every((w) => `${p.label} ${p.short} ${p.aliases} ${p.kind}`.toLowerCase().includes(w));
+    const art = (p, kind) => iconsShown()
+      ? (p.icon ? `<img src="${iconUrl(p.icon)}" alt="" draggable="false">` : `<span class="db-az-glyph" aria-hidden="true"></span>`)
+      : `<svg class="db-part-sk${kind === "group" ? " is-box" : ""}" viewBox="0 0 44 44" aria-hidden="true">${kind === "part" ? glyph(p, 0, 0) : boxGlyph(p)}</svg>`;
     const tile = (p, kind) => `<button type="button" class="db-part${kind === "group" ? " is-group" : ""}" data-kind="${kind}" data-id="${esc(p.id)}" title="${esc(p.label)}${kind === "part" ? "" : " (a box: drop it, then put parts inside)"}">
-        <svg class="db-part-sk${kind === "group" ? " is-box" : ""}" viewBox="0 0 44 44" aria-hidden="true">${kind === "part" ? glyph(p, 0, 0) : boxGlyph(p)}</svg><span>${esc(p.short)}</span></button>`;
+        ${art(p, kind)}<span>${esc(p.short)}</span></button>`;
     const parts = CATALOG.parts.filter(hit), groups = CATALOG.groups.filter(hit);
     let html = "";
     if (words.length) {
@@ -277,7 +347,8 @@ class Board {
       if (!ghost && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 4) return;
       if (!ghost) {
         this.dragged = true;
-        ghost = el(`<div class="db-dragghost">${btn.querySelector("svg") ? btn.querySelector("svg").outerHTML : ""}<span>${esc(btn.textContent.trim())}</span></div>`);
+        const art = btn.querySelector("img, svg, .db-az-glyph");   // whichever look the tile is in
+        ghost = el(`<div class="db-dragghost">${art ? art.outerHTML : ""}<span>${esc(btn.textContent.trim())}</span></div>`);
         document.body.append(ghost);
       }
       ghost.style.left = ev.clientX + "px"; ghost.style.top = ev.clientY + "px";
@@ -368,7 +439,8 @@ class Board {
       const label = g.name || d.short || d.label;
       out += `<g class="${cls}" data-group="${esc(g.id)}" tabindex="0" role="button" aria-label="${esc(label)}, ${esc(d.label)}${failed ? ", failed" : ""}">
         <rect class="db-g-body" x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="2" style="--c:${d.color};--f:${d.fill || "transparent"}"/>
-        <text class="db-g-label" x="${g.x + 8}" y="${g.y + 16}">${esc(label)}${g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region" ? `<tspan class="db-g-kind"> · ${esc(d.short || d.label)}</tspan>` : ""}</text>
+        ${iconsShown() && d.icon ? `<image class="db-g-icon" href="${iconUrl(d.icon)}" x="${g.x}" y="${g.y}" width="24" height="24"/>` : ""}
+        <text class="db-g-label" x="${g.x + boxInset(d)}" y="${g.y + 16}">${esc(label)}${g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region" ? `<tspan class="db-g-kind"> · ${esc(d.short || d.label)}</tspan>` : ""}</text>
         <rect class="db-g-grip" x="${g.x}" y="${g.y}" width="${g.w}" height="24" data-grip="1"/>
         ${failed ? `<text class="db-failed-tag" x="${g.x + g.w - 8}" y="${g.y + 16}" text-anchor="end">✕ failed</text>` : ""}
         ${sel.type === "group" && sel.id === g.id && this.mode === "draw" ? `<rect class="db-resize" x="${g.x + g.w - 7}" y="${g.y + g.h - 7}" width="12" height="12" rx="2" data-resize="${esc(g.id)}"/>` : ""}
@@ -385,7 +457,7 @@ class Board {
     for (const g of m.groups.values()) {
       const d = g.def, named = g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region";
       const label = (g.name || d.short || d.label) + (named ? ` · ${d.short || d.label}` : "");
-      blocked.push([g.x, g.y, g.x + 8 + textWidth(label, GROUP_FONT) * 1.25 + 8, g.y + 24]);
+      blocked.push([g.x, g.y, g.x + boxInset(d) + textWidth(label, GROUP_FONT) * 1.25 + 8, g.y + 24]);
     }
     this.chipT = new Map();
     const lines = m.edges.map((e) => {
@@ -444,7 +516,7 @@ class Board {
       out += `<g class="${cls}" data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(top)}, ${esc(n.p.label)}${multi ? ", Multi-AZ" : ""}${down ? ", failed" : ""}">
         <rect class="db-n-hit" x="${n.x - bw / 2}" y="${n.y - HALF - 4}" width="${bw}" height="${ICON + (sub ? 40 : 26)}" rx="6"/>
         <rect class="db-n-ring" x="${n.x - HALF - 4}" y="${n.y - HALF - 4}" width="${ICON + 8}" height="${ICON + 8}" rx="8"/>
-        ${glyph(n.p, n.x - HALF, n.y - HALF)}
+        ${iconsShown() ? `<image class="db-n-icon" href="${iconUrl(n.p.icon)}" x="${n.x - HALF}" y="${n.y - HALF}" width="${ICON}" height="${ICON}"/>` : glyph(n.p, n.x - HALF, n.y - HALF)}
         <text class="db-n-name" x="${n.x}" y="${n.y + HALF + 15}" text-anchor="middle">${esc(top)}</text>
         ${sub ? `<text class="db-n-part" x="${n.x}" y="${n.y + HALF + 29}" text-anchor="middle">${esc(sub)}</text>` : ""}
         ${multi ? `<g class="db-badge db-b-multi"><rect x="${n.x + HALF - 10}" y="${n.y - HALF - 9}" width="44" height="15" rx="7.5"/><text x="${n.x + HALF + 12}" y="${n.y - HALF + 2}" text-anchor="middle">Multi-AZ</text></g>` : ""}
@@ -1126,6 +1198,7 @@ function mountAll() {
       if (n.matches("details.db-reference")) { n.removeAttribute("open"); break; }
     }
   }
+  if (LOOK === "aws" && BOARDS.size) loadIcons();       // a reader who picked them before
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountAll); else mountAll();

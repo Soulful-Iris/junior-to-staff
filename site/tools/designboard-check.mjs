@@ -24,6 +24,8 @@ const PORT = +(process.env.DESIGNBOARD_PORT || 8932);
 // the published site instead of a local build (no server is started).
 const SITE = process.env.DESIGNBOARD_SITE || `http://127.0.0.1:${PORT}`;
 const PAGE = `${SITE}/curriculum/03-production/01-system-design/whiteboard.html`;
+// AWS's icons live beside the board as one data file, fetched on demand.
+const ICONS_JSON = /\/assets\/designboard\/icons\.[0-9a-f]{16}\.json$/;
 const shots = process.env.SITE_SCREENSHOTS || mkdtempSync(join(tmpdir(), "designboard-"));
 mkdirSync(shots, { recursive: true });
 
@@ -135,6 +137,16 @@ try {
     assert.ok(await tile(0, "sqs").locator("svg.db-part-sk rect").count() >= 1 && await tile(0, "sqs").locator("svg.db-part-sk path").count() >= 1, "SQS is a bar with slots");
     // The boxes are drawn as the board draws them: a zone dashed.
     assert.ok(await B(0).locator('.db-part[data-id="az"] svg rect[stroke-dasharray]').count() >= 1);
+  });
+
+  await check("drawn comes first on every board, and AWS's icons are not fetched until a reader asks", async () => {
+    for (let i = 0; i < 4; i++) {
+      assert.deepEqual(await B(i).locator(".db-look-b").allInnerTexts(), ["Drawn", "AWS icons"], "drawn is the first option");
+      assert.equal(await B(i).locator('.db-look-b[aria-pressed="true"]').innerText(), "Drawn");
+      assert.match(await B(i).locator(".db-credit").innerText(), /drawn the way you would sketch them/);
+    }
+    // Two page loads so far (the first, and the reload with storage cleared).
+    assert.deepEqual(sent.filter((r) => ICONS_JSON.test(r.url)).map((r) => r.url), [], "nobody picked AWS icons, so nothing downloads them");
   });
 
   await check("clicking a part adds it, labelled, and it is saved", async () => {
@@ -729,6 +741,93 @@ try {
     anthropic = null;
   });
 
+  // ---- Drawn | AWS icons. The board draws parts as people sketch them, and
+  // AWS's own icons are one click away, on every board at once.
+  const iconsLoaded = (i) => page.waitForFunction((i) => document.querySelectorAll(".db")[i].querySelector(".db-part img"), i, { timeout: 10000 });
+  const decoded = (href) => decodeURIComponent(href || "");
+  await check("one click shows AWS's own icons on every board: the parts list, the parts, the boxes, and a part being dragged", async () => {
+    await clickTile(0, "vpc");
+    await clickTile(0, "rds");
+    const rds = (await newest(0, "nodes")).id, vpc = (await state(0)).groups.find((g) => g.part === "vpc").id;
+    assert.ok(await node(0, rds).locator("g.db-sk").count() === 1 && await node(0, rds).locator("image").count() === 0, "drawn before the click");
+    const before = sent.filter((r) => ICONS_JSON.test(r.url)).length;
+    await B(0).locator('.db-look-b[data-look="aws"]').click();
+    await iconsLoaded(0);
+    // The parts list: AWS's own files, by their own titles; a zone, which has
+    // no icon, stays a dashed outline.
+    assert.match(decoded(await tile(0, "sqs").locator("img").getAttribute("src")), /Arch_Amazon-Simple-Queue-Service_48/);
+    assert.equal(await tile(0, "sqs").locator("svg").count(), 0);
+    assert.equal(await B(0).locator('.db-part[data-id="az"] .db-az-glyph').count(), 1);
+    // The canvas: the part is AWS's icon, and the box's name moves over for its icon.
+    assert.match(decoded(await node(0, rds).locator("image.db-n-icon").getAttribute("href")), /Arch_Amazon-RDS_48/);
+    assert.equal(await B(0).locator(".db-svg g.db-sk").count(), 0, "no drawn part left on the canvas");
+    const g = B(0).locator(`.db-svg [data-group="${vpc}"]`);
+    assert.match(decoded(await g.locator("image.db-g-icon").getAttribute("href")), /Virtual-private-cloud-VPC_32/);
+    assert.equal(+(await g.locator(".db-g-label").getAttribute("x")) - +(await g.locator(".db-g-body").getAttribute("x")), 30);
+    await shot(0, "look-aws.png");
+    // A part dragged out of the list carries the look it is in.
+    await tile(0, "lambda").scrollIntoViewIfNeeded();
+    const from = await tile(0, "lambda").boundingBox();
+    await page.mouse.move(from.x + 20, from.y + 15); await page.mouse.down();
+    await page.mouse.move(from.x + 60, from.y + 60, { steps: 6 });
+    assert.equal(await page.locator(".db-dragghost img").count(), 1, "the dragged part is AWS's icon");
+    await page.mouse.move(from.x + 20, from.y - 300, { steps: 6 }); await page.mouse.up();   // off the canvas: adds nothing
+    // Every board follows the one click, and says whose icons these are.
+    for (let i = 0; i < 4; i++) {
+      assert.equal(await B(i).locator('.db-look-b[aria-pressed="true"]').innerText(), "AWS icons", `board ${i} switched`);
+      assert.ok(await B(i).locator(".db-part img").count() > 60, `board ${i} shows the icons`);
+      assert.match(await B(i).locator(".db-credit").innerText(), /AWS Architecture Icons/);
+    }
+    assert.equal(sent.filter((r) => ICONS_JSON.test(r.url)).length - before, 1, "one download for all four boards");
+  });
+
+  await check("the choice survives a reload, and Drawn brings the strokes back everywhere", async () => {
+    const rds = (await state(0)).nodes.find((n) => n.part === "rds").id;
+    await page.reload({ waitUntil: "load" });
+    await page.addStyleTag({ content: ".reading-bar{position:static!important}html{scroll-behavior:auto!important}.read-progress{display:none!important}" });
+    await iconsLoaded(3);
+    for (let i = 0; i < 4; i++) assert.equal(await B(i).locator('.db-look-b[aria-pressed="true"]').innerText(), "AWS icons", `board ${i} remembers`);
+    assert.equal(await node(0, rds).locator("image.db-n-icon").count(), 1);
+    await B(3).locator('.db-look-b[data-look="drawn"]').click();
+    for (let i = 0; i < 4; i++) {
+      assert.equal(await B(i).locator(".db-part img").count(), 0, `board ${i} is drawn again`);
+      assert.ok(await B(i).locator(".db-part svg.db-part-sk").count() > 60);
+    }
+    assert.equal(await node(0, rds).locator("g.db-sk").count(), 1);
+    assert.equal(await page.evaluate(() => localStorage.getItem("j2s-designboard:look")), "drawn");
+    const loads = sent.length;
+    await page.reload({ waitUntil: "load" });
+    await page.addStyleTag({ content: ".reading-bar{position:static!important}html{scroll-behavior:auto!important}.read-progress{display:none!important}" });
+    await page.waitForTimeout(400);
+    assert.equal(await B(0).locator('.db-look-b[aria-pressed="true"]').innerText(), "Drawn");
+    assert.deepEqual(sent.slice(loads).filter((r) => ICONS_JSON.test(r.url)).map((r) => r.url), [], "drawn again: nothing downloads the icons");
+  });
+
+  await check("an icons file that is not the one the board was built with is refused, and the board stays drawn and says so", async () => {
+    // One letter changed inside an icon's text: still valid JSON, so only the
+    // integrity hash can tell. (A broken file would fail to parse, and a check
+    // that passed on that would say nothing about the hash.)
+    await page.route(ICONS_JSON, async (route) => {
+      const res = await route.fetch(), body = await res.text(), at = body.indexOf("<svg");
+      await route.fulfill({ response: res, body: body.slice(0, at) + "<svG" + body.slice(at + 4) });
+    });
+    try {
+      await B(1).locator('.db-look-b[data-look="aws"]').click();
+      await B(1).locator(".db-look-note").waitFor({ state: "visible", timeout: 10000 });
+      assert.match(await B(1).locator(".db-look-note").innerText(), /did not load, so the parts stay drawn/);
+      for (let i = 0; i < 4; i++) {
+        assert.equal(await B(i).locator(".db-part img").count(), 0, `board ${i} stays drawn`);
+        assert.equal(await B(i).locator('.db-look-b[aria-pressed="true"]').innerText(), "Drawn", `board ${i}'s switch says so`);
+      }
+      assert.equal(await page.evaluate(() => localStorage.getItem("j2s-designboard:look")), "drawn");
+    } finally { await page.unroute(ICONS_JSON); }
+    // The real file, on the next try: the note goes and the icons come.
+    await B(1).locator('.db-look-b[data-look="aws"]').click();
+    await iconsLoaded(1);
+    assert.equal(await B(1).locator(".db-look-note").isVisible(), false);
+    await B(1).locator('.db-look-b[data-look="drawn"]').click();
+  });
+
   // The one check that reaches the real model, and only when asked to:
   // DESIGNBOARD_HAIKU_KEY=<an Anthropic key> draws for real on whichever site
   // this runs against. Never in CI; the key is typed into the page like a
@@ -745,6 +844,11 @@ try {
     assert.match(await bar(1).locator(".db-haiku-note").innerText(), /Drawn/, await bar(1).locator(".db-haiku-note").innerText());
     assert.ok((await state(1)).nodes.some((n) => n.part === "rds"));
     await shot(1, "live-1-drawn.png");
+    // The same drawing with AWS's icons, then drawn again for the edit.
+    await B(1).locator('.db-look-b[data-look="aws"]').click();
+    await iconsLoaded(1);
+    await shot(1, "live-1-aws.png");
+    await B(1).locator('.db-look-b[data-look="drawn"]').click();
     await ask(1, "oh no, i meant a cache, not a database");
     await idle(1);
     const s = await state(1);
@@ -756,9 +860,13 @@ try {
 
   await check("no page errors, and nothing refused by the page's policy", async () => {
     // The refusals the checks above provoke on purpose (a 400 and a 401 from
-    // Anthropic, a planted script, a request to another site) are expected;
-    // window.__csp still has to be empty, so a real refusal cannot hide here.
-    const provoked = /api\.anthropic\.com|status of 40[01]\b|^Executing inline script violates|^Fetch API cannot load https:\/\/example\.com\/steal/;
+    // Anthropic, a planted script, a request to another site, a damaged icons
+    // file) are expected; window.__csp still has to be empty, so a real
+    // refusal cannot hide here. Chromium words the icons refusal one of two
+    // ways from run to run (both seen, 2026-09-26); both name the file.
+    const provoked = new RegExp([/api\.anthropic\.com|status of 40[01]\b|^Executing inline script violates|^Fetch API cannot load https:\/\/example\.com\/steal/.source,
+      /^Fetch API cannot load \S+\/assets\/designboard\/icons\.[0-9a-f]{16}\.json\. SRI's integrity checks failed\.$/.source,
+      /^Failed to find a valid digest in the 'integrity' attribute for resource '[^']+\/assets\/designboard\/icons\.[0-9a-f]{16}\.json' with computed SHA-256 integrity '[^']+'\. The resource has been blocked\.$/.source].join("|"));
     assert.deepEqual(errors.filter((e) => !provoked.test(e)), []);
     assert.deepEqual(await page.evaluate(() => window.__csp), []);
   });
