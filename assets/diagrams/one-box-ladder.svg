@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 372" width="760" height="372" role="img" aria-label="A load ladder against one small server, four rungs at one thousand, two thousand, two thousand five hundred and three thousand concurrent virtual users. The median response time barely moves across the whole ladder, from 4.7 to 11 milliseconds. The p95 and p99 bars grow enormously on a logarithmic scale: p95 goes 19, 161, 288 and 1356 milliseconds, and p99 goes 50, 276, 775 and 2287 milliseconds. The p95 target of 500 milliseconds and the p99 target of one second are drawn as dashed vertical lines, and only the three thousand user rung crosses them. The error column reads zero percent on every rung including the one that fails, which is the point of the drawing.">
+  <rect width="760" height="372" rx="10" fill="#faf9f7"/>
+
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE CEILING IS A LATENCY CLIFF, NOT AN ERROR RATE</text>
+
+  <!-- target lines, labelled on separate rows so they cannot collide -->
+  <line x1="602.7" y1="72" x2="602.7" y2="300" stroke="#c2703d" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="602.7" y="64" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#a85d2f" letter-spacing="0.8">p95 TARGET 500ms</text>
+  <line x1="636.5" y1="94" x2="636.5" y2="300" stroke="#8a857d" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="636.5" y="82" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="0.8">p99 TARGET 1s</text>
+
+  <!-- column headings -->
+  <text x="32" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">USERS</text>
+  <text x="100" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">MEDIAN</text>
+  <text x="164" y="106" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">ERRORS</text>
+  <text x="240" y="106" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1">p95</text>
+  <text x="288" y="106" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="1">p99</text>
+  <text x="728" y="106" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">VERDICT</text>
+
+  <!-- rung 1: 1,000 -->
+  <text x="32" y="136" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">1,000</text>
+  <text x="100" y="136" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">4.7ms</text>
+  <text x="164" y="136" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">0%</text>
+  <text x="240" y="136" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#2f6f4e">19</text>
+  <text x="288" y="136" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#c2703d">50</text>
+  <rect x="300" y="124" width="143.4" height="8" rx="2" fill="#2f6f4e"/>
+  <rect x="300" y="134" width="190.6" height="8" rx="2" fill="#c2703d"/>
+  <text x="728" y="138" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">PASS</text>
+
+  <!-- rung 2: 2,000 -->
+  <text x="32" y="182" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">2,000</text>
+  <text x="100" y="182" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">6.3ms</text>
+  <text x="164" y="182" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">0%</text>
+  <text x="240" y="182" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#2f6f4e">161</text>
+  <text x="288" y="182" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#c2703d">276</text>
+  <rect x="300" y="170" width="247.5" height="8" rx="2" fill="#2f6f4e"/>
+  <rect x="300" y="180" width="273.8" height="8" rx="2" fill="#c2703d"/>
+  <text x="728" y="184" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">PASS</text>
+
+  <!-- rung 3: 2,500 — the ceiling -->
+  <rect x="24" y="206" width="704" height="34" rx="4" fill="#2f6f4e" opacity="0.07"/>
+  <text x="32" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">2,500</text>
+  <text x="100" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">11ms</text>
+  <text x="164" y="228" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">0%</text>
+  <text x="240" y="228" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#2f6f4e">288</text>
+  <text x="288" y="228" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#c2703d">775</text>
+  <rect x="300" y="216" width="275.9" height="8" rx="2" fill="#2f6f4e"/>
+  <rect x="300" y="226" width="324.1" height="8" rx="2" fill="#c2703d"/>
+  <text x="728" y="230" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">CEILING</text>
+
+  <!-- rung 4: 3,000 -->
+  <text x="32" y="274" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">3,000</text>
+  <text x="100" y="274" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">—</text>
+  <text x="164" y="274" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">0%</text>
+  <text x="240" y="274" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#2f6f4e">1356</text>
+  <text x="288" y="274" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" fill="#c2703d">2287</text>
+  <rect x="300" y="262" width="351.3" height="8" rx="2" fill="#2f6f4e"/>
+  <rect x="300" y="272" width="376.8" height="8" rx="2" fill="#c2703d"/>
+  <text x="728" y="276" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">FAIL</text>
+
+  <!-- log axis -->
+  <line x1="300" y1="300" x2="690" y2="300" stroke="#ded9d1" stroke-width="1.2"/>
+  <text x="32" y="314" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d" letter-spacing="0.8">RESPONSE TIME · LOG SCALE</text>
+  <text x="300" y="314" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">1ms</text>
+  <text x="412.2" y="314" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">10</text>
+  <text x="524.3" y="314" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">100</text>
+  <text x="636.5" y="314" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">1,000</text>
+
+  <line x1="32" y1="332" x2="728" y2="332" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="352" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">The median moved 2.3x while p95 moved 71x. The error column never moved at all.</text>
+  <text x="32" y="366" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">A dashboard watching availability shows a healthy server at the moment it becomes unusable.</text>
+</svg>

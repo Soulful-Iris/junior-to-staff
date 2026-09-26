@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 352" width="760" height="352" role="img" aria-label="Five stations in a row, from the database on the left to the reader on the right: Postgres, the Node application, the Nginx proxy, a CDN which was not tested, and the reader. Below the row, two nested bars show how much work each cache placement removes. A one-second cache inside the Node process spans the database box only: it skips the database, cuts about one hundred queries a second, and raises the ceiling from two thousand five hundred to four thousand concurrent users. The same one-second rule moved one hop out into Nginx spans both the database and the application: it skips both and raises the ceiling to five thousand two hundred and fifty. The nesting is the point, because each hop toward the reader removes strictly more work per request. A closing caption notes 2.1 times the users on the same machine with no change to the bill, and that the price is staleness bounded at one second, which is a product decision rather than a technical one.">
+  <rect width="760" height="352" rx="10" fill="#faf9f7"/>
+
+  <defs>
+    <marker id="hop" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse">
+      <path d="M0 0 L7 3.5 L0 7" fill="#ded9d1"/>
+    </marker>
+  </defs>
+
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">MOVE THE WORK CLOSER TO THE READER</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Same box, same code paths. Only the place the answer is kept changes.</text>
+
+  <!-- stations -->
+  <rect x="40" y="80" width="104" height="54" rx="6" stroke="#6d6459" stroke-width="1.5" fill="#eef2ef"/>
+  <text x="92" y="104" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Postgres</text>
+  <text x="92" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">339 MB</text>
+
+  <rect x="184" y="80" width="104" height="54" rx="6" stroke="#2f6f4e" stroke-width="1.8" fill="#eef2ef"/>
+  <text x="236" y="104" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Node app</text>
+  <text x="236" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="0.6">CACHE 1</text>
+
+  <rect x="328" y="80" width="104" height="54" rx="6" stroke="#c2703d" stroke-width="1.8" fill="#eef2ef"/>
+  <text x="380" y="104" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Nginx</text>
+  <text x="380" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="0.6">CACHE 2</text>
+
+  <rect x="472" y="80" width="104" height="54" rx="6" stroke="#ded9d1" stroke-width="1.5" stroke-dasharray="4 4" fill="#faf9f7"/>
+  <text x="524" y="104" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#8a857d">CDN</text>
+  <text x="524" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">NOT TESTED</text>
+
+  <rect x="616" y="80" width="104" height="54" rx="6" stroke="#6d6459" stroke-width="1.5" fill="#eef2ef"/>
+  <text x="668" y="104" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Reader</text>
+  <text x="668" y="122" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">0.1 req/s</text>
+
+  <path d="M144 107 H180" stroke="#ded9d1" stroke-width="1.5" fill="none" marker-end="url(#hop)"/>
+  <path d="M288 107 H324" stroke="#ded9d1" stroke-width="1.5" fill="none" marker-end="url(#hop)"/>
+  <path d="M432 107 H468" stroke="#ded9d1" stroke-width="1.5" fill="none" marker-end="url(#hop)"/>
+  <path d="M576 107 H612" stroke="#ded9d1" stroke-width="1.5" fill="none" marker-end="url(#hop)"/>
+
+  <!-- cache 1: the span it removes is the database -->
+  <rect x="40" y="156" width="104" height="7" rx="3.5" fill="#2f6f4e"/>
+  <text x="164" y="162" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="0.8">CACHE 1 · INSIDE THE NODE PROCESS · 1 SECOND</text>
+  <text x="164" y="181" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Skips the database. About 100 fewer queries a second.</text>
+  <text x="164" y="200" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#2f6f4e">2,500 → 4,000 concurrent users</text>
+
+  <!-- cache 2: same rule, one hop out, so the span nests and grows -->
+  <rect x="40" y="228" width="248" height="7" rx="3.5" fill="#c2703d"/>
+  <text x="308" y="234" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="0.8">CACHE 2 · SAME RULE, ONE HOP OUT</text>
+  <text x="308" y="253" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Skips the database and the application.</text>
+  <text x="308" y="272" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#c2703d">4,000 → 5,250 concurrent users</text>
+
+  <line x1="32" y1="300" x2="728" y2="300" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="322" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">2.1x the users on the same machine. The bill did not change.</text>
+  <text x="32" y="340" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">The price is staleness, bounded at one second, and that is a product decision rather than a technical one.</text>
+</svg>

@@ -10,6 +10,8 @@ Speeding up a 40 ms helper inside a 900 ms request cannot make the page four tim
 
 Identify a measured bottleneck, make one relevant change, and compare equivalent workloads. Use the deployment-headroom case to account for capacity temporarily removed during a rollout. Keep teaching numbers, local measurements, and cloud invoices clearly labeled.
 
+The one-box case runs a whole experiment instead of describing one: criteria fixed before the first request, a binary search for the ceiling, the saturated resource named, and the ceiling then doubled without buying anything. It also shows the two results that contradict the usual guess — a server that fails on latency with a zero error rate, and a load generator that flatters its own tail.
+
 </section>
 
 [Curriculum](../../README.md) · [About this part](../README.md)
@@ -27,8 +29,9 @@ Testing and ownership checks are part of each implementation. The dedicated test
 | Step | Existing lesson or exercise |
 |---|---|
 | 1 | [Find the bottleneck and measure cost per useful operation](measurement-and-cost.md) |
-| 2 | [Reserve capacity for rollout, zone loss and backlog recovery](cases/deployment-headroom.md) |
-| 3 | [Reject excess API work before queues grow without bound](problems/overload-shedding.md) |
+| 2 | [Find the ceiling of one server, then move it without spending more](one-box-ceiling.md) |
+| 3 | [Reserve capacity for rollout, zone loss and backlog recovery](cases/deployment-headroom.md) |
+| 4 | [Reject excess API work before queues grow without bound](problems/overload-shedding.md) |
 
 ## Explore failures and changed requirements
 
