@@ -291,6 +291,4 @@ This is a build brief. Submit a load script with an explicit think-time model, a
 
 ---
 
-**Not covered here:** the measurement plumbing, which is the subject of [Use logs, metrics and traces to explain one slow request](../../03-production/04-observability/logs-metrics-traces.md). Rollout and zone-loss headroom belong to [Reserve capacity for rollout, zone loss and backlog recovery](cases/deployment-headroom.md). This lesson is deliberately about one machine, so multi-host capacity, autoscaling policy and load shedding are left to [Reject excess API work before queues grow without bound](problems/overload-shedding.md) and to [Data systems at scale](../01-data-at-scale/README.md).
-
 [Learning sequence](../../README.md) · [AWS implementation](../../03-production/03-infrastructure/aws/README.md)
