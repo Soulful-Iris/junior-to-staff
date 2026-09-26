@@ -520,8 +520,8 @@ try {
 
   await check("the board page allows only its own scripts, talks only to itself and Anthropic, and nothing on it is refused", async () => {
     const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
-    assert.match(policy, /connect-src 'self' https:\/\/api\.anthropic\.com;/);
-    assert.match(policy, /script-src 'self' 'sha256-[^']+' 'sha256-[^']+';/);
+    assert.match(policy, /connect-src 'self' https:\/\/api\.anthropic\.com https:\/\/cloudflareinsights\.com;/);
+    assert.match(policy, /script-src 'self' 'sha256-[^']+' 'sha256-[^']+' https:\/\/static\.cloudflareinsights\.com;/);
     const scriptSrc = policy.split(";").map((d) => d.trim()).find((d) => d.startsWith("script-src"));
     assert.doesNotMatch(scriptSrc, /unsafe/, "no inline script runs unless its hash is listed");
     assert.deepEqual(await page.evaluate(() => window.__csp), [], "the page as built breaks none of its own policy");

@@ -218,12 +218,19 @@ def board_csp(inline_scripts):
     api.anthropic.com. So even an injected script could neither run nor send a
     key anywhere else. Styles stay open because the board draws with inline
     ones; images may be data: URLs because the AWS icons are.
+
+    One outside script is allowed by name: Cloudflare's Web Analytics beacon,
+    which Cloudflare adds to the page on its way to a browser (never to curl,
+    which is how a check once concluded there was nothing injected). Cloudflare
+    already serves every byte of this page, so its own beacon adds no party
+    that could not already read the key; blocking it only broke the analytics
+    and put an error in every reader's console.
     """
     hashes = ' '.join("'sha256-" + base64.b64encode(hashlib.sha256(s.encode()).digest()).decode() + "'" for s in inline_scripts)
     policy = ("default-src 'self'; "
-              f"script-src 'self' {hashes}; "
+              f"script-src 'self' {hashes} https://static.cloudflareinsights.com; "
               "style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; "
-              "connect-src 'self' https://api.anthropic.com; "
+              "connect-src 'self' https://api.anthropic.com https://cloudflareinsights.com; "
               "object-src 'none'; base-uri 'none'; form-action 'none'")
     return f'<meta http-equiv="Content-Security-Policy" content="{policy}">'
 
