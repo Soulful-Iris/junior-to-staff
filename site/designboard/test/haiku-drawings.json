@@ -1,0 +1,844 @@
+{
+ "p1-alb-ecs-rds": {
+  "ask": "users hit an ALB in front of two ECS services in two zones, which read an RDS database",
+  "input": {
+   "boxes": [
+    {
+     "id": "vpc1",
+     "kind": "vpc"
+    },
+    {
+     "id": "az1",
+     "kind": "az",
+     "name": "us-east-1a",
+     "inside": "vpc1"
+    },
+    {
+     "id": "az2",
+     "kind": "az",
+     "name": "us-east-1b",
+     "inside": "vpc1"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users1",
+     "part": "users"
+    },
+    {
+     "id": "alb1",
+     "part": "alb",
+     "inside": "vpc1"
+    },
+    {
+     "id": "ecs1",
+     "part": "ecs",
+     "inside": "az1"
+    },
+    {
+     "id": "ecs2",
+     "part": "ecs",
+     "inside": "az2"
+    },
+    {
+     "id": "rds1",
+     "part": "rds",
+     "inside": "vpc1"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users1",
+     "to": "alb1"
+    },
+    {
+     "from": "alb1",
+     "to": "ecs1"
+    },
+    {
+     "from": "alb1",
+     "to": "ecs2"
+    },
+    {
+     "from": "ecs1",
+     "to": "rds1"
+    },
+    {
+     "from": "ecs2",
+     "to": "rds1"
+    }
+   ]
+  }
+ },
+ "p2-meant-cache": {
+  "ask": "oh no, i meant a cache, not a database",
+  "input": {
+   "boxes": [
+    {
+     "id": "vpc1",
+     "kind": "vpc"
+    },
+    {
+     "id": "az1",
+     "kind": "az",
+     "name": "us-east-1a",
+     "inside": "vpc1"
+    },
+    {
+     "id": "az2",
+     "kind": "az",
+     "name": "us-east-1b",
+     "inside": "vpc1"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users1",
+     "part": "users"
+    },
+    {
+     "id": "alb1",
+     "part": "alb",
+     "inside": "vpc1"
+    },
+    {
+     "id": "ecs1",
+     "part": "ecs",
+     "inside": "az1"
+    },
+    {
+     "id": "ecs2",
+     "part": "ecs",
+     "inside": "az2"
+    },
+    {
+     "id": "rds1",
+     "part": "elasticache",
+     "inside": "vpc1"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users1",
+     "to": "alb1"
+    },
+    {
+     "from": "alb1",
+     "to": "ecs1"
+    },
+    {
+     "from": "alb1",
+     "to": "ecs2"
+    },
+    {
+     "from": "ecs1",
+     "to": "rds1"
+    },
+    {
+     "from": "ecs2",
+     "to": "rds1"
+    }
+   ]
+  }
+ },
+ "p3-serverless": {
+  "ask": "a static site on S3 behind CloudFront, and an API Gateway with Lambda functions that store orders in DynamoDB",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users",
+     "part": "users"
+    },
+    {
+     "id": "cf",
+     "part": "cloudfront"
+    },
+    {
+     "id": "s3",
+     "part": "s3"
+    },
+    {
+     "id": "apigw",
+     "part": "apigw"
+    },
+    {
+     "id": "lambda",
+     "part": "lambda"
+    },
+    {
+     "id": "dynamodb",
+     "part": "dynamodb"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users",
+     "to": "cf"
+    },
+    {
+     "from": "cf",
+     "to": "s3"
+    },
+    {
+     "from": "users",
+     "to": "apigw"
+    },
+    {
+     "from": "apigw",
+     "to": "lambda"
+    },
+    {
+     "from": "lambda",
+     "to": "dynamodb"
+    }
+   ]
+  }
+ },
+ "p4-vague": {
+  "ask": "something that sends emails when people sign up",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users",
+     "part": "users"
+    },
+    {
+     "id": "apigw",
+     "part": "apigw",
+     "inside": "cloud"
+    },
+    {
+     "id": "lambda",
+     "part": "lambda",
+     "inside": "cloud"
+    },
+    {
+     "id": "ses",
+     "part": "ses",
+     "inside": "cloud"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users",
+     "to": "apigw"
+    },
+    {
+     "from": "apigw",
+     "to": "lambda"
+    },
+    {
+     "from": "lambda",
+     "to": "ses"
+    }
+   ]
+  }
+ },
+ "p5-mistake": {
+  "ask": "the API puts jobs on an SQS queue and the queue writes them to Postgres",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "api",
+     "part": "apigw"
+    },
+    {
+     "id": "queue",
+     "part": "sqs"
+    },
+    {
+     "id": "db",
+     "part": "rds"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "api",
+     "to": "queue"
+    },
+    {
+     "from": "queue",
+     "to": "db"
+    }
+   ]
+  }
+ },
+ "p6-network": {
+  "ask": "a VPC with two availability zones: public subnets with a NAT gateway each, private subnets with EC2 instances in an auto scaling group, an internet gateway, and a Multi-AZ Aurora database the instances use. Users come in through an ALB.",
+  "input": {
+   "boxes": [
+    {
+     "id": "vpc1",
+     "kind": "vpc"
+    },
+    {
+     "id": "az1",
+     "kind": "az",
+     "name": "us-east-1a",
+     "inside": "vpc1"
+    },
+    {
+     "id": "az2",
+     "kind": "az",
+     "name": "us-east-1b",
+     "inside": "vpc1"
+    },
+    {
+     "id": "pub1",
+     "kind": "public",
+     "inside": "az1"
+    },
+    {
+     "id": "pub2",
+     "kind": "public",
+     "inside": "az2"
+    },
+    {
+     "id": "priv1",
+     "kind": "private",
+     "inside": "az1"
+    },
+    {
+     "id": "priv2",
+     "kind": "private",
+     "inside": "az2"
+    },
+    {
+     "id": "asg1",
+     "kind": "asg",
+     "inside": "priv1"
+    },
+    {
+     "id": "asg2",
+     "kind": "asg",
+     "inside": "priv2"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users1",
+     "part": "users"
+    },
+    {
+     "id": "igw1",
+     "part": "igw",
+     "inside": "vpc1"
+    },
+    {
+     "id": "nat1",
+     "part": "natgw",
+     "inside": "pub1"
+    },
+    {
+     "id": "nat2",
+     "part": "natgw",
+     "inside": "pub2"
+    },
+    {
+     "id": "ec2_1",
+     "part": "ec2",
+     "inside": "asg1"
+    },
+    {
+     "id": "ec2_2",
+     "part": "ec2",
+     "inside": "asg2"
+    },
+    {
+     "id": "alb1",
+     "part": "alb",
+     "inside": "vpc1"
+    },
+    {
+     "id": "aurora1",
+     "part": "aurora",
+     "multiAz": true
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users1",
+     "to": "alb1"
+    },
+    {
+     "from": "alb1",
+     "to": "ec2_1"
+    },
+    {
+     "from": "alb1",
+     "to": "ec2_2"
+    },
+    {
+     "from": "ec2_1",
+     "to": "aurora1"
+    },
+    {
+     "from": "ec2_2",
+     "to": "aurora1"
+    }
+   ]
+  }
+ },
+ "q1-video": {
+  "ask": "a video upload pipeline: users upload to S3, the upload triggers a Lambda that puts a job on SQS, ECS workers take the jobs, transcode, and write the results back to S3, and CloudFront serves the finished videos to users",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users",
+     "part": "users"
+    },
+    {
+     "id": "s3",
+     "part": "s3",
+     "inside": "cloud"
+    },
+    {
+     "id": "lambda",
+     "part": "lambda",
+     "inside": "cloud"
+    },
+    {
+     "id": "sqs",
+     "part": "sqs",
+     "inside": "cloud"
+    },
+    {
+     "id": "ecs",
+     "part": "ecs",
+     "inside": "cloud"
+    },
+    {
+     "id": "cf",
+     "part": "cloudfront",
+     "inside": "cloud"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users",
+     "to": "s3",
+     "label": "upload video"
+    },
+    {
+     "from": "s3",
+     "to": "lambda",
+     "label": "upload event"
+    },
+    {
+     "from": "lambda",
+     "to": "sqs",
+     "label": "job"
+    },
+    {
+     "from": "sqs",
+     "to": "ecs",
+     "label": "job"
+    },
+    {
+     "from": "ecs",
+     "to": "s3",
+     "label": "transcoded video"
+    },
+    {
+     "from": "cf",
+     "to": "s3",
+     "label": "fetch video"
+    },
+    {
+     "from": "users",
+     "to": "cf",
+     "label": "watch video"
+    }
+   ]
+  }
+ },
+ "q2-dlq": {
+  "ask": "add a dead-letter queue for jobs that keep failing",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users",
+     "part": "users"
+    },
+    {
+     "id": "s3",
+     "part": "s3",
+     "inside": "cloud"
+    },
+    {
+     "id": "lambda",
+     "part": "lambda",
+     "inside": "cloud"
+    },
+    {
+     "id": "sqs",
+     "part": "sqs",
+     "inside": "cloud"
+    },
+    {
+     "id": "dlq",
+     "part": "sqs",
+     "inside": "cloud"
+    },
+    {
+     "id": "ecs",
+     "part": "ecs",
+     "inside": "cloud"
+    },
+    {
+     "id": "cf",
+     "part": "cloudfront",
+     "inside": "cloud"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users",
+     "to": "s3",
+     "label": "upload video"
+    },
+    {
+     "from": "s3",
+     "to": "lambda",
+     "label": "upload event"
+    },
+    {
+     "from": "lambda",
+     "to": "sqs",
+     "label": "job"
+    },
+    {
+     "from": "sqs",
+     "to": "ecs",
+     "label": "job"
+    },
+    {
+     "from": "ecs",
+     "to": "s3",
+     "label": "transcoded video"
+    },
+    {
+     "from": "cf",
+     "to": "s3",
+     "label": "fetch video"
+    },
+    {
+     "from": "users",
+     "to": "cf",
+     "label": "watch video"
+    },
+    {
+     "from": "sqs",
+     "to": "dlq",
+     "label": "failed job"
+    }
+   ]
+  }
+ },
+ "q3-three-tier": {
+  "ask": "the classic three tier app: Route 53 and CloudFront in front of an ALB, EC2 instances in an auto scaling group across two availability zones in private subnets, a Multi-AZ RDS Postgres and an ElastiCache Redis in front of it",
+  "input": {
+   "boxes": [
+    {
+     "id": "r1",
+     "kind": "region"
+    },
+    {
+     "id": "vpc1",
+     "kind": "vpc",
+     "inside": "r1"
+    },
+    {
+     "id": "az1",
+     "kind": "az",
+     "name": "us-east-1a",
+     "inside": "vpc1"
+    },
+    {
+     "id": "az2",
+     "kind": "az",
+     "name": "us-east-1b",
+     "inside": "vpc1"
+    },
+    {
+     "id": "priv1",
+     "kind": "private",
+     "inside": "az1"
+    },
+    {
+     "id": "priv2",
+     "kind": "private",
+     "inside": "az2"
+    },
+    {
+     "id": "asg1",
+     "kind": "asg",
+     "inside": "priv1"
+    },
+    {
+     "id": "asg2",
+     "kind": "asg",
+     "inside": "priv2"
+    }
+   ],
+   "parts": [
+    {
+     "id": "r53",
+     "part": "route53"
+    },
+    {
+     "id": "cf",
+     "part": "cloudfront"
+    },
+    {
+     "id": "alb",
+     "part": "alb",
+     "inside": "vpc1"
+    },
+    {
+     "id": "ec2a",
+     "part": "ec2",
+     "inside": "asg1"
+    },
+    {
+     "id": "ec2b",
+     "part": "ec2",
+     "inside": "asg2"
+    },
+    {
+     "id": "rds",
+     "part": "rds",
+     "inside": "vpc1",
+     "multiAz": true
+    },
+    {
+     "id": "cache",
+     "part": "elasticache",
+     "inside": "vpc1"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "r53",
+     "to": "cf"
+    },
+    {
+     "from": "cf",
+     "to": "alb"
+    },
+    {
+     "from": "alb",
+     "to": "ec2a"
+    },
+    {
+     "from": "alb",
+     "to": "ec2b"
+    },
+    {
+     "from": "ec2a",
+     "to": "cache"
+    },
+    {
+     "from": "ec2b",
+     "to": "cache"
+    },
+    {
+     "from": "cache",
+     "to": "rds"
+    }
+   ]
+  }
+ },
+ "q4-chat": {
+  "ask": "a chat app: browsers keep a websocket open to API Gateway, messages go to a Lambda that stores them in DynamoDB and fans them out through SNS to a push notification Lambda",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "browsers",
+     "part": "browser"
+    },
+    {
+     "id": "apigw",
+     "part": "apigw",
+     "inside": "cloud"
+    },
+    {
+     "id": "msgLambda",
+     "part": "lambda",
+     "inside": "cloud",
+     "multiAz": false
+    },
+    {
+     "id": "dynamodb",
+     "part": "dynamodb",
+     "inside": "cloud"
+    },
+    {
+     "id": "sns",
+     "part": "sns",
+     "inside": "cloud"
+    },
+    {
+     "id": "notifLambda",
+     "part": "lambda",
+     "inside": "cloud",
+     "multiAz": false
+    }
+   ],
+   "arrows": [
+    {
+     "from": "browsers",
+     "to": "apigw",
+     "label": "websocket"
+    },
+    {
+     "from": "apigw",
+     "to": "msgLambda"
+    },
+    {
+     "from": "msgLambda",
+     "to": "dynamodb"
+    },
+    {
+     "from": "msgLambda",
+     "to": "sns"
+    },
+    {
+     "from": "sns",
+     "to": "notifLambda"
+    }
+   ]
+  }
+ },
+ "q5-rename": {
+  "ask": "call the workers transcoder and make the bucket two buckets: uploads and videos",
+  "input": {
+   "boxes": [
+    {
+     "id": "cloud",
+     "kind": "cloud"
+    }
+   ],
+   "parts": [
+    {
+     "id": "users",
+     "part": "users"
+    },
+    {
+     "id": "uploads",
+     "part": "s3",
+     "name": "uploads"
+    },
+    {
+     "id": "videos",
+     "part": "s3",
+     "name": "videos"
+    },
+    {
+     "id": "lambda",
+     "part": "lambda",
+     "inside": "cloud"
+    },
+    {
+     "id": "sqs",
+     "part": "sqs",
+     "inside": "cloud"
+    },
+    {
+     "id": "dlq",
+     "part": "sqs",
+     "inside": "cloud"
+    },
+    {
+     "id": "transcoder",
+     "part": "ecs",
+     "name": "transcoder",
+     "inside": "cloud"
+    },
+    {
+     "id": "cf",
+     "part": "cloudfront",
+     "inside": "cloud"
+    }
+   ],
+   "arrows": [
+    {
+     "from": "users",
+     "to": "uploads",
+     "label": "upload video"
+    },
+    {
+     "from": "uploads",
+     "to": "lambda",
+     "label": "upload event"
+    },
+    {
+     "from": "lambda",
+     "to": "sqs",
+     "label": "job"
+    },
+    {
+     "from": "sqs",
+     "to": "transcoder",
+     "label": "job"
+    },
+    {
+     "from": "transcoder",
+     "to": "videos",
+     "label": "transcoded video"
+    },
+    {
+     "from": "cf",
+     "to": "videos",
+     "label": "fetch video"
+    },
+    {
+     "from": "users",
+     "to": "cf",
+     "label": "watch video"
+    },
+    {
+     "from": "sqs",
+     "to": "dlq",
+     "label": "failed job"
+    }
+   ]
+  }
+ }
+}
