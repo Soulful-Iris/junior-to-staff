@@ -17,11 +17,14 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const PORT = +(process.env.DESIGNBOARD_PORT || 8932);
-const PAGE = `http://127.0.0.1:${PORT}/curriculum/03-production/01-system-design/whiteboard.html`;
+// DESIGNBOARD_SITE=https://guide.soulful-ai.dev runs the same checks against
+// the published site instead of a local build (no server is started).
+const SITE = process.env.DESIGNBOARD_SITE || `http://127.0.0.1:${PORT}`;
+const PAGE = `${SITE}/curriculum/03-production/01-system-design/whiteboard.html`;
 const shots = process.env.SITE_SCREENSHOTS || mkdtempSync(join(tmpdir(), "designboard-"));
 mkdirSync(shots, { recursive: true });
 
-const server = spawn(process.env.PYTHON || "python3.12", ["site/serve.py", String(PORT)], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+const server = process.env.DESIGNBOARD_SITE ? null : spawn(process.env.PYTHON || "python3.12", ["site/serve.py", String(PORT)], { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
 let browser;
 const results = [];
 async function check(name, fn) {
@@ -33,7 +36,7 @@ async function check(name, fn) {
 try {
   // Our own server, or nothing: a probe on a port another service held once
   // got "not found" for every page and looked like a bug in the page.
-  await new Promise((resolve, reject) => {
+  if (server) await new Promise((resolve, reject) => {
     server.once("error", reject);
     server.once("exit", (code) => reject(new Error(`serve.py exited (${code}); is port ${PORT} taken?`)));
     setTimeout(resolve, 1500);
@@ -498,7 +501,7 @@ try {
   });
 } finally {
   if (browser) await browser.close();
-  server.kill();
+  if (server) server.kill();
   for (const [status, name, ms, why] of results) console.log(`${status.padEnd(4)} ${name}  (${ms} ms)${why ? "\n       " + why : ""}`);
   console.log(`screenshots: ${shots}`);
   process.exitCode = results.some((r) => r[0] !== "ok") ? 1 : 0;

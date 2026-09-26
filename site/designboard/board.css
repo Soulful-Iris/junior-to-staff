@@ -107,7 +107,9 @@
 .db-e-labelbg { fill: #fbfcf9; stroke: #dde2d9; stroke-width: 1; pointer-events: none; }
 .db-e-label { font: 500 10.5px var(--db-mono); fill: #3c4a41; pointer-events: none; }
 .db-edge.is-bad .db-e-labelbg { fill: var(--db-bad); stroke: var(--db-bad); }
-.db-edge.is-bad .db-e-label { fill: #fff; font-weight: 600; }
+/* Same weight as every other label: the box behind it is measured in that
+   weight, and a bold red label overflowed its box ("etch titl"). */
+.db-edge.is-bad .db-e-label { fill: #fff; }
 .db-edge.is-sel .db-e-labelbg { stroke: var(--db-sel); }
 .db-edge.is-dead .db-e-label { fill: #a3aba5; }
 .db-edge:focus { outline: none; }
