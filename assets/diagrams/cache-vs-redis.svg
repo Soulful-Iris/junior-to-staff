@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" width="760" height="320" role="img" aria-label="Two ways to add a cache, compared on the resource that is already the constraint. An in-process map inside the application adds no extra service, no network hop and no new competitor for the single core. A separate cache server adds one service to run, one network round trip per lookup, and one more process contending for the same core. A small table compares them on extra services, extra hops and extra tenants on the core. The caption says a dedicated cache server is the right answer when several application servers must share one cache, and that here there is only one application server and the constraint is the very resource the extra service would also consume.">
+  <rect width="760" height="320" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE OBVIOUS CACHE IS THE WRONG ONE HERE</text>
+
+  <text x="32" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">A MAP INSIDE THE PROCESS</text>
+  <rect x="32" y="74" width="332" height="108" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <rect x="52" y="94" width="292" height="68" rx="5" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.2"/>
+  <text x="68" y="118" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">the application</text>
+  <rect x="68" y="128" width="150" height="24" rx="4" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1"/>
+  <text x="80" y="145" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10.5" fill="#2f6f4e">cache, in memory</text>
+  <text x="232" y="145" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">a lookup is a read</text>
+
+  <text x="396" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">A SEPARATE CACHE SERVER</text>
+  <rect x="396" y="74" width="332" height="108" rx="6" fill="#faf9f7" stroke="#c2703d" stroke-width="1.4"/>
+  <rect x="414" y="100" width="128" height="56" rx="5" fill="#faf9f7" stroke="#ded9d1" stroke-width="1.2"/>
+  <text x="478" y="132" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">the application</text>
+  <rect x="582" y="100" width="128" height="56" rx="5" fill="#faf9f7" stroke="#c2703d" stroke-width="1.2"/>
+  <text x="646" y="132" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#c2703d">cache server</text>
+  <path d="M546 128 H578" stroke="#c2703d" stroke-width="1.4" fill="none"/>
+  <text x="562" y="120" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#c2703d">HOP</text>
+
+  <text x="32" y="212" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">WHAT EACH ONE ADDS</text>
+  <text x="300" y="212" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1">IN PROCESS</text>
+  <text x="520" y="212" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="1">SEPARATE SERVER</text>
+
+  <text x="32" y="234" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">services to run and keep alive</text>
+  <text x="300" y="234" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">none</text>
+  <text x="520" y="234" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">one more</text>
+
+  <text x="32" y="256" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">network round trips per lookup</text>
+  <text x="300" y="256" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">none</text>
+  <text x="520" y="256" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">one</text>
+
+  <text x="32" y="278" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">new tenants on the one core</text>
+  <text x="300" y="278" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">none</text>
+  <text x="520" y="278" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">one more</text>
+
+  <line x1="32" y1="294" x2="728" y2="294" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="314" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">A cache server is right when several app servers share one cache. Here there is one, and CPU is the constraint.</text>
+</svg>

@@ -27,6 +27,22 @@ Constructed brief over a measured public experiment. Prerequisites: [find the bo
 | Pass criteria, fixed first | p95 < 500 ms · p99 < 1 s · errors < 1% |
 | Excluded | This is one application shape on one provider. It is not a general "a server holds N users" constant |
 
+## What is actually on the machine
+
+Before any load arrives, three things decide what the rest of the experiment can possibly find: what the hardware is, what the data looks like, and what the traffic is made of. All three are cheap to establish and all three are routinely skipped.
+
+![Four spec tiles for the twelve dollar machine: one shared vCPU at 2.0 GHz, 2 GB of RAM of which 1,967 MB is usable, a 50 GB disk against a 349 MB database, and a rate of $0.018 an hour](../../../assets/diagrams/machine-spec.svg)
+
+Read that specification like somebody who will later have to defend a number taken from it. **Shared** is the word that matters: it means the denominator of every CPU percentage in this lesson can move, which is a caveat worth carrying to the end. *Usable* is the second: capacity arithmetic done against the advertised 2 GB is quietly wrong by 33 MB before it starts.
+
+![The seeded dataset: 50,000 users, 500,000 posts and 2,016,005 likes totalling 349 MB, split into 7 MB of users, 134 MB of posts and 208 MB of likes, against 1,967 MB of usable memory](../../../assets/diagrams/seed-data.svg)
+
+The shape matters more than the size. The join table is the largest object in the database, which is what you would expect of a social feed and is exactly the table a feed query has to touch. But the whole thing is 349 MB against 1,967 MB of memory, so the working set fits several times over and the disk is never asked a hard question. **That single fact is why the database does not appear in the bottleneck later**, and it is the first assumption that breaks on a real dataset.
+
+![Four endpoints with their share of traffic: the feed and a single post at 46 per cent each, a like at 7 per cent and a new post at 1 per cent, with reads about 92 per cent of the total](../../../assets/diagrams/app-surface.svg)
+
+And the mix. Two reads happen on every loop, a write on 15% of loops and another on 2%, so roughly **92% of requests are reads**. Nobody measured that before designing the test, and it is the property that decides the entire second half of this lesson: a read-dominated workload is one where caching is the lever. Had the mix been the other way round, the same careful experiment would have ended somewhere else entirely.
+
 ## Baseline to challenge
 
 ```mermaid
@@ -56,7 +72,11 @@ The figures are one application on one provider. Treat them as a worked method, 
 
 The most important decision happens before any request is sent, and it is the one most load tests get wrong: **what is a user?**
 
-A user is not a request firehose. Here each virtual user is a loop:
+A user is not a request firehose, and the difference is not a detail.
+
+![Two load models side by side: a thread firing requests back to back against one endpoint, versus a virtual user with its own login, several endpoints and real pauses between actions](../../../assets/diagrams/virtual-user.svg)
+
+The left-hand model is what a load test becomes when nobody decides otherwise, and it does answer a real question — how fast can this serve one endpoint — but that is a throughput answer, not a capacity answer. It will also produce a much larger number, which is part of why it survives. Here each virtual user is a loop:
 
 ```
 load the feed  ->  read for 3-7 s  ->  open a post  ->  read for 3-8 s
@@ -76,9 +96,21 @@ Two methodological details worth copying:
 - **The load generator ran on its own machine**, a 4 vCPU / 8 GB box under a millisecond away, and its own CPU peaked at 37%. Reporting that number is what makes the result admissible. A generator running near its own limit measures itself, and the failure is invisible because it looks exactly like the target slowing down.
 - **The generator cost $0.60** for the whole 4.5-hour session. The experiment is cheaper than the meeting about whether to run it.
 
+![The test rig: a four vCPU generator and the one vCPU target under a millisecond apart, the generator peaking at 37 per cent while the target reaches 80 per cent, and a session cost of sixty cents](../../../assets/diagrams/generator-rig.svg)
+
+The 37% deserves more than a footnote. A load generator is an instrument, and an instrument running near its own limit stops measuring the thing in front of it and starts measuring itself — and the symptom is identical to the target slowing down, so nothing in the results will tell you it happened. Reporting the generator's own utilisation is the cheapest way to make a load test citable, and almost no published load test includes it.
+
 ## Search for the ceiling, do not creep up on it
 
-With criteria fixed in advance, the search is a binary search, and it takes four runs:
+![The pass criteria written first, beside the three thousand user result: p95 and p99 both failing, and the error rate passing](../../../assets/diagrams/criteria-first.svg)
+
+Fixing the criteria first is not ceremony. It is the only thing standing between you and a negotiation you will win against yourself, because after the run a p95 of 1,356 ms arrives attached to a server that did not crash, returned every answer correctly, and looks fine on every graph anybody has built.
+
+![The first three rungs: ten, fifty and one hundred users, with the median falling from 5.2 to 4.2 milliseconds and the CPU at nine per cent](../../../assets/diagrams/warmup-rungs.svg)
+
+The first three rungs are where a great many load tests stop, and they teach nothing. The server is at 9% of one core and the median actually *improves* as load rises, because caches and runtime are warming up. A report written here says the system performs well under load, and the load has not started.
+
+With criteria fixed in advance, the real search is a binary search, and it takes four runs:
 
 | Concurrent users | Throughput | Median | p95 | p99 | Errors | Verdict |
 |---|---:|---:|---:|---:|---:|---|
@@ -92,7 +124,13 @@ Three things in that table are worth more than the ceiling itself.
 
 **It failed with zero errors.** Nothing crashed, nothing was refused, no connection was dropped. At 3,000 users the server returned a correct answer to every single request, far too late. A dashboard watching availability and error rate shows a perfectly healthy service at the exact moment it has become unusable. This is why the criteria have to include latency, and why they have to be written before the run: after the run, 1,356 ms is very easy to talk yourself into.
 
+![The same doubling from one thousand to two thousand users measured at three percentiles: the median up 1.3 times, the p95 up 8.5 times, the p99 up 5.5 times](../../../assets/diagrams/tail-multipliers.svg)
+
 **The median barely moved while the tail exploded.** From 1,000 to 3,000 users the median went 4.7 ms to about 11 ms at the ceiling — a factor of two. Over the same span p95 went from 19 ms to 1,356 ms, a factor of seventy-one. The average is the last number to tell you anything and the first one people put on a dashboard. See [percentiles and what a profiler sampled](measurement-and-cost.md) for why.
+
+![The search drawn as four runs on a number line: a thousand passes, two thousand passes, three thousand fails, and the search doubles back to two thousand five hundred](../../../assets/diagrams/binary-search.svg)
+
+Four runs, not forty. Double until something breaks, then halve the gap — and notice that the run which *failed* is the one that made the search possible. A cautious ladder that never crosses the line never finds it, and will report the largest number it happened to try as though it were a limit.
 
 **The failure is a cliff, not a slope.** Between 2,500 and 3,000 users — a 20% increase in offered load — p95 went from inside the target to nearly three times over it. Capacity planning that assumes a gentle degradation curve is planning for a shape this system does not have.
 
@@ -119,7 +157,13 @@ It was CPU, and the reason is the architecture rather than the code. Three servi
 | Nginx | 6% |
 | everything else | 6% |
 
+![One core divided at the ceiling: Node 38 per cent, Postgres 30 per cent, Nginx 6 per cent, other work 6 per cent, and 20 per cent idle, summing to the 80 per cent measured](../../../assets/diagrams/core-split.svg)
+
+Those four shares sum to 80, which is the total that was measured — a small reconciliation worth doing every time, because a breakdown that does not add up to its own total is telling you something about the measurement rather than the system.
+
 The two large shares are the application and the database, which on a normal deployment would be two machines that could not take capacity from each other. Here they can, and they do. Co-tenancy is the whole story: on a single-core box, work you add anywhere is work you take from everywhere. It also tells you where a fix has to land — trimming Nginx could recover at most six points, while removing database work recovers thirty.
+
+![The same workload on a quiet host and a busy one: on the busy host a neighbour takes part of the physical core, so identical work reads as a higher percentage](../../../assets/diagrams/steal-time.svg)
 
 **Curriculum addition — the moving ceiling.** A "shared" vCPU on a basic droplet is not a guaranteed core. Time can be lost to other tenants on the same physical host, which means CPU percentage is measured against a denominator that moves. For a teaching experiment this is fine. For a capacity commitment, measure steal time alongside utilisation, or the same test on a quiet Tuesday and a busy one will disagree and neither run will explain why.
 
@@ -135,11 +179,31 @@ The two columns cost very different things over a year. The left one is a decisi
 
 **Change one: a one-second in-memory cache on the feed, inside the Node process.** Not Redis — deliberately. Redis is another service, another network hop, and on a one-core box another competitor for the resource that is already the constraint. An in-process map costs one hop of nothing. Result: about 100 fewer queries per second to Postgres, and the ceiling moves 2,500 → 4,000 concurrent users, a 60% gain.
 
+![An in-process cache compared with a separate cache server on extra services, extra network hops, and extra tenants competing for the single core](../../../assets/diagrams/cache-vs-redis.svg)
+
+The instinct to reach for a dedicated cache server is a good one in most architectures and the wrong one here, and the reason is specific rather than stylistic: the constraint is CPU on a single shared core, and a cache server is one more process contending for exactly that. The right question is never "what is the standard cache", it is "what does this cost on the resource that is already scarce".
+
+![One second of feed requests: the first is a miss and costs one query, and every other request in that window is answered from the stored copy](../../../assets/diagrams/micro-cache-window.svg)
+
+It is worth being precise about what a one-second cache is *for*, because "cache" suggests keeping data a long time and that is not the mechanism here. At the ceiling the feed is fetched roughly 107 times a second. A one-second window turns those 107 database queries into one. The window's length barely matters; the request *rate* is what produces the saving, which means a micro-cache gets better exactly as traffic gets worse — the opposite of most fixes, and the reason it is the right shape for a spike.
+
 **Change two: the same one-second rule, moved into Nginx.** Identical policy, one hop closer to the reader, and now a cache hit never reaches the application at all. The feed endpoint's own ceiling goes from about 1,200 to more than 10,800 requests per second, and the system ceiling moves 4,000 → 5,250 users, at p95 160 ms and p99 454 ms.
+
+![The feed endpoint's ceiling rising ninefold from 1,200 to over 10,800 requests a second, while the system ceiling over the same change rises only 1.3 times](../../../assets/diagrams/nginx-ceiling.svg)
+
+Those are two different ceilings and the gap between them is the lesson. The endpoint got **nine times** faster; the system got **1.3 times** more users. Nothing went wrong — the rest of the work simply did not change, so it now dominates. Any optimisation of one component runs into this, and quoting the component's improvement as though it were the system's is how performance work ends up unbelievable.
+
+![The final result as three columns: 2,500 baseline, 4,000 after the in-application cache, and 5,250 after moving it to the proxy, at p95 160 ms and p99 454 ms](../../../assets/diagrams/results-chart.svg)
 
 Together: **2.1x the users, the same $12 bill.** The rule generalises along the whole path — database, application, proxy, CDN, device — and the further out you put the answer, the more work a hit removes. Nothing about that is free, which is the next section.
 
+![One second of cache drawn as a window: a post lands partway through, and every reader until the window expires sees the answer from before it](../../../assets/diagrams/staleness-budget.svg)
+
 **Curriculum addition — staleness is a product decision.** A one-second cache means a reader can see a feed one second old, and somebody who just posted may not see their own post. Whether that is acceptable is a product question, not a technical one, and it should be answered by the person who owns the product rather than assumed by the person who owns the server. Note the second effect as well: a cache in front of the database also **caps the damage a traffic spike can do to Postgres**, so this is an availability change as much as a speed one.
+
+![How much load a read cache can absorb as the write share rises: nearly all of it at eight per cent writes, much less at twenty, and very little at fifty](../../../assets/diagrams/read-write-mix.svg)
+
+**Curriculum addition — the fix has a domain of validity.** Caching worked here because 92% of requests are reads. As the write share climbs the benefit falls twice over, because a write can never be served from a cache *and* it invalidates the entry the next readers were about to use. Only the left-hand column above is measured; the other two are the mechanism drawn to show its direction. The practical instruction is narrow and it comes before any of the engineering: measure your own read-to-write mix, because it decides whether caching is a lever for you at all.
 
 ## What the experiment does not establish
 
@@ -150,6 +214,10 @@ The load generator is **closed-loop**: each virtual user waits for its response 
 Real users do not wait. Somebody opening the app during a slow period sends their request on their own schedule, and so does the next person.
 
 ![Two load generators against the same one-second stall: the open-loop generator records five slow requests and reports a p99 of 940 ms, while the closed-loop generator sends nothing during the stall and reports a healthy 210 ms](../../../assets/diagrams/coordinated-omission.svg)
+
+![The same virtual users against a healthy and a struggling server: when answers are slower every loop takes longer, so the same pool of users sends fewer requests](../../../assets/diagrams/offered-load-collapse.svg)
+
+Follow the mechanism rather than the name. Each virtual user waits for its answer before it starts its next pause, so a slower server makes every loop longer, and a fixed pool of users therefore produces *fewer* requests per second. The generator reduces the pressure at precisely the moment the server is failing, and it does it silently, because from the outside a lower request rate looks like a quiet period rather than a broken instrument.
 
 This is **coordinated omission**, and its direction is the thing to remember: it makes the tail look better than it is, which means **2,500 is optimistic rather than conservative**. It is not a small effect near a ceiling — near the cliff is precisely where the closed-loop generator throttles itself hardest.
 
@@ -169,6 +237,10 @@ Concurrency is a measure of how many people are inside the app at the same insta
 ![Ten users drawn as sessions scattered across a day, with a vertical line at one instant crossing exactly one of them](../../../assets/diagrams/concurrent-vs-daily.svg)
 
 At a 5–10% concurrency ratio, a ceiling of 5,250 concurrent corresponds to roughly **25,000–30,000 daily users** — on one machine, at twelve dollars a month.
+
+![Twelve dollars a month divided by twenty-five to thirty thousand daily users, giving about four hundredths of a cent per daily user per month](../../../assets/diagrams/cost-per-user.svg)
+
+That division is the **unit cost**, which is the number [the chapter's first lesson](measurement-and-cost.md) keeps asking for and which almost nobody computes. It is worth holding in the friendlier form — about 45 cents per thousand daily users per month — because in that shape a capacity argument becomes arithmetic anybody in the room can check, and the upgrade ladder becomes visibly what it is: the same service at twice the unit cost.
 
 Carry the 0.1 requests per second per user, not the 5,250. The per-user rate is the measured input; the concurrency figure is derived from it and from a think-time model that your application probably does not share. The safest way to use this lesson on your own system is to measure your own per-user rate and re-derive everything downstream of it.
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 296" width="760" height="296" role="img" aria-label="What one second of cache costs a reader. A timeline of one second shows the cached answer being built at zero, a write landing at about a fifth of a second in, and every reader after that point receiving the older answer until the window expires. The worst case is marked: a reader can see the feed up to one second out of date, and somebody who has just posted may not see their own post. The caption states that the cost is bounded and nameable, that whether it is acceptable is a product decision rather than a technical one, and that the same cache also caps how much damage a traffic spike can do to the database, so it buys availability as well as speed.">
+  <rect width="760" height="296" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHAT ONE SECOND OF CACHE COSTS A READER</text>
+
+  <rect x="60" y="80" width="640" height="34" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4"/>
+  <text x="380" y="102" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">one stored answer, served to everybody</text>
+
+  <line x1="60" y1="130" x2="700" y2="130" stroke="#ded9d1" stroke-width="2"/>
+  <text x="60" y="148" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">0.0 s</text>
+  <text x="700" y="148" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">1.0 s</text>
+
+  <line x1="188" y1="64" x2="188" y2="134" stroke="#c2703d" stroke-width="1.6"/>
+  <circle cx="188" cy="130" r="4.5" fill="#c2703d"/>
+  <text x="196" y="60" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#c2703d">somebody posts here</text>
+
+  <rect x="188" y="160" width="512" height="26" rx="4" fill="#c2703d" opacity="0.18"/>
+  <text x="444" y="178" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">every reader in this window sees the answer from before the post</text>
+
+  <text x="60" y="178" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">fresh</text>
+
+  <rect x="32" y="204" width="696" height="34" rx="5" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+  <text x="48" y="226" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Worst case: one second stale, and a poster may not see their own post immediately.</text>
+
+  <line x1="32" y1="254" x2="728" y2="254" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="274" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">The cost is bounded and nameable, so it can be decided rather than discovered.</text>
+  <text x="32" y="292" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">It is a product call, not a technical one. And the same window caps what a spike can do to the database.</text>
+</svg>

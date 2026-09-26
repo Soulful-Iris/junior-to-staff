@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 286" width="760" height="286" role="img" aria-label="Four spec tiles for a twelve dollar a month virtual machine: one vCPU on a shared core at 2.0 gigahertz, two gigabytes of RAM of which 1,967 megabytes are usable, a fifty gigabyte solid state disk against a database of only 349 megabytes, and a billed rate of 0.018 dollars per hour. The caption points out that the word doing the most work in the specification is shared, because a shared core is not a guaranteed core, and that advertised memory and usable memory are different numbers.">
+  <rect width="760" height="286" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHAT TWELVE DOLLARS ACTUALLY BUYS</text>
+
+  <rect x="32" y="56" width="160" height="112" rx="6" fill="#eef2ef" stroke="#c2703d" stroke-width="1.6"/>
+  <text x="48" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="34" fill="#1f2b24">1</text>
+  <text x="48" y="120" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459" letter-spacing="1">vCPU</text>
+  <text x="48" y="142" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#c2703d">shared core</text>
+  <text x="48" y="158" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">2.0 GHz</text>
+
+  <rect x="208" y="56" width="160" height="112" rx="6" fill="#eef2ef" stroke="#ded9d1" stroke-width="1.4"/>
+  <text x="224" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="34" fill="#1f2b24">2</text>
+  <text x="224" y="120" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459" letter-spacing="1">GB RAM</text>
+  <text x="224" y="142" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">1,967 MB</text>
+  <text x="224" y="158" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">usable</text>
+
+  <rect x="384" y="56" width="160" height="112" rx="6" fill="#eef2ef" stroke="#ded9d1" stroke-width="1.4"/>
+  <text x="400" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="34" fill="#1f2b24">50</text>
+  <text x="400" y="120" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459" letter-spacing="1">GB SSD</text>
+  <text x="400" y="142" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">the database</text>
+  <text x="400" y="158" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">uses 349 MB</text>
+
+  <rect x="560" y="56" width="160" height="112" rx="6" fill="#eef2ef" stroke="#ded9d1" stroke-width="1.4"/>
+  <text x="576" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" fill="#1f2b24">$0.018</text>
+  <text x="576" y="120" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459" letter-spacing="1">PER HOUR</text>
+  <text x="576" y="142" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">billed hourly,</text>
+  <text x="576" y="158" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">capped monthly</text>
+
+  <line x1="32" y1="196" x2="728" y2="196" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="220" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">The word doing the most work in that specification is <tspan fill="#c2703d">shared</tspan>.</text>
+  <text x="32" y="242" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">A shared core is not a guaranteed core, so every CPU figure later sits on a ceiling that can move.</text>
+  <text x="32" y="262" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Note the second gap: 2 GB advertised presents as 1,967 MB usable. Use the second number.</text>
+  <text x="32" y="280" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">The disk is 140x larger than the data on it, which is why storage never appears again.</text>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="What a one-second cache actually does. A bar represents a single second, with about twenty feed requests arriving along it. Only the first one is a miss: it goes down to Postgres and costs one query. Every other request in that second is served from the answer already held in memory. Numbers underneath show roughly 107 feed requests in that second collapsing to one database query, which is the hundred queries a second the change removed. The caption explains that the value of a micro-cache is not holding data for a long time but collapsing many identical requests inside one window, and that its hit rate improves as traffic rises, which is the opposite of how most fixes behave.">
+  <rect width="760" height="300" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">WHAT A ONE-SECOND CACHE ACTUALLY DOES</text>
+
+  <text x="60" y="60" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">ONE SECOND OF FEED REQUESTS</text>
+
+  <rect x="70" y="74" width="5" height="22" rx="2" fill="#c2703d"/>
+  <rect x="103" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="136" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="169" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="202" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="235" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="268" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="301" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="334" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="367" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="400" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="433" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="466" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="499" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="532" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="565" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="598" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="631" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="664" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <rect x="697" y="74" width="5" height="22" rx="2" fill="#2f6f4e" opacity="0.7"/>
+
+  <line x1="60" y1="102" x2="710" y2="102" stroke="#ded9d1" stroke-width="2"/>
+  <text x="60" y="118" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">0.0 s</text>
+  <text x="710" y="118" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" fill="#8a857d">1.0 s</text>
+
+  <path d="M72 128 V156" stroke="#c2703d" stroke-width="1.6" fill="none"/>
+  <rect x="32" y="158" width="180" height="46" rx="5" fill="#faf9f7" stroke="#c2703d" stroke-width="1.4"/>
+  <text x="122" y="178" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">Postgres</text>
+  <text x="122" y="196" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d">ONE QUERY, THIS SECOND</text>
+
+  <path d="M103 128 H700 M400 128 V156" stroke="#2f6f4e" stroke-width="1.4" fill="none" opacity="0.8"/>
+  <rect x="248" y="158" width="452" height="46" rx="5" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.4"/>
+  <text x="474" y="178" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">every other request, answered from memory</text>
+  <text x="474" y="196" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e">NO DATABASE WORK AT ALL</text>
+
+  <text x="32" y="234" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">About 107 feed requests a second collapse to <tspan fill="#2f6f4e">one</tspan> query. That is the ~100 queries a second removed.</text>
+
+  <line x1="32" y1="250" x2="728" y2="250" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="272" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">The value is not holding data for long. It is collapsing identical requests inside one window.</text>
+  <text x="32" y="292" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">So its hit rate improves as traffic rises, which is the opposite of how most fixes behave.</text>
+</svg>

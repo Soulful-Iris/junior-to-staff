@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 316" width="760" height="316" role="img" aria-label="Two load models side by side. On the left, the common mistake: a thread firing requests back to back with no pauses against a single endpoint, sharing one connection. It answers the question of how fast the server can serve one endpoint. On the right, a virtual user: its own account and login, a loop across several endpoints, with real pauses between actions and a realistic read to write mix. It answers the question of how many people the server can serve. The caption says both numbers are real and only the second one is a capacity answer, and that quoting the first as a user count is the commonest way a load test misleads.">
+  <rect width="760" height="316" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">A VIRTUAL USER IS NOT A THREAD</text>
+
+  <text x="32" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">WHAT GETS BUILT BY DEFAULT</text>
+  <rect x="32" y="74" width="332" height="132" rx="6" fill="#faf9f7" stroke="#c2703d" stroke-width="1.4"/>
+  <text x="48" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">a thread in a tight loop</text>
+  <text x="48" y="124" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">no pauses, ever</text>
+  <text x="48" y="144" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">one endpoint, usually the fast one</text>
+  <text x="48" y="164" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">one shared session, or none</text>
+  <rect x="48" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="66" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="84" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="102" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="120" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="138" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="156" y="176" width="14" height="10" rx="2" fill="#c2703d"/><rect x="174" y="176" width="14" height="10" rx="2" fill="#c2703d"/>
+  <text x="200" y="185" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">back to back, for ever</text>
+
+  <text x="396" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">WHAT A USER ACTUALLY IS</text>
+  <rect x="396" y="74" width="332" height="132" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="412" y="100" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">its own account and login</text>
+  <text x="412" y="124" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">pauses of 3 to 8 seconds between actions</text>
+  <text x="412" y="144" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">several endpoints, in a realistic order</text>
+  <text x="412" y="164" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">writes only as often as people write</text>
+  <rect x="412" y="176" width="14" height="10" rx="2" fill="#2f6f4e"/><rect x="476" y="176" width="14" height="10" rx="2" fill="#2f6f4e"/><rect x="556" y="176" width="14" height="10" rx="2" fill="#2f6f4e"/>
+  <text x="596" y="185" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">and mostly waiting</text>
+
+  <text x="32" y="232" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">answers: how fast can this serve one endpoint</text>
+  <text x="396" y="232" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">answers: how many people can this serve</text>
+
+  <line x1="32" y1="252" x2="728" y2="252" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="276" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">Both numbers are real. Only the right-hand one is a capacity answer.</text>
+  <text x="32" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Quoting the left-hand number as a user count is how a load test most often misleads,</text>
+  <text x="32" y="312" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">because it is larger, easier to produce, and sounds like the same thing.</text>
+</svg>

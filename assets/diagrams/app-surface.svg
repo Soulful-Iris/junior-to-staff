@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="Four endpoints with the share of traffic each one receives. Loading the feed and opening a single post are reads and happen on essentially every loop. Liking a post is a write and happens on fifteen per cent of loops. Creating a post is a write and happens on two per cent. Bars show the proportions. The arithmetic underneath: about 2.17 requests per loop, of which roughly 92 per cent are reads and 8 per cent are writes. The caption explains that a read-dominated mix is what makes caching the right lever, and that the same experiment on a write-heavy application would reach a different conclusion, so the traffic mix has to be measured before a fix is chosen.">
+  <rect width="760" height="300" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">FOUR ENDPOINTS, AND THE MIX IS THE WHOLE STORY</text>
+
+  <text x="32" y="60" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">ENDPOINT</text>
+  <text x="300" y="60" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">KIND</text>
+  <text x="372" y="60" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">PER LOOP</text>
+
+  <text x="32" y="88" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#1f2b24">GET /feed</text>
+  <text x="300" y="88" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">read</text>
+  <text x="372" y="88" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">every loop</text>
+  <rect x="470" y="78" width="185" height="12" rx="3" fill="#2f6f4e" opacity="0.75"/>
+  <text x="694" y="88" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e">46%</text>
+
+  <text x="32" y="122" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#1f2b24">GET /posts/:id</text>
+  <text x="300" y="122" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#2f6f4e">read</text>
+  <text x="372" y="122" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">every loop</text>
+  <rect x="470" y="112" width="185" height="12" rx="3" fill="#2f6f4e" opacity="0.75"/>
+  <text x="694" y="122" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e">46%</text>
+
+  <text x="32" y="156" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#1f2b24">POST /posts/:id/like</text>
+  <text x="300" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#c2703d">write</text>
+  <text x="372" y="156" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">15% of loops</text>
+  <rect x="470" y="146" width="28" height="12" rx="3" fill="#c2703d"/>
+  <text x="694" y="156" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#c2703d">7%</text>
+
+  <text x="32" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#1f2b24">POST /posts</text>
+  <text x="300" y="190" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#c2703d">write</text>
+  <text x="372" y="190" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">2% of loops</text>
+  <rect x="470" y="180" width="4" height="12" rx="2.5" fill="#c2703d"/>
+  <text x="694" y="190" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#c2703d">1%</text>
+
+  <line x1="32" y1="214" x2="728" y2="214" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="238" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">About 2.17 requests a loop, and roughly <tspan fill="#2f6f4e">92% of them are reads</tspan>.</text>
+  <text x="32" y="260" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">That property is what makes caching the right lever, and it was never measured first.</text>
+  <text x="32" y="278" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Run this on a write-heavy application and every conclusion after the ceiling changes.</text>
+  <text x="32" y="294" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">Shares are derived from the loop definition, not measured per endpoint.</text>
+</svg>

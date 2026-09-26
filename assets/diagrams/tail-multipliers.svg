@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 276" width="760" height="276" role="img" aria-label="Doubling the load from one thousand to two thousand users, shown per percentile. The median moved from 4.7 to 6.3 milliseconds, a factor of 1.3. The p95 moved from 19 to 161 milliseconds, a factor of 8.5. The p99 moved from 50 to 276 milliseconds, a factor of 5.5. Bars show the before and after for each. The caption points out that the same change in offered load produced three completely different answers depending on which percentile was asked, and that the one which barely moved is the one most dashboards display.">
+  <rect width="760" height="276" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE CHANGE IN LOAD, THREE DIFFERENT ANSWERS</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Going from 1,000 to 2,000 concurrent users. Same server, same code.</text>
+
+  <text x="32" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#6d6459" letter-spacing="1">p50</text>
+  <rect x="96" y="80" width="8" height="10" rx="2" fill="#ded9d1"/>
+  <rect x="96" y="92" width="11" height="10" rx="2" fill="#2f6f4e" opacity="0.7"/>
+  <text x="130" y="88" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">4.7 ms</text>
+  <text x="130" y="102" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">6.3 ms</text>
+  <text x="640" y="96" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="18" fill="#6d6459">x1.3</text>
+  <text x="728" y="96" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">barely</text>
+
+  <text x="32" y="156" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e" letter-spacing="1">p95</text>
+  <rect x="96" y="144" width="32" height="10" rx="2" fill="#ded9d1"/>
+  <rect x="96" y="156" width="272" height="10" rx="2" fill="#2f6f4e"/>
+  <text x="380" y="152" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">19 ms</text>
+  <text x="380" y="166" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">161 ms</text>
+  <text x="640" y="160" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="18" fill="#2f6f4e">x8.5</text>
+
+  <text x="32" y="220" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#c2703d" letter-spacing="1">p99</text>
+  <rect x="96" y="208" width="84" height="10" rx="2" fill="#ded9d1"/>
+  <rect x="96" y="220" width="466" height="10" rx="2" fill="#c2703d"/>
+  <text x="574" y="216" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">50 ms</text>
+  <text x="574" y="230" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">276 ms</text>
+  <text x="680" y="224" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="18" fill="#c2703d">x5.5</text>
+
+  <line x1="32" y1="248" x2="728" y2="248" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="268" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">The one that barely moved is the one most dashboards put on the wall.</text>
+</svg>

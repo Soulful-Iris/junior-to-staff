@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 296" width="760" height="296" role="img" aria-label="The seeded dataset: fifty thousand users, five hundred thousand posts and 2,016,005 likes, totalling 349 megabytes on disk. A stacked bar splits that total into 7 megabytes of users, 134 megabytes of posts and 208 megabytes of likes, so the join table is the largest object in the database. Underneath, the total is compared against 1,967 megabytes of usable memory, showing the whole working set fits in RAM roughly five and a half times over. The caption explains that this is why the database never became the bottleneck, and that it is the first assumption to break at ten times the data.">
+  <rect width="760" height="296" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE DATA SHAPE DECIDES WHETHER THE DATABASE IS A PROBLEM</text>
+
+  <text x="32" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" fill="#1f2b24">50,000</text>
+  <text x="152" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">users</text>
+  <text x="252" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" fill="#1f2b24">500,000</text>
+  <text x="392" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">posts</text>
+  <text x="480" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="26" fill="#c2703d">2,016,005</text>
+  <text x="656" y="74" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">likes</text>
+
+  <text x="32" y="112" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">349 MB ON DISK, SPLIT LIKE THIS</text>
+  <rect x="32" y="122" width="13.9" height="22" rx="3" fill="#6d6459"/>
+  <rect x="47.9" y="122" width="265.6" height="22" rx="3" fill="#2f6f4e" opacity="0.75"/>
+  <rect x="315.5" y="122" width="412.5" height="22" rx="3" fill="#c2703d" opacity="0.85"/>
+  <text x="32" y="162" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#6d6459">users 7</text>
+  <text x="160" y="162" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e">posts 134</text>
+  <text x="480" y="162" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d">likes 208</text>
+
+  <text x="32" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">AGAINST 1,967 MB OF USABLE MEMORY</text>
+  <rect x="32" y="206" width="696" height="16" rx="4" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="32" y="206" width="123.5" height="16" rx="4" fill="#2f6f4e" opacity="0.55"/>
+  <text x="164" y="219" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6d6459">the entire database, with room for it five times over</text>
+
+  <line x1="32" y1="242" x2="728" y2="242" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="264" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">The working set fits in memory, which is why Postgres never became the bottleneck.</text>
+  <text x="32" y="284" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">It is also the first assumption to break: at ten times the data, the disk starts answering.</text>
+</svg>

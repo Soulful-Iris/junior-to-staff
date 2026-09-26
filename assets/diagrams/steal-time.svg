@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 296" width="760" height="296" role="img" aria-label="Why a shared vCPU measures against a ceiling that moves. Two rows show the same physical core on a quiet host and on a busy one. On the quiet host almost the whole core is available to your instance and the same workload reads as eighty per cent utilisation. On the busy host neighbouring tenants take a slice, your available share shrinks, and the identical workload now reads much closer to saturation without anything in your own system having changed. The caption advises measuring steal time alongside utilisation, because otherwise the same test run on two different days disagrees and neither run explains why.">
+  <rect width="760" height="296" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">A SHARED CORE MEASURES AGAINST A CEILING THAT MOVES</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Same workload, same code, two different afternoons.</text>
+
+  <text x="32" y="88" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1">QUIET HOST</text>
+  <rect x="150" y="76" width="500" height="26" rx="4" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="150" y="76" width="400" height="26" rx="4" fill="#2f6f4e" opacity="0.72"/>
+  <text x="350" y="94" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#faf9f7">your work</text>
+  <text x="600" y="94" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">headroom</text>
+  <text x="666" y="94" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#2f6f4e">80%</text>
+
+  <text x="32" y="148" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="1">BUSY HOST</text>
+  <rect x="150" y="136" width="500" height="26" rx="4" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+  <rect x="150" y="136" width="400" height="26" rx="4" fill="#2f6f4e" opacity="0.72"/>
+  <rect x="550" y="136" width="100" height="26" rx="4" fill="#c2703d" opacity="0.30"/>
+  <path d="M550 136 L650 162 M570 136 L650 152 M550 146 L630 162" stroke="#c2703d" stroke-width="1" opacity="0.6"/>
+  <text x="350" y="154" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#faf9f7">the same work</text>
+  
+  <text x="666" y="154" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#c2703d">100%</text>
+
+  <text x="550" y="182" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#c2703d">taken by a neighbour</text>
+  <text x="150" y="182" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Nothing in your system changed. The denominator did.</text>
+
+  <line x1="32" y1="216" x2="728" y2="216" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="240" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">A utilisation percentage is a fraction, and on shared hardware the bottom of it moves.</text>
+  <text x="32" y="262" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Record steal time beside utilisation, or two runs of the same test will disagree and neither will say why.</text>
+  <text x="32" y="282" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#8a857d">Fine for a teaching experiment. Not fine for a capacity commitment you intend to hold somebody to.</text>
+</svg>

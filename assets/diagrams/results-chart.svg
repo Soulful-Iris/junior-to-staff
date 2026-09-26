@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-label="The final result as three columns. The baseline held two thousand five hundred concurrent users. Adding a one-second cache inside the application took it to four thousand, a sixty per cent gain. Moving the same rule into the proxy took it to five thousand two hundred and fifty, a further thirty-one per cent. The total is 2.1 times the baseline. At that ceiling the p95 was 160 milliseconds and the p99 was 454 milliseconds, both comfortably inside the targets of 500 milliseconds and one second. A footer notes the machine did not change and the bill is still twelve dollars a month.">
+  <rect width="760" height="300" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">TWICE THE USERS, SAME MACHINE</text>
+
+  <rect x="60" y="150" width="150" height="66" rx="4" fill="#6d6459" opacity="0.4"/>
+  <text x="135" y="140" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#1f2b24">2,500</text>
+  <text x="135" y="234" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">baseline</text>
+  <text x="135" y="250" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">no changes</text>
+
+  <rect x="290" y="110" width="150" height="106" rx="4" fill="#2f6f4e" opacity="0.8"/>
+  <text x="365" y="100" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#1f2b24">4,000</text>
+  <text x="365" y="234" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">cache in the app</text>
+  <text x="365" y="250" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">+60%</text>
+
+  <rect x="520" y="78" width="150" height="138" rx="4" fill="#c2703d"/>
+  <text x="595" y="68" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#1f2b24">5,250</text>
+  <text x="595" y="234" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">same rule, in the proxy</text>
+  <text x="595" y="250" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#8a857d">+31% again</text>
+
+  <line x1="60" y1="216" x2="700" y2="216" stroke="#ded9d1" stroke-width="1.5"/>
+
+  <text x="728" y="34" text-anchor="end" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#c2703d">x2.1 overall</text>
+
+  <line x1="32" y1="266" x2="728" y2="266" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="288" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">At 5,250: p95 <tspan fill="#2f6f4e">160 ms</tspan> against a 500 ms target, p99 <tspan fill="#2f6f4e">454 ms</tspan> against 1 s. Still $12 a month.</text>
+</svg>

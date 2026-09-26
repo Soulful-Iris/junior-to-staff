@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 306" width="760" height="306" role="img" aria-label="Why a closed-loop generator flatters a struggling server. Two rows show the same fixed number of virtual users. In the healthy row, each user's loop takes about twenty seconds and the pool of users produces its full offered rate. In the struggling row the server is slower, so every loop takes longer, and the same pool of users produces fewer requests per second. The requests that were never sent are drawn as empty outlines. The caption states the consequence: the generator quietly reduces pressure exactly when the server is failing, so the measured ceiling is optimistic rather than conservative, and the fix is to send at a fixed arrival rate regardless of how the server is doing.">
+  <rect width="760" height="306" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE GENERATOR BACKS OFF EXACTLY WHEN YOU NEED IT NOT TO</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Same number of virtual users in both rows. Each waits for its answer before it pauses.</text>
+
+  <text x="32" y="88" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#2f6f4e" letter-spacing="1">SERVER HEALTHY</text>
+  <rect x="196" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="252" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="308" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="364" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="420" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="476" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="532" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <rect x="588" y="76" width="28" height="16" rx="3" fill="#2f6f4e" opacity="0.8"/>
+  <text x="640" y="89" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#2f6f4e">full rate</text>
+
+  <text x="32" y="140" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#c2703d" letter-spacing="1">SERVER STRUGGLING</text>
+  <rect x="196" y="128" width="28" height="16" rx="3" fill="#c2703d"/>
+  <rect x="308" y="128" width="28" height="16" rx="3" fill="#c2703d"/>
+  <rect x="420" y="128" width="28" height="16" rx="3" fill="#c2703d"/>
+  <rect x="532" y="128" width="28" height="16" rx="3" fill="#c2703d"/>
+  <rect x="252" y="128" width="28" height="16" rx="3" fill="none" stroke="#ded9d1" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="364" y="128" width="28" height="16" rx="3" fill="none" stroke="#ded9d1" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="476" y="128" width="28" height="16" rx="3" fill="none" stroke="#ded9d1" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <rect x="588" y="128" width="28" height="16" rx="3" fill="none" stroke="#ded9d1" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text x="640" y="141" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#c2703d">half the rate</text>
+
+  <text x="196" y="170" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">the dashed ones are the requests that were never sent</text>
+
+  <rect x="32" y="192" width="696" height="40" rx="5" fill="#eef2ef" stroke="#c2703d" stroke-width="1.2"/>
+  <text x="48" y="217" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Slower answers make every loop longer, so the same users offer <tspan fill="#c2703d">less</tspan> load, not more.</text>
+
+  <line x1="32" y1="252" x2="728" y2="252" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="274" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">Real users do not wait their turn. They arrive on their own schedule.</text>
+  <text x="32" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">So a measured ceiling from a closed loop is optimistic. Send at a fixed arrival rate to find the real one.</text>
+</svg>
