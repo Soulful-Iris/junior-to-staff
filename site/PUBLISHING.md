@@ -28,6 +28,11 @@ systemctl --user start j2s-deploy.service
 journalctl --user -u j2s-deploy.service -n 40 --no-pager
 ```
 
-Old releases remain available for rollback and fingerprinted assets. No automatic
-cleanup is performed. The only publication prerequisites are a successful build,
-a usable output directory and working filesystem operations.
+The newest ten releases remain available for rollback and fingerprinted assets
+(`J2S_KEEP_RELEASES` changes the number). Older ones are removed after each
+successful publication, never the release that was live just before it, so a
+hand rollback to an old release survives the next deploy. Until 2026-09-26 every
+release was kept; they share almost no bytes, and 46 of them (3.5 GB) filled the
+box's disk to 93%. A failure to remove one is logged and does not fail the
+publication. The only publication prerequisites are a successful build, a usable
+output directory and working filesystem operations.

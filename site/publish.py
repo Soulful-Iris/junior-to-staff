@@ -1,6 +1,6 @@
 """Publish a built static release, automatically adopting an existing out directory.
 
-Old releases are retained. After initial adoption, releases use a symlink switch.
+The newest KEEP releases are retained. After initial adoption, releases use a symlink switch.
 """
 import argparse
 import fcntl
@@ -8,8 +8,17 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
+import sys
 import tempfile
 import uuid
+
+# Releases share almost no bytes (every page's HTML changes in every build), so
+# each one costs the whole site again, ~110 MB in September 2026. Keeping all of
+# them filled the box's disk to 93% in three days. Ten is a rollback and the
+# fingerprinted-asset fallback in serve.py for a tab left open across a burst
+# of deploys.
+KEEP = int(os.environ.get('J2S_KEEP_RELEASES', '10'))
 
 
 def smoke(root):
@@ -79,7 +88,33 @@ def publish(stage, live, revision, marker):
             if (switched or adopted) and previous is not None:
                 replace_link(live, previous)
             raise
+        # Only after the switch is live and recorded, and never the release
+        # that was live a moment ago, however old: that is a rollback target.
+        protect = {release}
+        if previous is not None:
+            protect.add(live.parent / previous)
+        prune(releases, KEEP, protect)
         return release
+
+
+def prune(releases, keep, protect):
+    """Remove all but the newest `keep` releases, never one in `protect`.
+
+    A failure here is reported and swallowed. The new release is already live
+    and recorded, so raising would make deploy.sh log PUBLICATION FAILED about
+    a publication that succeeded.
+    """
+    protect = {Path(p).resolve() for p in protect}
+    found = [p for p in releases.iterdir() if p.is_dir() and not p.is_symlink()]
+    found.sort(key=lambda p: (p.stat().st_mtime, p.name), reverse=True)
+    for old in found[keep:]:
+        if old.resolve() in protect:
+            continue
+        try:
+            shutil.rmtree(old)
+        except OSError as e:
+            print(f'publish: could not remove old release {old.name}: {e}',
+                  file=sys.stderr)
 
 
 if __name__ == '__main__':
