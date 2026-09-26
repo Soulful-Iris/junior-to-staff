@@ -12,13 +12,15 @@ import { catalogIndex, buildModel, GUARDS, KINDS } from "./model.js";
 import { runChecks, CHECKS } from "./checks.js";
 import { simulate, CAPABILITIES, FAILS, zonal, multiAzOn } from "./sim.js";
 import { icon } from "./ui-icons.js";
+import { CONSOLE_URL, ERRORS, keyProblem, keyStore, buildRequest, callDrawer, validateDrawing, diagramFromState, drawingToState, wantsCloud } from "./drawer.js";
 
 const INDEX = catalogIndex(CATALOG);
-const W = 860, H = 540, ICON = 44, HALF = ICON / 2;
+const W0 = 860, H0 = 540, ICON = 44, HALF = ICON / 2;   // the canvas, unless a drawing needs more (state.canvas)
 const DESKTOP = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
 const TIMER_SECONDS = 120;
 const HISTORY = 60;
+const ASKED = 12;                    // how many of the reader's own instructions a board keeps
 const GROUP_SIZE = { region: [800, 500], vpc: [620, 420], az: [280, 360], "public-subnet": [240, 130], "private-subnet": [240, 170], asg: [240, 150], cloud: [820, 520] };
 const GUARD_LABEL = { timeout: "Timeout", retries: "Retries", breaker: "Circuit breaker", fallback: "Fallback" };
 const GUARD_SHORT = { timeout: "timeout", retries: "retries", breaker: "breaker", fallback: "fallback" };
@@ -49,19 +51,36 @@ function textWidth(s, font) {
 const NAME_FONT = "600 12px Inter, ui-sans-serif, -apple-system, 'Segoe UI', sans-serif";
 const PART_FONT = "400 11px Inter, ui-sans-serif, -apple-system, 'Segoe UI', sans-serif";
 const EDGE_FONT = "500 10.5px ui-monospace, Menlo, Consolas, monospace";
+const GROUP_FONT = "600 11.5px Inter, ui-sans-serif, -apple-system, 'Segoe UI', sans-serif";
+const CHIP_SPOTS = [0.42, 0.5, 0.34, 0.58, 0.26, 0.66, 0.2, 0.74, 0.8, 0.14];
 
 // Where an arrow leaves a part heading for (bx, by). A part is its icon and,
-// under it, its labels: an arrow that leaves downwards starts below the
-// labels, so it never runs through the part's own name.
+// under it, its labels: an arrow that would cross them starts below them, so
+// it never runs through the part's own name. That includes an arrow that
+// leaves the icon sideways and then drops through a wide name ("Application
+// Load Balancer"), which the icon's square alone did not see.
 function exitPoint(ax, ay, bx, by, below = 0, halfLabel = HALF) {
   const dx = bx - ax, dy = by - ay;
   if (!dx && !dy) return [ax, ay];
   const pad = HALF + 5;
   const along = (hw, top, bottom) => Math.min(dx ? hw / Math.abs(dx) : Infinity, dy > 0 ? bottom / dy : dy < 0 ? top / -dy : Infinity);
   let t = along(pad, pad, pad);
-  const y = ay + dy * t, x = ax + dx * t;
-  if (below && dy > 0 && y >= ay + pad - 0.5 && Math.abs(x - ax) <= halfLabel + 4) t = along(halfLabel + 4, pad, HALF + below + 4);
+  if (below && dy > 0) {
+    const out = leaves(ax, ay, dx, dy, ax - halfLabel - 4, ay + HALF - 2, ax + halfLabel + 4, ay + HALF + below + 4);
+    if (out != null && out > t) t = out;
+  }
   return [ax + dx * t, ay + dy * t];
+}
+// Where the ray a + t*d leaves a rectangle, or null if it never meets it.
+function leaves(ax, ay, dx, dy, x0, y0, x1, y1) {
+  let t0 = 0, t1 = Infinity;
+  for (const [p, q] of [[-dx, ax - x0], [dx, x1 - ax], [-dy, ay - y0], [dy, y1 - ay]]) {
+    if (p === 0) { if (q < 0) return null; continue; }
+    const r = q / p;
+    if (p < 0) { if (r > t1) return null; if (r > t0) t0 = r; }
+    else { if (r < t0) return null; if (r < t1) t1 = r; }
+  }
+  return t1;
 }
 
 // ------------------------------------------------------------------- board
@@ -70,6 +89,7 @@ class Board {
     this.mount = mount; this.data = data; this.x = data.exercise;
     this.key = `j2s-designboard:v1:${data.page}:${this.x.id}`;
     this.state = this.load() || { nodes: [], groups: [], edges: [] };
+    this.asked = this.loadAsked();          // what the reader asked Haiku for on this board, oldest first
     this.undoStack = []; this.redoStack = [];
     this.sel = null;                 // { type: "node"|"edge"|"group", id }
     this.mode = "draw";              // or "break"
@@ -81,13 +101,20 @@ class Board {
     this.render();
   }
 
+  // The canvas is 860 x 540 unless a drawing Haiku made needs more: then the
+  // board zooms out (same shape, so the page does not move) instead of
+  // squeezing parts onto each other.
+  get W() { const c = this.state.canvas; return c && c.w > W0 ? c.w : W0; }
+  get H() { const c = this.state.canvas; return c && c.h > H0 ? c.h : H0; }
+
   // ------------------------------------------------------------- storage
   load() { try { const s = JSON.parse(localStorage.getItem(this.key) || "null"); return s && s.state ? s.state : null; } catch { return null; } }
+  loadAsked() { try { const s = JSON.parse(localStorage.getItem(this.key) || "null"); return s && Array.isArray(s.asked) ? s.asked.filter((x) => typeof x === "string").slice(-ASKED) : []; } catch { return []; } }
   save() {
     try {
       const empty = !this.state.nodes.length && !this.state.groups.length;
-      if (empty) localStorage.removeItem(this.key);
-      else localStorage.setItem(this.key, JSON.stringify({ state: this.state, at: Date.now() }));
+      if (empty && !this.asked.length) localStorage.removeItem(this.key);
+      else localStorage.setItem(this.key, JSON.stringify({ state: this.state, at: Date.now(), ...(this.asked.length ? { asked: this.asked } : {}) }));
     } catch { /* private mode: the board still works, it just forgets */ }
     // The next sketch offers to start from this one; tell it this one changed.
     for (const other of BOARDS) if (other !== this && other.data.previous && other.data.previous.id === this.x.id) other.renderLayer();
@@ -150,8 +177,29 @@ class Board {
           <div class="db-parts"></div>
         </div></aside>
         <div class="db-stage" tabindex="-1">
-          <svg class="db-svg" viewBox="0 0 ${W} ${H}" role="application" aria-label="Diagram canvas. Parts, boxes and arrows you draw."></svg>
+          <svg class="db-svg" viewBox="0 0 ${W0} ${H0}" role="application" aria-label="Diagram canvas. Parts, boxes and arrows you draw."></svg>
           <div class="db-layer"></div>
+          <div class="db-drawing" aria-hidden="true"><span>${icon("sparkles", 15, "", 2)}Haiku is drawing</span></div>
+        </div>
+        <div class="db-haiku" role="group" aria-label="Haiku draws what you describe">
+          <ol class="db-said" aria-label="What you asked Haiku for"></ol>
+          <div class="db-haiku-row">
+            <span class="db-haiku-ic" aria-hidden="true">${icon("sparkles", 16, "", 2)}</span>
+            <input class="db-haiku-in" type="text" maxlength="1000" autocomplete="off" spellcheck="true" placeholder="Tell Haiku what to draw, or what to change" aria-label="Tell Haiku what to draw, or what to change">
+            <button type="button" class="db-btn db-primary db-haiku-go" data-act="draw">Draw</button>
+            <button type="button" class="db-tb-icon db-haiku-key" data-act="key" aria-label="Your Anthropic API key" aria-expanded="false" title="Your Anthropic API key">${icon("key-round", 16, "", 2)}</button>
+          </div>
+          <p class="db-haiku-note" aria-live="polite"></p>
+          <div class="db-keypanel" hidden>
+            <p class="db-key-why">Haiku draws with <b>your own Anthropic API key</b>. It stays in this browser and goes only to api.anthropic.com; this site never sees it. A drawing costs less than a cent.</p>
+            <div class="db-key-row">
+              <input class="db-key-in" type="password" autocomplete="off" spellcheck="false" data-1p-ignore data-lpignore="true" placeholder="sk-ant-api03-…" aria-label="Anthropic API key">
+              <label class="db-key-keep"><input type="checkbox" class="db-key-remember"> Remember on this device</label>
+              <button type="button" class="db-btn db-primary" data-act="key-save">Use this key</button>
+            </div>
+            <p class="db-key-err" aria-live="polite"></p>
+            <p class="db-key-foot"><a href="${CONSOLE_URL}" target="_blank" rel="noopener noreferrer">Create a key in the Anthropic Console</a><span class="db-key-have"> · <button type="button" class="db-link" data-act="key-forget">Forget my key</button></span></p>
+          </div>
         </div>
       </div>
       <div class="db-strip" aria-live="polite"><div class="db-strip-l"></div><div class="db-strip-r">${icon("corner-down-right", 13)}<span><b>A → B</b> means A sends a request or a message to B; the answer rides back on it.</span></div></div>
@@ -174,6 +222,7 @@ class Board {
     q('[data-act="timer"]').addEventListener("click", () => this.timerToggle());
     q('[data-act="timer-reset"]').addEventListener("click", () => this.timerReset());
     this.search.addEventListener("input", () => this.renderPalette(this.search.value));
+    this.buildAsk();
     this.search.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { const first = this.partsBox.querySelector(".db-part"); if (first) { e.preventDefault(); this.addFromPalette(first.dataset.kind, first.dataset.id); } }
       if (e.key === "Escape") { this.search.value = ""; this.renderPalette(""); }
@@ -255,30 +304,31 @@ class Board {
     if (this.mode === "break") return;
     if (kind === "group") {
       const [w, h] = GROUP_SIZE[INDEX.groups.get(id).type] || [240, 160];
-      return this.add(kind, id, W / 2, H / 2 - 10, { w, h });
+      return this.add(kind, id, this.W / 2, this.H / 2 - 10, { w, h });
     }
     // The first free spot on a loose grid, left to right, top to bottom.
     for (let row = 0; row < 6; row++) for (let col = 0; col < 7; col++) {
       const x = 90 + col * 115, y = 70 + row * 88;
       if (this.state.nodes.every((n) => Math.hypot(n.x - x, n.y - y) > 80)) return this.add(kind, id, x, y);
     }
-    return this.add(kind, id, W / 2, H / 2);
+    return this.add(kind, id, this.W / 2, this.H / 2);
   }
 
   add(kind, partId, x, y) {
+    if (this.drawingNow) return;
     if (kind === "group") {
       const def = INDEX.groups.get(partId);
       const [w, h] = GROUP_SIZE[def.type] || [240, 160];
       const id = this.nextId("g");
       const zones = this.state.groups.filter((g) => (INDEX.groups.get(g.part) || {}).type === "az").length;
       const name = def.type === "az" ? `us-east-1${"abcdef"[zones] || "x"}` : def.type === "region" ? "us-east-1" : "";
-      const gx = clamp(snap(x - w / 2), 4, W - w - 4), gy = clamp(snap(y - 14), 4, H - h - 4);
+      const W = this.W, H = this.H, gx = clamp(snap(x - w / 2), 4, W - w - 4), gy = clamp(snap(y - 14), 4, H - h - 4);
       this.change((s) => s.groups.push({ id, part: partId, name, x: gx, y: gy, w: Math.min(w, W - 8), h: Math.min(h, H - 8) }));
       this.select({ type: "group", id });
     } else {
       const part = INDEX.parts.get(partId);
       const id = this.nextId("n");
-      const n = { id, part: partId, name: "", x: clamp(snap(x), 30, W - 30), y: clamp(snap(y), 30, H - 44) };
+      const n = { id, part: partId, name: "", x: clamp(snap(x), 30, this.W - 30), y: clamp(snap(y), 30, this.H - 44) };
       if (part.placement === "multiaz" && part.multiAzDefault) n.multiAz = true;
       this.change((s) => s.nodes.push(n));
       this.select({ type: "node", id });
@@ -288,16 +338,18 @@ class Board {
   // ---------------------------------------------------------------- canvas
   toLogical(e) {
     const r = this.svg.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
+    return { x: ((e.clientX - r.left) / r.width) * this.W, y: ((e.clientY - r.top) / r.height) * this.H };
   }
   layout() {
     const r = this.svg.getBoundingClientRect();
-    this.scale = r.width / W || 1;
+    this.scale = r.width / this.W || 1;
     this.layer.style.width = r.width + "px"; this.layer.style.height = r.height + "px";
     this.placeToolbar();
   }
 
   render() {
+    const box = `0 0 ${this.W} ${this.H}`;
+    if (this.svg.getAttribute("viewBox") !== box) { this.svg.setAttribute("viewBox", box); this.layout(); }
     const m = this.model();
     this.m = m;
     const sim = this.mode === "break" ? simulate(m, this.failed) : null;
@@ -308,7 +360,7 @@ class Board {
     let out = `<defs>
       <pattern id="db-dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d7ddd2"/></pattern>
       ${["plain", "sel", "bad", "dead"].map((k) => `<marker id="db-m-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="db-mk-${k}"/></marker>`).join("")}
-    </defs><rect class="db-bg" x="0" y="0" width="${W}" height="${H}" fill="url(#db-dots)"/>`;
+    </defs><rect class="db-bg" x="0" y="0" width="${this.W}" height="${this.H}" fill="url(#db-dots)"/>`;
 
     // Boxes, biggest first, so a subnet sits on top of its VPC.
     const groups = [...m.groups.values()].sort((a, b) => b.w * b.h - a.w * a.h);
@@ -329,22 +381,53 @@ class Board {
 
     // Arrows. A pair drawn both ways is pulled apart so both stay visible.
     const body = new Map([...m.nodes.values()].map((n) => [n.id, this.labelBlock(n)]));
-    for (const e of m.edges) {
+    // What a chip on an arrow must not cover: a part and its labels, a box's
+    // name, another chip. It slides along its arrow to the first clear spot,
+    // nearest the old 42% first (a chip fixed at 42% landed on a part's name
+    // whenever its arrow passed close under one).
+    const blocked = [...m.nodes.values()].map((n) => { const b = body.get(n.id), hw = Math.max(HALF, b.w / 2) + 3; return [n.x - hw, n.y - HALF - 5, n.x + hw, n.y + HALF + b.h + 3]; });
+    for (const g of m.groups.values()) {
+      const d = g.def, named = g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region";
+      const label = (g.name || d.short || d.label) + (named ? ` · ${d.short || d.label}` : "");
+      blocked.push([g.x, g.y, g.x + (d.icon ? 30 : 8) + textWidth(label, GROUP_FONT) * 1.25 + 8, g.y + 24]);
+    }
+    this.chipT = new Map();
+    const lines = m.edges.map((e) => {
       const a = m.nodes.get(e.from), b = m.nodes.get(e.to);
-      const twin = m.edge(e.to, e.from);
       const ba = body.get(a.id), bb = body.get(b.id);
       let [x1, y1] = exitPoint(a.x, a.y, b.x, b.y, ba.h, ba.w / 2), [x2, y2] = exitPoint(b.x, b.y, a.x, a.y, bb.h, bb.w / 2);
-      if (twin) { const len = Math.hypot(x2 - x1, y2 - y1) || 1, nx = -(y2 - y1) / len * 6, ny = (x2 - x1) / len * 6; x1 += nx; y1 += ny; x2 += nx; y2 += ny; }
+      if (m.edge(e.to, e.from)) { const len = Math.hypot(x2 - x1, y2 - y1) || 1, nx = -(y2 - y1) / len * 6, ny = (x2 - x1) / len * 6; x1 += nx; y1 += ny; x2 += nx; y2 += ny; }
+      const guards = GUARDS.filter((k) => (e.guards || {})[k]).map((k) => GUARD_SHORT[k]);
+      const text = [e.label, guards.length ? guards.join(" · ") : ""].filter(Boolean).join("  ·  ");
+      return { e, x1, y1, x2, y2, text, w: text ? textWidth(text, EDGE_FONT) * 1.15 + 14 : 0 };
+    });
+    // Chips on the shortest arrows first: they have the fewest places to go,
+    // and a long arrow's chip can slide out of their way (two chips placed in
+    // drawing order sat on each other beside Users). A spot must also leave
+    // the arrow's two ends showing, the arrowhead most of all.
+    for (const L of [...lines].filter((l) => l.text).sort((p, q) => Math.hypot(p.x2 - p.x1, p.y2 - p.y1) - Math.hypot(q.x2 - q.x1, q.y2 - q.y1))) {
+      const { x1, y1, x2, y2, w } = L, len = Math.hypot(x2 - x1, y2 - y1) || 1, ux = Math.abs(x2 - x1) / len, uy = Math.abs(y2 - y1) / len;
+      const along = ux * w / 2 + uy * 10;
+      const at = (t) => [x1 + (x2 - x1) * t, y1 + (y2 - y1) * t];
+      const ends = (t) => t * len >= along + 4 && (1 - t) * len >= along + 14;
+      const cover = (t) => { const [cx, cy] = at(t); return blocked.reduce((sum, [a, b, c, d]) => sum + Math.max(0, Math.min(c, cx + w / 2) - Math.max(a, cx - w / 2)) * Math.max(0, Math.min(d, cy + 10) - Math.max(b, cy - 10)), 0); };
+      const room = CHIP_SPOTS.filter(ends);
+      const pool = room.length ? room : CHIP_SPOTS;
+      const t = pool.find((t) => !cover(t)) ?? pool.reduce((best, t) => (cover(t) < cover(best) ? t : best), pool[0]);
+      this.chipT.set(L.e.id, t);
+      const [mx, my] = at(t);
+      L.chip = [mx, my];
+      blocked.push([mx - w / 2, my - 10, mx + w / 2, my + 10]);
+    }
+    for (const { e, x1, y1, x2, y2, text, w, chip } of lines) {
       const isSel = sel.type === "edge" && sel.id === e.id, bad = (off.edges || []).includes(e.id);
       const dead = sim && (sim.down.has(e.from) || sim.down.has(e.to) || ["stuck"].includes(sim.health.get(e.to)));
       const kind = bad ? "bad" : isSel ? "sel" : dead ? "dead" : "plain";
-      const guards = GUARDS.filter((k) => (e.guards || {})[k]).map((k) => GUARD_SHORT[k]);
-      const text = [e.label, guards.length ? guards.join(" · ") : ""].filter(Boolean).join("  ·  ");
       out += `<g class="db-edge is-${kind}" data-edge="${esc(e.id)}" tabindex="0" role="button" aria-label="Arrow from ${esc(m.name(e.from))} to ${esc(m.name(e.to))}${e.label ? ", " + esc(e.label) : ""}">
         <line class="db-e-hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
         <line class="db-e-line" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#db-m-${kind})"/>`;
       if (text) {
-        const mx = x1 + (x2 - x1) * 0.42, my = y1 + (y2 - y1) * 0.42, w = textWidth(text, EDGE_FONT) + 10;
+        const [mx, my] = chip;
         out += `<rect class="db-e-labelbg" x="${mx - w / 2}" y="${my - 9}" width="${w}" height="17" rx="4"/><text class="db-e-label" x="${mx}" y="${my + 3.5}" text-anchor="middle">${esc(text)}</text>`;
       }
       out += `</g>`;
@@ -431,10 +514,10 @@ class Board {
     if (empty && this.mode === "draw") {
       const prev = this.previous();
       if (!hint) { hint = el(`<div class="db-empty"></div>`); layer.append(hint); }
-      hint.innerHTML = `<p>${icon("spline", 18, "", 1.8)}<span>Drag parts in from the left, or click one. Then drag from a part's dot to the part it calls.</span></p>
+      hint.innerHTML = `<p>${icon("spline", 18, "", 1.8)}<span>Drag parts in from the left, or click one. Then drag from a part's dot to the part it calls. Or tell Haiku below what to draw.</span></p>
         ${prev ? `<button type="button" class="db-btn db-ghost" data-act="continue">${icon("copy-plus", 14)}Start from ${esc(this.data.previous.label)}</button>` : ""}`;
       const b = hint.querySelector('[data-act="continue"]');
-      if (b) b.addEventListener("click", () => this.change((s) => { const p = this.previous(); s.nodes = p.nodes; s.groups = p.groups; s.edges = p.edges; }));
+      if (b) b.addEventListener("click", () => this.change((s) => { const p = this.previous(); s.nodes = p.nodes; s.groups = p.groups; s.edges = p.edges; if (p.canvas) s.canvas = p.canvas; }));
     } else if (hint) hint.remove();
     this.renderToolbar();
   }
@@ -524,7 +607,8 @@ class Board {
       spots = [[it.x, it.y - gap - h], [it.x + it.w - w, it.y - gap - h], [it.x + it.w - w, it.y + 30], [it.x, it.y + it.h + gap]];
     } else {
       const a = this.state.nodes.find((n) => n.id === it.from), b = this.state.nodes.find((n) => n.id === it.to);
-      const mx = a.x + (b.x - a.x) * 0.42, my = a.y + (b.y - a.y) * 0.42;
+      const t = (this.chipT && this.chipT.get(it.id)) ?? 0.42;
+      const mx = a.x + (b.x - a.x) * t, my = a.y + (b.y - a.y) * t;
       spots = [[mx - w / 2, my - 14 - h], [mx - w / 2, my + 14], [mx + 16, my - h / 2], [mx - 16 - w, my - h / 2]];
     }
     const boxes = this.state.nodes.filter((n) => !(this.sel.type === "node" && n.id === it.id)).map((n) => {
@@ -532,7 +616,7 @@ class Board {
       const hw = Math.max(HALF, lb.w / 2) + 4;
       return [n.x - hw, n.y - HALF - 6, n.x + hw, n.y + HALF + lb.h + 4];
     });
-    const fits = ([x, y]) => x >= 2 && y >= 2 && x + w <= W - 2 && y + h <= H - 2;
+    const W = this.W, H = this.H, fits = ([x, y]) => x >= 2 && y >= 2 && x + w <= W - 2 && y + h <= H - 2;
     const clear = ([x, y]) => boxes.every(([x1, y1, x2, y2]) => x + w < x1 || x > x2 || y + h < y1 || y > y2);
     const clamped = ([x, y]) => [clamp(x, 2, W - w - 2), clamp(y, 2, H - h - 2)];
     const pick = spots.find((p) => fits(p) && clear(p)) || spots.map(clamped).find(clear) || clamped(spots[0]);
@@ -567,7 +651,7 @@ class Board {
 
   // ------------------------------------------------------------- pointer
   onDown(e) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || this.drawingNow) return;
     // The canvas redraws on almost every press, and a focused element that a
     // redraw replaces takes the focus with it, to the page: then Esc, Delete
     // and the arrow keys never reach the board. So a press never moves focus
@@ -620,9 +704,9 @@ class Board {
       if (!moved && Math.hypot(dx, dy) < 3) return;
       moved = true;
       if (sel.type === "node") {
-        item.x = clamp(snap(origin.x + dx), 26, W - 26); item.y = clamp(snap(origin.y + dy), 26, H - 40);
+        item.x = clamp(snap(origin.x + dx), 26, this.W - 26); item.y = clamp(snap(origin.y + dy), 26, this.H - 40);
       } else {
-        const ddx = clamp(snap(dx), -origin.x, W - item.w - origin.x), ddy = clamp(snap(dy), -origin.y, H - item.h - origin.y);
+        const ddx = clamp(snap(dx), -origin.x, this.W - item.w - origin.x), ddy = clamp(snap(dy), -origin.y, this.H - item.h - origin.y);
         item.x = origin.x + ddx; item.y = origin.y + ddy;
         for (const [n, x, y] of origin.nodes) { n.x = x + ddx; n.y = y + ddy; }
         for (const [g, x, y] of origin.groups) { g.x = x + ddx; g.y = y + ddy; }
@@ -653,7 +737,7 @@ class Board {
     const g = this.state.groups.find((x) => x.id === id), before = clone(this.state), w0 = g.w, h0 = g.h;
     this.capture(e, (ev) => {
       const q = this.toLogical(ev);
-      g.w = clamp(snap(w0 + q.x - p.x), 80, W - g.x - 2); g.h = clamp(snap(h0 + q.y - p.y), 60, H - g.y - 2);
+      g.w = clamp(snap(w0 + q.x - p.x), 80, this.W - g.x - 2); g.h = clamp(snap(h0 + q.y - p.y), 60, this.H - g.y - 2);
       this.render();
     }, () => { if (g.w !== w0 || g.h !== h0) { this.undoStack.push(before); this.redoStack = []; this.afterChange(); } });
   }
@@ -741,6 +825,8 @@ class Board {
   }
 
   onKey(e) {
+    // While Haiku draws nothing else changes the board: its answer replaces it.
+    if (this.drawingNow) { if (e.key === "Escape") { e.preventDefault(); this.stopDrawing(); } return; }
     const typing = e.target.matches("input, select, textarea");
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); return this.check(); }
     if (typing) return;
@@ -773,12 +859,15 @@ class Board {
   }
 
   reset() {
+    this.stopDrawing();
     if (!this.state.nodes.length && !this.state.groups.length) return;
     const before = clone(this.state);
-    this.change((s) => { s.nodes = []; s.groups = []; s.edges = []; }, { keepSel: false });
-    this.results = null; this.live = false; this.selCheck = null; this.hideTip();
+    const asked = this.asked;
+    this.asked = [];
+    this.change((s) => { s.nodes = []; s.groups = []; s.edges = []; delete s.canvas; }, { keepSel: false });
+    this.results = null; this.live = false; this.selCheck = null; this.hideTip(); this.renderSaid();
     this.setStrip(`Cleared. <button type="button" class="db-link" data-act="undo-reset">Undo</button>`);
-    this.stripL.querySelector('[data-act="undo-reset"]').addEventListener("click", () => { this.state = before; this.afterChange(); this.stripNote = null; this.renderStrip(); });
+    this.stripL.querySelector('[data-act="undo-reset"]').addEventListener("click", () => { this.state = before; this.asked = asked; this.afterChange(); this.renderSaid(); this.stripNote = null; this.renderStrip(); });
   }
 
   // --------------------------------------------------------------- checks
@@ -895,6 +984,105 @@ class Board {
     this.tipBox.querySelector(".db-tip-close").addEventListener("click", () => this.hideTip());
   }
   hideTip() { this.tip = null; if (this.tipBox) { this.tipBox.hidden = true; this.tipBox.innerHTML = ""; } }
+
+  // ------------------------------------------------------------ Haiku draws
+  // The reader describes; Haiku turns the words into a graph with one forced
+  // tool call; the layout places it. What goes to Anthropic is built from the
+  // catalog, the drawing and the reader's own words, and nothing else: this.x,
+  // the exercise, is never passed in (drawer.js says why).
+  buildAsk() {
+    const q = (sel) => this.root.querySelector(sel);
+    this.ask = { input: q(".db-haiku-in"), go: q('[data-act="draw"]'), keyBtn: q('[data-act="key"]'), note: q(".db-haiku-note"), said: q(".db-said"),
+      panel: q(".db-keypanel"), keyIn: q(".db-key-in"), remember: q(".db-key-remember"), keyErr: q(".db-key-err"), have: q(".db-key-have") };
+    const a = this.ask;
+    a.input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey && !e.metaKey && !e.ctrlKey) { e.preventDefault(); this.draw(); }
+      if (e.key === "Escape" && this.drawingNow) { e.preventDefault(); this.stopDrawing(); }
+    });
+    a.go.addEventListener("click", () => (this.drawingNow ? this.stopDrawing() : this.draw()));
+    a.keyBtn.addEventListener("click", () => this.showKeyPanel(a.panel.hidden));
+    q('[data-act="key-save"]').addEventListener("click", () => this.saveKey());
+    a.keyIn.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); this.saveKey(); } if (e.key === "Escape") { e.preventDefault(); this.showKeyPanel(false); a.input.focus(); } });
+    q('[data-act="key-forget"]').addEventListener("click", () => { keyStore.forget(); this.setAskNote("Your key is forgotten on this device."); this.showKeyPanel(false); });
+    a.said.addEventListener("click", (e) => { const li = e.target.closest("[data-said]"); if (li && !this.drawingNow) { a.input.value = this.asked[+li.dataset.said] || ""; a.input.focus(); } });
+    // Measures text the way the board draws it, in an svg that never redraws.
+    this.ruler = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this.ruler.setAttribute("class", "db-ruler"); this.ruler.setAttribute("aria-hidden", "true");
+    this.ruler.innerHTML = `<text class="db-n-name"></text><text class="db-n-part"></text><text class="db-g-label"></text><text class="db-e-label"></text>`;
+    this.stage.append(this.ruler);
+    this.renderSaid();
+  }
+  measure(text, kind) {
+    const t = this.ruler.children[{ name: 0, part: 1, box: 2, edge: 3 }[kind] ?? 0];
+    t.textContent = text;
+    return t.getComputedTextLength() || String(text).length * 7;
+  }
+  renderSaid() {
+    if (!this.ask) return;
+    const show = this.asked.slice(-3), from = this.asked.length - show.length;
+    this.ask.said.innerHTML = show.map((s, i) => `<li data-said="${from + i}" title="Ask this again">${esc(s)}</li>`).join("");
+  }
+  setAskNote(text, bad = false) { this.ask.note.textContent = text || ""; this.ask.note.classList.toggle("is-bad", !!bad); }
+  showKeyPanel(open) {
+    const a = this.ask;
+    a.panel.hidden = !open;
+    a.keyBtn.setAttribute("aria-expanded", String(!!open));
+    a.have.hidden = !keyStore.get();
+    a.keyErr.textContent = "";
+    a.remember.checked = keyStore.remembered();
+    if (open) { a.keyIn.value = ""; a.keyIn.focus(); }
+  }
+  saveKey() {
+    const a = this.ask, key = a.keyIn.value.trim(), problem = keyProblem(key);
+    if (problem) { a.keyErr.textContent = problem; a.keyIn.focus(); return; }
+    if (!keyStore.set(key, a.remember.checked)) { a.keyErr.textContent = "This browser will not keep it: storage is turned off for this site."; return; }
+    a.keyIn.value = "";
+    this.showKeyPanel(false);
+    this.setAskNote(a.remember.checked ? "Key saved on this device." : "Key saved until you close this tab.");
+    if (this.pendingAsk) { const p = this.pendingAsk; this.pendingAsk = null; a.input.value = p; this.draw(); }
+    else a.input.focus();
+  }
+  async draw() {
+    const a = this.ask;
+    if (this.drawingNow || this.mode !== "draw") return;
+    const said = a.input.value.trim();
+    if (!said) { a.input.focus(); return; }
+    const key = keyStore.get();
+    if (keyProblem(key)) { this.pendingAsk = said; this.setAskNote(""); this.showKeyPanel(true); return; }
+    const request = buildRequest({ catalog: CATALOG, diagram: diagramFromState(this.state, INDEX), earlier: this.asked, ask: said });
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort("timeout"), 90000);
+    this.drawingNow = ctl;
+    this.sel = null;
+    this.setDrawing(true);
+    let res;
+    try { res = await callDrawer({ key, request, signal: ctl.signal }); }
+    finally { clearTimeout(timer); this.drawingNow = null; this.setDrawing(false); }
+    if (res.error) {
+      if (res.error === "key") keyStore.forget();
+      this.setAskNote(ERRORS[res.error] || ERRORS.refused, res.error !== "stopped");
+      if (res.error === "key") this.showKeyPanel(true);
+      return;
+    }
+    const keepCloud = wantsCloud(this.state, [...this.asked, said]);
+    const next = drawingToState(validateDrawing(res.input, INDEX, { keepCloud }), { index: INDEX, current: this.state, measure: (t, k) => this.measure(t, k) });
+    this.asked = [...this.asked, said].slice(-ASKED);
+    this.change((s) => { s.nodes = next.nodes; s.groups = next.groups; s.edges = next.edges; if (next.canvas) s.canvas = next.canvas; else delete s.canvas; }, { keepSel: false });
+    this.renderSaid();
+    a.input.value = "";
+    this.setAskNote(!next.fits ? `Drawn, tightly: drag things apart where they touch. ${MOD}+Z puts back what was there.` : next.canvas ? `Drawn, zoomed out to fit. ${MOD}+Z puts back what was there.` : `Drawn. ${MOD}+Z puts back what was there.`);
+    a.input.focus();
+  }
+  stopDrawing() { if (this.drawingNow) this.drawingNow.abort("stopped"); }
+  setDrawing(on) {
+    const a = this.ask;
+    this.root.classList.toggle("is-drawing", on);
+    a.input.disabled = on;
+    a.go.innerHTML = on ? `${icon("square", 12, "", 2.4)}Stop` : "Draw";
+    a.go.setAttribute("aria-label", on ? "Stop drawing" : "Draw");
+    if (on) this.setAskNote("");
+    this.render();
+  }
 
   // ---------------------------------------------------------------- timer
   // The page's rehearsal: draw the happy path in two minutes. It counts down,

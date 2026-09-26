@@ -234,4 +234,46 @@
 .db-guide p { margin: 0 0 10px; max-width: 70ch; }
 .db-credit { padding: 8px 16px 10px; border-top: 1px solid var(--line, #dde2d9); font-size: 11px; color: var(--db-muted2); border-radius: 0 0 9px 9px; }
 
-@media (prefers-reduced-motion: reduce) { .db * { transition: none !important; } }
+/* Haiku: one line under the canvas, in draw mode. The reader's own last few
+   instructions sit faintly above it; nothing Haiku says is ever shown,
+   because it says nothing: its only answer is the drawing. */
+.db-body { grid-template-rows: auto auto; }
+.db-rail { grid-row: 1 / span 2; }
+.db-haiku { grid-column: 2; border-top: 1px solid var(--line, #dde2d9); background: #fbfcf9; padding: 9px 12px 9px; }
+.db.is-break .db-haiku { display: none; }
+.db .db-said { list-style: none; margin: 0 0 6px !important; padding: 0 !important; display: flex; flex-direction: column; gap: 1px; }
+.db .db-said:empty { display: none; }
+.db .db-said li { margin: 0 !important; padding: 0 0 0 28px !important; font-size: 12px; line-height: 1.55; color: #8b968e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.db .db-said li::before { content: none !important; }
+.db .db-said li:hover { color: #34463b; }
+.db-haiku-row { display: flex; align-items: center; gap: 8px; }
+.db-haiku-ic { display: inline-flex; width: 20px; justify-content: center; color: #b4643a; }
+.db-haiku-in { flex: 1; min-width: 0; height: 34px; border: 1px solid #d3dbce; border-radius: 7px; padding: 0 11px; font-size: 13.5px; background: #fff; color: var(--ink, #202d29); }
+.db-haiku-in::placeholder { color: #8b968e; }
+.db-haiku-in:focus { outline: 2px solid var(--db-sel); outline-offset: 0; border-color: transparent; }
+.db-haiku-in:disabled { background: #f3f5f0; color: #6d7a72; }
+.db-haiku-go { height: 34px; padding: 0 16px; gap: 6px; }
+.db-haiku-key[aria-expanded="true"] { background: #eef2e8; color: var(--ink, #202d29); }
+.db .db-haiku-note { margin: 6px 0 0 28px !important; font-size: 12px; line-height: 1.5; color: var(--db-muted); max-width: none !important; }
+.db .db-haiku-note:empty { display: none; }
+.db .db-haiku-note.is-bad { color: var(--db-fail); }
+.db-keypanel { margin: 9px 0 2px 28px; padding: 12px 14px 11px; border: 1px solid #ddd5c4; background: #fbf8f1; border-radius: 8px; }
+.db .db-key-why { margin: 0 0 10px !important; font-size: 13px; line-height: 1.55; color: #3b392f; max-width: 74ch; }
+.db-key-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.db-key-in { flex: 1 1 240px; min-width: 0; height: 32px; border: 1px solid #d6cdb9; border-radius: 6px; padding: 0 10px; font: 13px var(--db-mono); background: #fff; color: var(--ink, #202d29); }
+.db-key-in:focus { outline: 2px solid var(--db-sel); outline-offset: 0; border-color: transparent; }
+.db-key-keep { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #4b493d; white-space: nowrap; cursor: pointer; }
+.db .db-key-err { margin: 8px 0 0 !important; font-size: 12.5px; line-height: 1.5; color: var(--db-fail); max-width: 74ch; }
+.db .db-key-err:empty { display: none; }
+.db .db-key-foot { margin: 10px 0 0 !important; font-size: 12px; color: var(--db-muted); }
+.db-key-foot a { color: #2f6b4d; text-underline-offset: 2px; }
+.db-ruler { position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }
+.db-drawing { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; background: rgba(251, 252, 249, .5); pointer-events: none; }
+.db.is-drawing .db-drawing { display: flex; }
+.db-drawing span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 999px; background: #fff; border: 1px solid #ddd5c4;
+  box-shadow: 0 6px 18px rgba(32, 45, 41, .12); font: 600 12.5px var(--sans, system-ui); color: #5c4a2c; }
+.db-drawing .db-ic { color: #b4643a; animation: db-pulse 1.2s ease-in-out infinite; }
+@keyframes db-pulse { 50% { opacity: .35; transform: scale(.82); } }
+.db.is-drawing .db-rail-in { opacity: .5; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) { .db * { transition: none !important; } .db-drawing .db-ic { animation: none; } }
