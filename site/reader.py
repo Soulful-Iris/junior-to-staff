@@ -166,6 +166,57 @@ def mount_codefield(b, soup, page, depth):
     page['codefield'] = True
 
 
+def mount_designboard(b, soup, page, depth):
+    """Give each whiteboard sketch a design board, under its heading.
+
+    Where `<page>.board.json` sits beside the page, each exercise in it names
+    the h2 it belongs to. The board mounts right under that heading, and the
+    sketch's own reference diagram moves into a <details> after it, so a
+    desktop reader draws first and compares after (board.js closes it; on a
+    phone, where no board mounts, it stays open). The break-it prompt is read
+    from the page's own "Break it:" paragraph, so the two cannot disagree.
+    """
+    spec = b.ROOT / (page['src'][:-3] + '.board.json')
+    if not spec.is_file() or not getattr(b, 'DESIGNBOARD', None) or lock.is_locked(page):
+        return
+    exercises = json.loads(spec.read_text())['exercises']
+    norm = lambda t: re.sub(r'\s+', ' ', t).strip()
+    mounted = []
+    for i, x in enumerate(exercises):
+        heading = next((h for h in soup.find_all('h2') if norm(h.get_text(' ', strip=True)) == norm(x['heading'])), None)
+        if heading is None:
+            raise ValueError(f"{spec.name}: no heading {x['heading']!r} on {page['src']}")
+        section, node = [], heading.next_sibling
+        while node is not None and getattr(node, 'name', None) != 'h2':
+            section.append(node); node = node.next_sibling
+        figure = next((n for n in section if getattr(n, 'name', None) == 'div' and 'mer' in (n.get('class') or [])), None)
+        prompt = next((n for n in section if getattr(n, 'name', None) == 'p' and n.get_text(' ', strip=True).startswith('Break it:')), None)
+        data = {'page': page['src'], 'exercise': x,
+                'previous': {'id': exercises[i - 1]['id'], 'label': f'sketch {i}'} if i else None,
+                'breakText': re.sub(r'^Break it:\s*', '', prompt.get_text(' ', strip=True)) if prompt else ''}
+        mount = soup.new_tag('div', attrs={'class': 'designboard', 'data-board': x['id'], 'hidden': ''})
+        blob = soup.new_tag('script', attrs={'type': 'application/json'})
+        blob.string = json.dumps(data, ensure_ascii=True).replace('<', '\\u003c')
+        mount.append(blob)
+        heading.insert_after(mount)
+        if figure is not None:
+            ref = soup.new_tag('details', attrs={'class': 'db-reference', 'open': ''})
+            summary = soup.new_tag('summary'); summary.string = 'The reference sketch · compare after you have drawn yours'
+            figure.insert_before(ref)
+            ref.extend([summary, figure.extract()])
+        mounted.append(x['id'])
+    page['designboard'] = mounted
+
+
+def build_designboard(b):
+    """Bundle the design board for this release (content-hashed, like the code field)."""
+    r = subprocess.run(['node', str(b.ROOT / 'site/tools/build-designboard.mjs'), str(b.OUT)],
+                       capture_output=True, text=True, timeout=180)
+    if r.returncode != 0:
+        raise SystemExit('design board bundle failed:\n' + r.stderr[-3000:])
+    return json.loads(r.stdout)
+
+
 def build_codefield(b):
     """Bundle the code field for this release (content-hashed, like reader-js)."""
     r = subprocess.run(['node', str(b.ROOT / 'site/tools/build-codefield.mjs'), str(b.OUT)],
@@ -283,6 +334,7 @@ def compose(b, page, have, by_dest):
         details.append(ul); soup.append(details)
     frame_practice(soup, page)
     mount_codefield(b, soup, page, depth)
+    mount_designboard(b, soup, page, depth)
     headings = []
     for heading in soup.find_all(['h2', 'h3']):
         if heading.get('id'): headings.append({'id': heading['id'], 'title': heading.get_text(' ', strip=True), 'level': int(heading.name[1])})
@@ -514,6 +566,10 @@ def shell(b, page, body, pages, sequence, base):
     cf = getattr(b, 'CODEFIELD', None)
     codefield_js = (f'<script type="module" src="{base}{cf["js"]["file"]}" integrity="{cf["js"]["integrity"]}" '
                     'crossorigin="anonymous"></script>') if cf and page.get('codefield') else ''
+    dbd = getattr(b, 'DESIGNBOARD', None)
+    if dbd and page.get('designboard'):
+        codefield_js += (f'<script type="module" src="{base}{dbd["js"]["file"]}" integrity="{dbd["js"]["integrity"]}" '
+                         'crossorigin="anonymous"></script>')
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light">{robots}{lock_check}<link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
 <body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">{'Skip to overview' if is_home else 'Skip to lesson'}</a><div class="mobile-bar"><button id="open-contents" data-open-contents aria-expanded="false" aria-controls="sidebar">☰ <span>{browse_label}</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
 <noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script>{codefield_js}</body></html>'''
@@ -580,6 +636,7 @@ def build(b):
                                 'integrity': 'sha256-' + base64.b64encode(digest).decode()}
     (b.OUT/'reader-assets.json').write_text(json.dumps(b.READER_ASSETS, indent=2))
     b.CODEFIELD = build_codefield(b)
+    b.DESIGNBOARD = build_designboard(b)
     # Keep the old endpoints for existing bookmarks, but never reference them
     # from new HTML: old HTML and new styles must not share a cache identity.
     for filename in ('style.css','app.js'): shutil.copy(b.ROOT/'site'/filename,b.OUT/filename)

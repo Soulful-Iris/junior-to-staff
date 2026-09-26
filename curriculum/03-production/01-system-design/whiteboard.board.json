@@ -1,0 +1,165 @@
+{
+  "about": "The design board on whiteboard.md: one board per sketch, mounted under the sketch's heading on a desktop. checks are ids in site/designboard/checks.js; capabilities are what break-it mode shows as working or not, from site/designboard/sim.js. A tip is a string or {text, code}; tips are chosen by the check that does not hold. The break-it prompt is read from the page itself, the paragraph that starts with Break it.",
+  "exercises": [
+    {
+      "id": "bookmark-survives-restart",
+      "heading": "1 · A bookmark must survive a restart",
+      "title": "A bookmark must survive a restart",
+      "brief": "A member saves a documentation URL with POST /bookmarks and reads the list back with GET /bookmarks. The URL is the durable record: it must still be there after every copy of the API restarts.",
+      "checks": ["arrows", "reachesApi", "commitsToDb", "noDirectDb"],
+      "capabilities": [{ "id": "save", "label": "Save a bookmark" }],
+      "tips": {
+        "start": [
+          "Start where the request starts. Drag **Users** or **Client (browser)** onto the board, then what receives the request: an **ALB** in front of **ECS**, or **API Gateway** in front of **Lambda**.",
+          { "text": "Then the durable record. A bookmark is a row looked up by its owner, so it belongs in a database: RDS, Aurora or DynamoDB. The arrows follow the request, from the side that asks:", "code": "Users → ALB → ECS → RDS" },
+          "Select a part and type a name for it, such as bookmarks-api. The checks read what kind of part it is, and use your names only when they talk to you."
+        ],
+        "arrows": [
+          "An arrow is a request, drawn from the side that asks. A database never asks anything: if you drew its answer as an arrow, delete it. The request's own arrow carries the answer back.",
+          "Select an arrow and press **Reverse** if it points the wrong way."
+        ],
+        "reachesApi": [
+          "An arrow means 'sends a request to'. Draw it from the browser to the first thing that receives the POST.",
+          "Hover a part to see its dot, then drag from the dot to the part it calls. Or select the part and choose a target under **Connect to**."
+        ],
+        "commitsToDb": [
+          "Memory and caches are copies that can vanish. What must survive a restart has to be written to a database.",
+          "Draw the arrow from your API to RDS or DynamoDB: the API sends the INSERT, and the result comes back along the same arrow."
+        ],
+        "noDirectDb": [
+          "Your API is where something checks that a bookmark belongs to the member asking for it. A browser that reaches the database directly skips that check.",
+          "Select the arrow into the database from anything that is not your API, press Delete, and send the request through the API instead."
+        ],
+        "passing": [
+          "Every check holds. Now press **Break it** and fail the database: see what a member can still do. Then the page's question: the commit succeeds but the response is lost. Where must an operation ID be stored so that a retry does not save the bookmark twice?"
+        ]
+      }
+    },
+    {
+      "id": "read-traffic-grows",
+      "heading": "2 · Read traffic grows",
+      "title": "Read traffic grows",
+      "brief": "The shared reading list is opened far more often than it changes, and reads now arrive faster than one API and one database can answer. Add capacity so that reads keep up, and so that the design survives losing an Availability Zone.",
+      "checks": ["arrows", "spread", "readsSkipDb", "commitsToDb", "storesPrivate", "survivesZone"],
+      "capabilities": [{ "id": "read", "label": "Read the list" }, { "id": "save", "label": "Save a bookmark" }],
+      "tips": {
+        "start": [
+          "If you drew sketch 1, **Start from sketch 1** copies it here. Then put a load balancer in front, and a second copy of the API behind it.",
+          "Real AWS diagrams draw the network as well: a **VPC**, two **Availability Zones** inside it, and in each zone a **public subnet** (where the load balancer's side faces the internet) and a **private subnet** (the API, the cache, the database).",
+          { "text": "One arrangement that meets every check, from the outside in:", "code": "Users → ALB → ECS in zone a, ECS in zone b\nECS → ElastiCache first, then RDS on a miss\nRDS with Multi-AZ on, in a private subnet" }
+        ],
+        "spread": [
+          "One copy of the API is a ceiling on throughput and a single point of failure. A load balancer spreads requests over copies, and takes a failed one out of rotation.",
+          "Draw an **Application Load Balancer**, then two **ECS** parts behind it, one in each Availability Zone. Every request should pass the load balancer: delete any arrow that goes straight from the browser to a copy."
+        ],
+        "readsSkipDb": [
+          "Most reads ask for the same lists again and again. Keep a disposable copy close: the API looks in the cache first, and only a miss reaches the database.",
+          "Draw an arrow from the API to **ElastiCache** as well as to the database. CloudFront in front also counts, for responses that are the same for everyone."
+        ],
+        "commitsToDb": [
+          "The cache is a copy that can be evicted at any moment, so it cannot be where a bookmark lives. Writes still go to the database.",
+          "Keep an arrow from the API to the database: it carries every write, and every read the cache misses."
+        ],
+        "storesPrivate": [
+          "A subnet's route table decides what can reach what is in it. A public subnet routes to the internet gateway; a private one has no route from the internet at all.",
+          "Draw a **VPC**, then a **Private subnet** inside it, and move the database and the cache into it. The load balancer is the part that faces the internet."
+        ],
+        "survivesZone": [
+          "An EC2 instance or an ECS task runs in exactly one Availability Zone. A single database instance does too, until Multi-AZ gives it a standby in another zone.",
+          "Put two **Availability Zone** boxes in the VPC, an API copy in each, then select the database and turn on **Multi-AZ**. Use **Break it** on a zone to see the difference."
+        ],
+        "passing": [
+          "Everything holds. Now press **Break it** and fail the cache: every read lands on the database. That is the page's question: can the database survive the bypass traffic, and where would coalescing or an admission limit go? Then fail a whole zone."
+        ]
+      }
+    },
+    {
+      "id": "refresh-takes-seconds",
+      "heading": "3 · Refreshing a page takes seconds",
+      "title": "Refreshing a page takes seconds",
+      "brief": "A member asks to refresh a bookmark's title. That means fetching the remote page, which can take seconds or never answer. The request must not wait for it: accept the refresh at once, do it in the background, and let the browser find out when it is done.",
+      "checks": ["arrows", "offRequestPath", "workerFromQueue", "resultsDurable", "statusReadable", "deadLetters", "callDeadline", "egress"],
+      "capabilities": [{ "id": "accept", "label": "Accept a refresh" }, { "id": "process", "label": "Refresh the title" }, { "id": "result", "label": "See the result" }],
+      "tips": {
+        "start": [
+          "Put **Users**, your API and the **External website** on the board first. The whole sketch is about which of them may wait for which.",
+          "The API should only accept the job and answer 202. Something else, a worker, fetches the page, and a queue between them keeps the job until a worker is free.",
+          { "text": "The shape of it:", "code": "Users → API Gateway → Lambda (accept) → SQS → Lambda (worker) → External website\nworker → DynamoDB (results)    SQS → SQS (dead letters)\nUsers → API → results, to ask how it went" }
+        ],
+        "offRequestPath": [
+          "Anything the browser's request touches before the answer is sent is on the request path. If that includes the slow website, every request waits for someone else's server.",
+          "Delete the arrow from your API to the website. The API sends the job to a queue; a worker takes it from the queue and calls the website."
+        ],
+        "workerFromQueue": [
+          "A worker that is busy, restarting or deploying must not lose the job. A queue keeps each message until something takes it and says it is done.",
+          "Draw **SQS**, an arrow from your API to it, and an arrow from it to the worker. SNS or EventBridge alone push once and move on."
+        ],
+        "resultsDurable": [
+          "The worker will be restarted, redeployed and scaled in. Whatever it found has to be written down somewhere before it acknowledges the job.",
+          "Draw an arrow from the worker to a database, such as DynamoDB or RDS."
+        ],
+        "statusReadable": [
+          "The browser got a 202 and a job ID, and nothing else. It needs a way to learn how the job ended.",
+          "Give the API an arrow to the database the worker writes to: the browser polls it with the job ID. Or push the result to the browser when it is ready."
+        ],
+        "deadLetters": [
+          "Some pages will fail every time: a dead link, a site that blocks you. Without a place to put those, the queue redelivers them forever, or they expire in silence.",
+          "Draw a second **SQS** queue and an arrow to it from the work queue. SQS moves a message there after its maximum number of receives: that is its dead-letter queue."
+        ],
+        "callDeadline": [
+          "A page that never answers will hold the worker that asked for it, forever, unless the call has a deadline.",
+          "Select the arrow into the website and turn on **Timeout**. Turn on **Retries** too: that is the page's deadline and retry policy."
+        ],
+        "egress": [
+          "A private subnet has no route to the internet. A worker in one cannot reach the website until its traffic has a way out.",
+          "Put a **NAT gateway** in a public subnet and an **Internet gateway** on the edge of the VPC. The worker stays private: it can call out, and nothing can call in. A Lambda outside the VPC needs neither."
+        ],
+        "passing": [
+          "Everything holds. Now press **Break it** and fail the worker: refreshes pause, and the jobs wait in the queue. Then the page's question: the worker writes the result and crashes before acknowledging. The job is delivered again. What stops the second write from doing harm?"
+        ]
+      }
+    },
+    {
+      "id": "dependency-slow",
+      "heading": "4 · A dependency becomes slow",
+      "title": "A dependency becomes slow",
+      "brief": "The reading list also shows an optional preview of each page, from a third-party API, and that API has started taking ten seconds to answer. Saving and reading bookmarks must stay fast while it is slow; the preview may degrade.",
+      "checks": ["arrows", "admission", "bulkhead", "callDeadline", "breaker", "fallback", "survivesZone"],
+      "capabilities": [{ "id": "critical", "label": "Save and read bookmarks" }, { "id": "preview", "label": "Show previews" }],
+      "tips": {
+        "start": [
+          "Two kinds of work now share the front door: saving and reading bookmarks, which must stay fast, and the preview, which may degrade. Draw them as separate compute, both behind the load balancer.",
+          "Add the **Third-party API** and draw an arrow to it from the preview compute only. Then protect that arrow: select it and look at what it offers.",
+          { "text": "The shape of it:", "code": "Users → WAF → ALB → ECS (bookmarks) → RDS\n                  ALB → ECS (previews) → Third-party API\n                        timeout, circuit breaker, fallback" }
+        ],
+        "admission": [
+          "A load balancer spreads requests but never refuses one. When there are more than the pools can take, something at the front has to answer 429 instead of queueing them.",
+          "Put **AWS WAF** with a rate-based rule in front of the load balancer (Users → WAF → ALB), or use **API Gateway**, whose throttling does the same."
+        ],
+        "bulkhead": [
+          "If the code that saves bookmarks also waits on the slow API, its threads fill up with waiting calls and every save waits behind them. That is a bulkhead's job: separate pools, so one cannot drown the other.",
+          "Run the preview on its own ECS service, and draw the arrow to the third party from that one only."
+        ],
+        "callDeadline": [
+          "A call without a timeout waits as long as the other side does. Ten seconds today, forever tomorrow.",
+          "Select the arrow into the third-party API and turn on **Timeout**."
+        ],
+        "breaker": [
+          "A timeout still costs its full length on every call. When the API is failing anyway, stop calling it for a while: that is a circuit breaker.",
+          "Select the arrow into the third-party API and turn on **Circuit breaker**. It counts failures, which is why it needs the timeout too."
+        ],
+        "fallback": [
+          "The preview is optional. When its call fails or is skipped, answer with something planned: no preview, or yesterday's.",
+          "Select the arrow into the third-party API and turn on **Fallback**."
+        ],
+        "survivesZone": [
+          "Saving and reading bookmarks has to survive a zone as well as a slow API. Each pool needs a copy in each zone, and the database a standby.",
+          "Put the bookmark compute in two Availability Zones and turn on **Multi-AZ** for the database."
+        ],
+        "passing": [
+          "Everything holds. Now press **Break it** and fail the third-party API: previews fall back, and bookmarks carry on. Then the page's question: both pools share the same database. Which failure can still cross your bulkhead?"
+        ]
+      }
+    }
+  ]
+}
