@@ -208,6 +208,26 @@ def mount_designboard(b, soup, page, depth):
     page['designboard'] = mounted
 
 
+def board_csp(inline_scripts):
+    """The Content-Security-Policy on a page with a design board.
+
+    A reader may paste their own Anthropic API key into the board so Haiku can
+    draw for them; it stays in their browser. What guards it is this: only this
+    site's own scripts and the page's two inline ones (hashed from their exact
+    text) may run, and a script may talk only to this site and to
+    api.anthropic.com. So even an injected script could neither run nor send a
+    key anywhere else. Styles stay open because the board draws with inline
+    ones; images may be data: URLs because the AWS icons are.
+    """
+    hashes = ' '.join("'sha256-" + base64.b64encode(hashlib.sha256(s.encode()).digest()).decode() + "'" for s in inline_scripts)
+    policy = ("default-src 'self'; "
+              f"script-src 'self' {hashes}; "
+              "style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; "
+              "connect-src 'self' https://api.anthropic.com; "
+              "object-src 'none'; base-uri 'none'; form-action 'none'")
+    return f'<meta http-equiv="Content-Security-Policy" content="{policy}">'
+
+
 def build_designboard(b):
     """Bundle the design board for this release (content-hashed, like the code field)."""
     r = subprocess.run(['node', str(b.ROOT / 'site/tools/build-designboard.mjs'), str(b.OUT)],
@@ -557,7 +577,9 @@ def shell(b, page, body, pages, sequence, base):
     current=json.dumps({'src':page['src'],'url':href(base,page),'title':page['title'],'position':position,'total':total,'private':lock.is_locked(page)},ensure_ascii=True).replace('<','\\u003c')
     robots = '<meta name="robots" content="noindex,nofollow">' if is_locked_shell else ''
     # Hide lock forms until the saved unlock has been tried, so an unlocked reader never sees them flash.
-    lock_check = '<script>if(/(?:^|;\\s*)j2s_track=/.test(document.cookie))document.documentElement.classList.add("lock-checking")</script>'
+    lock_js = 'if(/(?:^|;\\s*)j2s_track=/.test(document.cookie))document.documentElement.classList.add("lock-checking")'
+    lock_check = f'<script>{lock_js}</script>'
+    site_base_js = f'window.SITE_BASE={json.dumps(base)};'
     mobile_location = (f'<span class="mobile-location"><span class="mobile-page-title" title="{E(page["title"])}">'
                        f'{"The Engineering Guide" if is_home else E(page["title"])}</span>'
                        f'<span class="mobile-page-position">{"Guided curriculum" if is_home else meta}</span></span>')
@@ -570,9 +592,12 @@ def shell(b, page, body, pages, sequence, base):
     if dbd and page.get('designboard'):
         codefield_js += (f'<script type="module" src="{base}{dbd["js"]["file"]}" integrity="{dbd["js"]["integrity"]}" '
                          'crossorigin="anonymous"></script>')
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light">{robots}{lock_check}<link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
+    if page.get('designboard') and page.get('codefield'):
+        raise ValueError(f"{page['src']}: a design board's CSP does not yet allow the code field's worker and wasm")
+    csp = board_csp([lock_js, site_base_js]) if page.get('designboard') else ''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8">{csp}<meta name="viewport" content="width=device-width,initial-scale=1"><title>{E(page['title'])} · The Engineering Guide</title><meta name="description" content="{E(page['summary'][:180])}"><meta name="color-scheme" content="light">{robots}{lock_check}<link rel="stylesheet" href="{base}{b.READER_ASSETS['css']['file']}" integrity="{b.READER_ASSETS['css']['integrity']}" crossorigin="anonymous"><style id="reader-styles">{b.READER_CSS}</style></head>
 <body class="{'home' if is_home else 'lesson'}{' company-page' if page['kind']=='company' else ''}"><a class="skip-link" href="#reading">{'Skip to overview' if is_home else 'Skip to lesson'}</a><div class="mobile-bar"><button id="open-contents" data-open-contents aria-expanded="false" aria-controls="sidebar">☰ <span>{browse_label}</span></button>{mobile_location}</div><button class="drawer-backdrop" id="close-contents" aria-label="Close contents" tabindex="-1" hidden></button><aside class="sidebar" id="sidebar"><button class="mobile-close" id="dismiss-contents" aria-label="Close contents">×</button><nav aria-label="Table of contents">{toc(pages,sequence,page,base)}</nav></aside>
-<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>window.SITE_BASE={json.dumps(base)};</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script>{codefield_js}</body></html>'''
+<noscript><style>.search-box,#motion-toggle,.mobile-bar button{{display:none}}@media(max-width:760px){{.sidebar{{position:relative;transform:none;width:100%;height:65vh;box-shadow:none}}.mobile-close{{display:none}}}}</style></noscript><div class="reading-shell"><header class="reading-bar{' has-sequence' if sticky_nav else ''}"><span>{E(subtitle)}</span><div class="reading-controls">{sticky_nav}<span id="saved-progress">{f'Step {position} of {total-1}' if position else 'Your guided curriculum'}</span>{motion_control}</div></header><div class="read-progress" aria-hidden="true"><span></span></div><main id="reading" tabindex="-1">{top_note}<article class="lesson-body">{body}</article>{nav}<footer class="page-footer"><span>THE ENGINEERING GUIDE</span><span>Understanding, through practice.</span></footer></main></div><script id="page-state" type="application/json">{current}</script><script>{site_base_js}</script><script src="{base}{b.READER_ASSETS['js']['file']}" integrity="{b.READER_ASSETS['js']['integrity']}" crossorigin="anonymous" defer></script>{codefield_js}</body></html>'''
 
 
 def locked_shell(b, page, full_html, pages, sequence, base):
