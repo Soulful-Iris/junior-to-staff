@@ -124,13 +124,17 @@ try {
     assert.equal(await B(0).locator(".db-check").count(), 4);
   });
 
-  await check("the palette shows AWS's own icons, labelled, common parts first", async () => {
+  await check("the palette shows each part the way you would sketch it, labelled, common parts first", async () => {
     const tiles = B(0).locator(".db-grid").nth(1).locator(".db-part");
     assert.ok(await tiles.count() >= 20);
     const labels = await tiles.allInnerTexts();
     for (const want of ["ALB", "SQS", "RDS", "ElastiCache", "Lambda", "API Gateway", "NAT gateway"]) assert.ok(labels.some((l) => l.trim() === want), `${want} is a common part`);
-    const src = await tile(0, "sqs").locator("img").getAttribute("src");
-    assert.match(decodeURIComponent(src), /Arch_Amazon-Simple-Queue-Service_48/, "the icon is AWS's file, by its own title");
+    // A database is a cylinder, a queue a slotted bar: drawn strokes, not an image.
+    assert.equal(await tile(0, "sqs").locator("img").count(), 0);
+    assert.ok(await tile(0, "rds").locator("svg.db-part-sk ellipse").count() >= 1, "RDS is drawn as a cylinder");
+    assert.ok(await tile(0, "sqs").locator("svg.db-part-sk rect").count() >= 1 && await tile(0, "sqs").locator("svg.db-part-sk path").count() >= 1, "SQS is a bar with slots");
+    // The boxes are drawn as the board draws them: a zone dashed.
+    assert.ok(await B(0).locator('.db-part[data-id="az"] svg rect[stroke-dasharray]').count() >= 1);
   });
 
   await check("clicking a part adds it, labelled, and it is saved", async () => {

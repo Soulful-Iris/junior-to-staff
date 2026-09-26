@@ -434,7 +434,7 @@ export function placeDrawing(d, index, measure) {
     const p = byId.get(id), def = index.parts.get(p.part), { top, sub } = partLabels(def, p.name);
     return Math.max(measure(top, "name"), sub ? measure(sub, "part") : 0);
   };
-  const boxWidth = (id) => { const b = boxById.get(id), def = index.groups.get(b.kind); return (def.icon ? 30 : 8) + measure(boxLabel(def, b.name), "box") + 12; };
+  const boxWidth = (id) => { const b = boxById.get(id), def = index.groups.get(b.kind); return 8 + measure(boxLabel(def, b.name), "box") + 12; };
   return layout(graph, { kindOf, measure: labelWidth, measureBox: boxWidth, measureEdge: (t) => measure(t, "edge") });
 }
 

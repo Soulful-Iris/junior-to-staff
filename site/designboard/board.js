@@ -6,15 +6,20 @@
 // the need is small and fixed and every gesture needs its own check anyway
 // (site/tools/designboard-check.mjs), which is what a library would not give.
 import CATALOG from "./catalog.json";
-import ICONS from "designboard:icons";
 import BOARD_CSS from "./board.css";
 import { catalogIndex, buildModel, GUARDS, KINDS } from "./model.js";
 import { runChecks, CHECKS } from "./checks.js";
 import { simulate, CAPABILITIES, FAILS, zonal, multiAzOn } from "./sim.js";
 import { icon } from "./ui-icons.js";
+import { glyph, boxGlyph } from "./sketch.js";
 import { CONSOLE_URL, ERRORS, keyProblem, keyStore, buildRequest, callDrawer, validateDrawing, diagramFromState, drawingToState, wantsCloud } from "./drawer.js";
 
 const INDEX = catalogIndex(CATALOG);
+// Parts are drawn as people sketch them at a whiteboard (sketch.js), with
+// AWS's name under each. AWS's own icons came first and were "not drawable"
+// (Bruno, 2026-09-26): nobody sketches them with a marker in an interview.
+// INK: one marker for every part, or each in the colour AWS gives its kind.
+const INK = false;
 const W0 = 860, H0 = 540, ICON = 44, HALF = ICON / 2;   // the canvas, unless a drawing needs more (state.canvas)
 const DESKTOP = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
@@ -33,14 +38,6 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const snap = (v) => Math.round(v / 4) * 4;
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-
-// Icons are images from data URLs: each one keeps its own ids to itself, and
-// is exactly AWS's file.
-const URLS = new Map();
-const iconUrl = (file) => {
-  if (!URLS.has(file)) URLS.set(file, ICONS[file] ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(ICONS[file]) : "");
-  return URLS.get(file);
-};
 
 let measureCtx = null;
 function textWidth(s, font) {
@@ -159,7 +156,7 @@ class Board {
   // ---------------------------------------------------------------- build
   build() {
     const x = this.x;
-    this.root = el(`<section class="db" aria-label="Design board: ${esc(x.title)}">
+    this.root = el(`<section class="db${INK ? " is-ink" : ""}" aria-label="Design board: ${esc(x.title)}">
       <div class="db-cap">
         <div class="db-cap-l"><span class="db-kicker">${icon("spline", 14, "", 2)}Design board</span><span class="db-title">${esc(x.title)}</span></div>
         <div class="db-cap-r">
@@ -205,7 +202,7 @@ class Board {
       <div class="db-strip" aria-live="polite"><div class="db-strip-l"></div><div class="db-strip-r">${icon("corner-down-right", 13)}<span><b>A → B</b> means A sends a request or a message to B; the answer rides back on it.</span></div></div>
       <div class="db-tip" hidden aria-live="polite"></div>
       <div class="db-results"><div class="db-list" role="listbox" aria-label="Checks"></div><div class="db-detail"></div></div>
-      <div class="db-credit">Parts: AWS Architecture Icons, used under AWS's terms for architecture diagrams. What an arrow carries is yours to write: it is shown, never graded.</div>
+      <div class="db-credit">Parts are drawn the way you would sketch them at a whiteboard; the names under them are AWS's. What an arrow carries is yours to write: it is shown, never graded.</div>
     </section>`);
     this.mount.replaceChildren(this.root);
     this.root.dbBoard = this;             // for site/tools/designboard-check.mjs
@@ -247,7 +244,7 @@ class Board {
     const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
     const hit = (p) => !words.length || words.every((w) => `${p.label} ${p.short} ${p.aliases} ${p.kind}`.toLowerCase().includes(w));
     const tile = (p, kind) => `<button type="button" class="db-part${kind === "group" ? " is-group" : ""}" data-kind="${kind}" data-id="${esc(p.id)}" title="${esc(p.label)}${kind === "part" ? "" : " (a box: drop it, then put parts inside)"}">
-        ${p.icon ? `<img src="${iconUrl(p.icon)}" alt="" draggable="false">` : `<span class="db-az-glyph" aria-hidden="true"></span>`}<span>${esc(p.short)}</span></button>`;
+        <svg class="db-part-sk${kind === "group" ? " is-box" : ""}" viewBox="0 0 44 44" aria-hidden="true">${kind === "part" ? glyph(p, 0, 0) : boxGlyph(p)}</svg><span>${esc(p.short)}</span></button>`;
     const parts = CATALOG.parts.filter(hit), groups = CATALOG.groups.filter(hit);
     let html = "";
     if (words.length) {
@@ -280,7 +277,7 @@ class Board {
       if (!ghost && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 4) return;
       if (!ghost) {
         this.dragged = true;
-        ghost = el(`<div class="db-dragghost">${btn.querySelector("img") ? `<img src="${btn.querySelector("img").src}" alt="">` : ""}<span>${esc(btn.textContent.trim())}</span></div>`);
+        ghost = el(`<div class="db-dragghost">${btn.querySelector("svg") ? btn.querySelector("svg").outerHTML : ""}<span>${esc(btn.textContent.trim())}</span></div>`);
         document.body.append(ghost);
       }
       ghost.style.left = ev.clientX + "px"; ghost.style.top = ev.clientY + "px";
@@ -371,8 +368,7 @@ class Board {
       const label = g.name || d.short || d.label;
       out += `<g class="${cls}" data-group="${esc(g.id)}" tabindex="0" role="button" aria-label="${esc(label)}, ${esc(d.label)}${failed ? ", failed" : ""}">
         <rect class="db-g-body" x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="2" style="--c:${d.color};--f:${d.fill || "transparent"}"/>
-        ${d.icon ? `<image href="${iconUrl(d.icon)}" x="${g.x}" y="${g.y}" width="24" height="24"/>` : ""}
-        <text class="db-g-label" x="${g.x + (d.icon ? 30 : 8)}" y="${g.y + 16}">${esc(label)}${g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region" ? `<tspan class="db-g-kind"> · ${esc(d.short || d.label)}</tspan>` : ""}</text>
+        <text class="db-g-label" x="${g.x + 8}" y="${g.y + 16}">${esc(label)}${g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region" ? `<tspan class="db-g-kind"> · ${esc(d.short || d.label)}</tspan>` : ""}</text>
         <rect class="db-g-grip" x="${g.x}" y="${g.y}" width="${g.w}" height="24" data-grip="1"/>
         ${failed ? `<text class="db-failed-tag" x="${g.x + g.w - 8}" y="${g.y + 16}" text-anchor="end">✕ failed</text>` : ""}
         ${sel.type === "group" && sel.id === g.id && this.mode === "draw" ? `<rect class="db-resize" x="${g.x + g.w - 7}" y="${g.y + g.h - 7}" width="12" height="12" rx="2" data-resize="${esc(g.id)}"/>` : ""}
@@ -389,7 +385,7 @@ class Board {
     for (const g of m.groups.values()) {
       const d = g.def, named = g.name && g.name !== (d.short || d.label) && d.type !== "az" && d.type !== "region";
       const label = (g.name || d.short || d.label) + (named ? ` · ${d.short || d.label}` : "");
-      blocked.push([g.x, g.y, g.x + (d.icon ? 30 : 8) + textWidth(label, GROUP_FONT) * 1.25 + 8, g.y + 24]);
+      blocked.push([g.x, g.y, g.x + 8 + textWidth(label, GROUP_FONT) * 1.25 + 8, g.y + 24]);
     }
     this.chipT = new Map();
     const lines = m.edges.map((e) => {
@@ -448,7 +444,7 @@ class Board {
       out += `<g class="${cls}" data-node="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(top)}, ${esc(n.p.label)}${multi ? ", Multi-AZ" : ""}${down ? ", failed" : ""}">
         <rect class="db-n-hit" x="${n.x - bw / 2}" y="${n.y - HALF - 4}" width="${bw}" height="${ICON + (sub ? 40 : 26)}" rx="6"/>
         <rect class="db-n-ring" x="${n.x - HALF - 4}" y="${n.y - HALF - 4}" width="${ICON + 8}" height="${ICON + 8}" rx="8"/>
-        <image class="db-n-icon" href="${iconUrl(n.p.icon)}" x="${n.x - HALF}" y="${n.y - HALF}" width="${ICON}" height="${ICON}"/>
+        ${glyph(n.p, n.x - HALF, n.y - HALF)}
         <text class="db-n-name" x="${n.x}" y="${n.y + HALF + 15}" text-anchor="middle">${esc(top)}</text>
         ${sub ? `<text class="db-n-part" x="${n.x}" y="${n.y + HALF + 29}" text-anchor="middle">${esc(sub)}</text>` : ""}
         ${multi ? `<g class="db-badge db-b-multi"><rect x="${n.x + HALF - 10}" y="${n.y - HALF - 9}" width="44" height="15" rx="7.5"/><text x="${n.x + HALF + 12}" y="${n.y - HALF + 2}" text-anchor="middle">Multi-AZ</text></g>` : ""}

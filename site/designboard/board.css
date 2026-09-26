@@ -58,9 +58,6 @@
 .db-part span { overflow-wrap: normal; word-break: normal; hyphens: manual; max-width: 100%; }
 .db-part:hover { background: #eaf0e3; border-color: #d3dcce; }
 .db-part:active { cursor: grabbing; }
-.db-part img { width: 32px; height: 32px; display: block; pointer-events: none; }
-.db-part.is-group img { width: 24px; height: 24px; margin: 4px 0; }
-.db-az-glyph { display: block; width: 30px; height: 24px; margin: 4px 0; border: 1.6px dashed #00a4a6; border-radius: 2px; }
 .db-more { margin: 0 !important; border: 0 !important; background: none !important; padding: 0 !important; }
 .db-more > summary { list-style: none; display: flex !important; align-items: center; gap: 6px; padding: 8px 12px !important; font: 600 11.5px var(--sans) !important; color: #3a5242 !important; cursor: pointer; border: 0 !important; margin: 0 !important; }
 .db-more > summary::before { content: '›' !important; font-size: 15px !important; color: var(--db-muted2); transition: transform .15s; }
@@ -70,7 +67,7 @@
 .db-none { font-size: 12px; color: var(--db-muted); padding: 6px 12px; margin: 0; }
 .db-dragghost { position: fixed; z-index: 1000; pointer-events: none; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,.92); box-shadow: 0 8px 22px rgba(32,45,41,.2); font: 600 11px var(--sans, system-ui); color: #253a2e; }
-.db-dragghost img { width: 36px; height: 36px; }
+.db-dragghost svg { width: 36px; height: 36px; }
 
 .db-stage { position: relative; background: #fbfcf9; outline: none; overflow: hidden; }
 .db-stage.is-drop { box-shadow: inset 0 0 0 2px #9fc3a0; }
@@ -123,10 +120,8 @@
 .db-node.is-sel .db-n-ring { stroke: var(--db-sel); stroke-width: 2; fill: rgba(71, 126, 170, .06); }
 .db-node.is-hover .db-n-ring, .db-node.is-bad .db-n-ring { stroke: var(--db-bad); stroke-width: 2.4; fill: rgba(194, 65, 42, .07); }
 .db-node.is-target .db-n-ring { stroke: var(--db-sel); stroke-width: 2; stroke-dasharray: 4 3; fill: rgba(71, 126, 170, .08); }
-.db-n-icon { pointer-events: none; }
 .db-n-name { font: 600 12px var(--sans, system-ui); fill: #1f2d27; pointer-events: none; }
 .db-n-part { font: 400 11px var(--sans, system-ui); fill: #66726a; pointer-events: none; }
-.db-node.is-down .db-n-icon { opacity: .28; filter: grayscale(1); }
 .db-node.is-down .db-n-name, .db-node.is-down .db-n-part { fill: #a7afa9; }
 .db.is-break .db-n-hit { cursor: pointer; }
 .db-handle { fill: #fff; stroke: var(--db-sel); stroke-width: 1.8; opacity: 0; pointer-events: none; cursor: crosshair; transition: opacity .12s; }
@@ -275,5 +270,18 @@
 .db-drawing .db-ic { color: #b4643a; animation: db-pulse 1.2s ease-in-out infinite; }
 @keyframes db-pulse { 50% { opacity: .35; transform: scale(.82); } }
 .db.is-drawing .db-rail-in { opacity: .5; pointer-events: none; }
+
+/* Parts as whiteboard strokes (sketch.js): one marker per kind of service,
+   in the colour AWS gives it, and a pale wash behind. */
+.db-sk * { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.db-sk .f { fill: currentColor; stroke: none; }
+.db-sk .t { fill: currentColor; fill-opacity: .1; }
+.db-sk.c-outside { color: #36443c; } .db-sk.c-network { color: #7d3ff0; } .db-sk.c-security { color: #c8283f; }
+.db-sk.c-compute { color: #d86a00; } .db-sk.c-integration { color: #d1106b; } .db-sk.c-database { color: #b31fbc; }
+.db-sk.c-storage { color: #5f8d0c; } .db-sk.c-management { color: #d1106b; }
+.db-node.is-down .db-sk { opacity: .28; filter: grayscale(1); }
+.db-part-sk { width: 34px; height: 34px; display: block; pointer-events: none; }
+.db-part-sk.is-box { width: 30px; height: 30px; margin: 2px 0; }
+.db.is-ink .db-sk:not(.db-sk-box) { color: #2a3730 !important; }
 
 @media (prefers-reduced-motion: reduce) { .db * { transition: none !important; } .db-drawing .db-ic { animation: none; } }
