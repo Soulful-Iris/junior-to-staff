@@ -230,3 +230,33 @@ export function createEditor(parent, { doc, given = [], onRun, onChange, breakpo
   };
 }
 
+// A reader's own input: a few lines of setup and the call to run on the last.
+// Same colours and keys as the main editor, no gutter: it is a cell, not a file.
+export function createCellEditor(parent, { doc, onRun, onChange, label }) {
+  const view = new EditorView({
+    parent,
+    state: EditorState.create({
+      doc,
+      extensions: [
+        history(), indentOnInput(), bracketMatching(), closeBrackets(),
+        indentUnit.of("    "), EditorState.tabSize.of(4),
+        python(), syntaxHighlighting(highlight), theme, drawSelection(),
+        EditorView.theme({ ".cm-content": { padding: "9px 0" }, ".cm-line": { padding: "0 12px" } }),
+        Prec.highest(keymap.of([
+          { key: "Mod-Enter", run: () => { onRun && onRun(); return true; } },
+          { key: "Shift-Enter", run: () => { onRun && onRun(); return true; } },
+        ])),
+        keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, indentWithTab]),
+        EditorView.updateListener.of((u) => { if (u.docChanged && onChange) onChange(); }),
+        EditorView.contentAttributes.of({ "aria-label": label || "Your input, Python" }),
+      ],
+    }),
+  });
+  return {
+    view,
+    getCode: () => view.state.doc.toString(),
+    focus() { view.focus(); view.dispatch({ selection: { anchor: view.state.doc.length } }); },
+    destroy: () => view.destroy(),
+  };
+}
+

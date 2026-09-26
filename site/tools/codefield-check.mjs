@@ -195,9 +195,164 @@ try {
     assert.match(await page.locator(".cf-strip").innerText(), /Restored your code/);
   });
 
+  // ---- v2: your own inputs, time and memory, tips, a clean Python every run
+  const TIPS = JSON.parse(readFileSync(join(PROBLEM, "tips.json"), "utf8"));
+  const tipText = (t) => (typeof t === "string" ? t : t.text).replace(/`/g, "");
+  const cf = (fn, arg) => page.evaluate(fn, arg);
+  const clearInputs = () => cf(() => { const f = document.querySelector(".cf").cfField; while (f.cells.length) f.removeInput(0); });
+
+  await check("the tests are listed before the first run", async () => {
+    await clearInputs();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await field().waitFor();
+    const rows = page.locator(".cf-case:not(.kind-input)");
+    assert.equal(await rows.count(), 2);
+    assert.equal(await page.locator(".cf-case.planned").count(), 2);
+    assert.match(await rows.first().innerText(), /Every small prefix and cycle length/);
+  });
+
+  await check("add your own input: it starts from the problem's example and shows value, time and memory", async () => {
+    await page.waitForSelector(".cf-status.ready", { timeout: 120000 });
+    await setCode(readFileSync(join(PROBLEM, "solution.py"), "utf8"));
+    await page.click(".cf-add");
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 1);
+    assert.match(await page.locator(".cf-detail .cf-cell .cm-content").innerText(), /cycle_entry\(a\)/);
+    await run();
+    const detail = await page.locator(".cf-detail").innerText();
+    assert.match(detail, /Returned\s+Node\(value='b'/);
+    assert.match(detail, /inside\s+cycle_entry/);
+    assert.match(detail, /\d+(\.\d)? [KM]?B\s+(of new|peak) memory used by the call/, "the memory line is missing");
+    assert.match(await page.locator(".cf-case.kind-input .cf-csub").innerText(), /→ Node\(value='b'/);
+    await shotOf("6-your-input.png");
+  });
+
+  await check("memory is measured in the browser's Python: an input that allocates shows it", async () => {
+    // A number is not enough: 0 B is also what a tracemalloc that tracks
+    // nothing would say. A bytearray is its length in bytes on any build (the
+    // browser's Python is 32-bit, so a list's size there is half of CPython's
+    // on a desktop: 250,000 references came back as 977 KB, not 2 MB).
+    await page.click(".cf-add");
+    await page.evaluate(() => {
+      const f = document.querySelector(".cf").cfField, v = f.cells[f.cells.length - 1].view;
+      v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: "bytearray(3_000_000)" } });
+    });
+    await run();
+    await page.locator(".cf-case.kind-input").nth(1).click();
+    assert.match(await page.locator(".cf-detail .cf-metrics").innerText(), /(2\.[5-9]|3\.[0-2]) MB\s+peak memory used by the call/);
+    await page.evaluate(() => document.querySelector(".cf").cfField.removeInput(1));
+  });
+
+  await check("each test shows the time spent inside your code", async () => {
+    await page.locator(".cf-case:not(.kind-input)").first().click();
+    assert.match(await page.locator(".cf-detail .cf-metrics").innerText(), /inside your code/);
+    assert.match(await page.locator(".cf-detail .cf-metrics").innerText(), /the whole test took/);
+    for (const t of await page.locator(".cf-case:not(.kind-input) .cf-ct").allInnerTexts()) assert.match(t, /ms|s$/);
+    await shotOf("7-test-time.png");
+  });
+
+  await check("your inputs survive a reload", async () => {
+    await page.evaluate(() => document.querySelector(".cf").cfField.save());
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await field().waitFor();
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 1);
+    assert.match(await page.locator(".cf-case.kind-input .cf-cl").innerText(), /cycle_entry\(a\)/);
+  });
+
+  await check("an input that never ends stops the run, and says the tests did not run", async () => {
+    await page.waitForSelector(".cf-status.ready", { timeout: 120000 });
+    await setCode(STARTER_BUG(false));
+    await run();
+    assert.match(await page.locator(".cf-strip").innerText(), /Stopped in your input\s+1/);
+    const banner = await page.locator(".cf-detail .cf-banner").innerText();
+    assert.match(banner, /Your input ran for 3 seconds/);
+    assert.match(banner, /The tests did not run/);
+    assert.equal(await page.locator(".cf-line-stop").count(), 2);
+  });
+
+  await check("a tip about a stop comes from the problem's own stopped tips", async () => {
+    await page.click('.cf [data-act="tip"]');
+    const tip = await page.locator(".cf-tip").innerText();
+    assert.match(tip, /Tip 1 of \d+/);
+    assert.ok(tip.replace(/\s+/g, " ").includes(tipText(TIPS.stopped[0]).slice(0, 60)), tip);
+    await shotOf("8-tip-stopped.png");
+  });
+
+  await check("five inputs is the most, and one can be removed", async () => {
+    for (let n = await page.locator(".cf-case.kind-input").count(); n < 5; n++) await page.click(".cf-add");
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 5);
+    assert.equal(await page.locator(".cf-add").isDisabled(), true);
+    assert.match(await page.locator(".cf-add").innerText(), /Five inputs is the most/);
+    await page.locator(".cf-case.kind-input").nth(4).hover();
+    await page.locator(".cf-case.kind-input").nth(4).locator(".cf-x").click();
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 4);
+    assert.equal(await page.locator(".cf-add").isDisabled(), false);
+    await clearInputs();
+  });
+
+  await check("on the starter, a tip is the first step of the approach, and Another tip goes on", async () => {
+    await page.evaluate(() => { const f = document.querySelector(".cf").cfField; f.reset(); f.result = null; f.sel = null; f.hideTip(); f.render(); });
+    await page.click('.cf [data-act="tip"]');
+    assert.ok((await page.locator(".cf-tip p").innerText()).includes(tipText(TIPS.start[0]).slice(0, 50)));
+    await shotOf("9-tip-start.png");
+    await page.click('.cf-tip [data-tip="next"]');
+    assert.match(await page.locator(".cf-tip").innerText(), /Tip 2 of/);
+    assert.ok((await page.locator(".cf-tip p").innerText()).includes(tipText(TIPS.start[1]).slice(0, 50)));
+    await page.click(".cf-tip-close");
+    assert.equal(await page.locator(".cf-tip").isHidden(), true);
+  });
+
+  await check("every run starts from a clean Python", async () => {
+    const code = "import builtins\ncount = 0\ncount += 1\nbuiltins.LEAK = getattr(builtins, 'LEAK', 0) + 1\n";
+    const tests = "import unittest, builtins\nfrom solution import count\nclass T(unittest.TestCase):\n" +
+                  "    def test_fresh(self):\n        self.assertEqual((count, builtins.LEAK), (1, 1))\n";
+    for (let k = 0; k < 2; k++) {
+      const r = await page.evaluate((p) => document.querySelector(".cf").cfField.runtime.run(p), JSON.stringify({ code, tests }));
+      assert.deepEqual(r.tests.map((t) => t.status), ["pass"], JSON.stringify(r.tests[0]));
+    }
+  });
+
+  await check("a failed check on plain values can be run as your own input", async () => {
+    const two = PAGE.replace("15-linked-list-cycle-entry", "01-two-sum");
+    await page.goto(two, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".cf-status.ready", { timeout: 120000 });
+    await page.evaluate(() => { const f = document.querySelector(".cf").cfField; while (f.cells.length) f.removeInput(0); });
+    await setCode("def two_sum(nums, target):\n    return (0, 0)\n");
+    await run();
+    await page.locator(".cf-case.st-fail").first().click();
+    const link = page.locator(".cf-detail [data-try]");
+    assert.equal(await link.count(), 1);
+    await link.click();
+    await page.waitForFunction(() => { const b = document.querySelector('.cf [data-act="run"]'); return b && !b.disabled; }, null, { timeout: 30000 });
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 1);
+    assert.match(await page.locator(".cf-detail").innerText(), /Returned\s+\(0, 0\)/);
+    await shotOf("10-try-as-input.png");
+    await page.evaluate(() => { const f = document.querySelector(".cf").cfField; while (f.cells.length) f.removeInput(0); f.reset(); });
+  });
+
+  await check("once everything passes, a tip whose code is an input runs as one", async () => {
+    // Problem 14's passing tip carries a long list to reverse: an input, not a skeleton.
+    const dir = PROBLEM.replace("15-linked-list-cycle-entry", "14-reverse-linked-list");
+    const passing = JSON.parse(readFileSync(join(dir, "tips.json"), "utf8")).passing;
+    assert.ok(passing.code && !/^def /m.test(passing.code), "14's passing tip is no longer an input; pick another problem");
+    await page.goto(PAGE.replace("15-linked-list-cycle-entry", "14-reverse-linked-list"), { waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".cf-status.ready", { timeout: 120000 });
+    await page.evaluate(() => { const f = document.querySelector(".cf").cfField; while (f.cells.length) f.removeInput(0); });
+    await setCode(readFileSync(join(dir, "solution.py"), "utf8"));
+    await run();
+    await page.click('.cf [data-act="tip"]');
+    assert.match(await page.locator(".cf-tip").innerText(), /about what to try next/);
+    await page.click('.cf-tip [data-tip="try"]');
+    await page.waitForFunction(() => { const b = document.querySelector('.cf [data-act="run"]'); return b && !b.disabled; }, null, { timeout: 30000 });
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator(".cf-case.kind-input").count(), 1);
+    assert.match(await page.locator(".cf-detail").innerText(), /Returned\s+Node\(/);
+    await page.evaluate(() => { const f = document.querySelector(".cf").cfField; while (f.cells.length) f.removeInput(0); f.reset(); });
+  });
+
   await check("no page errors", async () => { assert.deepEqual(errors, []); });
 
-  await check("all 38 reference solutions pass in the browser's Python", async () => {
+  await check("all 38 reference solutions pass in the browser's Python, with their example inputs", async () => {
     // Its own context: 38 runs grow one Python's heap, and nothing after this
     // should run on it.
     await context.close();
@@ -210,10 +365,16 @@ try {
     for (const d of readdirSync(root38).sort()) {
       const dir = join(root38, d);
       if (!existsSync(join(dir, "test_solution.py")) || !/\*\*Write this:\*\*/.test(readFileSync(join(dir, "README.md"), "utf8"))) continue;
-      const payload = JSON.stringify({ code: readFileSync(join(dir, "solution.py"), "utf8"), tests: readFileSync(join(dir, "test_solution.py"), "utf8"), seconds: 20 });
+      // With the problem's own example as an input: the one the page offers
+      // first must run in the browser's Python, not only under CPython, and at
+      // the page's own 3 seconds it must leave the tests time to run.
+      const example = JSON.parse(readFileSync(join(dir, "tips.json"), "utf8")).example;
+      const payload = JSON.stringify({ code: readFileSync(join(dir, "solution.py"), "utf8"), tests: readFileSync(join(dir, "test_solution.py"), "utf8"), seconds: 3, inputs: [example] });
       const r = await p38.evaluate((p) => document.querySelector(".cf").cfField.runtime.run(p), payload);
       const failing = (r.tests || []).filter((t) => t.status !== "pass");
-      if (r.status !== "ok" || !r.tests.length || failing.length) bad.push(`${d}: ${r.status} ${failing.map((t) => t.name + "=" + t.status).join(", ")} ${r.error ? r.error.message : ""}`);
+      const inp = (r.inputs || [])[0] || {};
+      if (r.status !== "ok" || !r.tests.length || failing.length || inp.status !== "ok")
+        bad.push(`${d}: ${r.status} ${failing.map((t) => t.name + "=" + t.status).join(", ")} example=${inp.status} ${JSON.stringify(inp.failure || "")} ${r.error ? r.error.message : ""}`);
       this_count++;
     }
     assert.equal(this_count, 38);

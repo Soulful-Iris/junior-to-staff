@@ -18,6 +18,7 @@ import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent / 'codefield'))
 import starter as codefield_starter  # noqa: E402
+import tips as codefield_tips  # noqa: E402
 
 E = html.escape
 CODE_SUFFIXES = {'.py', '.ts', '.js', '.mjs', '.cjs', '.json', '.yaml', '.yml', '.sql', '.csv', '.txt', '.diff', '.sh'}
@@ -154,8 +155,11 @@ def mount_codefield(b, soup, page, depth):
                                            'data-worker': up + b.CODEFIELD['worker']['file'],
                                            'data-harness': up + b.CODEFIELD['harness']['file']})
     data = soup.new_tag('script', attrs={'type': 'application/json'})
+    # tips.json beside the README: what the page can say when the reader asks
+    # for a tip, chosen by what went wrong. Checked by site/codefield/test_tips.py.
     data.string = json.dumps({'id': Path(src).parent.name, 'starter': start['code'],
-                              'given': start['given'], 'tests': tests.read_text()},
+                              'given': start['given'], 'tests': tests.read_text(),
+                              'tips': codefield_tips.load(tests.parent)},
                              ensure_ascii=True).replace('<', '\\u003c')
     mount.append(data)
     wrap.extend([static, mount])

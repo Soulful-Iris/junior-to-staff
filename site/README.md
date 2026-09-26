@@ -53,9 +53,14 @@ On a desktop, each of the 38 data-structures problems with a "Write this:" block
 - In a browser worker, CPython frees a linked structure recursively on the JavaScript engine's stack, and a few thousand nodes are enough to break that Python for good. Seven problems build deeper than that on purpose. The harness installs a queue-based finalizer on the reader's classes so every free is one level deep. `site/tools/codefield-check.mjs` includes the case that fails without it.
 - The starter code is the page's own "Write this:" block (`site/codefield/starter.py`); `@dataclass` classes written out in full are the problem's data and are read-only in the editor.
 - `site/tools/build-codefield.mjs` bundles CodeMirror 6 and the field per release into content-hashed files under `assets/codefield/`.
+- **Your own inputs**, up to five, listed above the tests. Each is a small cell: setup lines, then the call to run on the last line. The page shows what it returned, what it printed, its time and its peak memory, measured around that call alone after its arguments exist (tracemalloc, on a second call with fresh arguments, so tracing cannot slow the timed one). Inputs are saved with the code. Python in the browser is 32-bit, so most sizes are smaller than a desktop Python reports.
+- **Time inside your code** for every test: the clock runs only while a frame of the reader's code is live, so the inputs a test builds are not charged to the reader.
+- **A clean Python every run**: modules, builtins, `sys.path`, the recursion limit, the collector, trace hooks and `random`'s state are put back after each run, and `input()` reads an empty stdin instead of waiting.
+- **Tips** come from `tips.json` beside each problem's README, chosen by what just went wrong: a stop, an error type, which test failed, unstarted code, everything passing. No model runs at read time. `site/codefield/tips.py` holds the format; `site/codefield/test_tips.py` refuses an example that does not run on the reference, a key naming a test that does not exist, a copied reference line, and a snippet that passes the tests on its own.
 
 ```bash
 python3.12 -m pytest site/codefield/test_harness.py          # harness, all 38 problems, under CPython
+python3.12 -m pytest site/codefield/test_tips.py             # every problem's tips, checked against its reference and tests
 CHROME_PATH=/path/to/chromium node site/tools/codefield-check.mjs   # the field in a real browser; downloads Pyodide
 ```
 
