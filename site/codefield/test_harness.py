@@ -15,6 +15,7 @@ drives that half. What these prove, and why each exists:
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -280,3 +281,188 @@ def test_a_stop_inside_a_helper_names_the_loop_that_keeps_calling_it():
     s = r["stopped"]
     assert s["kind"] == "output"
     assert s["loop"] == [6, 7] and s["function"] == "spin", s
+
+
+# --- v2: the reader's own inputs, and a clean Python every run ----------------
+
+TWO = PROBLEMS / "01-two-sum"
+
+
+def test_an_input_returns_its_value_with_time_and_memory():
+    r = harness.run((TWO / "solution.py").read_text(), _tests(TWO),
+                    inputs=["two_sum([2, 7, 11, 15], 9)", "   "])
+    assert len(r["inputs"]) == 1                          # blank ones are dropped
+    i = r["inputs"][0]
+    assert i["status"] == "ok" and i["value"] in ("[0, 1]", "(0, 1)")
+    assert i["seconds"] >= 0 and isinstance(i["peak_bytes"], int)
+    assert all(t["status"] == "pass" for t in r["tests"])
+
+
+def test_time_counts_the_call_not_building_its_arguments():
+    code = "def build(n):\n    return list(range(n))\n\ndef first(xs):\n    return xs[0]\n"
+    tests = "import unittest\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n"
+    r = harness.run(code, tests, inputs=["first(build(3_000_000))"], seconds=20)
+    i = r["inputs"][0]
+    assert i["value"] == "0" and i["seconds"] < 0.005, i
+
+
+def test_memory_is_the_peak_during_the_call():
+    code = "def grow(n):\n    return [0] * n\n\ndef nothing():\n    return None\n"
+    tests = "import unittest\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n"
+    r = harness.run(code, tests, inputs=["grow(250_000)", "nothing()"])
+    big, small = r["inputs"]
+    assert big["peak_bytes"] > 1_900_000 and small["peak_bytes"] < 10_000, (big, small)
+
+
+def test_an_input_that_never_ends_is_stopped_and_the_tests_do_not_run():
+    code = "def spin():\n    while True:\n        pass\n"
+    tests = "import unittest\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n"
+    r = harness.run(code, tests, inputs=["spin()"], seconds=0.3)
+    assert r["status"] == "stopped" and r["stopped"]["input"] is True
+    assert r["inputs"][0]["status"] == "stopped" and r["stopped"]["loop"] == [2, 3]
+    assert r["tests"] == [] or all(t["status"] == "not-run" for t in r["tests"])
+
+
+def test_an_input_that_fails_says_how_and_where():
+    code = "def half(x):\n    return x / 0\n"
+    tests = "import unittest\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n"
+    r = harness.run(code, tests, inputs=["half(4)", "half(", "1, 2, 3, 4, 5, 6"] + ["half(1)"] * 5)
+    assert len(r["inputs"]) == 5                           # never more than five
+    a, b = r["inputs"][:2]
+    assert a["status"] == "error" and a["failure"]["type"] == "ZeroDivisionError" and a["failure"]["line"] == 2
+    assert b["status"] == "error" and b["failure"]["type"] == "SyntaxError"
+
+
+def test_every_run_starts_from_a_clean_python():
+    import builtins
+    leaky = ("import builtins, sys, types\ncount = 0\ncount += 1\n"
+             "builtins.LEAKED = count\nsys.modules['leaky'] = types.ModuleType('leaky')\n"
+             "sys.path.append('/nowhere')\n")
+    tests = "import unittest\nfrom solution import count\nclass T(unittest.TestCase):\n    def test_fresh(self):\n        self.assertEqual(count, 1)\n"
+    path = list(sys.path)
+    for _ in range(2):                                     # the second run sees nothing of the first
+        r = harness.run(leaky, tests)
+        assert r["tests"][0]["status"] == "pass"
+        assert not hasattr(builtins, "LEAKED")
+        assert "leaky" not in sys.modules
+        assert sys.path == path
+
+
+# --- v2: an input is a cell, and a test is timed only inside the reader's code
+
+_NOOP_TESTS = "import unittest\nclass T(unittest.TestCase):\n    def test_x(self):\n        pass\n"
+
+
+def test_an_input_cell_can_build_what_one_expression_cannot():
+    cell = """
+        a, b, c = Node("a"), Node("b"), Node("c")
+        a.next, b.next, c.next = b, c, b
+        cycle_entry(a)
+    """
+    r = harness.run((CYCLE / "solution.py").read_text(), _tests(CYCLE), inputs=[cell])
+    i = r["inputs"][0]
+    assert i["status"] == "ok", i
+    assert i["value"].startswith("Node(value='b'") and i["type"] == "Node", i
+    assert isinstance(i["peak_bytes"], int) and i["seconds"] >= 0
+
+
+def test_a_cell_that_does_not_end_in_a_call_says_so():
+    r = harness.run((TWO / "solution.py").read_text(), _tests(TWO),
+                    inputs=["x = two_sum([1, 2], 3)"])
+    f = r["inputs"][0]["failure"]
+    assert f["type"] == "No call to run" and f["input_line"] == 1
+
+
+def test_an_error_in_the_setup_names_the_input_line():
+    r = harness.run((TWO / "solution.py").read_text(), _tests(TWO),
+                    inputs=["nums = [1, 2]\nnums.appendd(3)\ntwo_sum(nums, 3)"])
+    f = r["inputs"][0]["failure"]
+    assert f["type"] == "AttributeError" and f["input_line"] == 2 and f["line"] is None, f
+
+
+def test_prints_during_the_memory_measurement_are_not_shown_twice():
+    code = "def loud(n):\n    print('called with', n)\n    return n\n"
+    r = harness.run(code, _NOOP_TESTS, inputs=["print('setup')\nloud(3)"])
+    assert r["inputs"][0]["output"] == "setup\ncalled with 3\n", r["inputs"][0]
+
+
+def test_measuring_memory_never_stops_a_correct_run():
+    # The tips writers' case, on the reference answer: tracing a 600 x 600
+    # table is about 13 times slower than running it, and when the memory pass
+    # shared the reader's 3 seconds this whole run was stopped before a test ran.
+    d = PROBLEMS / "35-edit-distance"
+    r = harness.run((d / "solution.py").read_text(), _tests(d),
+                    inputs=['edit_distance("ab" * 300, "ba" * 300)'])
+    i = r["inputs"][0]
+    assert r["status"] == "ok" and i["status"] == "ok", (r["status"], i)
+    assert i["peak_bytes"] is None, "a call this slow is not traced"
+    assert r["tests"] and all(t["status"] == "pass" for t in r["tests"])
+
+
+def test_the_memory_pass_is_given_back_to_the_readers_time():
+    run = harness._Run("", _NOOP_TESTS, (), 3.0, 65536, 200)
+    run.deadline = before = time.monotonic() + 3.0
+    peak = run._measure_memory(lambda: (lambda: time.sleep(0.25)), 0.001)
+    assert isinstance(peak, int)
+    assert 0.24 < run.memory_spent < 0.6
+    assert abs(run.deadline - before - run.memory_spent) < 1e-9
+
+
+def test_a_loop_in_an_inputs_own_lines_is_stopped():
+    r = harness.run((TWO / "solution.py").read_text(), _tests(TWO),
+                    inputs=["while True:\n    pass\ntwo_sum([1, 2], 3)"], seconds=0.3)
+    assert r["status"] == "stopped" and r["stopped"]["input"] is True, r["status"]
+
+
+def test_a_test_is_timed_inside_the_readers_code_not_its_setup():
+    code = "def first(xs):\n    return xs[0]\n"
+    tests = ("import unittest\nfrom solution import first\nclass T(unittest.TestCase):\n"
+             "    def test_big_setup(self):\n        xs = list(range(2_000_000))\n"
+             "        self.assertEqual(first(xs), 0)\n")
+    t = harness.run(code, tests, seconds=20)["tests"][0]
+    assert t["status"] == "pass"
+    assert t["ms"] > 5 and t["code_ms"] < 1, t
+
+
+def test_the_readers_own_loop_is_counted():
+    code = "def count(n):\n    k = 0\n    for _ in range(n):\n        k += 1\n    return k\n"
+    tests = ("import unittest\nfrom solution import count\nclass T(unittest.TestCase):\n"
+             "    def test_loop(self):\n        self.assertEqual(count(300_000), 300_000)\n")
+    t = harness.run(code, tests, seconds=20)["tests"][0]
+    assert t["code_ms"] > 0.5 * t["ms"], t
+
+
+def test_a_generator_is_timed_across_its_yields_and_not_between_them():
+    code = ("def gen(n):\n    for i in range(n):\n        s = 0\n        for _ in range(2000):\n"
+            "            s += 1\n        yield s\n")
+    tests = ("import unittest\nfrom solution import gen\nclass T(unittest.TestCase):\n"
+             "    def test_gen(self):\n        total = 0\n        for v in gen(100):\n"
+             "            waste = list(range(20_000))\n            total += v\n"
+             "        self.assertEqual(total, 200_000)\n")
+    t = harness.run(code, tests, seconds=20)["tests"][0]
+    assert t["status"] == "pass"
+    assert 0 < t["code_ms"] < 0.6 * t["ms"], t        # the test's own list-building is not counted
+
+
+def test_an_exception_leaving_the_readers_code_stops_the_clock():
+    code = "def boom(depth):\n    if depth == 0:\n        raise ValueError('no')\n    return boom(depth - 1)\n"
+    tests = ("import unittest\nfrom solution import boom\nclass T(unittest.TestCase):\n"
+             "    def test_raise(self):\n        with self.assertRaises(ValueError):\n"
+             "            boom(50)\n        waste = [list(range(1000)) for _ in range(2000)]\n")
+    t = harness.run(code, tests, seconds=20)["tests"][0]
+    assert t["status"] == "pass"
+    assert t["code_ms"] < 0.2 * t["ms"], t            # still running after the raise would count the waste
+
+
+def test_settings_the_reader_changes_do_not_reach_the_next_run():
+    import gc, random
+    code = ("import sys, gc, random\nsys.setrecursionlimit(50_000)\ngc.disable()\n"
+            "random.seed(1)\nsys.settrace(lambda *a: None)\n"
+            "def ask():\n    return input()\n")
+    tests = ("import unittest\nfrom solution import ask\nclass T(unittest.TestCase):\n"
+             "    def test_input(self):\n        with self.assertRaises(EOFError):\n            ask()\n")
+    limit, state = sys.getrecursionlimit(), random.getstate()
+    r = harness.run(code, tests)
+    assert r["tests"][0]["status"] == "pass", r["tests"][0]   # input() did not wait
+    assert sys.getrecursionlimit() == limit and gc.isenabled()
+    assert sys.gettrace() is None and random.getstate() == state

@@ -24,13 +24,34 @@ code cannot swallow them. Values are shown through bounded_repr, which never
 calls the reader's own __repr__ and never recurses without a limit, because a
 linked list can be ten thousand nodes long or loop forever, and printing one
 is the same runaway as printing in a loop.
+
+Time and memory are measured only while the reader's code runs (Bruno: "It
+should only start measuring when the function actually runs"):
+
+  tests   "time in your code": the same monitoring counts entries into and
+          exits from the reader's own code objects, and the clock runs only
+          while at least one of their frames is live. The 10,000-node list a
+          test builds before calling the reader is not charged to the reader.
+  inputs  the reader's own cells: setup lines, then a final call. The call's
+          arguments are built first and the clock covers the call alone. Its
+          memory is tracemalloc's peak during a second call on freshly built
+          arguments, so tracing cannot slow the timed call.
+
+Every run starts from the same Python: a fresh module, and afterwards
+anything the reader's code added to sys.modules, builtins or sys.path is
+removed, and the recursion limit, the collector, trace hooks and random's
+state are put back.
 """
 from __future__ import annotations
 
 import ast
+import builtins
+import gc
 import io
+import random
 import reprlib
 import sys
+import textwrap
 import time
 import traceback
 import types
@@ -228,7 +249,8 @@ class _Stream(io.TextIOBase):
 
 # ------------------------------------------------------------------- the run
 class _Run:
-    def __init__(self, code, tests, breakpoints, seconds, max_bytes, max_stops):
+    def __init__(self, code, tests, breakpoints, seconds, max_bytes, max_stops, inputs=()):
+        self.inputs = [str(x) for x in (inputs or ()) if str(x).strip()][:5]
         self.code_src = code
         self.test_src = tests
         self.code_lines = code.splitlines()
@@ -247,11 +269,16 @@ class _Run:
         self.tree = None
         self.user_codes = set()
         self.tool = None
+        self.inside = [0, 0.0, 0.0]    # live reader frames, clock at first entry, total seconds
+        self.quiet = False             # the second, traced call of an input prints nowhere
+        self.memory_spent = 0.0        # seconds its memory passes took, given back to the reader
 
     # -- output -------------------------------------------------------------
     def emit(self, s: str) -> int:
         if not isinstance(s, str):
             s = str(s)
+        if self.quiet:
+            return len(s)
         data = s.encode("utf-8", "replace")
         room = self.max_bytes - self.used_bytes
         target = self.current["output"] if self.current is not None else self.import_output
@@ -283,16 +310,40 @@ class _Run:
         self.tool = tool
         counter = [0]
         deadline_check = self._deadline_check
+        inside = self.inside
+        clock = time.perf_counter
+        user_codes = self.user_codes
 
         def on_jump(co, src, dst):
             counter[0] += 1
             if counter[0] & 1023 == 0:
                 deadline_check()
 
-        def on_start(co, offset):
+        def on_start(co, offset, *_):
+            # A frame of the reader's code starts or resumes. The clock runs
+            # from the first one until the last one is gone.
+            if inside[0] == 0:
+                inside[1] = clock()
+            inside[0] += 1
             counter[0] += 1
             if counter[0] & 1023 == 0:
                 deadline_check()
+
+        def on_leave(co, offset, *_):
+            if inside[0] > 0:
+                inside[0] -= 1
+                if inside[0] == 0:
+                    inside[2] += clock() - inside[1]
+
+        def on_unwind(co, offset, exc):
+            # PY_UNWIND and PY_THROW cannot be set per code object, so these
+            # arrive for every function; only the reader's count.
+            if co in user_codes:
+                on_leave(co, offset)
+
+        def on_throw(co, offset, exc):
+            if co in user_codes:
+                on_start(co, offset)
 
         stops = self.stops
         bps = self.breakpoints
@@ -307,33 +358,86 @@ class _Run:
                 return DISABLE
             frame = sys._getframe(1)
             stops.append({"test": run.current["index"] if run.current else None,
+                          "input": bool(run.current and run.current.get("kind") == "input"),
                           "line": line, "vars": run._locals(frame)})
             return None
 
-        M.register_callback(tool, M.events.JUMP, on_jump)
-        M.register_callback(tool, M.events.PY_START, on_start)
-        events = M.events.JUMP | M.events.PY_START
+        E = M.events
+        M.register_callback(tool, E.JUMP, on_jump)
+        for ev in (E.PY_START, E.PY_RESUME):
+            M.register_callback(tool, ev, on_start)
+        for ev in (E.PY_RETURN, E.PY_YIELD):
+            M.register_callback(tool, ev, on_leave)
+        M.register_callback(tool, E.PY_UNWIND, on_unwind)
+        M.register_callback(tool, E.PY_THROW, on_throw)
+        events = E.JUMP | E.PY_START | E.PY_RESUME | E.PY_RETURN | E.PY_YIELD
         if bps:
-            M.register_callback(tool, M.events.LINE, on_line)
-            events |= M.events.LINE
+            M.register_callback(tool, E.LINE, on_line)
+            events |= E.LINE
         for co in _code_objects(code_obj):
             self.user_codes.add(co)
             M.set_local_events(tool, co, events)
-
+        M.set_events(tool, E.PY_UNWIND | E.PY_THROW)
 
     def _disarm(self):
         if self.tool is None:
             return
         M = sys.monitoring
+        E = M.events
+        M.set_events(self.tool, 0)
         for co in self.user_codes:
             try:
                 M.set_local_events(self.tool, co, 0)
             except Exception:
                 pass
-        for ev in (M.events.JUMP, M.events.PY_START, M.events.LINE):
+        for ev in (E.JUMP, E.PY_START, E.PY_RESUME, E.PY_RETURN, E.PY_YIELD,
+                   E.PY_UNWIND, E.PY_THROW, E.LINE):
             M.register_callback(self.tool, ev, None)
         M.free_tool_id(self.tool)
         self.tool = None
+
+    def in_code_seconds(self, reset=False) -> float:
+        """Seconds spent inside the reader's code since the last reset,
+        including a frame still live when a limit stopped the run."""
+        d, since, total = self.inside
+        if d > 0:
+            total += time.perf_counter() - since
+        if reset:
+            self.inside[:] = [0, 0.0, 0.0]
+        return total
+
+    @staticmethod
+    def _snapshot():
+        return {"modules": set(sys.modules), "builtins": dict(vars(builtins)),
+                "path": list(sys.path), "limit": sys.getrecursionlimit(),
+                "gc": gc.isenabled(), "trace": sys.gettrace(), "profile": sys.getprofile(),
+                "random": random.getstate(), "stdin": sys.stdin}
+
+    def _clean_up(self, before):
+        """Each run starts from the same Python: anything the reader's code put
+        into sys.modules, builtins or sys.path is taken out again, the process
+        settings it could have changed are put back, and the garbage is
+        collected. Standard-library modules it imported stay loaded; they hold
+        no reader data and re-importing some C modules is unsafe."""
+        for name in set(sys.modules) - before["modules"]:
+            if not _stdlib_module(sys.modules[name]):
+                sys.modules.pop(name, None)
+        b = vars(builtins)
+        for name in set(b) - set(before["builtins"]):
+            b.pop(name, None)
+        for name, value in before["builtins"].items():
+            if b.get(name) is not value:
+                b[name] = value
+        sys.path[:] = before["path"]
+        # A raised limit carries into the next run and, in a browser worker,
+        # lets recursion reach the engine's own stack before Python notices.
+        sys.setrecursionlimit(before["limit"])
+        (gc.enable if before["gc"] else gc.disable)()
+        sys.settrace(before["trace"])
+        sys.setprofile(before["profile"])
+        random.setstate(before["random"])
+        sys.stdin = before["stdin"]
+        gc.collect()
 
     def _deadline_check(self):
         if time.monotonic() > self.deadline:
@@ -359,7 +463,7 @@ class _Run:
         check = next((f for f in reversed(frames) if f.filename == TESTS), None)
         return user, check
 
-    def describe_failure(self, err):
+    def describe_failure(self, err, input_name=None):
         etype, value, tb = err
         user, check = self._where(tb)
         message = str(value)
@@ -369,6 +473,9 @@ class _Run:
         out = {"type": etype.__name__, "message": message[:2000],
                "user_lines": [f.lineno for f in user][-6:],
                "line": user[-1].lineno if user else None}
+        if input_name is not None:
+            cell = [f for f in traceback.extract_tb(tb) if f.filename == input_name]
+            out["input_line"] = cell[-1].lineno if cell else None
         if check is not None and 1 <= check.lineno <= len(self.test_lines):
             out["check"] = {"line": check.lineno,
                             "source": self.test_lines[check.lineno - 1].strip()}
@@ -392,6 +499,7 @@ class _Run:
                     break
         stop = {"kind": "time" if etype is TimeLimit else "output",
                 "test": self.current["index"] if self.current else None,
+                "input": bool(self.current and self.current.get("kind") == "input"),
                 "line": line, "loop": loop, "function": None,
                 "seconds": round(time.monotonic() - self.started, 2),
                 "bytes": self.used_bytes}
@@ -400,6 +508,149 @@ class _Run:
         return stop
 
     # -- the whole thing ------------------------------------------------------
+    def _run_inputs(self, module):
+        """The reader's own inputs. Each is a small cell: setup lines, then the
+        call to run on its last line, like
+
+            a, b = Node("a"), Node("b")
+            a.next, b.next = b, a
+            cycle_entry(a)
+
+        Time and memory are measured around that last CALL only, after its
+        arguments are built, because building a 10,000-node list to pass in is
+        not the function's work ("It should only start measuring when the
+        function actually runs"). Memory is tracemalloc's peak during a second
+        call on freshly built arguments, so the traced run cannot slow the
+        timed one. Each cell gets its own namespace: the solution's names, and
+        nothing from another cell.
+        """
+        records = [{"kind": "input", "index": i, "source": src, "status": "not-run",
+                    "output": [], "output_cut": False} for i, src in enumerate(self.inputs)]
+        for rec in records:
+            if self.stopped:
+                break
+            self.current = rec
+            rec["status"] = "running"
+            name = f"<input {rec['index'] + 1}>"
+            try:
+                tree = ast.parse(textwrap.dedent(rec["source"]).strip(), name, mode="exec")
+            except SyntaxError as e:
+                rec["status"] = "error"
+                rec["failure"] = {"type": "SyntaxError", "message": e.msg, "line": None,
+                                  "input_line": e.lineno}
+                continue
+            if not tree.body or not isinstance(tree.body[-1], ast.Expr):
+                rec["status"] = "error"
+                rec["failure"] = {"type": "No call to run", "line": None,
+                                  "message": "The last line of an input is the call to run, "
+                                             "and this one ends with something else.",
+                                  "input_line": tree.body[-1].lineno if tree.body else None}
+                continue
+            setup = compile(ast.Module(body=tree.body[:-1], type_ignores=[]), name, "exec")
+            self._watch(setup)
+            final = tree.body[-1].value
+            simple = isinstance(final, ast.Call) and not any(
+                isinstance(a, ast.Starred) for a in final.args) and all(k.arg for k in final.keywords)
+            if isinstance(final, ast.Call):          # what the page calls the thing it timed
+                f = final.func
+                rec["call"] = f.id if isinstance(f, ast.Name) else f.attr if isinstance(f, ast.Attribute) else None
+
+            def prepare():
+                """A fresh namespace with the setup run in it, and the thing to
+                measure as a no-argument callable whose arguments already exist."""
+                ns = dict(vars(module))
+                exec(setup, ns)
+
+                def ev(node):
+                    code = compile(ast.Expression(node), name, "eval")
+                    self._watch(code)
+                    return eval(code, ns)
+                if simple:
+                    fn, args = ev(final.func), [ev(a) for a in final.args]
+                    kw = {k.arg: ev(k.value) for k in final.keywords}
+                    return lambda: fn(*args, **kw)
+                code = compile(ast.Expression(final), name, "eval")
+                self._watch(code)
+                return lambda: eval(code, ns)
+
+            try:
+                go = prepare()
+                t0 = time.perf_counter()
+                value = go()
+                rec["seconds"] = time.perf_counter() - t0
+                rec["value"] = bounded_repr(value, 400)
+                rec["type"] = type(value).__name__
+                rec["status"] = "ok"
+                rec["peak_bytes"] = self._measure_memory(prepare, rec["seconds"])
+            except (TimeLimit, OutputLimit):
+                self.stopped = self.describe_stop(sys.exc_info())
+                rec["status"] = "stopped"
+            except BaseException:
+                rec["status"] = "error"
+                rec["failure"] = self.describe_failure(sys.exc_info(), input_name=name)
+        self.current = None
+        for rec in records:
+            rec["output"] = "".join(rec["output"])
+        return records
+
+    # Seconds per run for every input's memory pass together. NOT the reader's:
+    # whatever a pass takes is given back to their 3 seconds afterwards.
+    MEMORY_BUDGET = 1.5
+
+    def _measure_memory(self, prepare, seconds):
+        """Peak bytes the call held, from a second, traced call on freshly
+        built arguments, or None when that cannot be had in time.
+
+        Tracing makes allocation-heavy code 12 to 15 times slower (measured on
+        2026-09-26 by the tips writers: coin change on 100,000 took 0.16 s
+        plain and 2.7 s in all, and edit distance on two 600-letter words, on
+        the REFERENCE answer, had the whole run stopped before any test ran).
+        So this pass has its own small allowance instead of the reader's, and
+        running out of it ends in "not measured", never in the reader's run
+        being stopped for a number they did not ask to wait for.
+        """
+        allowance = min(self.MEMORY_BUDGET - self.memory_spent, 1.0)
+        if allowance < 0.05 or 15 * seconds > allowance:
+            return None
+        try:
+            import tracemalloc
+        except ImportError:
+            return None
+        saved, t0, started = self.deadline, time.monotonic(), False
+        self.deadline = t0 + allowance
+        self.quiet = True
+        try:
+            go = prepare()                # the arguments exist before tracing starts
+            started = not tracemalloc.is_tracing()
+            if started:
+                tracemalloc.start()
+            tracemalloc.reset_peak()
+            base = tracemalloc.get_traced_memory()[0]
+            go()
+            return max(0, tracemalloc.get_traced_memory()[1] - base)
+        except BaseException:             # out of allowance, or it failed the second time
+            return None
+        finally:
+            if started:
+                tracemalloc.stop()
+            used = time.monotonic() - t0
+            self.memory_spent += used
+            self.deadline = saved + used
+            self.quiet = False
+
+    def _watch(self, code):
+        """Put the time check on code the reader typed into an input: a setup
+        loop that never ends must be stopped like one in the solution. Loop
+        turns only, and no breakpoints: those are solution line numbers."""
+        if self.tool is None:
+            return
+        M = sys.monitoring
+        for co in _code_objects(code):
+            try:
+                M.set_local_events(self.tool, co, M.events.JUMP)
+            except ValueError:
+                pass
+
     def go(self) -> dict:
         self.import_output = []
         result = {"python": sys.version.split()[0], "status": "ok", "tests": [],
@@ -414,11 +665,15 @@ class _Run:
                                "line": e.lineno, "column": e.offset}
             return result
 
+        clean = self._snapshot()
         saved = (sys.stdout, sys.stderr, sys.modules.get("solution"),
                  sys.modules.get("test_solution"), unittest.case.safe_repr,
                  unittest.util.safe_repr)
         stream = _Stream(self)
         sys.stdout = sys.stderr = stream
+        # input() reads an empty line's end at once instead of waiting on a
+        # keyboard nobody can type into.
+        sys.stdin = io.StringIO("")
         unittest.case.safe_repr = unittest.util.safe_repr = _safe_repr
         self.started = time.monotonic()
         self.deadline = self.started + self.seconds
@@ -454,6 +709,10 @@ class _Run:
                 result["error"] = self.describe_failure(sys.exc_info())
                 return result
 
+            result["inputs"] = self._run_inputs(module)
+            if self.stopped:
+                result["status"] = "stopped"
+                return result
             suite = unittest.defaultTestLoader.loadTestsFromModule(tmod)
             cases = list(_flatten(suite))
             classes = {type(c).__name__ for c in cases}
@@ -482,6 +741,7 @@ class _Run:
                 else:
                     sys.modules[name] = mod
             unittest.case.safe_repr, unittest.util.safe_repr = saved[4], saved[5]
+            self._clean_up(clean)
             result["stopped"] = self.stopped
             result["stops_truncated"] = self.stops_truncated
             result["output_bytes"] = self.used_bytes
@@ -491,6 +751,22 @@ class _Run:
             for r in self.records:
                 r["output"] = "".join(r["output"])
             result["tests"] = self.records
+
+
+def _stdlib_dirs():
+    import sysconfig
+    paths = sysconfig.get_paths()
+    return tuple({paths["stdlib"], paths["platstdlib"]})
+
+
+def _stdlib_module(mod) -> bool:
+    """Built in, frozen, or a file in the standard library's own directory.
+    (Not sys.prefix: in Pyodide that can be "/", which is every file.)"""
+    f = getattr(mod, "__file__", None)
+    if f:
+        return f.startswith(_stdlib_dirs())
+    spec = getattr(mod, "__spec__", None)
+    return spec is not None and getattr(spec, "origin", None) in ("built-in", "frozen")
 
 
 def _flatten(suite):
@@ -514,6 +790,7 @@ class _Result(unittest.TestResult):
         super().startTest(test)
         rec = self._rec(test)
         rec["status"] = "running"
+        self.run.in_code_seconds(reset=True)
         rec["_t"] = time.perf_counter()
         self.run.current = rec
 
@@ -522,6 +799,7 @@ class _Result(unittest.TestResult):
         rec = self.run.current
         if rec is not None:
             rec["ms"] = round((time.perf_counter() - rec.pop("_t")) * 1000, 2)
+            rec["code_ms"] = round(self.run.in_code_seconds() * 1000, 3)
             if rec["status"] == "running":
                 rec["status"] = "pass"
         self.run.current = None
@@ -574,10 +852,10 @@ class _Result(unittest.TestResult):
 
 
 def run(code: str, tests: str, breakpoints=(), seconds: float = 3.0,
-        max_bytes: int = 65536, max_stops: int = 200) -> dict:
+        max_bytes: int = 65536, max_stops: int = 200, inputs=()) -> dict:
     """Run `tests` against `code`. Returns a JSON-ready dict. Never raises."""
     try:
-        return _Run(code, tests, breakpoints, seconds, max_bytes, max_stops).go()
+        return _Run(code, tests, breakpoints, seconds, max_bytes, max_stops, inputs).go()
     except BaseException as e:            # a bug in the harness, never the reader's
         return {"python": sys.version.split()[0], "status": "harness-error",
                 "error": {"type": type(e).__name__, "message": str(e)[:500]},
@@ -591,7 +869,7 @@ def run_json(payload: str) -> str:
     try:
         p = json.loads(payload)
         r = run(p["code"], p["tests"], p.get("breakpoints", ()), p.get("seconds", 3.0),
-                p.get("max_bytes", 65536), p.get("max_stops", 200))
+                p.get("max_bytes", 65536), p.get("max_stops", 200), p.get("inputs", ()))
     except BaseException as e:
         r = {"status": "harness-error", "error": {"type": type(e).__name__,
              "message": str(e)[:500]}, "tests": [], "stops": [], "stopped": None}
