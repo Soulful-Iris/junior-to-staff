@@ -379,6 +379,16 @@ class Board {
       out += `<line class="db-connecting" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#db-m-sel)"/>`;
     }
     this.svg.innerHTML = out;
+    // Size each arrow label's box to the text as the browser drew it. A width
+    // measured beforehand on a canvas depends on which font that canvas
+    // resolved, and on this box it resolved a narrower one: every box was too
+    // small, which only showed where the text was white, on a red box.
+    for (const t of this.svg.querySelectorAll(".db-e-label")) {
+      const r = t.previousElementSibling;
+      if (!r || !r.classList.contains("db-e-labelbg")) continue;
+      const w = t.getComputedTextLength() + 10, cx = +t.getAttribute("x");
+      r.setAttribute("x", cx - w / 2); r.setAttribute("width", w);
+    }
     this.root.classList.toggle("is-break", this.mode === "break");
     this.root.classList.toggle("is-empty", !this.state.nodes.length && !this.state.groups.length);
     const f = this.focusId && this.svg.querySelector(`[data-node="${CSS_ESC(this.focusId)}"],[data-edge="${CSS_ESC(this.focusId)}"],[data-group="${CSS_ESC(this.focusId)}"]`);
