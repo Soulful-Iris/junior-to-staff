@@ -46,6 +46,10 @@ Build in this order. The four new projects include working reference code, local
 3. [Route extracted invoices through validation and review](projects/03-invoice-review.md)
 4. [Track AI evaluation evidence and serving versions](projects/04-release-evidence.md)
 
+Then build one for yourself, on your own machine, in a macOS and a Windows version. This one is a design brief rather than supplied code, and it is the only project here where you hold the authority you are granting:
+
+5. [Drive your own desktop by voice, with a model that cannot invent an action](projects/05-voice-desk.md)
+
 Then use the open-ended brief to design your own feature:
 
 - [Decide whether an AI feature improves a reading list](projects/an-ai-feature-you-can-defend.md)

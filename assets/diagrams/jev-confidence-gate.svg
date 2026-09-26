@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 326" width="760" height="326" role="img" aria-label="A probability axis from zero to one divided into three bands: below a lower threshold the system refuses and says it did not understand, between the two thresholds it asks for a single confirmation, and above the upper threshold it acts on its own. The thresholds shown are illustrative and are meant to be set from your own measurements. A separate panel below states a second rule that overrides the first: an action on a list you marked destructive stops for approval no matter how high the probability, because confidence is a statement about the model and permission is a statement about you.">
+  <rect width="760" height="326" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">A CALIBRATED PROBABILITY MAKES AUTONOMY A DIAL</text>
+  <text x="32" y="54" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6d6459">Every decision comes back with a number, so the policy can be written down.</text>
+
+  <rect x="60" y="86" width="384" height="34" rx="4" fill="#c2703d" opacity="0.28"/>
+  <rect x="444" y="86" width="192" height="34" rx="4" fill="#c2703d" opacity="0.55"/>
+  <rect x="636" y="86" width="64" height="34" rx="4" fill="#2f6f4e"/>
+
+  <text x="252" y="108" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">say you did not understand</text>
+  <text x="540" y="108" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#faf9f7">ask once</text>
+  <text x="668" y="108" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#faf9f7">act</text>
+
+  <line x1="60" y1="128" x2="700" y2="128" stroke="#ded9d1" stroke-width="1.2"/>
+  <text x="60" y="144" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">0.0</text>
+  <text x="444" y="144" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">0.60</text>
+  <text x="636" y="144" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">0.90</text>
+  <text x="700" y="144" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d">1.0</text>
+  <text x="32" y="166" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">Those two thresholds are placeholders. Set them from your own logged decisions, not from this picture.</text>
+
+  <rect x="32" y="188" width="696" height="62" rx="6" fill="#eef2ef" stroke="#c2703d" stroke-width="1.6"/>
+  <text x="48" y="212" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">THE RULE THAT OVERRIDES THE DIAL</text>
+  <text x="48" y="236" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2b24">Anything you marked destructive stops for approval at any probability, including 1.00.</text>
+
+  <line x1="32" y1="274" x2="728" y2="274" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="296" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">Confidence is a statement about the model. Permission is a statement about you.</text>
+  <text x="32" y="316" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">Collapsing the two is the commonest way an assistant that works becomes an assistant you regret.</text>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" width="760" height="330" role="img" aria-label="Two ways to let a model act on a computer. On the left, a language model is given a goal and emits a string describing an action, which your code must parse and then trust, because the string can name a button, a path or a URL that does not exist. On the right, a System One model is given the list of controls that actually exist on screen, returns one typed choice from that list together with a calibrated probability, and your code executes it and independently verifies the outcome. The caption says the answer space is the list, so an action that is not on the list cannot be returned, which is a property of the interface rather than a promise about behaviour.">
+  <rect width="760" height="330" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">THE MODEL PICKS. IT DOES NOT AUTHOR.</text>
+
+  <text x="32" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#c2703d" letter-spacing="1">A LANGUAGE MODEL</text>
+  <rect x="32" y="74" width="332" height="172" rx="6" fill="#faf9f7" stroke="#c2703d" stroke-width="1.4"/>
+  <text x="48" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">you send a goal</text>
+  <rect x="48" y="108" width="300" height="30" rx="4" fill="#eef2ef" stroke="#ded9d1" stroke-width="1"/>
+  <text x="60" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#1f2b24">"open my mail and reply to Ana"</text>
+  <text x="48" y="160" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">it writes back a string</text>
+  <rect x="48" y="170" width="300" height="30" rx="4" fill="#faf9f7" stroke="#c2703d" stroke-width="1.2"/>
+  <text x="60" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#c2703d">click("Reply All")</text>
+  <text x="48" y="222" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#c2703d">you parse it, then hope that button exists</text>
+
+  <text x="396" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" fill="#2f6f4e" letter-spacing="1">A SYSTEM ONE MODEL</text>
+  <rect x="396" y="74" width="332" height="172" rx="6" fill="#eef2ef" stroke="#2f6f4e" stroke-width="1.6"/>
+  <text x="412" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">you send the controls that exist</text>
+  <rect x="412" y="108" width="300" height="30" rx="4" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1"/>
+  <text x="424" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#1f2b24">[Reply, Reply All, Archive, Delete]</text>
+  <text x="412" y="160" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">it returns one of them, typed</text>
+  <rect x="412" y="170" width="300" height="30" rx="4" fill="#faf9f7" stroke="#2f6f4e" stroke-width="1.2"/>
+  <text x="424" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#2f6f4e">Reply · p = 0.94</text>
+  <text x="412" y="222" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#2f6f4e">your code executes it, then checks it happened</text>
+
+  <line x1="32" y1="268" x2="728" y2="268" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="292" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">The answer space is the list, so an action that is not on the list cannot come back.</text>
+  <text x="32" y="312" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">That is a property of the interface, not a promise about behaviour, and it is the whole reason to use one.</text>
+</svg>

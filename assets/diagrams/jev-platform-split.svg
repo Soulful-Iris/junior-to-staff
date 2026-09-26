@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 344" width="760" height="344" role="img" aria-label="The same five-layer pipeline written for macOS and for Windows. Capture, see, act and verify each need a platform-specific implementation: on macOS, the system speech recogniser or a local whisper build, the accessibility tree and Vision text recognition, AppleScript and synthetic input events; on Windows, a local whisper build, UI Automation and the built-in OCR, and Windows input and window activation. The decide layer in the middle is one HTTP call to the same model with the same request on both platforms, and is highlighted to show it is the only row you do not write twice. The caption notes that this is why the port is mostly mechanical and why the interesting design work sits in what you put on the candidate list.">
+  <rect width="760" height="344" rx="10" fill="#faf9f7"/>
+  <text x="32" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#8a857d" letter-spacing="1.6">ONE OF THESE FIVE LAYERS IS NOT PLATFORM WORK</text>
+
+  <text x="32" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">LAYER</text>
+  <text x="240" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">macOS</text>
+  <text x="500" y="66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" fill="#8a857d" letter-spacing="1">WINDOWS</text>
+
+  <text x="32" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">capture the voice</text>
+  <text x="240" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">system recogniser or whisper</text>
+  <text x="500" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">whisper, locally</text>
+
+  <text x="32" y="130" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">see what is on screen</text>
+  <text x="240" y="130" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">accessibility tree, Vision OCR</text>
+  <text x="500" y="130" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">UI Automation, built-in OCR</text>
+
+  <rect x="24" y="146" width="704" height="40" rx="5" fill="#2f6f4e" opacity="0.12"/>
+  <rect x="24" y="146" width="704" height="40" rx="5" fill="none" stroke="#2f6f4e" stroke-width="1.4"/>
+  <text x="32" y="172" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#2f6f4e">decide which one</text>
+  <text x="240" y="172" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">one call, same request</text>
+  <text x="500" y="172" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2b24">one call, same request</text>
+
+  <text x="32" y="216" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">act on it</text>
+  <text x="240" y="216" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">AppleScript, synthetic events</text>
+  <text x="500" y="216" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">input and window activation</text>
+
+  <text x="32" y="248" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2b24">verify it happened</text>
+  <text x="240" y="248" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">re-read the tree</text>
+  <text x="500" y="248" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">re-read the tree</text>
+
+  <line x1="32" y1="276" x2="728" y2="276" stroke="#ded9d1" stroke-width="1"/>
+  <text x="32" y="300" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#1f2b24">Four rows are a port. The middle row is the same code on both machines.</text>
+  <text x="32" y="320" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#6d6459">So the design work is not the decision. It is what you are willing to put on the candidate list.</text>
+  <text x="32" y="338" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#8a857d">Write the see and act layers behind one interface and the port stops being a rewrite.</text>
+</svg>
